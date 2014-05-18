@@ -21,7 +21,7 @@ Debian/Ubuntu
 
 Add the the apt repository
 
-    deb http://nightly.openerp.com/6.1/deb/ ./
+    deb http://nightly.openerp.com/trunk/deb/ ./
 
 in your source.list and type:
 
