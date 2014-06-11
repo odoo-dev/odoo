@@ -1,0 +1,3 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_ir_attachment_signature_all","ir_attachment_signature all","model_ir_attachment_signature",,1,0,0,0
+"access_ir_attachment_signature_group_user","ir_attachment_signature group_user","model_ir_attachment_signature","base.group_user",1,1,1,1

@@ -1,0 +1,83 @@
+.openerp .oe_mail .oe_attachment .oe_sign {
+  display: none;
+}
+.openerp .oe_mail .oe_msg_composer .oe_attachment .oe_sign {
+  display: block;
+  position: absolute;
+  top: -15px;
+  right: 0px;
+  text-shadow: 1px 0px white, -1px 0px white, 0px 1px white, 0px -1px white;
+  cursor: pointer;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s linear;
+  -moz-transition: opacity 0.2s linear;
+  -o-transition: opacity 0.2s linear;
+  transition: opacity 0.2s linear;
+}
+.openerp .oe_mail .oe_msg_composer .oe_attachment:hover .oe_sign {
+  opacity: 1;
+  -webkit-transition: opacity 0.2s linear;
+  -moz-transition: opacity 0.2s linear;
+  -o-transition: opacity 0.2s linear;
+  transition: opacity 0.2s linear;
+}
+.openerp .oe_mail .oe_msg_composer .oe_attachment .oe_delete {
+  top: -20px !important;
+}
+
+.bs-sidebar {
+  position: fixed;
+  z-index: 1;
+  background-color: #f7f5fa;
+  border-radius: 5px;
+}
+
+.media, .media-body {
+  overflow: hidden;
+  zoom: 1;
+  background-color: #f7f5fa;
+  width: 75%;
+  padding: 5px 5px;
+}
+
+@media (min-width: 992px) {
+  .bs-sidebar {
+    width: 213px;
+  }
+}
+@media (min-width: 1200px) {
+  .bs-sidebar {
+    width: 263px;
+  }
+}
+@media print {
+  body {
+    padding: 0 !important;
+  }
+}
+.oe_lside_panel {
+  padding: 10px;
+  word-wrap: break-word;
+}
+
+.openerp .oe_email {
+  color: #777777;
+}
+.openerp .oe_img {
+  width: 23px;
+}
+.openerp .table.oe_sel_followers td {
+  border-top: 0;
+  padding: 3px 3px;
+}
+.openerp .oe_sign_title {
+  padding: 10px 15px;
+}
+.openerp .oe_sign_title span {
+  font-weight: bold;
+  font-size: 20px;
+  color: #7c7bad;
+}
+.openerp .oe_sign_comment {
+  padding: 10px 30px;
+}

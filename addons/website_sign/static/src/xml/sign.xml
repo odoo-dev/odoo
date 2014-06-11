@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+    <t t-name="select.people">
+        <input type="hidden" t-att-value="attach_id" id="attach_id"/>
+        <div class="row">
+            <div class="col-md-12 oe_sign_title">
+                <span>1. Who needs to sign ?</span>
+            </div>
+        </div>
+        <div class="table-responsive col-md-12">
+            <table class="table table-hover oe_sel_followers">
+                <t t-foreach='result.signer_data' t-as='res'>
+                    <tr>
+                        <td>
+                            <t t-if="res.selected">
+                                <input type="checkbox" t-att-checked="res.selected" t-att-id="'input_mail_followers_'+res.followers_id" t-att-data-id="res.followers_id" t-att-name="res.name"/>
+                            </t>
+                            <t t-if="!res.selected">
+                                <input type="checkbox" t-att-id="'input_mail_followers_'+res.followers_id" t-att-data-id="res.followers_id" t-att-name="res.name"/>
+                            </t>
+                        </td>
+                        <td>
+                            <label t-att-for="'input_mail_followers_'+res.followers_id"><t t-raw="res.name"/></label>
+                        </td>
+                        <td class="oe_email">
+                            <label t-att-for="'input_mail_followers_'+res.followers_id"><t t-raw="res.email"/></label>
+                        </td>
+                        <td>
+                            <img class="oe_img" t-att-src="'/website/image?model=res.partner&amp;field=image_small&amp;id='+res.followers_id"></img>
+                        </td>
+                    </tr>
+                </t>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-md-12 oe_sign_title">
+                <span>2. Add document title and comments.</span>
+            </div>
+        </div>
+        <div class="row">
+            <div id="doc_title" class="col-md-12 oe_sign_comment">
+                <input id="title" type="text" class="form-control" placeholder="Title" t-att-value="result.doc_data[0].name"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 oe_sign_comment">
+                <textarea id="comments" rows="3" class="form-control" placeholder="Comments"><t t-raw="result.doc_data[0].description ? result.doc_data[0].description:'' "/></textarea>
+            </div>
+        </div>
+    </t>
+    <t t-extend="mail.thread.message.attachments">
+        <t t-jquery="div#attachments" t-operation="append">
+            <div class="text-center" t-if="attachment.count">
+                <a t-att-href="'/sign/document/'+attachment.id" target="_blank"> <b>Signed(<t t-raw="attachment.signed+'/'+attachment.count"/>)</b> </a>
+            </div>
+        </t>
+    </t>
+</template>

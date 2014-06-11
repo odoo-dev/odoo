@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="request_sign_template" model="email.template">
+            <field name="name">Document Sign Request</field>
+            <field name="model_id" ref="website_sign.model_ir_attachment_signature"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="email_from">${ctx['email_from']}</field>
+            <field name="email_to" >${ctx['email_to']}</field>
+            <field name="body_html"><![CDATA[
+                <center>
+                    <table width = "60%">
+                        <tbody>
+                            <tr>
+                                <td style="background-color:#ffffff;border:1px solid #ccc;padding:10px 10px 5px 10px" bgcolor="FFFFFF" align="center">
+                                    <h1 style="font-size:14px">
+                                        ${ctx['email_from_usr']} has requested your signature
+                                    </h1>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table width="60%">
+                        <tbody>
+                            <tr>
+                                <td style="background-color:#ffffff;border:1px solid #ccc;padding:40px 40px 30px 40px" bgcolor="FFFFFF">
+                                    <h1 style="font-size:18px;margin:0 0 10px 0;font-weight:bold">${ctx['docnames']}</h1>
+                                    <p style="line-height:1.4em;font-size:14px;margin:10px 0px">
+                                        <span style="color:#8c8c8c">From: ${ctx['email_from_usr']}  -
+                                            <a href="mailto:${ctx['email_from']}?subject=RE:" style="color:#368bc6;text-decoration:none" target="_blank">Reply</a>
+                                        </span>
+                                    </p>
+                                    % if ctx['msgbody']:
+                                        <hr style="color:#cccccc;background-color:#cccccc;min-height:1px;border:none"/>
+                                        <p style="margin:20px 0px 20px 0px">
+                                            ${ctx['msgbody'] | safe}
+                                        </p>
+                                    % endif
+                                    <hr style="color:#cccccc;background-color:#cccccc;min-height:1px;border:none"/>
+                                    <div style="margin:20px 0px 20px 0px">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    % for link in ctx['links']:
+                                                        <td style='padding:9px 16px 9px 16px;font-size:16px;color:#f7fbfd;background:#0088cc'>
+                                                            <a style='text-decoration:none;font-size:16px;color:#f7fbfd' href=${link[0]}>
+                                                                <span style='color:#f7fbfd'>Sign on ${link[1]}</span>
+                                                            </a>
+                                                        </td>
+                                                    % endfor
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <hr style="color:#cccccc;background-color:#cccccc;min-height:1px;border:none">
+                                    <p style="margin:10px 0px;font-size:14px;line-height:1.4em;color:#ff0000">Warning: do not forward this email to others or else they will be able to access your document.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </center>
+            ]]>
+            </field>
+        </record>
+    </data>
+</openerp>

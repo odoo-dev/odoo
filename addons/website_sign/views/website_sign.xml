@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+  <template id="assets_backend" name="website_sign assets" inherit_id="web.assets_backend">
+    <xpath expr="." position="inside">
+        <link rel="stylesheet" href="/website_sign/static/src/css/website_sign.css"/>
+        <script type="text/javascript" src="/website_sign/static/src/js/sign.js"></script>
+    </xpath>
+  </template>
+  <template id="website_sign.doc_sign" name="Document Sign">
+    <t t-call="website.layout">
+        <t t-set="head">
+            <script type="text/javascript" src="/website_sign/static/src/js/sign.js"></script>
+            <script type="text/javascript" src="/website/static/lib/jSignature/jSignature.min.js"></script>
+            <link rel='stylesheet' href='/website_sign/static/src/css/website_sign.css'/>
+            <t t-raw="head or ''"/>
+        </t>
+        <body data-spy="scroll" data-target=".navspy">
+            <div class="container">
+                <div class="row mt16">
+                    <div class="col-md-3">
+                        <div class="bs-sidebar">
+                            <div class="text-left hidden-print oe_lside_panel">
+                                <t t-if="current_sign and current_sign.state == 'draft' ">
+                                    <a class="btn btn-primary btn-block fa fa-check" data-toggle="modal" data-target="#modesign">
+                                        Sign Document
+                                    </a>
+                                </t>
+                                <t t-if="current_sign and current_sign.state != 'draft'">
+                                    <h4 class="modal-title">You have Signed the document.</h4>
+                                </t>
+                            </div>
+                            <div class="oe_lside_panel"><h4><t t-raw="attachment.name"/></h4></div>
+                            <div class="oe_lside_panel" t-if="attachment.description"> <t t-raw="attachment.description"/> </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div t-if="message==1" class="alert alert-success alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                            Your message has been successfully sent!
+                        </div>
+                        <div t-if="message==2" class="alert alert-success alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                            You have successfully signed the document.
+                        </div>
+                        <div id="main_panel" class="row mb32" style="margin-left:0">
+                            <div class="col-md-8">
+                                <t t-foreach="record.message_ids" t-as="message">
+                                    <t t-foreach='message.attachment_ids' t-as='attachment'>
+                                        <div class="row" t-if="attachment.id == attachment_id">
+                                            <a t-att-href="'/mail/download_attachment?model=mail.message&amp;id='+str(message.id)+'&amp;method=download_attachment&amp;attachment_id='+str(attachment_id)" target="_blank">
+                                                <t t-if="attachment.file_type_icon == 'webimage'">
+                                                    <img class="media-object pull-left" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(attachment_id) + '&amp;resize=300,180'" style="width: 400px;"/>
+                                                </t>
+                                                <t t-if="attachment.file_type_icon != 'webimage'">
+                                                    <img class="media-object pull-left" t-att-src="'/mail/static/src/img/mimetypes/' + attachment.file_type_icon + '.png'" style="width: 400px;"></img>
+                                                </t>
+                                            </a>
+                                        </div>
+                                    </t>
+                                </t>
+                                <t t-if="signatures">
+                                    <t t-foreach="signatures" t-as="sign">
+                                        <div class="row" t-if="sign.state == 'closed'">
+                                            <img class="media-object pull-left" t-att-src="'/web/binary/image?model=ir.attachment.signature&amp;field=sign&amp;id=' + str(sign.id) + '&amp;resize=500,180'" style="width: 150px;"/>
+                                            <div style="line-height:65px; font-weight:bold;">
+                                                by <t t-raw="sign.signer_name"/> on <t t-raw="sign.signing_date"/>.
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                            <div class="col-md-4" id="right_panel"> </div>
+                        </div>
+                        <div class="modal fade" id="modesign" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="sign_doc" method="post" t-attf-action="/website_sign/signed/#{attachment_id}/?token=#{token}" class="js_sign_json modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
+                                        <h4 class="modal-title">Sign Document</h4>
+                                    </div>
+                                    <div class="modal-body" id="sign-modal-dialog">
+                                        <p>
+                                            I agree, by signing this document.
+                                        </p>
+                                        <div id="signer" class="form-group" t-if="current_sign">
+                                            <label class="control-label" for="name">Your Name:</label>
+                                            <input class="form-control" name="signer" id="signer_name" t-att-value="current_sign.partner_id.name" type="text"/>
+                                            <div class="panel panel-default mt16 mb0" id="drawsign">
+                                                <div class="panel-heading">
+                                                    <div class="pull-right">
+                                                        <a id="sign_clean" class="btn btn-xs">Clear</a>
+                                                    </div>
+                                                    <strong>Draw your signature</strong>
+                                                </div>
+                                                <div id="sign" class="panel-body" style="padding: 0"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" id="signed_req" t-attf-class="btn btn-primary">Sign Document</button> or
+                                        <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      </body>
+    </t>
+  </template>
+
+  <template id="opt_website_sign_right_panel" name="Requested Sign" inherit_id="website_sign.doc_sign">
+    <xpath expr="//div[@id='right_panel']" position="inside">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>
+                    <t t-if="not sign_req">
+                        Signed(<t t-raw="str(len(signatures)) +'/'+ str(len(signatures))"/>)
+                    </t>
+                    <t t-if="len(sign_req) and (len(sign_req) == len(signatures) or len(sign_req) != len(signatures))">
+                        Waiting Signatures(<t t-raw="str(len(sign_req)) +'/'+ str(len(signatures))"/>)
+                    </t>
+                </h4>
+            </div>
+            <div class="panel-body">
+                <t t-foreach="signatures" t-as="sign">
+                    <div t-if="sign.state == 'draft'"><b><t t-raw="sign.partner_id.name"/></b> is requested to sign.</div>
+                    <div t-if="sign.state == 'closed'"><b><t t-raw="sign.partner_id.name"/></b> has signed the Document.</div>
+                </t>
+            </div>
+        </div>
+    </xpath>
+  </template>
+
+  <template id="opt_website_sign_chatter_comment" name="Allow Comments" inherit_id="website_sign.doc_sign">
+      <xpath expr="//div[@id='main_panel']" position="after">
+          <section class="mt32 mb32 css_editable_mode_hidden hidden-print">
+              <form id="comment" t-attf-action="/sign/document/#{attachment_id}/#{token}/note" method="POST">
+                  <div class="pull-left mb32 mt32" style="width: 75%">
+                      <textarea rows="4" name="comment" class="form-control" placeholder="Send us a note..."></textarea>
+                      <button type="submit" class="btn btn-primary mt8">Send</button>
+                  </div>
+              </form>
+          </section>
+          <div class="clearfix"/>
+      </xpath>
+  </template>
+</data>
+</openerp>
