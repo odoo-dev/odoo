@@ -90,7 +90,147 @@ class MetaField(type):
 
 
 class Field(object):
-    """ Base class of all fields. """
+    """ The field descriptor contains the field definition, and manages accesses
+        and assignments of the corresponding field on records. The following
+        attributes may be provided when instanciating a field:
+
+        :param string: the label of the field seen by users (string); if not
+            set, the ORM takes the field name in the class (capitalized).
+
+        :param help: the tooltip of the field seen by users (string)
+
+        :param readonly: whether the field is readonly (boolean, by default ``False``)
+
+        :param required: whether the value of the field is required (boolean, by
+            default ``False``)
+
+        :param index: whether the field is indexed in database (boolean, by
+            default ``False``)
+
+        :param default: the default value for the field; this is either a static
+            value, or a function taking a recordset and returning a value
+
+        :param states: a dictionary mapping state values to lists of attribute-value
+            pairs; possible attributes are: 'readonly', 'required', 'invisible'
+
+        :param groups: comma-separated list of group xml ids (string); this
+            restricts the field access to the users of the given groups only
+
+        .. _field-computed:
+
+        .. rubric:: Computed fields
+
+        One can define a field whose value is computed instead of simply being
+        read from the database. The attributes that are specific to computed
+        fields are given below. To define such a field, simply provide a value
+        for the attribute `compute`.
+
+        :param compute: name of a method that computes the field
+
+        :param inverse: name of a method that inverses the field (optional)
+
+        :param search: name of a method that implement search on the field (optional)
+
+        :param store: whether the field is stored in database (boolean, by
+            default ``False`` on computed fields)
+
+        The methods given for `compute`, `inverse` and `search` are model
+        methods. Their signature is shown in the following example::
+
+            upper = fields.Char(compute='_compute_upper',
+                                inverse='_inverse_upper',
+                                search='_search_upper')
+
+            @api.depends('name')
+            def _compute_upper(self):
+                for rec in self:
+                    self.upper = self.name.upper() if self.name else False
+
+            def _inverse_upper(self):
+                for rec in self:
+                    self.name = self.upper.lower() if self.upper else False
+
+            def _search_upper(self, operator, value):
+                if operator == 'like':
+                    operator = 'ilike'
+                return [('name', operator, value)]
+
+        The compute method has to assign the field on all records of the invoked
+        recordset. The decorator :meth:`openerp.api.depends` must be applied on
+        the compute method to specify the field dependencies; those dependencies
+        are used to determine when to recompute the field; recomputation is
+        automatic and guarantees cache/database consistency. Note that the same
+        method can be used for several fields, you simply have to assign all the
+        given fields in the method; the method will be invoked once for all
+        those fields.
+
+        By default, a computed field is not stored to the database, and is
+        computed on-the-fly. Adding the attribute ``store=True`` will store the
+        field's values in the database. The advantage of a stored field is that
+        searching on that field is done by the database itself. The disadvantage
+        is that it requires database updates when the field must be recomputed.
+
+        The inverse method, as its name says, does the inverse of the compute
+        method: the invoked records have a value for the field, and you must
+        apply the necessary changes on the field dependencies such that the
+        computation gives the expected value. Note that a computed field without
+        an inverse method is readonly by default.
+
+        The search method is invoked when processing domains before doing an
+        actual search on the model. It must return a domain equivalent to the
+        condition: `field operator value`.
+
+        .. _field-related:
+
+        .. rubric:: Related fields
+
+        The value of a related field is given by following a sequence of
+        relational fields and reading a field on the reached model. The complete
+        sequence of fields to traverse is specified by the attribute
+
+        :param related: sequence of field names
+
+        The value of some attributes from related fields are automatically taken
+        from the source field, when it makes sense. Examples are the attributes
+        `string` or `selection` on selection fields.
+
+        By default, the values of related fields are not stored to the database.
+        Add the attribute ``store=True`` to make it stored, just like computed
+        fields. Related fields are automatically recomputed when their
+        dependencies are modified.
+
+        .. _field-company-dependent:
+
+        .. rubric:: Company-dependent fields
+
+        Formerly known as 'property' fields, the value of those fields depends
+        on the company. In other words, users that belong to different companies
+        may see different values for the field on a given record.
+
+        :param company_dependent: whether the field is company-dependent (boolean)
+
+        .. _field-incremental-definition:
+
+        .. rubric:: Incremental definition
+
+        A field is defined as class attribute on a model class. If the model is
+        extended (see :class:`BaseModel`), one can also extend the field
+        definition by redefining a field with the same name and same type on the
+        subclass. In that case, the attributes of the field are taken from the
+        parent class and overridden by the ones given in subclasses.
+
+        For instance, the second class below only adds a tooltip on the field
+        ``state``::
+
+            class First(models.Model):
+                _name = 'foo'
+                state = fields.Selection([...], required=True)
+
+            class Second(models.Model):
+                _inherit = 'foo'
+                state = fields.Selection(help="Blah blah blah")
+
+    """
     __metaclass__ = MetaField
 
     _attrs = None               # dictionary with all field attributes
@@ -114,6 +254,7 @@ class Field(object):
     inverse = None              # inverse(recs) inverses field on recs
     search = None               # search(recs, operator, value) searches on self
     related = None              # sequence of field names, for related fields
+    company_dependent = False   # whether `self` is company-dependent (property field)
     default = None              # default value
 
     string = None               # field label
@@ -157,6 +298,7 @@ class Field(object):
         if attrs.get('related'):
             # by default, related fields are not stored
             attrs['store'] = attrs.get('store', False)
+
         for attr, value in attrs.iteritems():
             if not hasattr(self, attr):
                 self._free_attrs.append(attr)
@@ -173,19 +315,19 @@ class Field(object):
     def __repr__(self):
         return "%s.%s" % (self.model_name, self.name)
 
+    ############################################################################
     #
-    # Field setup.
-    #
-    # Recomputation of computed fields: each field stores a set of triggers
-    # (`field`, `path`); when the field is modified, it invalidates the cache of
-    # `field` and registers the records to recompute based on `path`. See method
-    # `modified` below for details.
+    # Field setup
     #
 
     def reset(self):
         """ Prepare `self` for a new setup. """
+        # self._triggers is a set of pairs (field, path) that represents the
+        # computed fields that depend on `self`. When `self` is modified, it
+        # invalidates the cache of each `field`, and registers the records to
+        # recompute based on `path`. See method `modified` below for details.
+        self._triggers = set()
         self._setup_done = False
-        self._triggers = set()          # set of (field, path)
 
     def setup(self, env):
         """ Complete the setup of `self` (dependencies, recomputation triggers,
@@ -213,6 +355,10 @@ class Field(object):
             for field in env[self.model_name]._fields.itervalues()
             if field.compute in (self.compute, self.compute.__name__)
         ] or []
+
+    #
+    # Setup of related fields
+    #
 
     def _setup_related(self, env):
         """ Setup the attributes of a related field. """
@@ -275,6 +421,10 @@ class Field(object):
     _related_help = property(attrgetter('help'))
     _related_readonly = property(attrgetter('readonly'))
     _related_groups = property(attrgetter('groups'))
+
+    #
+    # Setup of non-related fields
+    #
 
     def _setup_regular(self, env):
         """ Setup the attributes of a non-related field. """
@@ -343,6 +493,7 @@ class Field(object):
         """ Return the computed fields that depend on `self`. """
         return (field for field, path in self._triggers)
 
+    ############################################################################
     #
     # Field description
     #
@@ -362,6 +513,7 @@ class Field(object):
     # properties used by get_description()
     _description_depends = property(attrgetter('depends'))
     _description_related = property(attrgetter('related'))
+    _description_company_dependent = property(attrgetter('company_dependent'))
     _description_readonly = property(attrgetter('readonly'))
     _description_required = property(attrgetter('required'))
     _description_states = property(attrgetter('states'))
@@ -381,6 +533,7 @@ class Field(object):
             return trans or self.help
         return self.help
 
+    ############################################################################
     #
     # Conversion to column instance
     #
@@ -399,6 +552,13 @@ class Field(object):
                 args[attr[8:]] = getattr(self, attr)
             elif attr in self._free_attrs:
                 args[attr] = getattr(self, attr)
+
+        if self.company_dependent:
+            # company-dependent fields are mapped to former property fields
+            args['type'] = self.type
+            args['relation'] = self.comodel_name
+            return fields.property(**args)
+
         return getattr(fields, self.type)(**args)
 
     # properties used by to_column() to create a column instance
@@ -410,6 +570,7 @@ class Field(object):
     _column_states = property(attrgetter('states'))
     _column_groups = property(attrgetter('groups'))
 
+    ############################################################################
     #
     # Conversion of values
     #
@@ -453,6 +614,7 @@ class Field(object):
         """ convert `value` from the cache to a suitable display name. """
         return ustr(value)
 
+    ############################################################################
     #
     # Descriptor methods
     #
@@ -516,6 +678,7 @@ class Field(object):
             record.write({self.name: self.convert_to_write(value)})
             record._cache[self] = value
 
+    ############################################################################
     #
     # Computation of field values
     #
@@ -593,6 +756,7 @@ class Field(object):
         else:
             return [(self.name, operator, value)]
 
+    ############################################################################
     #
     # Notification when fields are modified
     #
@@ -665,7 +829,12 @@ class Integer(Field):
 
 
 class Float(Field):
-    """ Float field. """
+    """ Float field. The precision digits are given by the attribute
+
+        :param digits: a pair (total, decimal), or a function taking a database
+            cursor and returning a pair (total, decimal)
+
+    """
     type = 'float'
     _digits = None              # digits argument passed to class initializer
     digits = None               # digits as computed by setup()
@@ -702,7 +871,15 @@ class _String(Field):
 
 
 class Char(_String):
-    """ Char field. """
+    """ Char field.
+
+        :param size: the maximum size of values stored for that field (integer,
+            optional)
+
+        :param translate: whether the value of the field has translations
+            (boolean, by default ``False``)
+
+    """
     type = 'char'
     size = None
 
@@ -715,7 +892,13 @@ class Char(_String):
 
 
 class Text(_String):
-    """ Text field. """
+    """ Text field. Very similar to :class:`Char`, but typically for longer
+        contents.
+
+        :param translate: whether the value of the field has translations
+            (boolean, by default ``False``)
+
+    """
     type = 'text'
 
     def convert_to_cache(self, value, env):
@@ -736,6 +919,9 @@ class Date(Field):
 
     @staticmethod
     def today(*args):
+        """ Return the current day in the format expected by the ORM.
+            This function may be used to compute default values.
+        """
         return date.today().strftime(DATE_FORMAT)
 
     @staticmethod
@@ -763,11 +949,13 @@ class Date(Field):
 
     @staticmethod
     def from_string(value):
+        """ Convert an ORM `value` into a :class:`date` value. """
         value = value[:DATE_LENGTH]
         return datetime.strptime(value, DATE_FORMAT).date()
 
     @staticmethod
     def to_string(value):
+        """ Convert a :class:`date` value into the format expected by the ORM. """
         return value.strftime(DATE_FORMAT)
 
     def convert_to_cache(self, value, env):
@@ -789,6 +977,9 @@ class Datetime(Field):
 
     @staticmethod
     def now(*args):
+        """ Return the current day and time in the format expected by the ORM.
+            This function may be used to compute default values.
+        """
         return datetime.now().strftime(DATETIME_FORMAT)
 
     @staticmethod
@@ -821,6 +1012,7 @@ class Datetime(Field):
 
     @staticmethod
     def from_string(value):
+        """ Convert an ORM `value` into a :class:`datetime` value. """
         value = value[:DATETIME_LENGTH]
         if len(value) == DATE_LENGTH:
             value += " 00:00:00"
@@ -828,6 +1020,7 @@ class Datetime(Field):
 
     @staticmethod
     def to_string(value):
+        """ Convert a :class:`datetime` value into the format expected by the ORM. """
         return value.strftime(DATETIME_FORMAT)
 
     def convert_to_cache(self, value, env):
@@ -849,17 +1042,20 @@ class Binary(Field):
 
 
 class Selection(Field):
-    """ Selection field. """
+    """ Selection field.
+
+        :param selection: specifies the possible values for this field.
+            It is given as either a list of pairs (`value`, `string`), or a
+            model method, or a method name.
+
+        The attribute `selection` is mandatory except in the case of related
+        fields (see :ref:`field-related`) or field extensions
+        (see :ref:`field-incremental-definition`).
+    """
     type = 'selection'
     selection = None        # [(value, string), ...], model method or method name
 
     def __init__(self, selection=None, string=None, **kwargs):
-        """ Selection field.
-
-            :param selection: specifies the possible values for this field.
-                It is given as either a list of pairs (`value`, `string`), or a
-                model method, or a method name.
-        """
         if callable(selection):
             from openerp import api
             selection = api.expected(api.model, selection)
@@ -925,17 +1121,20 @@ class Selection(Field):
 
 
 class Reference(Selection):
-    """ Reference field. """
+    """ Reference field.
+
+        :param selection: specifies the possible model names for this field.
+            It is given as either a list of pairs (`value`, `string`), or a
+            model method, or a method name.
+
+        The attribute `selection` is mandatory except in the case of related
+        fields (see :ref:`field-related`) or field extensions
+        (see :ref:`field-incremental-definition`).
+    """
     type = 'reference'
     size = 128
 
     def __init__(self, selection=None, string=None, **kwargs):
-        """ Reference field.
-
-            :param selection: specifies the possible model names for this field.
-                It is given as either a list of pairs (`value`, `string`), or a
-                model method, or a method name.
-        """
         super(Reference, self).__init__(selection=selection, string=string, **kwargs)
 
     _related_size = property(attrgetter('size'))
@@ -993,7 +1192,29 @@ class _Relational(Field):
 
 
 class Many2one(_Relational):
-    """ Many2one field. """
+    """ Many2one field; the value of such a field is a recordset of size 0 (no
+        record) or 1 (a single record).
+
+        :param comodel_name: name of the target model (string)
+
+        :param domain: an optional domain to set on candidate values on the
+            client side (domain or string)
+
+        :param context: an optional context to use on the client side when
+            handling that field (dictionary)
+
+        :param ondelete: what to do when the referred record is deleted;
+            possible values are: ``'set null'``, ``'restrict'``, ``'cascade'``
+
+        :param auto_join: whether JOINs are generated upon search through that
+            field (boolean, by default ``False``)
+
+        :param delegate: set it to ``True`` to make fields of the target model
+            accessible from the current model (corresponds to ``_inherits``)
+
+        The attribute `comodel_name` is mandatory except in the case of related
+        fields or field extensions.
+    """
     type = 'many2one'
     ondelete = 'set null'               # what to do when value is deleted
     auto_join = False                   # whether joins are generated upon search
@@ -1146,7 +1367,29 @@ class _RelationalMulti(_Relational):
 
 
 class One2many(_RelationalMulti):
-    """ One2many field. """
+    """ One2many field; the value of such a field is the recordset of all the
+        records in `comodel_name` such that the field `inverse_name` is equal to
+        the current record.
+
+        :param comodel_name: name of the target model (string)
+
+        :param inverse_name: name of the inverse `Many2one` field in
+            `comodel_name` (string)
+
+        :param domain: an optional domain to set on candidate values on the
+            client side (domain or string)
+
+        :param context: an optional context to use on the client side when
+            handling that field (dictionary)
+
+        :param auto_join: whether JOINs are generated upon search through that
+            field (boolean, by default ``False``)
+
+        :param limit: optional limit to use upon read (integer)
+
+        The attributes `comodel_name` and `inverse_name` are mandatory except in
+        the case of related fields or field extensions.
+    """
     type = 'one2many'
     inverse_name = None                 # name of the inverse field
     auto_join = False                   # whether joins are generated upon search
@@ -1173,7 +1416,35 @@ class One2many(_RelationalMulti):
 
 
 class Many2many(_RelationalMulti):
-    """ Many2many field. """
+    """ Many2many field; the value of such a field is the recordset.
+
+        :param comodel_name: name of the target model (string)
+
+        The attribute `comodel_name` is mandatory except in the case of related
+        fields or field extensions.
+
+        :param relation: optional name of the table that stores the relation in
+            the database (string)
+
+        :param column1: optional name of the column referring to "these" records
+            in the table `relation` (string)
+
+        :param column2: optional name of the column referring to "those" records
+            in the table `relation` (string)
+
+        The attributes `relation`, `column1` and `column2` are optional. If not
+        given, names are automatically generated from model names, provided
+        `model_name` and `comodel_name` are different!
+
+        :param domain: an optional domain to set on candidate values on the
+            client side (domain or string)
+
+        :param context: an optional context to use on the client side when
+            handling that field (dictionary)
+
+        :param limit: optional limit to use upon read (integer)
+
+    """
     type = 'many2many'
     relation = None                     # name of table
     column1 = None                      # column of table referring to model

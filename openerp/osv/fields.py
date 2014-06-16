@@ -1566,130 +1566,51 @@ class serialized(_column):
 # TODO: review completly this class for speed improvement
 class property(function):
 
-    def _get_default(self, obj, cr, uid, prop_name, context=None):
-        return self._get_defaults(obj, cr, uid, [prop_name], context=None)[prop_name]
+    def to_field_args(self):
+        args = super(property, self).to_field_args()
+        args['company_dependent'] = True
+        return args
 
-    def _get_defaults(self, obj, cr, uid, prop_names, context=None):
-        """Get the default values for ``prop_names´´ property fields (result of ir.property.get() function for res_id = False).
+    def _fnct_search(self, tobj, cr, uid, obj, name, domain, context=None):
+        ir_property = obj.pool['ir.property']
+        result = []
+        for field, operator, value in domain:
+            result += ir_property.search_multi(cr, uid, name, tobj._name, operator, value, context=context)
+        return result
 
-           :param list of string prop_names: list of name of property fields for those we want the default value
-           :return: map of property field names to their default value
-           :rtype: dict
-        """
-        prop = obj.pool.get('ir.property')
-        res = {}
-        for prop_name in prop_names:
-            res[prop_name] = prop.get(cr, uid, prop_name, obj._name, context=context)
-        return res
-
-    def _get_by_id(self, obj, cr, uid, prop_name, ids, context=None):
-        prop = obj.pool.get('ir.property')
-        vids = [obj._name + ',' + str(oid) for oid in  ids]
-        domain = [('fields_id.model', '=', obj._name), ('fields_id.name', 'in', prop_name)]
-        if context and context.get('company_id'):
-            domain += [('company_id', '=', context.get('company_id'))]
-        if vids:
-            domain = [('res_id', 'in', vids)] + domain
-        return prop.search(cr, uid, domain, context=context)
-
-    # TODO: to rewrite more clean
-    def _fnct_write(self, obj, cr, uid, id, prop_name, id_val, obj_dest, context=None):
-        if context is None:
-            context = {}
-
-        def_id = self._field_get(cr, uid, obj._name, prop_name)
-        company = obj.pool.get('res.company')
-        cid = company._company_default_get(cr, uid, obj._name, def_id, context=context)
-        # TODO for trunk: add new parameter company_id to _get_by_id method
-        context_company = dict(context, company_id=cid)
-        nids = self._get_by_id(obj, cr, uid, [prop_name], [id], context_company)
-        if nids:
-            cr.execute('DELETE FROM ir_property WHERE id IN %s', (tuple(nids),))
-
-        default_val = self._get_default(obj, cr, uid, prop_name, context)
-
-        property_create = False
-        if isinstance(default_val, openerp.osv.orm.BaseModel):
-            if default_val.id != id_val:
-                property_create = True
-        elif default_val != id_val:
-            property_create = True
-
-        if property_create:
-            propdef = obj.pool.get('ir.model.fields').browse(cr, uid, def_id,
-                                                             context=context)
-            prop = obj.pool.get('ir.property')
-            return prop.create(cr, uid, {
-                'name': propdef.name,
-                'value': id_val,
-                'res_id': obj._name+','+str(id),
-                'company_id': cid,
-                'fields_id': def_id,
-                'type': self._type,
-            }, context=context)
-        return False
+    def _fnct_write(self, obj, cr, uid, id, prop_name, value, obj_dest, context=None):
+        ir_property = obj.pool['ir.property']
+        ir_property.set_multi(cr, uid, prop_name, obj._name, {id: value}, context=context)
+        return True
 
     def _fnct_read(self, obj, cr, uid, ids, prop_names, obj_dest, context=None):
-        prop = obj.pool.get('ir.property')
-        # get the default values (for res_id = False) for the property fields
-        default_val = self._get_defaults(obj, cr, uid, prop_names, context)
+        ir_property = obj.pool['ir.property']
 
-        # build the dictionary that will be returned
-        res = {}
-        for id in ids:
-            res[id] = default_val.copy()
-
+        res = {id: {} for id in ids}
         for prop_name in prop_names:
-            property_field = obj._all_columns.get(prop_name).column
-            property_destination_obj = property_field._obj if property_field._type == 'many2one' else False
-            # If the property field is a m2o field, we will append the id of the value to name_get_ids
-            # in order to make a name_get in batch for all the ids needed.
-            name_get_ids = {}
-            for id in ids:
-                # get the result of ir.property.get() for this res_id and save it in res if it's existing
-                obj_reference = obj._name + ',' + str(id)
-                value = prop.get(cr, uid, prop_name, obj._name, res_id=obj_reference, context=context)
-                if value:
+            column = obj._all_columns[prop_name].column
+            values = ir_property.get_multi(cr, uid, prop_name, obj._name, ids, context=context)
+            if column._type == 'many2one':
+                for id, value in values.iteritems():
+                    res[id][prop_name] = value.name_get()[0] if value else False
+            else:
+                for id, value in values.iteritems():
                     res[id][prop_name] = value
-                # Check existence as root (as seeing the name of a related
-                # object depends on access right of source document,
-                # not target, so user may not have access) in order to avoid
-                # pointing on an unexisting record.
-                if property_destination_obj:
-                    if res[id][prop_name] and obj.pool[property_destination_obj].exists(cr, SUPERUSER_ID, res[id][prop_name].id):
-                        name_get_ids[id] = res[id][prop_name].id
-                    else:
-                        res[id][prop_name] = False
-            if property_destination_obj:
-                # name_get as root (as seeing the name of a related
-                # object depends on access right of source document,
-                # not target, so user may not have access.)
-                name_get_values = dict(obj.pool[property_destination_obj].name_get(cr, SUPERUSER_ID, name_get_ids.values(), context=context))
-                # the property field is a m2o, we need to return a tuple with (id, name)
-                for k, v in name_get_ids.iteritems():
-                    if res[k][prop_name]:
-                        res[k][prop_name] = (v , name_get_values.get(v))
+
         return res
 
-    def _field_get(self, cr, uid, model_name, prop):
-        if not self.field_id.get(cr.dbname):
-            cr.execute('SELECT id \
-                    FROM ir_model_fields \
-                    WHERE name=%s AND model=%s', (prop, model_name))
-            res = cr.fetchone()
-            self.field_id[cr.dbname] = res and res[0]
-        return self.field_id[cr.dbname]
-
-
     def __init__(self, **args):
-        self.field_id = {}
         if 'view_load' in args:
             _logger.warning("view_load attribute is deprecated on ir.fields. Args: %r", args)
         obj = 'relation' in args and args['relation'] or ''
-        function.__init__(self, self._fnct_read, False, self._fnct_write, obj=obj, multi='properties', **args)
-
-    def restart(self):
-        self.field_id = {}
+        super(property, self).__init__(
+            fnct=self._fnct_read,
+            fnct_inv=self._fnct_write,
+            fnct_search=self._fnct_search,
+            obj=obj,
+            multi='properties',
+            **args
+        )
 
 
 class column_info(object):
