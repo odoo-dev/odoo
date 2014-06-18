@@ -316,12 +316,17 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         this._super();
     },
     load_record: function(record) {
-        var self = this, set_values = [];
         if (!record) {
             this.set({ 'title' : undefined });
             this.do_warn(_t("Form"), _t("The record could not be found in the database."), true);
             return $.Deferred().reject();
         }
+        var self = this,
+            set_values = [],
+            record_fields = _.keys(record),
+            v8_onchange_fields = _.filter(self.fields_order, function(f) {
+                return self._has_v8_onchange(self.fields[f]).onchange;
+            });
         this.datarecord = record;
         this._actualize_mode();
         this.set({ 'title' : record.id ? record.display_name : _t("New") });
@@ -335,15 +340,26 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         });
         return $.when.apply(null, set_values).then(function() {
             if (!record.id) {
-                // New record: Second pass in order to trigger the onchanges
+                // New record: Second pass in order to trigger the (v7) onchanges
                 // respecting the fields order defined in the view
                 _.each(self.fields_order, function(field_name) {
                     if (record[field_name] !== undefined) {
                         var field = self.fields[field_name];
-                        field._dirty_flag = true;
-                        self.do_onchange(field);
+                        if (!_.contains(v8_onchange_fields, field_name)) {
+                            field._dirty_flag = true;
+                            self.do_onchange(field);
+                        }
                     }
                 });
+                // Third pass to trigger v8 onchange on fields modified by v7 onchanges.
+                var oc = _.filter(v8_onchange_fields, function(f) {
+                    return self.fields[f]._dirty_flag && !_.contains(record_fields, f);
+                });
+                if (!_.isEmpty(oc)) {
+                    var spec = self._parse_on_change_v8(self.fields[oc[0]], oc);
+                    self.on_change_list = [{spec: spec, v8: true}].concat(self.on_change_list);
+                    self._process_operations();
+                }
             }
             self.on_form_changed();
             self.rendering_engine.init_fields();
@@ -438,8 +454,15 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             $(".oe_form_pager_state", this.$pager).html(_.str.sprintf(_t("%d / %d"), this.dataset.index + 1, this.dataset.ids.length));
         }
     },
-    parse_on_change_v8: function (onchange, widget) {
+    _parse_on_change_v8: function (widget, changed_fields/*=null*/) {
         // onchange V8: call onchange(field_values, field_name, tocheck)
+        var onchange = this._has_v8_onchange(widget);
+        if (!onchange.v8) {
+            return undefined;
+        }
+        if (!onchange.onchange) {
+            return {};
+        }
         var field_values = this.get_fields_values();
         if (field_values.id.toString().match(instance.web.BufferedDataSet.virtual_id_regex)) {
             delete field_values.id;
@@ -465,22 +488,30 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                 });
             });
         });
+        changed_fields = changed_fields || [widget.name];
         return {
+            v8: true,
             method: "onchange",
-            args: [field_values, widget.name, tocheck]
+            args: [changed_fields, field_values]
         };
     },
+    _has_v8_onchange: function(widget) {
+        // return {v8: bool, onchange: bool}
+        var oc = _.str.trim(widget.node.attrs.on_change),
+            v8 = _(['1', 'true', '0', 'false']).contains(oc);
+            active = (oc === '1' || oc === 'true');
+        return {v8: v8, onchange: active};
+    },
     parse_on_change: function (on_change, widget) {
+        var v8 = this._parse_on_change_v8(widget);
+        if (!_.isUndefined(v8)) {
+            return v8;
+        }
+        // legacy v7 onchange handling
         var self = this;
         var onchange = _.str.trim(on_change);
         var call = onchange.match(/^(\w+)\((.*?)\)$/);
         if (!call) {
-            if (onchange === "1" || onchange === "true") {
-                return this.parse_on_change_v8(onchange, widget);
-            }
-            if (onchange === "0" || onchange === "false") {
-                return {};
-            }
             throw new Error(_.str.sprintf(_t("Wrong on change format: %s"), onchange));
         }
 
@@ -544,21 +575,24 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         };
     },
     do_onchange: function(widget, processed) {
-        var self = this;
-        this.on_change_list = [{widget: widget, processed: processed}].concat(this.on_change_list);
+        v8 = this._has_v8_onchange(widget).onchange;
+        this.on_change_list = [{widget: widget, processed: processed || [], v8: v8}].concat(this.on_change_list);
         return this._process_operations();
     },
     _process_onchange: function(on_change_obj) {
         var self = this;
         var widget = on_change_obj.widget;
-        var processed = on_change_obj.processed;
         try {
             var def = $.when({});
-            processed = processed || [];
-            processed.push(widget.name);
-            var on_change = widget.node.attrs.on_change;
-            if (on_change) {
-                var change_spec = self.parse_on_change(on_change, widget);
+            var change_spec = on_change_obj.spec;
+            if (!change_spec && widget) {
+                on_change_obj.processed.push(widget.name);
+                var on_change = widget.node.attrs.on_change;
+                if (on_change) {
+                    change_spec = self.parse_on_change(on_change, widget);
+                }
+            }
+            if (change_spec) {
                 if (change_spec.method) {
                     var ids = [];
                     if (self.datarecord.id && !instance.web.BufferedDataSet.virtual_id_regex.test(self.datarecord.id)) {
@@ -603,7 +637,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                 }
                 return response;
             }).then(function(response) {
-                return self.on_processed_onchange(response, processed);
+                return self.on_processed_onchange(response, on_change_obj);
             });
         } catch(e) {
             console.error(e);
@@ -611,7 +645,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             return $.Deferred().reject();
         }
     },
-    on_processed_onchange: function(result, processed) {
+    on_processed_onchange: function(result, onchange_obj) {
         try {
         var fields = this.fields;
         _(result.domain).each(function (domain, fieldname) {
@@ -621,7 +655,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         });
 
         if (!_.isEmpty(result.value)) {
-            this._internal_set_values(result.value, processed);
+            this._internal_set_values(result.value, onchange_obj);
         }
         if (!_.isEmpty(result.warning)) {
             new instance.web.Dialog(this, {
@@ -677,8 +711,8 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             return iterate();
         });
     },
-    _internal_set_values: function(values, exclude) {
-        exclude = exclude || [];
+    _internal_set_values: function(values, onchange_obj) {
+        onchange_obj = onchange_obj || {};
         for (var f in values) {
             if (!values.hasOwnProperty(f)) { continue; }
             var field = this.fields[f];
@@ -690,8 +724,8 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                     field.set_value(value_);
                     field._inhibit_on_change_flag = false;
                     field._dirty_flag = true;
-                    if (!_.contains(exclude, field.name)) {
-                        this.do_onchange(field, exclude);
+                    if (!onchange_obj.v8 && !_.contains(onchange_obj.processed || [], field.name)) {
+                        this.do_onchange(field, onchange_obj.processed);
                     }
                 }
             }

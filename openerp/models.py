@@ -5471,7 +5471,7 @@ class BaseModel(object):
             any(dep in other_fields for dep in field.dependents)
 
     @api.multi
-    def onchange(self, values, field_name, tocheck=None):
+    def onchange(self, field_names, values):
         """ Perform an onchange on the given field.
 
             :param values: dictionary mapping field names to values, giving the
@@ -5481,57 +5481,54 @@ class BaseModel(object):
                 this for secondary fields that are not keys of `values`
         """
         env = self.env
+        result = {
+            'value': {},
+            'domain': {},
+            'warning': '',
+        }
 
-        if field_name not in self._fields:
-            return {}
+        processed = set()
+        to_change = list(field_names)
 
         with env.do_in_draft():
-            # create a new record with the values, except field_name
             record = self.new(values)
-            record_values = dict(record._cache)
-            field_value = record._cache.pop(field_name, False)
-
-            # attach `self` with a different context (for cache consistency)
-            record._origin = self.with_context(__onchange=True)
-
-        # at this point, the cache should be clean
-        assert not env.dirty
-
-        with env.do_in_draft():
-            # apply the change on the record
-            record[field_name] = field_value
-
-            # invoke field-specific onchange methods
-            result = {}
-            for method in self._onchange_methods.get(field_name, ()):
-                method_res = method(record)
-                if not method_res:
+            while to_change:
+                fn = to_change.pop(0)
+                processed.add(fn)
+                if fn not in self._fields:
                     continue
-                if 'domain' in method_res:
-                    result.setdefault('domain', {}).update(method_res['domain'])
-                if 'warning' in method_res:
-                    result['warning'] = method_res['warning']
 
-            # compute function fields on secondary records (one2many, many2many)
-            for field_seq in (tocheck or ()):
-                record.mapped(field_seq)
+                val = record[fn] = record[fn]     # force recomputation
+                result['value'][fn] = record._fields[fn].convert_to_read(val)
 
-            # map fields to the corresponding set of subfields to consider
-            subfields = defaultdict(set)
-            for dotname in (tocheck or ()):
-                if '.' in dotname:
-                    name, subname = dotname.split('.')
-                    subfields[name].add(subname)
+                for dep in record._fields[fn].dependents:
+                    if dep not in processed and dep.model_name == record._name:
+                        to_change.append(dep.name)
 
-            # add changed values to result, and return it
-            changed = result.setdefault('value', {})
-            for name, oldval in record_values.iteritems():
-                newval = record[name]
-                if newval != oldval or getattr(newval, '_dirty', False):
-                    field = self._fields[name]
-                    changed[name] = field.convert_to_write(newval, self, subfields[name])
+                for method in self._onchange_methods.get(fn, ()):
+                    method_res = method(record)
+                    if not method_res:
+                        continue
+                    values = method_res.get('value', {})
+                    for k, v in values.items():
+                        if k not in processed:
+                            to_change.append(k)
 
-            return result
+                    if 'domain' in method_res:
+                        result.setdefault('domain', {}).update(method_res['domain'])
+                    if 'warning' in method_res:
+                        result['warning'] = method_res['warning']
+
+        changed = result['value']
+        for name, oldval in values.iteritems():
+            field = self._fields[name]
+            if not isinstance(field, _RelationalMulti):
+                continue
+            newval = record[name]
+            if newval != oldval or getattr(newval, '_dirty', False):
+                changed[name] = field.convert_to_write(newval, self)
+
+        return result
 
 
 class RecordCache(MutableMapping):
@@ -5691,6 +5688,6 @@ PGERROR_TO_OE = defaultdict(
 
 # keep those imports here to avoid dependency cycle errors
 from .osv import expression
-from .fields import Field, SpecialValue, FailedValue
+from .fields import Field, SpecialValue, FailedValue, _RelationalMulti
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
