@@ -3,8 +3,8 @@
 
         <record id="gd_taxr_1_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1111"/>
             <field name="sequence">1</field>
@@ -13,15 +13,15 @@
         <record id="gd_taxr_1_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxr_1"/>
         </record>
         <record id="gd_taxr_1_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxr_1"/>
@@ -29,7 +29,7 @@
         <record id="gd_taxr_1_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="gd_taxc_1111"/>
             <field name="sequence">1</field>
@@ -38,8 +38,8 @@
 
         <record id="gd_taxr_2_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1112"/>
             <field name="sequence">1</field>
@@ -48,7 +48,7 @@
         <record id="gd_taxr_2_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">8.5</field>
-            <field name="amount">8.5</field>
+            <field name="debit_credit_amount">8.5</field>
             <field name="code_id" ref="gd_taxc_2111"/>
             <field name="account_id" ref="gd_acc_260001"/>
             <field name="apply_on">invoice</field>
@@ -57,8 +57,8 @@
         </record>
         <record id="gd_taxr_2_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1112"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -67,7 +67,7 @@
         <record id="gd_taxr_2_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">-0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="gd_acc_260001"/>
             <field name="code_id" ref="gd_taxc_2111"/>
@@ -77,8 +77,8 @@
 
         <record id="gd_taxr_3_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1113"/>
             <field name="sequence">1</field>
@@ -86,8 +86,8 @@
         </record>
         <record id="gd_taxr_3_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
-            <field name="amount">20</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
             <field name="code_id" ref="gd_taxc_2112"/>
             <field name="account_id" ref="gd_acc_260002"/>
             <field name="apply_on">invoice</field>
@@ -96,8 +96,8 @@
         </record>
         <record id="gd_taxr_3_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1113"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -105,8 +105,8 @@
         </record>
         <record id="gd_taxr_3_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
-            <field name="amount">20</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">200</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="gd_acc_260002"/>
             <field name="code_id" ref="gd_taxc_2112"/>
@@ -116,8 +116,8 @@
 
         <record id="gd_taxp_1_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1121"/>
             <field name="sequence">1</field>
@@ -126,15 +126,15 @@
         <record id="gd_taxp_1_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_1"/>
         </record>
         <record id="gd_taxp_1_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1121"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -143,7 +143,7 @@
         <record id="gd_taxp_1_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">-0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_1"/>
@@ -151,8 +151,8 @@
 
         <record id="gd_taxp_2_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1122"/>
             <field name="sequence">1</field>
@@ -160,8 +160,8 @@
         </record>
         <record id="gd_taxp_2_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.5</field>
-            <field name="amount">8.5</field>
+            <field name="tax_amount">85</field>
+            <field name="debit_credit_amount">85</field>
             <field name="code_id" ref="gd_taxc_2121"/>
             <field name="account_id" ref="gd_acc_160002"/>
             <field name="apply_on">invoice</field>
@@ -170,8 +170,8 @@
         </record>
         <record id="gd_taxp_2_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1122"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -179,8 +179,8 @@
         </record>
         <record id="gd_taxp_2_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.5</field>
-            <field name="amount">8.5</field>
+            <field name="tax_amount">-85</field>
+            <field name="debit_credit_amount">85</field>
             <field name="account_id" ref="gd_acc_160002"/>
             <field name="code_id" ref="gd_taxc_2121"/>
             <field name="apply_on">refund</field>
@@ -190,8 +190,8 @@
 
         <record id="gd_taxp_3_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1123"/>
             <field name="sequence">1</field>
@@ -199,8 +199,8 @@
         </record>
         <record id="gd_taxp_3_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
-            <field name="amount">20</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
             <field name="code_id" ref="gd_taxc_2122"/>
             <field name="account_id" ref="gd_acc_160003"/>
             <field name="apply_on">invoice</field>
@@ -209,8 +209,8 @@
         </record>
         <record id="gd_taxp_3_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1123"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -218,8 +218,8 @@
         </record>
         <record id="gd_taxp_3_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
-            <field name="amount">20</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">200</field>
             <field name="code_id" ref="gd_taxc_2122"/>
             <field name="account_id" ref="gd_acc_160003"/>
             <field name="apply_on">refund</field>
@@ -229,8 +229,8 @@
 
         <record id="gd_taxp_nr_1_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1211"/>
             <field name="sequence">1</field>
@@ -238,8 +238,8 @@
         </record>
         <record id="gd_taxp_nr_1_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.5</field>
-            <field name="amount">8.5</field>
+            <field name="tax_amount">85</field>
+            <field name="debit_credit_amount">85</field>
             <field name="code_id" ref="gd_taxc_2211"/>
             <field name="account_id" ref="gd_acc_160001"/>
             <field name="apply_on">invoice</field>
@@ -248,8 +248,8 @@
         </record>
         <record id="gd_taxp_nr_1_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1211"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -257,8 +257,8 @@
         </record>
         <record id="gd_taxp_nr_1_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.5</field>
-            <field name="amount">8.5</field>
+            <field name="tax_amount">-85</field>
+            <field name="debit_credit_amount">85</field>
             <field name="code_id" ref="gd_taxc_2211"/>
             <field name="account_id" ref="gd_acc_160001"/>
             <field name="apply_on">refund</field>
@@ -268,8 +268,8 @@
 
         <record id="gd_taxp_nr_2_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1212"/>
             <field name="sequence">1</field>
@@ -277,8 +277,8 @@
         </record>
         <record id="gd_taxp_nr_2_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
-            <field name="amount">20</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
             <field name="code_id" ref="gd_taxc_2212"/>
             <field name="account_id" ref="gd_acc_160001"/>
             <field name="apply_on">invoice</field>
@@ -287,8 +287,8 @@
         </record>
         <record id="gd_taxp_nr_2_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1212"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -296,8 +296,8 @@
         </record>
         <record id="gd_taxp_nr_2_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
-            <field name="amount">20</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">200</field>
             <field name="code_id" ref="gd_taxc_2212"/>
             <field name="account_id" ref="gd_acc_160001"/>
             <field name="apply_on">refund</field>
@@ -307,8 +307,8 @@
 
         <record id="gd_taxp_st_1_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="gd_taxc_1122"/>
             <field name="sequence">1</field>
@@ -317,15 +317,15 @@
         <record id="gd_taxp_st_1_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_1"/>
         </record>
         <record id="gd_taxp_st_1_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1122"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -334,7 +334,7 @@
         <record id="gd_taxp_st_1_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_1"/>
@@ -342,16 +342,16 @@
 
         <record id="gd_taxp_st_1_1_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_1"/>
         </record>
         <record id="gd_taxp_st_1_1_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.5</field>
-            <field name="amount">8.5</field>
+            <field name="tax_amount">85</field>
+            <field name="debit_credit_amount">85</field>
             <field name="code_id" ref="gd_taxc_2121"/>
             <field name="account_id" ref="gd_acc_160002"/>
             <field name="apply_on">invoice</field>
@@ -360,16 +360,16 @@
         </record>
         <record id="gd_taxp_st_1_1_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_1"/>
         </record>
         <record id="gd_taxp_st_1_1_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.5</field>
-            <field name="amount">8.5</field>
+            <field name="tax_amount">85</field>
+            <field name="debit_credit_amount">85</field>
             <field name="code_id" ref="gd_taxc_2121"/>
             <field name="account_id" ref="gd_acc_160002"/>
             <field name="apply_on">refund</field>
@@ -379,16 +379,16 @@
 
         <record id="gd_taxp_st_1_2_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_2"/>
         </record>
         <record id="gd_taxp_st_1_2_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.5</field>
-            <field name="amount">-8.5</field>
+            <field name="tax_amount">85</field>
+            <field name="debit_credit_amount">-85</field>
             <field name="code_id" ref="gd_taxc_2111"/>
             <field name="account_id" ref="gd_acc_260001"/>
             <field name="apply_on">invoice</field>
@@ -397,16 +397,16 @@
         </record>
         <record id="gd_taxp_st_1_2_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_2"/>
         </record>
         <record id="gd_taxp_st_1_2_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.5</field>
-            <field name="amount">-8.5</field>
+            <field name="tax_amount">-85</field>
+            <field name="debit_credit_amount">-85</field>
             <field name="code_id" ref="gd_taxc_2111"/>
             <field name="account_id" ref="gd_acc_260001"/>
             <field name="apply_on">refund</field>
@@ -416,8 +416,8 @@
 
         <record id="gd_taxp_st_2_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1123"/>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
@@ -426,15 +426,15 @@
         <record id="gd_taxp_st_2_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_2"/>
         </record>
         <record id="gd_taxp_st_2_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="gd_taxc_1123"/>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
@@ -443,7 +443,7 @@
         <record id="gd_taxp_st_2_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_2"/>
@@ -451,16 +451,16 @@
 
         <record id="gd_taxp_st_2_1_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_2"/>
         </record>
         <record id="gd_taxp_st_2_1_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
-            <field name="amount">20</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
             <field name="code_id" ref="gd_taxc_2122"/>
             <field name="account_id" ref="gd_acc_160003"/>
             <field name="apply_on">invoice</field>
@@ -469,16 +469,16 @@
         </record>
         <record id="gd_taxp_st_2_1_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_2"/>
         </record>
         <record id="gd_taxp_st_2_1_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
-            <field name="amount">20</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">200</field>
             <field name="code_id" ref="gd_taxc_2122"/>
             <field name="account_id" ref="gd_acc_160003"/>
             <field name="apply_on">refund</field>
@@ -488,16 +488,16 @@
 
         <record id="gd_taxp_st_2_2_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_2"/>
         </record>
         <record id="gd_taxp_st_2_2_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
-            <field name="amount">-20</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">-200</field>
             <field name="code_id" ref="gd_taxc_2112"/>
             <field name="account_id" ref="gd_acc_260002"/>
             <field name="apply_on">invoice</field>
@@ -506,16 +506,16 @@
         </record>
         <record id="gd_taxp_st_2_2_ref_base_id" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="sequence">1</field>
             <field name="tax_id" ref="gd_taxp_st_2"/>
         </record>
         <record id="gd_taxp_st_2_2_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
-            <field name="amount">-20</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">-200</field>
             <field name="code_id" ref="gd_taxc_2112"/>
             <field name="account_id" ref="gd_acc_260002"/>
             <field name="apply_on">refund</field>
@@ -526,8 +526,8 @@
         <!-- Child Records For Tax Template -->
         <record id="gd_taxp_st_1_1_child_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.5</field>
-            <field name="amount">8.5</field>
+            <field name="tax_amount">85</field>
+            <field name="debit_credit_amount">85</field>
             <field name="code_id" ref="gd_taxc_2121"/>
             <field name="account_id" ref="gd_acc_160002"/>
             <field name="apply_on">invoice</field>
@@ -536,8 +536,8 @@
         </record>
         <record id="gd_taxp_st_1_1_child_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.5</field>
-            <field name="amount">8.5</field>
+            <field name="tax_amount">-85</field>
+            <field name="debit_credit_amount">85</field>
             <field name="account_id" ref="gd_acc_160002"/>
             <field name="code_id" ref="gd_taxc_2121"/>
             <field name="apply_on">refund</field>
@@ -546,8 +546,8 @@
         </record>
         <record id="gd_taxp_st_1_2_child_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.5</field>
-            <field name="amount">-8.5</field>
+            <field name="tax_amount">85</field>
+            <field name="debit_credit_amount">-85</field>
             <field name="code_id" ref="gd_taxc_2111"/>
             <field name="account_id" ref="gd_acc_160002"/>
             <field name="apply_on">invoice</field>
@@ -556,8 +556,8 @@
         </record>
         <record id="gd_taxp_st_1_2_child_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.5</field>
-            <field name="amount">-8.5</field>
+            <field name="tax_amount">-85</field>
+            <field name="debit_credit_amount">-85</field>
             <field name="account_id" ref="gd_acc_160002"/>
             <field name="code_id" ref="gd_taxc_2111"/>
             <field name="apply_on">refund</field>
@@ -567,8 +567,8 @@
 
         <record id="gd_taxp_st_2_1_child_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2</field>
-            <field name="amount">2</field>
+            <field name="tax_amount">20</field>
+            <field name="debit_credit_amount">20</field>
             <field name="code_id" ref="gd_taxc_2122"/>
             <field name="account_id" ref="gd_acc_160003"/>
             <field name="apply_on">invoice</field>
@@ -577,8 +577,8 @@
         </record>
         <record id="gd_taxp_st_2_1_child_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2</field>
-            <field name="amount">2</field>
+            <field name="tax_amount">-20</field>
+            <field name="debit_credit_amount">20</field>
             <field name="account_id" ref="gd_acc_160003"/>
             <field name="code_id" ref="gd_taxc_2122"/>
             <field name="apply_on">refund</field>
@@ -587,8 +587,8 @@
         </record>
         <record id="gd_taxp_st_2_2_child_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2</field>
-            <field name="amount">-2</field>
+            <field name="tax_amount">20</field>
+            <field name="debit_credit_amount">-20</field>
             <field name="code_id" ref="gd_taxc_2112"/>
             <field name="account_id" ref="gd_acc_260002"/>
             <field name="apply_on">invoice</field>
@@ -597,8 +597,8 @@
         </record>
         <record id="gd_taxp_st_2_2_child_ref_tax_id" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2</field>
-            <field name="amount">-2</field>
+            <field name="tax_amount">-20</field>
+            <field name="debit_credit_amount">-20</field>
             <field name="account_id" ref="gd_acc_260002"/>
             <field name="code_id" ref="gd_taxc_2112"/>
             <field name="apply_on">refund</field>
