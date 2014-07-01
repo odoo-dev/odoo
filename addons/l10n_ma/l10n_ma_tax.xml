@@ -766,7 +766,7 @@
   <record id="tva_exo_tax_id" model="account.tax.line.template">
     <field name="code_type">tax</field>
     <field name="tax_amount">0</field>
-    <field name="amount">0</field>
+    <field name="debit_credit_amount">0</field>
     <field name="apply_on">invoice</field>
     <field name="tax_id" ref="tva_exo"/>
   </record>
@@ -780,7 +780,7 @@
   <record id="tva_exo_ref_tax_id" model="account.tax.line.template">
     <field name="code_type">tax</field>
     <field name="tax_amount">0</field>
-    <field name="amount">0</field>
+    <field name="debit_credit_amount">0</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tva_exo"/>
   </record>

@@ -172,7 +172,7 @@
         <record id="vat_25_ref_tax_id" model="account.tax.line.template">
           <field name="code_type">tax</field>
           <field name="tax_amount">-25</field>
-          <field name="amount">25</field>
+          <field name="debit_credit_amount">25</field>
           <field name="apply_on">refund</field>
           <field name="account_id" ref="ch_1170"/>
           <field name="code_id" ref="vat_code_due_tva25"/>
@@ -200,7 +200,7 @@
         <record id="vat_25_purchase_tax_id" model="account.tax.line.template">
           <field name="code_type">tax</field>
           <field name="tax_amount">-25</field>
-          <field name="amount">25</field>
+          <field name="debit_credit_amount">25</field>
           <field name="apply_on">invoice</field>
           <field name="account_id" ref="ch_1171"/>
           <field name="code_id" ref="vat_code_payable_bs"/>
