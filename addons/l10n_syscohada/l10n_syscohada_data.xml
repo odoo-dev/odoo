@@ -1913,16 +1913,16 @@
     </record>
     <record id="tva_sale_18_base_id" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
         <field name="code_id" ref="tax_col_18_ht"/>
         <field name="tax_id" ref="tva_sale_18"/>
     </record>
     <record id="tva_sale_18_tax_id" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">18</field>
-        <field name="amount">18</field>
+        <field name="tax_amount">180</field>
+        <field name="debit_credit_amount">180</field>
         <field name="apply_on">invoice</field>
         <field name="account_id" ref="pcg_4441"/>
         <field name="code_id" ref="tax_col_18"/>
@@ -1930,16 +1930,16 @@
     </record>
     <record id="tva_sale_18_ref_base_id" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">-1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
         <field name="code_id" ref="tax_col_18_ht"/>
         <field name="tax_id" ref="tva_sale_18"/>
     </record>
     <record id="tva_sale_18_ref_tax_id" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-18</field>
-        <field name="amount">18</field>
+        <field name="tax_amount">-180</field>
+        <field name="debit_credit_amount">180</field>
         <field name="apply_on">refund</field>
         <field name="account_id" ref="pcg_4449"/>
         <field name="code_id" ref="tax_col_18"/>
@@ -1955,16 +1955,16 @@
     </record>
     <record id="tva_purchase_18_base_id" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
         <field name="code_id" ref="tax_acq_18_ht"/>
         <field name="tax_id" ref="tva_purchase_18"/>
     </record>
     <record id="tva_purchase_18_tax_id" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">18</field>
-        <field name="amount">18</field>
+        <field name="tax_amount">180</field>
+        <field name="debit_credit_amount">180</field>
         <field name="apply_on">invoice</field>
         <field name="account_id" ref="pcg_4441"/>
         <field name="code_id" ref="tax_acq_18"/>
@@ -1972,16 +1972,16 @@
     </record>
     <record id="tva_purchase_18_ref_base_id" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">-1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
         <field name="code_id" ref="tax_acq_18_ht"/>
         <field name="tax_id" ref="tva_purchase_18"/>
     </record>
     <record id="tva_purchase_18_ref_tax_id" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-18</field>
-        <field name="amount">18</field>
+        <field name="tax_amount">-180</field>
+        <field name="debit_credit_amount">180</field>
         <field name="apply_on">refund</field>
         <field name="account_id" ref="pcg_4449"/>
         <field name="code_id" ref="tax_acq_18"/>
@@ -1996,22 +1996,22 @@
     </record>
     <record id="tva_exonere_base_id" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
         <field name="tax_id" ref="tva_exonere"/>
     </record>
     <record id="tva_exonere_tax_id" model="account.tax.line.template">
         <field name="code_type">tax</field>
         <field name="tax_amount">0</field>
-        <field name="amount">0</field>
+        <field name="debit_credit_amount">0</field>
         <field name="apply_on">invoice</field>
         <field name="tax_id" ref="tva_exonere"/>
     </record>
     <record id="tva_exonere_ref_base_id" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="tva_exonere"/>
     </record>
