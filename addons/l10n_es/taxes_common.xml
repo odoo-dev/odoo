@@ -49,8 +49,8 @@
         
         <record id="iva_sop_4_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_22_4"/>
             <field name="tax_id" ref="iva_sop_4"/>
@@ -58,8 +58,8 @@
         
         <record id="iva_sop_4_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_23_4"/>
@@ -68,8 +68,8 @@
         
         <record id="iva_sop_4_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_22_4"/>
             <field name="amount">100</field>
@@ -78,8 +78,8 @@
         
         <record id="iva_sop_4_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_23_4"/>
@@ -97,8 +97,8 @@
         
         <record id="iva_sop_4_inv_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_24_4"/>
             <field name="tax_id" ref="iva_sop_4_inv"/>
@@ -106,8 +106,8 @@
         
         <record id="iva_sop_4_inv_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_25_4"/>
@@ -116,8 +116,8 @@
         
         <record id="iva_sop_4_inv_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_24_4"/>
             <field name="tax_id" ref="iva_sop_4_inv"/>
@@ -125,8 +125,8 @@
         
         <record id="iva_sop_4_inv_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_25_4"/>
@@ -144,8 +144,8 @@
         
         <record id="iva_sop_10_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_22_10"/>
             <field name="tax_id" ref="iva_sop_10"/>
@@ -153,8 +153,8 @@
         
         <record id="iva_sop_10_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_23_10"/>
@@ -163,8 +163,8 @@
         
         <record id="iva_sop_10_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_22_10"/>
             <field name="tax_id" ref="iva_sop_10"/>
@@ -172,8 +172,8 @@
         
         <record id="iva_sop_10_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_23_10"/>
@@ -191,8 +191,8 @@
         
         <record id="iva_sop_10_inv_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_24_10"/>
             <field name="tax_id" ref="iva_sop_10_inv"/>
@@ -200,8 +200,8 @@
         
         <record id="iva_sop_10_inv_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_25_10"/>
@@ -210,8 +210,8 @@
         
         <record id="iva_sop_10_inv_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_24_10"/>
             <field name="tax_id" ref="iva_sop_10_inv"/>
@@ -219,8 +219,8 @@
         
         <record id="iva_sop_10_inv_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_25_10"/>
@@ -239,8 +239,8 @@
         
         <record id="iva_sop_12_agr_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="base_sop_agr"/>
             <field name="tax_id" ref="iva_sop_12_agr"/>
@@ -248,8 +248,8 @@
         
         <record id="iva_sop_12_agr_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_34"/>
@@ -258,8 +258,8 @@
         
         <record id="iva_sop_12_agr_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="base_sop_agr"/>
             <field name="tax_id" ref="iva_sop_12_agr"/>
@@ -267,8 +267,8 @@
         
         <record id="iva_sop_12_agr_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_34"/>
@@ -287,8 +287,8 @@
         
         <record id="iva_sop_21_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_22_21"/>
             <field name="tax_id" ref="iva_sop_21"/>
@@ -296,8 +296,8 @@
         
         <record id="iva_sop_21_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_23_21"/>
@@ -306,8 +306,8 @@
         
         <record id="iva_sop_21_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_22_21"/>
             <field name="tax_id" ref="iva_sop_21"/>
@@ -315,8 +315,8 @@
         
         <record id="iva_sop_21_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_23_21"/>
@@ -334,8 +334,8 @@
         
         <record id="iva_sop_21_inv_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_24_21"/>
             <field name="tax_id" ref="iva_sop_21_inv"/>
@@ -343,8 +343,8 @@
         
         <record id="iva_sop_21_inv_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_25_21"/>
@@ -353,8 +353,8 @@
         
         <record id="iva_sop_21_inv_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_24_21"/>
             <field name="tax_id" ref="iva_sop_21_inv"/>
@@ -362,8 +362,8 @@
         
         <record id="iva_sop_21_inv_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_25_21"/>
@@ -384,8 +384,8 @@
                 
         <record id="iva_X0_compras_bc_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_26"/>
             <field name="tax_id" ref="iva_X0_compras_bc"/>
@@ -394,7 +394,7 @@
         <record id="iva_X0_compras_bc_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_27"/>
             <field name="tax_id" ref="iva_X0_compras_bc"/>
@@ -402,8 +402,8 @@
         
         <record id="iva_X0_compras_bc_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_26"/>
             <field name="tax_id" ref="iva_X0_compras_bc"/>
@@ -412,7 +412,7 @@
         <record id="iva_X0_compras_bc_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_27"/>
             <field name="tax_id" ref="iva_X0_compras_bc"/>
@@ -429,8 +429,8 @@
         
         <record id="iva_X0_compras_bi_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_28"/>
             <field name="tax_id" ref="iva_X0_compras_bi"/>
@@ -439,7 +439,7 @@
         <record id="iva_X0_compras_bi_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_29"/>
             <field name="tax_id" ref="iva_X0_compras_bi"/>
@@ -447,8 +447,8 @@
         
         <record id="iva_X0_compras_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_28"/>
             <field name="tax_id" ref="iva_X0_compras_bi"/>
@@ -457,7 +457,7 @@
         <record id="iva_X0_compras_bi_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_29"/>
             <field name="tax_id" ref="iva_X0_compras_bi"/>
@@ -474,8 +474,8 @@
         
         <record id="iva_X4_compras_bc_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_26_4"/>
             <field name="tax_id" ref="iva_X4_compras_bc"/>
@@ -483,8 +483,8 @@
         
         <record id="iva_X4_compras_bc_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_27_4"/>
@@ -493,8 +493,8 @@
         
         <record id="iva_X4_compras_bc_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_26_4"/>
             <field name="tax_id" ref="iva_X4_compras_bc"/>
@@ -502,8 +502,8 @@
         
         <record id="iva_X4_compras_bc_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_27_4"/>
@@ -521,8 +521,8 @@
         
         <record id="iva_X4_compras_bi_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_28_4"/>
             <field name="tax_id" ref="iva_X4_compras_bi"/>
@@ -530,8 +530,8 @@
         
         <record id="iva_X4_compras_bi_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_29_4"/>
@@ -541,7 +541,7 @@
         <record id="iva_X4_compras_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_28_4"/>
             <field name="tax_id" ref="iva_X4_compras_bi"/>
@@ -549,8 +549,8 @@
         
         <record id="iva_X4_compras_bi_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_29_4"/>
@@ -568,8 +568,8 @@
         
         <record id="iva_X10_compras_bc_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_26_10"/>
             <field name="tax_id" ref="iva_X10_compras_bc"/>
@@ -577,8 +577,8 @@
         
         <record id="iva_X10_compras_bc_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_27_10"/>
@@ -587,8 +587,8 @@
         
         <record id="iva_X10_compras_bc_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_26_10"/>
             <field name="tax_id" ref="iva_X10_compras_bc"/>
@@ -596,8 +596,8 @@
         
         <record id="iva_X10_compras_bc_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_27_10"/>
@@ -615,8 +615,8 @@
         
         <record id="iva_X10_compras_bi_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_28_10"/>
             <field name="tax_id" ref="iva_X10_compras_bi"/>
@@ -624,8 +624,8 @@
         
         <record id="iva_X10_compras_bi_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_29_10"/>
@@ -634,8 +634,8 @@
         
         <record id="iva_X10_compras_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_28_10"/>
             <field name="tax_id" ref="iva_X10_compras_bi"/>
@@ -643,8 +643,8 @@
         
         <record id="iva_X10_compras_bi_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_29_10"/>
@@ -662,8 +662,8 @@
         
         <record id="iva_X21_compras_bc_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_26_21"/>
             <field name="tax_id" ref="iva_X21_compras_bc"/>
@@ -671,8 +671,8 @@
         
         <record id="iva_X10_compras_bc_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_27_21"/>
@@ -681,8 +681,8 @@
         
         <record id="iva_X21_compras_bc_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_26_21"/>
             <field name="tax_id" ref="iva_X21_compras_bc"/>
@@ -690,8 +690,8 @@
         
         <record id="iva_X21_compras_bc_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_27_21"/>
@@ -709,8 +709,8 @@
         
         <record id="iva_X21_compras_bi_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_28_21"/>
             <field name="tax_id" ref="iva_X21_compras_bi"/>
@@ -718,8 +718,8 @@
         
         <record id="iva_X21_compras_bi_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_29_21"/>
@@ -728,8 +728,8 @@
         
         <record id="iva_X21_compras_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_28_21"/>
             <field name="tax_id" ref="iva_X21_compras_bi"/>
@@ -737,8 +737,8 @@
         
         <record id="iva_X21_compras_bi_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_29_21"/>
@@ -759,8 +759,8 @@
         
         <record id="iva_X0_compras_bi_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="base_extra_43"/>
             <field name="tax_id" ref="iva_X0"/>
@@ -768,15 +768,15 @@
         
         <record id="iva_X0_compras_bi_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
         </record>
         
         <record id="iva_X0_compras_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="base_extra_43"/>
             <field name="tax_id" ref="iva_X0"/>
@@ -785,7 +785,7 @@
         <record id="iva_X0_compras_bi_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0.0</field>
-            <field name="amount">0.0</field>
+            <field name="debit_credit_amount">0.0</field>
             <field name="apply_on">refund</field>
         </record>
 
@@ -803,32 +803,32 @@
         
         <record id="iva_ISP_compras_21_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_ISP_compras_21"/>
         </record>
         
         <!-- <record id="iva_ISP_compras_21_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_ISP_compras_21"/>
         </record> -->
         
         <record id="iva_ISP_compras_21_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_ISP_compras_21"/>
         </record>
         
         <!-- <record id="iva_ISP_compras_21_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_ISP_compras_21"/>
         </record> -->
@@ -836,7 +836,7 @@
         <record id="iva_ISP_compras_21_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_ISP_compras_21"/>
         </record>
@@ -844,15 +844,15 @@
         <record id="iva_ISP_compras_21_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_ISP_compras_21"/>
         </record>
         
         <record id="iva_ISP_compras_21_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">-21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_09_21"/>
@@ -861,8 +861,8 @@
         
         <record id="iva_ISP_compras_21_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">-21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_09_21"/>
@@ -871,8 +871,8 @@
         
         <record id="iva_ISP_compras_21_3_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_23_21"/>
@@ -881,8 +881,8 @@
         
         <record id="iva_ISP_compras_21_3_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_23_21"/>
@@ -902,8 +902,8 @@
         
         <record id="iva_rep_4_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_dev_01"/>
             <field name="tax_id" ref="iva_rep_4"/>
@@ -911,8 +911,8 @@
         
         <record id="iva_rep_4_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_03"/>
@@ -921,8 +921,8 @@
         
         <record id="iva_rep_4_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_dev_01"/>
             <field name="tax_id" ref="iva_rep_4"/>
@@ -930,8 +930,8 @@
         
         <record id="iva_rep_4_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_03"/>
@@ -949,8 +949,8 @@
         
         <record id="iva_rep_10_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_dev_04_10"/>
             <field name="tax_id" ref="iva_rep_10"/>
@@ -958,8 +958,8 @@
         
         <record id="iva_rep_10_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_06_10"/>
@@ -968,8 +968,8 @@
         
         <record id="iva_rep_10_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_dev_04_10"/>
             <field name="tax_id" ref="iva_rep_10"/>
@@ -977,8 +977,8 @@
         
         <record id="iva_rep_10_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_06_10"/>
@@ -997,8 +997,8 @@
         
         <record id="iva_rep_21_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_dev_07_21"/>
             <field name="tax_id" ref="iva_rep_21"/>
@@ -1006,8 +1006,8 @@
         
         <record id="iva_rep_21_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_09_21"/>
@@ -1016,8 +1016,8 @@
         
         <record id="iva_rep_21_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_dev_07_21"/>
             <field name="tax_id" ref="iva_rep_21"/>
@@ -1025,8 +1025,8 @@
         
         <record id="iva_rep_21_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_09_21"/>
@@ -1046,8 +1046,8 @@
         
         <record id="re_05_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_dev_10"/>
             <field name="tax_id" ref="re_05"/>
@@ -1055,8 +1055,8 @@
         
         <record id="re_05_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">5</field>
-            <field name="amount">5</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_12"/>
@@ -1065,8 +1065,8 @@
         
         <record id="re_05_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_dev_10"/>
             <field name="tax_id" ref="re_05"/>
@@ -1074,8 +1074,8 @@
         
         <record id="re_05_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-5</field>
-            <field name="amount">5</field>
+            <field name="tax_amount">-50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_12"/>
@@ -1093,8 +1093,8 @@
         
         <record id="re_14_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_dev_13_14"/>
             <field name="tax_id" ref="re_14"/>
@@ -1102,8 +1102,8 @@
         
         <record id="re_14_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">14</field>
-            <field name="amount">14</field>
+            <field name="tax_amount">140</field>
+            <field name="debit_credit_amount">140</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_15_14"/>
@@ -1112,8 +1112,8 @@
         
         <record id="re_14_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_dev_13_14"/>
             <field name="tax_id" ref="re_14"/>
@@ -1121,8 +1121,8 @@
         
         <record id="re_14_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-14</field>
-            <field name="amount">14</field>
+            <field name="tax_amount">-140</field>
+            <field name="debit_credit_amount">140</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_15_14"/>
@@ -1140,8 +1140,8 @@
         
         <record id="re_52_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_dev_16_52"/>
             <field name="tax_id" ref="re_52"/>
@@ -1149,8 +1149,8 @@
         
         <record id="re_52_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">52</field>
-            <field name="amount">52</field>
+            <field name="tax_amount">520</field>
+            <field name="debit_credit_amount">520</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_18_52"/>
@@ -1159,8 +1159,8 @@
         
         <record id="re_52_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_dev_16_52"/>
             <field name="tax_id" ref="re_52"/>
@@ -1168,8 +1168,8 @@
         
         <record id="re_52_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-52</field>
-            <field name="amount">52</field>
+            <field name="tax_amount">-520</field>
+            <field name="debit_credit_amount">520</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_18_52"/>
@@ -1187,8 +1187,8 @@
         
         <record id="re_buy_05_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_10"/>
             <field name="tax_id" ref="re_buy_05"/>
@@ -1196,8 +1196,8 @@
         
         <record id="re_buy_05_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">52</field>
-            <field name="amount">52</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_12"/>
@@ -1206,8 +1206,8 @@
         
         <record id="re_buy_05_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_10"/>
             <field name="tax_id" ref="re_buy_05"/>
@@ -1215,8 +1215,8 @@
         
         <record id="re_buy_05_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-52</field>
-            <field name="amount">52</field>
+            <field name="tax_amount">-50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_12"/>
@@ -1234,8 +1234,8 @@
         
          <record id="re_buy_14_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_13_14"/>
             <field name="tax_id" ref="re_buy_14"/>
@@ -1243,8 +1243,8 @@
         
         <record id="re_buy_14_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">52</field>
-            <field name="amount">52</field>
+            <field name="tax_amount">140</field>
+            <field name="debit_credit_amount">140</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_15_14"/>
@@ -1253,8 +1253,8 @@
         
         <record id="re_buy_14_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_13_14"/>
             <field name="tax_id" ref="re_buy_14"/>
@@ -1262,8 +1262,8 @@
         
         <record id="re_buy_14_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-52</field>
-            <field name="amount">52</field>
+            <field name="tax_amount">-140</field>
+            <field name="debit_credit_amount">140</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_15_14"/>
@@ -1281,8 +1281,8 @@
         
         <record id="re_buy_52_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="iva_ded_16_52"/>
             <field name="tax_id" ref="re_buy_52"/>
@@ -1290,8 +1290,8 @@
         
         <record id="re_buy_52_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">52</field>
-            <field name="amount">52</field>
+            <field name="tax_amount">520</field>
+            <field name="debit_credit_amount">520</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_18_52"/>
@@ -1300,8 +1300,8 @@
         
         <record id="re_buy_52_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_16_52"/>
             <field name="tax_id" ref="re_buy_52"/>
@@ -1309,8 +1309,8 @@
         
         <record id="re_buy_52_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-52</field>
-            <field name="amount">52</field>
+            <field name="tax_amount">-520</field>
+            <field name="debit_credit_amount">520</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_18_52"/>
@@ -1334,8 +1334,8 @@
         
         <record id="iva_IO_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="base_intra_42"/>
             <field name="tax_id" ref="iva_IO"/>
@@ -1344,15 +1344,15 @@
         <record id="iva_IO_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IO"/>
         </record>
         
         <record id="iva_IO_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="base_intra_42"/>
             <field name="tax_id" ref="iva_IO"/>
@@ -1361,7 +1361,7 @@
         <record id="iva_IO_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IO"/>
         </record>
@@ -1380,40 +1380,40 @@
         
         <record id="iva_IC_compras_4_bc_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_4_bc"/>
         </record>
         
         <!-- <record id="iva_IC_compras_4_bc_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">1</field>
-            <field name="amount">1</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_4_bc"/>
         </record> -->
         
         <record id="iva_IC_compras_4_bc_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_4_bc"/>
         </record>
         
         <!-- <record id="iva_IC_compras_4_bc_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-1</field>
-            <field name="amount">1</field>
+            <field name="tax_amount">-10</field>
+            <field name="debit_credit_amount">10</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_4_bc"/>
         </record> -->
 
         <record id="iva_IC_compras_4_bc_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_4"/>
@@ -1422,8 +1422,8 @@
         
         <record id="iva_IC_compras_4_bc_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_4"/>
@@ -1432,8 +1432,8 @@
         
        <record id="iva_IC_compras_4_bc_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">-4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">-40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1442,8 +1442,8 @@
         
         <record id="iva_IC_compras_4_bc_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">-4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">-40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1462,40 +1462,40 @@
         
         <record id="iva_IC_compras_4_bi_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_4_bi"/>
         </record>
         
         <!-- <record id="iva_IC_compras_4_bi_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">1</field>
-            <field name="amount">1</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_4_bi"/>
         </record> -->
         
         <record id="iva_IC_compras_4_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_4_bi"/>
         </record>
         
         <!-- <record id="iva_IC_compras_4_bi_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-1</field>
-            <field name="amount">1</field>
+            <field name="tax_amount">-10</field>
+            <field name="debit_credit_amount">10</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_4_bi"/>
         </record> -->
 
         <record id="iva_IC_compras_4_bi_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_33_4"/>
@@ -1504,8 +1504,8 @@
         
         <record id="iva_IC_compras_4_bi_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_33_4"/>
@@ -1514,8 +1514,8 @@
         
         <record id="iva_IC_compras_4_bi_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
-            <field name="amount">-4</field>
+            <field name="tax_amount">-40</field>
+            <field name="debit_credit_amount">-40</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1524,8 +1524,8 @@
         
         <record id="iva_IC_compras_4_bi_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
-            <field name="amount">-4</field>
+            <field name="tax_amount">40</field>
+            <field name="debit_credit_amount">-40</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1544,40 +1544,40 @@
         
         <record id="iva_IC_compras_10_bc_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_10_bc"/>
         </record>
         
         <!-- <record id="iva_IC_compras_10_bc_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">1</field>
-            <field name="amount">1</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_10_bc"/>
         </record> -->
         
         <record id="iva_IC_compras_10_bc_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_am0ount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_10_bc"/>
         </record>
         
         <!-- <record id="iva_IC_compras_10_bc_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_10_bc"/>
         </record> -->
         
         <record id="iva_IC_compras_10_bc_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_10"/>
@@ -1586,8 +1586,8 @@
         
         <record id="iva_IC_compras_10_bc_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_10"/>
@@ -1596,8 +1596,8 @@
         
         <record id="iva_IC_compras_10_bc_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">-10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">-100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1606,8 +1606,8 @@
         
         <record id="iva_IC_compras_10_bc_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">-10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">-100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1626,40 +1626,40 @@
         
         <record id="iva_IC_compras_10_bi_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_10_bi"/>
         </record>
         
         <!-- <record id="iva_IC_compras_10_bi_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">1</field>
-            <field name="amount">1</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_10_bi"/>
         </record> -->
         
         <record id="iva_IC_compras_10_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_10_bi"/>
         </record>
         
         <!-- <record id="iva_IC_compras_10_bi_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_10_bi"/>
         </record> -->
         
         <record id="iva_IC_compras_10_bi_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_10"/>
@@ -1668,8 +1668,8 @@
         
         <record id="iva_IC_compras_10_bi_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_10"/>
@@ -1678,8 +1678,8 @@
         
         <record id="iva_IC_compras_10_bi_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">-10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">-100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1688,8 +1688,8 @@
         
         <record id="iva_IC_compras_10_bi_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">-10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">-100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1708,40 +1708,40 @@
         
         <record id="iva_IC_compras_21_bc_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_21_bc"/>
         </record>
         
         <!-- <record id="iva_IC_compras_21_bc_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">1</field>
-            <field name="amount">1</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_21_bc"/>
         </record> -->
         
         <record id="iva_IC_compras_21_bc_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_21_bc"/>
         </record>
         
         <!-- <record id="iva_IC_compras_21_bc_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_21_bc"/>
         </record> -->
         
         <record id="iva_IC_compras_21_bc_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_21"/>
@@ -1750,8 +1750,8 @@
         
         <record id="iva_IC_compras_21_bc_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_21"/>
@@ -1760,8 +1760,8 @@
         
         <record id="iva_IC_compras_21_bc_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
-            <field name="amount">-10</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">-100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1770,8 +1770,8 @@
         
         <record id="iva_IC_compras_21_bc_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="amount">-10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">-100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1790,40 +1790,40 @@
         
         <record id="iva_IC_compras_21_bi_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_21_bi"/>
         </record>
         
         <!-- <record id="iva_IC_compras_21_bi_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_21_bi"/>
         </record> -->
         
         <record id="iva_IC_compras_21_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_21_bi"/>
         </record>
         
         <!-- <record id="iva_IC_compras_21_bi_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_21_bi"/>
         </record> -->
         
         <record id="iva_IC_compras_21_bi_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_21"/>
@@ -1832,8 +1832,8 @@
         
         <record id="iva_IC_compras_21_bi_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_31_21"/>
@@ -1842,8 +1842,8 @@
         
         <record id="iva_IC_compras_21_bi_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">-21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1852,8 +1852,8 @@
         
         <record id="iva_IC_compras_21_bi_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">-21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1872,40 +1872,40 @@
         
         <record id="iva_IC_compras_21_sv_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_21_sv"/>
         </record>
         
         <!-- <record id="iva_IC_compras_21_sv_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_IC_compras_21_sv"/>
         </record> -->
         
         <record id="iva_IC_compras_21_sv_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_21_sv"/>
         </record>
         
         <!-- <record id="iva_IC_compras_21_sv_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_IC_compras_21_sv"/>
         </record> -->
         
         <record id="iva_IC_compras_21_sv_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1914,8 +1914,8 @@
         
         <record id="iva_IC_compras_21_sv_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1924,8 +1924,8 @@
         
         <record id="iva_IC_compras_21_sv_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">-21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_ded_31_21"/>
@@ -1934,8 +1934,8 @@
         
         <record id="iva_IC_compras_21_sv_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">-21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_ded_31_21"/>
@@ -1957,8 +1957,8 @@
         
         <record id="iva_rep_ex_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="base_rep_ex"/>
             <field name="tax_id" ref="iva_rep_ex"/>
@@ -1967,15 +1967,15 @@
         <record id="iva_rep_ex_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_rep_ex"/>
         </record>
         
         <record id="iva_rep_ex_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="base_rep_ex"/>
             <field name="tax_id" ref="iva_rep_ex"/>
@@ -1984,7 +1984,7 @@
         <record id="iva_rep_ex_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_rep_ex"/>
         </record>
@@ -2002,8 +2002,8 @@
         
         <record id="iva_sop_ex_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="base_sop_ex"/>
             <field name="tax_id" ref="iva_sop_ex"/>
@@ -2012,15 +2012,15 @@
         <record id="iva_sop_ex_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="iva_sop_ex"/>
         </record>
         
         <record id="iva_sop_ex_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="base_sop_ex"/>
             <field name="tax_id" ref="iva_sop_ex"/>
@@ -2029,7 +2029,7 @@
         <record id="iva_sop_ex_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="iva_sop_ex"/>
         </record>
@@ -2053,136 +2053,332 @@
             <field name="chart_template_id" ref="account_chart_template_common"/>
             <field name="description">Retenciones IRPF 1%</field>
             <field name="name">P_IRPF1</field>
-            <field eval="-0.01" name="amount"/>
+            <field eval="-1" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="pgc_4751_child"/>
-            <field name="account_paid_id" ref="pgc_4751_child"/>
-            <field name="base_code_id" ref="irpf_base_1"/>
-            <field name="tax_code_id" ref="irpf_cuota_1"/>
-            <field name="ref_base_code_id" ref="irpf_base_1"/>
-            <field name="ref_tax_code_id" ref="irpf_cuota_1"/>
-            <field eval="1.0" name="tax_sign"/>
-            <field eval="1.0" name="base_sign"/>
-            <field eval="-1.0" name="ref_tax_sign"/>
-            <field eval="-1.0" name="ref_base_sign"/>
             <field name="type_tax_use">purchase</field>
         </record>
-
+        
+        <record id="irpf_1_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="irpf_base_1"/>
+            <field name="tax_id" ref="irpf_1"/>
+        </record>
+        
+        <record id="irpf_1_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">-10</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_1"/>
+            <field name="tax_id" ref="irpf_1"/>
+        </record>
+        
+        <record id="irpf_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="irpf_base_1"/>
+            <field name="tax_id" ref="irpf_1"/>
+        </record>
+        
+        <record id="irpf_1_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-10</field>
+            <field name="debit_credit_amount">-10</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_1"/>
+            <field name="tax_id" ref="irpf_1"/>
+        </record>
+        
         <record id="irpf_2" model="account.tax.template">
             <field name="chart_template_id" ref="account_chart_template_common"/>
             <field name="description">Retenciones IRPF 2%</field>
             <field name="name">P_IRPF2</field>
-            <field eval="-0.02" name="amount"/>
+            <field eval="-2" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="pgc_4751_child"/>
-            <field name="account_paid_id" ref="pgc_4751_child"/>
-            <field name="base_code_id" ref="irpf_base_2"/>
-            <field name="tax_code_id" ref="irpf_cuota_2"/>
-            <field name="ref_base_code_id" ref="irpf_base_2"/>
-            <field name="ref_tax_code_id" ref="irpf_cuota_2"/>
-            <field eval="1.0" name="tax_sign"/>
-            <field eval="1.0" name="base_sign"/>
-            <field eval="-1.0" name="ref_tax_sign"/>
-            <field eval="-1.0" name="ref_base_sign"/>
             <field name="type_tax_use">purchase</field>
             <field eval="50" name="sequence"/>
         </record>
-
+        
+        <record id="irpf_2_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="irpf_base_2"/>
+            <field name="tax_id" ref="irpf_2"/>
+        </record>
+        
+        <record id="irpf_2_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">20</field>
+            <field name="debit_credit_amount">-20</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_2"/>
+            <field name="tax_id" ref="irpf_2"/>
+        </record>
+        
+        <record id="irpf_2_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="irpf_base_2"/>
+            <field name="tax_id" ref="irpf_2"/>
+        </record>
+        
+        <record id="irpf_2_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-20</field>
+            <field name="debit_credit_amount">-20</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_2"/>
+            <field name="tax_id" ref="irpf_2"/>
+        </record>
+        
         <record id="irpf_7" model="account.tax.template">
             <field name="chart_template_id" ref="account_chart_template_common"/>
             <field name="description">Retenciones IRPF 7%</field>
             <field name="name">P_IRPF7</field>
-            <field eval="-0.07" name="amount"/>
-            <field name="type">percent</field>
-            <field name="account_collected_id" ref="pgc_4751_child"/>
-            <field name="account_paid_id" ref="pgc_4751_child"/>
-            <field name="base_code_id" ref="irpf_base_7"/>
-            <field name="tax_code_id" ref="irpf_cuota_7"/>
-            <field name="ref_base_code_id" ref="irpf_base_7"/>
-            <field name="ref_tax_code_id" ref="irpf_cuota_7"/>
-            <field eval="1.0" name="tax_sign"/>
-            <field eval="1.0" name="base_sign"/>
-            <field eval="-1.0" name="ref_tax_sign"/>
-            <field eval="-1.0" name="ref_base_sign"/>
+            <field eval="-7" name="amount"/>
             <field name="type_tax_use">purchase</field>
         </record>
-
+        
+        <record id="irpf_7_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="irpf_base_7"/>
+            <field name="tax_id" ref="irpf_7"/>
+        </record>
+        
+        <record id="irpf_7_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">70</field>
+            <field name="debit_credit_amount">-70</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_7"/>
+            <field name="tax_id" ref="irpf_7"/>
+        </record>
+        
+        <record id="irpf_7_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="irpf_base_7"/>
+            <field name="tax_id" ref="irpf_7"/>
+        </record>
+        
+        <record id="irpf_7_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-70</field>
+            <field name="debit_credit_amount">-70</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_7"/>
+            <field name="tax_id" ref="irpf_7"/>
+        </record>
+        
         <record id="irpf_9" model="account.tax.template">
             <field name="chart_template_id" ref="account_chart_template_common"/>
             <field name="description">Retenciones IRPF 9%</field>
             <field name="name">P_IRPF9</field>
-            <field eval="-0.09" name="amount"/>
+            <field eval="-9" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="pgc_4751_child"/>
-            <field name="account_paid_id" ref="pgc_4751_child"/>
-            <field name="base_code_id" ref="irpf_base_9"/>
-            <field name="tax_code_id" ref="irpf_cuota_9"/>
-            <field name="ref_base_code_id" ref="irpf_base_9"/>
-            <field name="ref_tax_code_id" ref="irpf_cuota_9"/>
-            <field eval="1.0" name="tax_sign"/>
-            <field eval="1.0" name="base_sign"/>
-            <field eval="-1.0" name="ref_tax_sign"/>
-            <field eval="-1.0" name="ref_base_sign"/>
             <field name="type_tax_use">purchase</field>
         </record>
-
+        
+        <record id="irpf_9_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="irpf_base_9"/>
+            <field name="tax_id" ref="irpf_9"/>
+        </record>
+        
+        <record id="irpf_9_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">90</field>
+            <field name="debit_credit_amount">-90</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_9"/>
+            <field name="tax_id" ref="irpf_9"/>
+        </record>
+        
+        <record id="irpf_9_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="irpf_base_9"/>
+            <field name="tax_id" ref="irpf_9"/>
+        </record>
+        
+        <record id="irpf_9_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-90</field>
+            <field name="debit_credit_amount">-90</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_9"/>
+            <field name="tax_id" ref="irpf_9"/>
+        </record>
+        
         <record id="irpf_15" model="account.tax.template">
             <field name="chart_template_id" ref="account_chart_template_common"/>
             <field name="description">Retenciones IRPF 15%</field>
             <field name="name">P_IRPF15</field>
-            <field eval="-0.15" name="amount"/>
+            <field eval="-15" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="pgc_4751_child"/>
-            <field name="account_paid_id" ref="pgc_4751_child"/>
-            <field name="base_code_id" ref="irpf_base_15"/>
-            <field name="tax_code_id" ref="irpf_cuota_15"/>
-            <field name="ref_base_code_id" ref="irpf_base_15"/>
-            <field name="ref_tax_code_id" ref="irpf_cuota_15"/>
-            <field eval="1.0" name="tax_sign"/>
-            <field eval="1.0" name="base_sign"/>
-            <field eval="-1.0" name="ref_tax_sign"/>
-            <field eval="-1.0" name="ref_base_sign"/>
             <field name="type_tax_use">purchase</field>
         </record>
-
+        
+        <record id="irpf_15_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="irpf_base_15"/>
+            <field name="tax_id" ref="irpf_15"/>
+        </record>
+        
+        <record id="irpf_15_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">150</field>
+            <field name="debit_credit_amount">-150</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_15"/>
+            <field name="tax_id" ref="irpf_15"/>
+        </record>
+        
+        <record id="irpf_15_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="irpf_base_15"/>
+            <field name="tax_id" ref="irpf_15"/>
+        </record>
+        
+        <record id="irpf_15_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-150</field>
+            <field name="debit_credit_amount">-150</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_15"/>
+            <field name="tax_id" ref="irpf_15"/>
+        </record>
+        
         <record id="irpf_20" model="account.tax.template">
             <field name="chart_template_id" ref="account_chart_template_common"/>
             <field name="description">Retenciones IRPF 20%</field>
             <field name="name">P_IRPF20</field>
-            <field eval="-0.20" name="amount"/>
+            <field eval="-20" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="pgc_4751_child"/>
-            <field name="account_paid_id" ref="pgc_4751_child"/>
-            <field name="base_code_id" ref="irpf_base_20"/>
-            <field name="tax_code_id" ref="irpf_cuota_20"/>
-            <field name="ref_base_code_id" ref="irpf_base_20"/>
-            <field name="ref_tax_code_id" ref="irpf_cuota_20"/>
-            <field eval="1.0" name="tax_sign"/>
-            <field eval="1.0" name="base_sign"/>
-            <field eval="-1.0" name="ref_tax_sign"/>
-            <field eval="-1.0" name="ref_base_sign"/>
             <field name="type_tax_use">purchase</field>
         </record>
-
+        
+        <record id="irpf_20_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="irpf_base_20"/>
+            <field name="tax_id" ref="irpf_20"/>
+        </record>
+        
+        <record id="irpf_20_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">-200</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_20"/>
+            <field name="tax_id" ref="irpf_20"/>
+        </record>
+        
+        <record id="irpf_20_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="irpf_base_20"/>
+            <field name="tax_id" ref="irpf_20"/>
+        </record>
+        
+        <record id="irpf_20_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">-200</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_20"/>
+            <field name="tax_id" ref="irpf_20"/>
+        </record>
+        
         <record id="irpf_21" model="account.tax.template">
             <field name="chart_template_id" ref="account_chart_template_common"/>
             <field name="description">Retenciones IRPF 21%</field>
             <field name="name">P_IRPF21</field>
-            <field eval="-0.21" name="amount"/>
+            <field eval="-21" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="pgc_4751_child"/>
-            <field name="account_paid_id" ref="pgc_4751_child"/>
-            <field name="base_code_id" ref="irpf_base_21"/>
-            <field name="tax_code_id" ref="irpf_cuota_21"/>
-            <field name="ref_base_code_id" ref="irpf_base_21"/>
-            <field name="ref_tax_code_id" ref="irpf_cuota_21"/>
-            <field eval="1.0" name="tax_sign"/>
-            <field eval="1.0" name="base_sign"/>
-            <field eval="-1.0" name="ref_tax_sign"/>
-            <field eval="-1.0" name="ref_base_sign"/>
             <field name="type_tax_use">purchase</field>
         </record>
-
+        
+        <record id="irpf_21_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="irpf_base_21"/>
+            <field name="tax_id" ref="irpf_21"/>
+        </record>
+        
+        <record id="irpf_21_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_21"/>
+            <field name="tax_id" ref="irpf_21"/>
+        </record>
+        
+        <record id="irpf_21_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="irpf_base_21"/>
+            <field name="tax_id" ref="irpf_21"/>
+        </record>
+        
+        <record id="irpf_21_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">-210</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_4751_child"/>
+            <field name="code_id" ref="irpf_cuota_21"/>
+            <field name="tax_id" ref="irpf_21"/>
+        </record>
+        
+        
 
         <!-- Retenciones practicadas -->
 
@@ -2197,8 +2393,8 @@
         
         <record id="irpf_sale_1_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="irpf_base_sale_1"/>
             <field name="tax_id" ref="irpf_sale_1"/>
@@ -2206,8 +2402,8 @@
         
         <record id="irpf_sale_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">1</field>
-            <field name="amount">-1</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">-10</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_1"/>
@@ -2216,8 +2412,8 @@
         
         <record id="irpf_sale_1_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="irpf_base_sale_1"/>
             <field name="tax_id" ref="irpf_sale_1"/>
@@ -2225,8 +2421,8 @@
         
         <record id="irpf_sale_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-1</field>
-            <field name="amount">-1</field>
+            <field name="tax_amount">-10</field>
+            <field name="debit_credit_amount">-10</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_1"/>
@@ -2244,8 +2440,8 @@
                 
         <record id="irpf_sale_2_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="irpf_base_sale_2"/>
             <field name="tax_id" ref="irpf_sale_2"/>
@@ -2253,8 +2449,8 @@
         
         <record id="irpf_sale_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2</field>
-            <field name="amount">-2</field>
+            <field name="tax_amount">20</field>
+            <field name="debit_credit_amount">-20</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_2"/>
@@ -2263,8 +2459,8 @@
         
         <record id="irpf_sale_2_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="irpf_base_sale_2"/>
             <field name="tax_id" ref="irpf_sale_2"/>
@@ -2272,8 +2468,8 @@
         
         <record id="irpf_sale_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2</field>
-            <field name="amount">-2</field>
+            <field name="tax_amount">-20</field>
+            <field name="debit_credit_amount">-20</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_2"/>
@@ -2292,8 +2488,8 @@
         
         <record id="irpf_sale_7_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="irpf_base_sale_7"/>
             <field name="tax_id" ref="irpf_sale_7"/>
@@ -2301,8 +2497,8 @@
         
         <record id="irpf_sale_7_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">7</field>
-            <field name="amount">-7</field>
+            <field name="tax_amount">70</field>
+            <field name="debit_credit_amount">-70</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_7"/>
@@ -2311,8 +2507,8 @@
         
         <record id="irpf_sale_7_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="irpf_base_sale_7"/>
             <field name="tax_id" ref="irpf_sale_7"/>
@@ -2320,8 +2516,8 @@
         
         <record id="irpf_sale_7_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-7</field>
-            <field name="amount">-7</field>
+            <field name="tax_amount">-70</field>
+            <field name="debit_credit_amount">-70</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_7"/>
@@ -2339,8 +2535,8 @@
         
         <record id="irpf_sale_9_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="irpf_base_sale_9"/>
             <field name="tax_id" ref="irpf_sale_9"/>
@@ -2348,8 +2544,8 @@
         
         <record id="irpf_sale_9_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">9</field>
-            <field name="amount">-9</field>
+            <field name="tax_amount">90</field>
+            <field name="debit_credit_amount">-90</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_9"/>
@@ -2358,8 +2554,8 @@
         
         <record id="irpf_sale_9_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="irpf_base_sale_9"/>
             <field name="tax_id" ref="irpf_sale_9"/>
@@ -2367,8 +2563,8 @@
         
         <record id="irpf_sale_9_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-9</field>
-            <field name="amount">-9</field>
+            <field name="tax_amount">-90</field>
+            <field name="debit_credit_amount">-90</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_9"/>
@@ -2388,8 +2584,8 @@
         
         <record id="irpf_sale_15_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="irpf_base_sale_15"/>
             <field name="tax_id" ref="irpf_sale_15"/>
@@ -2397,8 +2593,8 @@
         
         <record id="irpf_sale_15_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
-            <field name="amount">-15</field>
+            <field name="tax_amount">150</field>
+            <field name="debit_credit_amount">-150</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_15"/>
@@ -2407,8 +2603,8 @@
         
         <record id="irpf_sale_15_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="irpf_base_sale_15"/>
             <field name="tax_id" ref="irpf_sale_15"/>
@@ -2416,8 +2612,8 @@
         
         <record id="irpf_sale_15_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-15</field>
-            <field name="amount">-15</field>
+            <field name="tax_amount">-150</field>
+            <field name="debit_credit_amount">-150</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_15"/>
@@ -2435,8 +2631,8 @@
         
         <record id="irpf_sale_20_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="irpf_base_sale_20"/>
             <field name="tax_id" ref="irpf_sale_20"/>
@@ -2444,8 +2640,8 @@
         
         <record id="irpf_sale_20_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
-            <field name="amount">-20</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">-200</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_20"/>
@@ -2454,8 +2650,8 @@
         
         <record id="irpf_sale_20_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="irpf_base_sale_20"/>
             <field name="tax_id" ref="irpf_sale_20"/>
@@ -2463,8 +2659,8 @@
         
         <record id="irpf_sale_20_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
-            <field name="amount">-20</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">-200</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_20"/>
@@ -2482,8 +2678,8 @@
         
         <record id="irpf_sale_21_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="irpf_base_sale_21"/>
             <field name="tax_id" ref="irpf_sale_21"/>
@@ -2491,8 +2687,8 @@
         
         <record id="irpf_sale_21_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
-            <field name="amount">-21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_21"/>
@@ -2501,8 +2697,8 @@
         
         <record id="irpf_sale_21_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="irpf_base_sale_21"/>
             <field name="tax_id" ref="irpf_sale_21"/>
@@ -2510,8 +2706,8 @@
         
         <record id="irpf_sale_21_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="amount">-21</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_473_child"/>
             <field name="code_id" ref="irpf_cuota_sale_21"/>
