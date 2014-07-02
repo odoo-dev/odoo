@@ -12,8 +12,8 @@
 
     <record id="ITAX_19_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
         <field name="code_id" ref="vat_code_base_sale"/>
         <field name="tax_id" ref="ITAX_19"/>
@@ -21,8 +21,8 @@
 
     <record id="ITAX_19_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">19</field>
-        <field name="amount">19</field>
+        <field name="tax_amount">190</field>
+        <field name="debit_credit_amount">190</field>
         <field name="apply_on">invoice</field>
         <field name="code_id" ref="vat_code_IVA_receive"/>
         <field name="account_id" ref="231"/>
@@ -31,8 +31,8 @@
 
     <record id="ITAX_19_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
         <field name="code_id" ref="vat_code_base_sale"/>
         <field name="tax_id" ref="ITAX_19"/>
@@ -40,8 +40,8 @@
 
     <record id="ITAX_19_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">19</field>
-        <field name="amount">19</field>
+        <field name="tax_amount">190</field>
+        <field name="debit_credit_amount">190</field>
         <field name="apply_on">refund</field>
         <field name="code_id" ref="vat_code_IVA_receive"/>
         <field name="account_id" ref="231"/>
@@ -58,8 +58,8 @@
 
     <record id="OTAX_19_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
         <field name="code_id" ref="vat_code_base_purchase"/>
         <field name="tax_id" ref="OTAX_19"/>
@@ -67,8 +67,8 @@
 
     <record id="OTAX_19_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">19</field>
-        <field name="amount">19</field>
+        <field name="tax_amount">190</field>
+        <field name="debit_credit_amount">190</field>
         <field name="apply_on">invoice</field>
         <field name="code_id" ref="vat_code_IVA_pay"/>
         <field name="account_id" ref="231"/>
@@ -77,8 +77,8 @@
 
     <record id="OTAX_19_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
         <field name="code_id" ref="vat_code_base_purchase"/>
         <field name="tax_id" ref="OTAX_19"/>
@@ -86,8 +86,8 @@
 
     <record id="OTAX_19_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">19</field>
-        <field name="amount">19</field>
+        <field name="tax_amount">190</field>
+        <field name="debit_credit_amount">190</field>
         <field name="apply_on">refund</field>
         <field name="code_id" ref="vat_code_IVA_pay"/>
         <field name="account_id" ref="231"/>
