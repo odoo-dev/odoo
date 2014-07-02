@@ -493,8 +493,8 @@
 
 <record id="tax_input_vat_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_input"/>
     <field name="tax_id" ref="tax_input_vat"/>
@@ -502,8 +502,8 @@
 
 <record id="tax_input_vat_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">7</field>
-    <field name="amount">7</field>
+    <field name="tax_amount">70</field>
+    <field name="debit_credit_amount">70</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_vat_input"/>
     <field name="account_id" ref="a_input_vat"/>
@@ -512,16 +512,16 @@
 
 <record id="tax_input_vat_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_input_vat"/>
 </record>
 
 <record id="tax_input_vat_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">7</field>
-    <field name="amount">7</field>
+    <field name="tax_amount">70</field>
+    <field name="debit_credit_amount">70</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_input_vat"/>
     <field name="tax_id" ref="tax_input_vat"/>
@@ -537,8 +537,8 @@
 
 <record id="tax_output_vat_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_output"/>
     <field name="tax_id" ref="tax_output_vat"/>
@@ -546,8 +546,8 @@
 
 <record id="tax_output_vat_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">7</field>
-    <field name="amount">7</field>
+    <field name="tax_amount">70</field>
+    <field name="debit_credit_amount">70</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_vat_output"/>
     <field name="account_id" ref="a_output_vat"/>
@@ -556,16 +556,16 @@
 
 <record id="tax_output_vat_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_output_vat"/>
 </record>
 
 <record id="tax_output_vat_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">7</field>
-    <field name="amount">7</field>
+    <field name="tax_amount">70</field>
+    <field name="debit_credit_amount">70</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_output_vat"/>
     <field name="tax_id" ref="tax_output_vat"/>
@@ -581,8 +581,8 @@
 
 <record id="tax_wht_co_1_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_wht_co_other"/>
     <field name="tax_id" ref="tax_wht_co_1"/>
@@ -590,8 +590,8 @@
 
 <record id="tax_wht_co_1_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">1</field>
-    <field name="amount">1</field>
+    <field name="tax_amount">10</field>
+    <field name="debit_credit_amount">10</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_wht_co_other"/>
     <field name="account_id" ref="a_wht"/>
@@ -600,16 +600,16 @@
 
 <record id="tax_wht_co_1_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_co_1"/>
 </record>
 
 <record id="tax_wht_co_1_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">1</field>
-    <field name="amount">1</field>
+    <field name="tax_amount">10</field>
+    <field name="debit_credit_amount">10</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht"/>
     <field name="tax_id" ref="tax_wht_co_1"/>
@@ -625,8 +625,8 @@
 
 <record id="tax_wht_co_2_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_wht_co_other"/>
     <field name="tax_id" ref="tax_wht_co_2"/>
@@ -634,8 +634,8 @@
 
 <record id="tax_wht_co_2_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">2</field>
-    <field name="amount">2</field>
+    <field name="tax_amount">20</field>
+    <field name="debit_credit_amount">20</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_wht_co_other"/>
     <field name="account_id" ref="a_wht"/>
@@ -644,16 +644,16 @@
 
 <record id="tax_wht_co_2_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_co_2"/>
 </record>
 
 <record id="tax_wht_co_2_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">2</field>
-    <field name="amount">2</field>
+    <field name="tax_amount">20</field>
+    <field name="debit_credit_amount">20</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht"/>
     <field name="tax_id" ref="tax_wht_co_2"/>
@@ -669,8 +669,8 @@
 
 <record id="tax_wht_co_3_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_wht_co_serv"/>
     <field name="tax_id" ref="tax_wht_co_3"/>
@@ -678,8 +678,8 @@
 
 <record id="tax_wht_co_3_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">3</field>
-    <field name="amount">3</field>
+    <field name="tax_amount">30</field>
+    <field name="debit_credit_amount">30</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_wht_co_serv"/>
     <field name="account_id" ref="a_wht"/>
@@ -688,16 +688,16 @@
 
 <record id="tax_wht_co_3_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_co_3"/>
 </record>
 
 <record id="tax_wht_co_3_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">3</field>
-    <field name="amount">3</field>
+    <field name="tax_amount">30</field>
+    <field name="debit_credit_amount">30</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht"/>
     <field name="tax_id" ref="tax_wht_co_3"/>
@@ -713,8 +713,8 @@
 
 <record id="tax_wht_co_5_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_wht_co_other"/>
     <field name="tax_id" ref="tax_wht_co_5"/>
@@ -722,8 +722,8 @@
 
 <record id="tax_wht_co_5_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">5</field>
-    <field name="amount">5</field>
+    <field name="tax_amount">50</field>
+    <field name="debit_credit_amount">50</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_wht_co_other"/>
     <field name="account_id" ref="a_wht"/>
@@ -732,16 +732,16 @@
 
 <record id="tax_wht_co_5_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_co_5"/>
 </record>
 
 <record id="tax_wht_co_5_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">5</field>
-    <field name="amount">5</field>
+    <field name="tax_amount">50</field>
+    <field name="debit_credit_amount">50</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht"/>
     <field name="tax_id" ref="tax_wht_co_5"/>
@@ -757,8 +757,8 @@
 
 <record id="tax_wht_pers_1_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_wht_pers_other"/>
     <field name="tax_id" ref="tax_wht_pers_1"/>
@@ -766,8 +766,8 @@
 
 <record id="tax_wht_pers_1_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">1</field>
-    <field name="amount">1</field>
+    <field name="tax_amount">10</field>
+    <field name="debit_credit_amount">10</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_wht_pers_other"/>
     <field name="account_id" ref="a_wht"/>
@@ -776,16 +776,16 @@
 
 <record id="tax_wht_pers_1_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_pers_1"/>
 </record>
 
 <record id="tax_wht_pers_1_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">1</field>
-    <field name="amount">1</field>
+    <field name="tax_amount">10</field>
+    <field name="debit_credit_amount">10</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht"/>
     <field name="tax_id" ref="tax_wht_pers_1"/>
@@ -801,8 +801,8 @@
 
 <record id="tax_wht_pers_2_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_wht_pers_other"/>
     <field name="tax_id" ref="tax_wht_pers_2"/>
@@ -810,8 +810,8 @@
 
 <record id="tax_wht_pers_2_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">2</field>
-    <field name="amount">2</field>
+    <field name="tax_amount">20</field>
+    <field name="debit_credit_amount">20</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_wht_pers_other"/>
     <field name="account_id" ref="a_wht"/>
@@ -820,16 +820,16 @@
 
 <record id="tax_wht_pers_2_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_pers_2"/>
 </record>
 
 <record id="tax_wht_pers_2_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">2</field>
-    <field name="amount">2</field>
+    <field name="tax_amount">20</field>
+    <field name="debit_credit_amount">20</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht"/>
     <field name="tax_id" ref="tax_wht_pers_2"/>
@@ -845,8 +845,8 @@
 
 <record id="tax_wht_pers_3_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_wht_pers_serv"/>
     <field name="tax_id" ref="tax_wht_pers_3"/>
@@ -854,8 +854,8 @@
 
 <record id="tax_wht_pers_3_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">3</field>
-    <field name="amount">3</field>
+    <field name="tax_amount">30</field>
+    <field name="debit_credit_amount">30</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_wht_pers_serv"/>
     <field name="account_id" ref="a_wht"/>
@@ -864,16 +864,16 @@
 
 <record id="tax_wht_pers_3_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_pers_3"/>
 </record>
 
 <record id="tax_wht_pers_3_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">3</field>
-    <field name="amount">3</field>
+    <field name="tax_amount">30</field>
+    <field name="debit_credit_amount">30</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht"/>
     <field name="tax_id" ref="tax_wht_pers_3"/>
@@ -889,8 +889,8 @@
 
 <record id="tax_wht_pers_5_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_base_wht_pers_other"/>
     <field name="tax_id" ref="tax_wht_pers_5"/>
@@ -898,8 +898,8 @@
 
 <record id="tax_wht_pers_5_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">5</field>
-    <field name="amount">5</field>
+    <field name="tax_amount">50</field>
+    <field name="debit_credit_amount">50</field>
     <field name="apply_on">invoice</field>
     <field name="code_id" ref="tc_tax_wht_pers_other"/>
     <field name="account_id" ref="a_wht"/>
@@ -908,16 +908,16 @@
 
 <record id="tax_wht_pers_5_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_pers_5"/>
 </record>
 
 <record id="tax_wht_pers_5_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">5</field>
-    <field name="amount">5</field>
+    <field name="tax_amount">50</field>
+    <field name="debit_credit_amount">50</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht"/>
     <field name="tax_id" ref="tax_wht_pers_5"/>
@@ -933,16 +933,16 @@
 
 <record id="tax_wht_income_1_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="tax_id" ref="tax_wht_income_1"/>
 </record>
 
 <record id="tax_wht_income_1_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">1</field>
-    <field name="amount">1</field>
+    <field name="tax_amount">10</field>
+    <field name="debit_credit_amount">10</field>
     <field name="apply_on">invoice</field>
     <field name="account_id" ref="a_wht_income"/>
     <field name="tax_id" ref="tax_wht_income_1"/>
@@ -950,16 +950,16 @@
 
 <record id="tax_wht_income_1_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_income_1"/>
 </record>
 
 <record id="tax_wht_income_1_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">1</field>
-    <field name="amount">1</field>
+    <field name="tax_amount">10</field>
+    <field name="debit_credit_amount">10</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht_income"/>
     <field name="tax_id" ref="tax_wht_income_1"/>
@@ -975,16 +975,16 @@
 
 <record id="tax_wht_income_2_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="tax_id" ref="tax_wht_income_2"/>
 </record>
 
 <record id="tax_wht_income_2_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">2</field>
-    <field name="amount">2</field>
+    <field name="tax_amount">20</field>
+    <field name="debit_credit_amount">20</field>
     <field name="apply_on">invoice</field>
     <field name="account_id" ref="a_wht_income"/>
     <field name="tax_id" ref="tax_wht_income_2"/>
@@ -992,16 +992,16 @@
 
 <record id="tax_wht_income_2_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_income_2"/>
 </record>
 
 <record id="tax_wht_income_2_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">2</field>
-    <field name="amount">2</field>
+    <field name="tax_amount">20</field>
+    <field name="debit_credit_amount">20</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht_income"/>
     <field name="tax_id" ref="tax_wht_income_2"/>
@@ -1017,16 +1017,16 @@
 
 <record id="tax_wht_income_3_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="tax_id" ref="tax_wht_income_3"/>
 </record>
 
 <record id="tax_wht_income_3_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">3</field>
-    <field name="amount">3</field>
+    <field name="tax_amount">30</field>
+    <field name="debit_credit_amount">30</field>
     <field name="apply_on">invoice</field>
     <field name="account_id" ref="a_wht_income"/>
     <field name="tax_id" ref="tax_wht_income_3"/>
@@ -1034,16 +1034,16 @@
 
 <record id="tax_wht_income_3_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_income_3"/>
 </record>
 
 <record id="tax_wht_income_3_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">3</field>
-    <field name="amount">3</field>
+    <field name="tax_amount">30</field>
+    <field name="debit_credit_amount">30</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht_income"/>
     <field name="tax_id" ref="tax_wht_income_3"/>
@@ -1059,16 +1059,16 @@
 
 <record id="tax_wht_income_5_invoice_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">invoice</field>
     <field name="tax_id" ref="tax_wht_income_5"/>
 </record>
 
 <record id="tax_wht_income_5_invoice_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">5</field>
-    <field name="amount">5</field>
+    <field name="tax_amount">50</field>
+    <field name="debit_credit_amount">50</field>
     <field name="apply_on">invoice</field>
     <field name="account_id" ref="a_wht_income"/>
     <field name="tax_id" ref="tax_wht_income_5"/>
@@ -1076,16 +1076,16 @@
 
 <record id="tax_wht_income_5_refund_base_line" model="account.tax.line.template">
     <field name="code_type">base</field>
-    <field name="tax_amount">100</field>
-    <field name="amount">100</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
     <field name="apply_on">refund</field>
     <field name="tax_id" ref="tax_wht_income_5"/>
 </record>
 
 <record id="tax_wht_income_5_refund_tax_line" model="account.tax.line.template">
     <field name="code_type">tax</field>
-    <field name="tax_amount">5</field>
-    <field name="amount">5</field>
+    <field name="tax_amount">50</field>
+    <field name="debit_credit_amount">50</field>
     <field name="apply_on">refund</field>
     <field name="account_id" ref="a_wht_income"/>
     <field name="tax_id" ref="tax_wht_income_5"/>
