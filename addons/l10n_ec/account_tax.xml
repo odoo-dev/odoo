@@ -11,34 +11,34 @@
 
     <record id="vat1_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_base_due"/>
         <field name="tax_id" ref="vat1"/>
     </record>
     <record id="vat1_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="vat_code_due_tva"/>
         <field name="account_id" ref="210401"/>
         <field name="tax_id" ref="vat1"/>
     </record>
     <record id="vat1_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_receivable_net"/>
         <field name="tax_id" ref="vat1"/>
     </record>
     <record id="vat1_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="vat_code_payable"/>
         <field name="account_id" ref="210401"/>
         <field name="tax_id" ref="vat1"/>
@@ -53,34 +53,34 @@
 
     <record id="vat2_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_base_due"/>
         <field name="tax_id" ref="vat2"/>
     </record>
     <record id="vat2_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="vat_code_due_tva"/>
         <field name="account_id" ref="210401"/>
         <field name="tax_id" ref="vat2"/>
     </record>
     <record id="vat2_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_receivable_net"/>
         <field name="tax_id" ref="vat2"/>
     </record>
     <record id="vat2_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="vat_code_payable"/>
         <field name="account_id" ref="210401"/>
         <field name="tax_id" ref="vat2"/>
@@ -95,34 +95,34 @@
 
     <record id="ret1_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_base_due"/>
         <field name="tax_id" ref="ret1"/>
     </record>
     <record id="ret1_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">8</field>
+        <field name="tax_amount">80</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">-8</field>
+        <field name="debit_credit_amount">-80</field>
         <field name="code_id" ref="vat_code_due_tva"/>
         <field name="account_id" ref="210403"/>
         <field name="tax_id" ref="ret1"/>
     </record>
     <record id="ret1_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_receivable_net"/>
         <field name="tax_id" ref="ret1"/>
     </record>
     <record id="ret1_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">8</field>
+        <field name="tax_amount">80</field>
         <field name="apply_on">refund</field>
-        <field name="amount">-8</field>
+        <field name="debit_credit_amount">-80</field>
         <field name="code_id" ref="vat_code_payable"/>
         <field name="account_id" ref="210403"/>
         <field name="tax_id" ref="ret1"/>
@@ -137,34 +137,34 @@
 
     <record id="ret2_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_base_due"/>
         <field name="tax_id" ref="ret2"/>
     </record>
     <record id="ret2_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">30</field>
+        <field name="tax_amount">300</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">-30</field>
+        <field name="debit_credit_amount">-300</field>
         <field name="code_id" ref="vat_code_due_tva"/>
         <field name="account_id" ref="210403"/>
         <field name="tax_id" ref="ret2"/>
     </record>
     <record id="ret2_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_receivable_net"/>
         <field name="tax_id" ref="ret2"/>
     </record>
     <record id="ret2_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">30</field>
+        <field name="tax_amount">300</field>
         <field name="apply_on">refund</field>
-        <field name="amount">-30</field>
+        <field name="debit_credit_amount">-300</field>
         <field name="code_id" ref="vat_code_payable"/>
         <field name="account_id" ref="210403"/>
         <field name="tax_id" ref="ret2"/>
@@ -179,34 +179,34 @@
 
     <record id="ret3_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_base_due"/>
         <field name="tax_id" ref="ret3"/>
     </record>
     <record id="ret3_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">70</field>
+        <field name="tax_amount">700</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">-70</field>
+        <field name="debit_credit_amount">-700</field>
         <field name="code_id" ref="vat_code_due_tva"/>
         <field name="account_id" ref="210403"/>
         <field name="tax_id" ref="ret3"/>
     </record>
     <record id="ret3_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_receivable_net"/>
         <field name="tax_id" ref="ret3"/>
     </record>
     <record id="ret3_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">70</field>
+        <field name="tax_amount">700</field>
         <field name="apply_on">refund</field>
-        <field name="amount">-70</field>
+        <field name="debit_credit_amount">-700</field>
         <field name="code_id" ref="vat_code_payable"/>
         <field name="account_id" ref="210403"/>
         <field name="tax_id" ref="ret3"/>
@@ -221,34 +221,34 @@
 
     <record id="ret4_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_base_due"/>
         <field name="tax_id" ref="ret4"/>
     </record>
     <record id="ret4_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">-100</field>
+        <field name="debit_credit_amount">-1000</field>
         <field name="code_id" ref="vat_code_due_tva"/>
         <field name="account_id" ref="210403"/>
         <field name="tax_id" ref="ret4"/>
     </record>
     <record id="ret4_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="vat_code_receivable_net"/>
         <field name="tax_id" ref="ret4"/>
     </record>
     <record id="ret4_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">-100</field>
+        <field name="debit_credit_amount">-1000</field>
         <field name="code_id" ref="vat_code_payable"/>
         <field name="account_id" ref="210403"/>
         <field name="tax_id" ref="ret4"/>
