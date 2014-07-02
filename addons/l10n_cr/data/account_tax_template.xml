@@ -18,16 +18,16 @@
         </record>
         <record id="account_tax_template_IV_0_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="account_tax_code_template_IVPrin"/>
             <field name="tax_id" ref="account_tax_template_IV_0"/>
         </record>
         <record id="account_tax_template_IV_0_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">13</field>
-            <field name="amount">13</field>
+            <field name="tax_amount">130</field>
+            <field name="debit_credit_amount">13</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="account_tax_code_template_IVTax"/>
             <field name="tax_id" ref="account_tax_template_IV_0"/>
@@ -35,16 +35,16 @@
         </record>
         <record id="account_tax_template_IV_0_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="account_tax_code_template_IVPrin"/>
             <field name="tax_id" ref="account_tax_template_IV_0"/>
         </record>
        <record id="account_tax_template_IV_0_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-13</field>
-            <field name="amount">13</field>
+            <field name="tax_amount">-130</field>
+            <field name="debit_credit_amount">13</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="account_tax_code_template_IVTax"/>
             <field name="tax_id" ref="account_tax_template_IV_0"/>
@@ -64,16 +64,16 @@
         </record>
         <record id="account_tax_template_IV_x_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="account_tax_code_template_IVPrin"/>
             <field name="tax_id" ref="account_tax_template_IV_x"/>
         </record>
         <record id="account_tax_template_IV_x_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">13</field>
-            <field name="amount">13</field>
+            <field name="tax_amount">130</field>
+            <field name="debit_credit_amount">13</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="account_tax_code_template_IVPrin"/>
             <field name="tax_id" ref="account_tax_template_IV_x"/>
@@ -81,16 +81,16 @@
         </record>
         <record id="account_tax_template_IV_x_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="account_tax_code_template_IVPrin"/>
             <field name="tax_id" ref="account_tax_template_IV_x"/>
         </record>
        <record id="account_tax_template_IV_x_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-13</field>
-            <field name="amount">13</field>
+            <field name="tax_amount">-130</field>
+            <field name="debit_credit_amount">13</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="account_tax_code_template_IVPrin"/>
             <field name="tax_id" ref="account_tax_template_IV_x"/>

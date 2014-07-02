@@ -5,7 +5,7 @@
         <!-- id_tax03 -->
         <record id="tax03_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_14"/>
@@ -13,7 +13,7 @@
         </record>
         <record id="tax03_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
+            <field name="tax_amount">150</field>
             <field name="amount">15</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_23"/>
@@ -22,7 +22,7 @@
         </record>
         <record id="tax03_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_14"/>
@@ -30,7 +30,7 @@
         </record>
        <record id="tax03_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-15</field>
+            <field name="tax_amount">-150</field>
             <field name="amount">15</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_23"/>
@@ -42,7 +42,7 @@
 
         <record id="tax04_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_13"/>
@@ -58,7 +58,7 @@
         </record>
         <record id="tax04_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_13"/>
@@ -77,7 +77,7 @@
 
         <record id="tax06_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_12"/>
@@ -93,7 +93,7 @@
         </record>
         <record id="tax06_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_12"/>
@@ -112,7 +112,7 @@
 
         <record id="tax11_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_11"/>
@@ -128,7 +128,7 @@
         </record>
         <record id="tax11_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_11"/>
@@ -147,7 +147,7 @@
 
         <record id="tax02_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_16"/>
@@ -155,7 +155,7 @@
         </record>
         <record id="tax02_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2.0</field>
+            <field name="tax_amount">20.00</field>
             <field name="amount">-2.0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_28"/>
@@ -164,7 +164,7 @@
         </record>
         <record id="tax02_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_16"/>
@@ -172,7 +172,7 @@
         </record>
         <record id="tax02_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2.0</field>
+            <field name="tax_amount">-20.00</field>
             <field name="amount">-2.0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_28"/>
@@ -184,7 +184,7 @@
 
         <record id="tax13_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_17"/>
@@ -192,7 +192,7 @@
         </record>
         <record id="tax13_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">35</field>
+            <field name="tax_amount">350</field>
             <field name="amount">-35</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_29"/>
@@ -201,7 +201,7 @@
         </record>
         <record id="tax13_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_17"/>
@@ -209,7 +209,7 @@
         </record>
         <record id="tax13_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-35</field>
+            <field name="tax_amount">-350</field>
             <field name="amount">-35</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_29"/>
@@ -221,7 +221,7 @@
 
         <record id="tax14_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_18"/>
@@ -229,7 +229,7 @@
         </record>
         <record id="tax14_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
+            <field name="tax_amount">150</field>
             <field name="amount">-15</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_30"/>
@@ -238,7 +238,7 @@
         </record>
         <record id="tax14_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_18"/>
@@ -246,7 +246,7 @@
         </record>
         <record id="tax14_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-15</field>
+            <field name="tax_amount">-150</field>
             <field name="amount">-15</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_30"/>
@@ -258,7 +258,7 @@
 
         <record id="tax08_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_06"/>
@@ -266,7 +266,7 @@
         </record>
         <record id="tax08_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
+            <field name="tax_amount">150</field>
             <field name="amount">15</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_21"/>
@@ -275,7 +275,7 @@
         </record>
         <record id="tax08_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_06"/>
@@ -283,7 +283,7 @@
         </record>
         <record id="tax08_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-15</field>
+            <field name="tax_amount">-150</field>
             <field name="amount">15</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_21"/>
@@ -295,7 +295,7 @@
 
         <record id="tax07_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_05"/>
@@ -311,7 +311,7 @@
         </record>
         <record id="tax07_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_05"/>
@@ -330,7 +330,7 @@
 
         <record id="tax10_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_04"/>
@@ -346,7 +346,7 @@
         </record>
         <record id="tax10_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="id_tax10"/>
@@ -365,7 +365,7 @@
 
         <record id="tax9_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_03"/>
@@ -381,7 +381,7 @@
         </record>
         <record id="tax9_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_03"/>
@@ -400,7 +400,7 @@
 
         <record id="tax5_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_08"/>
@@ -408,7 +408,7 @@
         </record>
         <record id="tax5_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2.0</field>
+            <field name="tax_amount">20.0</field>
             <field name="amount">-2.0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_25"/>
@@ -417,7 +417,7 @@
         </record>
         <record id="tax5_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_08"/>
@@ -425,7 +425,7 @@
         </record>
         <record id="tax5_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2.0</field>
+            <field name="tax_amount">-20.00</field>
             <field name="amount">-2.0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_25"/>
@@ -437,7 +437,7 @@
 
         <record id="tax12_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_09"/>
@@ -445,7 +445,7 @@
         </record>
         <record id="tax12_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">35.0</field>
+            <field name="tax_amount">350.0</field>
             <field name="amount">-35.0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tc_26"/>
@@ -454,7 +454,7 @@
         </record>
         <record id="tax12_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">-100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_09"/>
@@ -462,7 +462,7 @@
         </record>
         <record id="tax12_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-35.0</field>
+            <field name="tax_amount">-350.0</field>
             <field name="amount">-35.0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tc_26"/>

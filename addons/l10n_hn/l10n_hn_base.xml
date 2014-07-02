@@ -33,7 +33,7 @@
 
         <record id="impuestos_plantilla_isv_por_cobrar_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="impuestos_base_isv_compras"/>
@@ -41,7 +41,7 @@
         </record>
         <record id="impuestos_plantilla_isv_por_cobrar_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
+            <field name="tax_amount">150</field>
             <field name="amount">15</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="impuestos_isv_por_cobrar"/>
@@ -50,7 +50,7 @@
         </record>
         <record id="impuestos_plantilla_isv_por_cobrar_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="impuestos_base_isv_compras"/>
@@ -58,7 +58,7 @@
         </record>
        <record id="impuestos_plantilla_isv_por_cobrar_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
+            <field name="tax_amount">150</field>
             <field name="amount">15</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="impuestos_isv_por_cobrar"/>
@@ -80,7 +80,7 @@
 
         <record id="impuestos_plantilla_isv_por_pagar_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="impuestos_base_isv_ventas"/>
@@ -88,7 +88,7 @@
         </record>
         <record id="impuestos_plantilla_isv_por_pagar_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
+            <field name="tax_amount">150</field>
             <field name="amount">15</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="impuestos_isv_por_pagar"/>
@@ -97,7 +97,7 @@
         </record>
         <record id="impuestos_plantilla_isv_por_pagar_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="impuestos_base_isv_ventas"/>
@@ -105,7 +105,7 @@
         </record>
        <record id="impuestos_plantilla_isv_por_pagar_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
+            <field name="tax_amount">150</field>
             <field name="amount">15</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="impuestos_isv_por_pagar"/>

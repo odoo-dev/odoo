@@ -5,7 +5,7 @@
         <!-- 22v -->
         <record id="tax22v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_22"/>
@@ -14,7 +14,7 @@
 
         <record id="tax22v_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">22</field>
+            <field name="tax_amount">220</field>
             <field name="amount">22</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_riscossa_22"/>
@@ -24,7 +24,7 @@
 
         <record id="tax22v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_22"/>
@@ -33,7 +33,7 @@
 
        <record id="tax22v_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-22</field>
+            <field name="tax_amount">-220</field>
             <field name="amount">22</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_riscossa_22"/>
@@ -45,7 +45,7 @@
 
         <record id="tax22a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_22"/>
@@ -54,7 +54,7 @@
 
         <record id="tax22a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-22</field>
+            <field name="tax_amount">-220</field>
             <field name="amount">22</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22"/>
@@ -64,7 +64,7 @@
 
         <record id="tax22a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_22"/>
@@ -73,7 +73,7 @@
 
         <record id="tax22a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">22</field>
+            <field name="tax_amount">220</field>
             <field name="amount">22</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22"/>
@@ -85,7 +85,7 @@
 
         <record id="tax21v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_21"/>
@@ -94,7 +94,7 @@
 
         <record id="tax21v_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
+            <field name="tax_amount">210</field>
             <field name="amount">21</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_riscossa_21"/>
@@ -104,7 +104,7 @@
 
         <record id="tax21v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_21"/>
@@ -113,7 +113,7 @@
 
         <record id="tax21v_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
+            <field name="tax_amount">-210</field>
             <field name="amount">21</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_riscossa_21"/>
@@ -125,7 +125,7 @@
 
         <record id="tax21a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_21"/>
@@ -134,7 +134,7 @@
 
         <record id="tax21a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
+            <field name="tax_amount">-210</field>
             <field name="amount">21</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21"/>
@@ -144,7 +144,7 @@
 
         <record id="tax21a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_21"/>
@@ -153,7 +153,7 @@
 
         <record id="tax21a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
+            <field name="tax_amount">210</field>
             <field name="amount">21</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21"/>
@@ -165,7 +165,7 @@
 
         <record id="tax20v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_20"/>
@@ -174,7 +174,7 @@
 
         <record id="tax20v_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
+            <field name="tax_amount">200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_riscossa_20"/>
@@ -184,7 +184,7 @@
 
         <record id="tax20v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_20"/>
@@ -193,7 +193,7 @@
 
         <record id="tax20v_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
+            <field name="tax_amount">-200</field>
             <field name="amount">20</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_riscossa_20"/>
@@ -205,7 +205,7 @@
 
         <record id="tax20a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_20"/>
@@ -214,7 +214,7 @@
 
         <record id="tax20a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
+            <field name="tax_amount">-200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20"/>
@@ -224,7 +224,7 @@
 
         <record id="tax20a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_20"/>
@@ -233,7 +233,7 @@
 
         <record id="tax20a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
+            <field name="tax_amount">200</field>
             <field name="amount">20</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20"/>
@@ -245,7 +245,7 @@
 
         <record id="tax10v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_10"/>
@@ -254,7 +254,7 @@
 
         <record id="tax10v_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
+            <field name="tax_amount">100</field>
             <field name="amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_riscossa_10"/>
@@ -264,7 +264,7 @@
 
         <record id="tax10v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_10"/>
@@ -273,7 +273,7 @@
 
         <record id="tax10v_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
+            <field name="tax_amount">-100</field>
             <field name="amount">10</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_riscossa_10"/>
@@ -285,7 +285,7 @@
 
         <record id="tax10a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_10"/>
@@ -294,7 +294,7 @@
 
         <record id="tax10a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
+            <field name="tax_amount">100</field>
             <field name="amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_10"/>
@@ -304,7 +304,7 @@
 
         <record id="tax10a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_10"/>
@@ -313,7 +313,7 @@
 
         <record id="tax10a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
+            <field name="tax_amount">-100</field>
             <field name="amount">10</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_10"/>
@@ -325,7 +325,7 @@
 
         <record id="tax10AO_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_10ind"/>
@@ -334,7 +334,7 @@
 
         <record id="tax10AO_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
+            <field name="tax_amount">-100</field>
             <field name="amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="10AO"/>
@@ -342,7 +342,7 @@
 
         <record id="tax10AO_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="10AO"/>
@@ -350,7 +350,7 @@
 
         <record id="tax10AO_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
+            <field name="tax_amount">100</field>
             <field name="amount">10</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_10"/>
@@ -383,7 +383,7 @@
 
         <record id="tax10AOa_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_10ind"/>
@@ -392,7 +392,7 @@
 
         <record id="tax10AOa_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_10ind"/>
@@ -403,7 +403,7 @@
 
         <record id="tax12v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_12"/>
@@ -412,7 +412,7 @@
 
         <record id="tax12v_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">12</field>
+            <field name="tax_amount">120</field>
             <field name="amount">12</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_riscossa_12"/>
@@ -422,7 +422,7 @@
 
         <record id="tax12v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_12"/>
@@ -431,7 +431,7 @@
 
         <record id="tax12v_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-12</field>
+            <field name="tax_amount">-120</field>
             <field name="amount">12</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_riscossa_12"/>
@@ -443,7 +443,7 @@
 
         <record id="tax12a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_12"/>
@@ -452,7 +452,7 @@
 
         <record id="tax12a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-12</field>
+            <field name="tax_amount">-120</field>
             <field name="amount">12</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_12"/>
@@ -462,7 +462,7 @@
 
         <record id="tax12a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_12"/>
@@ -471,7 +471,7 @@
 
         <record id="tax12a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">12</field>
+            <field name="tax_amount">120</field>
             <field name="amount">12</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_12"/>
@@ -483,7 +483,7 @@
 
         <record id="tax2010_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_20det10"/>
@@ -492,7 +492,7 @@
 
         <record id="tax2010_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
+            <field name="tax_amount">-200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2010"/>
@@ -500,7 +500,7 @@
 
         <record id="tax2010_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_20det10"/>
@@ -509,7 +509,7 @@
 
         <record id="tax2010_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
+            <field name="tax_amount">200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2010"/>
@@ -541,7 +541,7 @@
 
         <record id="tax2010a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-90</field>
+            <field name="tax_amount">-900</field>
             <field name="amount">90</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20det10ind"/>
@@ -550,7 +550,7 @@
 
         <record id="tax2010a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">90</field>
+            <field name="tax_amount">900</field>
             <field name="amount">90</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20det10ind"/>
@@ -561,7 +561,7 @@
 
         <record id="tax2015_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_20det15"/>
@@ -570,7 +570,7 @@
 
         <record id="tax2015_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
+            <field name="tax_amount">-200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2015"/>
@@ -578,7 +578,7 @@
 
         <record id="tax2015_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_20det15"/>
@@ -587,7 +587,7 @@
 
         <record id="tax2015_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
+            <field name="tax_amount">200</field>
             <field name="amount">20</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="2015"/>
@@ -597,7 +597,7 @@
 
         <record id="tax2015b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-3.0</field>
+            <field name="tax_amount">-30.0</field>
             <field name="amount">3.0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20det15"/>
@@ -607,7 +607,7 @@
 
         <record id="tax2015b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">3.0</field>
+            <field name="tax_amount">30.0</field>
             <field name="amount">3.0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20det15"/>
@@ -619,7 +619,7 @@
 
         <record id="tax2015a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-3.0</field>
+            <field name="tax_amount">-30.0</field>
             <field name="amount">3.0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20det15ind"/>
@@ -628,7 +628,7 @@
 
         <record id="tax2015a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">3.0</field>
+            <field name="tax_amount">30.0</field>
             <field name="amount">3.0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20det15ind"/>
@@ -639,7 +639,7 @@
 
         <record id="tax2040_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_20det40"/>
@@ -648,7 +648,7 @@
 
         <record id="tax2040_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
+            <field name="tax_amount">-200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2040"/>
@@ -656,7 +656,7 @@
 
         <record id="tax2040_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_20det40"/>
@@ -665,7 +665,7 @@
 
         <record id="tax2040_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
+            <field name="tax_amount">200</field>
             <field name="amount">20</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="2040"/>
@@ -675,7 +675,7 @@
 
         <record id="tax2040b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8</field>
+            <field name="tax_amount">-80</field>
             <field name="amount">8</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20det40"/>
@@ -685,7 +685,7 @@
 
         <record id="tax2040b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8</field>
+            <field name="tax_amount">80</field>
             <field name="amount">8</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20det40"/>
@@ -697,7 +697,7 @@
 
         <record id="tax2040a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8</field>
+            <field name="tax_amount">-80</field>
             <field name="amount">8</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20det40ind"/>
@@ -706,7 +706,7 @@
 
         <record id="tax2040a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8</field>
+            <field name="tax_amount">80</field>
             <field name="amount">8</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20det40ind"/>
@@ -717,7 +717,7 @@
 
         <record id="tax20AO_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_20ind"/>
@@ -726,7 +726,7 @@
 
         <record id="tax20AO_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
+            <field name="tax_amount">-200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="20AO"/>
@@ -734,7 +734,7 @@
 
         <record id="tax20AO_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_20ind"/>
@@ -743,7 +743,7 @@
 
         <record id="tax20AO_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
+            <field name="tax_amount">200</field>
             <field name="amount">20</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="20AO"/>
@@ -752,7 +752,7 @@
        <!-- 20AOb -->
         <record id="tax20AOb_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
+            <field name="tax_amount">-40</field>
             <field name="amount">4</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20ind"/>
@@ -762,7 +762,7 @@
 
         <record id="tax20AOb_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
+            <field name="tax_amount">40</field>
             <field name="amount">4</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20ind"/>
@@ -774,7 +774,7 @@
 
         <record id="tax20AOa_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
+            <field name="tax_amount">-40</field>
             <field name="amount">4</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20ind"/>
@@ -783,7 +783,7 @@
 
         <record id="tax20AOa_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
+            <field name="tax_amount">40</field>
             <field name="amount">4</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20ind"/>
@@ -794,7 +794,7 @@
 
         <record id="tax20I5_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_20det50"/>
@@ -803,7 +803,7 @@
 
         <record id="tax20I5_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
+            <field name="tax_amount">-200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="20I5"/>
@@ -811,7 +811,7 @@
 
         <record id="tax20I5_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="20I5"/>
@@ -819,7 +819,7 @@
 
         <record id="tax20I5_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
+            <field name="tax_amount">200</field>
             <field name="amount">20</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20ind"/>
@@ -830,7 +830,7 @@
 
         <record id="tax20I5b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
+            <field name="tax_amount">-100</field>
             <field name="amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20det50"/>
@@ -840,7 +840,7 @@
 
         <record id="tax20I5b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
+            <field name="tax_amount">100</field>
             <field name="amount">10</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20det50"/>
@@ -852,7 +852,7 @@
 
         <record id="tax20I5a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
+            <field name="tax_amount">-100</field>
             <field name="amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_20det50ind"/>
@@ -861,7 +861,7 @@
 
         <record id="tax20I5a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
+            <field name="tax_amount">100</field>
             <field name="amount">10</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_20det50ind"/>
@@ -872,7 +872,7 @@
 
         <record id="tax2v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_2"/>
@@ -881,7 +881,7 @@
 
         <record id="tax2v_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2</field>
+            <field name="tax_amount">20</field>
             <field name="amount">2</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_riscossa_2"/>
@@ -891,7 +891,7 @@
 
         <record id="tax2v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_2"/>
@@ -900,7 +900,7 @@
 
         <record id="tax2v_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2</field>
+            <field name="tax_amount">-20</field>
             <field name="amount">2</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_riscossa_2"/>
@@ -912,7 +912,7 @@
 
         <record id="tax2a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_2"/>
@@ -921,7 +921,7 @@
 
         <record id="tax2a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2</field>
+            <field name="tax_amount">-20</field>
             <field name="amount">2</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_2"/>
@@ -931,7 +931,7 @@
 
         <record id="tax2a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_2"/>
@@ -940,7 +940,7 @@
 
         <record id="tax2a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2</field>
+            <field name="tax_amount">20</field>
             <field name="amount">2</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_2"/>
@@ -952,7 +952,7 @@
 
         <record id="tax4v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_4"/>
@@ -961,7 +961,7 @@
 
         <record id="tax4v_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
+            <field name="tax_amount">40</field>
             <field name="amount">4</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_riscossa_4"/>
@@ -971,7 +971,7 @@
 
         <record id="tax4v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_4"/>
@@ -980,7 +980,7 @@
 
         <record id="tax4v_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
+            <field name="tax_amount">-40</field>
             <field name="amount">4</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_riscossa_4"/>
@@ -992,7 +992,7 @@
 
         <record id="tax4a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_4"/>
@@ -1001,7 +1001,7 @@
 
         <record id="tax4a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
+            <field name="tax_amount">-40</field>
             <field name="amount">4</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_4"/>
@@ -1011,7 +1011,7 @@
 
         <record id="tax4a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_4"/>
@@ -1020,7 +1020,7 @@
 
         <record id="tax4a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
+            <field name="tax_amount">40</field>
             <field name="amount">4</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_4"/>
@@ -1032,7 +1032,7 @@
 
         <record id="tax4AO_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_4ind"/>
@@ -1049,7 +1049,7 @@
 
         <record id="tax4AO_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="4AO"/>
@@ -1057,7 +1057,7 @@
 
         <record id="tax4AO_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
+            <field name="tax_amount">40</field>
             <field name="amount">4</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_4"/>
@@ -1068,7 +1068,7 @@
 
         <record id="tax4AOb_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-0.16</field>
+            <field name="tax_amount">-1.6</field>
             <field name="amount">0.16</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_4ind"/>
@@ -1078,7 +1078,7 @@
 
         <record id="tax4AOb_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">0.16</field>
+            <field name="tax_amount">1.6</field>
             <field name="amount">0.16</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_4ind"/>
@@ -1090,7 +1090,7 @@
 
         <record id="tax4AOa_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-0.16</field>
+            <field name="tax_amount">-1.6</field>
             <field name="amount">0.16</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_4ind"/>
@@ -1099,7 +1099,7 @@
 
         <record id="tax4AOa_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">0.16</field>
+            <field name="tax_amount">1.6</field>
             <field name="amount">0.16</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_4ind"/>
@@ -1110,7 +1110,7 @@
 
         <record id="tax10I5_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_10det50"/>
@@ -1119,7 +1119,7 @@
 
         <record id="tax10I5_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
+            <field name="tax_amount">-100</field>
             <field name="amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="10I5"/>
@@ -1127,7 +1127,7 @@
 
         <record id="tax10I5_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_10det50"/>
@@ -1136,7 +1136,7 @@
 
         <record id="tax10I5_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
+            <field name="tax_amount">100</field>
             <field name="amount">10</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="10I5"/>
@@ -1146,7 +1146,7 @@
 
         <record id="tax10I5b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-5</field>
+            <field name="tax_amount">-50</field>
             <field name="amount">5</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_10det50"/>
@@ -1156,7 +1156,7 @@
 
         <record id="tax10I5b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">5</field>
+            <field name="tax_amount">50</field>
             <field name="amount">5</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_10det50"/>
@@ -1168,7 +1168,7 @@
 
         <record id="tax10I5a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-5</field>
+            <field name="tax_amount">-50</field>
             <field name="amount">5</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_10det50ind"/>
@@ -1177,7 +1177,7 @@
 
         <record id="tax10I5a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">5</field>
+            <field name="tax_amount">50</field>
             <field name="amount">5</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_10det50ind"/>
@@ -1188,7 +1188,7 @@
 
         <record id="tax4I5_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_4det50"/>
@@ -1197,7 +1197,7 @@
 
         <record id="tax4I5_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
+            <field name="tax_amount">-40</field>
             <field name="amount">4</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="4I5"/>
@@ -1205,7 +1205,7 @@
 
         <record id="tax4I5_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_4det50"/>
@@ -1214,7 +1214,7 @@
 
         <record id="tax4I5_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
+            <field name="tax_amount">40</field>
             <field name="amount">4</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="4I5"/>
@@ -1224,7 +1224,7 @@
 
         <record id="tax4I5b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2</field>
+            <field name="tax_amount">-20</field>
             <field name="amount">2</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_4det50"/>
@@ -1234,7 +1234,7 @@
 
         <record id="tax4I5b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2</field>
+            <field name="tax_amount">20</field>
             <field name="amount">2</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_4det50"/>
@@ -1246,7 +1246,7 @@
 
         <record id="tax4I5a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2</field>
+            <field name="tax_amount">-20</field>
             <field name="amount">2</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_4det50ind"/>
@@ -1255,7 +1255,7 @@
 
         <record id="tax4I5a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2</field>
+            <field name="tax_amount">20</field>
             <field name="amount">2</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_4det50ind"/>
@@ -1266,7 +1266,7 @@
 
         <record id="tax00v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_0"/>
@@ -1285,7 +1285,7 @@
 
         <record id="tax00v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_0"/>
@@ -1306,7 +1306,7 @@
 
         <record id="tax00a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_0"/>
@@ -1325,7 +1325,7 @@
 
         <record id="tax00a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_0"/>
@@ -1346,7 +1346,7 @@
 
         <record id="tax00art15v_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_riscossa_art15"/>
@@ -1365,7 +1365,7 @@
 
         <record id="tax00art15v_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_riscossa_art15"/>
@@ -1386,7 +1386,7 @@
 
         <record id="tax00art15a_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_art15"/>
@@ -1405,7 +1405,7 @@
 
         <record id="tax00art15a_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_art15"/>
@@ -1426,7 +1426,7 @@
 
         <record id="tax22vINC_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_22"/>
@@ -1435,7 +1435,7 @@
 
         <record id="tax22vINC_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">22</field>
+            <field name="tax_amount">220</field>
             <field name="amount">22</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_22"/>
@@ -1445,7 +1445,7 @@
 
         <record id="tax22vINC_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_22"/>
@@ -1454,7 +1454,7 @@
 
         <record id="tax22vINC_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-22</field>
+            <field name="tax_amount">-220</field>
             <field name="amount">22</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_22"/>
@@ -1466,7 +1466,7 @@
 
         <record id="tax21vINC_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_21"/>
@@ -1475,7 +1475,7 @@
 
         <record id="tax21vINC_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
+            <field name="tax_amount">210</field>
             <field name="amount">21</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_21"/>
@@ -1485,7 +1485,7 @@
 
         <record id="tax21vINC_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_21"/>
@@ -1494,7 +1494,7 @@
 
         <record id="tax21vINC_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
+            <field name="tax_amount">-210</field>
             <field name="amount">21</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_21"/>
@@ -1506,7 +1506,7 @@
 
         <record id="tax20vINC_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_20"/>
@@ -1515,7 +1515,7 @@
 
         <record id="tax20vINC_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">20</field>
+            <field name="tax_amount">200</field>
             <field name="amount">20</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_20"/>
@@ -1525,7 +1525,7 @@
 
         <record id="tax20vINC_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_20"/>
@@ -1534,7 +1534,7 @@
 
         <record id="tax20vINC_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-20</field>
+            <field name="tax_amount">-200</field>
             <field name="amount">20</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_20"/>
@@ -1546,7 +1546,7 @@
 
         <record id="tax10vINC_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_10"/>
@@ -1555,7 +1555,7 @@
 
         <record id="tax10vINC_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
+            <field name="tax_amount">100</field>
             <field name="amount">10</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_ivacode_riscossa_10"/>
@@ -1565,7 +1565,7 @@
 
         <record id="tax10vINC_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_10"/>
@@ -1574,7 +1574,7 @@
 
         <record id="tax10vINC_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10</field>
+            <field name="tax_amount">-100</field>
             <field name="amount">10</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_ivacode_riscossa_10"/>
@@ -1586,7 +1586,7 @@
 
         <record id="tax12vINC_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_12"/>
@@ -1595,7 +1595,7 @@
 
         <record id="tax12vINC_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">12</field>
+            <field name="tax_amount">120</field>
             <field name="amount">12</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_12"/>
@@ -1605,7 +1605,7 @@
 
         <record id="tax12vINC_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_12"/>
@@ -1614,7 +1614,7 @@
 
         <record id="tax12vINC_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-12</field>
+            <field name="tax_amount">-120</field>
             <field name="amount">12</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_12"/>
@@ -1626,7 +1626,7 @@
 
         <record id="tax2vINC_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_2"/>
@@ -1635,7 +1635,7 @@
 
         <record id="tax2vINC_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2</field>
+            <field name="tax_amount">20</field>
             <field name="amount">2</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_ivacode_riscossa_2"/>
@@ -1645,7 +1645,7 @@
 
         <record id="tax2vINC_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_2"/>
@@ -1654,7 +1654,7 @@
 
         <record id="tax2vINC_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2</field>
+            <field name="tax_amount">-20</field>
             <field name="amount">2</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_ivacode_riscossa_2"/>
@@ -1666,7 +1666,7 @@
 
         <record id="tax4vINC_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_4"/>
@@ -1675,7 +1675,7 @@
 
         <record id="tax4vINC_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4</field>
+            <field name="tax_amount">40</field>
             <field name="amount">4</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_ivacode_riscossa_4"/>
@@ -1685,7 +1685,7 @@
 
         <record id="tax4vINC_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_4"/>
@@ -1694,7 +1694,7 @@
 
         <record id="tax4vINC_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4</field>
+            <field name="tax_amount">-40</field>
             <field name="amount">4</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_ivacode_riscossa_4"/>
@@ -1706,7 +1706,7 @@
 
         <record id="tax00vINC_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_0"/>
@@ -1725,7 +1725,7 @@
 
         <record id="tax00vINC_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="l10n_it.template_impcode_riscossa_0"/>
@@ -1747,7 +1747,7 @@
         <record id="tax2110_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_21det10"/>
             <field name="tax_id" ref="2110"/>
@@ -1755,7 +1755,7 @@
 
         <record id="tax2110_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
+            <field name="tax_amount">-210</field>
             <field name="amount">21</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2110"/>
@@ -1763,7 +1763,7 @@
 
         <record id="tax2110_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_21det10"/>
@@ -1772,7 +1772,7 @@
 
         <record id="tax2110_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
+            <field name="tax_amount">210</field>
             <field name="amount">21</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="2110"/>
@@ -1782,7 +1782,7 @@
 
         <record id="tax2110b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2.10</field>
+            <field name="tax_amount">-21.0</field>
             <field name="amount">2.10</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21det10"/>
@@ -1792,8 +1792,8 @@
 
         <record id="tax2110b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2.10</field>
-            <field name="amount">2.10</field>
+            <field name="tax_amount">21.0</field>
+            <field name="amount">21.0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21det10"/>
             <field name="tax_id" ref="2110"/>
@@ -1804,8 +1804,8 @@
 
         <record id="tax2110a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2.10</field>
-            <field name="amount">2.10</field>
+            <field name="tax_amount">-21.0</field>
+            <field name="amount">21.0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21det10ind"/>
             <field name="tax_id" ref="2110"/>
@@ -1813,8 +1813,8 @@
 
         <record id="tax2110a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2.10</field>
-            <field name="amount">2.10</field>
+            <field name="tax_amount">21.0</field>
+            <field name="amount">21.0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21det10ind"/>
             <field name="tax_id" ref="2110"/>
@@ -1824,7 +1824,7 @@
 
         <record id="tax2115_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_21det15"/>
@@ -1833,7 +1833,7 @@
 
         <record id="tax2115_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
+            <field name="tax_amount">-210</field>
             <field name="amount">21</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2115"/>
@@ -1841,7 +1841,7 @@
 
         <record id="tax2115_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_21det15"/>
@@ -1850,7 +1850,7 @@
 
         <record id="tax2115_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
+            <field name="tax_amount">210</field>
             <field name="amount">21</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="2115"/>
@@ -1861,7 +1861,7 @@
 
         <record id="tax2115b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-3.15</field>
+            <field name="tax_amount">-31.5</field>
             <field name="amount">3.15</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21det15"/>
@@ -1871,7 +1871,7 @@
 
         <record id="tax2115b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">3.15</field>
+            <field name="tax_amount">31.5</field>
             <field name="amount">3.15</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21det15"/>
@@ -1883,7 +1883,7 @@
 
         <record id="tax2115a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-3.15</field>
+            <field name="tax_amount">-31.5</field>
             <field name="amount">3.15</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21det15ind"/>
@@ -1892,7 +1892,7 @@
 
         <record id="tax2115a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">3.15</field>
+            <field name="tax_amount">31.5</field>
             <field name="amount">3.15</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21det15ind"/>
@@ -1903,7 +1903,7 @@
 
         <record id="tax2140_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_21det40"/>
@@ -1912,7 +1912,7 @@
 
         <record id="tax2140_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
+            <field name="tax_amount">-210</field>
             <field name="amount">21</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2140"/>
@@ -1920,7 +1920,7 @@
 
         <record id="tax2140_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_21det40"/>
@@ -1929,7 +1929,7 @@
 
         <record id="tax2140_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
+            <field name="tax_amount">210</field>
             <field name="amount">21</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="2140"/>
@@ -1939,7 +1939,7 @@
 
         <record id="tax2140b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.40</field>
+            <field name="tax_amount">-84.0</field>
             <field name="amount">8.40</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21det40"/>
@@ -1949,7 +1949,7 @@
 
         <record id="tax2140b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.40</field>
+            <field name="tax_amount">84.0</field>
             <field name="amount">8.40</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21det40"/>
@@ -1961,7 +1961,7 @@
 
         <record id="tax2140a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.40</field>
+            <field name="tax_amount">-84.0</field>
             <field name="amount">8.40</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21det40ind"/>
@@ -1970,7 +1970,7 @@
 
         <record id="tax2140a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.40</field>
+            <field name="tax_amount">84.0</field>
             <field name="amount">8.40</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21det40ind"/>
@@ -1981,7 +1981,7 @@
 
         <record id="tax21AO_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_21det40"/>
@@ -1990,7 +1990,7 @@
 
         <record id="tax21AO_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
+            <field name="tax_amount">-210</field>
             <field name="amount">21</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="21AO"/>
@@ -1998,7 +1998,7 @@
 
         <record id="tax21AO_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_21det40"/>
@@ -2007,7 +2007,7 @@
 
         <record id="tax21AO_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
+            <field name="tax_amount">210</field>
             <field name="amount">21</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="21AO"/>
@@ -2017,7 +2017,7 @@
 
         <record id="tax21AOb_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4.41</field>
+            <field name="tax_amount">-44.1</field>
             <field name="amount">4.41</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21ind"/>
@@ -2027,7 +2027,7 @@
 
         <record id="tax21AOb_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4.41</field>
+            <field name="tax_amount">44.1</field>
             <field name="amount">4.41</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21ind"/>
@@ -2039,7 +2039,7 @@
 
         <record id="tax21AO_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4.41</field>
+            <field name="tax_amount">-44.1</field>
             <field name="amount">4.41</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21ind"/>
@@ -2048,7 +2048,7 @@
 
         <record id="tax21AO_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4.41</field>
+            <field name="tax_amount">44.1</field>
             <field name="amount">4.41</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21ind"/>
@@ -2059,7 +2059,7 @@
 
         <record id="tax21I5_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_21det50"/>
@@ -2068,7 +2068,7 @@
 
         <record id="tax21I5_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
+            <field name="tax_amount">-210</field>
             <field name="amount">21</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="21I5"/>
@@ -2076,7 +2076,7 @@
 
         <record id="tax21I5_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_21det50"/>
@@ -2085,7 +2085,7 @@
 
         <record id="tax21I5_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">21</field>
+            <field name="tax_amount">210</field>
             <field name="amount">21</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="21I5"/>
@@ -2095,7 +2095,7 @@
 
         <record id="tax21I5b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10.5</field>
+            <field name="tax_amount">-105.0</field>
             <field name="amount">10.5</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21det50"/>
@@ -2105,7 +2105,7 @@
 
         <record id="tax21I5b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10.5</field>
+            <field name="tax_amount">105.0</field>
             <field name="amount">10.5</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21det50"/>
@@ -2117,7 +2117,7 @@
 
         <record id="tax21I5a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-10.5</field>
+            <field name="tax_amount">-105</field>
             <field name="amount">10.5</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_21det50ind"/>
@@ -2126,7 +2126,7 @@
 
         <record id="tax21I5a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10.5</field>
+            <field name="tax_amount">105</field>
             <field name="amount">10.5</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_21det50ind"/>
@@ -2137,7 +2137,7 @@
 
         <record id="tax2210_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_22det10"/>
@@ -2146,7 +2146,7 @@
 
         <record id="tax2210_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-22</field>
+            <field name="tax_amount">-220</field>
             <field name="amount">22</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2210"/>
@@ -2154,7 +2154,7 @@
 
         <record id="tax2210_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_22det10"/>
@@ -2163,7 +2163,7 @@
 
         <record id="tax2210_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">22</field>
+            <field name="tax_amount">220</field>
             <field name="amount">22</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="2210"/>
@@ -2173,7 +2173,7 @@
 
         <record id="tax2210b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2.2</field>
+            <field name="tax_amount">-22</field>
             <field name="amount">2.2</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det10"/>
@@ -2183,7 +2183,7 @@
 
         <record id="tax2210b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">2.2</field>
+            <field name="tax_amount">22</field>
             <field name="amount">2.2</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22det10"/>
@@ -2195,7 +2195,7 @@
 
         <record id="tax2210a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2.2</field>
+            <field name="tax_amount">-22</field>
             <field name="amount">2.2</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det10ind"/>
@@ -2204,7 +2204,7 @@
 
         <record id="tax2210a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-2.2</field>
+            <field name="tax_amount">-22</field>
             <field name="amount">2.2</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22det10ind"/>
@@ -2215,7 +2215,7 @@
 
         <record id="tax2215_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_22det15"/>
@@ -2224,7 +2224,7 @@
 
         <record id="tax2215_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-22</field>
+            <field name="tax_amount">-220</field>
             <field name="amount">22</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2215"/>
@@ -2232,7 +2232,7 @@
 
         <record id="tax2215_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_22det15"/>
@@ -2241,7 +2241,7 @@
 
         <record id="tax2215_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">22</field>
+            <field name="tax_amount">220</field>
             <field name="amount">22</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="2215"/>
@@ -2251,7 +2251,7 @@
 
         <record id="tax2215b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-3.3</field>
+            <field name="tax_amount">-33</field>
             <field name="amount">3.3</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det15"/>
@@ -2261,7 +2261,7 @@
 
         <record id="tax2215b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">3.3</field>
+            <field name="tax_amount">33</field>
             <field name="amount">3.3</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det15"/>
@@ -2273,7 +2273,7 @@
 
         <record id="tax2215a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-3.3</field>
+            <field name="tax_amount">-33</field>
             <field name="amount">3.3</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det15ind"/>
@@ -2282,7 +2282,7 @@
 
         <record id="tax2215a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">3.3</field>
+            <field name="tax_amount">33</field>
             <field name="amount">3.3</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22det15ind"/>
@@ -2293,7 +2293,7 @@
 
         <record id="tax2240_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_22det40"/>
@@ -2302,7 +2302,7 @@
 
         <record id="tax2240_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-22</field>
+            <field name="tax_amount">-220</field>
             <field name="amount">22</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="2240"/>
@@ -2310,7 +2310,7 @@
 
         <record id="tax2240_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_22det40"/>
@@ -2319,7 +2319,7 @@
 
         <record id="tax2240_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">22</field>
+            <field name="tax_amount">220</field>
             <field name="amount">22</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="2240"/>
@@ -2329,7 +2329,7 @@
 
         <record id="tax2240b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.8</field>
+            <field name="tax_amount">-88</field>
             <field name="amount">8.8</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det40"/>
@@ -2339,7 +2339,7 @@
 
         <record id="tax2240b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.8</field>
+            <field name="tax_amount">-88</field>
             <field name="amount">8.8</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22det40"/>
@@ -2351,7 +2351,7 @@
 
         <record id="tax2240a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-8.8</field>
+            <field name="tax_amount">-88</field>
             <field name="amount">8.8</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det40ind"/>
@@ -2360,7 +2360,7 @@
 
         <record id="tax2240a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">8.8</field>
+            <field name="tax_amount">88</field>
             <field name="amount">8.8</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22det40ind"/>
@@ -2371,7 +2371,7 @@
 
         <record id="tax22AO_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_22ind"/>
@@ -2380,7 +2380,7 @@
 
         <record id="tax22AO_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-22</field>
+            <field name="tax_amount">-220</field>
             <field name="amount">22</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="22AO"/>
@@ -2388,7 +2388,7 @@
 
         <record id="tax22AO_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_22ind"/>
@@ -2397,7 +2397,7 @@
 
         <record id="tax22AO_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">22</field>
+            <field name="tax_amount">220</field>
             <field name="amount">22</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="22AO"/>
@@ -2407,7 +2407,7 @@
 
         <record id="tax22AOb_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4.84</field>
+            <field name="tax_amount">-48.4</field>
             <field name="amount">4.84</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22ind"/>
@@ -2417,7 +2417,7 @@
 
         <record id="tax22AOb_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4.84</field>
+            <field name="tax_amount">48.4</field>
             <field name="amount">4.84</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22ind"/>
@@ -2429,7 +2429,7 @@
 
         <record id="tax22AOa_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-4.84</field>
+            <field name="tax_amount">-48.4</field>
             <field name="amount">4.84</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22ind"/>
@@ -2438,7 +2438,7 @@
 
         <record id="tax22AOa_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">4.84</field>
+            <field name="tax_amount">48.4</field>
             <field name="amount">4.84</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22ind"/>
@@ -2449,7 +2449,7 @@
 
         <record id="tax22I5_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">-1000</field>
             <field name="amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_impcode_pagata_22det50"/>
@@ -2458,7 +2458,7 @@
 
         <record id="tax22I5_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-22</field>
+            <field name="tax_amount">-220</field>
             <field name="amount">22</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="22I5"/>
@@ -2466,7 +2466,7 @@
 
         <record id="tax22I5_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">1000</field>
             <field name="amount">100</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_impcode_pagata_22det50"/>
@@ -2475,7 +2475,7 @@
 
         <record id="tax22I5_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">22</field>
+            <field name="tax_amount">220</field>
             <field name="amount">22</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="22I5"/>
@@ -2485,7 +2485,7 @@
 
         <record id="tax22I5b_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-11</field>
+            <field name="tax_amount">-110</field>
             <field name="amount">11</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det50"/>
@@ -2495,7 +2495,7 @@
 
         <record id="tax22I5b_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-11</field>
+            <field name="tax_amount">-110</field>
             <field name="amount">11</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22det50"/>
@@ -2507,7 +2507,7 @@
 
         <record id="tax22I5a_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-11</field>
+            <field name="tax_amount">-110</field>
             <field name="amount">11</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="template_ivacode_pagata_22det50ind"/>
@@ -2516,7 +2516,7 @@
 
         <record id="tax22I5a_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">11</field>
+            <field name="tax_amount">110</field>
             <field name="amount">11</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="template_ivacode_pagata_22det50ind"/>
