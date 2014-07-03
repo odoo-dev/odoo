@@ -12,7 +12,6 @@
         <field name="description">TPSTVP_BC_SALE</field>
         <field name="type_tax_use">sale</field>
         <field name="amount">100</field>
-        <!--field name="child_depend">1</field-->
         <field name="type">percent</field>
     </record>
 
@@ -24,14 +23,6 @@
         <field name="tax_id" ref="gstpst_bc_sale_fr"/>
     </record>
 
-    <!--record id="gstpst_bc_sale_fr_invoice_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">invoice</field>
-        <field name="tax_id" ref="gstpst_bc_sale_fr"/>
-    </record-->
-
     <record id="gstpst_bc_sale_fr_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
         <field name="tax_amount">1000</field>
@@ -39,14 +30,6 @@
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="gstpst_bc_sale_fr"/>
     </record>
-
-    <!--record id="gstpst_bc_sale_fr_refund_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">refund</field>
-        <field name="tax_id" ref="gstpst_bc_sale_fr"/>
-    </record-->
 
     <!-- Child Record 1-->
     <record id="gstpst_sale_bc_gst_fr_invoice_tax_line" model="account.tax.line.template">
@@ -103,7 +86,6 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">100</field>
         <field name="type">percent</field>
-        <!--field name="child_depend" eval="True"/-->
     </record>
 
     <record id="gstpst_mb_sale_fr_invoice_base_line" model="account.tax.line.template">
@@ -114,14 +96,6 @@
         <field name="tax_id" ref="gstpst_mb_sale_fr"/>
     </record>
 
-    <!--record id="gstpst_mb_sale_fr_invoice_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">invoice</field>
-        <field name="tax_id" ref="gstpst_mb_sale_fr"/>
-    </record-->
-
     <record id="gstpst_mb_sale_fr_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
         <field name="tax_amount">1000</field>
@@ -129,14 +103,6 @@
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="gstpst_mb_sale_fr"/>
     </record>
-
-    <!--record id="gstpst_mb_sale_fr_refund_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">refund</field>
-        <field name="tax_id" ref="gstpst_mb_sale_fr"/>
-    </record-->
 
     <!-- Child Record 1-->
     <record id="gstpst_sale_mb_gst_fr_invoice_tax_line" model="account.tax.line.template">
@@ -193,7 +159,6 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">100</field>
         <field name="type">percent</field>
-        <!--field name="child_depend" eval="True"/-->
     </record>
 
     <record id="gstqst_sale_fr_invoice_base_line" model="account.tax.line.template">
@@ -204,14 +169,6 @@
         <field name="tax_id" ref="gstqst_sale_fr"/>
     </record>
 
-    <!--record id="gstqst_sale_fr_invoice_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">invoice</field>
-        <field name="tax_id" ref="gstqst_sale_fr"/>
-    </record-->
-
     <record id="gstqst_sale_fr_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
         <field name="tax_amount">1000</field>
@@ -219,14 +176,6 @@
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="gstqst_sale_fr"/>
     </record>
-
-    <!--record id="gstqst_sale_fr_refund_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">refund</field>
-        <field name="tax_id" ref="gstqst_sale_fr"/>
-    </record-->
 
     <!-- Child Record 1-->
     <record id="gstqst_sale_gst_fr_invoice_tax_line" model="account.tax.line.template">
@@ -283,7 +232,6 @@
         <field name="type_tax_use">sale</field>
         <field name="amount">100</field>
         <field name="type">percent</field>
-        <!--field name="child_depend" eval="True"/-->
     </record>
 
     <record id="gstpst_sk_sale_fr_invoice_base_line" model="account.tax.line.template">
@@ -294,14 +242,6 @@
         <field name="tax_id" ref="gstpst_sk_sale_fr"/>
     </record>
 
-    <!--record id="gstpst_sk_sale_fr_invoice_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">invoice</field>
-        <field name="tax_id" ref="gstpst_sk_sale_fr"/>
-    </record-->
-
     <record id="gstpst_sk_sale_fr_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
         <field name="tax_amount">1000</field>
@@ -309,14 +249,6 @@
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="gstpst_sk_sale_fr"/>
     </record>
-
-    <!--record id="gstpst_sk_sale_fr_refund_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">refund</field>
-        <field name="tax_id" ref="gstpst_sk_sale_fr"/>
-    </record-->
 
     <!-- Child Record 1-->
     <record id="gstpst_sale_sk_gst_fr_invoice_tax_line" model="account.tax.line.template">
@@ -567,7 +499,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">100</field>
         <field name="type">percent</field>
-        <!--field name="child_depend">1</field-->
     </record>
 
     <record id="gstpst_bc_purc_fr_invoice_base_line" model="account.tax.line.template">
@@ -576,15 +507,6 @@
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
         <field name="tax_id" ref="gstpst_bc_purc_fr"/>
-    </record>
-
-    <!--record id="gstpst_bc_purc_fr_invoice_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">invoice</field>
-        <field name="tax_id" ref="gstpst_bc_purc_fr"/>
-    </record-->
 
     <record id="gstpst_bc_purc_fr_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
@@ -593,14 +515,6 @@
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="gstpst_bc_purc_fr"/>
     </record>
-
-    <!--record id="gstpst_bc_purc_fr_refund_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">refund</field>
-        <field name="tax_id" ref="gstpst_bc_purc_fr"/>
-    </record-->
 
     <!-- Child Record 1-->
     <record id="gstpst_purc_bc_gst_fr_invoice_tax_line" model="account.tax.line.template">
@@ -657,7 +571,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">100</field>
         <field name="type">percent</field>
-        <!--field name="child_depend" eval="True"/-->
     </record>
 
     <record id="gstpst_mb_purc_fr_invoice_base_line" model="account.tax.line.template">
@@ -668,14 +581,6 @@
         <field name="tax_id" ref="gstpst_mb_purc_fr"/>
     </record>
 
-    <!--record id="gstpst_mb_purc_fr_invoice_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">invoice</field>
-        <field name="tax_id" ref="gstpst_mb_purc_fr"/>
-    </record-->
-
     <record id="gstpst_mb_purc_fr_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
         <field name="tax_amount">1000</field>
@@ -683,14 +588,6 @@
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="gstpst_mb_purc_fr"/>
     </record>
-
-    <!--record id="gstpst_mb_purc_fr_refund_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">refund</field>
-        <field name="tax_id" ref="gstpst_mb_purc_fr"/>
-    </record-->
 
     <!-- Child Record 1-->
     <record id="gstpst_sale_bc_gst_en_invoice_tax_line" model="account.tax.line.template">
@@ -747,7 +644,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">100</field>
         <field name="type">percent</field>
-        <!--field name="child_depend" eval="True"/-->
     </record>
 
     <record id="gstqst_purc_fr_invoice_base_line" model="account.tax.line.template">
@@ -758,14 +654,6 @@
         <field name="tax_id" ref="gstqst_purc_fr"/>
     </record>
 
-    <!--record id="gstqst_purc_fr_invoice_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">invoice</field>
-        <field name="tax_id" ref="gstqst_purc_fr"/>
-    </record-->
-
     <record id="gstqst_purc_fr_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
         <field name="tax_amount">1000</field>
@@ -773,14 +661,6 @@
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="gstqst_purc_fr"/>
     </record>
-
-    <!--record id="gstqst_purc_fr_refund_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">refund</field>
-        <field name="tax_id" ref="gstqst_purc_fr"/>
-    </record-->
 
     <!-- Child Record 1-->
     <record id="gstqst_purc_gst_fr_invoice_tax_line" model="account.tax.line.template">
@@ -837,7 +717,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="amount">100</field>
         <field name="type">percent</field>
-        <!--field name="child_depend" eval="True"/-->
     </record>
 
     <record id="gstpst_sk_purc_fr_invoice_base_line" model="account.tax.line.template">
@@ -848,14 +727,6 @@
         <field name="tax_id" ref="gstpst_sk_purc_fr"/>
     </record>
 
-    <!--record id="gstpst_sk_purc_fr_invoice_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">invoice</field>
-        <field name="tax_id" ref="gstpst_sk_purc_fr"/>
-    </record-->
-
     <record id="gstpst_sk_purc_fr_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
         <field name="tax_amount">1000</field>
@@ -863,14 +734,6 @@
         <field name="apply_on">refund</field>
         <field name="tax_id" ref="gstpst_sk_purc_fr"/>
     </record>
-
-    <!--record id="gstpst_sk_purc_fr_refund_tax_line" model="account.tax.line.template">
-        <field name="code_type">tax</field>
-        <field name="tax_amount">100</field>
-        <field name="amount">100</field>
-        <field name="apply_on">refund</field>
-        <field name="tax_id" ref="gstpst_sk_purc_fr"/>
-    </record-->
 
     <!-- Child Record 1-->
     <record id="gstpst_purc_sk_gst_fr_invoice_tax_line" model="account.tax.line.template">

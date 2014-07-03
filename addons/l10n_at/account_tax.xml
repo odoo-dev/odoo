@@ -293,7 +293,6 @@
             <field name="type">percent</field>
             <field name="amount">100</field>
             <field name="type_tax_use">purchase</field>
-            <!--field eval="True" name="child_depend"/-->
         </record>
 
         <record id="tax_eu_20_purchase_invoice_base_line" model="account.tax.line.template">
@@ -304,14 +303,6 @@
             <field name="tax_id" ref="tax_eu_20_purchase"/>
         </record>
 
-        <!--record id="tax_eu_20_purchase_invoice_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
-            <field name="apply_on">invoice</field>
-            <field name="tax_id" ref="tax_eu_20_purchase"/>
-        </record-->
-
         <record id="tax_eu_20_purchase_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">1000</field>
@@ -319,14 +310,6 @@
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="tax_eu_20_purchase"/>
         </record>
-
-        <!--record id="tax_eu_20_purchase_refund_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
-            <field name="apply_on">refund</field>
-            <field name="tax_id" ref="tax_eu_20_purchase"/>
-        </record-->
 
         <!-- Child Record 1-->
         <record id="tax_eu_20_purchase_ust_invoice_tax_line" model="account.tax.line.template">
@@ -377,7 +360,6 @@
             <field name="type">percent</field>
             <field name="amount">100</field>
             <field name="type_tax_use">purchase</field>
-            <!--field eval="True" name="child_depend"/-->
         </record>
 
         <record id="tax_eu_10_purchase_invoice_base_line" model="account.tax.line.template">
@@ -388,14 +370,6 @@
             <field name="tax_id" ref="tax_eu_10_purchase"/>
         </record>
 
-        <!--record id="tax_eu_10_purchase_invoice_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
-            <field name="apply_on">invoice</field>
-            <field name="tax_id" ref="tax_eu_10_purchase"/>
-        </record-->
-
         <record id="tax_eu_10_purchase_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">1000</field>
@@ -403,14 +377,6 @@
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="tax_eu_10_purchase"/>
         </record>
-
-        <!--record id="tax_eu_10_purchase_refund_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
-            <field name="apply_on">refund</field>
-            <field name="tax_id" ref="tax_eu_10_purchase"/>
-        </record-->
 
         <!-- Child Record 1-->
         <record id="tax_eu_10_purchase_ust_invoice_tax_line" model="account.tax.line.template">
