@@ -1,0 +1,1437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="True">
+    <record id="rrif_pdv_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24003"/>
+        <field name="tax_id" ref="rrif_pdv_25"/>
+    </record>
+    <record id="rrif_pdv_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24003"/>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_25"/>
+    </record>
+
+    <record id="rrif_pdv_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24003"/>
+        <field name="tax_id" ref="rrif_pdv_25"/>
+    </record>
+
+    <record id="rrif_pdv_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24003"/>
+        <field name="tax_id" ref="rrif_pdv_25"/>
+    </record>
+
+    <record id="rrif_pdv_25usl_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24003"/>
+        <field name="tax_id" ref="rrif_pdv_25usl"/>
+    </record>
+
+    <record id="rrif_pdv_25usl_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24003"/>
+        <field name="tax_id" ref="rrif_pdv_25usl"/>
+    </record>
+
+    <record id="rrif_pdv_25usl_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24003"/>
+        <field name="tax_id" ref="rrif_pdv_25usl"/>
+    </record>
+
+    <record id="rrif_pdv_25usl_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24003"/>
+        <field name="tax_id" ref="rrif_pdv_25usl"/>
+    </record>
+
+    <record id="rrif_pdv_10_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24000"/>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_10"/>
+    </record>
+
+    <record id="rrif_pdv_10_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24000"/>
+        <field name="tax_id" ref="rrif_pdv_10"/>
+    </record>
+
+    <record id="rrif_pdv_10_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o21"/>
+        <field name="account_id" ref="kp_rrif24000"/>
+        <field name="tax_id" ref="rrif_pdv_10"/>
+    </record>
+
+    <record id="rrif_pdv_10_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="pdv_code_p21"/>
+        <field name="account_id" ref="kp_rrif24000"/>
+        <field name="tax_id" ref="rrif_pdv_10"/>
+    </record>
+
+    <record id="rrif_pdv_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o21"/>
+        <field name="tax_id" ref="rrif_pdv_0"/>
+    </record>
+
+    <record id="rrif_pdv_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p21"/>
+        <field name="tax_id" ref="rrif_pdv_0"/>
+    </record>
+
+    <record id="rrif_pdv_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o13"/>
+        <field name="tax_id" ref="rrif_pdv_0"/>
+    </record>
+
+    <record id="rrif_pdv_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pdv_0"/>
+    </record>
+
+    <record id="rrif_pdv_avans_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24013"/>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_avans_25"/>
+    </record>
+
+    <record id="rrif_pdv_avans_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24013"/>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_avans_25"/>
+    </record>
+
+    <record id="rrif_pdv_avans_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24013"/>
+        <field name="tax_id" ref="rrif_pdv_avans_25"/>
+    </record>
+
+    <record id="rrif_pdv_avans_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24013"/>
+        <field name="tax_id" ref="rrif_pdv_avans_25"/>
+    </record>
+
+    <record id="rrif_pdv_avans_10_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o21"/>
+        <field name="account_id" ref="kp_rrif24010"/>
+        <field name="tax_id" ref="rrif_pdv_avans_10"/>
+    </record>
+
+    <record id="rrif_pdv_avans_10_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p21"/>
+        <field name="account_id" ref="kp_rrif24010"/>
+        <field name="tax_id" ref="rrif_pdv_avans_10"/>
+    </record>
+
+    <record id="rrif_pdv_avans_10_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o21"/>
+        <field name="account_id" ref="kp_rrif24010"/>
+        <field name="tax_id" ref="rrif_pdv_avans_10"/>
+    </record>
+
+    <record id="rrif_pdv_avans_10_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="pdv_code_p21"/>
+        <field name="account_id" ref="kp_rrif24010"/>
+        <field name="tax_id" ref="rrif_pdv_avans_10"/>
+    </record>
+
+    <record id="rrif_pdv_avans_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o13"/>
+        <field name="tax_id" ref="rrif_pdv_avans_0"/>
+    </record>
+
+    <record id="rrif_pdv_avans_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_avans_0"/>
+    </record>
+
+    <record id="rrif_pdv_avans_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o13"/>
+        <field name="tax_id" ref="rrif_pdv_avans_0"/>
+    </record>
+
+    <record id="rrif_pdv_avans_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pdv_avans_0"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24033"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_25"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24033"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_25"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o23"/>
+        <field name="account_id" ref="kp_rrif24033"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_25"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p23"/>
+        <field name="account_id" ref="kp_rrif24033"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_25"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_10_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o21"/>
+        <field name="account_id" ref="kp_rrif24030"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_10"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_10_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p21"/>
+        <field name="account_id" ref="kp_rrif24030"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_10"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_10_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o21"/>
+        <field name="account_id" ref="kp_rrif24030"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_10"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_10_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="pdv_code_p21"/>
+        <field name="account_id" ref="kp_rrif24030"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_10"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o13"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_0"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_0"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o13"/>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_0"/>
+    </record>
+
+    <record id="rrif_pdv_nezar_isp_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pdv_nezar_isp_0"/>
+    </record>
+
+    <record id="rrif_pdv_nepod_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o11"/>
+        <field name="tax_id" ref="rrif_pdv_nepod_0"/>
+    </record>
+
+    <record id="rrif_pdv_nepod_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_nepod_0"/>
+    </record>
+
+    <record id="rrif_pdv_nepod_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o11"/>
+        <field name="tax_id" ref="rrif_pdv_nepod_0"/>
+    </record>
+
+    <record id="rrif_pdv_nepod_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pdv_nepod_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_izvoz_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o121"/>
+        <field name="tax_id" ref="rrif_pdv_osl_izvoz_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_izvoz_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_osl_izvoz_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_izvoz_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o121"/>
+        <field name="tax_id" ref="rrif_pdv_osl_izvoz_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_izvoz_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pdv_osl_izvoz_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_medpri_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o122"/>
+        <field name="tax_id" ref="rrif_pdv_osl_medpri_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_medpri_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_osl_medpri_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_medpri_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o122"/>
+        <field name="tax_id" ref="rrif_pdv_osl_medpri_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_medpri_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pdv_osl_medpri_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_tuz_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o123"/>
+        <field name="tax_id" ref="rrif_pdv_osl_tuz_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_tuz_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_osl_tuz_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_tuz_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o123"/>
+        <field name="tax_id" ref="rrif_pdv_osl_tuz_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_tuz_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pdv_osl_tuz_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_ost_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o124"/>
+    <field name="tax_id" ref="rrif_pdv_osl_ost_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_ost_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pdv_osl_ost_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_ost_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o124"/>
+        <field name="tax_id" ref="rrif_pdv_osl_ost_0"/>
+    </record>
+
+    <record id="rrif_pdv_osl_ost_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pdv_osl_ost_0"/>
+    </record>
+
+    <record id="rrif_pp_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o33"/>
+        <field name="account_id" ref="kp_rrif14003"/>
+        <field name="tax_id" ref="rrif_pp_25"/>
+    </record>
+
+    <record id="rrif_pp_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14003"/>
+        <field name="tax_id" ref="rrif_pp_25"/>
+    </record>
+
+    <record id="rrif_pp_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o33"/>
+        <field name="account_id" ref="kp_rrif14003"/>
+        <field name="tax_id" ref="rrif_pp_25"/>
+    </record>
+
+    <record id="rrif_pp_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14003"/>
+        <field name="tax_id" ref="rrif_pp_25"/>
+    </record>
+
+    <record id="rrif_pp_25usl_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o33"/>
+        <field name="account_id" ref="kp_rrif14003"/>
+        <field name="tax_id" ref="rrif_pp_25usl"/>
+    </record>
+
+    <record id="rrif_pp_25usl_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14003"/>
+        <field name="tax_id" ref="rrif_pp_25usl"/>
+    </record>
+
+    <record id="rrif_pp_25usl_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o33"/>
+        <field name="account_id" ref="kp_rrif14003"/>
+        <field name="tax_id" ref="rrif_pp_25usl"/>
+    </record>
+
+    <record id="rrif_pp_25usl_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14003"/>
+        <field name="tax_id" ref="rrif_pp_25usl"/>
+    </record>
+
+    <record id="rrif_pp_10_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o31"/>
+        <field name="account_id" ref="kp_rrif14000"/>
+        <field name="tax_id" ref="rrif_pp_10"/>
+    </record>
+
+    <record id="rrif_pp_10_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p31"/>
+        <field name="account_id" ref="kp_rrif14000"/>
+        <field name="tax_id" ref="rrif_pp_10"/>
+    </record>
+
+    <record id="rrif_pp_10_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o31"/>
+        <field name="account_id" ref="kp_rrif14000"/>
+        <field name="tax_id" ref="rrif_pp_10"/>
+    </record>
+
+    <record id="rrif_pp_10_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="pdv_code_p31"/>
+        <field name="account_id" ref="kp_rrif14000"/>
+        <field name="tax_id" ref="rrif_pp_10"/>
+    </record>
+
+    <record id="rrif_pp_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o391"/>
+        <field name="tax_id" ref="rrif_pp_0"/>
+    </record>
+
+    <record id="rrif_pp_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pp_0"/>
+    </record>
+
+    <record id="rrif_pp_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o391"/>
+        <field name="tax_id" ref="rrif_pp_0"/>
+    </record>
+
+    <record id="rrif_pp_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pp_0"/>
+    </record>
+
+    <record id="rrif_pp_avans_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o33"/>
+        <field name="account_id" ref="kp_rrif14013"/>
+        <field name="tax_id" ref="rrif_pp_avans_25"/>
+    </record>
+
+    <record id="rrif_pp_avans_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14013"/>
+        <field name="tax_id" ref="rrif_pp_avans_25"/>
+    </record>
+
+    <record id="rrif_pp_avans_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o33"/>
+        <field name="account_id" ref="kp_rrif14013"/>
+        <field name="tax_id" ref="rrif_pp_avans_25"/>
+    </record>
+
+    <record id="rrif_pp_avans_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14013"/>
+        <field name="tax_id" ref="rrif_pp_avans_25"/>
+    </record>
+
+    <record id="rrif_pp_avans_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o391"/>
+        <field name="tax_id" ref="rrif_pp_avans_0"/>
+    </record>
+
+    <record id="rrif_pp_avans_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pp_avans_0"/>
+    </record>
+
+    <record id="rrif_pp_avans_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o391"/>
+        <field name="tax_id" ref="rrif_pp_avans_0"/>
+    </record>
+
+    <record id="rrif_pp_avans_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pp_avans_0"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o34"/>
+        <field name="account_id" ref="kp_rrif14023"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p34"/>
+        <field name="account_id" ref="kp_rrif14023"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o34"/>
+        <field name="account_id" ref="kp_rrif14023"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="pdv_code_p34"/>
+        <field name="account_id" ref="kp_rrif14023"/>
+        <field name="debit_credit_amount">250</field>
+        <field name="tax_id" ref="rrif_pp_uvoz_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_10_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o34"/>
+        <field name="account_id" ref="kp_rrif14020"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_10"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_10_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p34"/>
+        <field name="account_id" ref="kp_rrif14020"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_10"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_10_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o34"/>
+        <field name="account_id" ref="kp_rrif14020"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_10"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_10_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="pdv_code_p34"/>
+        <field name="account_id" ref="kp_rrif14020"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_10"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_0_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o34"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_0"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_0_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_pp_uvoz_0"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_0_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o34"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_0"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_0_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="tax_id" ref="rrif_pp_uvoz_0"/>
+    </record>
+
+    <record id="rrif_pp_ino_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o37"/>
+        <field name="account_id" ref="kp_rrif14033"/>
+        <field name="tax_id" ref="rrif_pp_ino_25"/>
+    </record>
+
+    <record id="rrif_pp_ino_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p37"/>
+        <field name="account_id" ref="kp_rrif14033"/>
+        <field name="tax_id" ref="rrif_pp_ino_25"/>
+    </record>
+
+    <record id="rrif_pp_ino_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o37"/>
+        <field name="account_id" ref="kp_rrif14033"/>
+        <field name="tax_id" ref="rrif_pp_ino_25"/>
+    </record>
+
+    <record id="rrif_pp_ino_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p37"/>
+        <field name="account_id" ref="kp_rrif14033"/>
+        <field name="tax_id" ref="rrif_pp_ino_25"/>
+    </record>
+
+    <record id="rrif_pp_ino_10_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o35"/>
+        <field name="account_id" ref="kp_rrif14030"/>
+        <field name="tax_id" ref="rrif_pp_ino_10"/>
+    </record>
+
+    <record id="rrif_pp_ino_10_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p35"/>
+        <field name="account_id" ref="kp_rrif14030"/>
+        <field name="tax_id" ref="rrif_pp_ino_10"/>
+    </record>
+
+    <record id="rrif_pp_ino_10_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o35"/>
+        <field name="account_id" ref="kp_rrif14030"/>
+        <field name="tax_id" ref="rrif_pp_ino_10"/>
+    </record>
+
+    <record id="rrif_pp_ino_10_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="pdv_code_p35"/>
+        <field name="account_id" ref="kp_rrif14030"/>
+        <field name="tax_id" ref="rrif_pp_ino_10"/>
+    </record>
+
+    <record id="rrif_ppr2_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppr2_25"/>
+        <field name="code_id" ref="pdv_code_o92"/>
+        <field name="account_id" ref="kp_rrif1409"/>
+    </record>
+
+    <record id="rrif_ppr2_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p9201"/>
+        <field name="account_id" ref="kp_rrif1409"/>
+        <field name="tax_id" ref="rrif_ppr2_25"/>
+    </record>
+
+    <record id="rrif_ppr2_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="pdv_code_o92"/>
+        <field name="account_id" ref="kp_rrif1409"/>
+        <field name="tax_id" ref="rrif_ppr2_25"/>
+    </record>
+
+    <record id="rrif_ppr2_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p9201"/>
+        <field name="account_id" ref="kp_rrif1409"/>
+        <field name="tax_id" ref="rrif_ppr2_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_samopdv_25_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-100</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o913"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_samopdv_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_samopdv_25_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p9202"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_samopdv_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_samopdv_25_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="pdv_code_o913"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_samopdv_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_samopdv_25_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p9202"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_samopdv_25"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_samopdv_25usl_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-100</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_o913"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_samopdv_25usl"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_samopdv_25usl_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p9203"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_samopdv_25usl"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_samopdv_25usl_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="pdv_code_o913"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_samopdv_25usl"/>
+    </record>
+
+    <record id="rrif_pp_uvoz_samopdv_25usl_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p9203"/>
+        <field name="tax_id" ref="rrif_pp_uvoz_samopdv_25usl"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_1_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_1_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_1_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_1_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_1_r2_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_1_r2_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_1_r2_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_1_r2_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+<!-- parent_id record -->
+
+    <record id="rrif_ppdnp1_3070_30_2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_30_2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_30_3_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p913"/>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_30_3_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="pdv_code_p913"/>
+        <field name="debit_credit_amount">250</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_70_2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">700</field>
+        <field name="debit_credit_amount">700</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_70_2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">700</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">700</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_70_3_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14002"/>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_70_3_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14002"/>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_70_2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">700</field>
+        <field name="debit_credit_amount">700</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_70_2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">700</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">700</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_70_3_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p913"/>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+
+    <record id="rrif_ppdnp1_7030_70_3_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p913"/>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_30_2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_30_2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_30_3_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14002"/>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_30_3_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="pdv_code_p33"/>
+        <field name="account_id" ref="kp_rrif14002"/>
+        <field name="debit_credit_amount">250</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_30_2_r2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_30_2_r2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_30_3_r2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p913"/>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_30_3_r2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p913"/>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_70_2_r2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">700</field>
+        <field name="debit_credit_amount">700</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_70_2_r2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">700</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">700</field>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_70_3_r2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="pdv_code_p9201"/>
+        <field name="account_id" ref="kp_rrif1408"/>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_3070_70_3_r2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p9201"/>
+        <field name="account_id" ref="kp_rrif1408"/>
+        <field name="tax_id" ref="rrif_ppdnp1_3070_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_70_2_r2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">700</field>
+        <field name="debit_credit_amount">700</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_70_2_r2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">700</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">700</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_70_3_r2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p913"/>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_70_3_r2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="pdv_code_p913"/>
+        <field name="debit_credit_amount">250</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_30_2_r2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_30_2_r2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_30_3_r2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="apply_on">invoice</field>
+        <field name="account_id" ref="kp_rrif1408"/>
+        <field name="code_id" ref="pdv_code_p9201"/>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+
+    <record id="rrif_ppdnp1_7030_30_3_r2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">250</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">250</field>
+        <field name="code_id" ref="pdv_code_p9201"/>
+        <field name="account_id" ref="kp_rrif1408"/>
+        <field name="tax_id" ref="rrif_ppdnp1_7030_1_r2"/>
+    </record>
+    </data>
+</openerp>
