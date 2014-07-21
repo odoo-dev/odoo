@@ -308,6 +308,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_89"/>
             <field name="tax_id" ref="tax_eu_20_purchase"/>
         </record>
 
@@ -367,6 +368,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_93"/>
             <field name="tax_id" ref="tax_eu_10_purchase"/>
         </record>
 
@@ -375,6 +377,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_93"/>
             <field name="tax_id" ref="tax_eu_10_purchase"/>
         </record>
 
