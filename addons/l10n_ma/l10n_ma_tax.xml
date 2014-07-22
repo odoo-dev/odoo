@@ -752,92 +752,379 @@
   <record model="account.tax.template" id="tva_exo">
     <field name="name">Exonere de TVA</field>
     <field name="type_tax_use">all</field>
-    <field name="account_collected_id"/>
-    <field name="account_paid_id"/>
     <field name="amount">0</field>
-    <field name="type">none</field>
+    <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_exo_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_exo"/>
+  </record>
+  <record id="tva_exo_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">0</field>
+    <field name="debit_credit_amount">0</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_exo"/>
+  </record>
+  <record id="tva_exo_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_exo"/>
+  </record>
+  <record id="tva_exo_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">0</field>
+    <field name="debit_credit_amount">0</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_exo"/>
+  </record>
+
   <record model="account.tax.template" id="tva_vt20">
     <field name="name">TVA 20% VENTES</field>
     <field name="type_tax_use">sale</field>
-    <field name="account_collected_id" ref="pcg_445520"/>
-    <field name="account_paid_id" ref="pcg_445520"/>
-    <field name="amount">0.2</field>
+    <field name="amount">20</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_vt20_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_vt20"/>
+  </record>
+  <record id="tva_vt20_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">200</field>
+    <field name="debit_credit_amount">200</field>
+    <field name="account_id" ref="pcg_445520"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_vt20"/>
+  </record>
+  <record id="tva_vt20_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_vt20"/>
+  </record>
+  <record id="tva_vt20_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">200</field>
+    <field name="debit_credit_amount">200</field>
+    <field name="account_id" ref="pcg_445520"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_vt20"/>
+  </record>
+
   <record model="account.tax.template" id="tva_vt14">
     <field name="name">TVA 14% VENTES</field>
     <field name="type_tax_use">sale</field>
-    <field name="account_collected_id" ref="pcg_445514"/>
-    <field name="account_paid_id" ref="pcg_445514"/>
-    <field name="amount">0.14</field>
+    <field name="amount">14</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_vt14_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_vt14"/>
+  </record>
+  <record id="tva_vt14_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">140</field>
+    <field name="debit_credit_amount">140</field>
+    <field name="account_id" ref="pcg_445514"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_vt14"/>
+  </record>
+  <record id="tva_vt14_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_vt14"/>
+  </record>
+  <record id="tva_vt14_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">140</field>
+    <field name="debit_credit_amount">140</field>
+    <field name="account_id" ref="pcg_445514"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_vt14"/>
+  </record>
+
   <record model="account.tax.template" id="tva_vt10">
     <field name="name">TVA 10% VENTES</field>
     <field name="type_tax_use">sale</field>
-    <field name="account_collected_id" ref="pcg_445510"/>
-    <field name="account_paid_id" ref="pcg_445510"/>
-    <field name="amount">0.1</field>
+    <field name="amount">10</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_vt10_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_vt10"/>
+  </record>
+  <record id="tva_vt10_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">100</field>
+    <field name="debit_credit_amount">100</field>
+    <field name="account_id" ref="pcg_445510"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_vt10"/>
+  </record>
+  <record id="tva_vt10_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_vt10"/>
+  </record>
+  <record id="tva_vt10_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">100</field>
+    <field name="debit_credit_amount">100</field>
+    <field name="account_id" ref="pcg_445510"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_vt10"/>
+  </record>
+
   <record model="account.tax.template" id="tva_vt07">
     <field name="name">TVA 7% VENTES</field>
     <field name="type_tax_use">sale</field>
-    <field name="account_collected_id" ref="pcg_445507"/>
-    <field name="account_paid_id" ref="pcg_445507"/>
-    <field name="amount">0.07</field>
+    <field name="amount">7</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_vt07_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_vt07"/>
+  </record>
+  <record id="tva_vt07_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">70</field>
+    <field name="debit_credit_amount">70</field>
+    <field name="account_id" ref="pcg_445507"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_vt07"/>
+  </record>
+  <record id="tva_vt07_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_vt07"/>
+  </record>
+  <record id="tva_vt07_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">70</field>
+    <field name="debit_credit_amount">70</field>
+    <field name="account_id" ref="pcg_445507"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_vt07"/>
+  </record>
+
   <record model="account.tax.template" id="tva_ac20">
     <field name="name">TVA 20% ACHATS</field>
     <field name="type_tax_use">purchase</field>
-    <field name="account_collected_id" ref="pcg_3455220"/>
-    <field name="account_paid_id" ref="pcg_3455220"/>
-    <field name="amount">0.2</field>
+    <field name="amount">20</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_ac20_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_ac20"/>
+  </record>
+  <record id="tva_ac20_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">200</field>
+    <field name="debit_credit_amount">200</field>
+    <field name="account_id" ref="pcg_3455220"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_ac20"/>
+  </record>
+  <record id="tva_ac20_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_ac20"/>
+  </record>
+  <record id="tva_ac20_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">200</field>
+    <field name="debit_credit_amount">200</field>
+    <field name="account_id" ref="pcg_3455220"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_ac20"/>
+  </record>
+
   <record model="account.tax.template" id="tva_acim">
     <field name="name">TVA 20% ACHATS (immobilisation)</field>
     <field name="type_tax_use">purchase</field>
-    <field name="account_collected_id" ref="pcg_34551"/>
-    <field name="account_paid_id" ref="pcg_34551"/>
-    <field name="amount">0.2</field>
+    <field name="amount">20</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_acim_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_acim"/>
+  </record>
+  <record id="tva_acim_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">200</field>
+    <field name="debit_credit_amount">200</field>
+    <field name="account_id" ref="pcg_34551"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_acim"/>
+  </record>
+  <record id="tva_acim_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_acim"/>
+  </record>
+  <record id="tva_acim_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">200</field>
+    <field name="debit_credit_amount">200</field>
+    <field name="account_id" ref="pcg_34551"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_acim"/>
+  </record>
+
   <record model="account.tax.template" id="tva_ac14">
     <field name="name">TVA 14% ACHATS</field>
     <field name="type_tax_use">purchase</field>
-    <field name="account_collected_id" ref="pcg_3455214"/>
-    <field name="account_paid_id" ref="pcg_3455214"/>
-    <field name="amount">0.14</field>
+    <field name="amount">14</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_ac14_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_ac14"/>
+  </record>
+  <record id="tva_ac14_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">140</field>
+    <field name="debit_credit_amount">140</field>
+    <field name="account_id" ref="pcg_3455214"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_ac14"/>
+  </record>
+  <record id="tva_ac14_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_ac14"/>
+  </record>
+  <record id="tva_ac14_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">140</field>
+    <field name="debit_credit_amount">140</field>
+    <field name="account_id" ref="pcg_3455214"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_ac14"/>
+  </record>
+
   <record model="account.tax.template" id="tva_ac10">
     <field name="name">TVA 10% ACHATS</field>
     <field name="type_tax_use">purchase</field>
-    <field name="account_collected_id" ref="pcg_3455210"/>
-    <field name="account_paid_id" ref="pcg_3455210"/>
-    <field name="amount">0.1</field>
+    <field name="amount">10</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
   </record>
+  <record id="tva_ac10_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_ac10"/>
+  </record>
+  <record id="tva_ac10_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">100</field>
+    <field name="debit_credit_amount">100</field>
+    <field name="account_id" ref="pcg_3455210"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_ac10"/>
+  </record>
+  <record id="tva_ac10_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_ac10"/>
+  </record>
+  <record id="tva_ac10_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">100</field>
+    <field name="debit_credit_amount">100</field>
+    <field name="account_id" ref="pcg_3455210"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_ac10"/>
+  </record>
+
   <record model="account.tax.template" id="tva_ac07">
     <field name="name">TVA 7% ACHATS</field>
     <field name="type_tax_use">purchase</field>
-    <field name="account_collected_id" ref="pcg_3455207"/>
-    <field name="account_paid_id" ref="pcg_3455207"/>
-    <field name="amount">0.07</field>
+    <field name="amount">7</field>
     <field name="type">percent</field>
     <field name="chart_template_id" ref="l10n_kzc_temp_chart"/>
+  </record>
+  <record id="tva_ac07_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_ac07"/>
+  </record>
+  <record id="tva_ac07_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">70</field>
+    <field name="debit_credit_amount">70</field>
+    <field name="account_id" ref="pcg_3455207"/>
+    <field name="apply_on">invoice</field>
+    <field name="tax_id" ref="tva_ac07"/>
+  </record>
+  <record id="tva_ac07_ref_base_id" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_ac07"/>
+  </record>
+  <record id="tva_ac07_ref_tax_id" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">70</field>
+    <field name="debit_credit_amount">70</field>
+    <field name="account_id" ref="pcg_3455207"/>
+    <field name="apply_on">refund</field>
+    <field name="tax_id" ref="tva_ac07"/>
   </record>
 
 </data>

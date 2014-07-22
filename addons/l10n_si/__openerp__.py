@@ -37,7 +37,8 @@
         "data/account.fiscal.position.template.csv",
         "data/account.fiscal.position.account.template.csv",
         "data/account.fiscal.position.tax.template.csv",
-        "l10n_si_wizard.xml"
+        "l10n_si_wizard.xml",
+        "data/account_tax_template_line.xml",
     ],
     'auto_install': False,
     "installable": True,

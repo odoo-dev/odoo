@@ -1907,40 +1907,121 @@
     <record model="account.tax.template" id="tva_sale_18">
         <field name="name">TVA 18% (vente)</field>
         <field name="chart_template_id" ref="syscohada_chart_template"/>
-        <field name="amount" eval="0.18"/>
+        <field name="amount" eval="18"/>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="pcg_4441"/>
-        <field name="account_paid_id" ref="pcg_4449"/>
-        <field name="base_code_id" ref="tax_col_18_ht"/>
-        <field name="tax_code_id" ref="tax_col_18"/>
-        <field name="type_tax_use">sale</field>        
-        <field name="ref_base_code_id" ref="tax_col_18_ht"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_code_id" ref="tax_col_18"/>
-        <field name="ref_tax_sign" eval="-1"/>        
+        <field name="type_tax_use">sale</field>
     </record>
-    
-    
+    <record id="tva_sale_18_base_id" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="tax_col_18_ht"/>
+        <field name="tax_id" ref="tva_sale_18"/>
+    </record>
+    <record id="tva_sale_18_tax_id" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">180</field>
+        <field name="debit_credit_amount">180</field>
+        <field name="apply_on">invoice</field>
+        <field name="account_id" ref="pcg_4441"/>
+        <field name="code_id" ref="tax_col_18"/>
+        <field name="tax_id" ref="tva_sale_18"/>
+    </record>
+    <record id="tva_sale_18_ref_base_id" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="tax_col_18_ht"/>
+        <field name="tax_id" ref="tva_sale_18"/>
+    </record>
+    <record id="tva_sale_18_ref_tax_id" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-180</field>
+        <field name="debit_credit_amount">180</field>
+        <field name="apply_on">refund</field>
+        <field name="account_id" ref="pcg_4449"/>
+        <field name="code_id" ref="tax_col_18"/>
+        <field name="tax_id" ref="tva_sale_18"/>
+    </record>
+
     <record model="account.tax.template" id="tva_purchase_18">
         <field name="name">TVA 18% (achat)</field>
         <field name="chart_template_id" ref="syscohada_chart_template"/>
-        <field name="amount" eval="0.18"/>
+        <field name="amount" eval="18"/>
         <field name="type">percent</field>
-        <field name="type_tax_use">purchase</field>    
-        <field name="account_collected_id" ref="pcg_4441"/>
-        <field name="account_paid_id" ref="pcg_4449"/>
-        <field name="base_code_id" ref="tax_acq_18_ht"/>
-        <field name="tax_code_id" ref="tax_acq_18"/>
-        <field name="ref_base_code_id" ref="tax_acq_18_ht"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_code_id" ref="tax_acq_18"/>
-        <field name="ref_tax_sign" eval="-1"/>        
-    </record>    
+        <field name="type_tax_use">purchase</field>
+    </record>
+    <record id="tva_purchase_18_base_id" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="tax_acq_18_ht"/>
+        <field name="tax_id" ref="tva_purchase_18"/>
+    </record>
+    <record id="tva_purchase_18_tax_id" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">180</field>
+        <field name="debit_credit_amount">180</field>
+        <field name="apply_on">invoice</field>
+        <field name="account_id" ref="pcg_4441"/>
+        <field name="code_id" ref="tax_acq_18"/>
+        <field name="tax_id" ref="tva_purchase_18"/>
+    </record>
+    <record id="tva_purchase_18_ref_base_id" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="tax_acq_18_ht"/>
+        <field name="tax_id" ref="tva_purchase_18"/>
+    </record>
+    <record id="tva_purchase_18_ref_tax_id" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-180</field>
+        <field name="debit_credit_amount">180</field>
+        <field name="apply_on">refund</field>
+        <field name="account_id" ref="pcg_4449"/>
+        <field name="code_id" ref="tax_acq_18"/>
+        <field name="tax_id" ref="tva_purchase_18"/>
+    </record>
 
     <record model="account.tax.template" id="tva_exonere">
         <field name="name">Exonéré de TVA</field>
         <field name="chart_template_id" ref="syscohada_chart_template"/>
         <field name="amount" eval="0"/>
-        <field name="type">none</field>
+        <field name="type">percent</field>
     </record>
-</data></openerp>
+    <record id="tva_exonere_base_id" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="tva_exonere"/>
+    </record>
+    <record id="tva_exonere_tax_id" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="tva_exonere"/>
+    </record>
+    <record id="tva_exonere_ref_base_id" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="tva_exonere"/>
+    </record>
+    <record id="tva_exonere_ref_tax_id" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="tva_exonere"/>
+    </record>
+
+  </data>
+</openerp>
