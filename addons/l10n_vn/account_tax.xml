@@ -8,83 +8,278 @@
     <record id="tax_purchase_vat10" model="account.tax.template">
             <field name="chart_template_id" ref="vn_template"/>
             <field name="name">Thuế GTGT được khấu trừ 10%</field>
-            <field name="amount" eval="0.100000"/>
+            <field name="amount" eval="1"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart1331"/>
-            <field name="account_paid_id" ref="chart1331"/>
             <field name="type_tax_use">purchase</field>
-            <field name="base_code_id" ref="l10n_vn.vat_code_tax_in_local_10_base"/>
-            <field name="tax_code_id" ref="l10n_vn.vat_code_tax_in_local_10_balance"/>
-            <field name="ref_base_code_id" ref="l10n_vn.vat_code_tax_in_local_10_base"/>
-            <field name="ref_tax_code_id" ref="l10n_vn.vat_code_tax_in_local_10_balance"/>
     </record>
+    
+    <record id="tax_purchase_vat10_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_10_base"/>
+            <field name="tax_id" ref="tax_purchase_vat10"/>
+    </record>
+    
+    <record id="tax_purchase_vat10_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart1331"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_10_balance"/>
+            <field name="tax_id" ref="tax_purchase_vat10"/>
+    </record>
+    
+    <record id="tax_purchase_vat10_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_10_base"/>
+            <field name="tax_id" ref="tax_purchase_vat10"/>
+    </record>
+    
+    <record id="tax_purchase_vat10_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart1331"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_10_balance"/>
+            <field name="tax_id" ref="tax_purchase_vat10"/>
+    </record>
+        
     <record id="tax_purchase_vat5" model="account.tax.template">
             <field name="chart_template_id" ref="vn_template"/>
             <field name="name">Thuế GTGT được khấu trừ 5%</field>
-            <field name="amount" eval="0.050000"/>
+            <field name="amount" eval="5"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart1331"/>
-            <field name="account_paid_id" ref="chart1331"/>
             <field name="type_tax_use">purchase</field>
-            <field name="base_code_id" ref="l10n_vn.vat_code_tax_in_local_05_base"/>
-            <field name="tax_code_id" ref="l10n_vn.vat_code_tax_in_local_05_balance"/>
-            <field name="ref_base_code_id" ref="l10n_vn.vat_code_tax_in_local_05_base"/>
-            <field name="ref_tax_code_id" ref="l10n_vn.vat_code_tax_in_local_05_balance"/>
     </record>
+
+    <record id="tax_purchase_vat5_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_05_base"/>
+            <field name="tax_id" ref="tax_purchase_vat5"/>
+    </record>
+    
+    <record id="tax_purchase_vat5_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart1331"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_05_balance"/>
+            <field name="tax_id" ref="tax_purchase_vat5"/>
+    </record>
+    
+    <record id="tax_purchase_vat5_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_05_base"/>
+            <field name="tax_id" ref="tax_purchase_vat5"/>
+    </record>
+    
+    <record id="tax_purchase_vat5_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart1331"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_05_balance"/>
+            <field name="tax_id" ref="tax_purchase_vat5"/>
+    </record>
+        
     <record id="tax_purchase_vat0" model="account.tax.template">
             <field name="chart_template_id" ref="vn_template"/>
             <field name="name">Thuế GTGT được khấu trừ 0%</field>
             <field name="amount" eval="0.000000"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart1331"/>
-            <field name="account_paid_id" ref="chart1331"/>
             <field name="type_tax_use">purchase</field>
-            <field name="base_code_id" ref="l10n_vn.vat_code_tax_in_local_00_base"/>
-            <field name="tax_code_id" ref="l10n_vn.vat_code_tax_in_local_00_balance"/>
-            <field name="ref_base_code_id" ref="l10n_vn.vat_code_tax_in_local_00_base"/>
-            <field name="ref_tax_code_id" ref="l10n_vn.vat_code_tax_in_local_00_balance"/>
     </record>
     
+    <record id="tax_purchase_vat0_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_00_base"/>
+            <field name="tax_id" ref="tax_purchase_vat0"/>
+    </record>
+    
+    <record id="tax_purchase_vat0_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart1331"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_00_balance"/>
+            <field name="tax_id" ref="tax_purchase_vat0"/>
+    </record>
+    
+    <record id="tax_purchase_vat0_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_00_base"/>
+            <field name="tax_id" ref="tax_purchase_vat0"/>
+    </record>
+    
+    <record id="tax_purchase_vat0_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart1331"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_in_local_00_balance"/>
+            <field name="tax_id" ref="tax_purchase_vat0"/>
+    </record>
+        
     <!-- for sale -->
     <record id="tax_sale_vat10" model="account.tax.template">
             <field name="chart_template_id" ref="vn_template"/>
             <field name="name">Thuế GTGT phải nộp 10%</field>
-            <field name="amount" eval="0.100000"/>
+            <field name="amount" eval="1"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart33311"/>
-            <field name="account_paid_id" ref="chart33311"/>
             <field name="type_tax_use">sale</field>
-            <field name="base_code_id" ref="l10n_vn.vat_code_tax_out_local_10_base"/>
-            <field name="tax_code_id" ref="l10n_vn.vat_code_tax_out_local_10_balance"/>
-            <field name="ref_base_code_id" ref="l10n_vn.vat_code_tax_out_local_10_base"/>
-            <field name="ref_tax_code_id" ref="l10n_vn.vat_code_tax_out_local_10_balance"/>
     </record>
+    
+    <record id="tax_sale_vat10_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_10_base"/>
+            <field name="tax_id" ref="tax_sale_vat10"/>
+    </record>
+    
+    <record id="tax_sale_vat10_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart33311"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_10_balance"/>
+            <field name="tax_id" ref="tax_sale_vat10"/>
+    </record>
+    
+    <record id="tax_sale_vat10_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_10_base"/>
+            <field name="tax_id" ref="tax_sale_vat10"/>
+    </record>
+    
+    <record id="tax_sale_vat10_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">10</field>
+            <field name="debit_credit_amount">10</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart33311"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_10_balance"/>
+            <field name="tax_id" ref="tax_sale_vat10"/>
+    </record>
+    
     <record id="tax_sale_vat5" model="account.tax.template">
             <field name="chart_template_id" ref="vn_template"/>
             <field name="name">Thuế GTGT phải nộp 5%</field>
-            <field name="amount" eval="0.050000"/>
+            <field name="debit_credit_amount" eval="5"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart33311"/>
-            <field name="account_paid_id" ref="chart33311"/>
             <field name="type_tax_use">sale</field>
-            <field name="base_code_id" ref="l10n_vn.vat_code_tax_out_local_05_base"/>
-            <field name="tax_code_id" ref="l10n_vn.vat_code_tax_out_local_05_balance"/>
-            <field name="ref_base_code_id" ref="l10n_vn.vat_code_tax_out_local_05_base"/>
-            <field name="ref_tax_code_id" ref="l10n_vn.vat_code_tax_out_local_05_balance"/>
     </record>
+        
+    <record id="tax_sale_vat5_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_05_base"/>
+            <field name="tax_id" ref="tax_sale_vat5"/>
+    </record>
+    
+    <record id="tax_sale_vat5_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart33311"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_05_balance"/>
+            <field name="tax_id" ref="tax_sale_vat5"/>
+    </record>
+    
+    <record id="tax_sale_vat05_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_05_base"/>
+            <field name="tax_id" ref="tax_sale_vat5"/>
+    </record>
+    
+    <record id="tax_sale_vat5_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart33311"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_05_balance"/>
+            <field name="tax_id" ref="tax_sale_vat5"/>
+    </record>
+    
     <record id="tax_sale_vat0" model="account.tax.template">
             <field name="chart_template_id" ref="vn_template"/>
             <field name="name">Thuế GTGT phải nộp 0%</field>
-            <field name="amount" eval="0.000000"/>
+            <field name="debit_credit_amount" eval="0.000000"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart33311"/>
-            <field name="account_paid_id" ref="chart33311"/>
             <field name="type_tax_use">sale</field>
-            <field name="base_code_id" ref="l10n_vn.vat_code_tax_out_local_00_base"/>
-            <field name="tax_code_id" ref="l10n_vn.vat_code_tax_out_local_00_balance"/>
-            <field name="ref_base_code_id" ref="l10n_vn.vat_code_tax_out_local_00_base"/>
-            <field name="ref_tax_code_id" ref="l10n_vn.vat_code_tax_out_local_00_balance"/>
     </record>
-
+    
+   <record id="tax_sale_vat0_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_00_base"/>
+            <field name="tax_id" ref="tax_sale_vat0"/>
+    </record>
+    
+    <record id="tax_sale_vat0_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart33311"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_00_balance"/>
+            <field name="tax_id" ref="tax_sale_vat0"/>
+    </record>
+    
+    <record id="tax_sale_vat05_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_00_base"/>
+            <field name="tax_id" ref="tax_sale_vat0"/>
+    </record>
+    
+    <record id="tax_sale_vat0_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart33311"/>
+            <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_00_balance"/>
+            <field name="tax_id" ref="tax_sale_vat0"/>
+    </record>
 </data>
 </openerp>

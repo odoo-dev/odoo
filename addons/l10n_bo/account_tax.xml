@@ -3,48 +3,144 @@
   <data>
 
     <record id="ITAX_21" model="account.tax.template">
-      <field name="chart_template_id" ref="bo_chart_template"/>
-      <field name="name">IVA 13% Venta</field>
-      <field name="amount">0.130000</field>
-      <field name="type">percent</field>
-      <field name="type_tax_use">sale</field>
-      <field name="include_base_amount">1</field>
-      <field name="account_collected_id" ref="231"/>
-      <field name="account_paid_id" ref="231"/>
-      <field name="base_code_id" ref="vat_code_base_sale"/>
-      <field name="tax_code_id" ref="vat_code_IVA_receive"/>
-      <field name="ref_base_code_id" ref="vat_code_base_sale"/>
-      <field name="ref_tax_code_id" ref="vat_code_IVA_receive"/>
+        <field name="chart_template_id" ref="bo_chart_template"/>
+        <field name="name">IVA 13% Venta</field>
+        <field name="amount">13</field>
+        <field name="type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="include_base_amount">1</field>
     </record>
+    
+    <record id="ITAX_21_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_sale"/>
+        <field name="tax_id" ref="ITAX_21"/>
+    </record>
+    
+    <record id="ITAX_21_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">130</field>
+        <field name="debit_credit_amount">130</field>
+        <field name="apply_on">invoice</field>
+        <field name="account_id" ref="231"/>
+        <field name="code_id" ref="vat_code_IVA_receive"/>
+        <field name="tax_id" ref="ITAX_21"/>
+    </record>
+    
+    <record id="ITAX_21_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_sale"/>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="ITAX_21"/>
+    </record>
+    
+    <record id="ITAX_21_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">130</field>
+        <field name="debit_credit_amount">130</field>
+        <field name="apply_on">refund</field>
+        <field name="account_id" ref="231"/>
+        <field name="code_id" ref="vat_code_IVA_receive"/>
+        <field name="tax_id" ref="ITAX_21"/>
+    </record>
+    
     <record id="OTAX_21" model="account.tax.template">
-      <field name="chart_template_id" ref="bo_chart_template"/>
-      <field name="name">IVA 13% Compra</field>
-      <field name="amount">0.130000</field>
-      <field name="type">percent</field>
-      <field name="type_tax_use">purchase</field>
-      <field name="include_base_amount">1</field>
-      <field name="account_collected_id" ref="231"/>
-      <field name="account_paid_id" ref="231"/>
-      <field name="base_code_id" ref="vat_code_base_purchase"/>
-      <field name="tax_code_id" ref="vat_code_IVA_pay"/>
-      <field name="ref_base_code_id" ref="vat_code_base_purchase"/>
-      <field name="ref_tax_code_id" ref="vat_code_IVA_pay"/>
+        <field name="chart_template_id" ref="bo_chart_template"/>
+        <field name="name">IVA 13% Compra</field>
+        <field name="amount">13</field>
+        <field name="type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="include_base_amount">1</field>
     </record>
-
+    
+    <record id="OTAX_21_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_purchase"/>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="OTAX_21"/>
+    </record>
+    
+    <record id="OTAX_21_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">130</field>
+        <field name="amount">130</field>
+        <field name="apply_on">invoice</field>
+        <field name="account_id" ref="231"/>
+        <field name="code_id" ref="vat_code_IVA_pay"/>
+        <field name="tax_id" ref="OTAX_21"/>
+    </record>
+    
+    <record id="OTAX_21_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_purchase"/>
+        <field name="tax_id" ref="OTAX_21"/>
+    </record>
+    
+    <record id="OTAX_21_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">130</field>
+        <field name="debit_credit_amount">130</field>
+        <field name="apply_on">refund</field>
+        <field name="account_id" ref="231"/>
+        <field name="code_id" ref="vat_code_IVA_pay"/>
+        <field name="tax_id" ref="OTAX_21"/>
+    </record>
+    
     <record id="ITAX_03" model="account.tax.template">
-      <field name="chart_template_id" ref="bo_chart_template"/>
-      <field name="name">IT 3%</field>
-      <field name="amount">0.30000</field>
-      <field name="type">percent</field>
-      <field name="type_tax_use">sale</field>
-      <field name="price_include">0</field>
-      <field name="account_collected_id" ref="232"/>
-      <field name="account_paid_id" ref="232"/>
-      <field name="base_code_id" ref="vat_code_base_sale"/>
-      <field name="tax_code_id" ref="vat_code_transacciones"/>
-      <field name="ref_base_code_id" ref="vat_code_base_sale"/>
-      <field name="ref_tax_code_id" ref="vat_code_transacciones"/>
-    </record>      
-
+        <field name="chart_template_id" ref="bo_chart_template"/>
+        <field name="name">IT 3%</field>
+        <field name="amount">30</field>
+        <field name="type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="price_include">0</field>
+    </record>  
+        
+	<record id="ITAX_03_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_sale"/>
+        <field name="tax_id" ref="ITAX_03"/>
+    </record>
+    
+	<record id="ITAX_03_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="apply_on">invoice</field>
+        <field name="account_id" ref="232"/>
+        <field name="code_id" ref="vat_code_transacciones"/>
+        <field name="tax_id" ref="ITAX_03"/>
+    </record>
+    
+    <record id="ITAX_03_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_sale"/>
+        <field name="tax_id" ref="ITAX_03"/>
+    </record>
+    
+    <record id="ITAX_03_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">300</field>
+        <field name="debit_credit_amount">300</field>
+        <field name="apply_on">refund</field>
+        <field name="account_id" ref="232"/>
+        <field name="code_id" ref="vat_code_transacciones"/>
+        <field name="tax_id" ref="ITAX_03"/>
+    </record>
   </data>
 </openerp>
