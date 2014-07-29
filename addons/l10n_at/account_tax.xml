@@ -291,7 +291,7 @@
             <field name="name">Innergem. Erwerb 20%USt/20%VSt</field>
             <field name="description">innergem. Erwerb 20%</field>
             <field name="type">percent</field>
-            <field name="amount">100</field>
+            <field name="amount">20</field>
             <field name="type_tax_use">purchase</field>
         </record>
 
@@ -359,7 +359,7 @@
             <field name="name">Innergem. Erwerb 10%USt/10%VSt</field>
             <field name="description">innergem. Erwerb 10%</field>
             <field name="type">percent</field>
-            <field name="amount">100</field>
+            <field name="amount">10</field>
             <field name="type_tax_use">purchase</field>
         </record>
 
