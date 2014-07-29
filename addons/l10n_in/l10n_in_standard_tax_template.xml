@@ -6,183 +6,574 @@
         <field name="name">Input Sales Tax @ 15%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.15</field>
+        <field name="amount">15</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p11235"/>
-        <field name="base_code_id" ref="15bases_vat_code_sales_tax_sale"/>
-        <field name="tax_code_id" ref="15vat_code_sales_tax_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="input_tax_15_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="15bases_vat_code_sales_tax_sale"/>
+        <field name="tax_id" ref="input_tax_15"/>
+    </record>
+    <record id="input_tax_15_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">150</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">150</field>
+        <field name="code_id" ref="15vat_code_sales_tax_sale"/>
+        <field name="account_id" ref="p11235"/>
+        <field name="tax_id" ref="input_tax_15"/>
+    </record>
+    <record id="input_tax_15_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="input_tax_15"/>
+    </record>
+    <record id="input_tax_15_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">150</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">150</field>
+        <field name="tax_id" ref="input_tax_15"/>
+    </record>
+
     <record id="input_tax_12" model="account.tax.template">
         <field name="name">Input Sales Tax @ 12%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.12</field>
+        <field name="amount">12</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p11235"/>
-        <field name="base_code_id" ref="12bases_vat_code_sales_tax_sale"/>
-        <field name="tax_code_id" ref="12vat_code_sales_tax_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="input_tax_12_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="12bases_vat_code_sales_tax_sale"/>
+        <field name="tax_id" ref="input_tax_12"/>
+    </record>
+    <record id="input_tax_12_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="code_id" ref="12vat_code_sales_tax_sale"/>
+        <field name="account_id" ref="p11235"/>
+        <field name="tax_id" ref="input_tax_12"/>
+    </record>
+    <record id="input_tax_12_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="input_tax_12"/>
+    </record>
+    <record id="input_tax_12_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="tax_id" ref="input_tax_12"/>
+    </record>
+
     <record id="input_tax_4" model="account.tax.template">
         <field name="name">Input Sales Tax @ 4%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.04</field>
+        <field name="amount">4</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p11235"/>
-        <field name="base_code_id" ref="4bases_vat_code_sales_tax_sale"/>
-        <field name="tax_code_id" ref="4vat_code_sales_tax_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="input_tax_4_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="4bases_vat_code_sales_tax_sale"/>
+        <field name="tax_id" ref="input_tax_4"/>
+    </record>
+    <record id="input_tax_4_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">40</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">40</field>
+        <field name="code_id" ref="4vat_code_sales_tax_sale"/>
+        <field name="account_id" ref="p11235"/>
+        <field name="tax_id" ref="input_tax_4"/>
+    </record>
+    <record id="input_tax_4_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="input_tax_4"/>
+    </record>
+    <record id="input_tax_4_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">40</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">40</field>
+        <field name="tax_id" ref="input_tax_4"/>
+    </record>
+
     <record id="add_input_vat_1" model="account.tax.template">
         <field name="name">Additional Input VAT @ 1%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.01</field>
+        <field name="amount">1</field>
         <field name="sequence">15</field>
-        <field name="account_collected_id" ref="p11232"/>
-        <field name="base_code_id" ref="1bases_add_vat_on_sale"/>
-        <field name="tax_code_id" ref="1add_vat_on_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="add_input_vat_1_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="1bases_add_vat_on_sale"/>
+        <field name="tax_id" ref="add_input_vat_1"/>
+    </record>
+    <record id="add_input_vat_1_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="code_id" ref="1add_vat_on_sale"/>
+        <field name="account_id" ref="p11232"/>
+        <field name="tax_id" ref="add_input_vat_1"/>
+    </record>
+    <record id="add_input_vat_1_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="add_input_vat_1"/>
+    </record>
+    <record id="add_input_vat_1_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="tax_id" ref="add_input_vat_1"/>
+    </record>
+
     <record id="input_vat_12" model="account.tax.template">
         <field name="name">Input VAT @ 12.5%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.125</field>
+        <field name="amount">12.5</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p11232"/>
-        <field name="base_code_id" ref="12bases_vat_on_sale"/>
-        <field name="tax_code_id" ref="12vat_on_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="input_vat_12_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="12bases_vat_on_sale"/>
+        <field name="tax_id" ref="input_vat_12"/>
+    </record>
+    <record id="input_vat_12_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">125</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">125</field>
+        <field name="code_id" ref="12vat_on_sale"/>
+        <field name="account_id" ref="p11232"/>
+        <field name="tax_id" ref="input_vat_12"/>
+    </record>
+    <record id="input_vat_12_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="input_vat_12"/>
+    </record>
+    <record id="input_vat_12_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">125</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">125</field>
+        <field name="tax_id" ref="input_vat_12"/>
+    </record>
+
     <record id="add_input_vat_2" model="account.tax.template">
         <field name="name">Additional Input VAT @ 2.5%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.025</field>
+        <field name="amount">2.5</field>
         <field name="sequence">15</field>
-        <field name="account_collected_id" ref="p11232"/>
-        <field name="base_code_id" ref="2bases_add_vat_on_sale"/>
-        <field name="tax_code_id" ref="2add_vat_on_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="add_input_vat_2_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="2bases_add_vat_on_sale"/>
+        <field name="tax_id" ref="add_input_vat_2"/>
+    </record>
+    <record id="add_input_vat_2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">25</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">25</field>
+        <field name="code_id" ref="2add_vat_on_sale"/>
+        <field name="account_id" ref="p11232"/>
+        <field name="tax_id" ref="add_input_vat_2"/>
+    </record>
+    <record id="add_input_vat_2_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="add_input_vat_2"/>
+    </record>
+    <record id="add_input_vat_2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">25</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">25</field>
+        <field name="tax_id" ref="add_input_vat_2"/>
+    </record>
+
     <record id="sale_vat_8" model="account.tax.template">
         <field name="name">Input VAT @ 8%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.08</field>
+        <field name="amount">8</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p11232"/>
-        <field name="base_code_id" ref="8bases_vat_on_sale"/>
-        <field name="tax_code_id" ref="8vat_on_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="sale_vat_8_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="8bases_vat_on_sale"/>
+        <field name="tax_id" ref="sale_vat_8"/>
+    </record>
+    <record id="sale_vat_8_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">80</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="code_id" ref="8vat_on_sale"/>
+        <field name="account_id" ref="p11232"/>
+        <field name="tax_id" ref="sale_vat_8"/>
+    </record>
+    <record id="sale_vat_8_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="sale_vat_8"/>
+    </record>
+    <record id="sale_vat_8_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">80</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="tax_id" ref="sale_vat_8"/>
+    </record>
+
     <record id="sale_vat_10" model="account.tax.template">
         <field name="name">Input VAT @ 10%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.1</field>
+        <field name="amount">10</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p11232"/>
-        <field name="base_code_id" ref="10bases_vat_on_sale"/>
-        <field name="tax_code_id" ref="10vat_on_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="sale_vat_10_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="10bases_vat_on_sale"/>
+        <field name="tax_id" ref="sale_vat_10"/>
+    </record>
+    <record id="sale_vat_10_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="10vat_on_sale"/>
+        <field name="account_id" ref="p11232"/>
+        <field name="tax_id" ref="sale_vat_10"/>
+    </record>
+    <record id="sale_vat_10_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="sale_vat_10"/>
+    </record>
+    <record id="sale_vat_10_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="tax_id" ref="sale_vat_10"/>
+    </record>
+
     <record id="sale_Excise_Duty_12" model="account.tax.template">
         <field name="name">Input Excise Duty @ 12.36%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.12</field>
+        <field name="amount">12</field>
         <field name="include_base_amount">True</field>
         <field name="sequence">1</field>
-        <field name="account_collected_id" ref="p112331"/>
-        <field name="base_code_id" ref="bases_vat_code_tax_exice_sale"/>
-        <field name="tax_code_id" ref="vat_code_tax_exice_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
-    <record id="sale_edu_cess_Excise_Duty_2" model="account.tax.template">
-        <field name="name">Input Education Cess @ 2% On Excise Duty</field>
-        <field name="type_tax_use">sale</field>
-        <field name="type">percent</field>
-        <field name="amount">0.02</field>
-        <field name="include_base_amount">True</field>
-        <field name="parent_id" ref="sale_Excise_Duty_12"/>
+
+    <record id="sale_Excise_Duty_12_invoice_base_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="bases_vat_code_tax_exice_sale"/>
+        <field name="tax_id" ref="sale_Excise_Duty_12"/>
+    </record>
+    <record id="sale_Excise_Duty_12_invoice_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="code_id" ref="vat_code_tax_exice_sale"/>
+        <field name="account_id" ref="p112331"/>
+        <field name="tax_id" ref="sale_Excise_Duty_12"/>
+    </record>
+    <record id="sale_Excise_Duty_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="p112332"/>
-        <field name="tax_code_id" ref="edu_vat_code_tax_exice_sale"/>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="code_id" ref="edu_vat_code_tax_exice_sale"/>
+        <field name="account_id" ref="p112332"/>
+        <field name="tax_id" ref="sale_Excise_Duty_12"/>
     </record>
-    <record id="sale_hedu_cess_Excise_Duty_1" model="account.tax.template">
-        <field name="name">Input Higher Education Cess @ 1% On Excise Duty</field>
-        <field name="type_tax_use">sale</field>
-        <field name="type">percent</field>
-        <field name="amount">0.01</field>
-        <field name="include_base_amount">True</field>
-        <field name="parent_id" ref="sale_Excise_Duty_12"/>
+    <record id="sale_Excise_Duty_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
-        <field name="account_collected_id" ref="p112333"/>
-        <field name="tax_code_id" ref="hedu_vat_code_tax_exice_sale"/>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="code_id" ref="hedu_vat_code_tax_exice_sale"/>
+        <field name="account_id" ref="p112333"/>
+        <field name="tax_id" ref="sale_Excise_Duty_12"/>
     </record>
+    <record id="sale_Excise_Duty_12_refund_base_line" model="account.tax.line.template">
+        <field name="sequence">10</field>
+        <field name="code_type">base</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="sale_Excise_Duty_12"/>
+    </record>
+    <record id="sale_Excise_Duty_12_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="tax_id" ref="sale_Excise_Duty_12"/>
+    </record>
+    <record id="sale_Excise_Duty_12_child1_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="tax_id" ref="sale_Excise_Duty_12"/>
+    </record>
+    <record id="sale_Excise_Duty_12_child2_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">3</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="tax_id" ref="sale_Excise_Duty_12"/>
+    </record>
+
     <record id="sale_service_tax_12" model="account.tax.template">
         <field name="name">Input Service Tax @ 12.36%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.12</field>
+        <field name="amount">12</field>
         <field name="include_base_amount">True</field>
         <field name="sequence">8</field>
-        <field name="account_collected_id" ref="p112341"/>
-        <field name="base_code_id" ref="bases_vat_code_service_tax_sale"/>
-        <field name="tax_code_id" ref="vat_code_service_tax_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
-    <record id="sale_edu_cess_service_tax_2" model="account.tax.template">
-        <field name="name">Input Education Cess @ 2% On Service Tax</field>
-        <field name="type_tax_use">sale</field>
-        <field name="type">percent</field>
-        <field name="amount">0.02</field>
-        <field name="include_base_amount">True</field>
-        <field name="parent_id" ref="sale_service_tax_12"/>
+
+    <record id="sale_service_tax_12_invoice_base_line" model="account.tax.line.template">
+        <field name="sequence">8</field>
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="bases_vat_code_service_tax_sale"/>
+        <field name="tax_id" ref="sale_service_tax_12"/>
+    </record>
+    <record id="sale_service_tax_12_invoice_tax_line" model="account.tax.line.template">
+        <field name="sequence">8</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="code_id" ref="vat_code_service_tax_sale"/>
+        <field name="account_id" ref="p112341"/>
+        <field name="tax_id" ref="sale_service_tax_12"/>
+    </record>
+    <record id="sale_service_tax_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p112342"/>
-        <field name="tax_code_id" ref="edu_vat_code_service_tax_sale"/>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="code_id" ref="edu_vat_code_service_tax_sale"/>
+        <field name="account_id" ref="p112342"/>
+        <field name="tax_id" ref="sale_service_tax_12"/>
     </record>
-    <record id="sale_high_edu_service_tax_1" model="account.tax.template">
-        <field name="name">Input Higher Education Cess @ 1% On Service Tax</field>
-        <field name="type_tax_use">sale</field>
-        <field name="type">percent</field>
-        <field name="amount">0.01</field>
-        <field name="parent_id" ref="sale_service_tax_12"/>
-        <field name="include_base_amount">True</field>
+    <record id="sale_service_tax_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p112343"/>
-        <field name="tax_code_id" ref="hedu_vat_code_service_tax_sale"/>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="code_id" ref="hedu_vat_code_service_tax_sale"/>
+        <field name="account_id" ref="p112343"/>
+        <field name="tax_id" ref="sale_service_tax_12"/>
     </record>
+    <record id="sale_service_tax_12_refund_base_line" model="account.tax.line.template">
+        <field name="sequence">8</field>
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="sale_service_tax_12"/>
+    </record>
+    <record id="sale_service_tax_12_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">8</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="tax_id" ref="sale_service_tax_12"/>
+    </record>
+    <record id="sale_service_tax_12_child1_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">10</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="tax_id" ref="sale_service_tax_12"/>
+    </record>
+    <record id="sale_service_tax_12_child2_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">10</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="tax_id" ref="sale_service_tax_12"/>
+    </record>
+
     <record id="sale_tax_2" model="account.tax.template">
         <field name="name">Input Sales Tax @ 2% Against C Form</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.02</field>
+        <field name="amount">2</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p11235"/>
-        <field name="base_code_id" ref="bases_vat_code_tax_c_forms_sale"/>
-        <field name="tax_code_id" ref="vat_code_tax_c_forms_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="sale_tax_2_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="bases_vat_code_tax_c_forms_sale"/>
+        <field name="tax_id" ref="sale_tax_2"/>
+    </record>
+    <record id="sale_tax_2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="code_id" ref="vat_code_tax_c_forms_sale"/>
+        <field name="account_id" ref="p11235"/>
+        <field name="tax_id" ref="sale_tax_2"/>
+    </record>
+    <record id="sale_tax_2_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="sale_tax_2"/>
+    </record>
+    <record id="sale_tax_2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="tax_id" ref="sale_tax_2"/>
+    </record>
+
     <record id="input_vat_4" model="account.tax.template">
         <field name="name">Input VAT @ 4%</field>
         <field name="type_tax_use">sale</field>
         <field name="type">percent</field>
-        <field name="amount">0.04</field>
+        <field name="amount">4</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p11232"/>
-        <field name="base_code_id" ref="4bases_vat_on_sale"/>
-        <field name="tax_code_id" ref="4vat_on_sale"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+    </record>
+
+    <record id="input_vat_4_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="4bases_vat_on_sale"/>
+        <field name="tax_id" ref="input_vat_4"/>
+    </record>
+    <record id="input_vat_4_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">40</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">40</field>
+        <field name="code_id" ref="4vat_on_sale"/>
+        <field name="account_id" ref="p11232"/>
+        <field name="tax_id" ref="input_vat_4"/>
+    </record>
+    <record id="input_vat_4_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="input_vat_4"/>
+    </record>
+    <record id="input_vat_4_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">40</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">40</field>
+        <field name="tax_id" ref="input_vat_4"/>
     </record>
 
     <!--output purchase tax-->
@@ -190,215 +581,574 @@
         <field name="name">Output Purchase Tax @ 15%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.15</field>
+        <field name="amount">15</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p10050"/>
-        <field name="base_code_id" ref="15bases_vat_code_sales_tax_purchase"/>
-        <field name="tax_code_id" ref="15vat_code_sales_tax_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="output_tax_15_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="15bases_vat_code_sales_tax_purchase"/>
+        <field name="tax_id" ref="output_tax_15"/>
+    </record>
+    <record id="output_tax_15_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-150</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">150</field>
+        <field name="code_id" ref="15vat_code_sales_tax_purchase"/>
+        <field name="account_id" ref="p10050"/>
+        <field name="tax_id" ref="output_tax_15"/>
+    </record>
+    <record id="output_tax_15_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="output_tax_15"/>
+    </record>
+    <record id="output_tax_15_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">150</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">150</field>
+        <field name="tax_id" ref="output_tax_15"/>
+    </record>
+
     <record id="output_tax_12" model="account.tax.template">
         <field name="name">Output Purchase Tax @ 12%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.12</field>
+        <field name="amount">12</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p10050"/>
-        <field name="base_code_id" ref="12bases_vat_code_sales_tax_purchase"/>
-        <field name="tax_code_id" ref="12vat_code_sales_tax_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="output_tax_12_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="12bases_vat_code_sales_tax_purchase"/>
+        <field name="tax_id" ref="output_tax_12"/>
+    </record>
+    <record id="output_tax_12_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-120</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="code_id" ref="12vat_code_sales_tax_purchase"/>
+        <field name="account_id" ref="p10050"/>
+        <field name="tax_id" ref="output_tax_12"/>
+    </record>
+    <record id="output_tax_12_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="output_tax_12"/>
+    </record>
+    <record id="output_tax_12_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="tax_id" ref="output_tax_12"/>
+    </record>
+
     <record id="output_tax_4" model="account.tax.template">
         <field name="name">Output Purchase Tax @ 4%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.04</field>
+        <field name="amount">4</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p10050"/>
-        <field name="base_code_id" ref="4bases_vat_code_sales_tax_purchase"/>
-        <field name="tax_code_id" ref="4vat_code_sales_tax_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="output_tax_4_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="4bases_vat_code_sales_tax_purchase"/>
+        <field name="tax_id" ref="output_tax_4"/>
+    </record>
+    <record id="output_tax_4_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-40</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">40</field>
+        <field name="code_id" ref="4vat_code_sales_tax_purchase"/>
+        <field name="account_id" ref="p10050"/>
+        <field name="tax_id" ref="output_tax_4"/>
+    </record>
+    <record id="output_tax_4_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="output_tax_4"/>
+    </record>
+    <record id="output_tax_4_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">40</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">40</field>
+        <field name="tax_id" ref="output_tax_4"/>
+    </record>
+
     <record id="add_output_vat_1" model="account.tax.template">
         <field name="name">Additional Output VAT @ 1%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.01</field>
+        <field name="amount">1</field>
         <field name="sequence">15</field>
-        <field name="account_collected_id" ref="p10051"/>
-        <field name="base_code_id" ref="1bases_add_vat_on_purchase"/>
-        <field name="tax_code_id" ref="1add_vat_on_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="add_output_vat_1_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="1bases_add_vat_on_purchase"/>
+        <field name="tax_id" ref="add_output_vat_1"/>
+    </record>
+    <record id="add_output_vat_1_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-10</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="code_id" ref="1add_vat_on_purchase"/>
+        <field name="account_id" ref="p10051"/>
+        <field name="tax_id" ref="add_output_vat_1"/>
+    </record>
+    <record id="add_output_vat_1_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="add_output_vat_1"/>
+    </record>
+    <record id="add_output_vat_1_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="tax_id" ref="add_output_vat_1"/>
+    </record>
+
     <record id="output_vat_12" model="account.tax.template">
         <field name="name">Output VAT @ 12.5%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.125</field>
+        <field name="amount">12.5</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p10051"/>
-        <field name="base_code_id" ref="12bases_vat_on_purchase"/>
-        <field name="tax_code_id" ref="12vat_on_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="output_vat_12_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="12bases_vat_on_purchase"/>
+        <field name="tax_id" ref="output_vat_12"/>
+    </record>
+    <record id="output_vat_12_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-125</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">125</field>
+        <field name="code_id" ref="12vat_on_purchase"/>
+        <field name="account_id" ref="p10051"/>
+        <field name="tax_id" ref="output_vat_12"/>
+    </record>
+    <record id="output_vat_12_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="output_vat_12"/>
+    </record>
+    <record id="output_vat_12_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">125</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">125</field>
+        <field name="tax_id" ref="output_vat_12"/>
+    </record>
+
     <record id="add_output_vat_2" model="account.tax.template">
         <field name="name">Additional Output VAT @ 2.5%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.025</field>
+        <field name="amount">2.5</field>
         <field name="sequence">15</field>
-        <field name="account_collected_id" ref="p10051"/>
-        <field name="base_code_id" ref="2bases_add_vat_on_purchase"/>
-        <field name="tax_code_id" ref="2add_vat_on_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="add_output_vat_2_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="2bases_add_vat_on_purchase"/>
+        <field name="tax_id" ref="add_output_vat_2"/>
+    </record>
+    <record id="add_output_vat_2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-25</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">25</field>
+        <field name="code_id" ref="2add_vat_on_purchase"/>
+        <field name="account_id" ref="p10051"/>
+        <field name="tax_id" ref="add_output_vat_2"/>
+    </record>
+    <record id="add_output_vat_2_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="add_output_vat_2"/>
+    </record>
+    <record id="add_output_vat_2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">25</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">25</field>
+        <field name="tax_id" ref="add_output_vat_2"/>
+    </record>
+
     <record id="purchase_vat_8" model="account.tax.template">
         <field name="name">Output VAT @ 8%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.08</field>
+        <field name="amount">8</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p10051"/>
-        <field name="base_code_id" ref="8bases_vat_on_purchase"/>
-        <field name="tax_code_id" ref="8vat_on_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="purchase_vat_8_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="8bases_vat_on_purchase"/>
+        <field name="tax_id" ref="purchase_vat_8"/>
+    </record>
+    <record id="purchase_vat_8_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-80</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="code_id" ref="8vat_on_purchase"/>
+        <field name="account_id" ref="p10051"/>
+        <field name="tax_id" ref="purchase_vat_8"/>
+    </record>
+    <record id="purchase_vat_8_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="purchase_vat_8"/>
+    </record>
+    <record id="purchase_vat_8_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">80</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="tax_id" ref="purchase_vat_8"/>
+    </record>
+
     <record id="purchase_vat_10" model="account.tax.template">
         <field name="name">Output VAT @ 10%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.1</field>
+        <field name="amount">10</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p10051"/>
-        <field name="base_code_id" ref="10bases_vat_on_purchase"/>
-        <field name="tax_code_id" ref="10vat_on_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="purchase_vat_10_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="10bases_vat_on_purchase"/>
+        <field name="tax_id" ref="purchase_vat_10"/>
+    </record>
+    <record id="purchase_vat_10_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-100</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="code_id" ref="10vat_on_purchase"/>
+        <field name="account_id" ref="p10051"/>
+        <field name="tax_id" ref="purchase_vat_10"/>
+    </record>
+    <record id="purchase_vat_10_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="purchase_vat_10"/>
+    </record>
+    <record id="purchase_vat_10_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">100</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">100</field>
+        <field name="tax_id" ref="purchase_vat_10"/>
+    </record>
+
     <record id="purchase_Excise_Duty_12" model="account.tax.template">
         <field name="name">Output Excise Duty @ 12.36%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.12</field>
+        <field name="amount">12</field>
         <field name="include_base_amount">True</field>
         <field name="sequence">1</field>
-        <field name="account_collected_id" ref="p100521"/>
-        <field name="base_code_id" ref="bases_vat_code_tax_exice_purchase"/>
-        <field name="tax_code_id" ref="vat_code_tax_exice_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
-    <record id="purchase_edu_cess_Excise_Duty_2" model="account.tax.template">
-        <field name="name">Output Education Cess @ 2% Excise Duty</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="type">percent</field>
-        <field name="amount">0.02</field>
+
+    <record id="purchase_Excise_Duty_12_invoice_base_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="bases_vat_code_tax_exice_purchase"/>
+        <field name="tax_id" ref="purchase_Excise_Duty_12"/>
+    </record>
+    <record id="purchase_Excise_Duty_12_invoice_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-120</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="code_id" ref="vat_code_tax_exice_purchase"/>
+        <field name="account_id" ref="p100521"/>
+        <field name="tax_id" ref="purchase_Excise_Duty_12"/>
+    </record>
+    <record id="purchase_Excise_Duty_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="p100522"/>
-        <field name="parent_id" ref="purchase_Excise_Duty_12"/>
-        <field name="include_base_amount">True</field>
-        <field name="tax_code_id" ref="edu_vat_code_tax_exice_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-20</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="code_id" ref="edu_vat_code_tax_exice_purchase"/>
+        <field name="account_id" ref="p100522"/>
+        <field name="tax_id" ref="purchase_Excise_Duty_12"/>
     </record>
-    <record id="purchase_hedu_cess_Excise_Duty_1" model="account.tax.template">
-        <field name="name">Output Higher Education Cess @ 1% Excise Duty</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="type">percent</field>
-        <field name="amount">0.01</field>
-        <field name="parent_id" ref="purchase_Excise_Duty_12"/>
-        <field name="include_base_amount">True</field>
+    <record id="purchase_Excise_Duty_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
-        <field name="account_collected_id" ref="p100523"/>
-        <field name="tax_code_id" ref="hedu_vat_code_tax_exice_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-10</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="code_id" ref="hedu_vat_code_tax_exice_purchase"/>
+        <field name="account_id" ref="p100523"/>
+        <field name="tax_id" ref="purchase_Excise_Duty_12"/>
     </record>
+    <record id="purchase_Excise_Duty_12_refund_base_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="purchase_Excise_Duty_12"/>
+    </record>
+    <record id="purchase_Excise_Duty_12_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="tax_id" ref="purchase_Excise_Duty_12"/>
+    </record>
+    <record id="purchase_Excise_Duty_12_child1_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="tax_id" ref="purchase_Excise_Duty_12"/>
+    </record>
+    <record id="purchase_Excise_Duty_12_child2_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">3</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="tax_id" ref="purchase_Excise_Duty_12"/>
+    </record>
+
     <record id="st_purchase_service_tax_12" model="account.tax.template">
         <field name="name">Output Service Tax @ 12.36%</field>
         <field name="type_tax_use">purchase</field>
         <field name="include_base_amount">True</field>
         <field name="type">percent</field>
-        <field name="amount">0.12</field>
+        <field name="amount">12</field>
         <field name="sequence">8</field>
-        <field name="account_collected_id" ref="p100531"/>
-        <field name="base_code_id" ref="bases_vat_code_service_tax_pur"/>
-        <field name="tax_code_id" ref="vat_code_service_tax_pur"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
-    <record id="purchase_edu_cess_service_tax_2" model="account.tax.template">
-        <field name="name">Output Education Cess @ 2% On Service Tax</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="type">percent</field>
-        <field name="amount">0.02</field>
-        <field name="include_base_amount">True</field>
-        <field name="parent_id" ref="st_purchase_service_tax_12"/>  
+
+    <record id="st_purchase_service_tax_12_invoice_base_line" model="account.tax.line.template">
+        <field name="sequence">8</field>
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="bases_vat_code_service_tax_pur"/>
+        <field name="tax_id" ref="st_purchase_service_tax_12"/>
+    </record>
+    <record id="st_purchase_service_tax_12_invoice_tax_line" model="account.tax.line.template">
+        <field name="sequence">8</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-120</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="code_id" ref="vat_code_service_tax_pur"/>
+        <field name="account_id" ref="p100531"/>
+        <field name="tax_id" ref="st_purchase_service_tax_12"/>
+    </record>
+    <record id="st_purchase_service_tax_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p100532"/>
-        <field name="tax_code_id" ref="edu_vat_code_service_tax_pur"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-20</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="code_id" ref="edu_vat_code_service_tax_pur"/>
+        <field name="account_id" ref="p100532"/>
+        <field name="tax_id" ref="st_purchase_service_tax_12"/>
     </record>
-    <record id="purchase_high_edu_service_tax_1" model="account.tax.template">
-        <field name="name">Output Higher Education Cess @ 1% On Service Tax</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="type">percent</field>
-        <field name="amount">0.01</field>
+    <record id="st_purchase_service_tax_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p100533"/>
-        <field name="include_base_amount">True</field>
-        <field name="parent_id" ref="st_purchase_service_tax_12"/>
-        <field name="tax_code_id" ref="hedu_vat_code_service_tax_pur"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-10</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="code_id" ref="hedu_vat_code_service_tax_pur"/>
+        <field name="account_id" ref="p100533"/>
+        <field name="tax_id" ref="st_purchase_service_tax_12"/>
     </record>
+    <record id="st_purchase_service_tax_12_refund_base_line" model="account.tax.line.template">
+        <field name="sequence">8</field>
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="st_purchase_service_tax_12"/>
+    </record>
+    <record id="st_purchase_service_tax_12_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">8</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">120</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">120</field>
+        <field name="tax_id" ref="st_purchase_service_tax_12"/>
+    </record>
+    <record id="st_purchase_service_tax_12_child1_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">10</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="tax_id" ref="st_purchase_service_tax_12"/>
+    </record>
+    <record id="st_purchase_service_tax_12_child2_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">10</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">10</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">10</field>
+        <field name="tax_id" ref="st_purchase_service_tax_12"/>
+    </record>
+
     <record id="output_vat_4" model="account.tax.template">
         <field name="name">Output VAT @ 4%</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.04</field>
+        <field name="amount">4</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p10051"/>
-        <field name="base_code_id" ref="4bases_vat_on_purchase"/>
-        <field name="tax_code_id" ref="4vat_on_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
     </record>
+
+    <record id="output_vat_4_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="4bases_vat_on_purchase"/>
+        <field name="tax_id" ref="output_vat_4"/>
+    </record>
+    <record id="output_vat_4_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-40</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">40</field>
+        <field name="code_id" ref="4vat_on_purchase"/>
+        <field name="account_id" ref="p10051"/>
+        <field name="tax_id" ref="output_vat_4"/>
+    </record>
+    <record id="output_vat_4_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="output_vat_4"/>
+    </record>
+    <record id="output_vat_4_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">40</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">40</field>
+        <field name="tax_id" ref="output_vat_4"/>
+    </record>
+
     <record id="output_pur_tax_2" model="account.tax.template">
         <field name="name">Output Sales Tax @ 2% Against C Form</field>
         <field name="type_tax_use">purchase</field>
         <field name="type">percent</field>
-        <field name="amount">0.02</field>
+        <field name="amount">2</field>
         <field name="sequence">10</field>
-        <field name="account_collected_id" ref="p10050"/>
-        <field name="base_code_id" ref="bases_vat_code_tax_c_forms_purchase"/>
-        <field name="tax_code_id" ref="vat_code_tax_c_forms_purchase"/>
-        <field name="base_sign" eval="-1"/>
-        <field name="tax_sign" eval="-1"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+    </record>
+
+    <record id="output_pur_tax_2_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="bases_vat_code_tax_c_forms_purchase"/>
+        <field name="tax_id" ref="output_pur_tax_2"/>
+    </record>
+    <record id="output_pur_tax_2_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-20</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="code_id" ref="vat_code_tax_c_forms_purchase"/>
+        <field name="account_id" ref="p10050"/>
+        <field name="tax_id" ref="output_pur_tax_2"/>
+    </record>
+    <record id="output_pur_tax_2_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="tax_id" ref="output_pur_tax_2"/>
+    </record>
+    <record id="output_pur_tax_2_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">20</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">20</field>
+        <field name="tax_id" ref="output_pur_tax_2"/>
     </record>
 
     </data>
