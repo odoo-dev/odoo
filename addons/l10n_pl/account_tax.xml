@@ -4,123 +4,346 @@
     <record id="tax_vat_23_due" model="account.tax.template">
         <field name="chart_template_id" ref="pl_chart_template"/>
         <field name="name">VAT-23%(23.0%)</field>
-        <field name="amount">0.230000</field>
+        <field name="amount">23</field>
         <field name="type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="account_collected_id" ref="chart222030100"/>
-        <field name="account_paid_id" ref="chart222030100"/>
-        <field name="base_code_id" ref="vat_code_base_due"/>
-        <field name="tax_code_id" ref="vat_code_due_tva"/>
-        <field name="ref_base_code_id" ref="vat_code_base_due"/>
-        <field name="ref_tax_code_id" ref="vat_code_due_tva"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_sign" eval="-1"/>
     </record>
+
+    <record id="tax_vat_23_due_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_base_due"/>
+        <field name="tax_id" ref="tax_vat_23_due"/>
+    </record>
+    <record id="tax_vat_23_due_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">230</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">230</field>
+        <field name="code_id" ref="vat_code_due_tva"/>
+        <field name="account_id" ref="chart222030100"/>
+        <field name="tax_id" ref="tax_vat_23_due"/>
+    </record>
+    <record id="tax_vat_23_due_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_base_due"/>
+        <field name="tax_id" ref="tax_vat_23_due"/>
+    </record>
+    <record id="tax_vat_23_due_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-230</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">230</field>
+        <field name="code_id" ref="vat_code_due_tva"/>
+        <field name="account_id" ref="chart222030100"/>
+        <field name="tax_id" ref="tax_vat_23_due"/>
+    </record>
+
     <record id="tax_vat_8_due" model="account.tax.template">
         <field name="chart_template_id" ref="pl_chart_template"/>
         <field name="name">VAT-8%(8.0%)</field>
-        <field name="amount">0.080000</field>
+        <field name="amount">8</field>
         <field name="type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="account_collected_id" ref="chart222030200"/>
-        <field name="account_paid_id" ref="chart222030200"/>
-        <field name="base_code_id" ref="vat_code_base_due"/>
-        <field name="tax_code_id" ref="vat_code_due_tva"/>
-        <field name="ref_base_code_id" ref="vat_code_base_due"/>
-        <field name="ref_tax_code_id" ref="vat_code_due_tva"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_sign" eval="-1"/>
     </record>
+
+    <record id="tax_vat_8_due_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_base_due"/>
+        <field name="tax_id" ref="tax_vat_8_due"/>
+    </record>
+    <record id="tax_vat_8_due_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="code_id" ref="vat_code_due_tva"/>
+        <field name="account_id" ref="chart222030200"/>
+        <field name="tax_id" ref="tax_vat_8_due"/>
+    </record>
+    <record id="tax_vat_8_due_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_base_due"/>
+        <field name="tax_id" ref="tax_vat_8_due"/>
+    </record>
+    <record id="tax_vat_8_due_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-80</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="code_id" ref="vat_code_due_tva"/>
+        <field name="account_id" ref="chart222030200"/>
+        <field name="tax_id" ref="tax_vat_8_due"/>
+    </record>
+
     <record id="tax_vat_5_due" model="account.tax.template">
         <field name="chart_template_id" ref="pl_chart_template"/>
         <field name="name">VAT-5%(5.0%)</field>
-        <field name="amount">0.050000</field>
+        <field name="amount">5</field>
         <field name="type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="account_collected_id" ref="chart222030400"/>
-        <field name="account_paid_id" ref="chart222030400"/>
-        <field name="base_code_id" ref="vat_code_base_due"/>
-        <field name="tax_code_id" ref="vat_code_due_tva"/>
-        <field name="ref_base_code_id" ref="vat_code_base_due"/>
-        <field name="ref_tax_code_id" ref="vat_code_due_tva"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_sign" eval="-1"/>
     </record>
+
+    <record id="tax_vat_5_due_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_base_due"/>
+        <field name="tax_id" ref="tax_vat_5_due"/>
+    </record>
+    <record id="tax_vat_5_due_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="code_id" ref="vat_code_due_tva"/>
+        <field name="account_id" ref="chart222030400"/>
+        <field name="tax_id" ref="tax_vat_5_due"/>
+    </record>
+    <record id="tax_vat_5_due_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_base_due"/>
+        <field name="tax_id" ref="tax_vat_5_due"/>
+    </record>
+    <record id="tax_vat_5_due_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-50</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="code_id" ref="vat_code_due_tva"/>
+        <field name="account_id" ref="chart222030400"/>
+        <field name="tax_id" ref="tax_vat_5_due"/>
+    </record>
+
     <record id="tax_vat_0_due" model="account.tax.template">
         <field name="chart_template_id" ref="pl_chart_template"/>
         <field name="name">VAT-0%(0.0%)</field>
-        <field name="amount">0.000000</field>
+        <field name="amount">0</field>
         <field name="type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="account_collected_id" ref="chart222030300"/>
-        <field name="account_paid_id" ref="chart222030300"/>
-        <field name="base_code_id" ref="vat_code_base_due"/>
-        <field name="tax_code_id" ref="vat_code_due_tva"/>
-        <field name="ref_base_code_id" ref="vat_code_base_due"/>
-        <field name="ref_tax_code_id" ref="vat_code_due_tva"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_sign" eval="-1"/>
+    </record>
+
+    <record id="tax_vat_0_due_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_base_due"/>
+        <field name="tax_id" ref="tax_vat_0_due"/>
+    </record>
+    <record id="tax_vat_0_due_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="code_id" ref="vat_code_due_tva"/>
+        <field name="account_id" ref="chart222030300"/>
+        <field name="tax_id" ref="tax_vat_0_due"/>
+    </record>
+    <record id="tax_vat_0_due_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_base_due"/>
+        <field name="tax_id" ref="tax_vat_0_due"/>
+    </record>
+    <record id="tax_vat_0_due_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="code_id" ref="vat_code_due_tva"/>
+        <field name="tax_id" ref="tax_vat_0_due"/>
+        <field name="account_id" ref="chart222030300"/>
     </record>
 
     <record id="tax_vat_23_recivable" model="account.tax.template">
         <field name="chart_template_id" ref="pl_chart_template"/>
         <field name="name">VAT naliczony-23%(23.0%)</field>
-        <field name="amount">0.230000</field>
+        <field name="amount">23</field>
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chart222020100"/>
-        <field name="account_paid_id" ref="chart222020100"/>
-        <field name="base_code_id" ref="vat_code_receivable_net"/>
-        <field name="tax_code_id" ref="vat_code_payable"/>
-        <field name="ref_base_code_id" ref="vat_code_receivable_net"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_sign" eval="-1"/>
     </record>
+
+    <record id="tax_vat_23_recivable_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_receivable_net"/>
+        <field name="tax_id" ref="tax_vat_23_recivable"/>
+    </record>
+    <record id="tax_vat_23_recivable_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">230</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">230</field>
+        <field name="code_id" ref="vat_code_payable"/>
+        <field name="account_id" ref="chart222020100"/>
+        <field name="tax_id" ref="tax_vat_23_recivable"/>
+    </record>
+    <record id="tax_vat_23_recivable_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_receivable_net"/>
+        <field name="tax_id" ref="tax_vat_23_recivable"/>
+    </record>
+    <record id="tax_vat_23_recivable_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-230</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">230</field>
+        <field name="code_id" ref="vat_code_payable"/>
+        <field name="account_id" ref="chart222020100"/>
+        <field name="tax_id" ref="tax_vat_23_recivable"/>
+    </record>
+
     <record id="tax_vat_8_recivable" model="account.tax.template">
         <field name="chart_template_id" ref="pl_chart_template"/>
         <field name="name">VAT naliczony-8%(8.0%)</field>
-        <field name="amount">0.080000</field>
+        <field name="amount">8</field>
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chart222020200"/>
-        <field name="account_paid_id" ref="chart222020200"/>
-        <field name="base_code_id" ref="vat_code_receivable_net"/>
-        <field name="tax_code_id" ref="vat_code_payable"/>
-        <field name="ref_base_code_id" ref="vat_code_receivable_net"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_sign" eval="-1"/>
     </record>
+
+    <record id="tax_vat_8_recivable_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_receivable_net"/>
+        <field name="tax_id" ref="tax_vat_8_recivable"/>
+    </record>
+    <record id="tax_vat_8_recivable_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">80</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="code_id" ref="vat_code_payable"/>
+        <field name="account_id" ref="chart222020200"/>
+        <field name="tax_id" ref="tax_vat_8_recivable"/>
+    </record>
+    <record id="tax_vat_8_recivable_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_receivable_net"/>
+        <field name="tax_id" ref="tax_vat_8_recivable"/>
+    </record>
+    <record id="tax_vat_8_recivable_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-80</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="code_id" ref="vat_code_payable"/>
+        <field name="account_id" ref="chart222020200"/>
+        <field name="tax_id" ref="tax_vat_8_recivable"/>
+    </record>
+
     <record id="tax_vat_5_recivable" model="account.tax.template">
         <field name="chart_template_id" ref="pl_chart_template"/>
         <field name="name">VAT naliczony-5%(5.0%)</field>
-        <field name="amount">0.050000</field>
+        <field name="amount">5</field>
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chart222020400"/>
-        <field name="account_paid_id" ref="chart222020200"/>
-        <field name="base_code_id" ref="vat_code_receivable_net"/>
-        <field name="tax_code_id" ref="vat_code_payable"/>
-        <field name="ref_base_code_id" ref="vat_code_receivable_net"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_sign" eval="-1"/>
     </record>
+
+    <record id="tax_vat_5_recivable_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_receivable_net"/>
+        <field name="tax_id" ref="tax_vat_5_recivable"/>
+    </record>
+    <record id="tax_vat_5_recivable_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="code_id" ref="vat_code_payable"/>
+        <field name="account_id" ref="chart222020400"/>
+        <field name="tax_id" ref="tax_vat_5_recivable"/>
+    </record>
+    <record id="tax_vat_5_recivable_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_receivable_net"/>
+        <field name="tax_id" ref="tax_vat_5_recivable"/>
+    </record>
+    <record id="tax_vat_5_recivable_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">-50</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="code_id" ref="vat_code_payable"/>
+        <field name="account_id" ref="chart222020200"/>
+        <field name="tax_id" ref="tax_vat_5_recivable"/>
+    </record>
+
     <record id="tax_vat_0_recivable" model="account.tax.template">
         <field name="chart_template_id" ref="pl_chart_template"/>
         <field name="name">VAT naliczony-0%(0.0%)</field>
-        <field name="amount">0.000000</field>
+        <field name="amount">0</field>
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chart222020300"/>
-        <field name="account_paid_id" ref="chart222020300"/>
-        <field name="base_code_id" ref="vat_code_receivable_net"/>
-        <field name="tax_code_id" ref="vat_code_payable"/>
-        <field name="ref_base_code_id" ref="vat_code_receivable_net"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable"/>
-        <field name="ref_base_sign" eval="-1"/>
-        <field name="ref_tax_sign" eval="-1"/>
     </record>
+
+    <record id="tax_vat_0_recivable_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_receivable_net"/>
+        <field name="tax_id" ref="tax_vat_0_recivable"/>
+    </record>
+    <record id="tax_vat_0_recivable_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="code_id" ref="vat_code_payable"/>
+        <field name="account_id" ref="chart222020300"/>
+        <field name="tax_id" ref="tax_vat_0_recivable"/>
+    </record>
+    <record id="tax_vat_0_recivable_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">-1000</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="code_id" ref="vat_code_receivable_net"/>
+        <field name="tax_id" ref="tax_vat_0_recivable"/>
+    </record>
+    <record id="tax_vat_0_recivable_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="code_id" ref="vat_code_payable"/>
+        <field name="account_id" ref="chart222020300"/>
+        <field name="tax_id" ref="tax_vat_0_recivable"/>
+    </record>
+
 </data>
 </openerp>
