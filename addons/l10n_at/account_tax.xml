@@ -8,98 +8,282 @@
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">Mehrwertsteuer 20%</field>
             <field name="description">20% MwSt</field>
-            <field name="amount">0.200000</field>
+            <field name="amount">20</field>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart3500"/>
-            <field name="account_paid_id" ref="chart3500"/>
-            <field name="base_code_id" ref="tax_code_81"/>
-            <field name="tax_code_id" ref="tax_code_811"/>
-            <field name="ref_base_code_id" ref="tax_code_81"/>
-            <field name="ref_tax_code_id" ref="tax_code_811"/>
             <field name="type_tax_use">sale</field>
-        </record>    
-    
+        </record>
+
+        <record id="tax_at_mwst_20_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_81"/>
+            <field name="tax_id" ref="tax_at_mwst_20"/>
+        </record>
+
+        <record id="tax_at_mwst_20_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_811"/>
+            <field name="account_id" ref="chart3500"/>
+            <field name="tax_id" ref="tax_at_mwst_20"/>
+        </record>
+
+        <record id="tax_at_mwst_20_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_81"/>
+            <field name="tax_id" ref="tax_at_mwst_20"/>
+        </record>
+
+        <record id="tax_at_mwst_20_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_811"/>
+            <field name="account_id" ref="chart3500"/>
+            <field name="tax_id" ref="tax_at_mwst_20"/>
+        </record>
+
         <record id="tax_at_mwst_10" model="account.tax.template">
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">Mehrwertsteuer 10%</field>
             <field name="description">10% MwSt</field>
-            <field name="amount">0.100000</field>
+            <field name="amount">10</field>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart3500"/>
-            <field name="account_paid_id" ref="chart3500"/>
-            <field name="base_code_id" ref="tax_code_86"/>
-            <field name="tax_code_id" ref="tax_code_861"/>
-            <field name="ref_base_code_id" ref="tax_code_86"/>
-            <field name="ref_tax_code_id" ref="tax_code_861"/>
             <field name="type_tax_use">sale</field>
         </record>
-        
+
+        <record id="tax_at_mwst_10_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_86"/>
+            <field name="tax_id" ref="tax_at_mwst_10"/>
+        </record>
+
+        <record id="tax_at_mwst_10_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_861"/>
+            <field name="account_id" ref="chart3500"/>
+            <field name="tax_id" ref="tax_at_mwst_10"/>
+        </record>
+
+        <record id="tax_at_mwst_10_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_86"/>
+            <field name="tax_id" ref="tax_at_mwst_10"/>
+        </record>
+
+        <record id="tax_at_mwst_10_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_861"/>
+            <field name="account_id" ref="chart3500"/>
+            <field name="tax_id" ref="tax_at_mwst_10"/>
+        </record>
+
         <record id="tax_at_vst_20" model="account.tax.template">
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">Vorsteuer 20%</field>
             <field name="description">20% VSt</field>
-            <field name="amount">0.200000</field>
+            <field name="amount">20</field>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart2500"/>
-            <field name="account_paid_id" ref="chart2500"/>
-            <field name="base_code_id" ref="tax_code_89"/>
-            <field name="tax_code_id" ref="tax_code_891"/>
-            <field name="ref_base_code_id" ref="tax_code_89"/>
-            <field name="ref_tax_code_id" ref="tax_code_891"/>
             <field name="type_tax_use">purchase</field>
         </record>
-        
+
+        <record id="tax_at_vst_20_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_89"/>
+            <field name="tax_id" ref="tax_at_vst_20"/>
+        </record>
+
+        <record id="tax_at_vst_20_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_891"/>
+            <field name="account_id" ref="chart2500"/>
+            <field name="tax_id" ref="tax_at_vst_20"/>
+        </record>
+
+        <record id="tax_at_vst_20_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_89"/>
+            <field name="tax_id" ref="tax_at_vst_20"/>
+        </record>
+
+        <record id="tax_at_vst_20_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_891"/>
+            <field name="account_id" ref="chart2500"/>
+            <field name="tax_id" ref="tax_at_vst_20"/>
+        </record>
+
         <record id="tax_at_vst_10" model="account.tax.template">
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">Vorsteuer 10%</field>
             <field name="description">10% VSt</field>
-            <field name="amount">0.100000</field>
+            <field name="amount">10</field>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart2500"/>
-            <field name="account_paid_id" ref="chart2500"/>
-            <field name="base_code_id" ref="tax_code_93"/>
-            <field name="tax_code_id" ref="tax_code_931"/>
-            <field name="ref_base_code_id" ref="tax_code_93"/>
-            <field name="ref_tax_code_id" ref="tax_code_931"/>
             <field name="type_tax_use">purchase</field>
         </record>
-        
+
+        <record id="tax_at_vst_10_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_93"/>
+            <field name="tax_id" ref="tax_at_vst_10"/>
+        </record>
+
+        <record id="tax_at_vst_10_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_931"/>
+            <field name="account_id" ref="chart2500"/>
+            <field name="tax_id" ref="tax_at_vst_10"/>
+        </record>
+
+        <record id="tax_at_vst_10_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_93"/>
+            <field name="tax_id" ref="tax_at_vst_10"/>
+        </record>
+
+        <record id="tax_at_vst_10_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_931"/>
+            <field name="account_id" ref="chart2500"/>
+            <field name="tax_id" ref="tax_at_vst_10"/>
+        </record>
+
         <record model="account.tax.template" id="tax_import_20">
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">20% Einfuhrumsatzsteuer</field>
             <field name="description">20% EUSt</field>
             <field name="type">percent</field>
-            <field name="amount">0.20</field>
-            <field name="account_paid_id" ref="chart2510"/>
-            <field name="base_code_id" ref="tax_code_BAUS20"/>
-            <field name="base_sign">-1</field>
-            <field name="tax_code_id" ref="tax_code_62"/>
-            <field name="tax_sign">-1</field>
-            <field name="account_collected_id" ref="chart2510"/>
-            <field name="ref_base_code_id" ref="tax_code_BAUS20"/>
-            <field name="ref_base_sign">1</field>
-            <field name="ref_tax_code_id" ref="tax_code_62"/>
-            <field name="ref_tax_sign">1</field>
+            <field name="amount">20</field>
             <field name="type_tax_use">purchase</field>
         </record>
-        
+
+        <record id="tax_import_20_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_BAUS20"/>
+            <field name="tax_id" ref="tax_import_20"/>
+        </record>
+
+        <record id="tax_import_20_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_62"/>
+            <field name="account_id" ref="chart2510"/>
+            <field name="tax_id" ref="tax_import_20"/>
+        </record>
+
+        <record id="tax_import_20_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_BAUS20"/>
+            <field name="tax_id" ref="tax_import_20"/>
+        </record>
+
+        <record id="tax_import_20_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_62"/>
+            <field name="account_id" ref="chart2510"/>
+            <field name="tax_id" ref="tax_import_20"/>
+        </record>
+
         <record model="account.tax.template" id="tax_import_10">
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">10% Einfuhrumsatzsteuer</field>
             <field name="description">10% EUSt</field>
             <field name="type">percent</field>
-            <field name="amount">0.10</field>
-            <field name="account_paid_id" ref="chart2510"/>
-            <field name="base_code_id" ref="tax_code_BAUS10"/>
-            <field name="base_sign">-1</field>
-            <field name="tax_code_id" ref="tax_code_62"/>
-            <field name="tax_sign">-1</field>
-            <field name="account_collected_id" ref="chart2510"/>
-            <field name="ref_base_code_id" ref="tax_code_BAUS10"/>
-            <field name="ref_base_sign">1</field>
-            <field name="ref_tax_code_id" ref="tax_code_62"/>
-            <field name="ref_tax_sign">1</field>
+            <field name="amount">10</field>
             <field name="type_tax_use">purchase</field>
+        </record>
+
+        <record id="tax_import_10_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_BAUS10"/>
+            <field name="tax_id" ref="tax_import_10"/>
+        </record>
+
+        <record id="tax_import_10_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_62"/>
+            <field name="account_id" ref="chart2510"/>
+            <field name="tax_id" ref="tax_import_10"/>
+        </record>
+
+        <record id="tax_import_10_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_BAUS10"/>
+            <field name="tax_id" ref="tax_import_10"/>
+        </record>
+
+        <record id="tax_import_10_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_62"/>
+            <field name="account_id" ref="chart2510"/>
+            <field name="tax_id" ref="tax_import_10"/>
         </record>
 
         <record model="account.tax.template" id="tax_eu_20_purchase">
@@ -107,47 +291,67 @@
             <field name="name">Innergem. Erwerb 20%USt/20%VSt</field>
             <field name="description">innergem. Erwerb 20%</field>
             <field name="type">percent</field>
-            <field name="amount">1</field>
-            <field name="type_tax_use">purchase</field>
-            <field eval="True" name="child_depend"/>
-        </record>
-        
-        <record model="account.tax.template" id="tax_eu_20_purchase_ust">
-            <field name="chart_template_id" ref="austria_chart_template"/>
-            <field name="name">20% Umsatzsteuer aus innergem. Erwerb</field>
-            <field name="description">20% USt</field>
-            <field name="type">percent</field>
-            <field name="amount">-0.20</field>
-            <field name="account_paid_id" ref="chart3501"/>
-            <field name="base_code_id" ref="tax_code_89"/>
-            <field name="base_sign">-1</field>
-            <field name="tax_code_id" ref="tax_code_891"/>
-            <field name="tax_sign">-1</field>
-            <field name="account_collected_id" ref="chart3501"/>
-            <field name="ref_base_code_id" ref="tax_code_89"/>
-            <field name="ref_base_sign">1</field>
-            <field name="ref_tax_code_id" ref="tax_code_891"/>
-            <field name="ref_tax_sign">1</field>
-            <field name="parent_id" ref="tax_eu_20_purchase"/>
+            <field name="amount">20</field>
             <field name="type_tax_use">purchase</field>
         </record>
-        
-        <record model="account.tax.template" id="tax_eu_20_purchase_vst">
-            <field name="chart_template_id" ref="austria_chart_template"/>            
-            <field name="name">20% Vorsteuer aus innergem. Erwerb</field>
-            <field name="description">20% VSt</field>
-            <field name="type">percent</field>
-            <field name="amount">0.20</field>
-            <field name="account_paid_id" ref="chart2501"/>
-            <field name="base_sign">-1</field>
-            <field name="tax_code_id" ref="tax_code_065"/>
-            <field name="tax_sign">-1</field>
-            <field name="account_collected_id" ref="chart2501"/>
-            <field name="ref_base_sign">1</field>
-            <field name="ref_tax_code_id" ref="tax_code_065"/>
-            <field name="ref_tax_sign">1</field>
-            <field name="parent_id" ref="tax_eu_20_purchase"/>
-            <field name="type_tax_use">purchase</field>
+
+        <record id="tax_eu_20_purchase_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="tax_eu_20_purchase"/>
+        </record>
+
+        <record id="tax_eu_20_purchase_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_89"/>
+            <field name="tax_id" ref="tax_eu_20_purchase"/>
+        </record>
+
+        <!-- Child Record 1-->
+        <record id="tax_eu_20_purchase_ust_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">-200</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_891"/>
+            <field name="account_id" ref="chart3501"/>
+            <field name="tax_id" ref="tax_eu_20_purchase"/>
+        </record>
+
+        <record id="tax_eu_20_purchase_ust_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">-200</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_891"/>
+            <field name="account_id" ref="chart3501"/>
+            <field name="tax_id" ref="tax_eu_20_purchase"/>
+        </record>
+
+        <!-- Child Record 2-->
+        <record id="tax_eu_20_purchase_vst_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_065"/>
+            <field name="account_id" ref="chart2501"/>
+            <field name="tax_id" ref="tax_eu_20_purchase"/>
+        </record>
+
+        <record id="tax_eu_20_purchase_vst_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_065"/>
+            <field name="account_id" ref="chart2501"/>
+            <field name="tax_id" ref="tax_eu_20_purchase"/>
         </record>
 
         <record model="account.tax.template" id="tax_eu_10_purchase">
@@ -155,121 +359,254 @@
             <field name="name">Innergem. Erwerb 10%USt/10%VSt</field>
             <field name="description">innergem. Erwerb 10%</field>
             <field name="type">percent</field>
-            <field name="amount">1</field>
-            <field name="type_tax_use">purchase</field>
-            <field eval="True" name="child_depend"/>
-        </record>
-        
-        <record model="account.tax.template" id="tax_eu_10_purchase_ust">
-            <field name="chart_template_id" ref="austria_chart_template"/>
-            <field name="name">10% Umsatzsteuer aus innergem. Erwerb</field>
-            <field name="description">10% USt</field>
-            <field name="type">percent</field>
-            <field name="amount">-0.10</field>
-            <field name="account_paid_id" ref="chart3503"/>
-            <field name="base_code_id" ref="tax_code_93"/>
-            <field name="base_sign">-1</field>
-            <field name="tax_code_id" ref="tax_code_931"/>
-            <field name="tax_sign">-1</field>
-            <field name="account_collected_id" ref="chart3503"/>
-            <field name="ref_base_code_id" ref="tax_code_93"/>
-            <field name="ref_base_sign">1</field>
-            <field name="ref_tax_code_id" ref="tax_code_931"/>
-            <field name="ref_tax_sign">1</field>
-            <field name="parent_id" ref="tax_eu_10_purchase"/>
+            <field name="amount">10</field>
             <field name="type_tax_use">purchase</field>
         </record>
-        
-        <record model="account.tax.template" id="tax_eu_10_purchase_vst">
-            <field name="chart_template_id" ref="austria_chart_template"/>
-            <field name="name">10% Vorsteuer aus innergem. Erwerb</field>
-            <field name="description">10% VSt</field>
-            <field name="type">percent</field>
-            <field name="amount">0.10</field>
-            <field name="account_paid_id" ref="chart2503"/>
-            <field name="base_sign">-1</field>
-            <field name="tax_code_id" ref="tax_code_065"/>
-            <field name="tax_sign">-1</field>
-            <field name="account_collected_id" ref="chart2503"/>
-            <field name="ref_base_sign">1</field>
-            <field name="ref_tax_code_id" ref="tax_code_065"/>
-            <field name="ref_tax_sign">1</field>
-            <field name="parent_id" ref="tax_eu_10_purchase"/>
-            <field name="type_tax_use">purchase</field>
+
+        <record id="tax_eu_10_purchase_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_93"/>
+            <field name="tax_id" ref="tax_eu_10_purchase"/>
         </record>
-        
+
+        <record id="tax_eu_10_purchase_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_93"/>
+            <field name="tax_id" ref="tax_eu_10_purchase"/>
+        </record>
+
+        <!-- Child Record 1-->
+        <record id="tax_eu_10_purchase_ust_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">-100</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_931"/>
+            <field name="account_id" ref="chart3503"/>
+            <field name="tax_id" ref="tax_eu_10_purchase"/>
+        </record>
+
+        <record id="tax_eu_10_purchase_ust_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">-100</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_931"/>
+            <field name="account_id" ref="chart3503"/>
+            <field name="tax_id" ref="tax_eu_10_purchase"/>
+        </record>
+
+        <!-- Child Record 2-->
+        <record id="tax_eu_10_purchase_vst_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_065"/>
+            <field name="account_id" ref="chart2503"/>
+            <field name="tax_id" ref="tax_eu_10_purchase"/>
+        </record>
+
+        <record id="tax_eu_10_purchase_vst_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_065"/>
+            <field name="account_id" ref="chart2503"/>
+            <field name="tax_id" ref="tax_eu_10_purchase"/>
+        </record>
+
         <record model="account.tax.template" id="tax_at_mwst_20_eu">
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">20% Umsatzsteuer EU Lieferung</field>
             <field name="description">20% USt EU</field>
             <field name="type">percent</field>
-            <field name="amount">0.20</field>
-            <field name="account_paid_id" ref="chart3510"/>
-            <field name="base_code_id" ref="tax_code_81"/>
-            <field name="base_sign">1</field>
-            <field name="tax_code_id" ref="tax_code_811"/>
-            <field name="tax_sign">1</field>
-            <field name="account_collected_id" ref="chart3510"/>
-            <field name="ref_base_code_id" ref="tax_code_81"/>
-            <field name="ref_base_sign">-1</field>
-            <field name="ref_tax_code_id" ref="tax_code_811"/>
-            <field name="ref_tax_sign">-1</field>
+            <field name="amount">20</field>
             <field name="type_tax_use">sale</field>
-        </record>        
+        </record>
+
+        <record id="tax_at_mwst_20_eu_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_81"/>
+            <field name="tax_id" ref="tax_at_mwst_20_eu"/>
+        </record>
+
+        <record id="tax_at_mwst_20_eu_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_811"/>
+            <field name="account_id" ref="chart3510"/>
+            <field name="tax_id" ref="tax_at_mwst_20_eu"/>
+        </record>
+
+        <record id="tax_at_mwst_20_eu_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_81"/>
+            <field name="tax_id" ref="tax_at_mwst_20_eu"/>
+        </record>
+
+        <record id="tax_at_mwst_20_eu_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-200</field>
+            <field name="debit_credit_amount">200</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_811"/>
+            <field name="account_id" ref="chart3510"/>
+            <field name="tax_id" ref="tax_at_mwst_20_eu"/>
+        </record>
 
         <record model="account.tax.template" id="tax_at_mwst_10_eu">
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">10% Umsatzsteuer EU Lieferung</field>
             <field name="description">10% USt EU</field>
             <field name="type">percent</field>
-            <field name="amount">0.10</field>
-            <field name="account_paid_id" ref="chart3511"/>
-            <field name="base_code_id" ref="tax_code_86"/>
-            <field name="base_sign">1</field>
-            <field name="tax_code_id" ref="tax_code_861"/>
-            <field name="tax_sign">1</field>
-            <field name="account_collected_id" ref="chart3511"/>
-            <field name="ref_base_code_id" ref="tax_code_86"/>
-            <field name="ref_base_sign">-1</field>
-            <field name="ref_tax_code_id" ref="tax_code_861"/>
-            <field name="ref_tax_sign">-1</field>
+            <field name="amount">10</field>
             <field name="type_tax_use">sale</field>
-        </record>        
-        
+        </record>
+
+        <record id="tax_at_mwst_10_eu_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_86"/>
+            <field name="tax_id" ref="tax_at_mwst_10_eu"/>
+        </record>
+
+        <record id="tax_at_mwst_10_eu_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_861"/>
+            <field name="account_id" ref="chart3511"/>
+            <field name="tax_id" ref="tax_at_mwst_10_eu"/>
+        </record>
+
+        <record id="tax_at_mwst_10_eu_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_86"/>
+            <field name="tax_id" ref="tax_at_mwst_10_eu"/>
+        </record>
+
+        <record id="tax_at_mwst_10_eu_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">100</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_861"/>
+            <field name="account_id" ref="chart3511"/>
+            <field name="tax_id" ref="tax_at_mwst_10_eu"/>
+        </record>
+
         <record model="account.tax.template" id="tax_eu_sale_at">
             <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">Steuerfreie innergem. Lieferung</field>
             <field name="description">strf. i.g.L</field>
             <field name="type">percent</field>
             <field name="amount">0</field>
-            <field name="account_paid_id" ref="chart3500"/>
-            <field name="base_code_id" ref="tax_code_41"/>
-            <field name="base_sign">1</field>
-            <field name="tax_sign">1</field>
-            <field name="account_collected_id" ref="chart3500"/>
-            <field name="ref_base_code_id" ref="tax_code_41"/>
-            <field name="ref_base_sign">-1</field>
-            <field name="ref_tax_sign">-1</field>
             <field name="type_tax_use">sale</field>
         </record>
+
+        <record id="tax_eu_sale_at_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_41"/>
+            <field name="tax_id" ref="tax_eu_sale_at"/>
+        </record>
+
+        <record id="tax_eu_sale_at_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart3500"/>
+            <field name="tax_id" ref="tax_eu_sale_at"/>
+        </record>
+
+        <record id="tax_eu_sale_at_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_41"/>
+            <field name="tax_id" ref="tax_eu_sale_at"/>
+        </record>
+
+        <record id="tax_eu_sale_at_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart3500"/>
+            <field name="tax_id" ref="tax_eu_sale_at"/>
+        </record>
+
         <record model="account.tax.template" id="tax_export_at">
-        <field name="chart_template_id" ref="austria_chart_template"/>
+            <field name="chart_template_id" ref="austria_chart_template"/>
             <field name="name">Steuerfreie Ausfuhr</field>
             <field name="description">steuerfreie Ausfuhr</field>
             <field name="type">percent</field>
             <field name="amount">0</field>
-            <field name="account_paid_id" ref="chart3500"/>
-            <field name="base_code_id" ref="tax_code_43"/>
-            <field name="base_sign">1</field>
-            <field name="tax_sign">1</field>
-            <field name="account_collected_id" ref="chart3500"/>
-            <field name="ref_base_code_id" ref="tax_code_43"/>
-            <field name="ref_base_sign">-1</field>
-            <field name="ref_tax_sign">-1</field>
             <field name="type_tax_use">sale</field>
         </record>
-        
-        
+
+        <record id="tax_export_at_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="tax_code_43"/>
+            <field name="tax_id" ref="tax_export_at"/>
+        </record>
+
+        <record id="tax_export_at_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart3500"/>
+            <field name="tax_id" ref="tax_export_at"/>
+        </record>
+
+        <record id="tax_export_at_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="tax_code_43"/>
+            <field name="tax_id" ref="tax_export_at"/>
+        </record>
+
+        <record id="tax_export_at_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart3500"/>
+            <field name="tax_id" ref="tax_export_at"/>
+        </record>
+
 <!-- LIEFERANT EU UNTERNEHMEN OHNE UID -->        
         <!-- Fiscal Position Templates -->
         <record model="account.fiscal.position.template" id="fiscal_position_eu_no_id_purchase_at">

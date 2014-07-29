@@ -1,169 +1,465 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data noupdate="0">
+
 <record id="tvac_00" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA colectat 0%</field>
-	<field name="amount">0.000000</field>
+	<field name="amount">0</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4427"/>
-	<field name="account_paid_id" ref="pcg_4427"/>
-	<field name="base_code_id" ref="vat_code_tvac_baza00"/>
-	<field name="base_sign">1.00</field>
-	<field name="tax_code_id" ref="vat_code_tvac_tva00"/>
-	<field name="tax_sign">1.00</field>
-	<field name="ref_base_code_id" ref="vat_code_tvac_baza00"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_code_id" ref="vat_code_tvac_tva00"/>
-	<field name="ref_tax_sign">-1.00</field>
+	<field name="type_tax_use">sale</field>
 </record>
+
+<record id="tvac_00_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_baza00"/>
+    <field name="tax_id" ref="tvac_00"/>
+</record>
+
+<record id="tvac_00_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">0</field>
+    <field name="debit_credit_amount">0</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_tva00"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_00"/>
+</record>
+
+<record id="tvac_00_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_baza00"/>
+    <field name="tax_id" ref="tvac_00"/>
+</record>
+
+<record id="tvac_00_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">0</field>
+    <field name="debit_credit_amount">0</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_tva00"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_00"/>
+</record>
+
 <record id="tvac_05" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA colectat 5%</field>
-	<field name="amount">0.050000</field>
+	<field name="amount">5</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4427"/>
-	<field name="account_paid_id" ref="pcg_4427"/>
-	<field name="base_code_id" ref="vat_code_tvac_baza05"/>
-	<field name="tax_code_id" ref="vat_code_tvac_tva05"/>
-	<field name="ref_base_code_id" ref="vat_code_tvac_baza05"/>
-	<field name="ref_tax_code_id" ref="vat_code_tvac_tva05"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_sign">-1.00</field>
-	<field name="base_sign">1.00</field>
-	<field name="tax_sign">1.00</field>
+	<field name="type_tax_use">sale</field>
 </record>
+
+<record id="tvac_05_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_baza05"/>
+    <field name="tax_id" ref="tvac_05"/>
+</record>
+
+<record id="tvac_05_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">50</field>
+    <field name="debit_credit_amount">50</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_tva05"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_05"/>
+</record>
+
+<record id="tvac_05_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_baza05"/>
+    <field name="tax_id" ref="tvac_05"/>
+</record>
+
+<record id="tvac_05_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">-50</field>
+    <field name="debit_credit_amount">50</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_tva05"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_05"/>
+</record>
+
 <record id="tvac_09" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA colectat 9%</field>
-	<field name="amount">0.090000</field>
+	<field name="amount">9</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4427"/>
-	<field name="account_paid_id" ref="pcg_4427"/>
-	<field name="base_code_id" ref="vat_code_tvac_baza09"/>
-	<field name="tax_code_id" ref="vat_code_tvac_tva09"/>
-	<field name="ref_base_code_id" ref="vat_code_tvac_baza09"/>
-	<field name="ref_tax_code_id" ref="vat_code_tvac_tva09"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_sign">-1.00</field>
-	<field name="base_sign">1.00</field>
-	<field name="tax_sign">1.00</field>
+	<field name="type_tax_use">sale</field>
 </record>
+
+<record id="tvac_09_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_baza09"/>
+    <field name="tax_id" ref="tvac_09"/>
+</record>
+
+<record id="tvac_09_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">90</field>
+    <field name="debit_credit_amount">90</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_tva09"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_09"/>
+</record>
+
+<record id="tvac_09_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_baza09"/>
+    <field name="tax_id" ref="tvac_09"/>
+</record>
+
+<record id="tvac_09_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">-90</field>
+    <field name="debit_credit_amount">90</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_tva09"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_09"/>
+</record>
+
 <record id="tvac_19" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA colectat 19%</field>
-	<field name="amount">0.190000</field>
+	<field name="amount">19</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4427"/>
-	<field name="account_paid_id" ref="pcg_4427"/>
-	<field name="base_code_id" ref="vat_code_tvac_baza19"/>
-	<field name="tax_code_id" ref="vat_code_tvac_tva19"/>
-	<field name="ref_base_code_id" ref="vat_code_tvac_baza19"/>
-	<field name="ref_tax_code_id" ref="vat_code_tvac_tva19"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_sign">-1.00</field>
-	<field name="base_sign">1.00</field>
-	<field name="tax_sign">1.00</field>
+	<field name="type_tax_use">sale</field>
+</record>
+
+<record id="tvac_19_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_baza19"/>
+    <field name="tax_id" ref="tvac_19"/>
+</record>
+
+<record id="tvac_19_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">190</field>
+    <field name="debit_credit_amount">190</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_tva19"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_19"/>
+</record>
+
+<record id="tvac_19_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_baza19"/>
+    <field name="tax_id" ref="tvac_19"/>
+</record>
+
+<record id="tvac_19_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">-190</field>
+    <field name="debit_credit_amount">190</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_tva19"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_19"/>
 </record>
 
 <record id="tvac_24" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA colectat 24%</field>
-	<field name="amount">0.240000</field>
+	<field name="amount">24</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4427"/>
-	<field name="account_paid_id" ref="pcg_4427"/>
-	<field name="base_code_id" ref="vat_code_tvac_baza24"/>
-	<field name="tax_code_id" ref="vat_code_tvac_tva24"/>
-	<field name="ref_base_code_id" ref="vat_code_tvac_baza24"/>
-	<field name="ref_tax_code_id" ref="vat_code_tvac_tva24"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_sign">-1.00</field>
-	<field name="base_sign">1.00</field>
-	<field name="tax_sign">1.00</field>
+	<field name="type_tax_use">sale</field>
+</record>
+
+<record id="tvac_24_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_baza24"/>
+    <field name="tax_id" ref="tvac_24"/>
+</record>
+
+<record id="tvac_24_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">240</field>
+    <field name="debit_credit_amount">240</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvac_tva24"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_24"/>
+</record>
+
+<record id="tvac_24_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_baza24"/>
+    <field name="tax_id" ref="tvac_24"/>
+</record>
+
+<record id="tvac_24_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">-240</field>
+    <field name="debit_credit_amount">240</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvac_tva24"/>
+    <field name="account_id" ref="pcg_4427"/>
+    <field name="tax_id" ref="tvac_24"/>
 </record>
 
 <record id="tvad_00" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA deductibil 0%</field>
-	<field name="amount">0.000000</field>
+	<field name="amount">0</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4426"/>
-	<field name="account_paid_id" ref="pcg_4426"/>
-	<field name="base_code_id" ref="vat_code_tvad_baza00"/>
-	<field name="base_sign">1.00</field>
-	<field name="tax_code_id" ref="vat_code_tvad_tva00"/>
-	<field name="tax_sign">1.00</field>
-	<field name="ref_base_code_id" ref="vat_code_tvad_baza00"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_code_id" ref="vat_code_tvad_tva00"/>
-	<field name="ref_tax_sign">-1.00</field>
+	<field name="type_tax_use">purchase</field>
 </record>
+
+<record id="tvad_00_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_baza00"/>
+    <field name="tax_id" ref="tvad_00"/>
+</record>
+
+<record id="tvad_00_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">0</field>
+    <field name="debit_credit_amount">0</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_tva00"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_00"/>
+</record>
+
+<record id="tvad_00_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_baza00"/>
+    <field name="tax_id" ref="tvad_00"/>
+</record>
+
+<record id="tvad_00_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">0</field>
+    <field name="debit_credit_amount">0</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_tva00"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_00"/>
+</record>
+
 <record id="tvad_05" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA deductibil 5%</field>
-	<field name="amount">0.050000</field>
+	<field name="amount">5</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4426"/>
-	<field name="account_paid_id" ref="pcg_4426"/>
-	<field name="base_code_id" ref="vat_code_tvad_baza05"/>
-	<field name="tax_code_id" ref="vat_code_tvad_tva05"/>
-	<field name="ref_base_code_id" ref="vat_code_tvad_baza05"/>
-	<field name="ref_tax_code_id" ref="vat_code_tvad_tva05"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_sign">-1.00</field>
-	<field name="base_sign">1.00</field>
-	<field name="tax_sign">1.00</field>
+	<field name="type_tax_use">purchase</field>
 </record>
+
+<record id="tvad_05_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_baza05"/>
+    <field name="tax_id" ref="tvad_05"/>
+</record>
+
+<record id="tvad_05_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">50</field>
+    <field name="debit_credit_amount">50</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_tva05"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_05"/>
+</record>
+
+<record id="tvad_05_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_baza05"/>
+    <field name="tax_id" ref="tvad_05"/>
+</record>
+
+<record id="tvad_05_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">-50</field>
+    <field name="debit_credit_amount">50</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_tva05"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_05"/>
+</record>
+
 <record id="tvad_09" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA deductibil 9%</field>
-	<field name="amount">0.090000</field>
+	<field name="amount">9</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4426"/>
-	<field name="account_paid_id" ref="pcg_4426"/>
-	<field name="base_code_id" ref="vat_code_tvad_baza09"/>
-	<field name="tax_code_id" ref="vat_code_tvad_tva09"/>
-	<field name="ref_base_code_id" ref="vat_code_tvad_baza09"/>
-	<field name="ref_tax_code_id" ref="vat_code_tvad_tva09"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_sign">-1.00</field>
-	<field name="base_sign">1.00</field>
-	<field name="tax_sign">1.00</field>
+	<field name="type_tax_use">purchase</field>
 </record>
+
+<record id="tvad_09_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_baza09"/>
+    <field name="tax_id" ref="tvad_09"/>
+</record>
+
+<record id="tvad_09_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">90</field>
+    <field name="debit_credit_amount">90</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_tva09"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_09"/>
+</record>
+
+<record id="tvad_09_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_baza09"/>
+    <field name="tax_id" ref="tvad_09"/>
+</record>
+
+<record id="tvad_09_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">-90</field>
+    <field name="debit_credit_amount">90</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_tva09"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_09"/>
+</record>
+
 <record id="tvad_19" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA deductibil 19%</field>
-	<field name="amount">0.190000</field>
+	<field name="amount">19</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4426"/>
-	<field name="account_paid_id" ref="pcg_4426"/>
-	<field name="base_code_id" ref="vat_code_tvad_baza19"/>
-	<field name="tax_code_id" ref="vat_code_tvad_tva19"/>
-	<field name="ref_base_code_id" ref="vat_code_tvad_baza19"/>
-	<field name="ref_tax_code_id" ref="vat_code_tvad_tva19"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_sign">-1.00</field>
-	<field name="base_sign">1.00</field>
-	<field name="tax_sign">1.00</field>
-
+	<field name="type_tax_use">purchase</field>
 </record>
+
+<record id="tvad_19_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_baza19"/>
+    <field name="tax_id" ref="tvad_19"/>
+</record>
+
+<record id="tvad_19_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">190</field>
+    <field name="debit_credit_amount">190</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_tva19"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_19"/>
+</record>
+
+<record id="tvad_19_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_baza19"/>
+    <field name="tax_id" ref="tvad_19"/>
+</record>
+
+<record id="tvad_19_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">-190</field>
+    <field name="debit_credit_amount">190</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_tva19"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_19"/>
+</record>
+
 <record id="tvad_24" model="account.tax.template">
 	<field name="chart_template_id" ref="romania_chart_template"/>
 	<field name="name">TVA deductibil 24%</field>
-	<field name="amount">0.240000</field>
+	<field name="amount">24</field>
 	<field name="type">percent</field>
-	<field name="account_collected_id" ref="pcg_4426"/>
-	<field name="account_paid_id" ref="pcg_4426"/>
-	<field name="base_code_id" ref="vat_code_tvad_baza24"/>
-	<field name="tax_code_id" ref="vat_code_tvad_tva24"/>
-	<field name="ref_base_code_id" ref="vat_code_tvad_baza24"/>
-	<field name="ref_tax_code_id" ref="vat_code_tvad_tva24"/>
-	<field name="ref_base_sign">-1.00</field>
-	<field name="ref_tax_sign">-1.00</field>
-	<field name="base_sign">1.00</field>
-	<field name="tax_sign">1.00</field>
+	<field name="type_tax_use">purchase</field>
+</record>
 
+<record id="tvad_24_invoice_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_baza24"/>
+    <field name="tax_id" ref="tvad_24"/>
+</record>
+
+<record id="tvad_24_invoice_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">240</field>
+    <field name="debit_credit_amount">240</field>
+    <field name="apply_on">invoice</field>
+    <field name="code_id" ref="vat_code_tvad_tva24"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_24"/>
+</record>
+
+<record id="tvad_24_refund_base_line" model="account.tax.line.template">
+    <field name="code_type">base</field>
+    <field name="tax_amount">-1000</field>
+    <field name="debit_credit_amount">1000</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_baza24"/>
+    <field name="tax_id" ref="tvad_24"/>
+</record>
+
+<record id="tvad_24_refund_tax_line" model="account.tax.line.template">
+    <field name="code_type">tax</field>
+    <field name="tax_amount">-240</field>
+    <field name="debit_credit_amount">240</field>
+    <field name="apply_on">refund</field>
+    <field name="code_id" ref="vat_code_tvad_tva24"/>
+    <field name="account_id" ref="pcg_4426"/>
+    <field name="tax_id" ref="tvad_24"/>
 </record>
 
 </data>

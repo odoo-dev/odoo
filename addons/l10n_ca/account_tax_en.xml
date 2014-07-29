@@ -11,44 +11,70 @@
         <field name="name">GST + PST for sales (BC)</field>
         <field name="description">GSTPST_BC_SALE</field>
         <field name="type_tax_use">sale</field>
-        <field name="amount">1</field>
+        <field name="amount">100</field>
         <field name="type">percent</field>
-        <field name="child_depend">1</field>
     </record>
 
-    <record id="gstpst_sale_bc_gst_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">GST for sales - 5% (BC)</field>
-        <field name="description">GST</field>
-        <field name="type_tax_use">sale</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_bc_sale_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="gstpst_bc_sale_en"/>
+    </record>
+
+    <record id="gstpst_bc_sale_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="gstpst_bc_sale_en"/>
+    </record>
+
+    <!-- Child Record 1-->
+    <record id="gstpst_sale_bc_gst_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
-        <field name="include_base_amount" eval="True"/>
-        <field name="account_collected_id" ref="chart2131_en"/>
-        <field name="account_paid_id" ref="chart2131_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="parent_id" ref="gstpst_bc_sale_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gstpst_bc_sale_en"/>
     </record>
 
-    <record id="pst_bc_sale_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">PST for sales - 7% (BC)</field>
-        <field name="description">PST</field>
-        <field name="type_tax_use">sale</field>
-        <field name="amount">0.070000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_sale_bc_gst_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gstpst_bc_sale_en"/>
+    </record>
+
+    <!-- Child Record 2-->
+    <record id="pst_bc_sale_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="chart2132_en"/>
-        <field name="account_paid_id" ref="chart2132_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_pst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_pst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_pst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_pst_en"/>
-        <field name="parent_id" ref="gstpst_bc_sale_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">70</field>
+        <field name="debit_credit_amount">70</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_pst_en"/>
+        <field name="account_id" ref="chart2132_en"/>
+        <field name="tax_id" ref="gstpst_bc_sale_en"/>
+    </record>
+
+    <record id="pst_bc_sale_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">70</field>
+        <field name="debit_credit_amount">70</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_pst_en"/>
+        <field name="account_id" ref="chart2132_en"/>
+        <field name="tax_id" ref="gstpst_bc_sale_en"/>
     </record>
 
     <!-- Manitoba PST -->
@@ -58,44 +84,70 @@
         <field name="name">GST + PST for sales (MB)</field>
         <field name="description">GSTPST_MB_SALE</field>
         <field name="type_tax_use">sale</field>
-        <field name="amount">1</field>
+        <field name="amount">100</field>
         <field name="type">percent</field>
-        <field name="child_depend" eval="True"/>
     </record>
 
-    <record id="gstpst_sale_mb_gst_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">GST for sales - 5% (MB)</field>
-        <field name="description">GST</field>
-        <field name="type_tax_use">sale</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_mb_sale_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="gstpst_mb_sale_en"/>
+    </record>
+
+    <record id="gstpst_mb_sale_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="gstpst_mb_sale_en"/>
+    </record>
+
+    <!-- Child Record 1-->
+    <record id="gstpst_sale_mb_gst_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
-        <field name="include_base_amount" eval="True"/>
-        <field name="account_collected_id" ref="chart2131_en"/>
-        <field name="account_paid_id" ref="chart2131_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="parent_id" ref="gstpst_mb_sale_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gstpst_mb_sale_en"/>
     </record>
 
-    <record id="pst_mb_sale_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">PST for sales - 8% (MB)</field>
-        <field name="description">PST</field>
-        <field name="type_tax_use">sale</field>
-        <field name="amount">0.080000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_sale_mb_gst_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gstpst_mb_sale_en"/>
+    </record>
+
+    <!-- Child Record 2-->
+    <record id="pst_mb_sale_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="chart2132_en"/>
-        <field name="account_paid_id" ref="chart2132_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_pst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_pst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_pst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_pst_en"/>
-        <field name="parent_id" ref="gstpst_mb_sale_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">80</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_pst_en"/>
+        <field name="account_id" ref="chart2132_en"/>
+        <field name="tax_id" ref="gstpst_mb_sale_en"/>
+    </record>
+
+    <record id="pst_mb_sale_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">80</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_pst_en"/>
+        <field name="account_id" ref="chart2132_en"/>
+        <field name="tax_id" ref="gstpst_mb_sale_en"/>
     </record>
 
     <!-- Quebec PST -->
@@ -105,43 +157,70 @@
         <field name="name">GST + QST for sales</field>
         <field name="description">GSTQST_SALE</field>
         <field name="type_tax_use">sale</field>
-        <field name="amount">1</field>
+        <field name="amount">100</field>
         <field name="type">percent</field>
-        <field name="child_depend" eval="True"/>
     </record>
 
-    <record id="gstqst_sale_gst_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">GST for sales - 5% (QC)</field>
-        <field name="description">GST</field>
-        <field name="type_tax_use">sale</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstqst_sale_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="gstqst_sale_en"/>
+    </record>
+
+    <record id="gstqst_sale_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="gstqst_sale_en"/>
+    </record>
+
+    <!-- Child Record 1-->
+    <record id="gstqst_sale_gst_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
-        <field name="account_collected_id" ref="chart2131_en"/>
-        <field name="account_paid_id" ref="chart2131_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="parent_id" ref="gstqst_sale_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gstqst_sale_en"/>
     </record>
 
-    <record id="qst_sale_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">QST for sales - 9.975%</field>
-        <field name="description">QST</field>
-        <field name="type_tax_use">sale</field>
-        <field name="amount">0.099750</field>
-        <field name="type">percent</field>
+    <record id="gstqst_sale_gst_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gstqst_sale_en"/>
+    </record>
+
+    <!-- Child Record 2-->
+    <record id="qst_sale_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="chart2132_en"/>
-        <field name="account_paid_id" ref="chart2132_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_pst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_pst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_pst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_pst_en"/>
-        <field name="parent_id" ref="gstqst_sale_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">99.75</field>
+        <field name="debit_credit_amount">99.75</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_pst_en"/>
+        <field name="account_id" ref="chart2132_en"/>
+        <field name="tax_id" ref="gstqst_sale_en"/>
+    </record>
+
+    <record id="qst_sale_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">99.75</field>
+        <field name="debit_credit_amount">99.75</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_pst_en"/>
+        <field name="account_id" ref="chart2132_en"/>
+        <field name="tax_id" ref="gstqst_sale_en"/>
     </record>
 
     <!-- Saskatchewan PST -->
@@ -151,44 +230,70 @@
         <field name="name">GST + PST for sales (SK)</field>
         <field name="description">GSTPST_SK_SALE</field>
         <field name="type_tax_use">sale</field>
-        <field name="amount">1</field>
+        <field name="amount">100</field>
         <field name="type">percent</field>
-        <field name="child_depend" eval="True"/>
     </record>
 
-    <record id="gstpst_sale_sk_gst_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">GST for sales - 5% (SK)</field>
-        <field name="description">GST</field>
-        <field name="type_tax_use">sale</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_sk_sale_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="gstpst_sk_sale_en"/>
+    </record>
+
+    <record id="gstpst_sk_sale_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="gstpst_sk_sale_en"/>
+    </record>
+
+    <!-- Child Record 1-->
+    <record id="gstpst_sale_sk_gst_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
-        <field name="include_base_amount" eval="True"/>
-        <field name="account_collected_id" ref="chart2131_en"/>
-        <field name="account_paid_id" ref="chart2131_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="parent_id" ref="gstpst_sk_sale_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gstpst_sk_sale_en"/>
     </record>
 
-    <record id="pst_sk_sale_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">PST for sales - 5% (SK)</field>
-        <field name="description">PST</field>
-        <field name="type_tax_use">sale</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_sale_sk_gst_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gstpst_sk_sale_en"/>
+    </record>
+
+    <!-- Child Record 2-->
+    <record id="pst_sk_sale_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="chart2132_en"/>
-        <field name="account_paid_id" ref="chart2132_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_pst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_pst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_pst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_pst_en"/>
-        <field name="parent_id" ref="gstpst_sk_sale_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_pst_en"/>
+        <field name="account_id" ref="chart2132_en"/>
+        <field name="tax_id" ref="gstpst_sk_sale_en"/>
+    </record>
+
+    <record id="pst_sk_sale_en_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_pst_en"/>
+        <field name="account_id" ref="chart2132_en"/>
+        <field name="tax_id" ref="gstpst_sk_sale_en"/>
     </record>
 
     <!-- HST -->
@@ -198,14 +303,46 @@
         <field name="name">HST for sales - 13%</field>
         <field name="description">HST13_SALE</field>
         <field name="type_tax_use">sale</field>
-        <field name="amount">0.130000</field>
+        <field name="amount">13</field>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="chart21331_en"/>
-        <field name="account_paid_id" ref="chart21331_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_hst13_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_hst13_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_hst13_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_hst13_en"/>
+    </record>
+
+    <record id="hst13_sale_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_hst13_en"/>
+        <field name="tax_id" ref="hst13_sale_en"/>
+    </record>
+
+    <record id="hst13_sale_en_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">130</field>
+        <field name="debit_credit_amount">130</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_hst13_en"/>
+        <field name="account_id" ref="chart21331_en"/>
+        <field name="tax_id" ref="hst13_sale_en"/>
+    </record>
+
+    <record id="hst13_sale_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_hst13_en"/>
+        <field name="tax_id" ref="hst13_sale_en"/>
+    </record>
+
+    <record id="hst13_sale_en_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">130</field>
+        <field name="debit_credit_amount">130</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_hst13_en"/>
+        <field name="account_id" ref="chart21331_en"/>
+        <field name="tax_id" ref="hst13_sale_en"/>
     </record>
 
     <record id="hst14_sale_en" model="account.tax.template">
@@ -213,14 +350,46 @@
         <field name="name">HST for sales - 14%</field>
         <field name="description">HST14_SALE</field>
         <field name="type_tax_use">sale</field>
-        <field name="amount">0.14000</field>
+        <field name="amount">14</field>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="chart21332_en"/>
-        <field name="account_paid_id" ref="chart21332_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_hst14_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_hst14_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_hst14_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_hst14_en"/>
+    </record>
+
+    <record id="hst14_sale_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_hst14_en"/>
+        <field name="tax_id" ref="hst14_sale_en"/>
+    </record>
+
+    <record id="hst14_sale_en_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">140</field>
+        <field name="debit_credit_amount">140</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_hst14_en"/>
+        <field name="account_id" ref="chart21332_en"/>
+        <field name="tax_id" ref="hst14_sale_en"/>
+    </record>
+
+    <record id="hst14_sale_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_hst14_en"/>
+        <field name="tax_id" ref="hst14_sale_en"/>
+    </record>
+
+    <record id="hst14_sale_en_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">140</field>
+        <field name="debit_credit_amount">140</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_hst14_en"/>
+        <field name="account_id" ref="chart21332_en"/>
+        <field name="tax_id" ref="hst14_sale_en"/>
     </record>
 
     <record id="hst15_sale_en" model="account.tax.template">
@@ -228,14 +397,46 @@
         <field name="name">HST for sales - 15%</field>
         <field name="description">HST15_SALE</field>
         <field name="type_tax_use">sale</field>
-        <field name="amount">0.150000</field>
+        <field name="amount">15</field>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="chart21333_en"/>
-        <field name="account_paid_id" ref="chart21333_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_hst15_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_hst15_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_hst15_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_hst15_en"/>
+    </record>
+
+    <record id="hst15_sale_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_hst15_en"/>
+        <field name="tax_id" ref="hst15_sale_en"/>
+    </record>
+
+    <record id="hst15_sale_en_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">150</field>
+        <field name="debit_credit_amount">150</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_hst15_en"/>
+        <field name="account_id" ref="chart21333_en"/>
+        <field name="tax_id" ref="hst15_sale_en"/>
+    </record>
+
+    <record id="hst15_sale_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_hst15_en"/>
+        <field name="tax_id" ref="hst15_sale_en"/>
+    </record>
+
+    <record id="hst15_sale_en_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">150</field>
+        <field name="debit_credit_amount">150</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_hst15_en"/>
+        <field name="account_id" ref="chart21333_en"/>
+        <field name="tax_id" ref="hst15_sale_en"/>
     </record>
 
     <!-- GST -->
@@ -245,14 +446,46 @@
         <field name="name">GST for sales - 5%</field>
         <field name="description">GST_SALE</field>
         <field name="type_tax_use">sale</field>
-        <field name="amount">0.050000</field>
+        <field name="amount">5</field>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="chart2131_en"/>
-        <field name="account_paid_id" ref="chart2131_en"/>
-        <field name="base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_payable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_receivable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_payable_gst_en"/>
+    </record>
+
+    <record id="gst_sale_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gst_sale_en"/>
+    </record>
+
+    <record id="gst_sale_en_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gst_sale_en"/>
+    </record>
+
+    <record id="gst_sale_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gst_sale_en"/>
+    </record>
+
+    <record id="gst_sale_en_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_payable_gst_en"/>
+        <field name="account_id" ref="chart2131_en"/>
+        <field name="tax_id" ref="gst_sale_en"/>
     </record>
 
     <!-- PURCHASE TAXES -->
@@ -264,44 +497,70 @@
         <field name="name">GST + PST for purchases (BC)</field>
         <field name="description">GSTPST_BC_PURC</field>
         <field name="type_tax_use">purchase</field>
-        <field name="amount">1</field>
+        <field name="amount">100</field>
         <field name="type">percent</field>
-        <field name="child_depend">1</field>
     </record>
 
-    <record id="gstpst_purc_bc_gst_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">GST for purchases - 5% (BC)</field>
-        <field name="description">GST</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_bc_purc_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="gstpst_bc_purc_en"/>
+    </record>
+
+    <record id="gstpst_bc_purc_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="gstpst_bc_purc_en"/>
+    </record>
+
+    <!-- Child Record 1-->
+    <record id="gstpst_purc_bc_gst_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
-        <field name="include_base_amount" eval="True"/>
-        <field name="account_collected_id" ref="chart1181_en"/>
-        <field name="account_paid_id" ref="chart1181_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="parent_id" ref="gstpst_bc_purc_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gstpst_bc_purc_en"/>
     </record>
 
-    <record id="pst_bc_purc_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">PST for purchases - 7% (BC)</field>
-        <field name="description">PST</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="amount">0.070000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_purc_bc_gst_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gstpst_bc_purc_en"/>
+    </record>
+
+    <!-- Child Record 2-->
+    <record id="pst_bc_purc_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="chart1182_en"/>
-        <field name="account_paid_id" ref="chart1182_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_pst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_pst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_pst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_pst_en"/>
-        <field name="parent_id" ref="gstpst_bc_purc_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">70</field>
+        <field name="debit_credit_amount">70</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_pst_en"/>
+        <field name="account_id" ref="chart1182_en"/>
+        <field name="tax_id" ref="gstpst_bc_purc_en"/>
+    </record>
+
+    <record id="pst_bc_purc_en_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">70</field>
+        <field name="debit_credit_amount">70</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_pst_en"/>
+        <field name="account_id" ref="chart1182_en"/>
+        <field name="tax_id" ref="gstpst_bc_purc_en"/>
     </record>
 
     <!-- Manitoba PST -->
@@ -311,44 +570,70 @@
         <field name="name">GST + PST for purchases (MB)</field>
         <field name="description">GSTPST_MB_PURC</field>
         <field name="type_tax_use">purchase</field>
-        <field name="amount">1</field>
+        <field name="amount">100</field>
         <field name="type">percent</field>
-        <field name="child_depend" eval="True"/>
     </record>
 
-    <record id="gstpst_purc_mb_gst_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">GST for purchases - 5% (MB)</field>
-        <field name="description">GST</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_mb_purc_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="gstpst_mb_purc_en"/>
+    </record>
+
+    <record id="gstpst_mb_purc_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="gstpst_mb_purc_en"/>
+    </record>
+
+    <!-- Child Record 1-->
+    <record id="gstpst_purc_mb_gst_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
-        <field name="include_base_amount" eval="True"/>
-        <field name="account_collected_id" ref="chart1181_en"/>
-        <field name="account_paid_id" ref="chart1181_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="parent_id" ref="gstpst_mb_purc_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gstpst_mb_purc_en"/>
     </record>
 
-    <record id="pst_mb_purc_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">PST for purchases - 8% (MB)</field>
-        <field name="description">PST</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="amount">0.080000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_purc_mb_gst_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gstpst_mb_purc_en"/>
+    </record>
+
+    <!-- Child Record 2-->
+    <record id="pst_mb_purc_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="chart1182_en"/>
-        <field name="account_paid_id" ref="chart1182_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_pst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_pst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_pst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_pst_en"/>
-        <field name="parent_id" ref="gstpst_mb_purc_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">80</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_pst_en"/>
+        <field name="account_id" ref="chart1182_en"/>
+        <field name="tax_id" ref="gstpst_mb_purc_en"/>
+    </record>
+
+    <record id="pst_mb_purc_en_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">80</field>
+        <field name="debit_credit_amount">80</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_pst_en"/>
+        <field name="account_id" ref="chart1182_en"/>
+        <field name="tax_id" ref="gstpst_mb_purc_en"/>
     </record>
 
     <!-- Quebec PST -->
@@ -358,43 +643,70 @@
         <field name="name">GST + QST for purchases</field>
         <field name="description">GSTQST_PURC</field>
         <field name="type_tax_use">purchase</field>
-        <field name="amount">1</field>
+        <field name="amount">100</field>
         <field name="type">percent</field>
-        <field name="child_depend" eval="True"/>
     </record>
 
-    <record id="gstqst_purc_gst_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">GST for purchases - 5% (QC)</field>
-        <field name="description">GST</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstqst_purc_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="gstqst_purc_en"/>
+    </record>
+
+    <record id="gstqst_purc_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="gstqst_purc_en"/>
+    </record>
+
+    <!-- Child Record 1-->
+    <record id="gstqst_purc_gst_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
-        <field name="account_collected_id" ref="chart1181_en"/>
-        <field name="account_paid_id" ref="chart1181_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="parent_id" ref="gstqst_purc_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gstqst_purc_en"/>
     </record>
 
-    <record id="qst_purc_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">QST for purchases - 9.975%</field>
-        <field name="description">QST</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="amount">0.099750</field>
-        <field name="type">percent</field>
+    <record id="gstqst_purc_gst_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gstqst_purc_en"/>
+    </record>
+
+    <!-- Child Record 2-->
+    <record id="qst_purc_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="chart1182_en"/>
-        <field name="account_paid_id" ref="chart1182_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_pst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_pst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_pst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_pst_en"/>
-        <field name="parent_id" ref="gstqst_purc_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">99.75</field>
+        <field name="debit_credit_amount">99.75</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_pst_en"/>
+        <field name="account_id" ref="chart1182_en"/>
+        <field name="tax_id" ref="gstqst_purc_en"/>
+    </record>
+
+    <record id="qst_purc_en_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">99.75</field>
+        <field name="debit_credit_amount">99.75</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_pst_en"/>
+        <field name="account_id" ref="chart1182_en"/>
+        <field name="tax_id" ref="gstqst_purc_en"/>
     </record>
 
     <!-- Saskatchewan PST -->
@@ -404,44 +716,70 @@
         <field name="name">GST + PST for purchases (SK)</field>
         <field name="description">GSTPST_SK_PURC</field>
         <field name="type_tax_use">purchase</field>
-        <field name="amount">1</field>
+        <field name="amount">100</field>
         <field name="type">percent</field>
-        <field name="child_depend" eval="True"/>
     </record>
 
-    <record id="gstpst_purc_sk_gst_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">GST for purchases - 5% (SK)</field>
-        <field name="description">GST</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_sk_purc_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="tax_id" ref="gstpst_sk_purc_en"/>
+    </record>
+
+    <record id="gstpst_sk_purc_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="tax_id" ref="gstpst_sk_purc_en"/>
+    </record>
+
+    <!-- Child Record 1-->
+    <record id="gstpst_purc_sk_gst_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
-        <field name="include_base_amount" eval="True"/>
-        <field name="account_collected_id" ref="chart1181_en"/>
-        <field name="account_paid_id" ref="chart1181_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="parent_id" ref="gstpst_sk_purc_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gstpst_sk_purc_en"/>
     </record>
 
-    <record id="pst_sk_purc_en" model="account.tax.template">
-        <field name="chart_template_id" ref="ca_en_chart_template_en"/>
-        <field name="name">PST for purchases - 5% (SK)</field>
-        <field name="description">PST</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="amount">0.050000</field>
-        <field name="type">percent</field>
+    <record id="gstpst_purc_sk_gst_en_refund_tax_line" model="account.tax.line.template">
+        <field name="sequence">1</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gstpst_sk_purc_en"/>
+    </record>
+
+    <!-- Child Record 2-->
+    <record id="pst_sk_purc_en_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
-        <field name="account_collected_id" ref="chart1182_en"/>
-        <field name="account_paid_id" ref="chart1182_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_pst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_pst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_pst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_pst_en"/>
-        <field name="parent_id" ref="gstpst_sk_purc_en"/>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_pst_en"/>
+        <field name="account_id" ref="chart1182_en"/>
+        <field name="tax_id" ref="gstpst_sk_purc_en"/>
+    </record>
+
+    <record id="pst_sk_purc_en_tax_line" model="account.tax.line.template">
+        <field name="sequence">2</field>
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_pst_en"/>
+        <field name="account_id" ref="chart1182_en"/>
+        <field name="tax_id" ref="gstpst_sk_purc_en"/>
     </record>
 
     <!-- HST -->
@@ -451,14 +789,46 @@
         <field name="name">HST for purchases - 13%</field>
         <field name="description">HST13_PURC</field>
         <field name="type_tax_use">purchase</field>
-        <field name="amount">0.130000</field>
+        <field name="amount">13</field>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="chart11831_en"/>
-        <field name="account_paid_id" ref="chart11831_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_hst13_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_hst13_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_hst13_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_hst13_en"/>
+    </record>
+
+    <record id="hst13_purc_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_hst13_en"/>
+        <field name="tax_id" ref="hst13_purc_en"/>
+    </record>
+
+    <record id="hst13_purc_en_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">130</field>
+        <field name="debit_credit_amount">130</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_hst13_en"/>
+        <field name="account_id" ref="chart11831_en"/>
+        <field name="tax_id" ref="hst13_purc_en"/>
+    </record>
+
+    <record id="hst13_purc_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_hst13_en"/>
+        <field name="tax_id" ref="hst13_purc_en"/>
+    </record>
+
+    <record id="hst13_purc_en_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">130</field>
+        <field name="debit_credit_amount">130</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_hst13_en"/>
+        <field name="account_id" ref="chart11831_en"/>
+        <field name="tax_id" ref="hst13_purc_en"/>
     </record>
 
     <record id="hst14_purc_en" model="account.tax.template">
@@ -466,14 +836,46 @@
         <field name="name">HST for purchases - 14%</field>
         <field name="description">HST14_PURC</field>
         <field name="type_tax_use">purchase</field>
-        <field name="amount">0.140000</field>
+        <field name="amount">14</field>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="chart11832_en"/>
-        <field name="account_paid_id" ref="chart11832_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_hst14_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_hst14_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_hst14_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_hst14_en"/>
+    </record>
+
+    <record id="hst14_purc_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_hst14_en"/>
+        <field name="tax_id" ref="hst14_purc_en"/>
+    </record>
+
+    <record id="hst14_purc_en_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">140</field>
+        <field name="debit_credit_amount">140</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_hst14_en"/>
+        <field name="account_id" ref="chart11832_en"/>
+        <field name="tax_id" ref="hst14_purc_en"/>
+    </record>
+
+    <record id="hst14_purc_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_hst14_en"/>
+        <field name="tax_id" ref="hst14_purc_en"/>
+    </record>
+
+    <record id="hst14_purc_en_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">140</field>
+        <field name="debit_credit_amount">140</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_hst14_en"/>
+        <field name="account_id" ref="chart11832_en"/>
+        <field name="tax_id" ref="hst14_purc_en"/>
     </record>
 
     <record id="hst15_purc_en" model="account.tax.template">
@@ -481,14 +883,46 @@
         <field name="name">HST for purchases - 15%</field>
         <field name="description">HST15_PURC</field>
         <field name="type_tax_use">purchase</field>
-        <field name="amount">0.150000</field>
+        <field name="amount">15</field>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="chart11833_en"/>
-        <field name="account_paid_id" ref="chart11833_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_hst15_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_hst15_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_hst15_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_hst15_en"/>
+    </record>
+
+    <record id="hst15_purc_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_hst15_en"/>
+        <field name="tax_id" ref="hst15_purc_en"/>
+    </record>
+
+    <record id="hst15_purc_en_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">150</field>
+        <field name="debit_credit_amount">150</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_hst15_en"/>
+        <field name="account_id" ref="chart11833_en"/>
+        <field name="tax_id" ref="hst15_purc_en"/>
+    </record>
+
+    <record id="hst15_purc_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_hst15_en"/>
+        <field name="tax_id" ref="hst15_purc_en"/>
+    </record>
+
+    <record id="hst15_purc_en_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">150</field>
+        <field name="debit_credit_amount">150</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_hst15_en"/>
+        <field name="account_id" ref="chart11833_en"/>
+        <field name="tax_id" ref="hst15_purc_en"/>
     </record>
 
     <!-- GST -->
@@ -498,14 +932,46 @@
         <field name="name">GST for purchases - 5%</field>
         <field name="description">GST_PURC</field>
         <field name="type_tax_use">purchase</field>
-        <field name="amount">0.050000</field>
+        <field name="amount">5</field>
         <field name="type">percent</field>
-        <field name="account_collected_id" ref="chart1181_en"/>
-        <field name="account_paid_id" ref="chart1181_en"/>
-        <field name="base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="tax_code_id" ref="vat_code_receivable_gst_en"/>
-        <field name="ref_base_code_id" ref="vat_code_base_payable_gst_en"/>
-        <field name="ref_tax_code_id" ref="vat_code_receivable_gst_en"/>
+    </record>
+
+    <record id="gst_purc_en_invoice_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gst_purc_en"/>
+    </record>
+
+    <record id="gst_purc_en_invoice_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gst_purc_en"/>
+    </record>
+
+    <record id="gst_purc_en_refund_base_line" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">1000</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gst_purc_en"/>
+    </record>
+
+    <record id="gst_purc_en_refund_tax_line" model="account.tax.line.template">
+        <field name="code_type">tax</field>
+        <field name="tax_amount">50</field>
+        <field name="debit_credit_amount">50</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_receivable_gst_en"/>
+        <field name="account_id" ref="chart1181_en"/>
+        <field name="tax_id" ref="gst_purc_en"/>
     </record>
 
     </data>
