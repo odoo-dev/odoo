@@ -19,6 +19,7 @@
 
 import openerp
 from openerp.osv import fields, osv
+from openerp.addons.account import account
 
 TAX_CODE_COLUMNS = {
                     'domain':fields.char('Domain', size=32, 
@@ -162,7 +163,6 @@ class account_tax_template(osv.osv):
         return result
 
 
-
 class account_tax(osv.osv):
     """ Add fields used to define some brazilian taxes """
     _inherit = 'account.tax'
@@ -176,12 +176,7 @@ class account_tax(osv.osv):
                'amount_mva': fields.float('MVA Percent', required=True, 
                                           digits_compute=get_precision_tax(), 
                                           help="Um percentual decimal em % entre 0-1."),
-               'type': fields.selection([('percent','Percentage'), 
-                                         ('fixed','Fixed Amount'), 
-                                         ('none','None'), 
-                                         ('code','Python Code'), 
-                                         ('balance','Balance'), 
-                                         ('quantity','Quantity')], 'Tax Type', required=True,
+               'type': fields.selection(account.TAX_TYPE + [('quantity', 'Quantity')], 'Tax Type', required=True,
                                         help="The computation method for the tax amount."),
                }
     _defaults = TAX_DEFAULTS

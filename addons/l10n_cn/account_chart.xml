@@ -963,20 +963,77 @@
         <record id="vats" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_chart_china"/>
             <field name="name">增值税17%销项税</field>
-            <field eval="0.17" name="amount"/>
+            <field eval="17" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart22210105"/>
-            <field name="account_paid_id" ref="chart22210105"/>
             <field name="type_tax_use">sale</field>
         </record>
+        <record id="vats_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="vats"/>
+        </record>
+        <record id="vats_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">170</field>
+            <field name="debit_credit_amount">170</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart22210105"/>
+            <field name="tax_id" ref="vats"/>
+        </record>
+        <record id="vats_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="vats"/>
+        </record>
+        <record id="vats_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">170</field>
+            <field name="debit_credit_amount">170</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart22210105"/>
+            <field name="tax_id" ref="vats"/>
+        </record>
+
         <record id="vatp" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_chart_china"/>
             <field name="name">增值税17%进项税</field>
-            <field eval="0.17" name="amount"/>
+            <field eval="17" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="chart22210101"/>
-            <field name="account_paid_id" ref="chart22210101"/>
             <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="vatp_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="vatp"/>
+        </record>
+        <record id="vatp_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">170</field>
+            <field name="debit_credit_amount">170</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="chart22210101"/>
+            <field name="tax_id" ref="vatp"/>
+        </record>
+        <record id="vatp_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="vatp"/>
+        </record>
+        <record id="vatp_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">170</field>
+            <field name="debit_credit_amount">170</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chart22210101"/>
+            <field name="tax_id" ref="vatp"/>
         </record>
     </data>
 </openerp>

@@ -59,126 +59,410 @@
     <record id="ivat19" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Πωλήσεις ΦΠΑ 19%</field>
-        <field eval="0.19" name="amount"/>
-        <field name="sequence" eval="3" />
+        <field eval="19" name="amount"/>
+        <field name="sequence" eval="3"/>
         <field name="type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_ivat_303"/>
-        <field name="tax_code_id" ref="vat_code_ivat_333"/>
-
-    <!-- refunds: <field name="ref_base_code_id" ref="vat_code_purch_S"/>
-        <field name="ref_tax_code_id" ref="vat_code_input_S"/> -->
     </record>
+
+        <record id="ivat19_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_ivat_303"/>
+            <field name="tax_id" ref="ivat19"/>
+        </record>
+
+        <record id="ivat19_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">190</field>
+            <field name="debit_credit_amount">190</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_ivat_333"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="ivat19"/>
+        </record>
+
+        <record id="ivat19_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="ivat19"/>
+        </record>
+
+        <record id="ivat19_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">190</field>
+            <field name="debit_credit_amount">190</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="ivat19"/>
+        </record>
 
     <record id="ivat21" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Πωλήσεις ΦΠΑ 21%</field>
-        <field eval="0.21" name="amount"/>
+        <field eval="21" name="amount"/>
         <field name="sequence" eval="2" />
         <field name="type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_ivat_303"/>
-        <field name="tax_code_id" ref="vat_code_ivat_333"/>
     </record>
+
+        <record id="ivat21_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_ivat_303"/>
+            <field name="tax_id" ref="ivat21"/>
+        </record>
+
+        <record id="ivat21_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_ivat_333"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="ivat21"/>
+        </record>
+
+        <record id="ivat21_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="ivat21"/>
+        </record>
+
+        <record id="ivat21_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="ivat21"/>
+        </record>
 
     <record id="ivat23" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Πωλήσεις ΦΠΑ 23%</field>
-        <field eval="0.23" name="amount"/>
+        <field eval="23" name="amount"/>
         <field name="type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_ivat_303"/>
-        <field name="tax_code_id" ref="vat_code_ivat_333"/>
     </record>
-    
+
+        <record id="ivat23_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_ivat_303"/>
+            <field name="tax_id" ref="ivat23"/>
+        </record>
+
+        <record id="ivat23_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">230</field>
+            <field name="debit_credit_amount">230</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_ivat_333"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="ivat23"/>
+        </record>
+
+        <record id="ivat23_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="ivat23"/>
+        </record>
+
+        <record id="ivat23_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">230</field>
+            <field name="debit_credit_amount">230</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="ivat23"/>
+        </record>
+
     <!-- tax definitions for return VAT from purchases -->
 
     <record id="pvat19" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Αγορές ΦΠΑ19%</field>
-        <field eval="0.19" name="amount"/>
+        <field eval="19" name="amount"/>
         <field name="sequence" eval="3" />
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_evat_353"/>
-        <field name="tax_code_id" ref="vat_code_evat_373"/>
-    <!-- refunds: <field name="ref_base_code_id" ref="vat_code_purch_S"/>
-        <field name="ref_tax_code_id" ref="vat_code_input_S"/> -->
     </record>
 
+        <record id="pvat19_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_353"/>
+            <field name="tax_id" ref="pvat19"/>
+        </record>
+
+        <record id="pvat19_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">190</field>
+            <field name="debit_credit_amount">190</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_373"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="pvat19"/>
+        </record>
+
+        <record id="pvat19_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <!--field name="code_id" ref="vat_code_purch_S"/-->
+            <field name="tax_id" ref="pvat19"/>
+        </record>
+
+        <record id="pvat19_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">190</field>
+            <field name="debit_credit_amount">190</field>
+            <field name="apply_on">refund</field>
+            <!--field name="code_id" ref="vat_code_input_S"/-->
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="pvat19"/>
+        </record>
 
     <record id="pvat21" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Αγορές ΦΠΑ21%</field>
-        <field eval="0.21" name="amount"/>
+        <field eval="21" name="amount"/>
         <field name="sequence" eval="2" />
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_evat_353"/>
-        <field name="tax_code_id" ref="vat_code_evat_373"/>
     </record>
+
+        <record id="pvat21_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_353"/>
+            <field name="tax_id" ref="pvat21"/>
+        </record>
+
+        <record id="pvat21_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_373"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="pvat21"/>
+        </record>
+
+        <record id="pvat21_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="pvat21"/>
+        </record>
+
+        <record id="pvat21_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="pvat21"/>
+        </record>
 
     <record id="pvat23" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Αγορές ΦΠΑ23%</field>
-        <field eval="0.23" name="amount"/>
+        <field eval="23" name="amount"/>
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_evat_353"/>
-        <field name="tax_code_id" ref="vat_code_evat_373"/>
     </record>
+
+        <record id="pvat23_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_353"/>
+            <field name="tax_id" ref="pvat23"/>
+        </record>
+
+        <record id="pvat23_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">230</field>
+            <field name="debit_credit_amount">230</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_373"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="pvat23"/>
+        </record>
+
+        <record id="pvat23_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="pvat23"/>
+        </record>
+
+        <record id="pvat23_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">230</field>
+            <field name="debit_credit_amount">230</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="pvat23"/>
+        </record>
 
     <!-- return VAT on expenses (different from purchases ) -->
     <record id="evat19" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Δαπάνες ΦΠΑ19%</field>
-        <field eval="0.19" name="amount"/>
-        <field name="sequence" eval="3" />
+        <field eval="19" name="amount"/>
+        <field name="sequence" eval="3"/>
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_evat_357"/>
-        <field name="tax_code_id" ref="vat_code_evat_377"/>
     </record>
+
+        <record id="evat19_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_357"/>
+            <field name="tax_id" ref="evat19"/>
+        </record>
+
+        <record id="evat19_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">190</field>
+            <field name="debit_credit_amount">190</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_377"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="evat19"/>
+        </record>
+
+        <record id="evat19_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="evat19"/>
+        </record>
+
+        <record id="evat19_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">190</field>
+            <field name="debit_credit_amount">190</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="evat19"/>
+        </record>
 
     <record id="evat21" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Δαπάνες ΦΠΑ21%</field>
-        <field eval="0.21" name="amount"/>
-        <field name="sequence" eval="2" />
+        <field eval="21" name="amount"/>
+        <field name="sequence" eval="2"/>
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_evat_357"/>
-        <field name="tax_code_id" ref="vat_code_evat_377"/>
     </record>
+
+        <record id="evat21_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_357"/>
+            <field name="tax_id" ref="evat21"/>
+        </record>
+
+        <record id="evat21_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_377"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="evat21"/>
+        </record>
+
+        <record id="evat21_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="evat21"/>
+        </record>
+
+        <record id="evat21_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="evat21"/>
+        </record>
 
     <record id="evat23" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         <field name="name">Δαπάνες ΦΠΑ23%</field>
-        <field eval="0.23" name="amount"/>
+        <field eval="23" name="amount"/>
         <field name="sequence" eval="2" />
         <field name="type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="account_collected_id" ref="chartgr_54_00"/>
-        <field name="account_paid_id" ref="chartgr_54_00"/>
-        <field name="base_code_id" ref="vat_code_evat_357"/>
-        <field name="tax_code_id" ref="vat_code_evat_377"/>
     </record>
+
+        <record id="evat23_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_357"/>
+            <field name="tax_id" ref="evat23"/>
+        </record>
+
+        <record id="evat23_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">230</field>
+            <field name="debit_credit_amount">230</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="vat_code_evat_377"/>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="evat23"/>
+        </record>
+
+        <record id="evat23_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="evat23"/>
+        </record>
+
+        <record id="evat23_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">230</field>
+            <field name="debit_credit_amount">230</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="chartgr_54_00"/>
+            <field name="tax_id" ref="evat23"/>
+        </record>
 
 </data>
 </openerp>
