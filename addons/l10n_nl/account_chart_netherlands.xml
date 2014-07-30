@@ -4138,116 +4138,360 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Verkopen/omzet onbelast (nul-tarief)</field>
             <field name="description">0% BTW</field>
-            <field eval="0.00" name="amount"/>
+            <field eval="0" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable0"/>
-            <field name="account_paid_id" ref="vat_payable0"/>
-            <field name="base_code_id" ref="omz_code_1e"/>
-            <field name="ref_base_code_id" ref="omz_code_1e"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">sale</field>
         </record>
+        
+        <record id="btw_0_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_1e"/>
+            <field name="tax_id" ref="btw_0"/>
+        </record>
+       
+        <record id="btw_0_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">tax</field>
+            <field eval="0" name="tax_amount"/>
+            <field eval="0" name="debit_credit_amount"/>
+            <field name="account_id" ref="vat_payable0"/>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="btw_0"/>
+        </record>
+
+        <record id="btw_0_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_1e"/>
+            <field name="tax_id" ref="btw_0"/>
+        </record>
+
+        <record id="btw_0_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable0"/>
+            <field eval="0" name="tax_amount"/>
+            <field eval="0" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="btw_0"/>
+        </record>
+
         <record id="btw_6" model="account.tax.template">
             <field name="sequence">10</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Verkopen/omzet laag</field>
             <field name="description">6% BTW</field>
-            <field eval="0.06" name="amount"/>
+            <field eval="6" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable_low"/>
-            <field name="account_paid_id" ref="vat_payable_low"/>
-            <field name="base_code_id" ref="omz_code_1b"/>
-            <field name="tax_code_id" ref="btw_code_1b"/>
-            <field name="ref_base_code_id" ref="omz_code_1b"/>
-            <field name="ref_tax_code_id" ref="btw_code_1b"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">sale</field>
         </record>
+        
+        <record id="btw_6_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_1b"/>
+            <field name="tax_id" ref="btw_6"/>
+        </record>
+
+        <record id="btw_6_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_low"/>
+            <field eval="60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_1b"/>
+            <field name="tax_id" ref="btw_6"/>
+        </record>
+        
+        <record id="btw_6_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_1b"/>
+            <field name="tax_id" ref="btw_6"/>
+        </record>
+
+        <record id="btw_6_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_low"/>
+            <field eval="-60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_1b"/>
+            <field name="tax_id" ref="btw_6"/>
+        </record>
+
         <record id="btw_21" model="account.tax.template">
             <field name="sequence">5</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Verkopen/omzet hoog</field>
             <field name="description">21% BTW</field>
-            <field eval="0.21" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable_high"/>
-            <field name="account_paid_id" ref="vat_payable_high"/>
-            <field name="base_code_id" ref="omz_code_1a"/>
-            <field name="tax_code_id" ref="btw_code_1a"/>
-            <field name="ref_base_code_id" ref="omz_code_1a"/>
-            <field name="ref_tax_code_id" ref="btw_code_1a"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">sale</field>
         </record>
+
+        <record id="btw_21_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">5</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_1a"/>
+            <field name="tax_id" ref="btw_21"/>
+        </record>
+
+        <record id="btw_21_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">5</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_1a"/>
+            <field name="tax_id" ref="btw_21"/>
+        </record>
+
+        <record id="btw_21_mwst_20_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">5</field>
+            <field name="code_type">base</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_1a"/>
+            <field name="tax_id" ref="btw_21"/>
+   	    </record>
+
+        <record id="btw_21_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">5</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_1a"/>
+            <field name="tax_id" ref="btw_21"/>
+        </record>
+        
 <!-- TODO - nakijken btw overig op percentage-->
         <record id="btw_overig" model="account.tax.template">
             <field name="sequence">15</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Verkopen/omzet overig</field>
             <field name="description">variabel BTW</field>
-            <field eval="0.21" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable_high"/>
-            <field name="account_paid_id" ref="vat_payable_high"/>
-            <field name="base_code_id" ref="omz_code_1a"/>
-            <field name="tax_code_id" ref="btw_code_1a"/>
-            <field name="ref_base_code_id" ref="omz_code_1c"/>
-            <field name="ref_tax_code_id" ref="btw_code_1c"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">sale</field>
         </record>
 
+        <record id="btw_overig_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_1a"/>
+            <field name="tax_id" ref="btw_overig"/>
+        </record>
+        
+        <record id="btw_overig_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_1a"/>
+            <field name="tax_id" ref="btw_overig"/>
+        </record>
+
+        <record id="btw_overig_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_1c"/>
+            <field name="tax_id" ref="btw_overig"/>
+        </record>
+
+        <record id="btw_overig_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_1c"/>
+            <field name="tax_id" ref="btw_overig"/>
+        </record>
+        
 <!--Inkoop BTW -->
         <record id="btw_6_buy" model="account.tax.template">
             <field name="sequence">10</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW te vorderen laag (inkopen)</field>
             <field name="description">6% BTW</field>
-            <field eval="0.06" name="amount"/>
+            <field eval="6" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_refund_low"/>
-            <field name="account_paid_id" ref="vat_refund_low"/>
-            <field name="tax_code_id" ref="btw_code_5b"/>
-            <field name="ref_tax_code_id" ref="btw_code_5b"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
+        
+        <record id="btw_6_buy_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+           <field name="tax_id" ref="btw_6_buy"/>
+        </record>
+
+        <record id="btw_6_buy_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_low"/>
+            <field eval="60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_6_buy"/>
+        </record>
+
+        <record id="btw_6_buy_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+        <field name="tax_id" ref="btw_6_buy"/>
+        </record>
+
+        <record id="btw_6_buy_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">10</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_low"/>
+            <field eval="-60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_6_buy"/>
+        </record>
+
         <record id="btw_21_buy" model="account.tax.template">
             <field name="sequence">5</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW te vorderen hoog (inkopen)</field>
             <field name="description">21% BTW</field>
-            <field eval="0.21" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_refund_high"/>
-            <field name="account_paid_id" ref="vat_refund_high"/>
-            <field name="tax_code_id" ref="btw_code_5b"/>
-            <field name="ref_tax_code_id" ref="btw_code_5b"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
+
+        <record id="btw_21_buy_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">5</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="btw_21_buy"/>
+        </record>
+
+        <record id="btw_21_buy_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">5</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_21_buy"/>
+        </record>
+
+        <record id="btw_21_buy_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">5</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="btw_21_buy"/>
+        </record>
+
+        <record id="btw_21_buy_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">5</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_21_buy"/>
+        </record>
+
         <record id="btw_overig_buy" model="account.tax.template">
             <field name="sequence">15</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW te vorderen overig (inkopen)</field>
             <field name="description">variabel BTW</field>
-            <field eval="0.21" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_refund_high"/>
-            <field name="account_paid_id" ref="vat_refund_high"/>
-            <field name="tax_code_id" ref="btw_code_5b"/>
-            <field name="ref_tax_code_id" ref="btw_code_5b"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
-<!--BTW verlegd-->
+        
+        <record id="btw_overig_buy_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="btw_overig_buy"/>
+        </record>
+
+        <record id="btw_overig_buy_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_overig_buy"/>
+        </record>
+
+        <record id="btw_overig_buy_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="btw_overig_buy"/>
+        </record>
+
+        <record id="btw_overig_buy_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_overig_buy"/>
+        </record>
+
+        <!--BTW verlegd-->
         <record id="btw_verk_0" model="account.tax.template">
             <field name="sequence">15</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
@@ -4255,59 +4499,121 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="description">0% BTW verlegd</field>
             <field eval="0.00" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable_verlegd"/>
-            <field name="account_paid_id" ref="vat_payable_verlegd"/>
-            <field eval="omz_code_1e" name="base_code_id"/>
-            <field eval="omz_code_1e" name="ref_base_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">sale</field>
         </record>
+        
+        <record id="btw_verk_0_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>            
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_1e"/>
+            <field name="tax_id" ref="btw_verk_0"/>
+        </record>
+        
+        <record id="btw_verk_0_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_verlegd"/>
+            <field eval="0.00" name="tax_amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="btw_verk_0"/>
+        </record>
+
+        <record id="btw_verk_0_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_1e"/>
+            <field name="tax_id" ref="btw_verk_0"/>
+        </record>
+
+        <record id="btw_verk_0_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_verlegd"/>
+            <field eval="0.00" name="tax_amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="btw_verk_0"/>
+        </record>
+
         <record id="btw_ink_0" model="account.tax.template">
             <field name="sequence">15</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW af te dragen verlegd (inkopen)</field>
             <field name="description">21% BTW verlegd</field>
-            <field eval="0.21" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable_verlegd"/>
-            <field name="account_paid_id" ref="vat_payable_verlegd"/>
-            <field eval="omz_code_2a" name="base_code_id"/>
-            <field eval="omz_code_2a" name="ref_base_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
-            <field eval="True" name="child_depend"/>
         </record>
-        <record id="btw_ink_0_1" model="account.tax.template">
+
+        <record id="btw_ink_0_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_2a"/>
+            <field name="tax_id" ref="btw_ink_0"/>
+        </record>
+
+        <record id="btw_ink_0_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">15</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_2a"/>
+            <field name="tax_id" ref="btw_ink_0"/>
+        </record>
+
+        <record id="btw_ink_0_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">98</field>
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">BTW te vorderen verlegd (inkopen1)</field>
-            <field eval="1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field eval="btw_ink_0" name="parent_id"/>
-            <field name="account_collected_id" ref="vat_payable_verlegd"/>
-            <field name="account_paid_id" ref="vat_payable_verlegd"/>
-            <field eval="btw_code_2a" name="tax_code_id"/>
-            <field eval="btw_code_2a" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_verlegd"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_2a"/>
+            <field name="tax_id" ref="btw_ink_0"/>
         </record>
-        <record id="btw_ink_0_2" model="account.tax.template">
+        
+        <record id="btw_ink_0_refund_tax_line_2" model="account.tax.line.template">
+            <field name="sequence">98</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_verlegd"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_2a"/>
+            <field name="tax_id" ref="btw_ink_0"/>
+        </record>
+        
+        <record id="btw_ink_0_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">BTW af te dragen verlegd (inkopen2)</field>
-            <field eval="-1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field eval="btw_ink_0" name="parent_id"/>
-            <field name="account_collected_id" ref="vat_payable_verlegd"/>
-            <field name="account_paid_id" ref="vat_payable_verlegd"/>
-            <field eval="btw_code_5b" name="tax_code_id"/>
-            <field eval="btw_code_5b" name="ref_tax_code_id"/>
-            <field name="tax_sign" eval="-1"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_verlegd"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_ink_0"/>
+        </record>
+        
+        <record id="btw_ink_0_refund_tax_line_4" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_verlegd"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_ink_0"/>
         </record>
 <!-- Binnen de EU -->
 <!-- BTW inkoop -->
@@ -4316,89 +4622,149 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import binnen EU laag</field>
             <field name="description">6% BTW import binnen EU</field>
-            <field eval="0.06" name="amount"/>
+            <field eval="6" name="amount"/>
             <field name="type">percent</field>
-            <field eval="True" name="child_depend"/>
-            <field eval="omz_code_4b" name="base_code_id"/>
-            <field eval="omz_code_4b" name="ref_base_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
-        <record id="btw_I_6_1" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
+
+        <record id="btw_I_6_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_4b"/>
+            <field name="tax_id" ref="btw_I_6"/>
+        </record>
+
+        <record id="btw_I_6_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_4b"/>
+            <field name="tax_id" ref="btw_I_6"/>
+        </record>
+
+        <record id="btw_I_6_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field name="name">Inkopen import binnen EU laag(1)</field>
-            <field eval="-1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_I_6"/>
-            <field name="account_collected_id" ref="vat_payable_low"/>
-            <field name="account_paid_id" ref="vat_payable_low"/>
-            <field eval="btw_code_4b" name="tax_code_id"/>
-            <field eval="btw_code_4b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_low"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_4b"/>
+            <field name="tax_id" ref="btw_I_6"/>
         </record>
-        <record id="btw_I_6_2" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
+        
+        <record id="btw_I_6_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field name="name">Inkopen import binnen EU laag(2)</field>
-            <field eval="1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_I_6"/>
-            <field name="account_collected_id" ref="vat_refund_low"/>
-            <field name="account_paid_id" ref="vat_refund_low"/>
-            <field eval="btw_code_5b" name="tax_code_id"/>
-            <field eval="btw_code_5b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_low"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_4b"/>
+            <field name="tax_id" ref="btw_I_6"/>
         </record>
+
+        <record id="btw_I_6_invoice_tax_line_3" model="account.tax.line.template">
+             <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_low"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_I_6"/>
+        </record>
+        
+        <record id="btw_I_6_refund_tax_line_4" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_low"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_I_6"/>
+        </record>
+        
         <record id="btw_I_21" model="account.tax.template">
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="sequence">20</field>
             <field name="name">Inkopen import binnen EU hoog</field>
             <field name="description">21% BTW import binnen EU</field>
-            <field eval="0.21" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="type">percent</field>
-            <field eval="True" name="child_depend"/>
-            <field eval="omz_code_4b" name="base_code_id"/>
-            <field eval="omz_code_4b" name="ref_base_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
-        <record id="btw_I_21_1" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
+
+        <record id="btw_I_21_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_4b"/>
+            <field name="tax_id" ref="btw_I_21"/>
+        </record>
+
+        <record id="btw_I_21_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_4b"/>
+            <field name="tax_id" ref="btw_I_21"/>
+        </record>
+
+        <record id="btw_I_21_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field name="name">Inkopen import binnen EU hoog(1)</field>
-            <field eval="-1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_I_21"/>
-            <field name="account_collected_id" ref="vat_payable_high"/>
-            <field name="account_paid_id" ref="vat_payable_high"/>
-            <field eval="btw_code_4b" name="tax_code_id"/>
-            <field eval="btw_code_4b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_4b"/>
+            <field name="tax_id" ref="btw_I_21"/>
         </record>
-        <record id="btw_I_21_2" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
+        
+        <record id="btw_I_21_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field name="name">Inkopen import binnen EU hoog(2)</field>
-            <field eval="1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_I_21"/>
-            <field name="account_collected_id" ref="vat_refund_high"/>
-            <field name="account_paid_id" ref="vat_refund_high"/>
-            <field eval="btw_code_5b" name="tax_code_id"/>
-            <field eval="btw_code_5b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_4b"/>
+            <field name="tax_id" ref="btw_I_21"/>
         </record>
+        
+        <record id="btw_I_21_invoice_tax_line_3" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_I_21"/>
+        </record>
+        
+        <record id="btw_I_21_refund_tax_line_4" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_I_21"/>
+        </record>
+        
         <record id="btw_I_overig" model="account.tax.template">
             <field name="sequence">20</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
@@ -4406,44 +4772,73 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="description">0% BTW import binnen EU</field>
             <field eval="0.00" name="amount"/>
             <field name="type">percent</field>
-            <field eval="True" name="child_depend"/>
-            <field eval="omz_code_4b" name="base_code_id"/>
-            <field eval="omz_code_4b" name="ref_base_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
-        <record id="btw_I_overig_1" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">Inkopen import binnen EU overig(1)</field>
+        
+        <record id="btw_I_overig_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_4b"/>
+            <field name="tax_id" ref="btw_I_overig"/>
+        </record>
+
+        <record id="btw_I_overig_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_4b"/>
+            <field name="tax_id" ref="btw_I_overig"/>
+        </record>
+
+        <record id="btw_I_overig_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field eval="-1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_I_overig"/>
-            <field name="account_collected_id" ref="vat_payable_high"/>
-            <field name="account_paid_id" ref="vat_payable_high"/>
-            <field eval="btw_code_4b" name="tax_code_id"/>
-            <field eval="btw_code_4b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_4b"/>
+            <field name="tax_id" ref="btw_I_overig"/>
         </record>
-        <record id="btw_I_overig_2" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">Inkopen import binnen EU overig(2)</field>
-            <field eval="1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_I_overig"/>
-            <field name="account_collected_id" ref="vat_refund_high"/>
-            <field name="account_paid_id" ref="vat_refund_high"/>
-            <field eval="btw_code_5b" name="tax_code_id"/>
+        
+        <record id="btw_I_overig_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field eval="btw_code_5b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_4b"/>
+            <field name="tax_id" ref="btw_I_overig"/>
         </record>
-<!-- BTW verkoop -->                        
+        
+        <record id="btw_I_overig_invoice_tax_line_3" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_I_overig"/>
+        </record>
+        
+        <record id="btw_I_overig_refund_tax_line_4" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_I_overig"/>
+        </record>
+       <!-- BTW verkoop -->                        
         <record id="btw_X0" model="account.tax.template">
             <field name="sequence">20</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
@@ -4451,14 +4846,49 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="description">BTW export binnen EU</field>
             <field eval="0.00" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable0"/>
-            <field name="account_paid_id" ref="vat_payable0"/>
-            <field name="base_code_id" ref="omz_code_3b"/>
-            <field name="ref_base_code_id" ref="omz_code_3b"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">sale</field>
         </record>
+        
+        <record id="btw_X0_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_3b"/>
+           <field name="tax_id" ref="btw_X0"/>
+        </record>
+
+        <record id="btw_X0_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable0"/>
+            <field eval="0.00" name="tax_amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="btw_X0"/>
+        </record>
+
+        <record id="btw_X0_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_3b"/>
+            <field name="tax_id" ref="btw_X0"/>
+        </record>
+
+        <record id="btw_X0_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable0"/>
+            <field eval="0.00" name="debit_credit_amount"/>
+            <field eval="0.00" name="tax_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="btw_X0"/>
+        </record>
+
         <record id="btw_X2" model="account.tax.template">
             <field name="sequence">20</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
@@ -4466,15 +4896,49 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="description">Inst./afst.verkopen binnen EU</field>
             <field eval="0.00" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable0"/>
-            <field name="account_paid_id" ref="vat_payable0"/>
-            <field name="base_code_id" ref="omz_code_3c"/>
-            <field name="ref_base_code_id" ref="omz_code_3c"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">sale</field>
         </record>
 
+        <record id="btw_X2_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_3c"/>
+            <field name="tax_id" ref="btw_X2"/>
+        </record>
+
+        <record id="btw_X2_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable0"/>
+            <field eval="0.00" name="tax_amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="btw_X2"/>
+        </record>
+
+        <record id="btw_X2_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_3c"/>
+            <field name="tax_id" ref="btw_X2"/>
+        </record>
+
+        <record id="btw_X2_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable0"/>
+            <field eval="0.00" name="tax_amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="btw_X2"/>
+        </record>
+        
 <!-- Buiten de EU -->
 <!-- BTW inkoop -->
         <record id="btw_E1" model="account.tax.template">
@@ -4482,133 +4946,223 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU laag</field>
             <field name="description">BTW import buiten EU</field>
-            <field eval="0.06" name="amount"/>
+            <field eval="6" name="amount"/>
             <field name="type">percent</field>
-            <field eval="True" name="child_depend"/>
-            <field eval="omz_code_4a" name="base_code_id"/>
-            <field eval="omz_code_4a" name="ref_base_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
-        <record id="btw_E1_1" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">Inkopen import buiten EU laag(1)</field>
-            <field eval="-1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_E1"/>
-            <field name="account_collected_id" ref="vat_payable_low"/>
-            <field name="account_paid_id" ref="vat_payable_low"/>
+        
+        <record id="btw_E1_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_4a"/>
+            <field name="tax_id" ref="btw_E1"/>
+        </record>
+
+        <record id="btw_E1_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_4a"/>
+            <field name="tax_id" ref="btw_E1"/>
+        </record>
+
+        <record id="btw_E1_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field eval="btw_code_4a" name="tax_code_id"/>
-            <field eval="btw_code_4a" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_low"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_4a"/>
+            <field name="tax_id" ref="btw_E1"/>
         </record>
-        <record id="btw_E1_2" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">Inkopen import buiten EU laag(2)</field>
-            <field eval="1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_E1"/>
-            <field name="account_collected_id" ref="vat_refund_low"/>
-            <field name="account_paid_id" ref="vat_refund_low"/>
+        
+        <record id="btw_E1_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field eval="btw_code_5b" name="tax_code_id"/>
-            <field eval="btw_code_5b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_low"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_4a"/>
+            <field name="tax_id" ref="btw_E1"/>
         </record>
+        
+        <record id="btw_E1_invoice_tax_line_3" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_low"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_E1"/>
+        </record>  
+          
+        <record id="btw_E1_refund_tax_line_4" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_low"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_E1"/>
+        </record>
+            
         <record id="btw_E2" model="account.tax.template">
             <field name="sequence">20</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU hoog</field>
             <field name="description">BTW import buiten EU</field>
-            <field eval="0.21" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="type">percent</field>
-            <field eval="True" name="child_depend"/>
-            <field eval="omz_code_4a" name="base_code_id"/>
-            <field eval="omz_code_4a" name="ref_base_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
-        <record id="btw_E2_1" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">Inkopen import buiten EU hoog(1)</field>
-            <field eval="-1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_E2"/>
-            <field name="account_collected_id" ref="vat_payable_high"/>
+        
+        <record id="btw_E2_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_4a"/>
+            <field name="tax_id" ref="btw_E2"/>
+        </record>
+
+        <record id="btw_E2_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_4a"/>
+            <field name="tax_id" ref="btw_E2"/>
+        </record>
+
+        <record id="btw_E2_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field name="account_paid_id" ref="vat_payable_high"/>
-            <field eval="btw_code_4a" name="tax_code_id"/>
-            <field eval="btw_code_4a" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_4a"/>
+            <field name="tax_id" ref="btw_E2"/>
         </record>
-        <record id="btw_E2_2" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">Inkopen import buiten EU hoog(2)</field>
-            <field eval="1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_E2"/>
+        
+        <record id="btw_E2_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">99</field>
-            <field name="account_collected_id" ref="vat_refund_high"/>
-            <field name="account_paid_id" ref="vat_refund_high"/>
-            <field eval="btw_code_5b" name="tax_code_id"/>
-            <field eval="btw_code_5b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_4a"/>
+            <field name="tax_id" ref="btw_E2"/>
         </record>
+        
+        <record id="btw_E2_invoice_tax_line_3" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_E2"/>
+        </record>
+        
+        <record id="btw_E2_refund_tax_line_4" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_E2"/>
+        </record>
+        
         <record id="btw_E_overig" model="account.tax.template">
             <field name="sequence">20</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU overig</field>
             <field name="description">BTW import buiten EU</field>
-            <field eval="0.21" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="type">percent</field>
-            <field eval="True" name="child_depend"/>
-            <field eval="omz_code_4a" name="base_code_id"/>
-            <field eval="omz_code_4a" name="ref_base_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">purchase</field>
         </record>
-        <record id="btw_E_overig_1" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">Inkopen import buiten EU overig(1)</field>
-            <field eval="-1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_E_overig"/>
-            <field name="account_collected_id" ref="vat_payable_high"/>
-            <field name="account_paid_id" ref="vat_payable_high"/>
-            <field eval="btw_code_4a" name="tax_code_id"/>
-            <field eval="btw_code_4a" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+
+        <record id="btw_E_overig_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_4a"/>
+            <field name="tax_id" ref="btw_E_overig"/>
+        </record>
+
+        <record id="btw_E_overig_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_4a"/>
+            <field name="tax_id" ref="btw_E_overig"/>
+        </record>
+
+        <record id="btw_E_overig_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_4a"/>
+            <field name="tax_id" ref="btw_E_overig"/>
         </record>
-        <record id="btw_E_overig_2" model="account.tax.template">
-            <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="name">Inkopen import buiten EU overig(2)</field>
-            <field eval="1.00" name="amount"/>
-            <field name="type">percent</field>
-            <field name="parent_id" ref="btw_E_overig"/>
-            <field name="account_collected_id" ref="vat_refund_high"/>
-            <field name="account_paid_id" ref="vat_refund_high"/>
-            <field eval="btw_code_5b" name="tax_code_id"/>
-            <field eval="btw_code_5b" name="ref_tax_code_id"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
-            <field name="type_tax_use">purchase</field>
+        
+        <record id="btw_E_overig_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable_high"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_4a"/>
+            <field name="tax_id" ref="btw_E_overig"/>
         </record>
+        
+        <record id="btw_E_overig_invoice_tax_line_3" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_E_overig"/>
+        </record>
+        
+        <record id="btw_E_overig_refund_tax_line_4" model="account.tax.line.template">
+            <field name="sequence">99</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_refund_high"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="btw_code_5b"/>
+            <field name="tax_id" ref="btw_E_overig"/>
+        </record>
+        
 <!-- BTW Verkoop -->
         <record id="btw_X1" model="account.tax.template">
             <field name="sequence">20</field>
@@ -4617,13 +5171,47 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="description">BTW export buiten EU</field>
             <field eval="0.00" name="amount"/>
             <field name="type">percent</field>
-            <field name="account_collected_id" ref="vat_payable0"/>
-            <field name="account_paid_id" ref="vat_payable0"/>
-            <field name="base_code_id" ref="omz_code_3a"/>
-            <field name="ref_base_code_id" ref="omz_code_3a"/>
-            <field name="ref_base_sign" eval="-1"/>
-            <field name="ref_tax_sign" eval="-1"/>
             <field name="type_tax_use">sale</field>
+        </record>
+
+        <record id="btw_X1_invoice_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="omz_code_3a"/>
+            <field name="tax_id" ref="btw_X1"/>
+    </record>
+
+        <record id="btw_X1_invoice_tax_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable0"/>
+            <field eval="0.00" name="tax_amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="btw_X1"/>
+        </record>
+
+        <record id="btw_X1_refund_base_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="omz_code_3a"/>
+            <field name="tax_id" ref="btw_X1"/>
+        </record>
+
+        <record id="btw_X1_refund_tax_line" model="account.tax.line.template">
+            <field name="sequence">20</field>
+            <field name="code_type">tax</field>
+            <field name="account_id" ref="vat_payable0"/>
+            <field eval="0.00" name="tax_amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="btw_X1"/>
         </record>
     </data>
 </openerp>
