@@ -2065,7 +2065,7 @@ class account_tax(osv.osv):
         return self.compute_all(cr, uid, [tax], amount, 1) # TOCHECK may use force_exclude parameter
 
     @api.v7
-    def compute_all(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, precision=None, date=None, apply_on='invoice', force_excluded=False):
+    def compute_all(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, precision=None, date=None, apply_on='invoice', force_excluded=False, context=None):
         """
         :param force_excluded: boolean used to say that we don't want to consider the value of field price_include of
             tax. It's used in encoding by line where you don't matter if you encoded a tax with that boolean to True or
@@ -2090,35 +2090,26 @@ class account_tax(osv.osv):
         if taxes and taxes[0].company_id.tax_calculation_rounding_method == 'round_globally':
             tax_compute_precision += 5
         totalin = totalex = round(price_unit * quantity, precision)
-        tin = []
-        tex = []
+        cur_price_unit = price_unit
+        all_taxes = []
         for tax in taxes:
-            if not tax.price_include or force_excluded:
-                tex.append(tax)
-            else:
-                tin.append(tax)
-        tin = self._compute(cr, uid, tin, price_unit, quantity, product=product, \
-                               partner=partner, precision=tax_compute_precision, date=date, apply_on=apply_on)
-        for r in tin:
-            if r.get('code_type') == 'tax':
-                totalex -= r.get('amount', 0.0)
-        totlex_qty = 0.0
-        try:
-            totlex_qty = totalex/quantity
-        except:
-            pass
-        tex = self._compute(cr, uid, tex, totlex_qty, quantity, product=product, \
-                            partner=partner, precision=tax_compute_precision, date=date, apply_on=apply_on)
-        for r in tex:
-            if r.get('code_type') == 'tax':
-                totalin += r.get('amount', 0.0)
-            #special case of group tax which will have child tax with include price option
-            if r.get('code_type') == 'tax' and r.get('price_include_in_group', False):
-                totalex -= r.get('amount', 0.0)
+            res_tax = self._compute(cr, uid, [tax], cur_price_unit, quantity, product=product,
+                        partner=partner, precision=tax_compute_precision, date=date, apply_on=apply_on, context=context)
+            all_taxes += res_tax
+            for rec in res_tax:
+                if rec.get('code_type') == 'tax' and not tax.price_include:
+                    totalin += rec.get('amount', 0.0)
+                if rec.get('code_type') == 'tax' and tax.include_base_amount:
+                    cur_price_unit += rec.get('amount', 0.0)
+                if rec.get('code_type') == 'tax' and tax.price_include:
+                    cur_price_unit -= rec.get('amount', 0.0)
+                #special case of group tax which will have child tax with include price option
+                if rec.get('code_type') == 'tax' and rec.get('price_include_in_group', False):
+                    totalex -= rec.get('amount', 0.0)
         return {
             'total': totalex,
             'total_included': totalin,
-            'taxes': tin + tex
+            'taxes': all_taxes
         }
 
     @api.v8

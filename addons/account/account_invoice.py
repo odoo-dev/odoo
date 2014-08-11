@@ -712,7 +712,7 @@ class account_invoice(models.Model):
             for tax in self.tax_line:
                 if tax.manual:
                     continue
-                key = (tax.tax_code_id.id, tax.base_code_id.id, tax.account_id.id)
+                key = (tax.tax_id.id, tax.base_code_id.id or tax.tax_code_id.id, tax.account_id.id, tax.account_analytic_id.id)
                 tax_key.append(key)
                 if key not in compute_taxes:
                     raise except_orm(_('Warning!'), _('Global taxes defined, but they are not in invoice lines !'))
@@ -1468,8 +1468,7 @@ class account_invoice_tax(models.Model):
 
     invoice_id = fields.Many2one('account.invoice', string='Invoice Line',
         ondelete='cascade', index=True)
-    name = fields.Char(string='Tax Description',
-        required=True)
+    name = fields.Char(string='Tax Description', required=True)
     account_id = fields.Many2one('account.account', string='Tax Account',
         required=True, domain=[('type', 'not in', ['view', 'income', 'closed'])])
     account_analytic_id = fields.Many2one('account.analytic.account', string='Analytic account')
@@ -1520,14 +1519,15 @@ class account_invoice_tax(models.Model):
         tax_grouped = {}
         currency = invoice.currency_id.with_context(date=invoice.date_invoice or fields.Date.today())
         apply_on = 'refund'
-        if invoice.type in ['out_invoice','in_invoice']:
+        if invoice.type in ['out_invoice', 'in_invoice']:
             apply_on = 'invoice'
         for line in invoice.invoice_line:
             taxes = line.invoice_line_tax_id.compute_all(
                 (line.price_unit * (1 - (line.discount or 0.0) / 100.0)),
                 line.quantity, line.product_id, invoice.partner_id, date=invoice.date_invoice, apply_on=apply_on)['taxes']
             for tax in taxes:
-                val={'invoice_id': invoice.id,
+                val = {
+                    'invoice_id': invoice.id,
                     'name': tax['name'],
                     'sequence': tax['sequence'],
                     'amount': tax['amount'],
@@ -1538,7 +1538,8 @@ class account_invoice_tax(models.Model):
                     'base_code_id': tax['code_type'] and tax['code_type'] == 'base' and tax['code_id'] or False,
                     'tax_code_id': tax['code_type'] and tax['code_type'] == 'tax' and tax['code_id'] or False,
                     'account_id': tax['account_id'] or line.account_id.id,
-                    'account_analytic_id': tax['analytic_account_id']}
+                    'account_analytic_id': tax['analytic_account_id'],
+                    'tax_id': tax['tax_id']}
 
                 # If the taxes generate moves on the same financial account as the invoice line
                 # and no default analytic account is defined at the tax level, propagate the
