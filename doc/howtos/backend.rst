@@ -1402,15 +1402,205 @@ PO/POT files.
 Reporting
 =========
 
-Reports
--------
+Printed reports
+---------------
 
-.. todo:: sle
+Odoo v8 comes with a new report engine based on QWeb, Twitter Bootstrap and Wkhtmltopdf. For an extensive overview
+of the QWeb templating engine, please refer to the eponymous section. Reports are declared just as
+any Qweb views, so they must be included in the Odoo manifest. A report is a combination of an
+ir.ui.view of 'qweb' type with an ir.actions.report.xml record. The latest allow to define
+informations like which model should be used to fill the magic variables, the default output type
+of the report (html, pdf, controller), if Odoo should save the report into database, ...
+
+As reports are web pages, they are available through an URL. An immediate advantage of it is that you can
+change the output instantly by editing this url. For instance, you can get the html output of the Invoice
+report with `/report/html/account.report_invoice/1` and the pdf one with `/report/pdf/account.report_invoice/1`
+
+
+Paper Formats
+-------------
+
+There is a model called Paper Format allowing to define details specific to the PDF output.
+These details include margins, header line, ... Everything related to the printed pdf.
+Defining a paper format is not mandatory as there is a default one set on the company.
+If you want a specific report to be associated to a specific paper format
+, just link the ir.actions.report.xml to it.
+
+Expressions used in Odoo report templates
+-----------------------------------------
+
+There are some magic variables used in the report rendering. The main ones are the following: 
+
+* docs: browserecord we want to print a report for.
+
+For instance, when you print the invoices of id 1 and 2, docs will be the browserecords of 
+account.invoice of id 1 and 2.
+
+* doc_ids: the list of ids of the concerned browse records
+* doc_model: the osv.Model record of the associated browse records
+* time: the python lib allowing to manipulate time
+* translate_doc: a function to translate a part of a report. It must be used as follow:
+
+
+
+user: browse record of the res.user printing the report
+res_company: browse record of the company of the user printing the report
+
+Generic / particular report
+---------------------------
+
+A generic report use the default rendering context, containing the magic variables as
+explained before. If you want a new rendering context containing anything you want to
+process your data Odoo AbstractModel, a custom module is needed. These reports are called
+"particular report".
+
+For a particular report, you have to write an Odoo Model containing a render_html method.
+Classically, this  method returns a call to the original **QWeb render** with 
+a **custom rendering context**. 
+
+Useful snippets
+----------------
+
+Creating a particular report
+############################
+
+.. code-block:: xml
+
+    <report 
+        id="account_invoices"
+        model="account.invoice"
+        string="Invoices"
+        report_type="qweb-pdf"
+        name="account.report_invoice"
+        file="account.report_invoice"
+        attachment_use="True"
+        attachment="(object.state in ('open','paid')) and
+            ('INV'+(object.number or '').replace('/','')+'.pdf')"
+    />
+
+Declare a paper format
+######################
+.. code-block:: xml
+
+    <record id="paperformat_frenchcheck" model="report.paperformat">
+        <field name="name">French Bank Check</field>
+        <field name="default" eval="True"/>
+        <field name="format">custom</field>
+        <field name="page_height">80</field>
+        <field name="page_width">175</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">3</field>
+        <field name="margin_bottom">3</field>
+        <field name="margin_left">3</field>
+        <field name="margin_right">3</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">3</field>
+        <field name="dpi">80</field>
+    </record>
+
+Minimal template
+################
+
+.. code-block:: xml
+
+    <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="report.external_layout">
+                <div class="page">
+                    <h2>Report title</h2>
+                </div>
+            </t>
+        </t>
+    </t>
+
+
+Template translation
+####################
+
+.. code-block:: xml
+
+    <t t-foreach="doc_ids" t-as="doc_id">
+        <t t-raw="translate_doc(doc_id, doc_model, 'partner_id.lang', account.report_invoice_document')"/>
+    </t>
+
+Writing a particular report
+###########################
+
+.. code-block:: python
+
+    from openerp import api, models
+
+
+    class ParticularReport(models.AbstractModel):
+        _name = 'report.<<module.reportname>>'
+        @api.multi
+        def render_html(self, data=None):
+            report_obj = self.env['report']
+            report = report_obj._get_report_from_name('<<module.reportname>>')
+            docargs = {
+                'doc_ids': ids,
+                'doc_model': report.model,
+                'docs': self.env[report.model].browse(ids),
+            }
+            return report_obj.render('<<module.reportname>>', docargs)
+
+.. admonition:: Exercise 1 - Create a report for the Session object, 
+   :class: exercise
+
+   Create a report for the Session object, displaying for each session its name, date,
+   duration, percentage of completion, responsible name and list of attendees.
+
+   .. only:: solutions
+
+        #.  Create a ``openacademy/openacademy_reports.xml``. It should contain:
+
+            .. code-block:: xml
+
+                <?xml version="1.0" encoding="UTF-8"?>
+                <openerp>
+                <data>
+                <report
+                    id="report_session"
+                    model="openacademy.session"
+                    string="Session Report"
+                    name="openacademy.report_session"
+                    file="openacademy.report_session"
+                    report_type="qweb-pdf"
+                />
+                </data>
+                </openerp>
+
+        #.  Create a ``openacademy/views/report_session.xml``. It should contain:
+
+            .. code-block:: xml
+
+                <template id="report_session">
+                    <t t-call="report.html_container">
+                        <t t-foreach="docs" t-as="o">
+                            <t t-call="report.external_layout">
+                                <div class="page">
+                                    <h2>Report title</h2>
+                                    <h2><span t-field="o.course_id"/> - <span t-field="o.name"/></h2>
+                                    <p>From <span t-field="o.start_date"/> to
+                                    <span t-field="o.stop_date"/>.</p>
+                                    <span>Attendees:</span>
+                                    <ul>
+                                        <t t-foreach="o.attendee_ids" t-as="attendee">
+                                            <li t-field="attendee.name"/>
+                                        </t>
+                                    </ul>
+                                </div>
+                            </t>
+                        </t>
+                    </t>
+                </template>
+
+        #.  Update ``openacademy/__openerp__.py`` to reference the new data file
 
 Dashboards
 ----------
 
-.. admonition:: Exercise 6 - Define a Dashboard
+.. admonition:: Exercise 2 - Define a Dashboard
    :class: exercise
 
    Define a dashboard containing the graph view you created, the sessions
