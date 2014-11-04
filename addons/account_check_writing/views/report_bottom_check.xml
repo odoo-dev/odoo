@@ -1,50 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
-<template id="report_check">
+<template id="report_bottomcheck">
     <t t-call="report.html_container">
         <t t-call="report.internal_layout">
             <t t-foreach="docs" t-as="voucher">
                 <div class="page">
-                    <div class="row col-xs-12">
-                        <div class="text-right col-xs-4 col-xs-offset-7">
-                            <span t-field="voucher.date"></span>
-                            <t t-if="voucher.journal_id.use_preprint_check">
-                                <span t-esc="voucher.chk_seq"></span>
-                            </t>
-                        </div>
-                    </div>
-                    <div class="row col-xs-12">
-                        <div class="text-left col-xs-offset-1 col-xs-4">
-                            <span t-field="voucher.partner_id.name"></span>
-                        </div>
-                        <div class="text-left col-xs-1 col-xs-offset-6">
-                            <span t-esc="voucher.amount"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="text-left col-xs-12">
-                             <span t-esc="fill_stars(voucher.amount_in_word)"></span>
-                         </div>
-                    </div>
-                    <div class="row col-xs-12">
-                        <div class="col-xs-offset-1 col-xs-5">
-                            <t t-if="voucher">
-                                <div class="text-left">
-                                    <address t-field="voucher.partner_id" t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
-                                </div>
-                            </t>
-                        </div>
-                    </div>
-                    
-                    <table>
-                        <tr>
-                            <td>
-                                <span t-field="voucher.name"></span>
-                            </td>
-                        </tr>
-                    </table>
-                    
                     <div class="row">
                         <div class="col-xs-5">
                             <strong>
@@ -53,13 +14,14 @@
                         </div>
                         <div class="col-xs-3 col-xs-offset-4">
                             <strong>
-                                <span t-esc="formatLang(voucher.date , date=True)"></span>
+                                <span t-esc="formatLang(voucher.date, date=True)"></span>
                                 <t t-if="voucher.journal_id.use_preprint_check">
                                     <span t-esc="voucher.chk_seq"></span>
                                 </t>
                             </strong>
                         </div>
                     </div>
+                    
                     <table width="100%">
                         <thead>
                             <tr>
@@ -113,9 +75,6 @@
                             </td>
                             <td class="text_center">
                                 <strong><span t-field="voucher.amount"/></strong>
-                                <t t-if="voucher.journal_id.use_preprint_check">
-                                    <span t-esc="voucher.chk_seq"></span>
-                                </t>
                             </td>
                         </tr>
                     </table>
@@ -129,6 +88,9 @@
                         <div class="col-xs-3 col-xs-offset-4">
                             <strong>
                                 <span t-esc="formatLang(voucher.date , date=True)"></span>
+                                <t t-if="voucher.journal_id.use_preprint_check">
+                                    <span t-esc="voucher.chk_seq"></span>
+                                </t>
                             </strong>
                         </div>
                     </div>
@@ -188,6 +150,36 @@
                             </td>
                         </tr>
                     </table>
+                    
+                    <div class="row col-xs-12 mt64">
+                        <div class="text-right col-xs-4 col-xs-offset-7">
+                            <t t-if="voucher.journal_id.use_preprint_check">
+                                <span t-esc="voucher.chk_seq"></span>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="row col-xs-12">
+                        <div class="text-left col-xs-offset-1 col-xs-4">
+                            <span t-field="voucher.date"></span>
+                        </div>
+                        <div class="text-right col-xs-1 col-xs-offset-6">
+                            <span t-esc="voucher.amount"/>
+                        </div>
+                    </div>
+                    <div class="row col-xs-12">
+                        <div class="col-xs-offset-1 col-xs-5">
+                            <t t-if="voucher">
+                                <div class="text-left">
+                                    <address t-field="voucher.partner_id" t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="text-left col-xs-12">
+                             <span t-esc="fill_stars(voucher.amount_in_word)"></span>
+                         </div>
+                    </div>
                 </div>
            </t>
          </t>

@@ -4,17 +4,15 @@
         <record id="paperformat_frenchcheck" model="report.paperformat">
             <field name="name">French Bank Check</field>
             <field name="default" eval="True"/>
-            <field name="format">custom</field>
-            <field name="page_height">80</field>
-            <field name="page_width">175</field>
+            <field name="format">Letter</field>
             <field name="orientation">Portrait</field>
-            <field name="margin_top">3</field>
-            <field name="margin_bottom">3</field>
-            <field name="margin_left">3</field>
-            <field name="margin_right">3</field>
+            <field name="margin_top">20</field>
+            <field name="margin_bottom">20</field>
+            <field name="margin_left">2</field>
+            <field name="margin_right">2</field>
             <field name="header_line" eval="False" />
-            <field name="header_spacing">3</field>
-            <field name="dpi">80</field>
+            <field name="header_spacing">15</field>
+            <field name="dpi">90</field>
         </record>
     </data>
 </openerp>

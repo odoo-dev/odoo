@@ -4,13 +4,39 @@
         <report
             id="action_report_check" 
             model="account.voucher" 
-            string="Check"
+            string="Print Check (Top)"
             report_type="qweb-pdf"
             name="account_check_writing.report_check" 
             file="account_check_writing.report_check" 
         />
 
         <record id="action_report_check" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="account_check_writing.paperformat_frenchcheck"/>
+        </record>
+        
+        <report
+            id="action_report_middlecheck" 
+            model="account.voucher" 
+            string="Print Check (Middle)"
+            report_type="qweb-pdf"
+            name="account_check_writing.report_middlecheck" 
+            file="account_check_writing.report_middlecheck" 
+        />
+
+        <record id="action_report_middlecheck" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="account_check_writing.paperformat_frenchcheck"/>
+        </record>
+        
+        <report
+            id="action_report_bottomcheck" 
+            model="account.voucher" 
+            string="Print Check (Bottom)"
+            report_type="qweb-pdf"
+            name="account_check_writing.report_bottomcheck" 
+            file="account_check_writing.report_bottomcheck" 
+        />
+
+        <record id="action_report_bottomcheck" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="account_check_writing.paperformat_frenchcheck"/>
         </record>
     </data>

@@ -36,6 +36,8 @@ Module for the Check Writing and Check Printing.
         'account_check_writing_data.xml',
         'data/report_paperformat.xml',
         'views/report_check.xml',
+        'views/report_middle_check.xml',
+        'views/report_bottom_check.xml',
         'account_check_writing_report.xml',
     ],
     'demo': ['account_demo.xml'],
