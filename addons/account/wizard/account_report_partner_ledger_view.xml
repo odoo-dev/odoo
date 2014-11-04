@@ -14,10 +14,11 @@
                 <field name="page_split"/>
                 <newline/>
             </xpath>
+            <!-- TODO: change filters
             <xpath expr="//field[@name='filter']" position="replace">
                 <field name="filter"/>
                 <field name="initial_balance" attrs="{'readonly':[('filter', 'in', ('filter_no', 'unreconciled'))]}" />
-            </xpath>
+            </xpath> -->
             </data>
             </field>
         </record>
