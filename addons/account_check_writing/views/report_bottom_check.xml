@@ -69,10 +69,10 @@
                 </table>
                <table class="text-right" width="100%">
                     <tr>
-                        <td class="text-right" width="90%">
+                        <td width="90%">
                             <strong>Check Amount</strong>
                         </td>
-                        <td class="text_center">
+                        <td>
                             <strong><span t-field="voucher.amount"/></strong>
                         </td>
                     </tr>
@@ -141,10 +141,10 @@
                 </table>
                <table class="text-right" width="100%">
                     <tr>
-                        <td class="text-right" width="90%">
+                        <td width="90%">
                             <strong>Check Amount</strong>
                         </td>
-                        <td class="text_center">
+                        <td>
                             <strong><span t-field="voucher.amount"/></strong>
                         </td>
                     </tr>
