@@ -3,186 +3,184 @@
 <data>
 <template id="report_bottomcheck">
     <t t-call="report.html_container">
-        <t t-call="report.internal_layout">
-            <t t-foreach="docs" t-as="voucher">
-                <div class="page">
-                    <div class="row">
-                        <div class="col-xs-5">
-                            <strong>
-                                <span t-field="voucher.partner_id.name"></span>
-                            </strong>
-                        </div>
-                        <div class="col-xs-3 col-xs-offset-4">
-                            <strong>
-                                <span t-esc="formatLang(voucher.date, date=True)"></span>
-                                <t t-if="voucher.journal_id.use_preprint_check">
-                                    <span t-esc="voucher.chk_seq"></span>
-                                </t>
-                            </strong>
-                        </div>
+        <t t-foreach="docs" t-as="voucher">
+            <div class="page">
+                <div class="row">
+                    <div class="col-xs-5">
+                        <strong>
+                            <span t-field="voucher.partner_id.name"></span>
+                        </strong>
                     </div>
-                    
-                    <table width="100%">
-                        <thead>
-                            <tr>
-                                <th class="text-left">
-                                    <strong>Due Date</strong>
-                                </th>
-                                <th class="text-left">
-                                    <strong>Description</strong>
-                                </th>
-                                <th class="text-center">
-                                    <strong>Original Amount</strong>
-                                </th>
-                                <th class="text-center">
-                                    <strong>Open Balance</strong>
-                                </th>
-                                <th class="text-center">
-                                    <strong>Discount</strong>
-                                </th>
-                                <th class="text-right">
-                                    <strong>Payment</strong>
-                                </th>
-                            </tr>
-                        </thead>
-                        <t t-foreach="get_lines(voucher.line_dr_ids)" t-as="l">
-                            <tr>
-                                <td class="text-left">
-                                   <t t-if="l['date_due']">
-                                        <span t-esc="formatLang(l['date_due'], date=True)"/>
-                                    </t>
-                                </td>
-                                <td class="text-left">
-                                   <span t-esc="l['name']"></span>
-                                </td>
-                                <td class="text-center">
-                                    <span t-esc="formatLang( l['amount_original'])"></span>
-                                </td>
-                                <td class="text-center">
-                                    <span t-esc="formatLang( l['amount_unreconciled'])"></span>
-                                </td>
-                                <td></td>
-                                <td class="text-right">
-                                    <span t-esc="formatLang( l['amount'])"></span>
-                                </td>
-                            </tr>
-                        </t>
-                    </table>
-                   <table class="text-right" width="100%">
-                        <tr>
-                            <td class="text-right" width="90%">
-                                <strong>Check Amount</strong>
-                            </td>
-                            <td class="text_center">
-                                <strong><span t-field="voucher.amount"/></strong>
-                            </td>
-                        </tr>
-                    </table>
-                    
-                    <div class="row mt32">
-                        <div class="col-xs-5">
-                            <strong>
-                                <span t-field="voucher.partner_id.name"></span>
-                            </strong>
-                        </div>
-                        <div class="col-xs-3 col-xs-offset-4">
-                            <strong>
-                                <span t-esc="formatLang(voucher.date , date=True)"></span>
-                                <t t-if="voucher.journal_id.use_preprint_check">
-                                    <span t-esc="voucher.chk_seq"></span>
-                                </t>
-                            </strong>
-                        </div>
-                    </div>
-                    <table width="100%">
-                        <thead>
-                            <tr>
-                                <th class="text-left">
-                                    <strong>Due Date</strong>
-                                </th>
-                                <th class="text-left">
-                                    <strong>Description</strong>
-                                </th>
-                                <th class="text-center">
-                                    <strong>Original Amount</strong>
-                                </th>
-                                <th class="text-center">
-                                    <strong>Open Balance</strong>
-                                </th>
-                                <th class="text-center">
-                                    <strong>Discount</strong>
-                                </th>
-                                <th class="text-right">
-                                    <strong>Payment</strong>
-                                </th>
-                            </tr>
-                        </thead>
-                        <t t-foreach="get_lines(voucher.line_dr_ids)" t-as="l">
-                            <tr>
-                                <td class="text-left">
-                                   <t t-if="l['date_due']">
-                                        <span t-esc="formatLang(l['date_due'], date=True)"/>
-                                    </t>
-                                </td>
-                                <td class="text-left">
-                                   <span t-esc="l['name']"></span>
-                                </td>
-                                <td class="text-center">
-                                    <span t-esc="formatLang( l['amount_original'])"></span>
-                                </td>
-                                <td class="text-center">
-                                    <span t-esc="formatLang( l['amount_unreconciled'])"></span>
-                                </td>
-                                <td></td>
-                                <td class="text-right">
-                                    <span t-esc="formatLang( l['amount'])"></span>
-                                </td>
-                            </tr>
-                        </t>
-                    </table>
-                   <table class="text-right" width="100%">
-                        <tr>
-                            <td class="text-right" width="90%">
-                                <strong>Check Amount</strong>
-                            </td>
-                            <td class="text_center">
-                                <strong><span t-field="voucher.amount"/></strong>
-                            </td>
-                        </tr>
-                    </table>
-                    
-                    <div class="row col-xs-12 mt64">
-                        <div class="text-right col-xs-4 col-xs-offset-7">
+                    <div class="col-xs-3 col-xs-offset-4">
+                        <strong>
+                            <span t-esc="formatLang(voucher.date, date=True)"></span>
                             <t t-if="voucher.journal_id.use_preprint_check">
                                 <span t-esc="voucher.chk_seq"></span>
                             </t>
-                        </div>
-                    </div>
-                    <div class="row col-xs-12">
-                        <div class="text-left col-xs-offset-1 col-xs-4">
-                            <span t-field="voucher.date"></span>
-                        </div>
-                        <div class="text-right col-xs-1 col-xs-offset-6">
-                            <span t-esc="voucher.amount"/>
-                        </div>
-                    </div>
-                    <div class="row col-xs-12">
-                        <div class="col-xs-offset-1 col-xs-5">
-                            <t t-if="voucher">
-                                <div class="text-left">
-                                    <address t-field="voucher.partner_id" t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
-                                </div>
-                            </t>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="text-left col-xs-12">
-                             <span t-esc="fill_stars(voucher.amount_in_word)"></span>
-                         </div>
+                        </strong>
                     </div>
                 </div>
-           </t>
-         </t>
+                
+                <table width="100%">
+                    <thead>
+                        <tr>
+                            <th class="text-left">
+                                <strong>Due Date</strong>
+                            </th>
+                            <th class="text-left">
+                                <strong>Description</strong>
+                            </th>
+                            <th class="text-center">
+                                <strong>Original Amount</strong>
+                            </th>
+                            <th class="text-center">
+                                <strong>Open Balance</strong>
+                            </th>
+                            <th class="text-center">
+                                <strong>Discount</strong>
+                            </th>
+                            <th class="text-right">
+                                <strong>Payment</strong>
+                            </th>
+                        </tr>
+                    </thead>
+                    <t t-foreach="get_lines(voucher.line_dr_ids)" t-as="l">
+                        <tr>
+                            <td class="text-left">
+                               <t t-if="l['date_due']">
+                                    <span t-esc="formatLang(l['date_due'], date=True)"/>
+                                </t>
+                            </td>
+                            <td class="text-left">
+                               <span t-esc="l['name']"></span>
+                            </td>
+                            <td class="text-center">
+                                <span t-esc="formatLang( l['amount_original'])"></span>
+                            </td>
+                            <td class="text-center">
+                                <span t-esc="formatLang( l['amount_unreconciled'])"></span>
+                            </td>
+                            <td></td>
+                            <td class="text-right">
+                                <span t-esc="formatLang( l['amount'])"></span>
+                            </td>
+                        </tr>
+                    </t>
+                </table>
+               <table class="text-right" width="100%">
+                    <tr>
+                        <td class="text-right" width="90%">
+                            <strong>Check Amount</strong>
+                        </td>
+                        <td class="text_center">
+                            <strong><span t-field="voucher.amount"/></strong>
+                        </td>
+                    </tr>
+                </table>
+                
+                <div class="row mt32">
+                    <div class="col-xs-5">
+                        <strong>
+                            <span t-field="voucher.partner_id.name"></span>
+                        </strong>
+                    </div>
+                    <div class="col-xs-3 col-xs-offset-4">
+                        <strong>
+                            <span t-esc="formatLang(voucher.date , date=True)"></span>
+                            <t t-if="voucher.journal_id.use_preprint_check">
+                                <span t-esc="voucher.chk_seq"></span>
+                            </t>
+                        </strong>
+                    </div>
+                </div>
+                <table width="100%">
+                    <thead>
+                        <tr>
+                            <th class="text-left">
+                                <strong>Due Date</strong>
+                            </th>
+                            <th class="text-left">
+                                <strong>Description</strong>
+                            </th>
+                            <th class="text-center">
+                                <strong>Original Amount</strong>
+                            </th>
+                            <th class="text-center">
+                                <strong>Open Balance</strong>
+                            </th>
+                            <th class="text-center">
+                                <strong>Discount</strong>
+                            </th>
+                            <th class="text-right">
+                                <strong>Payment</strong>
+                            </th>
+                        </tr>
+                    </thead>
+                    <t t-foreach="get_lines(voucher.line_dr_ids)" t-as="l">
+                        <tr>
+                            <td class="text-left">
+                               <t t-if="l['date_due']">
+                                    <span t-esc="formatLang(l['date_due'], date=True)"/>
+                                </t>
+                            </td>
+                            <td class="text-left">
+                               <span t-esc="l['name']"></span>
+                            </td>
+                            <td class="text-center">
+                                <span t-esc="formatLang( l['amount_original'])"></span>
+                            </td>
+                            <td class="text-center">
+                                <span t-esc="formatLang( l['amount_unreconciled'])"></span>
+                            </td>
+                            <td></td>
+                            <td class="text-right">
+                                <span t-esc="formatLang( l['amount'])"></span>
+                            </td>
+                        </tr>
+                    </t>
+                </table>
+               <table class="text-right" width="100%">
+                    <tr>
+                        <td class="text-right" width="90%">
+                            <strong>Check Amount</strong>
+                        </td>
+                        <td class="text_center">
+                            <strong><span t-field="voucher.amount"/></strong>
+                        </td>
+                    </tr>
+                </table>
+                
+                <div class="row col-xs-12 mt64">
+                    <div class="text-right col-xs-4 col-xs-offset-7">
+                        <t t-if="voucher.journal_id.use_preprint_check">
+                            <span t-esc="voucher.chk_seq"></span>
+                        </t>
+                    </div>
+                </div>
+                <div class="row col-xs-12">
+                    <div class="text-left col-xs-offset-1 col-xs-4">
+                        <span t-field="voucher.date"></span>
+                    </div>
+                    <div class="text-right col-xs-1 col-xs-offset-6">
+                        <span t-esc="voucher.amount"/>
+                    </div>
+                </div>
+                <div class="row col-xs-12">
+                    <div class="col-xs-offset-1 col-xs-5">
+                        <t t-if="voucher">
+                            <div class="text-left">
+                                <address t-field="voucher.partner_id" t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
+                            </div>
+                        </t>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="text-left col-xs-12">
+                         <span t-esc="fill_stars(voucher.amount_in_word)"></span>
+                     </div>
+                </div>
+            </div>
+        </t>
     </t>
 </template>
 </data>
