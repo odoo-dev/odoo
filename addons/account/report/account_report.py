@@ -24,26 +24,26 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 from openerp import tools
-from openerp.osv import fields,osv
+from openerp import models, fields, api
 
-def _code_get(self, cr, uid, context=None):
-    acc_type_obj = self.pool.get('account.account.type')
-    ids = acc_type_obj.search(cr, uid, [])
-    res = acc_type_obj.read(cr, uid, ids, ['code', 'name'], context)
-    return [(r['code'], r['name']) for r in res]
+@api.model
+def _code_get(self):
+    acc_type_obj = self.env['account.account.type']
+    account_type = acc_type_obj.search([])
+    return [(r.code, r.name) for r in account_type]
 
 
-class report_account_receivable(osv.osv):
+class report_account_receivable(models.Model):
     _name = "report.account.receivable"
     _description = "Receivable accounts"
     _auto = False
-    _columns = {
-        'name': fields.char('Week of Year', size=7, readonly=True),
-        'type': fields.selection(_code_get, 'Account Type', required=True),
-        'balance':fields.float('Balance', readonly=True),
-        'debit':fields.float('Debit', readonly=True),
-        'credit':fields.float('Credit', readonly=True),
-    }
+
+    name = fields.Char(string='Week of Year', size=7, readonly=True)
+    type = fields.Selection(_code_get, string='Account Type', required=True)
+    balance = fields.Float(string='Balance', readonly=True)
+    debit = fields.Float(string='Debit', readonly=True)
+    credit = fields.Float(string='Credit', readonly=True)
+
     _order = 'name desc'
 
     def init(self, cr):
@@ -68,16 +68,15 @@ class report_account_receivable(osv.osv):
             )""")
 
                     #a.type in ('receivable','payable')
-class temp_range(osv.osv):
+class temp_range(models.Model):
     _name = 'temp.range'
     _description = 'A Temporary table used for Dashboard view'
+    
+    name = fields.Char(string='Range')
+    
 
-    _columns = {
-        'name': fields.char('Range')
-    }
 
-
-class report_aged_receivable(osv.osv):
+class report_aged_receivable(models.Model):
     _name = "report.aged.receivable"
     _description = "Aged Receivable Till Today"
     _auto = False
@@ -86,20 +85,21 @@ class report_aged_receivable(osv.osv):
         super(report_aged_receivable, self).__init__(pool, cr)
         self.called = False
 
-    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         """ To call the init() method timely
         """
-        if context is None:context = {}
         if not self.called:
             self._init(cr, user)
         self.called = True # To make sure that init doesn't get called multiple times
 
-        res = super(report_aged_receivable, self).fields_view_get(cr, user, view_id, view_type, context, toolbar=toolbar, submenu=submenu)
+        res = super(report_aged_receivable, self).fields_view_get(view_id, view_type, toolbar=toolbar, submenu=submenu)
         return res
 
-    def _calc_bal(self, cr, uid, ids, name, args, context=None):
+    @api.multi
+    def _calc_bal(self):
         res = {}
-        for period in self.read(cr, uid, ids, ['name'], context=context):
+        for period in self.name:
             date1,date2 = period['name'].split(' to ')
             cr.execute("SELECT SUM(credit-debit) FROM account_move_line AS line, account_account as ac  \
                         WHERE (line.account_id=ac.id) AND ac.type='receivable' \
@@ -111,21 +111,17 @@ class report_aged_receivable(osv.osv):
 
         return res
 
-    _columns = {
-        'name': fields.char('Month Range', size=24, readonly=True),
-        'balance': fields.function(_calc_bal, string='Balance', readonly=True),
-    }
-
-    def init(self, cr):
-        return self._init(cr, 1)
-
-    def _init(self, cr, uid):
+    name = fields.Char(string='Month Range', size=24, readonly=True)
+    balance = fields.Float(string='Balance', compute='_calc_bal', readonly=True)
+    
+    @api.model
+    def _init(self): 
         """ This view will be used in dashboard
         The reason writing this code here is, we need to check date range from today to first date of fiscal year.
         """
-        pool_obj_fy = self.pool['account.fiscalyear']
+        pool_obj_fy = self.env['account.fiscalyear']
         current_date = datetime.date.today()
-        fy_id = pool_obj_fy.find(cr, uid, exception=False)
+        fy_id = pool_obj_fy.find(exception=False)
         names = []
 
         def add(names, start_on, stop_on):
@@ -133,7 +129,7 @@ class report_aged_receivable(osv.osv):
             return names
 
         if fy_id:
-            fiscal_year = pool_obj_fy.browse(cr, uid, fy_id)
+            fiscal_year = pool_obj_fy.browse(fy_id)
             fy_start_date = datetime.datetime.strptime(fiscal_year.date_start, '%Y-%m-%d').date()
             last_month_date = current_date - relativedelta(months=1)
 
@@ -146,7 +142,7 @@ class report_aged_receivable(osv.osv):
             cr.execute('delete from temp_range')
 
             for name in names:
-                self.pool['temp.range'].create(cr, uid, {'name':name})
+                self.env['temp.range'].create({'name':name})
 
         cr.execute("""
             create or replace view report_aged_receivable as (
@@ -154,37 +150,37 @@ class report_aged_receivable(osv.osv):
             )""")
 
 
-class report_invoice_created(osv.osv):
+class report_invoice_created(models.Model):
     _name = "report.invoice.created"
     _description = "Report of Invoices Created within Last 15 days"
     _auto = False
-    _columns = {
-        'name': fields.char('Description', readonly=True),
-        'type': fields.selection([
-            ('out_invoice','Customer Invoice'),
-            ('in_invoice','Supplier Invoice'),
-            ('out_refund','Customer Refund'),
-            ('in_refund','Supplier Refund'),
-            ],'Type', readonly=True),
-        'number': fields.char('Invoice Number', readonly=True),
-        'partner_id': fields.many2one('res.partner', 'Partner', readonly=True),
-        'amount_untaxed': fields.float('Untaxed', readonly=True),
-        'amount_total': fields.float('Total', readonly=True),
-        'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
-        'date_invoice': fields.date('Invoice Date', readonly=True),
-        'date_due': fields.date('Due Date', readonly=True),
-        'residual': fields.float('Residual', readonly=True),
-        'state': fields.selection([
-            ('draft','Draft'),
-            ('proforma','Pro-forma'),
-            ('proforma2','Pro-forma'),
-            ('open','Open'),
-            ('paid','Done'),
-            ('cancel','Cancelled')
-        ],'Status', readonly=True),
-        'origin': fields.char('Source Document', readonly=True, help="Reference of the document that generated this invoice report."),
-        'create_date': fields.datetime('Create Date', readonly=True)
-    }
+
+    name = fields.Char(string='Description', readonly=True)
+    type = fields.Selection([
+        ('out_invoice','Customer Invoice'),
+        ('in_invoice','Supplier Invoice'),
+        ('out_refund','Customer Refund'),
+        ('in_refund','Supplier Refund'),
+        ],'Type', readonly=True)
+    number = fields.Char(string='Invoice Number', readonly=True)
+    partner_id = fields.Many2one('res.partner', string='Partner', readonly=True)
+    amount_untaxed = fields.Float(string='Untaxed', readonly=True)
+    amount_total = fields.Float(string='Total', readonly=True)
+    currency_id = fields.Many2one('res.currency', string='Currency', readonly=True)
+    date_invoice = fields.Date(string='Invoice Date', readonly=True)
+    date_due = fields.Date(string='Due Date', readonly=True)
+    residual = fields.Float(string='Residual', readonly=True)
+    state = fields.Selection([
+        ('draft','Draft'),
+        ('proforma','Pro-forma'),
+        ('proforma2','Pro-forma'),
+        ('open','Open'),
+        ('paid','Done'),
+        ('cancel','Cancelled')
+    ],'Status', readonly=True)
+    origin = fields.Char(string='Source Document', readonly=True, help="Reference of the document that generated this invoice report.")
+    create_date = fields.Datetime(string='Create Date', readonly=True)
+
     _order = 'create_date'
 
     def init(self, cr):
@@ -206,21 +202,21 @@ class report_invoice_created(osv.osv):
                 (to_date(to_char(inv.create_date, 'YYYY-MM-dd'),'YYYY-MM-dd') > (CURRENT_DATE-15))
             )""")
 
-class report_account_type_sales(osv.osv):
+class report_account_type_sales(models.Model):
     _name = "report.account_type.sales"
     _description = "Report of the Sales by Account Type"
     _auto = False
-    _columns = {
-        'name': fields.char('Year', required=False, readonly=True),
-        'period_id': fields.many2one('account.period', 'Force Period', readonly=True),
-        'product_id': fields.many2one('product.product', 'Product', readonly=True),
-        'quantity': fields.float('Quantity', readonly=True),
-        'user_type': fields.many2one('account.account.type', 'Account Type', readonly=True),
-        'amount_total': fields.float('Total', readonly=True),
-        'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
-        'month':fields.selection([('01','January'), ('02','February'), ('03','March'), ('04','April'), ('05','May'), ('06','June'),
-                                  ('07','July'), ('08','August'), ('09','September'), ('10','October'), ('11','November'), ('12','December')], 'Month', readonly=True),
-    }
+
+    name = fields.Char(string='Year', required=False, readonly=True)
+    period_id = fields.Many2one('account.period', string='Force Period', readonly=True)
+    product_id = fields.Many2one('product.product', string='Product', readonly=True)
+    quantity = fields.Float(string='Quantity', readonly=True)
+    user_type = fields.Many2one('account.account.type', string='Account Type', readonly=True)
+    amount_total = fields.Float(string='Total', readonly=True)
+    currency_id = fields.Many2one('res.currency', string='Currency', readonly=True)
+    month = fields.Selection([('01','January'), ('02','February'), ('03','March'), ('04','April'), ('05','May'), ('06','June'),
+                              ('07','July'), ('08','August'), ('09','September'), ('10','October'), ('11','November'), ('12','December')], string='Month', readonly=True)
+
     _order = 'name desc,amount_total desc'
 
     def init(self, cr):
@@ -247,21 +243,21 @@ class report_account_type_sales(osv.osv):
             )""")
 
 
-class report_account_sales(osv.osv):
+class report_account_sales(models.Model):
     _name = "report.account.sales"
     _description = "Report of the Sales by Account"
     _auto = False
-    _columns = {
-        'name': fields.char('Year', required=False, readonly=True, select=True),
-        'period_id': fields.many2one('account.period', 'Force Period', readonly=True),
-        'product_id': fields.many2one('product.product', 'Product', readonly=True),
-        'quantity': fields.float('Quantity', readonly=True),
-        'account_id': fields.many2one('account.account', 'Account', readonly=True, domain=[('deprecated', '=', False)]),
-        'amount_total': fields.float('Total', readonly=True),
-        'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
-        'month':fields.selection([('01','January'), ('02','February'), ('03','March'), ('04','April'), ('05','May'), ('06','June'),
-                                  ('07','July'), ('08','August'), ('09','September'), ('10','October'), ('11','November'), ('12','December')], 'Month', readonly=True),
-    }
+
+    name = fields.Char(string='Year', required=False, readonly=True, select=True)
+    period_id = fields.Many2one('account.period', string='Force Period', readonly=True)
+    product_id = fields.Many2one('product.product', string='Product', readonly=True)
+    quantity = fields.Float(string='Quantity', readonly=True)
+    account_id = fields.Many2one('account.account', string='Account', readonly=True, domain=[('deprecated', '=', False)])
+    amount_total = fields.Float(string='Total', readonly=True)
+    currency_id = fields.Many2one('res.currency', string='Currency', readonly=True)
+    month = fields.Selection([('01','January'), ('02','February'), ('03','March'), ('04','April'), ('05','May'), ('06','June'),
+                              ('07','July'), ('08','August'), ('09','September'), ('10','October'), ('11','November'), ('12','December')], string='Month', readonly=True)
+
     _order = 'name desc'
 
     def init(self, cr):
