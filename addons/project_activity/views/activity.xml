@@ -1,0 +1,11 @@
+<openerp><data>
+  <record model="ir.actions.act_window" id="action_project_activity">
+    <field name="name">Activity</field>
+    <field name="res_model">project.activity</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="activity_configuration_menu" name="Activity" 
+	    parent="base.menu_definitions"
+	    action="action_project_activity"/>
+</data></openerp>
