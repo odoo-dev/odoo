@@ -1,0 +1,79 @@
+<openerp><data>
+  
+  <!-- tree view -->
+  <record model="ir.ui.view" id="project_activity_tree_view">
+    <field name="name">project.activity.tree</field>
+    <field name="model">project.activity</field>
+    <field name="arch" type="xml">
+      <tree string="Activity List">
+	<field name="user_id"/>
+	<field name="project_id"/>
+	<field name="task_id"/>
+      </tree>
+    </field>
+  </record>
+
+  <!-- form view -->
+  <record model="ir.ui.view" id="project_activity_form_view">
+    <field name="name">project.activity.form</field>
+    <field name="model">project.activity</field>
+    <field name="arch" type="xml">
+      <form string="Activity Form">
+	<group col="4">
+	  <field name="user_id"/>
+	  <field name="time"/>
+	  <field name="project_id"/>
+	  <field name="task_id"/>
+	  <field name="start_date"/>
+	  <field name="end_date"/>
+	</group>
+      </form>
+    </field>
+  </record>
+
+  <!-- search view -->
+  <record model="ir.ui.view" id="project_activity_search_view">
+    <field name="name">project.activity.search</field>
+    <field name="model">project.activity</field>
+    <field name="arch" type="xml">
+      <search>
+	<field name="user_id"/>
+	<field name="project_id"/>
+	<field name="task_id"/>
+	<filter name="my_activities" string="My activities"
+		domain="[('user_id', '=', uid)]"/>
+	<group string="Group By">
+	  <filter name="group_by_user_id" string="User"
+		  context="{'group_by': 'user_id'}"/>
+	  <filter name="group_by_project_id" string="Project"
+		  context="{'group_by': 'project_id'}"/>
+	  <filter name="group_by_task_id" string="Task"
+		  context="{'group_by': 'task_id'}"/>
+	</group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Gantt view -->
+  <record model="ir.ui.view" id="project_activity_gantt_view">
+    <field name="name">project.activity.gantt</field>
+    <field name="model">project.activity</field>
+    <field name="arch" type="xml">
+      <gantt date_start="start_date" 
+	     date_stop="end_date"
+	     default_group_by="project_id"/>
+    </field>
+  </record>
+
+  <!-- Menu records -->
+  
+  <record model="ir.actions.act_window" id="action_project_activity">
+    <field name="name">Activity</field>
+    <field name="res_model">project.activity</field>
+    <field name="view_mode">tree,form,gantt</field>
+  </record>
+
+  <menuitem id="activity_configuration_menu" name="Activity" 
+	    parent="base.menu_definitions"
+	    action="action_project_activity"/>
+</data></openerp>
