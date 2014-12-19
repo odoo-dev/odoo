@@ -61,7 +61,9 @@
     <field name="arch" type="xml">
       <gantt date_start="start_date" 
 	     date_stop="end_date"
-	     default_group_by="project_id"/>
+	     default_group_by="project_id"
+	     reconcile="time">
+      </gantt>
     </field>
   </record>
 

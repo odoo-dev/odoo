@@ -40,6 +40,17 @@ instance.web_gantt.GanttView = instance.web.View.extend({
         var self = this;
         this.fields_view = fields_view_get;
         this.$el.addClass(this.fields_view.arch.attrs['class']);
+
+	// Project activity - Reconcile options
+	this.reconcile = this.fields_view.arch.attrs.reconcile
+	if (this.reconcile) { 
+	    console.log("reconcile");
+	    gantt.templates.task_class = function(st, end, item){
+		return item.$level==0?"gantt_project_activity":"";
+	    }
+	}
+
+
         // Get colors attribute from xml view file.
         if(this.fields_view.arch.attrs.colors) {
             this.colors = _(this.fields_view.arch.attrs.colors.split(';')).chain().compact().map(function(color_pair) {
@@ -83,8 +94,10 @@ instance.web_gantt.GanttView = instance.web.View.extend({
         });
     },
     reload: function() {
-        if (this.last_domains !== undefined)
+        if (this.last_domains !== undefined) {
+	    console.log("reload");
             return this.do_search(this.last_domains, this.last_contexts, this.last_group_bys);
+	}
     },
     on_data_loaded: function(tasks, group_bys) {
         var self = this;
@@ -283,7 +296,9 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             });
             parent.start_date = start_date;
             parent.end_date = stop_date;
+	    parent.text = "<span style=\"color:red;\">" + start_date + "</span>";
             gantt.updateTask(parent.id);
+
         });
         gantt.attachEvent("onAfterTaskDrag", function(id){
             self.on_task_changed(gantt.getTask(id));

@@ -6,6 +6,8 @@ from openerp.exceptions import ValidationError
 class project_activity(models.Model):
     _name = 'project.activity'
     
+    name = fields.Char(compute='_get_name')
+
     user_id = fields.Many2one('res.users', string="User", required=True)
     project_id = fields.Many2one('project.project', string="Project")
     
@@ -18,6 +20,10 @@ class project_activity(models.Model):
     start_date = fields.Datetime(default=fields.Date.today, required="True")
     end_date = fields.Datetime(default=fields.Date.today, required="True")
     
+    @api.one
+    def _get_name(self):
+        self.name = str(self.time)
+
     # Fill the project_id if empty and the task is assigned to a project
     @api.one
     def _select_task_id(self):
