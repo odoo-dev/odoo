@@ -22,7 +22,7 @@ class project_activity(models.Model):
     
     @api.one
     def _get_name(self):
-        self.name = str(self.time)
+        self.name = self.user_id.name + "|" + self.project_id.name
 
     # Fill the project_id if empty and the task is assigned to a project
     @api.one

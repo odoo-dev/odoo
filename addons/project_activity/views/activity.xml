@@ -62,7 +62,9 @@
       <gantt date_start="start_date" 
 	     date_stop="end_date"
 	     default_group_by="project_id"
-	     reconcile="time">
+	     consolidation="time"
+	     consolidation_max_group_by="user_id"
+	     consolidation_max_number="8">
       </gantt>
     </field>
   </record>

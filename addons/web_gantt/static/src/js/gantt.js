@@ -41,15 +41,10 @@ instance.web_gantt.GanttView = instance.web.View.extend({
         this.fields_view = fields_view_get;
         this.$el.addClass(this.fields_view.arch.attrs['class']);
 
-	// Project activity - Reconcile options
-	this.reconcile = this.fields_view.arch.attrs.reconcile
-	if (this.reconcile) { 
-	    console.log("reconcile");
-	    gantt.templates.task_class = function(st, end, item){
-		return item.$level==0?"gantt_project_activity":"";
-	    }
-	}
-
+	// Consolidation options
+	this.consolidation = this.fields_view.arch.attrs.consolidation
+	this.consolidation_max_group_by = (this.fields_view.arch.attrs.consolidation_max_group_by) ? this.fields_view.arch.attrs.consolidation_max_group_by.split(","):undefined;
+	this.consolidation_max_number = parseFloat(this.fields_view.arch.attrs.consolidation_max_number);
 
         // Get colors attribute from xml view file.
         if(this.fields_view.arch.attrs.colors) {
@@ -79,11 +74,11 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             n_group_bys = group_bys;
         }
         // gather the fields to get
-        var fields = _.compact(_.map(["date_start", "date_delay", "date_stop", "progress"], function(key) {
+        var fields = _.compact(_.map(["date_start", "date_delay", "date_stop", "consolidation", "progress"], function(key) {
             return self.fields_view.arch.attrs[key] || '';
         }));
         fields = _.uniq(fields.concat(_.pluck(this.colors, "field").concat(n_group_bys)));
-        
+ 
         return $.when(this.has_been_loaded).then(function() {
             return self.dataset.read_slice(fields, {
                 domain: domains,
@@ -126,6 +121,8 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             this.fields._pseudo_group_by = {type: "string"};
         }
         
+	this.consolidation_with_color = (_.contains(this.consolidation_max_group_by, group_bys[0])) ? true:false;
+
         // get the groups
         var split_groups = function(tasks, group_bys) {
             if (group_bys.length === 0)
@@ -180,6 +177,9 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             } else {
                 var percent = 100;
             }
+	    
+	    var consolidation_value = task[self.fields_view.arch.attrs.consolidation];
+
             var level = plevel || 0;
             project_id = project_id || _.uniqueId("gantt_project_");
             if (task.__is_group) {
@@ -196,6 +196,7 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                 }, undefined);
                 var duration = (task_stop.getTime() - task_start.getTime()) / (1000 * 60 * 60);
                 var group_name = task.name ? instance.web.format_value(task.name, self.fields[group_bys[level]]) : "-";
+
                 if (level == 0) {
                     gantt.addTask({
                         'id': project_id,
@@ -208,13 +209,22 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                     return {task_start: task_start, task_stop: task_stop};
                 } else {
                   var id = _.uniqueId("gantt_project_task_");
+		  //Hard-code name column for project_activity
+		  if (self.fields_view.model == "project.activity"){
+		      if (group_bys[0] == "user_id") {
+			  group_name = group_name.split("|")[1];
+		      } else {
+			  group_name = group_name.split("|")[0];
+		      }
+		  }
                   tasks.push({
                       'id': id,
                       'text': group_name,
                       'start_date': task_start,
                       'duration': duration || 1,
                       'progress': percent / 100,
-                      'parent': project_id
+                      'parent': project_id,
+		      'consolidation': consolidation_value,
                   });
                   total_task = total_percent = 0;
                   return {task_start: task_start, task_stop: task_stop};
@@ -244,6 +254,14 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                     if(eval("'" + task[color.field] + "' " + color.opt + " '" + color.value + "'"))
                         self.color = color.color;
                 });
+		//Hard-code name column for project_activity
+		if (self.fields_view.model == "project.activity"){
+		    if (group_bys[0] == "user_id") {
+			task_name = task_name.split("|")[1];
+		    } else {
+			task_name = task_name.split("|")[0];
+		    }
+		}
                 tasks.push({
                     'id': "gantt_task_" + task.id,
                     'text': task_name,
@@ -251,7 +269,8 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                     'duration': (((duration / 24) * 8) * 3 || 1),
                     'progress': percent / 100,
                     'parent': project_id,
-                    'color': self.color
+                    'color': self.color,
+		    'consolidation': consolidation_value,
                 });
                 self.color = undefined;
                 return {task_start: task_start, task_stop: task_stop};
@@ -296,8 +315,11 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             });
             parent.start_date = start_date;
             parent.end_date = stop_date;
-	    parent.text = "<span style=\"color:red;\">" + start_date + "</span>";
             gantt.updateTask(parent.id);
+	    if (self.consolidation) {
+		$('[task_id="' + parent.id + '"]' + " .gantt_task_content").css("text-align", "left");
+		$('[task_id="' + parent.id + '"]' + " .gantt_task_content").html(self.consolidation_children(parent));
+	    }
 
         });
         gantt.attachEvent("onAfterTaskDrag", function(id){
@@ -310,6 +332,22 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             self.scale_zoom(self.$el.find(e.currentTarget).find("input").val());
             gantt.parse({"data": tasks});
         });
+	//consolidation
+	if (self.consolidation) {
+	    gantt.templates.task_text=function(start,end,task){
+		if (task.$level==0) {
+		    return self.consolidation_children(task);
+		}
+		return task.consolidation;
+	    };
+	}
+	// Set default value, if a gantt with consolidation is display before a gantt without
+	else {
+	    gantt.templates.task_text=function(start,end,task){
+		return task.text;
+	    };
+	}
+
     },
     scale_zoom: function(value) {
         gantt.config.step = 1;
@@ -427,6 +465,41 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                 initial_view: "form",
             }
         );
+    },
+    consolidation_children: function(parent) {
+	var self = this;
+	// First step : create a list of tupple (left, consolidation value) where left is position in the bar, and consolidation value is the number to add or remove
+	var leftParent = gantt.getTaskPosition(parent, parent.start_date, parent.end_date).left;
+	var getTuple = function(acc, task_id) {
+	    var task = gantt.getTask(task_id);
+	    var position = gantt.getTaskPosition(task, task.start_date, task.end_date);
+	    var left = position.left - leftParent;
+	    var right = left + position.width;
+	    acc.push([left, task.consolidation]);
+	    acc.push([right, -(task.consolidation)]);
+	    return acc;
+	};
+	var steps = _.reduce(gantt.getChildren(parent.id), getTuple, []);
+	// Order it by "left"
+	var orderSteps = _.sortBy(steps, function(el) {
+	    return el[0];
+	});
+	// Create the html for the bar
+	var html = "";
+	var acc = 0;
+	var last_el = 0;
+	orderSteps.forEach(function(el) {
+	    var width = el[0] - last_el - 2;
+	    if (el[0] != 0 && acc != 0 ){
+		var color = ((self.consolidation_with_color) && acc > self.consolidation_max_number) ? "red":"green";
+		var content = (width < 15) ? "":acc;
+		html += "<div style=\"position:absolute; text-align: center; border-radius:3px; height: 100%; background-color:"+color+"; left:"+(last_el+2)+"px; width:"+width+"px;\">"+content+"</div>";
+	    }
+	    last_el = el[0];
+	    acc = acc + el[1];
+	});
+	return html;
+
     },
 });
 };
