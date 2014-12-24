@@ -73,12 +73,13 @@ instance.web_gantt.GanttView = instance.web.View.extend({
         if (group_bys.length) {
             n_group_bys = group_bys;
         }
+
         // gather the fields to get
         var fields = _.compact(_.map(["date_start", "date_delay", "date_stop", "consolidation", "progress"], function(key) {
             return self.fields_view.arch.attrs[key] || '';
         }));
         fields = _.uniq(fields.concat(_.pluck(this.colors, "field").concat(n_group_bys)));
- 
+
         return $.when(this.has_been_loaded).then(function() {
             return self.dataset.read_slice(fields, {
                 domain: domains,
@@ -87,10 +88,11 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                 return self.on_data_loaded(data, n_group_bys);
             });
         });
+	
+
     },
     reload: function() {
         if (this.last_domains !== undefined) {
-	    console.log("reload");
             return this.do_search(this.last_domains, this.last_contexts, this.last_group_bys);
 	}
     },
@@ -167,7 +169,7 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                 _t("End date") + ":</b> " + _t(moment(end).format(normalize_format)) +
                 "<br/><b>" + _t("Duration") + ":</b> " + duration.toFixed(2) + " " + _t("Hours");
         };
-        
+
         var tasks = [];
         var total_percent = 0, total_task = 0;
         // creation of the chart
@@ -209,14 +211,6 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                     return {task_start: task_start, task_stop: task_stop};
                 } else {
                   var id = _.uniqueId("gantt_project_task_");
-		  //Hard-code name column for project_activity
-		  if (self.fields_view.model == "project.activity"){
-		      if (group_bys[0] == "user_id") {
-			  group_name = group_name.split("|")[1];
-		      } else {
-			  group_name = group_name.split("|")[0];
-		      }
-		  }
                   tasks.push({
                       'id': id,
                       'text': group_name,
@@ -254,14 +248,6 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                     if(eval("'" + task[color.field] + "' " + color.opt + " '" + color.value + "'"))
                         self.color = color.color;
                 });
-		//Hard-code name column for project_activity
-		if (self.fields_view.model == "project.activity"){
-		    if (group_bys[0] == "user_id") {
-			task_name = task_name.split("|")[1];
-		    } else {
-			task_name = task_name.split("|")[0];
-		    }
-		}
                 tasks.push({
                     'id': "gantt_task_" + task.id,
                     'text': task_name,
@@ -320,7 +306,6 @@ instance.web_gantt.GanttView = instance.web.View.extend({
 		$('[task_id="' + parent.id + '"]' + " .gantt_task_content").css("text-align", "left");
 		$('[task_id="' + parent.id + '"]' + " .gantt_task_content").html(self.consolidation_children(parent));
 	    }
-
         });
         gantt.attachEvent("onAfterTaskDrag", function(id){
             self.on_task_changed(gantt.getTask(id));
@@ -347,7 +332,6 @@ instance.web_gantt.GanttView = instance.web.View.extend({
 		return task.text;
 	    };
 	}
-
     },
     scale_zoom: function(value) {
         gantt.config.step = 1;
@@ -365,7 +349,7 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                 };
                 gantt.config.scale_unit = "day";
                 gantt.config.date_scale = "%d %M";
-                gantt.config.subscales = [];
+                gantt.config.subscales = [{unit:"hour", step:1, date:"%H h"}];
                 gantt.config.scale_height = 27;
                 break;
             case "week":
@@ -468,6 +452,7 @@ instance.web_gantt.GanttView = instance.web.View.extend({
     },
     consolidation_children: function(parent) {
 	var self = this;
+
 	// First step : create a list of tupple (left, consolidation value) where left is position in the bar, and consolidation value is the number to add or remove
 	var leftParent = gantt.getTaskPosition(parent, parent.start_date, parent.end_date).left;
 	var getTuple = function(acc, task_id) {
@@ -489,11 +474,11 @@ instance.web_gantt.GanttView = instance.web.View.extend({
 	var acc = 0;
 	var last_el = 0;
 	orderSteps.forEach(function(el) {
-	    var width = el[0] - last_el - 2;
+	    var width = el[0] - last_el - 3;
 	    if (el[0] != 0 && acc != 0 ){
-		var color = ((self.consolidation_with_color) && acc > self.consolidation_max_number) ? "red":"green";
+		var color = ((self.consolidation_with_color) && acc > self.consolidation_max_number) ? "#CB1C1C":"green";
 		var content = (width < 15) ? "":acc;
-		html += "<div style=\"position:absolute; text-align: center; border-radius:3px; height: 100%; background-color:"+color+"; left:"+(last_el+2)+"px; width:"+width+"px;\">"+content+"</div>";
+		html += "<div style=\"position:absolute; text-align: center; border-radius:3px; height: 15px; top: 1px; line-height: 16px; background-color:"+color+"; left:"+(last_el+1)+"px; width:"+width+"px;\">"+content+"</div>";
 	    }
 	    last_el = el[0];
 	    acc = acc + el[1];
