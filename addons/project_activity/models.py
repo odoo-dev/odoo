@@ -19,12 +19,35 @@ class project_activity(models.Model):
 
     start_date = fields.Datetime(default=fields.Date.today, required="True")
     end_date = fields.Datetime(default=fields.Date.today, required="True")
+
+    # used by the gantt view
+    project_start_date = fields.Datetime(compute="_get_project_start_date")
+    project_end_date = fields.Datetime(compute="_get_project_end_date")
+    task_start_date = fields.Datetime(compute="_get_task_start_date")
+    task_end_date = fields.Datetime(compute="_get_task_end_date")
+
     
     @api.one
     def _get_name(self):
         self.name = self.user_id.name + " - " + self.project_id.name
         if (self.task_id): self.name += " - " + self.task_id.name
 
+    @api.one
+    def _get_project_start_date(self):
+        self.project_start_date = self.project_id.date_start if (self.project_id) else ""
+        
+    @api.one
+    def _get_project_end_date(self):
+        self.project_end_date = self.project_id.date if (self.project_id) else ""
+ 
+    @api.one
+    def _get_task_start_date(self):
+        self.task_start_date = self.task_id.date_start if (self.task_id) else ""
+ 
+    @api.one
+    def _get_task_end_date(self):
+        self.task_end_date = self.task_id.date_end if (self.task_id) else ""
+        
     # Fill the project_id if empty and the task is assigned to a project
     @api.one
     def _select_task_id(self):

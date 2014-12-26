@@ -79,6 +79,11 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             return self.fields_view.arch.attrs[key] || '';
         }));
         fields = _.uniq(fields.concat(_.pluck(this.colors, "field").concat(n_group_bys)));
+	
+	// If in project.activity, load user_id, project_id and task_id
+	if (this.fields_view.model == "project.activity") {
+	    fields = fields.concat(["project_start_date", "project_end_date", "task_start_date", "task_end_date"]);
+	}
 
         return $.when(this.has_been_loaded).then(function() {
             return self.dataset.read_slice(fields, {
@@ -145,7 +150,21 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             return groups;
         }
         var groups = split_groups(tasks, group_bys);
-        
+
+	// project.activity : baseline support
+	if (this.fields_view.model == "project.activity") {
+	    groups.forEach(function(g) {
+		if (group_bys[0] === "project_id") {
+		    g.baseline_start = g.tasks[0].project_start_date;
+		    g.baseline_stop = g.tasks[0].project_end_date;
+		}
+		if (group_bys[0] === "task_id") {
+		    g.baseline_start = g.tasks[0].task_start_date;
+		    g.baseline_stop = g.tasks[0].task_end_date;
+		};
+	    });
+	}
+	
         // Use scale_zoom attribute in xml file to specify zoom timeline(day,week,month,year), By default month
         var scale = this.fields_view.arch.attrs.scale_zoom;
         if (!_.contains(['day', 'week', 'month', 'year'], scale)) {
@@ -200,13 +219,19 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                 var group_name = task.name ? instance.web.format_value(task.name, self.fields[group_bys[level]]) : "-";
 
                 if (level == 0) {
-                    gantt.addTask({
+		    var project_task = {
                         'id': project_id,
                         'text': group_name,
                         'start_date': task_start,
                         'duration': ((duration / 24) * 8) * 3 || 1,
                         'progress': total_percent / total_task / 100,
-                    });
+			'project': task[project_id],
+		    }
+                    if (self.fields_view.model === "project.activity"){
+			project_task.baseline_start = task.baseline_start;
+			project_task.baseline_stop = task.baseline_stop;
+		    }
+		    gantt.addTask(project_task);
                     total_task = total_percent = 0;
                     return {task_start: task_start, task_stop: task_stop};
                 } else {
@@ -257,7 +282,7 @@ instance.web_gantt.GanttView = instance.web.View.extend({
                     'parent': project_id,
                     'color': self.color,
 		    'consolidation': consolidation_value,
-                });
+               });
                 self.color = undefined;
                 return {task_start: task_start, task_stop: task_stop};
             }
@@ -302,14 +327,11 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             parent.start_date = start_date;
             parent.end_date = stop_date;
             gantt.updateTask(parent.id);
-	    if (self.consolidation) {
-		$('[task_id="' + parent.id + '"]' + " .gantt_task_content").css("text-align", "left");
-		$('[task_id="' + parent.id + '"]' + " .gantt_task_content").html(self.consolidation_children(parent));
-	    }
+	    if (self.fields_view.model === "project.activity") { $(".gantt_task_content").css("overflow", "visible"); }
         });
         gantt.attachEvent("onAfterTaskDrag", function(id){
             self.on_task_changed(gantt.getTask(id));
-        });
+	});
         if (this.is_action_enabled('create')) {
             this.$el.find(".oe_gantt_button_create").click(this.on_task_create);
         }
@@ -317,6 +339,17 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             self.scale_zoom(self.$el.find(e.currentTarget).find("input").val());
             gantt.parse({"data": tasks});
         });
+
+	// Project.activity : Allow to overflow the task bar, remove the click on the project task bar
+	if (this.fields_view.model == "project.activity") {
+	    gantt.attachEvent("onTaskClick", function(t) {
+		return false;
+	    });
+	    gantt.attachEvent("onDataRender", function(t) {
+		$(".gantt_task_content").css("overflow", "visible");
+	    });
+	};
+	
 	//consolidation
 	if (self.consolidation) {
 	    gantt.templates.task_text=function(start,end,task){
@@ -332,6 +365,7 @@ instance.web_gantt.GanttView = instance.web.View.extend({
 		return task.text;
 	    };
 	}
+
     },
     scale_zoom: function(value) {
         gantt.config.step = 1;
@@ -478,13 +512,31 @@ instance.web_gantt.GanttView = instance.web.View.extend({
 	    if (el[0] != 0 && acc != 0 ){
 		var color = ((self.consolidation_with_color) && acc > self.consolidation_max_number) ? "#CB1C1C":"green";
 		var content = (width < 15) ? "":acc;
-		html += "<div style=\"position:absolute; text-align: center; border-radius:3px; height: 15px; top: 1px; line-height: 16px; background-color:"+color+"; left:"+(last_el+1)+"px; width:"+width+"px;\">"+content+"</div>";
+		html += "<div style=\"position:absolute; text-align: center; border-radius:3px; height: 15px; top: 1px; line-height: 17px; background-color:"+color+"; left:"+(last_el+1)+"px; width:"+width+"px;\">"+content+"</div>";
 	    }
 	    last_el = el[0];
 	    acc = acc + el[1];
 	});
+	
+	$('[task_id="' + parent.id + '"]' + " .gantt_task_content").css("text-align", "left");
+	html += self.baseline(parent);
 	return html;
-
     },
+    baseline: function(task) {
+	var html = "";
+	if (task.baseline_start && task.baseline_stop) {
+	    var task_position = gantt.getTaskPosition(task, task.start_date, task.stop_date);
+	    var start_split = task.baseline_start.split(/ |-|:/);
+	    var stop_split = task.baseline_stop.split(/ |-|:/);
+	    var baseline_position = gantt.getTaskPosition(task,
+							  new Date(start_split[0], parseInt(start_split[1])-1, start_split[2],
+								   start_split[3], start_split[4], start_split[5]),
+							  new Date(stop_split[0], parseInt(stop_split[1])-1, stop_split[2],
+								   stop_split[3], stop_split[4], stop_split[5]));
+	    var left = baseline_position.left - task_position.left;
+	    html += "<div style=\"position:absolute; top:15px; width: "+ baseline_position.width + "px; height: 5px; background-color: blue; left: "+ left + "px; border-radius: 3px;\"></div>"
+	}
+	return html;
+    }
 });
 };
