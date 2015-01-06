@@ -116,10 +116,10 @@ class preprocess_attachment(osv.Model):
                 })
         return True
 
-class website_sign(osv.Model):
+class website_sign(osv.Model): # TODO check
     _inherit = 'mail.notification'
 
-    def get_partners_to_email(self, cr, uid, ids, message, context=None):
+    def get_partners_and_signers_to_email(self, cr, uid, ids, message, context=None):
         """ Return the list of partners to notify, based on their preferences.
 
             :param browse_record message: mail.message to notify
@@ -128,7 +128,7 @@ class website_sign(osv.Model):
         """
         notify_pids = []
         for notification in self.browse(cr, uid, ids, context=context):
-            if notification.read:
+            if notification.is_read:
                 continue
             partner = notification.partner_id
             # Do not send to partners without email address defined
@@ -138,54 +138,53 @@ class website_sign(osv.Model):
             if message.author_id and message.author_id.email == partner.email:
                 if not context.get('notify_author'):
                     continue
-            # Partner does not want to receive any emails or is opt-out
-            if partner.notify_email == 'none':
-                continue
+
             notify_pids.append(partner.id)
         return notify_pids
 
     def _notify(self, cr, uid, message_id, partners_to_notify=None, context=None, force_send=False, user_signature=True):
-        if context.get('signers_data'):
-            for ids in context.get('signers_data'):
-                super(website_sign, self)._notify(cr, uid, message_id, partners_to_notify=[int(ids)], context=context, force_send=force_send, user_signature=user_signature)
-        else:
+        if not context.get('signers_data'):
             super(website_sign, self)._notify(cr, uid, message_id, partners_to_notify=partners_to_notify, context=context, force_send=force_send, user_signature=user_signature)
+            return
 
+        for ids in context.get('signers_data'):
+            super(website_sign, self)._notify(cr, uid, message_id, partners_to_notify=[int(ids)], context=context, force_send=force_send, user_signature=user_signature)
+        
     def _notify_email(self, cr, uid, ids, message_id, force_send=False, user_signature=True, context=None):
+        if not context.get('signers_data'):
+            return super(website_sign, self)._notify_email(cr, uid, ids, message_id, force_send=force_send, user_signature=user_signature, context=context)
+
         message = self.pool['mail.message'].browse(cr, uid, message_id, context=context)
         sign_pool = self.pool['ir.attachment.signature']
         attachment_pool = self.pool['ir.attachment']
         partner_pool = self.pool['res.partner']
 
         # compute partners
-        email_pids = self.get_partners_to_email(cr, uid, ids, message, context=context)
+        email_pids = self.get_partners_and_signers_to_email(cr, uid, ids, message, context=context)
         if not email_pids:
             return True
 
         # compute epartners_to_notify mail body (signature, company data)
-        if context.get('signers_data'):
-            local_context = context.copy()
-            local_context['email_from_usr'] = re.sub('<.*>','',message.email_from)
-            local_context['email_from'] = message.email_from
-            docs, links = [], []
-            signers_data = context.get('signers_data')
-            template_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'website_sign', 'request_sign_template')[1]
-            email_to = partner_pool.search_read(cr, uid, [('id', '=', email_pids[0])], ['email'],context=context)[0]
-            local_context['email_to'] = email_to['email']
-            for signer_ids in signers_data:
-                if email_pids[0] == int(signer_ids):
-                    for signers in signers_data[signer_ids]:
-                        docs.append(signers['name'])
-                        res_id = attachment_pool.search_read(cr, uid, [('id', '=', signers['id'])], ['res_id'], context=context)[0]
-                        link = _("sign/document/%s/%s") % (signers['id'], signers['token'])
-                        links.append([link, signers['fname'].split('.')[:-1][0]])
-            local_context['docnames'] = ", ".join(docs)
-            local_context['msgbody'] = message.body
-            local_context['links'] = links
-            sign_template = self.pool['email.template'].generate_email_batch(cr, uid, template_id, [res_id['res_id']], context=local_context)
-            body_html = sign_template[res_id['res_id']]['body_html']
-        else:
-            body_html = message.body
+        local_context = context.copy()
+        local_context['email_from_usr'] = re.sub('<.*>','',message.email_from)
+        local_context['email_from'] = message.email_from
+        docs, links = [], []
+        signers_data = context.get('signers_data')
+        template_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'website_sign', 'request_sign_template')[1]
+        email_to = partner_pool.search_read(cr, uid, [('id', '=', email_pids[0])], ['email'],context=context)[0]
+        local_context['email_to'] = email_to['email']
+        for signer_ids in signers_data:
+            if email_pids[0] == int(signer_ids):
+                for signers in signers_data[signer_ids]:
+                    docs.append(signers['name'])
+                    res_id = attachment_pool.search_read(cr, uid, [('id', '=', signers['id'])], ['res_id'], context=context)[0]
+                    link = _("sign/document/%s/%s") % (signers['id'], signers['token'])
+                    links.append([link, signers['fname'].split('.')[:-1][0]])
+        local_context['docnames'] = ", ".join(docs)
+        local_context['msgbody'] = message.body
+        local_context['links'] = links
+        sign_template = self.pool['email.template'].generate_email_batch(cr, uid, template_id, [res_id['res_id']], context=local_context)
+        body_html = sign_template[res_id['res_id']]['body_html']
 
         user_id = message.author_id and message.author_id.user_ids and message.author_id.user_ids[0] and message.author_id.user_ids[0].id or None
         if user_signature:
@@ -203,9 +202,11 @@ class website_sign(osv.Model):
             'recipient_ids': [(4, id) for id in email_pids],
             'references': references,
         }
+        
         email_notif_id = self.pool.get('mail.mail').create(cr, uid, mail_values, context=context)
         if force_send:
             self.pool.get('mail.mail').send(cr, uid, [email_notif_id], context=context)
+
         return True
 
 class ir_attachment(osv.Model):

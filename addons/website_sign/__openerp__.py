@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Digital Sign on Document',
+    'name': 'Digital Signatures',
     'version': '1.0',
     'category': 'Website',
     'description': """
-Digital sign on attached Document.
-===================================
-
+Sign your documents easily by sending invitations to your recipients.
+Next to your attached files, you have the possibility to request a signature.
+https://docs.google.com/file/d/0Bz6OpV442af-U3Q5QVRtMTZDSE0/edit?usp=drivesdk
+Select your recipients and follow the signature process easily.
     """,
     'author': 'OpenERP SA',
     'website': 'http://www.openerp.com',

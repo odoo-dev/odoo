@@ -1,7 +1,5 @@
+
 .openerp .oe_mail .oe_attachment .oe_sign {
-  display: none;
-}
-.openerp .oe_mail .oe_msg_composer .oe_attachment .oe_sign {
   display: block;
   position: absolute;
   top: -15px;
@@ -14,7 +12,7 @@
   -o-transition: opacity 0.2s linear;
   transition: opacity 0.2s linear;
 }
-.openerp .oe_mail .oe_msg_composer .oe_attachment:hover .oe_sign {
+.openerp .oe_mail .oe_attachment:hover .oe_sign {
   opacity: 1;
   -webkit-transition: opacity 0.2s linear;
   -moz-transition: opacity 0.2s linear;
