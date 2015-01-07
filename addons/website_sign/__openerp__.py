@@ -5,9 +5,9 @@
     'version': '1.0',
     'category': 'Website',
     'description': """
-Sign your documents easily by sending invitations to your recipients.
-Next to your attached files, you have the possibility to request a signature.
-https://docs.google.com/file/d/0Bz6OpV442af-U3Q5QVRtMTZDSE0/edit?usp=drivesdk
+Sign your documents easily by sending invitations to your recipients.\n
+Next to your attached files, you have the possibility to request a signature.\n
+https://docs.google.com/file/d/0Bz6OpV442af-U3Q5QVRtMTZDSE0/edit?usp=drivesdk\n
 Select your recipients and follow the signature process easily.
     """,
     'author': 'OpenERP SA',

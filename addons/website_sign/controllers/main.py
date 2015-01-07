@@ -108,14 +108,14 @@ class website_sign(http.Controller):
         return followers_data
 
     @http.route(['/website_sign/set_signer'], type='json', auth="public", website=True)
-    def set_signer(self, attachment_id=None, signer_id=None, title=None, comments=None, **post):
+    def set_signer(self, attachment_id=None, signer_id=None, title=None, comments=None, send_directly=False, **post):
         ir_attachment_signature = request.registry.get('ir.attachment.signature')
         vals, att_vals = {}, {}
 
-        set_fol = ir_attachment_signature.search_read(request.cr, SUPERUSER_ID,[('document_id','=', attachment_id)],['partner_id'], context=request.context)
+        set_fol = ir_attachment_signature.search_read(request.cr, SUPERUSER_ID,[('document_id','=', attachment_id)],['partner_id','document_id','access_token'], context=request.context)
         set_fol_ids = map(lambda d: d['partner_id'][0], set_fol)
 
-        attach_data = request.registry.get('ir.attachment').search_read(request.cr, SUPERUSER_ID,[('id','=', attachment_id)],['name','description'], context=request.context)[0]
+        attach_data = request.registry.get('ir.attachment').search_read(request.cr, SUPERUSER_ID,[('id','=', attachment_id)],['name', 'description', 'res_id', 'res_model'], context=request.context)[0]
         if attach_data['name'] != title:
             att_vals['name'] =  title
         if attach_data['description'] != comments:
@@ -136,6 +136,12 @@ class website_sign(http.Controller):
                 vals['state'] = 'draft'
                 vals['date'] = time.strftime(DEFAULT_SERVER_DATE_FORMAT)
                 ir_attachment_signature.create(request.cr, request.uid, vals, context=request.context)
+
+        if send_directly:
+            signers_data = self.get_signer([attachment_id])
+            request.context.update({'signers_data': signers_data})
+            message = "New sign request for document <b>{}</b>".format(title)
+            self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='email')
 
         return True
 

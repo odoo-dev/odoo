@@ -42,7 +42,7 @@
                                             <tbody>
                                                 <tr>
                                                     % for link in ctx['links']:
-                                                        <td style='padding:9px 16px 9px 16px;font-size:16px;color:#f7fbfd;background:#0088cc'>
+                                                        <td style='padding:9px 16px 9px 16px;font-size:16px;color:#f7fbfd;background-color:#0088cc'>
                                                             <a style='text-decoration:none;font-size:16px;color:#f7fbfd' href=${link[0]}>
                                                                 <span style='color:#f7fbfd'>Sign on ${link[1]}</span>
                                                             </a>

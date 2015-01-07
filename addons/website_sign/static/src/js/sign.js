@@ -45,11 +45,13 @@ openerp.website_sign = function (session) {
     var QWeb = session.web.qweb, _t = session.web._t;
 
     session.web.SignRequest = session.web.Widget.extend({
-        init: function (parent, attachment_id, res_id, model) {
+        init: function (parent, sign_icon, attachment_id, res_id, model, send_directly) {
             this._super(parent);
+            this.sign_icon = sign_icon;
             this.attach_id = attachment_id;
             this.res_id = res_id;
             this.model = model;
+            this.send_directly = send_directly !== 'undefined' ? (send_directly == true) : false;
         },
         get_followers: function () {
             var self = this;
@@ -80,7 +82,6 @@ openerp.website_sign = function (session) {
                 self.$dialog.$buttons.find('.oe_dialog_custom_buttons').append('<button class="oe_button oe_form_button oe_highlight" type="button" id="request">Request Signature</button><span> or </span> <button class="oe_button oe_form_button oe_link" type="button" id="cancel_request"><span>Cancel</span></button>');
                 
                 self.$dialog.$buttons.find('#request').click(function(event) {
-                    console.log("thre");
                     self.request_followers();
                 });
                 self.$dialog.$buttons.find('#cancel_request').click(function(event) {
@@ -90,7 +91,6 @@ openerp.website_sign = function (session) {
             });
         },
         request_followers: function () {
-            console.log("here");
             var self = this;
             var attachment_id = this.$dialog.$el.find("#attach_id").val();
             var title = this.$dialog.$el.find("#title").val();
@@ -111,8 +111,11 @@ openerp.website_sign = function (session) {
                 'signer_id': sign_ids,
                 'title': title,
                 'comments': comments,
+                'send_directly': self.send_directly,
             }).then(function () {
                 self.$dialog.$el.parents('.modal').modal('hide');
+                self.sign_icon.attr("src", "/website_sign/static/src/img/check.png");
+
             });
             return false;
         },
@@ -125,6 +128,7 @@ openerp.website_sign = function (session) {
 
             attach_ids = _.map(this.attachment_ids, function (file) {return file.id;});
             for (var id in attach_ids) {
+                var signrequest = self.get_signrequest_dialog(attach_ids[id], self.res_id, self.model);
                 self.$el.find("[data-id='" + attach_ids[id] + "']").after(_.str.sprintf(
                     "<div class='request_sign oe_sign' title='Request Signature'><img id='%s' src='/website_sign/static/src/img/sign.png'  style='margin-top:32px; margin-left:-17px; height:20px; width:20px'/></div>", attach_ids[id]));
             }
@@ -132,11 +136,15 @@ openerp.website_sign = function (session) {
                 var attach_id = ev.currentTarget.id;
                 var res_id = self.res_id;
                 var model = self.model;
-                var followers = new session.web.SignRequest(self, attach_id, res_id, model);
-                followers.get_followers();
+                var signrequet = self.get_signrequest_dialog($(ev.currentTarget), attach_id, res_id, model);
+                signrequet.get_followers();
                 ev.stopImmediatePropagation();
             });
-        }
+        },
+
+        get_signrequest_dialog: function(sign_icon, attach_id, res_id, model){
+            return new session.web.SignRequest(this, sign_icon, attach_id, res_id, model, true);
+        },
     });
 
     session.mail.ThreadComposeMessage.include({
@@ -155,6 +163,10 @@ openerp.website_sign = function (session) {
                 };
                 return parent.apply(self, args);
             });
+        },
+
+        get_signrequest_dialog: function(sign_icon, attach_id, res_id, model){
+            return new session.web.SignRequest(this, sign_icon, attach_id, res_id, model, false);
         },
     });
 

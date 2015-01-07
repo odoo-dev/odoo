@@ -33,11 +33,11 @@
                                         <h4 class="modal-title">You have signed the document.</h4>
                                     </t>
                                     <t t-if="not current_sign">
-                                        <h4 class="modal-title">If you need to sign the document, check your mail to get the access link !</h4>
+                                        <h4 class="modal-title">Need to sign? Check your mail box to get your secure access !</h4>
                                     </t>
                                 </div>
-                                <div class="oe_lside_panel"><h4><t t-raw="attachment.name"/></h4></div>
-                                <div class="oe_lside_panel" t-if="attachment.description"> <t t-raw="attachment.description"/> </div>
+                                <div class="oe_lside_panel"><hr/><h4><t t-raw="attachment.name"/></h4></div>
+                                <div class="oe_lside_panel" t-if="attachment.description"><t t-raw="attachment.description"/></div>
                             </div>
                         </div>
                         <div class="col-md-9">
@@ -56,7 +56,7 @@
                                             <div class="row" t-if="attachment.id == attachment_id">
                                                 <a t-att-href="'/mail/download_attachment?model=mail.message&amp;id='+str(message.id)+'&amp;method=download_attachment&amp;attachment_id='+str(attachment_id)" target="_blank">
                                                     <t t-if="attachment.file_type_icon == 'webimage'">
-                                                        <img class="media-object pull-left" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(attachment_id) + '&amp;resize=300,180'" style="width: 400px;"/>
+                                                        <img class="media-object pull-left pull" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(attachment_id) + '&amp;resize=300,180'" style="width: 400px;"/>
                                                     </t>
                                                     <t t-if="attachment.file_type_icon != 'webimage'">
                                                         <img class="media-object pull-left" t-att-src="'/mail/static/src/img/mimetypes/' + attachment.file_type_icon + '.png'" style="width: 400px;"></img>
