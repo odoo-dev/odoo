@@ -6,7 +6,7 @@ from openerp import SUPERUSER_ID
 from openerp.osv import osv, orm, fields
 from openerp.tools.translate import _
 
-class preprocess_attachment(osv.Model): # TODO check
+class preprocess_attachment(osv.Model):
     _inherit = "mail.message"
 
     def _message_read_dict_postprocess(self, cr, uid, messages, message_tree, context=None):
@@ -49,7 +49,7 @@ class preprocess_attachment(osv.Model): # TODO check
                     doc_count.append(doc_id)
                     if ids.state == 'closed':
                         doc_state.append(ids.state)
-                doc_data[doc_id] = {'signed': len(doc_state), 'count': len(doc_count)}
+                doc_data[doc_id] = {'nb_signed': len(doc_state), 'nb_toSign': len(doc_count)}
 
         # 2. Attachments as SUPERUSER, because could receive msg and attachments for doc uid cannot see
         attachments = ir_attachment_obj.read(cr, SUPERUSER_ID, list(attachment_ids), ['id', 'datas_fname', 'name', 'file_type_icon'], context=context)
@@ -100,12 +100,6 @@ class website_sign(osv.Model):
     _inherit = 'mail.notification'
 
     def get_partners_and_signers_to_email(self, cr, uid, ids, message, context=None):
-        """ Return the list of partners to notify, based on their preferences.
-
-            :param browse_record message: mail.message to notify
-            :param list partners_to_notify: optional list of partner ids restricting
-                the notifications to process
-        """
         notify_pids = []
         for notification in self.browse(cr, uid, ids, context=context):
             if notification.is_read:

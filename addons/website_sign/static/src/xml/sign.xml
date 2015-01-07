@@ -50,8 +50,8 @@
     </t>
     <t t-extend="mail.thread.message.attachments">
         <t t-jquery="div#attachments" t-operation="append">
-            <div class="text-center" t-if="attachment.count">
-                <a t-att-href="'/sign/document/'+attachment.id" target="_blank"> <b>Signed (<t t-raw="attachment.signed+'/'+attachment.count"/>)</b> </a>
+            <div class="text-center" t-if="attachment.nb_toSign">
+                <a t-att-href="'/sign/document/'+attachment.id" target="_blank"><b>Signed (<t t-raw="attachment.nb_signed+'/'+attachment.nb_toSign"/>)</b></a>
             </div>
         </t>
     </t>

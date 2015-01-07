@@ -112,7 +112,7 @@ class website_sign(http.Controller):
         ir_attachment_signature = request.registry.get('ir.attachment.signature')
         vals, att_vals = {}, {}
 
-        set_fol = ir_attachment_signature.search_read(request.cr, SUPERUSER_ID,[('document_id','=', attachment_id)],['partner_id','document_id','access_token'], context=request.context)
+        set_fol = ir_attachment_signature.search_read(request.cr, SUPERUSER_ID,[('document_id','=', attachment_id)],['partner_id'], context=request.context)
         set_fol_ids = map(lambda d: d['partner_id'][0], set_fol)
 
         attach_data = request.registry.get('ir.attachment').search_read(request.cr, SUPERUSER_ID,[('id','=', attachment_id)],['name', 'description', 'res_id', 'res_model'], context=request.context)[0]

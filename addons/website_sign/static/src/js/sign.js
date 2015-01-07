@@ -64,14 +64,14 @@ openerp.website_sign = function (session) {
                 if (data.signer_data.length === 0) {
                     var dialog = new session.web.Dialog(this, {
                         size: 'small',
-                        title: _t("Warning"),
+                        title: _t("This document does not have any followers, please add them."),
                         buttons:[{
                             text: _t("Ok"),
                             click: function() {
                                 this.parents('.modal').modal('hide');
                             }
                         }],
-                    }, $("<div />").text(_t("This document doesn't have any followers, please add them."))).open();
+                    }, null).open();
                     return false;
                 }
                 self.$dialog = new session.web.Dialog(this, {
@@ -102,6 +102,19 @@ openerp.website_sign = function (session) {
                     sign_ids.push(parseInt($(record).data('id')));
                 }
             });
+            if(sign_ids.length <= 0){
+                var dialog = new session.web.Dialog(this, {
+                    size: 'medium',
+                    title: _t("You must select at least one signer to send a sign request."),
+                    buttons:[{
+                        text: _t("Ok"),
+                        click: function() {
+                            this.parents('.modal').modal('hide');
+                        }
+                    }],
+                }, null).open();
+                return false;
+            }
             $('#doc_title').toggleClass('has-error', !title);
             if (!title) {
                 return false;
@@ -115,7 +128,6 @@ openerp.website_sign = function (session) {
             }).then(function () {
                 self.$dialog.$el.parents('.modal').modal('hide');
                 self.sign_icon.attr("src", "/website_sign/static/src/img/check.png");
-
             });
             return false;
         },
@@ -129,17 +141,16 @@ openerp.website_sign = function (session) {
             attach_ids = _.map(this.attachment_ids, function (file) {return file.id;});
             for (var id in attach_ids) {
                 var signrequest = self.get_signrequest_dialog(attach_ids[id], self.res_id, self.model);
-                self.$el.find("[data-id='" + attach_ids[id] + "']").after(_.str.sprintf(
-                    "<div class='request_sign oe_sign' title='Request Signature'><img id='%s' src='/website_sign/static/src/img/sign.png'  style='margin-top:32px; margin-left:-17px; height:20px; width:20px'/></div>", attach_ids[id]));
+                var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/sign.png'/>", attach_ids[id]));
+                self.$el.find("[data-id='" + attach_ids[id] + "']").after(sign_icon);
+                sign_icon.on('click', function (ev) {
+                    var attach_id = ev.currentTarget.id;
+                    var res_id = self.res_id;
+                    var model = self.model;
+                    var signrequest = self.get_signrequest_dialog($(ev.currentTarget), attach_id, res_id, model);
+                    signrequest.get_followers();
+                });
             }
-            $('div.request_sign img').on('click', function (ev) {
-                var attach_id = ev.currentTarget.id;
-                var res_id = self.res_id;
-                var model = self.model;
-                var signrequet = self.get_signrequest_dialog($(ev.currentTarget), attach_id, res_id, model);
-                signrequet.get_followers();
-                ev.stopImmediatePropagation();
-            });
         },
 
         get_signrequest_dialog: function(sign_icon, attach_id, res_id, model){
