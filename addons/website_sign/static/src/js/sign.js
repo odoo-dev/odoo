@@ -136,11 +136,22 @@ openerp.website_sign = function (session) {
     session.mail.MessageCommon.include({
         display_attachments: function(){
             var self = this;
+
+            var checkedIds = [];
+            self.$el.find("img.request_sign.oe_sign[src='/website_sign/static/src/img/check.png']")
+                .each(function(i, el){
+                    checkedIds.push(parseInt(el.id));
+                });
+
             this._super();
 
             attach_ids = _.map(this.attachment_ids, function (file) {return file.id;});
             for (var id in attach_ids) {
-                var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/sign.png'/>", attach_ids[id]));
+                var signImg = "sign";
+                if($.inArray(attach_ids[id], checkedIds) > -1)
+                    signImg = "check";
+
+                var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/%s.png'/>", attach_ids[id], signImg));
                 self.$el.find("[data-id='" + attach_ids[id] + "']").after(sign_icon);
                 sign_icon.on('click', function (ev) {
                     var attach_id = ev.currentTarget.id;
@@ -180,14 +191,25 @@ openerp.website_sign = function (session) {
         },
     });
 
-    session.web.form.FieldMany2ManyBinaryMultiFiles.include({ // TODO check (+ double read_name_values() as call to _super needed)
+    session.web.form.FieldMany2ManyBinaryMultiFiles.include({
         render_value: function () {
             var self = this;
+
+            var checkedIds = [];
+            self.$el.find("img.request_sign.oe_sign[src='/website_sign/static/src/img/check.png']")
+                .each(function(i, el){
+                    checkedIds.push(parseInt(el.id));
+                });
+
             self._super();
 
             this.read_name_values().then(function (ids) {
                 for (var id in ids) {
-                    var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/sign.png'/>", ids[id]));
+                    var signImg = "sign";
+                    if($.inArray(ids[id], checkedIds) > -1)
+                        signImg = "check";
+
+                    var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/%s.png'/>", ids[id], signImg));
                     self.$el.find("[data-id='" + ids[id] + "']").after(sign_icon);
                     sign_icon.on('click', function (ev) {
                         var attach_id = ev.currentTarget.id;

@@ -6,6 +6,26 @@ from openerp import SUPERUSER_ID
 from openerp.osv import osv, orm, fields
 from openerp.tools.translate import _
 
+class prepare_signers(osv.Model):
+    _inherit = "mail.compose.message"
+
+    def get_mail_values(self, cr, uid, wizard, res_ids, context=None):
+        attachment_ids = [attach.id for attach in wizard.attachment_ids]
+        ir_attachment_signature = self.pool.get('ir.attachment.signature')
+        signer_obj = ir_attachment_signature.search(cr, uid, [('document_id', 'in', attachment_ids)], context=context)
+        signers = ir_attachment_signature.browse(cr, SUPERUSER_ID, signer_obj)
+        signer_ids = map(lambda d: d.partner_id.id, signers)
+
+        signers_data = {}
+        for sign_id in signer_ids:
+            signers_data[sign_id] = []
+            for doc in signers:
+                if sign_id == doc.partner_id.id:
+                    signers_data[sign_id].append({'id': doc.document_id.id,'name': doc.document_id.name, 'token': doc.access_token, 'fname': doc.document_id.datas_fname})
+        if signers_data:
+            context.update({'signers_data': signers_data})
+        return super(prepare_signers, self).get_mail_values(cr, uid, wizard, res_ids, context=context)
+
 class preprocess_attachment(osv.Model):
     _inherit = "mail.message"
 
