@@ -154,7 +154,7 @@ class website_sign(osv.Model):
         local_context['docnames'] = ", ".join(docs)
         local_context['msgbody'] = message.body
         local_context['links'] = links
-        sign_template = self.pool['email.template'].generate_email_batch(cr, uid, template_id, [res_id['res_id']], context=local_context)
+        sign_template = self.pool['mail.template'].generate_email_batch(cr, uid, template_id, [res_id['res_id']], context=local_context)
         body_html = sign_template[res_id['res_id']]['body_html']
 
         user_id = message.author_id and message.author_id.user_ids and message.author_id.user_ids[0] and message.author_id.user_ids[0].id or None
