@@ -140,7 +140,6 @@ openerp.website_sign = function (session) {
 
             attach_ids = _.map(this.attachment_ids, function (file) {return file.id;});
             for (var id in attach_ids) {
-                var signrequest = self.get_signrequest_dialog(attach_ids[id], self.res_id, self.model);
                 var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/sign.png'/>", attach_ids[id]));
                 self.$el.find("[data-id='" + attach_ids[id] + "']").after(sign_icon);
                 sign_icon.on('click', function (ev) {
@@ -181,31 +180,23 @@ openerp.website_sign = function (session) {
         },
     });
 
-    session.web.form.FieldMany2ManyBinaryMultiFiles.include({
+    session.web.form.FieldMany2ManyBinaryMultiFiles.include({ // TODO check (+ double read_name_values() as call to _super needed)
         render_value: function () {
             var self = this;
+            self._super();
+
             this.read_name_values().then(function (ids) {
-                var render = $(session.web.qweb.render('FieldBinaryFileUploader.files', {'widget': self, 'values': ids}));
-                render.on('click', '.oe_delete', _.bind(self.on_file_delete, self));
-                self.$('.oe_placeholder_files, .oe_attachments').replaceWith( render );
-                if (!self.field_manager.datarecord.is_log) {
-                    for (var id in ids) {
-                        self.$el.find("[data-id='" + ids[id] + "']").after(_.str.sprintf("<div id='request_sign' title='Request Signature'><img id='%s' src='/website_sign/static/src/img/sign.png'  style='margin-top:35px; margin-left:32px; height:20px; width:20px'/></div>", ids[id]));
-                    }
-                    $('div#request_sign img').on('click', function (ev) {
-                        var attach_id = ev.currentTarget.id
+                for (var id in ids) {
+                    var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/sign.png'/>", ids[id]));
+                    self.$el.find("[data-id='" + ids[id] + "']").after(sign_icon);
+                    sign_icon.on('click', function (ev) {
+                        var attach_id = ev.currentTarget.id;
                         var res_id = self.field_manager.datarecord.res_id;
                         var model = self.field_manager.datarecord.model;
-                        var followers = new session.web.SignRequest(self, attach_id, res_id, model);
-                            followers.get_followers();
-                        });
+                        var signrequest = new session.web.SignRequest(self, $(ev.currentTarget), attach_id, res_id, model, false);
+                        signrequest.get_followers();
+                    });
                 }
-
-                // reinit input type file
-                var $input = self.$('input.oe_form_binary_file');
-                $input.after($input.clone(true)).remove();
-                self.$(".oe_fileupload").show();
-
             });
         },
     });

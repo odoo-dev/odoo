@@ -9,13 +9,10 @@ from openerp.tools.translate import _
 class preprocess_attachment(osv.Model):
     _inherit = "mail.message"
 
+    # TODO check (double postprocess as call to super() needed)
     def _message_read_dict_postprocess(self, cr, uid, messages, message_tree, context=None):
-        """ Post-processing on values given by message_read. This method will
-            handle partners in batch to avoid doing numerous queries.
+        super(preprocess_attachment, self)._message_read_dict_postprocess(cr, uid, messages, message_tree, context=context)
 
-            :param list messages: list of message, as get_dict result
-            :param dict message_tree: {[msg.id]: msg browse record}
-        """
         res_partner_obj = self.pool.get('res.partner')
         ir_attachment_obj = self.pool.get('ir.attachment')
         pid = self.pool['res.users'].browse(cr, SUPERUSER_ID, uid, context=context).partner_id.id
