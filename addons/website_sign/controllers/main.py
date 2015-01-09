@@ -112,8 +112,9 @@ class website_sign(http.Controller):
         ir_attachment_signature = request.registry.get('ir.attachment.signature')
         vals, att_vals = {}, {}
 
-        set_fol = ir_attachment_signature.search_read(request.cr, SUPERUSER_ID,[('document_id','=', attachment_id)],['partner_id'], context=request.context)
-        set_fol_ids = map(lambda d: d['partner_id'][0], set_fol)
+        old_signers = ir_attachment_signature.search_read(request.cr, SUPERUSER_ID,[('document_id','=', attachment_id)],['partner_id'], context=request.context)
+        old_signers_ids = map(lambda d: d['partner_id'][0], old_signers)
+        old_ids = map(lambda d: d['id'], old_signers)
 
         attach_data = request.registry.get('ir.attachment').search_read(request.cr, SUPERUSER_ID,[('id','=', attachment_id)],['name', 'description', 'res_id', 'res_model'], context=request.context)[0]
         if attach_data['name'] != title:
@@ -124,11 +125,8 @@ class website_sign(http.Controller):
         if att_vals:
             request.registry.get('ir.attachment').write(request.cr, request.uid, attachment_id, att_vals, context=request.context)
 
-        if not set(signer_id) == set(set_fol_ids):
-            for partner in set_fol_ids:
-                for doc_id in set_fol:
-                    if doc_id['partner_id'][0] == partner:
-                        ir_attachment_signature.unlink(request.cr, SUPERUSER_ID, [doc_id['id']], context=request.context)
+        if not set(signer_id) == set(old_signers_ids):
+            ir_attachment_signature.unlink(request.cr, SUPERUSER_ID, old_ids, context=request.context)
 
             for signer in signer_id:
                 vals['partner_id'] = signer
@@ -137,11 +135,15 @@ class website_sign(http.Controller):
                 vals['date'] = time.strftime(DEFAULT_SERVER_DATE_FORMAT)
                 ir_attachment_signature.create(request.cr, request.uid, vals, context=request.context)
 
-        if send_directly:
-            signers_data = self.get_signer([attachment_id])
-            request.context.update({'signers_data': signers_data})
-            message = "New sign request for document <b>{}</b>".format(title)
-            self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='email')
+            if send_directly:
+                if len(signer_id) > 0:
+                    signers_data = self.get_signer([attachment_id])
+                    request.context.update({'signers_data': signers_data})
+                    message = "New sign request for document <b>{}</b>".format(title)
+                    self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='notification', subtype='mt_comment')
+                else:
+                    message = "Sign request for document <b>{}</b> has been deleted".format(title)
+                    self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='notification')
 
         return True
 

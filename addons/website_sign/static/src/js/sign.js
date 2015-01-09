@@ -51,7 +51,7 @@ openerp.website_sign = function (session) {
             this.attach_id = attachment_id;
             this.res_id = res_id;
             this.model = model;
-            this.send_directly = send_directly !== 'undefined' ? (send_directly == true) : false;
+            this.send_directly = (typeof send_directly !== undefined)? (send_directly == true) : false;
         },
         get_followers: function () {
             var self = this;
@@ -79,10 +79,18 @@ openerp.website_sign = function (session) {
                     title: _t('Request Signature From'),
                 }, $('<div class="oe_edit_partner_list">' + QWeb.render('select.people', {"result": data, "attach_id": self.attach_id}) + "</div>")).open();
                 self.$dialog.$buttons.find('.oe_dialog_custom_buttons').empty();
-                self.$dialog.$buttons.find('.oe_dialog_custom_buttons').append('<button class="oe_button oe_form_button oe_highlight" type="button" id="request">Request Signature</button><span> or </span> <button class="oe_button oe_form_button oe_link" type="button" id="cancel_request"><span>Cancel</span></button>');
+                self.$dialog.$buttons.find('.oe_dialog_custom_buttons').append(
+                    '<button class="oe_button oe_form_button oe_highlight" id="request">Request Signature</button>' +
+                    '<button class="oe_button oe_form_button" id="delete_request">Delete signature request</button>' +
+                    '<span> or </span>' +
+                    '<button class="oe_button oe_form_button oe_link" id="cancel_request"><span>Cancel</span></button>'
+                );
                 
                 self.$dialog.$buttons.find('#request').click(function(event) {
                     self.request_followers();
+                });
+                self.$dialog.$buttons.find('#delete_request').click(function(event) {
+                    self.request_followers(true);
                 });
                 self.$dialog.$buttons.find('#cancel_request').click(function(event) {
                     self.$dialog.$el.parents('.modal').modal('hide');
@@ -90,7 +98,8 @@ openerp.website_sign = function (session) {
                 return false;
             });
         },
-        request_followers: function () {
+        request_followers: function (deleteRequest) {
+            deleteRequest = (typeof deleteRequest !== undefined)? deleteRequest : false;
             var self = this;
             var attachment_id = this.$dialog.$el.find("#attach_id").val();
             var title = this.$dialog.$el.find("#title").val();
@@ -121,13 +130,16 @@ openerp.website_sign = function (session) {
             };
             openerp.jsonRpc("/website_sign/set_signer", 'call', {
                 'attachment_id': parseInt(attachment_id),
-                'signer_id': sign_ids,
+                'signer_id': (deleteRequest)? [] : sign_ids,
                 'title': title,
                 'comments': comments,
                 'send_directly': self.send_directly,
             }).then(function () {
                 self.$dialog.$el.parents('.modal').modal('hide');
-                self.sign_icon.attr("src", "/website_sign/static/src/img/check.png");
+                if(!deleteRequest)
+                    self.sign_icon.attr("src", "/website_sign/static/src/img/check.png");
+                else
+                    self.sign_icon.attr("src", "/website_sign/static/src/img/sign.png");
             });
             return false;
         },
@@ -145,21 +157,23 @@ openerp.website_sign = function (session) {
 
             this._super();
 
-            attach_ids = _.map(this.attachment_ids, function (file) {return file.id;});
-            for (var id in attach_ids) {
-                var signImg = "sign";
-                if($.inArray(attach_ids[id], checkedIds) > -1)
-                    signImg = "check";
+            if(this.is_author || this.author_id === false){
+                attach_ids = _.map(this.attachment_ids, function (file) {return file.id;});
+                for (var id in attach_ids) {
+                    var signImg = "sign";
+                    if($.inArray(attach_ids[id], checkedIds) > -1)
+                        signImg = "check";
 
-                var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/%s.png'/>", attach_ids[id], signImg));
-                self.$el.find("[data-id='" + attach_ids[id] + "']").after(sign_icon);
-                sign_icon.on('click', function (ev) {
-                    var attach_id = ev.currentTarget.id;
-                    var res_id = self.res_id;
-                    var model = self.model;
-                    var signrequest = self.get_signrequest_dialog($(ev.currentTarget), attach_id, res_id, model);
-                    signrequest.get_followers();
-                });
+                    var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/%s.png'/>", attach_ids[id], signImg));
+                    self.$el.find("[data-id='" + attach_ids[id] + "']").after(sign_icon);
+                    sign_icon.on('click', function (ev) {
+                        var attach_id = ev.currentTarget.id;
+                        var res_id = self.res_id;
+                        var model = self.model;
+                        var signrequest = self.get_signrequest_dialog($(ev.currentTarget), attach_id, res_id, model);
+                        signrequest.get_followers();
+                    });
+                }
             }
         },
 
