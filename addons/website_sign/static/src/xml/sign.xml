@@ -39,13 +39,13 @@
         </div>
         <div class="row">
             <div id="doc_title" class="col-md-12 oe_sign_comment">
-                <input id="title" type="text" class="form-control" placeholder="Title" t-att-value="result.doc_data[0].name"/>
+                <input id="title" type="text" class="form-control" placeholder="Title" t-att-value="result.doc_data.name"/>
             </div>
         </div>
         <div class="row">
             <div class="col-md-12 oe_sign_comment">
-                <textarea id="comments" rows="3" class="form-control" placeholder="Comments"><t t-raw="result.doc_data[0].description ? result.doc_data[0].description:'' "/></textarea>
-            </div>
+                <textarea id="comments" rows="3" class="form-control" placeholder="Comments"><t t-raw="result.doc_data.desc ? result.doc_data.desc : ''"/></textarea>
+            </div>d
         </div>
     </t>
     <t t-extend="mail.thread.message.attachments">
