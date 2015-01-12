@@ -76,14 +76,15 @@ openerp.website_sign = function (session) {
                 }
                 self.$dialog = new session.web.Dialog(this, {
                     size: 'medium',
-                    title: _t('Request Signature From'),
+                    title: _t('Signature Request'),
                 }, $('<div class="oe_edit_partner_list">' + QWeb.render('select.people', {"result": data, "attach_id": self.attach_id}) + "</div>")).open();
                 self.$dialog.$buttons.find('.oe_dialog_custom_buttons').empty();
+                var reqStr = _t("Request Signature"), delStr = _t("Delete Signature Request"), cancelStr = _t("Cancel");
                 self.$dialog.$buttons.find('.oe_dialog_custom_buttons').append(
-                    '<button class="oe_button oe_form_button oe_highlight" id="request">Request Signature</button>' +
-                    '<button class="oe_button oe_form_button" id="delete_request">Delete signature request</button>' +
+                    '<button class="oe_button oe_form_button oe_highlight" id="request">' + reqStr + '</button>' +
+                    '<button class="oe_button oe_form_button" id="delete_request">' + delStr + '</button>' +
                     '<span> or </span>' +
-                    '<button class="oe_button oe_form_button oe_link" id="cancel_request"><span>Cancel</span></button>'
+                    '<button class="oe_button oe_form_button oe_link" id="cancel_request"><span>' + cancelStr + '</span></button>'
                 );
                 
                 self.$dialog.$buttons.find('#request').click(function(event) {
@@ -111,7 +112,7 @@ openerp.website_sign = function (session) {
                     sign_ids.push(parseInt($(record).data('id')));
                 }
             });
-            if(sign_ids.length <= 0){
+            if(sign_ids.length <= 0 && !deleteRequest){
                 var dialog = new session.web.Dialog(this, {
                     size: 'medium',
                     title: _t("You must select at least one signer to send a sign request."),

@@ -174,5 +174,18 @@
             </t>
         </ul>
     </template>
+
+    <template id="website_sign.deleted_sign_request">
+        <t t-call="website.layout">
+            <body>
+                <div class="container">
+                    <h3>Missing signature request</h3>
+                    <p>
+                        The signature request you are trying to reach does not exist. Maybe it has been deleted or modified. Check if you have received a new mail access.
+                    </p>
+                </div>
+            </body>
+        </t>
+    </template>
 </data>
 </openerp>

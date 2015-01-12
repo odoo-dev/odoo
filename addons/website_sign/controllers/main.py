@@ -21,10 +21,12 @@ class website_sign(http.Controller):
         if token:
             current_sign =  ir_attachment_signature.search([('document_id', '=', id),('access_token', '=', token)], limit=1)
             if not current_sign:
-                return http.request.not_found()
+                return http.request.render('website_sign.deleted_sign_request')
 
         # list out partners and their signatures who are requested to sign.
         signatures = ir_attachment_signature.search([('document_id', '=', id)])
+        if not signatures:
+            return http.request.not_found()
         req_count = [signs.id for signs in signatures if signs.state == 'draft']
         attachment =  ir_attachment.browse(id)
         if token:
@@ -85,7 +87,7 @@ class website_sign(http.Controller):
 
         # get already selected signers
         sel_fol_obj = http.request.env['ir.attachment.signature']
-        sel_follower = sel_fol_obj.sudo().search([('document_id','=', attachment_id)])
+        sel_follower = sel_fol_obj.search([('document_id','=', attachment_id)])
         sel_fol_ids = map(lambda d: d.partner_id.id, sel_follower)
 
         res = []
@@ -99,7 +101,7 @@ class website_sign(http.Controller):
         followers_data['signer_data'] = res
 
         #get title and comments of attachment
-        doc_data = http.request.env['ir.attachment'].sudo().search([('id','=', attachment_id)], limit=1)
+        doc_data = http.request.env['ir.attachment'].search([('id','=', attachment_id)], limit=1)
         followers_data['doc_data'] = {}
         followers_data['doc_data']['name'] = doc_data.name
         followers_data['doc_data']['desc'] = doc_data.description
@@ -111,11 +113,11 @@ class website_sign(http.Controller):
         ir_attachment_signature = http.request.env['ir.attachment.signature']
         vals, att_vals = {}, {}
 
-        old_signers = ir_attachment_signature.sudo().search([('document_id','=', attachment_id)])
-        old_signers_ids = map(lambda d: d['partner_id'][0], old_signers)
+        old_signers = ir_attachment_signature.search([('document_id','=', attachment_id)])
+        old_signers_ids = map(lambda d: d['partner_id']['id'], old_signers)
         old_ids = map(lambda d: d['id'], old_signers)
 
-        attach_data = http.request.env['ir.attachment'].sudo().search([('id','=', attachment_id)], limit=1)
+        attach_data = http.request.env['ir.attachment'].search([('id','=', attachment_id)], limit=1)
         if attach_data['name'] != title:
             att_vals['name'] =  title
         if attach_data['description'] != comments:
@@ -125,7 +127,7 @@ class website_sign(http.Controller):
             http.request.env['ir.attachment'].browse(attachment_id).write(att_vals)
 
         if not set(signer_id) == set(old_signers_ids):
-            ir_attachment_signature.sudo().browse(old_ids).unlink()
+            ir_attachment_signature.browse(old_ids).unlink()
 
             for signer in signer_id:
                 vals['partner_id'] = signer
@@ -137,10 +139,10 @@ class website_sign(http.Controller):
             if send_directly:
                 if len(signer_id) > 0:
                     self.signers_data = self.get_signer([attachment_id])
-                    message = "New sign request for document <b>{}</b>".format(title)
+                    message = _("New sign request for document <b>{}</b>").format(title)
                     self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='notification', subtype='mt_comment')
                 else:
-                    message = "Sign request for document <b>{}</b> has been deleted".format(title)
+                    message = _("Sign request for document <b>{}</b> has been deleted").format(title)
                     self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='notification')
 
         return True
@@ -148,7 +150,7 @@ class website_sign(http.Controller):
     @http.route(['/website_sign/get_signer'], type='json', auth="public", website=True)
     def get_signer(self, attachment_ids=None, **post):
         ir_attachment_signature = http.request.env['ir.attachment.signature']
-        signers = ir_attachment_signature.sudo().search([('document_id', 'in', attachment_ids)])
+        signers = ir_attachment_signature.search([('document_id', 'in', attachment_ids)])
         signer_ids = map(lambda d: d.partner_id.id, signers)
 
         signers_data = {}

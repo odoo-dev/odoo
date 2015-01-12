@@ -67,11 +67,11 @@
 
 .openerp .table.oe_sel_followers td {
   border-top: 0;
-  padding: 3px 3px;
+  padding: 3px;
 }
 
 .openerp .oe_sign_title {
-  padding: 10px 15px;
+  padding: 5px 15px;
 }
 
 .openerp .oe_sign_title span {
@@ -81,5 +81,5 @@
 }
 
 .openerp .oe_sign_comment {
-  padding: 10px 30px;
+  padding: 5px 20px;
 }
