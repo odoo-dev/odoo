@@ -42,9 +42,19 @@
     </t>
     <t t-extend="mail.thread.message.attachments">
         <t t-jquery="div#attachments" t-operation="append">
-            <div class="text-center" t-if="attachment.nb_toSign">
-                <a t-att-href="'/sign/document/'+attachment.id" target="_blank"><b>Signed (<t t-raw="attachment.nb_signed+'/'+attachment.nb_toSign"/>)</b></a>
+            <div class="text-center">
+                <a t-if="attachment.nb_toSign" t-att-href="'/sign/document/'+attachment.id" target="_blank"><b>Signed (<t t-raw="attachment.nb_signed+'/'+attachment.nb_toSign"/>)</b></a>
+                <span t-if="!attachment.nb_toSign" style="visibility:hidden;">/</span>
             </div>
+        </t>
+        <t t-jquery="div#attachments .oe_delete" t-operation="after">
+            <img t-if="!attachment.nb_toSign" t-att-id="attachment.id" class="request_sign oe_sign" title="Request Signature" src="/website_sign/static/src/img/sign.png"/>
+            <img t-if="attachment.nb_toSign" t-att-id="attachment.id" class="request_sign oe_sign" title="Request Signature" src="/website_sign/static/src/img/check.png"/>
+        </t>
+    </t>
+    <t t-extend="FieldBinaryFileUploader.files">
+        <t t-jquery=".oe_attachment .oe_delete" t-operation="after">
+            <img t-att-id="file.id" class="request_sign oe_sign" title="Request Signature" src="/website_sign/static/src/img/sign.png"/>
         </t>
     </t>
 </template>

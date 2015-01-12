@@ -65,9 +65,9 @@ class website_sign(http.Controller):
         user = http.request.env.user
         if 'body' in http.request.session and http.request.session.body:
             if hasattr(self, 'signers_data') and self.signers_data:
-                model = http.request.env[thread_model].sudo().with_context(notify_author=True,signers_data=self.signers_data)
+                model = http.request.env[thread_model].with_context(notify_author=True,signers_data=self.signers_data)
             else:
-                model = http.request.env[thread_model].sudo().with_context(notify_author=True)
+                model = http.request.env[thread_model].with_context(notify_author=True)
             model.browse(thread_id).message_post(
                 body=http.request.session.body,
                 type=type,

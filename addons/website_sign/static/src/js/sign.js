@@ -161,12 +161,9 @@ openerp.website_sign = function (session) {
             if(this.is_author || this.author_id === false){
                 attach_ids = _.map(this.attachment_ids, function (file) {return file.id;});
                 for (var id in attach_ids) {
-                    var signImg = "sign";
+                    var sign_icon = self.$el.find("img.request_sign#" + attach_ids[id]);
                     if($.inArray(attach_ids[id], checkedIds) > -1)
-                        signImg = "check";
-
-                    var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/%s.png'/>", attach_ids[id], signImg));
-                    self.$el.find("[data-id='" + attach_ids[id] + "']").after(sign_icon);
+                        sign_icon.attr("src", "/website_sign/static/src/img/check.png");
                     sign_icon.on('click', function (ev) {
                         var attach_id = ev.currentTarget.id;
                         var res_id = self.res_id;
@@ -220,12 +217,9 @@ openerp.website_sign = function (session) {
 
             this.read_name_values().then(function (ids) {
                 for (var id in ids) {
-                    var signImg = "sign";
+                    var sign_icon = self.$el.find("img.request_sign#" + ids[id]);
                     if($.inArray(ids[id], checkedIds) > -1)
-                        signImg = "check";
-
-                    var sign_icon = $(_.str.sprintf("<img id='%s' class='request_sign oe_sign' title='Request Signature' src='/website_sign/static/src/img/%s.png'/>", ids[id], signImg));
-                    self.$el.find("[data-id='" + ids[id] + "']").after(sign_icon);
+                        sign_icon.attr("src", "/website_sign/static/src/img/check.png");
                     sign_icon.on('click', function (ev) {
                         var attach_id = ev.currentTarget.id;
                         var res_id = self.field_manager.datarecord.res_id;
