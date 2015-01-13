@@ -147,8 +147,10 @@
                 <form id="comment" t-attf-action="/sign/document/#{attachment_id}/#{token}/note" method="POST">
                     <h1 class="page-header hidden-print">History</h1>
                     <div class="pull left mb32 mt32" style="width: 75%">
-                        <textarea rows="4" name="comment" class="form-control" placeholder="Send us a note..."></textarea>
-                        <button type="submit" class="btn btn-primary mt8">Send</button>
+                        <t t-if="current_sign">
+                            <textarea rows="4" name="comment" class="form-control" placeholder="Send us a note..."></textarea>
+                            <button type="submit" class="btn btn-primary mt8">Send</button>
+                        </t>
                     </div>
                     <t t-call="website_sign.chatter"/>
                 </form>
@@ -181,7 +183,8 @@
                 <div class="container">
                     <h3>Missing signature request</h3>
                     <p>
-                        The signature request you are trying to reach does not exist. Maybe it has been deleted or modified. Check if you have received a new mail access.
+                        The signature access you are trying to reach does not exist. Maybe the signature request has been deleted or modified. <br/>
+                        If there still exists a signature request for this document, it's <a t-att-href="url">here</a>. If it exists you can check if you are in the asked signers there and get your access in your mail box!
                     </p>
                 </div>
             </body>

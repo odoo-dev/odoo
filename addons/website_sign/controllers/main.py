@@ -21,7 +21,7 @@ class website_sign(http.Controller):
         if token:
             current_sign =  ir_attachment_signature.search([('document_id', '=', id),('access_token', '=', token)], limit=1)
             if not current_sign:
-                return http.request.render('website_sign.deleted_sign_request')
+                return http.request.render('website_sign.deleted_sign_request', {'url': '/sign/document/' + str(id)})
 
         # list out partners and their signatures who are requested to sign.
         signatures = ir_attachment_signature.search([('document_id', '=', id)])
@@ -113,9 +113,8 @@ class website_sign(http.Controller):
         ir_attachment_signature = http.request.env['ir.attachment.signature']
         vals, att_vals = {}, {}
 
-        old_signers = ir_attachment_signature.search([('document_id','=', attachment_id)])
-        old_signers_ids = map(lambda d: d['partner_id']['id'], old_signers)
-        old_ids = map(lambda d: d['id'], old_signers)
+        old_signs = ir_attachment_signature.search([('document_id','=', attachment_id)])
+        old_signers_ids = map(lambda d: d['partner_id']['id'], old_signs)
 
         attach_data = http.request.env['ir.attachment'].search([('id','=', attachment_id)], limit=1)
         if attach_data['name'] != title:
@@ -126,10 +125,20 @@ class website_sign(http.Controller):
         if att_vals:
             http.request.env['ir.attachment'].browse(attachment_id).write(att_vals)
 
-        if not set(signer_id) == set(old_signers_ids):
-            ir_attachment_signature.browse(old_ids).unlink()
+        new_signers = set(signer_id)
+        old_signers = set(old_signers_ids)
+        if not new_signers == old_signers:
+            signers_to_remove = old_signers - new_signers
+            signers_to_add = new_signers - old_signers
+            signers_in_common = old_signers & new_signers
 
-            for signer in signer_id:
+            ids_to_remove = []
+            for sign in old_signs:
+                if sign['partner_id']['id'] in signers_to_remove:
+                    ids_to_remove.append(sign['id'])
+            ir_attachment_signature.browse(ids_to_remove).unlink()
+
+            for signer in signers_to_add:
                 vals['partner_id'] = signer
                 vals['document_id'] = attachment_id
                 vals['state'] = 'draft'
@@ -139,10 +148,12 @@ class website_sign(http.Controller):
             if send_directly:
                 if len(signer_id) > 0:
                     self.signers_data = self.get_signer([attachment_id])
-                    message = _("New sign request for document <b>{}</b>").format(title)
+                    for signer in signers_in_common:
+                        del self.signers_data[signer]
+                    message = _("Signature request for document <b>{}</b> has been added/modified").format(title)
                     self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='notification', subtype='mt_comment')
                 else:
-                    message = _("Sign request for document <b>{}</b> has been deleted").format(title)
+                    message = _("Signature request for document <b>{}</b> has been deleted").format(title)
                     self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='notification')
 
         return True
@@ -156,9 +167,9 @@ class website_sign(http.Controller):
         signers_data = {}
         for sign_id in signer_ids:
             signers_data[sign_id] = []
-            for doc in signers:
-                if sign_id == doc.partner_id.id:
-                    signers_data[sign_id].append({'id': doc.document_id.id,'name': doc.document_id.name, 'token': doc.access_token, 'fname': doc.document_id.datas_fname})
+        for doc in signers:
+            signers_data[doc.partner_id.id].append({'id': doc.document_id.id,'name': doc.document_id.name, 'token': doc.access_token, 'fname': doc.document_id.datas_fname})
+
         return signers_data
 
     @http.route(['/sign/document/<int:id>/<token>/note'], type='http', auth="public", website=True)
