@@ -5,8 +5,9 @@
             <field name="name">Document Sign Request</field>
             <field name="model_id" ref="website_sign.model_ir_attachment_signature"/>
             <field name="auto_delete" eval="True"/>
-            <field name="email_from">${ctx['email_from']}</field>
-            <field name="email_to" >${ctx['email_to']}</field>
+            <field name="email_from">${ctx['email_from']|safe}</field>
+            <field name="email_to">${ctx['email_to']|safe}</field>
+            <field name="subject">Signature request from ${ctx['email_from_usr']} for ${ctx['docnames']}</field>
             <field name="body_html"><![CDATA[
                 <center>
                     <table width = "60%">

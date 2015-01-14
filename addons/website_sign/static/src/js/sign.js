@@ -29,7 +29,7 @@ $(document).ready(function () {
         $('#signed_req').prop('disabled',true);
 
         openerp.jsonRpc("/website_sign/signed", 'call', {
-            'res_id': parseInt(attach_id[1]),
+            'id': parseInt(attach_id[1]),
             'token': token,
             'sign': sign?JSON.stringify(sign[1]):false,
             'signer': signer_name
@@ -45,21 +45,17 @@ openerp.website_sign = function (session) {
     var QWeb = session.web.qweb, _t = session.web._t;
 
     session.web.SignRequest = session.web.Widget.extend({
-        init: function (parent, sign_icon, attachment_id, res_id, model, send_directly) {
+        init: function (parent, sign_icon, attachment_id, send_directly) {
             this._super(parent);
             this.sign_icon = sign_icon;
             this.attach_id = attachment_id;
-            this.res_id = res_id;
-            this.model = model;
             this.send_directly = (typeof send_directly !== undefined)? (send_directly == true) : false;
         },
         get_followers: function () {
             var self = this;
             $('div.oe_edit_partner_list').remove();
             openerp.jsonRpc("/website_sign/get_followers", 'call', {
-                'thread_id': parseInt(self.res_id),
-                'attachment_id': parseInt(self.attach_id),
-                'model': self.model,
+                'attachment_id': parseInt(self.attach_id)
             }).then(function (data) {
                 if (data.signer_data.length === 0) {
                     var dialog = new session.web.Dialog(this, {
@@ -129,9 +125,9 @@ openerp.website_sign = function (session) {
             if (!title) {
                 return false;
             };
-            openerp.jsonRpc("/website_sign/set_signer", 'call', {
+            openerp.jsonRpc("/website_sign/set_signers", 'call', {
                 'attachment_id': parseInt(attachment_id),
-                'signer_id': (deleteRequest)? [] : sign_ids,
+                'signer_ids': (deleteRequest)? [] : sign_ids,
                 'title': title,
                 'comments': comments,
                 'send_directly': self.send_directly,
@@ -166,40 +162,21 @@ openerp.website_sign = function (session) {
                         sign_icon.attr("src", "/website_sign/static/src/img/check.png");
                     sign_icon.on('click', function (ev) {
                         var attach_id = ev.currentTarget.id;
-                        var res_id = self.res_id;
-                        var model = self.model;
-                        var signrequest = self.get_signrequest_dialog($(ev.currentTarget), attach_id, res_id, model);
+                        var signrequest = self.get_signrequest_dialog($(ev.currentTarget), attach_id);
                         signrequest.get_followers();
                     });
                 }
             }
         },
 
-        get_signrequest_dialog: function(sign_icon, attach_id, res_id, model){
-            return new session.web.SignRequest(this, sign_icon, attach_id, res_id, model, true);
+        get_signrequest_dialog: function(sign_icon, attach_id){
+            return new session.web.SignRequest(this, sign_icon, attach_id, true);
         },
     });
 
     session.mail.ThreadComposeMessage.include({
-        do_send_message_post: function (partner_ids, log) {
-            var self = this;
-            var attach_ids = _.map(this.attachment_ids, function (file) {return file.id;})
-            var parent = this._super;
-            var args = arguments;
-            openerp.jsonRpc("/website_sign/get_signer", 'call', {
-                'attachment_ids': attach_ids,
-            }).then(function (res) {
-                var values = {
-                    'context': _.extend(self.parent_thread.context, {
-                        'signers_data': res,
-                    }),
-                };
-                return parent.apply(self, args);
-            });
-        },
-
-        get_signrequest_dialog: function(sign_icon, attach_id, res_id, model){
-            return new session.web.SignRequest(this, sign_icon, attach_id, res_id, model, false);
+        get_signrequest_dialog: function(sign_icon, attach_id){
+            return new session.web.SignRequest(this, sign_icon, attach_id, false);
         },
     });
 
@@ -222,9 +199,7 @@ openerp.website_sign = function (session) {
                         sign_icon.attr("src", "/website_sign/static/src/img/check.png");
                     sign_icon.on('click', function (ev) {
                         var attach_id = ev.currentTarget.id;
-                        var res_id = self.field_manager.datarecord.res_id;
-                        var model = self.field_manager.datarecord.model;
-                        var signrequest = new session.web.SignRequest(self, $(ev.currentTarget), attach_id, res_id, model, false);
+                        var signrequest = new session.web.SignRequest(self, $(ev.currentTarget), attach_id, false);
                         signrequest.get_followers();
                     });
                 }

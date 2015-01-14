@@ -7,10 +7,27 @@ from openerp.addons.web.controllers.main import login_redirect
 from openerp.tools.translate import _
 
 class website_sign(http.Controller):
+
+    def __message_post(self, message, thread_model, thread_id, type='comment', subtype=False, attachments=[]):
+        http.request.session.body = message
+        user = http.request.env.user
+        msgid = False
+        if 'body' in http.request.session and http.request.session.body:
+            model = http.request.env[thread_model].with_context(notify_author=True)
+            msgid = model.browse(thread_id).message_post(
+                body=http.request.session.body,
+                type=type,
+                subtype=subtype,
+                author_id=user.partner_id.id,
+                partner_ids=[user.partner_id.id],
+            )
+            http.request.session.body = False
+        return msgid
+
     @http.route([
         "/sign/document/<int:id>",
         "/sign/document/<int:id>/<token>"
-    ], type='http', auth="public", website=True)
+    ], type='http', auth="user", website=True)
     def request_sign(self, id, token=None, message=False, **post):
         if not http.request.session.uid:
             return login_redirect()
@@ -47,132 +64,71 @@ class website_sign(http.Controller):
 
         return http.request.render('website_sign.doc_sign', values)
 
-    @http.route(['/website_sign/signed'], type='json', auth="public", website=True)
-    def signed(self, res_id=None, token=None, sign=None, signer=None, **post):
+    @http.route(['/website_sign/signed'], type='json', auth="user", website=True)
+    def signed(self, id=None, token=None, sign=None, signer=None, **post):
         ir_attachment_signature = http.request.env['ir.attachment.signature']
-        signature_id =  ir_attachment_signature.search([('document_id', '=', int(res_id)),('access_token', '=', token)], limit=1)
+        signature_id =  ir_attachment_signature.search([('document_id', '=', int(id)),('access_token', '=', token)], limit=1)
         signature_id.write({'state': 'closed', 'signing_date': time.strftime(DEFAULT_SERVER_DATE_FORMAT), 'sign': sign, 'signer_name': signer})
 
         #send mail and notification in chatter about signed by user.
-        model = http.request.env['ir.attachment'].search([('id', '=', int(res_id))], limit=1)
+        model = http.request.env['ir.attachment'].search([('id', '=', int(id))], limit=1)
         message = _('Document <b>%s</b> signed by %s') % (model.name, signer)
         self.__message_post(message, model.res_model, model.res_id, type='comment', subtype='mt_comment')
 
         return True
 
-    def __message_post(self, message, thread_model, thread_id, type='comment', subtype=False, attachments=[]):
-        http.request.session.body = message
-        user = http.request.env.user
-        if 'body' in http.request.session and http.request.session.body:
-            if hasattr(self, 'signers_data') and self.signers_data:
-                model = http.request.env[thread_model].with_context(notify_author=True,signers_data=self.signers_data)
-            else:
-                model = http.request.env[thread_model].with_context(notify_author=True)
-            model.browse(thread_id).message_post(
-                body=http.request.session.body,
-                type=type,
-                subtype=subtype,
-                author_id=user.partner_id.id,
-                partner_ids=[user.partner_id.id],
-            )
-            http.request.session.body = False
-            self.signers_data = None
-        return True
-
-    @http.route(['/website_sign/get_followers'], type='json', auth="public", website=True)
-    def get_followers(self, thread_id=None, attachment_id=None, model=None, **post):
+    @http.route(['/website_sign/get_followers'], type='json', auth="user", website=True)
+    def get_followers(self, attachment_id=None, **post):
         partner_id = http.request.env.user.partner_id.id
+        doc_data = http.request.env['ir.attachment'].browse([attachment_id])
 
-        followers = http.request.env['mail.followers'].sudo().search([('res_model', '=', model), ('res_id', 'in', [thread_id])])
+        followers = http.request.env['mail.followers'].sudo().search([('res_model', '=', doc_data.res_model), ('res_id', '=', doc_data.res_id)])
 
         # get already selected signers
-        sel_fol_obj = http.request.env['ir.attachment.signature']
-        sel_follower = sel_fol_obj.search([('document_id','=', attachment_id)])
-        sel_fol_ids = map(lambda d: d.partner_id.id, sel_follower)
+        signatures = http.request.env['ir.attachment.signature'].search([('document_id','=', attachment_id)])
+        signers = map(lambda d: d.partner_id.id, signatures)
 
         res = []
         followers_data = {}
         for follower in followers:
             if not partner_id == follower.partner_id.id:
-                if follower.partner_id.id in sel_fol_ids:
+                if follower.partner_id.id in signers:
                     res.append({'followers_id': follower.partner_id.id, 'name': follower.partner_id.name, 'email': follower.partner_id.email, 'selected':'checked'})
                 else:
                     res.append({'followers_id': follower.partner_id.id, 'name': follower.partner_id.name, 'email': follower.partner_id.email, 'selected': None})
         followers_data['signer_data'] = res
 
         #get title and comments of attachment
-        doc_data = http.request.env['ir.attachment'].search([('id','=', attachment_id)], limit=1)
         followers_data['doc_data'] = {}
         followers_data['doc_data']['name'] = doc_data.name
         followers_data['doc_data']['desc'] = doc_data.description
 
         return followers_data
 
-    @http.route(['/website_sign/set_signer'], type='json', auth="public", website=True)
-    def set_signer(self, attachment_id=None, signer_id=None, title=None, comments=None, send_directly=False, **post):
-        ir_attachment_signature = http.request.env['ir.attachment.signature']
-        vals, att_vals = {}, {}
-
-        old_signs = ir_attachment_signature.search([('document_id','=', attachment_id)])
-        old_signers_ids = map(lambda d: d['partner_id']['id'], old_signs)
-
-        attach_data = http.request.env['ir.attachment'].search([('id','=', attachment_id)], limit=1)
-        if attach_data['name'] != title:
-            att_vals['name'] =  title
-        if attach_data['description'] != comments:
+    @http.route(['/website_sign/set_signers'], type='json', auth="user", website=True)
+    def set_signers(self, attachment_id=None, title=None, comments=None, signer_ids=None, send_directly=False, **post):
+        attach = http.request.env['ir.attachment'].browse([attachment_id])
+        att_vals = {}
+        if attach['name'] != title:
+            att_vals['name'] = title
+        if attach['description'] != comments:
             att_vals['description'] = comments
-
         if att_vals:
-            http.request.env['ir.attachment'].browse(attachment_id).write(att_vals)
+            attach.write(att_vals)
 
-        new_signers = set(signer_id)
-        old_signers = set(old_signers_ids)
-        if not new_signers == old_signers:
-            signers_to_remove = old_signers - new_signers
-            signers_to_add = new_signers - old_signers
-            signers_in_common = old_signers & new_signers
-
-            ids_to_remove = []
-            for sign in old_signs:
-                if sign['partner_id']['id'] in signers_to_remove:
-                    ids_to_remove.append(sign['id'])
-            ir_attachment_signature.browse(ids_to_remove).unlink()
-
-            for signer in signers_to_add:
-                vals['partner_id'] = signer
-                vals['document_id'] = attachment_id
-                vals['state'] = 'draft'
-                vals['date'] = time.strftime(DEFAULT_SERVER_DATE_FORMAT)
-                ir_attachment_signature.create(vals)
-
-            if send_directly:
-                if len(signer_id) > 0:
-                    self.signers_data = self.get_signer([attachment_id])
-                    for signer in signers_in_common:
-                        del self.signers_data[signer]
-                    message = _("Signature request for document <b>{}</b> has been added/modified").format(title)
-                    self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='notification', subtype='mt_comment')
-                else:
-                    message = _("Signature request for document <b>{}</b> has been deleted").format(title)
-                    self.__message_post(message, attach_data['res_model'], attach_data['res_id'], type='notification')
-
+        signers_in_common = attach.set_signers(signer_ids)[0]
+        if signers_in_common != False and send_directly:
+            if len(signer_ids) > 0:
+                message = _("Signature request for document <b>%s</b> has been added/modified") % title
+                msgid = self.__message_post(message, attach['res_model'], attach['res_id'], type='notification')
+                http.request.env['mail.message'].browse([msgid]).send_signature_accesses(attachment_ids=[attachment_id], ignored_partners=signers_in_common)
+            else:
+                message = _("Signature request for document <b>%s</b> has been deleted") % title
+                self.__message_post(message, attach['res_model'], attach['res_id'], type='notification')
+                
         return True
 
-    @http.route(['/website_sign/get_signer'], type='json', auth="public", website=True)
-    def get_signer(self, attachment_ids=None, **post):
-        ir_attachment_signature = http.request.env['ir.attachment.signature']
-        signers = ir_attachment_signature.search([('document_id', 'in', attachment_ids)])
-        signer_ids = map(lambda d: d.partner_id.id, signers)
-
-        signers_data = {}
-        for sign_id in signer_ids:
-            signers_data[sign_id] = []
-        for doc in signers:
-            signers_data[doc.partner_id.id].append({'id': doc.document_id.id,'name': doc.document_id.name, 'token': doc.access_token, 'fname': doc.document_id.datas_fname})
-
-        return signers_data
-
-    @http.route(['/sign/document/<int:id>/<token>/note'], type='http', auth="public", website=True)
+    @http.route(['/sign/document/<int:id>/<token>/note'], type='http', auth="user", website=True)
     def post_note(self, id, token, **post):
         record = http.request.env['ir.attachment'].search([('id', '=', id)], limit=1)
         message = post.get('comment')
