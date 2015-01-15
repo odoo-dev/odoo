@@ -13,12 +13,7 @@ $(document).ready(function () {
     $('form.js_sign_json').submit(function(ev){
         ev.preventDefault();
         var $link = $(ev.currentTarget);
-        var href = $link.attr("action");
-        var attach_id = href.match(/signed\/([0-9]+)/);
-        var token = href.match(/token=(.*)/);
-        if (token)
-            token = token[1];
-        var signer_name = $("#signer_name").val();
+
         var sign = $("#sign").jSignature("getData",'image');
         var is_empty = sign?empty_sign[1]==sign[1]:false;
         $('#signer').toggleClass('has-error', ! signer_name);
@@ -28,16 +23,14 @@ $(document).ready(function () {
             return false;
         $('#signed_req').prop('disabled',true);
 
-        openerp.jsonRpc("/website_sign/signed", 'call', {
-            'id': parseInt(attach_id[1]),
-            'token': token,
+        openerp.jsonRpc($link.attr("action"), "call", {
             'sign': sign?JSON.stringify(sign[1]):false,
-            'signer': signer_name
+            'signer': $("#signer_name").val()
         }).then(function (data) {
             $('#modesign').modal('hide');
-            window.location.href = '/sign/document/'+attach_id[1]+'/'+token+'?message=2';
+            window.location.href = '/sign/document/'+data['id']+'/'+data['token']+'?message=2';
         });
-        return false
+        return false;
     });
 });
 
@@ -45,53 +38,65 @@ openerp.website_sign = function (session) {
     var QWeb = session.web.qweb, _t = session.web._t;
 
     session.web.SignRequest = session.web.Widget.extend({
-        init: function (parent, sign_icon, attachment_id, send_directly) {
+        init: function (parent, sign_icon, attachment_id, res_model, res_id, send_directly) {
             this._super(parent);
             this.sign_icon = sign_icon;
             this.attach_id = attachment_id;
+            this.res_model = res_model;
+            this.res_id = res_id;
             this.send_directly = (typeof send_directly !== undefined)? (send_directly == true) : false;
         },
         get_followers: function () {
             var self = this;
             $('div.oe_edit_partner_list').remove();
-            openerp.jsonRpc("/website_sign/get_followers", 'call', {
-                'attachment_id': parseInt(self.attach_id)
-            }).then(function (data) {
-                if (data.signer_data.length === 0) {
+            openerp.session.rpc("/website_sign/get_followers", {
+                'attachment_id': parseInt(self.attach_id),
+                'res_model': self.res_model,
+                'res_id': self.res_id
+            }).then(function (followers) {
+                if (followers.length === 0) {
                     var dialog = new session.web.Dialog(this, {
                         size: 'small',
                         title: _t("This document does not have any followers, please add them."),
                         buttons:[{
                             text: _t("Ok"),
                             click: function() {
-                                this.parents('.modal').modal('hide');
+                                dialog.close();
                             }
                         }],
                     }, null).open();
                     return false;
                 }
-                self.$dialog = new session.web.Dialog(this, {
-                    size: 'medium',
-                    title: _t('Signature Request'),
-                }, $('<div class="oe_edit_partner_list">' + QWeb.render('select.people', {"result": data, "attach_id": self.attach_id}) + "</div>")).open();
-                self.$dialog.$buttons.find('.oe_dialog_custom_buttons').empty();
-                var reqStr = _t("Request Signature"), delStr = _t("Delete Signature Request"), cancelStr = _t("Cancel");
-                self.$dialog.$buttons.find('.oe_dialog_custom_buttons').append(
-                    '<button class="oe_button oe_form_button oe_highlight" id="request">' + reqStr + '</button>' +
-                    '<button class="oe_button oe_form_button" id="delete_request">' + delStr + '</button>' +
-                    '<span> or </span>' +
-                    '<button class="oe_button oe_form_button oe_link" id="cancel_request"><span>' + cancelStr + '</span></button>'
-                );
-                
-                self.$dialog.$buttons.find('#request').click(function(event) {
-                    self.request_followers();
+
+                var Attachment = new openerp.Model("ir.attachment");
+                Attachment.query(['name', 'description'])
+                        .filter([['id', '=', parseInt(self.attach_id)]])
+                        .first().then(function(attachment){
+
+                    self.$dialog = new session.web.Dialog(self, {
+                        size: 'medium',
+                        title: _t('Signature Request'),
+                    }, $('<div class="oe_edit_partner_list">' + QWeb.render('select.people', {"followers": followers, "attachment": attachment}) + "</div>")).open();
+                    self.$dialog.$buttons.find('.oe_dialog_custom_buttons').empty();
+                    var reqStr = _t("Request Signature"), delStr = _t("Delete Signature Request"), cancelStr = _t("Cancel");
+                    self.$dialog.$buttons.find('.oe_dialog_custom_buttons').append(
+                        '<button class="oe_button oe_form_button oe_highlight" id="request">' + reqStr + '</button>' +
+                        '<button class="oe_button oe_form_button" id="delete_request">' + delStr + '</button>' +
+                        '<span> or </span>' +
+                        '<button class="oe_button oe_form_button oe_link" id="cancel_request"><span>' + cancelStr + '</span></button>'
+                    );
+                    
+                    self.$dialog.$buttons.find('#request').click(function(event) {
+                        self.request_followers();
+                    });
+                    self.$dialog.$buttons.find('#delete_request').click(function(event) {
+                        self.request_followers(true);
+                    });
+                    self.$dialog.$buttons.find('#cancel_request').click(function(event) {
+                        self.$dialog.close();
+                    });
                 });
-                self.$dialog.$buttons.find('#delete_request').click(function(event) {
-                    self.request_followers(true);
-                });
-                self.$dialog.$buttons.find('#cancel_request').click(function(event) {
-                    self.$dialog.$el.parents('.modal').modal('hide');
-                });
+
                 return false;
             });
         },
@@ -115,7 +120,7 @@ openerp.website_sign = function (session) {
                     buttons:[{
                         text: _t("Ok"),
                         click: function() {
-                            this.parents('.modal').modal('hide');
+                            dialog.close();
                         }
                     }],
                 }, null).open();
@@ -125,18 +130,23 @@ openerp.website_sign = function (session) {
             if (!title) {
                 return false;
             };
-            openerp.jsonRpc("/website_sign/set_signers", 'call', {
-                'attachment_id': parseInt(attachment_id),
-                'signer_ids': (deleteRequest)? [] : sign_ids,
-                'title': title,
-                'comments': comments,
-                'send_directly': self.send_directly,
-            }).then(function () {
-                self.$dialog.$el.parents('.modal').modal('hide');
-                if(!deleteRequest)
-                    self.sign_icon.attr("src", "/website_sign/static/src/img/check.png");
-                else
-                    self.sign_icon.attr("src", "/website_sign/static/src/img/sign.png");
+
+            var Attachment = new openerp.Model("ir.attachment");
+            Attachment.call("set_name_and_description", [parseInt(attachment_id), title, comments])
+                    .then(function(){
+
+                openerp.session.rpc("/website_sign/set_signers", {
+                    'attachment_id': parseInt(attachment_id),
+                    'signer_ids': (deleteRequest)? [] : sign_ids,
+                    'send_directly': self.send_directly,
+                }).then(function(){
+
+                    self.$dialog.close();
+                    if(!deleteRequest)
+                        self.sign_icon.attr("src", "/website_sign/static/src/img/check.png");
+                    else
+                        self.sign_icon.attr("src", "/website_sign/static/src/img/sign.png");
+                });
             });
             return false;
         },
@@ -170,13 +180,13 @@ openerp.website_sign = function (session) {
         },
 
         get_signrequest_dialog: function(sign_icon, attach_id){
-            return new session.web.SignRequest(this, sign_icon, attach_id, true);
+            return new session.web.SignRequest(this, sign_icon, attach_id, this.model, this.res_id, true);
         },
     });
 
     session.mail.ThreadComposeMessage.include({
         get_signrequest_dialog: function(sign_icon, attach_id){
-            return new session.web.SignRequest(this, sign_icon, attach_id, false);
+            return new session.web.SignRequest(this, sign_icon, attach_id, this.model, this.res_id, false);
         },
     });
 

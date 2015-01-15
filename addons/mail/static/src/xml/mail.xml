@@ -89,7 +89,6 @@
         -->
     <t t-name="mail.thread.message.attachments">
         <t t-foreach='widget.attachment_ids' t-as='attachment'>
-            <div id="attachments" style="display:inline-block;">
             <t t-if="attachment.file_type_icon !== 'webimage'">
                 <div t-attf-class="oe_attachment #{attachment.upload ? 'oe_uploading' : ''}">
                     <a t-att-href='attachment.url' target="_blank">
@@ -118,7 +117,6 @@
                     </div>
                 </div>
             </t>
-        </div>
         </t>
     </t>
 

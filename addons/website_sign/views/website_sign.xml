@@ -69,7 +69,7 @@
                                     <t t-if="signatures">
                                         <t t-foreach="signatures" t-as="sign">
                                             <div class="row" t-if="sign.state == 'closed'">
-                                                <img class="media-object pull-left" t-att-src="'/web/binary/image?model=ir.attachment.signature&amp;field=sign&amp;id=' + str(sign.id) + '&amp;resize=500,180'" style="width: 150px;"/>
+                                                <img class="media-object pull-left" t-att-src="'/web/binary/image?model=ir.attachment.signature&amp;field=signature&amp;id=' + str(sign.id) + '&amp;resize=500,180'" style="width: 150px;"/>
                                                 <div style="line-height:65px; font-weight:bold;">
                                                     by <t t-raw="sign.signer_name"/> on <t t-raw="sign.signing_date"/>.
                                                 </div>
@@ -81,7 +81,7 @@
                             </div>
                             <div class="modal fade" id="modesign" role="dialog" aria-hidden="true">
                                 <div class="modal-dialog">
-                                    <form id="sign_doc" method="post" t-attf-action="/website_sign/signed/#{attachment_id}/token=#{token}" class="js_sign_json modal-content">
+                                    <form id="sign_doc" method="post" t-attf-action="/website_sign/signed/#{attachment_id}/#{token}" class="js_sign_json modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
                                             <h4 class="modal-title">Sign Document</h4>

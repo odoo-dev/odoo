@@ -19,6 +19,26 @@
   opacity: 1;
 }
 
+.openerp .oe_mail .oe_attachment .sign_link {
+  display: block;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin: 3px;
+  padding: 0px 3px;
+  color: #FFFFFF;
+  background-color: rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  -webkit-transition: opacity 0.2s linear;
+  -moz-transition: opacity 0.2s linear;
+  -o-transition: opacity 0.2s linear;
+  transition: opacity 0.2s linear;
+}
+
+.openerp .oe_mail .oe_attachment:hover .sign_link {
+  opacity: 1;
+}
+
 .bs-sidebar {
   position: fixed;
   z-index: 1;

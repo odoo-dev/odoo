@@ -40,7 +40,7 @@ class signature_mail_message(models.Model):
         if attachment_ids == None:
             attachment_ids = map(lambda d: d.id, self.attachment_ids)
 
-        # get signers data
+        # Get signers data
         signers = self.env['ir.attachment.signature'].search([('document_id', 'in', attachment_ids)])
         signer_ids = map(lambda d: d.partner_id.id, signers)
 
@@ -53,11 +53,11 @@ class signature_mail_message(models.Model):
         if len(signers_data) <= 0:
             return
 
-        # exclude some signers
+        # Exclude some signers
         for ignored in ignored_partners:
             del signers_data[ignored]
 
-        # send mail to included signers
+        # Send mail to not-excluded signers
         base_context = self.env.context
         template_id = self.env.ref('website_sign.request_sign_template').id
         mail_template = self.env['mail.template'].browse([template_id])
@@ -127,13 +127,17 @@ class ir_attachment(models.Model):
 
         return False
 
+    def set_name_and_description(self, cr, uid, id, name, description, context=None):
+        attach = self.browse(cr, uid, [id], context=context)
+        attach.write({'name': name, 'description': description})
+
 class ir_attachment_signature(models.Model):
     _name = "ir.attachment.signature"
     _description = "Signature For Attachments"
 
     partner_id = fields.Many2one('res.partner', 'Partner')
     document_id = fields.Many2one('ir.attachment', 'Attachment', ondelete='cascade')
-    sign = fields.Binary('Signature')
+    signature = fields.Binary('Signature')
     date = fields.Date('Creation Date', help="Date of requesting Signature.")
     signing_date = fields.Date('Creation Date', help="Date of signing Attachment .")
     deadline_date = fields.Date('Creation Date', readonly=True, select=True, help="Deadline to sign Attachment.")
@@ -144,3 +148,7 @@ class ir_attachment_signature(models.Model):
     ])
     access_token = fields.Char('Security Token', size=256, required=True, default=(lambda self: str(uuid.uuid4())))
     signer_name = fields.Char('Signer Name', size=256)
+
+    @api.one
+    def sign(self, signer, signature):
+        self.write({'state': 'closed', 'signing_date': time.strftime(DEFAULT_SERVER_DATE_FORMAT), 'signature': signature, 'signer_name': signer})
