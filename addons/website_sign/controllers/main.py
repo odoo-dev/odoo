@@ -14,13 +14,22 @@ class website_sign(http.Controller):
         msgid = False
         if 'body' in http.request.session and http.request.session.body:
             model = http.request.env[thread_model].with_context(notify_author=True)
-            msgid = model.browse(thread_id).message_post(
-                body=http.request.session.body,
-                type=type,
-                subtype=subtype,
-                author_id=user.partner_id.id,
-                partner_ids=[user.partner_id.id],
-            )
+            try: # If only sudo, notes will be sent by mails by 'Administrator'
+                msgid = model.browse(thread_id).message_post(
+                    body=http.request.session.body,
+                    type=type,
+                    subtype=subtype,
+                    author_id=user.partner_id.id,
+                    partner_ids=[user.partner_id.id],
+                )
+            except:
+                msgid = model.sudo().browse(thread_id).message_post(
+                    body=http.request.session.body,
+                    type=type,
+                    subtype=subtype,
+                    author_id=user.partner_id.id,
+                    partner_ids=[user.partner_id.id],
+                )
             http.request.session.body = False
         return msgid
 
@@ -33,18 +42,17 @@ class website_sign(http.Controller):
         ir_attachment_signature = http.request.env['ir.attachment.signature']
 
         if token:
-            current_sign = ir_attachment_signature.search([('document_id', '=', id),('access_token', '=', token)], limit=1)
+            current_sign = ir_attachment_signature.sudo().search([('document_id', '=', id),('access_token', '=', token)], limit=1)
             if not current_sign:
                 return http.request.render('website_sign.deleted_sign_request', {'url': '/sign/document/' + str(id)})
 
-            signatures = ir_attachment_signature.sudo().search([('document_id', '=', id)])
             attachment =  http.request.env['ir.attachment'].sudo().browse(id)
             record = http.request.env[attachment.res_model].sudo().browse(attachment.res_id)
         else:
-            signatures = ir_attachment_signature.search([('document_id', '=', id)])
             attachment =  http.request.env['ir.attachment'].browse(id)
             record = http.request.env[attachment.res_model].browse(attachment.res_id)
 
+        signatures = attachment.signature_ids
         if not signatures:
             return http.request.not_found()
         req_count = [signs.id for signs in signatures if signs.state == 'draft']
@@ -65,9 +73,12 @@ class website_sign(http.Controller):
     @http.route(['/website_sign/signed/<int:id>/<token>'], type='json', auth="user", website=True)
     def signed(self, id=None, token=None, sign=None, signer=None, **post):
         signature =  http.request.env['ir.attachment.signature'].search([('document_id', '=', id),('access_token', '=', token)], limit=1)
+        if not signature:
+            return {'id': id, 'token': token}
+
         signature.sudo().sign(signer, sign)
 
-        attach = http.request.env['ir.attachment'].browse([id])
+        attach = http.request.env['ir.attachment'].sudo().browse([id])
         message = _('Document <b>%s</b> signed by %s') % (attach.name, signer)
         self.__message_post(message, attach.res_model, attach.res_id, type='comment', subtype='mt_comment')
 

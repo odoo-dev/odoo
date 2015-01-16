@@ -3,7 +3,6 @@
     <data>
         <record id="request_sign_template" model="mail.template">
             <field name="name">Document Sign Request</field>
-            <field name="model_id" ref="website_sign.model_ir_attachment_signature"/>
             <field name="auto_delete" eval="True"/>
             <field name="email_from">${ctx['email_from']|safe}</field>
             <field name="email_to">${ctx['email_to']|safe}</field>

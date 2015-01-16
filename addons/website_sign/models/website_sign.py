@@ -141,11 +141,16 @@ class ir_attachment(models.Model):
                 email_to = email_to,
                 docnames = docnames,
                 msgbody = message,
-                links = links,
-                is_signature_request = True
+                links = links
             )
 
-            template.send_mail(None, force_send=True)
+            mail_id = template.send_mail(None, force_send=False)
+            mail = self.env['mail.mail'].browse(mail_id)
+            attachment_ids = list(mail.attachment_ids)
+            for attachment in self:
+                attachment_ids.append((4, attachment.id))
+            mail.attachment_ids = attachment_ids
+            mail.with_context(is_signature_request=True).send(raise_exception=False)
 
         return True
 
