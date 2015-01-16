@@ -35,69 +35,37 @@ class signature_mail_message(models.Model):
 
         return result
 
-    @api.one
-    def send_signature_accesses(self, attachment_ids=None, ignored_partners=[]):
-        if attachment_ids == None:
-            attachment_ids = map(lambda d: d.id, self.attachment_ids)
-
-        # Get signers data
-        signers = self.env['ir.attachment.signature'].search([('document_id', 'in', attachment_ids)])
-        signer_ids = map(lambda d: d.partner_id.id, signers)
-
-        signers_data = {}
-        for sign_id in signer_ids:
-            signers_data[sign_id] = []
-        for doc in signers:
-            signers_data[doc.partner_id.id].append({'id': doc.document_id.id,'name': doc.document_id.name, 'token': doc.access_token, 'fname': doc.document_id.datas_fname})
-        
-        if len(signers_data) <= 0:
-            return
-
-        # Exclude some signers
-        for ignored in ignored_partners:
-            del signers_data[ignored]
-
-        # Send mail to not-excluded signers
-        base_context = self.env.context
-        template_id = self.env.ref('website_sign.request_sign_template').id
-        mail_template = self.env['mail.template'].browse([template_id])
-
-        email_from_usr = self.author_id.name
-        email_from = str(self.author_id.name) + "<" + str(self.author_id.email) + ">"
-
-        for signer in signers_data.keys():
-            email_to = self.env['res.partner'].search([('id', '=', signer)], limit=1).email
-
-            docs, links = [], []
-            for sign in signers_data[signer]:
-                docs.append(sign['name'])
-                link = _("sign/document/%s/%s") % (sign['id'], sign['token'])
-                links.append([link, sign['fname'].split('.')[:-1][0]])
-            docnames = ", ".join(docs)
-
-            template = mail_template.with_context(base_context,
-                email_from_usr = email_from_usr,
-                email_from = email_from,
-                email_to = email_to,
-                docnames = docnames,
-                msgbody = self.body,
-                links = links
-            )
-
-            template.send_mail(None, force_send=True)
-
-        return True
-
     def create(self, cr, uid, values, context=None):
-        tmp = super(signature_mail_message, self).create(cr, uid, values, context=context)
+        signers_data = []
+        if (context == None or 'is_signature_request' not in context) and 'attachment_ids' in values:
+            signers_data = self.pool.get("ir.attachment").browse(cr, uid, map(lambda a: a[1], values['attachment_ids']), context=context).get_signers().keys()
+
+        new_context = {'ignored_signers_for_mail': signers_data}
+        if context != None:
+            new_context.update(context)
+
+        tmp = super(signature_mail_message, self).create(cr, uid, values, context=new_context)
         mess = self.pool.get("mail.message").browse(cr, uid, [tmp], context=context)
-        mess.send_signature_accesses()
+        attachments = self.pool.get("ir.attachment").browse(cr, uid, map(lambda d: d.id, mess.attachment_ids), context=context)
+        attachments.send_signature_accesses(mess.body)
         return tmp
+
+class signature_mail_notification(models.Model):
+    _inherit = "mail.notification"
+
+    def _notify(self, cr, uid, message_id, partners_to_notify=None, context=None, force_send=False, user_signature=True):
+        if context != None and 'ignored_signers_for_mail' in context:
+            partners_to_notify = list(set(partners_to_notify) - set(context['ignored_signers_for_mail']))
+        super(signature_mail_notification, self)._notify(cr, uid, message_id, partners_to_notify=partners_to_notify, context=context, force_send=force_send, user_signature=user_signature)
 
 class ir_attachment(models.Model):
     _inherit = 'ir.attachment'
 
     signature_ids = fields.One2many('ir.attachment.signature', 'document_id', 'Signatures')
+
+    def set_name_and_description(self, cr, uid, id, name, description, context=None):
+        attach = self.browse(cr, uid, [id], context=context)
+        attach.write({'name': name, 'description': description})
 
     @api.one
     def set_signers(self, signer_ids):
@@ -127,9 +95,59 @@ class ir_attachment(models.Model):
 
         return False
 
-    def set_name_and_description(self, cr, uid, id, name, description, context=None):
-        attach = self.browse(cr, uid, [id], context=context)
-        attach.write({'name': name, 'description': description})
+    def get_signers(self):
+        signers = self.env['ir.attachment.signature'].search([('document_id', 'in', self.mapped('id'))])
+        signer_ids = map(lambda d: d.partner_id.id, signers)
+
+        signers_data = {}
+        for sign_id in signer_ids:
+            signers_data[sign_id] = []
+        for doc in signers:
+            signers_data[doc.partner_id.id].append({'id': doc.document_id.id,'name': doc.document_id.name, 'token': doc.access_token, 'fname': doc.document_id.datas_fname})
+        
+        return signers_data
+
+    def send_signature_accesses(self, message, ignored_partners=[]):
+        # Get signers data
+        signers_data = self.get_signers()
+        if len(signers_data) <= 0:
+            return
+
+        # Exclude some signers
+        for ignored in ignored_partners:
+            del signers_data[ignored]
+
+        # Send mail to not-excluded signers
+        base_context = self.env.context
+        template_id = self.env.ref('website_sign.request_sign_template').id
+        mail_template = self.env['mail.template'].browse([template_id])
+
+        email_from_usr = self.env.user.partner_id.name
+        email_from = str(self.env.user.partner_id.name) + "<" + str(self.env.user.partner_id.email) + ">"
+
+        for signer in signers_data.keys():
+            email_to = self.env['res.partner'].browse([signer]).email
+
+            docs, links = [], []
+            for sign in signers_data[signer]:
+                docs.append(sign['name'])
+                link = _("sign/document/%s/%s") % (sign['id'], sign['token'])
+                links.append([link, sign['fname'].split('.')[:-1][0]])
+            docnames = ", ".join(docs)
+
+            template = mail_template.sudo().with_context(base_context,
+                email_from_usr = email_from_usr,
+                email_from = email_from,
+                email_to = email_to,
+                docnames = docnames,
+                msgbody = message,
+                links = links,
+                is_signature_request = True
+            )
+
+            template.send_mail(None, force_send=True)
+
+        return True
 
 class ir_attachment_signature(models.Model):
     _name = "ir.attachment.signature"

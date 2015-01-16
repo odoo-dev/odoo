@@ -29,9 +29,6 @@ class website_sign(http.Controller):
         "/sign/document/<int:id>/<token>"
     ], type='http', auth="user", website=True)
     def request_sign(self, id, token=None, message=False, **post):
-        if not http.request.session.uid:
-            return login_redirect()
-
         current_sign = None
         ir_attachment_signature = http.request.env['ir.attachment.signature']
 
@@ -40,16 +37,17 @@ class website_sign(http.Controller):
             if not current_sign:
                 return http.request.render('website_sign.deleted_sign_request', {'url': '/sign/document/' + str(id)})
 
-        signatures = ir_attachment_signature.search([('document_id', '=', id)])
-        if not signatures:
-            return http.request.not_found()
-
-        req_count = [signs.id for signs in signatures if signs.state == 'draft']
-        attachment =  http.request.env['ir.attachment'].browse(id)
-        if token:
+            signatures = ir_attachment_signature.sudo().search([('document_id', '=', id)])
+            attachment =  http.request.env['ir.attachment'].sudo().browse(id)
             record = http.request.env[attachment.res_model].sudo().browse(attachment.res_id)
         else:
+            signatures = ir_attachment_signature.search([('document_id', '=', id)])
+            attachment =  http.request.env['ir.attachment'].browse(id)
             record = http.request.env[attachment.res_model].browse(attachment.res_id)
+
+        if not signatures:
+            return http.request.not_found()
+        req_count = [signs.id for signs in signatures if signs.state == 'draft']
 
         values = {
             'attachment_id': id,
@@ -67,7 +65,7 @@ class website_sign(http.Controller):
     @http.route(['/website_sign/signed/<int:id>/<token>'], type='json', auth="user", website=True)
     def signed(self, id=None, token=None, sign=None, signer=None, **post):
         signature =  http.request.env['ir.attachment.signature'].search([('document_id', '=', id),('access_token', '=', token)], limit=1)
-        signature.sign(signer, sign)
+        signature.sudo().sign(signer, sign)
 
         attach = http.request.env['ir.attachment'].browse([id])
         message = _('Document <b>%s</b> signed by %s') % (attach.name, signer)
@@ -99,8 +97,8 @@ class website_sign(http.Controller):
         if signers_in_common != False and send_directly:
             if len(signer_ids) > 0:
                 message = _("Signature request for document <b>%s</b> has been added/modified") % attach['name']
-                msgid = self.__message_post(message, attach.res_model, attach.res_id, type='notification')
-                http.request.env['mail.message'].browse([msgid]).send_signature_accesses(attachment_ids=[attachment_id], ignored_partners=signers_in_common)
+                self.__message_post(message, attach.res_model, attach.res_id, type='notification')
+                attach.send_signature_accesses(message, ignored_partners=signers_in_common)
             else:
                 message = _("Signature request for document <b>%s</b> has been deleted") % attach['name']
                 self.__message_post(message, attach.res_model, attach.res_id, type='notification')
