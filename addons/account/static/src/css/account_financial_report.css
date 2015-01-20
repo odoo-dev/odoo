@@ -5,3 +5,6 @@
 .ui-dialog-titlebar {
     display:none
 }
+input#summary, div.dropdown, i.fa, div.savedSummary span, td.unfoldable, td.foldable {
+    cursor: pointer; cursor: hand;
+}

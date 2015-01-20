@@ -71,8 +71,7 @@ class account_report_context_common(models.TransientModel):
 
     date_from = fields.Date("Start date")
     date_to = fields.Date("End date")
-    target_move = fields.Selection([('posted', 'All posted entries'), ('all', 'All entries')],
-                                   'Target moves', default='posted', required=True)
+    all_entries = fields.Boolean('Use all entries (not only posted ones)', default=False, required=True)
     multi_company = fields.Boolean('Allow multi-company', compute='_get_multi_company', store=True)
     company_id = fields.Many2one('res.company', 'Company', default=lambda s: s.env.user.company_id)
     date_filter = fields.Char('Date filter used', default=None)
@@ -271,19 +270,22 @@ class account_report_context_common(models.TransientModel):
             if self.get_report_obj().get_report_type() != 'no_date_range':
                 dt_from = datetime.strptime(self.date_from, "%Y-%m-%d")
                 delta = dt_to - dt_from
+                delta = timedelta(days=delta.days + 1)
+                delta_days = delta.days
                 for k in xrange(0, self.periods_number):
                     dt_from -= delta
                     dt_to -= delta
                     if display:
-                        columns += [dt_from.strftime('(From %d %b %Y <br />') + dt_to.strftime('to %d %b %Y)')]
+                        columns += [str((k + 1) * delta_days) + ' - ' + str((k + 2) * delta_days) + ' days ago']
                     else:
                         columns += [(dt_from.strftime("%Y-%m-%d"), dt_to.strftime("%Y-%m-%d"))]
             else:
-                dt_to -= timedelta(days=calendar.monthrange(dt_to.year, dt_to.month > 1 and dt_to.month - 1 or 12)[1])
-                if display:
-                    columns += [dt_to.strftime('(as at %d %b %Y)')]
-                else:
-                    columns += [(dt_to.strftime("%Y-%m-%d"), dt_to.strftime("%Y-%m-%d"))]
+                for k in xrange(0, self.periods_number):
+                    dt_to -= timedelta(days=calendar.monthrange(dt_to.year, dt_to.month > 1 and dt_to.month - 1 or 12)[1])
+                    if display:
+                        columns += [dt_to.strftime('(as at %d %b %Y)')]
+                    else:
+                        columns += [(dt_to.strftime("%Y-%m-%d"), dt_to.strftime("%Y-%m-%d"))]
         return columns
 
     @api.model
@@ -335,7 +337,7 @@ class account_report_context_common(models.TransientModel):
 
         return self.env['report']._run_wkhtmltopdf([], [], [(0, html)], landscape, self.env.user.company_id.paperformat_id)
 
-    def get_csv(self, response):
+    def get_xls(self, response):
         book = Workbook()
         report_id = self.get_report_obj()
         sheet = book.add_sheet(report_id.get_title())

@@ -5,7 +5,7 @@
         openerp.footnote = {};
         var _t = openerp._t;
 
-        var footNoteSeqNum = 1;
+        var curFootNoteTarget;
 
         openerp.reportWidgets = openerp.Widget.extend({
             events: {
@@ -26,12 +26,13 @@
                 'mouseenter .footnote': 'addTrashAndPencil',
                 'click .fa-trash-o': 'rmContent',
                 'click .closeSummary': 'rmContent',
+                'click .savedSummary > span': 'editSummary',
                 "change *[name='date_filter']": 'onChangeDateFilter',
                 "change *[name='date_filter_cmp']": 'onChangeCmpDateFilter',
                 "change *[name='date_to']": 'onChangeCmpDateFilter',
                 "change *[name='date_from']": 'onChangeCmpDateFilter',
                 "change *[name='comparison']": 'onChangeComparison',
-                "click button[name='summary']": 'onClickSummary',
+                "click input[name='summary']": 'onClickSummary',
                 "click button.saveSummary": 'saveSummary',
                 'click button.saveContent': 'saveContent',
                 'click button#saveFootNote': 'saveFootNote',
@@ -43,19 +44,17 @@
             saveFootNote: function() {
                 var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
                 var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
-                var footNoteSeqNum = $("#footnoteModal label").text();
                 var note = $("#note").val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
-                this.$("div.page").append(openerp.qweb.render("savedFootNote", {num: footNoteSeqNum, note: note}));
                 var model = new openerp.Model('account.report.context.common');
                 model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                     var contextModel = new openerp.Model(result);
-                    contextModel.call('add_footnote', [[parseInt(context_id)], $("#type").val(), $("#target_id").val(), $("#column").val(), footNoteSeqNum, note]);
-                    $('#footnoteModal').find('form')[0].reset();
-                    $('#footnoteModal').off('hidden.bs.modal')
-                    $('#footnoteModal').on('hidden.bs.modal', function (e) {
-                        $(this).find('form')[0].reset();
+                    contextModel.call('get_next_footnote_number', [[parseInt(context_id)]]).then(function (footNoteSeqNum) {
+                        curFootNoteTarget.append(openerp.qweb.render("supFootNoteSeqNum", {footNoteSeqNum: footNoteSeqNum}));
+                        contextModel.call('add_footnote', [[parseInt(context_id)], $("#type").val(), $("#target_id").val(), $("#column").val(), footNoteSeqNum, note]);
+                        $('#footnoteModal').find('form')[0].reset();
+                        $('#footnoteModal').modal('hide');
+                        $("div.page").append(openerp.qweb.render("savedFootNote", {num: footNoteSeqNum, note: note}));
                     });
-                    $('#footnoteModal').modal('hide');
                 });
             },
             start: function() {
@@ -304,35 +303,37 @@
                 var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
                 var model = new openerp.Model('account.report.context.common');
                 model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
+                    curFootNoteTarget = $(e.target).parents("div.dropdown").find("span.account_id");
                     var contextModel = new openerp.Model(result);
-                    contextModel.call('get_next_footnote_number', [[parseInt(context_id)]]).then(function (footNoteSeqNum) {
-                        $(e.target).parents("div.dropdown").find("span.account_id").append(openerp.qweb.render("supFootNoteSeqNum", {footNoteSeqNum: footNoteSeqNum}));
-                        $("#footnoteModal label").text(footNoteSeqNum);
-                        var type = $(e.target).parents('tr').attr("class").split(/\s+/)[0];
-                        var target_id = $(e.target).parents('tr').attr("class").split(/\s+/)[1];
-                        var column = $(e.target).parents('td').index();
-                        $("#footnoteModal #type").val(type);
-                        $("#footnoteModal #target_id").val(target_id);
-                        $("#footnoteModal #column").val(column);
-                        $('#footnoteModal').on('hidden.bs.modal', function (e) {
-                            $(this).find('form')[0].reset();
-                            $("sup:contains('" + footNoteSeqNum + "')").remove();
-                            contextModel.call('set_next_number', [[parseInt(context_id)], footNoteSeqNum]);
-                        });
-                        $('#footnoteModal').modal('show');
+                    var type = $(e.target).parents('tr').attr("class").split(/\s+/)[0];
+                    var target_id = $(e.target).parents('tr').attr("class").split(/\s+/)[1];
+                    var column = $(e.target).parents('td').index();
+                    $("#footnoteModal #type").val(type);
+                    $("#footnoteModal #target_id").val(target_id);
+                    $("#footnoteModal #column").val(column);
+                    $('#footnoteModal').on('hidden.bs.modal', function (e) {
+                        $(this).find('form')[0].reset();
                     });
+                    $('#footnoteModal').modal('show');
                 });
                 
+            },
+            editSummary: function(e) {
+                e.stopPropagation();
+                e.preventDefault;
+                var $el = $(e.target);
+                var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(\n\s*)+$/g, '');
+                $el.replaceWith(openerp.qweb.render("editContent", {num: 0, text: text}));
             },
             clickPencil: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
                 if ($(e.target).parents("div.summary, p.footnote").length > 0) {
-                    this.rmTrashAndPencil(e);
                     var num = 0;
                     if ($(e.target).parent().parent().is("p.footnote")) {
                         var $el = $(e.target).parent().parent();
-                        var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(<br>\s*)+$/g, '');
+                        this.$("i.fa-pencil-square").parent().remove();
+                        var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(\n\s*)+$/g, '');
                         text = text.split('.');
                         var num = text[0];
                         text = text[1];
@@ -340,7 +341,8 @@
                     }
                     else {
                         var $el = $(e.target).parents('div.savedSummary').children('span');
-                        var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(<br>\s*)+$/g, '');
+                        this.$("i.fa-pencil-square").parent().remove();
+                        var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(\n\s*)+$/g, '');
                         $el.replaceWith(openerp.qweb.render("editContent", {num: 0, text: text}));
                     }
                 }
@@ -349,23 +351,18 @@
                     var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
                     var model = new openerp.Model('account.report.context.common');
                     model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
+                        curFootNoteTarget = $(e.target).parent().parent();
                         var contextModel = new openerp.Model(result);
-                        contextModel.call('get_next_footnote_number', [[parseInt(context_id)]]).then(function (footNoteSeqNum) {
-                            $(e.target).parent().parent().append(openerp.qweb.render("supFootNoteSeqNum", {footNoteSeqNum: footNoteSeqNum}));
-                            $("#footnoteModal label").text(footNoteSeqNum);
-                            var type = $(e.target).parents('tr').attr("class").split(/\s+/)[0];
-                            var target_id = $(e.target).parents('tr').attr("class").split(/\s+/)[1];
-                            var column = $(e.target).parents('td').index();
-                            $("#footnoteModal #type").val(type);
-                            $("#footnoteModal #target_id").val(target_id);
-                            $("#footnoteModal #column").val(column);
-                            $('#footnoteModal').on('hidden.bs.modal', function (e) {
-                                $(this).find('form')[0].reset();
-                                $("sup:contains('" + footNoteSeqNum + "')").remove();
-                                contextModel.call('set_next_number', [[parseInt(context_id)], footNoteSeqNum]);
-                            });
-                            $('#footnoteModal').modal('show');
+                        var type = $(e.target).parents('tr').attr("class").split(/\s+/)[0];
+                        var target_id = $(e.target).parents('tr').attr("class").split(/\s+/)[1];
+                        var column = $(e.target).parents('td').index();
+                        $("#footnoteModal #type").val(type);
+                        $("#footnoteModal #target_id").val(target_id);
+                        $("#footnoteModal #column").val(column);
+                        $('#footnoteModal').on('hidden.bs.modal', function (e) {
+                            $(this).find('form')[0].reset();
                         });
+                        $('#footnoteModal').modal('show');
                     });
                 }
             },
@@ -375,6 +372,7 @@
                 var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
                 var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
                 var text = $(e.target).siblings('textarea').val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
+                debugger;
                 var footNoteSeqNum = $(e.target).parents('p.footnote').text().split('.')[0];
                 if ($(e.target).parents("p.footnote").length > 0) {
                     $(e.target).siblings('textarea').replaceWith(text);

@@ -27,11 +27,11 @@ class FinancialReportController(http.Controller):
             if report_name == 'financial_report':
                 create_vals['report_id'] = report_id
             context_id = context_obj.sudo(uid).create(create_vals)
-        if 'csv' in kw:
+        if 'xls' in kw:
             response = request.make_response(None,
                 headers=[('Content-Type', 'application/vnd.ms-excel'),
                          ('Content-Disposition', 'attachment; filename=' + report_obj.get_name() + '.xls;')])
-            context_id.get_csv(response)
+            context_id.get_xls(response)
             return response
         if 'pdf' in kw:
             return request.make_response(context_id.get_pdf(),
@@ -42,7 +42,7 @@ class FinancialReportController(http.Controller):
             for field in context_id._fields:
                 if kw.get(field):
                     update[field] = kw[field]
-                elif field in ['cash_basis', 'comparison']:
+                elif field in ['cash_basis', 'comparison', 'all_entries']:
                     update[field] = False
             context_id.write(update)
         lines = report_obj.get_lines(context_id)

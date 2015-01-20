@@ -71,22 +71,18 @@
                         <option selected="selected" t-if="context.date_filter_cmp == 'custom'" value='custom'>Custom</option>
                         <option t-if="context.date_filter_cmp != 'custom'" value='custom'>Custom</option>
                     </select>
-                    <label for="target_move">Target move :</label>
-                    <select name="target_move" class="form-control">
-                        <t t-if="context.target_move == 'posted'">
-                            <option selected="selected" value="posted">All Posted Entries</option>
-                            <option value="all">All Entries</option>
-                        </t>
-                        <t t-if="context.target_move != 'posted'">
-                            <option value="posted">All Posted Entries</option>
-                            <option selected="selected" value="all">All Entries</option>
-                        </t>
-                    </select>
+                    <div class="checkbox">
+                        <label> 
+                            <input t-if="context.all_entries == False" type="checkbox" name="all_entries" value="True" />
+                            <input t-if="context.all_entries == True" type="checkbox" name="all_entries" value="True" checked="checked" />
+                            Show all entries
+                        </label>
+                    </div>
                     <div class="checkbox">
                         <label> 
                             <input t-if="context.cash_basis == False" type="checkbox" name="cash_basis" value="True" />
                             <input t-if="context.cash_basis == True" type="checkbox" name="cash_basis" value="True" checked="checked" />
-                            Enable Cash Basis Method
+                            Cash Basis Method
                         </label>
                     </div>
                 </div>

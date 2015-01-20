@@ -82,10 +82,14 @@
             </t>
             <t t-if="mode == 'print' and a['type'] != 'line'"><span style="font-style: italic; margin-left: 70px" t-att-class="a.get('type') + ' ' + str(a.get('id'))"><t t-esc="a.get('name')"/></span><t t-call="account.report_financial_footnote_sup" /></t>
             <a t-if="a['type'] not in ['account_id', 'line', 'tax_id'] and mode != 'print'"><span style="font-style: italic; margin-left: 70px" t-att-class="a.get('type') + ' ' + str(a.get('id'))"><t t-esc="a.get('name')"/><t t-call="account.report_financial_footnote_sup" /></span></a>
-            <div class="dropdown" t-if="a['type'] == 'account_id' or a['type'] == 'tax_id' and mode != 'print'">
+            <div class="dropdown" t-if="(a['type'] == 'account_id' or a['type'] == 'tax_id') and mode != 'print'">
                 <a data-toggle="dropdown">
-                    <span style="font-style: italic; margin-left: 70px" t-att-class="' '.join([a['type'], str(a['id'])])"><t t-esc="a.get('name')"/><t t-call="account.report_financial_footnote_sup" /></span><span class="caret"></span>
+                    <span style="font-style: italic; margin-left: 70px" t-att-class="' '.join([a['type'], str(a['id'])])">
+                        <t t-esc="a.get('name')"/>
+                    </span>
+                    <span class="caret"></span>
                 </a>
+                <t t-call="account.report_financial_footnote_sup" />
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" style="margin-left: 70px">
                     <li role="presentation" t-if="a['type'] == 'account_id'"><a role="menuitem" tabindex="-1" class="to_graph">Graph</a></li>
                     <li role="presentation" t-if="a['type'] == 'account_id'"><a role="menuitem" tabindex="-1" class="to_amls">Account Move Lines</a></li>
@@ -122,7 +126,9 @@
             <link href="/web/static/lib/fontawesome/css/font-awesome.css" rel="stylesheet"/>
             <div t-att-class="' '.join(['page', 'oe_account_report_widgets', str(o.get_name()), str(context.id)])">
                 <div t-if="mode != 'print' and context.summary == ''" class="summary">
-                    <button name="summary" class="btn btn-default btn-sm">Add summary</button>
+                    <div class="alert alert-info alert-dismissible addSummary" role="alert">
+                        <span><input type='text' class="form-control" name='summary' placeholder='Click to add a summary' /></span>
+                    </div>
                 </div>
                 <div t-if="mode != 'print' and context.summary != ''" class="summary">
                     <div class="alert alert-info alert-dismissible savedSummary" role="alert">
@@ -160,7 +166,7 @@
                 </button>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                     <li role="presentation"><a role="menuitem" tabindex="-1" href="?pdf">PDF</a></li>
-                    <li role="presentation"><a role="menuitem" tabindex="-1" href="?csv">CSV</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="?xls">XLS</a></li>
                 </ul>
             </div>
             <!-- Modal -->
@@ -173,7 +179,7 @@
                         </div>
                         <div class="modal-body">
                             <form role="form">
-                                <label for="note"></label>
+                                <label for="note">Add a footnote</label>
                                 <textarea name="note" id="note" rows='4' class="form-control" placeholder="Insert foot note here"></textarea>
                                 <input type='hidden' id='type' />
                                 <input type='hidden' id='target_id' />
