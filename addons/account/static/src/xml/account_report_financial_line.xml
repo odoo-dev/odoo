@@ -11,7 +11,12 @@
     <t t-name="supFootNoteSeqNum">
          <sup><b style="position: absolute; margin-top: 6px;"><a t-att-href="'#footnote'+footNoteSeqNum"><t t-esc="footNoteSeqNum"/></a></b></sup>
     </t>
-    <t t-name="savedFootNote"><p class="footnote" t-att-id="'footnote'+num"><t t-raw="num+'. '+note"/></p></t>
+    <t t-name="savedFootNote">
+        <p class="footnote" t-att-id="'footnote'+num">
+            <span class='text'><t t-raw="num+'. '+note"/></span>
+            <span style="position: absolute; margin-left: 3px;"><i class="fa fa-pencil-square"></i><i class="fa fa-trash-o"></i> </span>
+        </p>
+    </t>
     <t t-name="foldable">
         <span style="position: absolute; margin-left: 3px;" t-att-class="'foldable '+lineId"><i class="fa fa-caret-down"></i></span>
     </t>

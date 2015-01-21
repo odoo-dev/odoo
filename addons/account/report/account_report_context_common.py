@@ -302,9 +302,9 @@ class account_report_context_common(models.TransientModel):
         elif report_type == 'date_range_extended':
             dt = datetime.today()
             update = {
-                'date_from': datetime.today().replace(day=1),
-                'date_to': dt.replace(day=calendar.monthrange(dt.year, dt.month)[1]),
-                'date_filter': 'this_month',
+                'date_from': datetime.today() - timedelta(days=29),
+                'date_to': datetime.today(),
+                'date_filter': 'custom',
                 'date_filter_cmp': 'previous_period',
                 'periods_number': 3,
             }

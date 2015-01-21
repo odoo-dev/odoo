@@ -931,6 +931,8 @@ class account_move_line(models.Model):
             elif context.get('opening_year_bal', False):
                 dt = context['date_from'][:4] + '-01-01'
                 where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +dt+"')"
+            elif context.get('non_issued', False):
+                where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date > '" +context['date_to']+"')"
             else:
                 where_move_lines_by_date = "("+obj+".move_id IN (SELECT id FROM account_move WHERE date >= '" +context['date_from']+"' AND date <= '"+context['date_to']+"')" \
                                            " OR ("+obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_from']+"'))" \

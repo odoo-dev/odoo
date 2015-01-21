@@ -18,12 +18,8 @@
                 'click span.user_type': 'displayMoveLinesByType',
                 'click span.partner_id': 'displayMoveLinesByPartner',
                 'click span.aml': 'displayMoveLine',
-                'mouseenter .annotable': 'addPencil',
                 'mouseleave td': 'rmPencil',
                 'mouseleave .footnote': 'rmPencil',
-                'mouseenter .line': 'addPencil',
-                'mouseenter .account_id': 'addPencil',
-                'mouseenter .footnote': 'addTrashAndPencil',
                 'click .fa-trash-o': 'rmContent',
                 'click .closeSummary': 'rmContent',
                 'click .savedSummary > span': 'editSummary',
@@ -62,18 +58,6 @@
                 var res = this._super();
                 this.onChangeCmpDateFilter();
                 return res;
-            },
-            addTrashAndPencil: function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                if ($(e.target).children("textarea").length == 0 && $(e.target).siblings("textarea").length == 0) {
-                    $(e.target).append(openerp.qweb.render("trashAndPencilIcon"));
-                }
-            },
-            rmTrashAndPencil: function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                this.$("i.fa-pencil-square").parent().remove();
             },
             onClickSummary: function(e) {
                 e.stopPropagation();
@@ -331,8 +315,7 @@
                 if ($(e.target).parents("div.summary, p.footnote").length > 0) {
                     var num = 0;
                     if ($(e.target).parent().parent().is("p.footnote")) {
-                        var $el = $(e.target).parent().parent();
-                        this.$("i.fa-pencil-square").parent().remove();
+                        var $el = $(e.target).parent().parent().find('span.text');
                         var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(\n\s*)+$/g, '');
                         text = text.split('.');
                         var num = text[0];
@@ -341,7 +324,6 @@
                     }
                     else {
                         var $el = $(e.target).parents('div.savedSummary').children('span');
-                        this.$("i.fa-pencil-square").parent().remove();
                         var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(\n\s*)+$/g, '');
                         $el.replaceWith(openerp.qweb.render("editContent", {num: 0, text: text}));
                     }
@@ -372,7 +354,6 @@
                 var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
                 var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
                 var text = $(e.target).siblings('textarea').val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
-                debugger;
                 var footNoteSeqNum = $(e.target).parents('p.footnote').text().split('.')[0];
                 if ($(e.target).parents("p.footnote").length > 0) {
                     $(e.target).siblings('textarea').replaceWith(text);
@@ -551,18 +532,6 @@
                 e.stopPropagation();
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
                 window.open("/web?#id=" + active_id + "&view_type=form&model=account.move.line", "_self");
-            },
-            addPencil: function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                if ($(e.target).parent().find("sup").length == 0 && $(e.target).parents("sup").length == 0 && ($(e.target).parent().is("div") || $(e.target).parent().is("td"))) {
-                    $(e.target).prepend(openerp.qweb.render("pencilIcon"));
-                }
-            },
-            rmPencil: function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                this.$("i.fa-pencil-square").parent().remove();
             },
         });
         var reportWidgets = new openerp.reportWidgets();

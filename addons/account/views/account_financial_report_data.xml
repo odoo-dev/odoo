@@ -539,13 +539,26 @@
         </record>
 
         <!--
-            Aged Partner Balance
+            Aged Payable
         -->
 
-        <record id="account_financial_report_agedpartner_line0" model="account.financial.report.line">
-            <field name="name">Aged Partner Balance</field>
+        <record id="account_financial_report_agedpayable_line0" model="account.financial.report.line">
+            <field name="name">Aged Payable</field>
             <field name="sequence" eval="1"/>
             <field name="domain" eval="[('account_id.user_type.type', '=', 'payable'), ('reconciled', '=', False)]" />
+            <field name="groupby">partner_id</field>
+            <field name="formulas">balance = sum.balance</field>
+            <field name="foldable" eval="False"></field>
+        </record>
+
+        <!--
+            Aged Receivable
+        -->
+
+        <record id="account_financial_report_agedreceivable_line0" model="account.financial.report.line">
+            <field name="name">Aged Receivable</field>
+            <field name="sequence" eval="1"/>
+            <field name="domain" eval="[('account_id.user_type.type', '=', 'receivable'), ('reconciled', '=', False)]" />
             <field name="groupby">partner_id</field>
             <field name="formulas">balance = sum.balance</field>
             <field name="foldable" eval="False"></field>
@@ -578,9 +591,15 @@
             <field name="line" ref="account_financial_report_executivesummary_line0"/>
             <field name="report_type">date_range</field>
         </record>
-        <record id="account_financial_report_agedpartner0" model="account.financial.report">
-            <field name="name">Aged Partner Balance</field>
-            <field name="line" ref="account_financial_report_agedpartner_line0"/>
+        <record id="account_financial_report_agedpayable0" model="account.financial.report">
+            <field name="name">Aged Payable</field>
+            <field name="line" ref="account_financial_report_agedpayable_line0"/>
+            <field name="report_type">date_range_extended</field>
+            <field name="offset_level" eval="2"/>
+        </record>
+        <record id="account_financial_report_agedreceivable0" model="account.financial.report">
+            <field name="name">Aged Receivable</field>
+            <field name="line" ref="account_financial_report_agedreceivable_line0"/>
             <field name="report_type">date_range_extended</field>
             <field name="offset_level" eval="2"/>
         </record>

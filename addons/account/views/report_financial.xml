@@ -81,7 +81,7 @@
                 </t>
             </t>
             <t t-if="mode == 'print' and a['type'] != 'line'"><span style="font-style: italic; margin-left: 70px" t-att-class="a.get('type') + ' ' + str(a.get('id'))"><t t-esc="a.get('name')"/></span><t t-call="account.report_financial_footnote_sup" /></t>
-            <a t-if="a['type'] not in ['account_id', 'line', 'tax_id'] and mode != 'print'"><span style="font-style: italic; margin-left: 70px" t-att-class="a.get('type') + ' ' + str(a.get('id'))"><t t-esc="a.get('name')"/><t t-call="account.report_financial_footnote_sup" /></span></a>
+            <a t-if="a['type'] not in ['account_id', 'line', 'tax_id'] and mode != 'print'"><span style="font-style: italic; margin-left: 70px" t-att-class="a.get('type') + ' ' + str(a.get('id'))"><span style="color: black;"><i class="fa fa-pencil-square"></i></span><t t-esc="a.get('name')"/><t t-call="account.report_financial_footnote_sup" /></span></a>
             <div class="dropdown" t-if="(a['type'] == 'account_id' or a['type'] == 'tax_id') and mode != 'print'">
                 <a data-toggle="dropdown">
                     <span style="font-style: italic; margin-left: 70px" t-att-class="' '.join([a['type'], str(a['id'])])">
@@ -98,14 +98,17 @@
                     <li role="presentation" t-if="a['type'] == 'tax_id'"><a role="menuitem" tabindex="-1" class="to_tax">See tax move lines</a></li>
                 </ul>
             </div>
-            <t t-if="a['type'] == 'line'"><span t-att-style="style" ><t t-esc="a.get('name')"/><t t-call="account.report_financial_footnote_sup" /></span></t>
+            <t t-if="a['type'] == 'line'"><span t-att-style="style" ><span style="color: black;"><i class="fa fa-pencil-square"></i></span><t t-esc="a.get('name')"/><t t-call="account.report_financial_footnote_sup" /></span></t>
         </td>
         <t t-set="base_style" t-value="style" />
         <t t-foreach="a['columns']" t-as="c">
             <td class="text-right" style="white-space: nowrap;">
                 <t t-set="column" t-value="column + 1" />
                 <t t-if="isinstance(c, tuple)"><t t-set="style" t-value="c[1] + base_style" /><t t-set="c" t-value="c[0]" /></t>
-                <span class="annotable" t-att-style="style"><t t-raw="c" /><t t-call="account.report_financial_footnote_sup" /></span>
+                <span class="annotable" t-att-style="style">
+                    <span style="color: black;"><i class="fa fa-pencil-square"></i></span>
+                    <t t-raw="c" /><t t-call="account.report_financial_footnote_sup" />
+                </span>
                 <t t-if="style != base_style"><t t-set="style" t-value="base_style" /></t>
             </td>
         </t>
@@ -156,7 +159,10 @@
                     </tbody>
                 </table>
                 <t t-foreach="context.footnotes" t-as="footnote">
-                    <p class="footnote" t-att-id="'footnote' + str(footnote.number)"><t t-raw="str(footnote.number) + '. ' + footnote.text"/></p>
+                    <p class="footnote" t-att-id="'footnote' + str(footnote.number)">
+                        <span class='text'><t t-raw="str(footnote.number) + '. ' + footnote.text"/></span>
+                        <span style="position: absolute; margin-left: 3px;"><i class="fa fa-pencil-square"></i><i class="fa fa-trash-o"></i></span>
+                    </p>
                 </t>
             </div>
             <div t-if="mode != 'print'" class="dropdown" style="float: right; margin-bottom: 250px;">

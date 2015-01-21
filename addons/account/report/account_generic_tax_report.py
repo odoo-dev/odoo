@@ -31,7 +31,7 @@ class report_account_generic_tax_report(models.AbstractModel):
         return self.with_context(
             date_from=context_id.date_from,
             date_to=context_id.date_to,
-            target_move=context_id.target_move,
+            target_move=context_id.all_entries and 'all' or 'posted',
             comparison=context_id.comparison,
             date_from_cmp=context_id.date_from_cmp,
             date_to_cmp=context_id.date_to_cmp,

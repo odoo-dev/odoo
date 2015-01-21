@@ -285,6 +285,8 @@ class account_financial_report_line(models.Model):
 
     def _put_columns_together(self, vals):
         columns = []
+        if 'non_issued' in vals:
+            columns += [vals['non_issued']]
         if 'debit' in vals and 'credit' in vals:
             columns += [vals['debit'], vals['credit']]
         if 'balance' in vals:
@@ -370,6 +372,10 @@ class account_financial_report_line(models.Model):
                 value = older_line.get_balance(['balance'])[0]['balance']
                 vals['older'] = self._format(value)
                 total += value
+                non_issued_line = self.with_context(non_issued=True)
+                value = non_issued_line.get_balance(['balance'])[0]['balance']
+                vals['non_issued'] = self._format(value)
+                total += value
                 vals['total'] = self._format(total)
         if not self.hidden:
             vals = self._put_columns_together(vals)
@@ -406,6 +412,11 @@ class account_financial_report_line(models.Model):
                         query = sql % (select, aml_older_ids._query_get(), self._ids_to_sql(aml_older_ids.ids))
                         self.env.cr.execute(query)
                         gb_older = dict(self.env.cr.fetchall())
+                        aml_non_issued_obj = aml_obj.with_context(non_issued=True)
+                        aml_non_issued_ids = aml_non_issued_obj.search(report_safe_eval(self.domain))
+                        query = sql % (select, aml_non_issued_ids._query_get(), self._ids_to_sql(aml_non_issued_ids.ids))
+                        self.env.cr.execute(query)
+                        gb_non_issued = dict(self.env.cr.fetchall())
 
                     for gb in gbs:
                         vals = {'id': gb[0], 'name': self._get_gb_name(gb[0]), 'level': level + 2, 
@@ -441,12 +452,20 @@ class account_financial_report_line(models.Model):
                                 del gb_older[gb[0]]
                             else:
                                 vals['older'] = self._format(0)
+                            if gb_non_issued.get(gb[0]):
+                                vals['non_issued'] = self._format(gb_non_issued[gb[0]])
+                                total += gb_non_issued[gb[0]]
+                                if not currency_id.is_zero(gb_non_issued[gb[0]]):
+                                    flag = True
+                                del gb_non_issued[gb[0]]
+                            else:
+                                vals['non_issued'] = self._format(0)
                             vals['total'] = self._format(total)
                         if flag:
                             vals = self._put_columns_together(vals)
                             lines.append(vals)
 
-                    if gbs_cmp or (extended and gb_older):
+                    if gbs_cmp or (extended and (gb_older or gb_non_issued)):
                         extra_gbs = []
                         for gb_cmp in gbs_cmp:
                             for key, value in gb_cmp.items() + (extended and gb_older.items() or []):
@@ -470,6 +489,11 @@ class account_financial_report_line(models.Model):
                                     total += gb_older[extra_gb]
                                 else:
                                     vals['older'] = self._format(0)
+                                if extra_gb in gb_non_issued:
+                                    vals['non_issued'] = self._format(gb_non_issued[extra_gb])
+                                    total += gb_non_issued[extra_gb]
+                                else:
+                                    vals['non_issued'] = self._format(0)
                                 vals['total'] = self._format(total)
                             vals = self._put_columns_together(vals)
                             lines.append(vals)
@@ -508,6 +532,13 @@ class account_financial_report_line(models.Model):
                                     c_older = FormulaContext(self.env['account.financial.report.line'], aml_older_obj.browse(aml.id))
                                     value = report_safe_eval(formula, c_older, nocopy=True)
                                     vals['older'] = self._format(value)
+                                    total += value
+                                    if not aml.company_id.currency_id.is_zero(value):
+                                        flag = True
+                                    aml_non_issued_obj = aml_obj.with_context(non_issued=True)
+                                    c_non_issued = FormulaContext(self.env['account.financial.report.line'], aml_non_issued_obj.browse(aml.id))
+                                    value = report_safe_eval(formula, c_non_issued, nocopy=True)
+                                    vals['non_issued'] = self._format(value)
                                     total += value
                                     vals['total'] = self._format(total)
                                     if not aml.company_id.currency_id.is_zero(value):
@@ -571,6 +602,8 @@ class account_financial_report_context(models.TransientModel):
 
     def get_columns_names(self):
         columns = []
+        if self.report_id.report_type == 'date_range_extended':
+            columns += ['Non-issued']
         if self.report_id.debit_credit and not self.comparison:
             columns += ['Debit', 'Credit']
         columns += [self.get_balance_date()]
