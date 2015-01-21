@@ -38,88 +38,91 @@ class website_sign(http.Controller):
         "/sign/document/<int:id>/<token>"
     ], type='http', auth="user", website=True)
     def request_sign(self, id, token=None, message=False, **post):
-        current_sign = None
-        ir_attachment_signature = http.request.env['ir.attachment.signature']
+        signature_request = http.request.env['signature.request'].sudo().browse(id)
+        if not signature_request:
+            return http.request.not_found()
 
+        current_request_item = None
         if token:
-            current_sign = ir_attachment_signature.sudo().search([('document_id', '=', id),('access_token', '=', token)], limit=1)
-            if not current_sign:
+            current_request_item = signature_request.request_items.filtered(lambda r: r.access_token == token)
+            if not current_request_item:
                 return http.request.render('website_sign.deleted_sign_request', {'url': '/sign/document/' + str(id)})
 
-            attachment =  http.request.env['ir.attachment'].sudo().browse(id)
-            record = http.request.env[attachment.res_model].sudo().browse(attachment.res_id)
+            record = http.request.env[signature_request.attachment.res_model].sudo().browse(signature_request.attachment.res_id)
         else:
-            attachment =  http.request.env['ir.attachment'].browse(id)
-            record = http.request.env[attachment.res_model].browse(attachment.res_id)
+            record = http.request.env[signature_request.attachment.res_model].browse(signature_request.attachment.res_id)
 
-        signatures = attachment.signature_ids
-        if not signatures:
-            return http.request.not_found()
-        req_count = [signs.id for signs in signatures if signs.state == 'draft']
+        # item_values = False
+        # if current_request_item:
+        #     item_values = current_request_item.signature_values.getByItem() 
 
         values = {
-            'attachment_id': id,
-            'signatures': signatures,
-            'current_sign': current_sign,
+            'signature_request': signature_request,
+            'current_request_item': current_request_item,
+            'readonly': not (current_request_item and current_request_item.state == 'opened'),
             'token': token,
-            'attachment': attachment,
-            'record': record,
-            'sign_req': req_count,
-            'message': message and int(message) or False
+            'messages': record.message_ids,
+            'message': message and int(message) or False,
+            # 'hasItems': len(signature_request.signature_items) > 0,
+            # 'itemsToValues': item_values
         }
 
         return http.request.render('website_sign.doc_sign', values)
 
     @http.route(['/website_sign/signed/<int:id>/<token>'], type='json', auth="user", website=True)
     def signed(self, id=None, token=None, sign=None, signer=None, **post):
-        signature =  http.request.env['ir.attachment.signature'].search([('document_id', '=', id),('access_token', '=', token)], limit=1)
-        if not signature:
-            return {'id': id, 'token': token}
-
-        signature.sudo().sign(signer, sign)
-
-        attach = http.request.env['ir.attachment'].sudo().browse([id])
-        message = _('Document <b>%s</b> signed by %s') % (attach.name, signer)
-        self.__message_post(message, attach.res_model, attach.res_id, type='comment', subtype='mt_comment')
+        request_item = http.request.env['signature.request.item'].search([('signature_request', '=', id), ('access_token', '=', token)], limit=1)
+        if request_item:
+            if request_item.sudo().sign(signer, sign):
+                attach = http.request.env['signature.request'].sudo().browse(id).attachment
+                message = _('Document <b>%s</b> signed by %s') % (attach.name, signer)
+                self.__message_post(message, attach.res_model, attach.res_id, type='comment', subtype='mt_comment')
 
         return {'id': id, 'token': token}
 
     @http.route(['/website_sign/get_followers'], type='json', auth="user", website=True)
     def get_followers(self, attachment_id=None, res_model=None, res_id=None, **post):
-        partner_id = http.request.env.user.partner_id.id
+        current_id = http.request.env.user.partner_id.id
         followers = http.request.env['mail.followers'].sudo().search([('res_model', '=', res_model), ('res_id', '=', res_id)])
-        signatures = http.request.env['ir.attachment.signature'].search([('document_id','=', attachment_id)])
-        signers = map(lambda d: d.partner_id.id, signatures)
+        request_items = http.request.env['signature.request'].search([('attachment','=', attachment_id)], limit=1).request_items
+        signers = map(lambda d: d.partner_id.id, request_items)
 
         res = []
         for follower in followers:
-            if not partner_id == follower.partner_id.id:
-                if follower.partner_id.id in signers:
-                    res.append({'id': follower.partner_id.id, 'name': follower.partner_id.name, 'email': follower.partner_id.email, 'selected':'checked'})
-                else:
-                    res.append({'id': follower.partner_id.id, 'name': follower.partner_id.name, 'email': follower.partner_id.email, 'selected': None})
+            if current_id == follower.partner_id.id:
+                continue
+            res.append({
+                'id': follower.partner_id.id,
+                'name': follower.partner_id.name,
+                'email': follower.partner_id.email,
+                'selected': 'checked' if follower.partner_id.id in signers else None
+            })
         
         return res
 
     @http.route(['/website_sign/set_signers'], type='json', auth="user", website=True)
-    def set_signers(self, attachment_id=None, signer_ids=None, send_directly=False, **post):
-        attach = http.request.env['ir.attachment'].browse([attachment_id])
-        signers_in_common = attach.set_signers(signer_ids)[0]
-        if signers_in_common != False and send_directly:
-            if len(signer_ids) > 0:
-                message = _("Signature request for document <b>%s</b> has been added/modified") % attach['name']
-                self.__message_post(message, attach.res_model, attach.res_id, type='notification')
-                attach.send_signature_accesses(message, ignored_partners=signers_in_common)
-            else:
-                message = _("Signature request for document <b>%s</b> has been deleted") % attach['name']
-                self.__message_post(message, attach.res_model, attach.res_id, type='notification')
+    def set_signers(self, attachment_id=None, signer_ids=None, message=None, send_directly=False, **post):
+        signature_request = http.request.env['signature.request'].search([('attachment', '=', attachment_id)])
+        if not signature_request:
+            signature_request = http.request.env['signature.request'].create({'attachment': attachment_id, 'message': message})
+        signers_in_common = signature_request.set_signers(signer_ids)[0]
+        
+        # if signers_in_common != False and send_directly:
+        #     attach = http.request.env['ir.attachment'].browse(attachment_id)
+        #     if len(signer_ids) > 0:
+        #         message = _("Signature request for document <b>%s</b> has been added/modified") % attach['name']
+        #         self.__message_post(message, attach.res_model, attach.res_id, type='notification')
+        #         signature_request.send_signature_accesses(message, ignored_partners=signers_in_common)
+        #     else:
+        #         message = _("Signature request for document <b>%s</b> has been deleted") % attach['name']
+        #         self.__message_post(message, attach.res_model, attach.res_id, type='notification')
                 
         return True
 
     @http.route(['/sign/document/<int:id>/<token>/note'], type='http', auth="user", website=True)
     def post_note(self, id, token, **post):
-        record = http.request.env['ir.attachment'].search([('id', '=', id)], limit=1)
+        attach = http.request.env['signature.request'].browse(id).attachment
         message = post.get('comment')
         if message:
-            self.__message_post(message, record.res_model, record.res_id, type='comment', subtype='mt_comment')
+            self.__message_post(message, attach.res_model, attach.res_id, type='comment', subtype='mt_comment')
         return http.request.redirect("/sign/document/%s/%s?message=1" % (id, token))

@@ -6,7 +6,8 @@
             <span>1. Who needs to sign ?</span>
         </div>
         <div class="table-responsive col-md-12">
-            <table class="table table-hover oe_sel_followers">
+            <table id="followers_signers_table" class="table table-hover oe_sel_followers">
+                <tr><td><input type="checkbox" id="select_all_to_sign_checkbox"/></td></tr>
                 <t t-foreach='followers' t-as='follower'>
                     <tr>
                         <td>
@@ -48,7 +49,10 @@
         </t>
         <t t-jquery="div:first-child .oe_delete" t-operation="after">
             <img t-if="!attachment.nb_toSign" t-att-id="'request_sign' + attachment.id" class="request_sign oe_sign" title="Request Signature" src="/website_sign/static/src/img/sign.png"/>
-            <img t-if="attachment.nb_toSign" t-att-id="'request_sign' + attachment.id" class="request_sign oe_sign" title="Request Signature" src="/website_sign/static/src/img/check.png"/>
+            <t t-if="attachment.nb_toSign">
+                <img t-att-id="'request_sign' + attachment.id" class="request_sign oe_sign" title="Request Signature" src="/website_sign/static/src/img/check.png"/>
+                <a title="Open Signature Request Form View" t-att-href="'?#id=' + attachment.signature_request + '&amp;view_type=form&amp;model=signature.request'" class="fa fa-external-link-square form_sign"/>
+            </t>
         </t>
     </t>
     <t t-extend="FieldBinaryFileUploader.files">

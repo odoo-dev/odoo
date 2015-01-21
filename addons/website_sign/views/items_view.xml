@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp><data>
+	<template id="website_sign.items_view" name="Digital Signatures - Items View">
+<!-- 		<form id="sign_doc_items" method="post" t-attf-action="/website_sign/signed/#{signature_request.id}/#{token}">
+			<div id="website_sign_items_view">
+				<t t-foreach="signature_request.request_items" t-as="item">
+					<t t-set="top" t-value="str(item.posy*100)"/>
+					<t t-set="left" t-value="str(item.posx*100)"/>
+					<t t-set="width" t-value="str(item.width*100)"/>
+					<t t-set="height" t-value="str(item.height*100)"/>
+
+					<t t-if="item.isSignature">
+						<button t-if="not readonly" t-att-id="'sign_item'+str(item.id)" type="button" class="sign_item btn btn-block" t-att-style="'top:'+top+'%;left:'+left+'%;width:'+width+'%;height:'+height+'%;'" data-toggle="modal" t-att-data-target="'#sign_diag'+str(item.id)"><t t-if="item.id in itemsToValues"><img t-att-src="'/web/binary/image?model=signature.item.value&amp;field=sign_img&amp;id=' + str(itemsToValues[item.id].id)"/></t><t t-if="item.id not in itemsToValues">Sign Here</t></button>
+						
+						<div t-if="readonly" t-att-id="'sign_item'+str(item.id)" class="sign_item" t-att-style="'top:'+top+'%;left:'+left+'%;width:'+width+'%;height:'+height+'%;'"><t t-if="item.id in itemsToValues"><span class="helper"/><img t-att-src="'data:image/png;base64,' + str(itemsToValues[item.id].sign_img)[1:-1]"/></t><t t-if="item.id not in itemsToValues">Sign Here</t></div>
+
+						<div class="modal fade sign_diag" t-att-id="'sign_diag'+str(item.id)" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <div class="panel panel-default mt16 mb0">
+                                            <div class="panel-heading">
+                                                <strong>Draw your signature</strong>
+                                            </div>
+                                            <div t-att-id="'sign'+str(item.id)" class="sign panel-body" style="padding: 0"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" t-att-id="'confirm_sign'+str(item.id)" data-dismiss="modal" class="btn btn-primary confirm_sign">Sign</button>
+                                </div>
+                            </div>
+                        </div>
+					</t>
+					<t t-if="not item.isSignature">
+						<textarea t-if="not readonly" t-att-id="'sign_item'+str(item.id)" class="sign_item" t-att-style="'top:'+top+'%;left:'+left+'%;width:'+width+'%;height:'+height+'%;'" required="1"><t t-if="item.id in itemsToValues"><t t-esc="itemsToValues[item.id].value"/></t></textarea>
+
+						<div t-if="readonly" t-att-id="'sign_item'+str(item.id)" class="sign_item" t-att-style="'top:'+top+'%;left:'+left+'%;width:'+width+'%;height:'+height+'%;'"><t t-if="item.id in itemsToValues"><t t-esc="itemsToValues[item.id].value"/></t></div>
+					</t>
+				</t>
+			</div>
+			<button t-if="not readonly" type="submit" class="btn btn-primary btn-block fa fa-check">Validate</button>
+		</form> -->
+	</template>
+</data></openerp>
