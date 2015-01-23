@@ -130,6 +130,9 @@ class report_account_financial_report(models.Model):
     def get_report_type(self):
         return self.report_type
 
+    def get_template(self):
+        return 'account.report_financial'
+
 
 class account_financial_report_line(models.Model):
     _name = "account.financial.report.line"
