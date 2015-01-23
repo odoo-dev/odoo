@@ -8,10 +8,10 @@
 input#summary, div.dropdown, i.fa, div.savedSummary span, td.unfoldable, td.foldable {
     cursor: pointer; cursor: hand;
 }
-td i.fa{
+td i.fa-pencil-square{
     visibility: hidden;
 }
-td:hover i.fa{
+td:hover i.fa-pencil-square{
     visibility: visible;
 }
 p.footnote i.fa{

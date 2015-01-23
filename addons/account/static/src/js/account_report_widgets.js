@@ -33,6 +33,8 @@
                 'click button.saveContent': 'saveContent',
                 'click button#saveFootNote': 'saveFootNote',
                 'click .add_footnote': 'footnoteFromDropdown',
+                'click .change_exp_date': 'displayExpNoteModal',
+                'click #savePaymentDate': 'changeExpDate',
                 'click .to_graph': 'displayMoveLinesByAccountGraph',
                 'click .to_net': 'displayNetTaxLines',
                 'click .to_tax': 'displayTaxLines',
@@ -55,6 +57,7 @@
             },
             start: function() {
                 openerp.qweb.add_template("/account/static/src/xml/account_report_financial_line.xml");
+                this.$('[data-toggle="tooltip"]').tooltip()
                 var res = this._super();
                 this.onChangeCmpDateFilter();
                 return res;
@@ -300,7 +303,27 @@
                     });
                     $('#footnoteModal').modal('show');
                 });
-                
+            },
+            displayExpNoteModal: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var target_id = $(e.target).parents('tr').attr("class").split(/\s+/)[1];
+                $("#paymentDateLabel").text($(e.target).parents("div.dropdown").find("span.invoice_id").text());
+                $("#paymentDateModal #target_id").val(target_id);
+                $('#paymentDateModal').on('hidden.bs.modal', function (e) {
+                    $(this).find('form')[0].reset();
+                });
+                $('#paymentDateModal').modal('show');
+            },
+            changeExpDate: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var note = $("#internalNote").val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
+                var invoiceModel = new openerp.Model('account.invoice');
+                invoiceModel.call('write', [[parseInt($("#paymentDateModal #target_id").val())], {expected_pay_date: $("#expectedDate").val(), internal_note: note}]).then(function (result) {
+                    $('#paymentDateModal').modal('hide');
+                    location.reload(true);
+                });        
             },
             editSummary: function(e) {
                 e.stopPropagation();

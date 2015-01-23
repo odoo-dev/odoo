@@ -30,7 +30,7 @@
         <span style="position: absolute; margin-left: 3px;"><i class="fa fa-pencil-square"></i><i class="fa fa-trash-o"></i> </span>
     </t>
     <t t-name="addSummary">
-        <div class="alert alert-info alert-dismissible addSummary" role="alert">
+        <div class="alert alert-dismissible addSummary" role="alert">
             <span><input type='text' class="form-control" name='summary' placeholder='Click to add a summary' /></span>
         </div>
     </t>
@@ -40,7 +40,7 @@
         <button class="btn btn-primary saveSummary">Save</button>
     </t>
     <t t-name="savedSummary">
-        <div class="alert alert-info alert-dismissible savedSummary" role="alert">
+        <div class="alert alert-dismissible savedSummary" role="alert">
             <button type="button" class="close closeSummary"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
             <button type="button" class="close"><i style="font-size: 16px;" class="fa fa-pencil"></i> </button>
             <span><t t-raw="summary" /></span>

@@ -11,7 +11,7 @@ class FinancialReportController(http.Controller):
         if name == 'generic_tax_report':
             return request.env['account.generic.tax.report'].sudo(uid)
 
-    @http.route('/account/<string:report_name>/<string:report_id>', type='http', auth='none')
+    @http.route('/account/<string:report_name>/<string:report_id>', type='http', auth='user')
     def report(self, report_name, report_id=None, **kw):
         uid = request.session.uid
         domain = [('create_uid', '=', uid)]
@@ -52,4 +52,42 @@ class FinancialReportController(http.Controller):
             'lines': lines,
             'mode': 'display',
         }
-        return request.render("account.report_financial", rcontext)
+        return request.render(report_obj.get_template(), rcontext)
+
+    @http.route('/account/followup_report/<string:partner>/', type='http', auth='user')
+    def followup(self, partner, *kw):
+        uid = request.session.uid
+        context_obj = request.env['account.report.context.followup']
+        report_obj = request.env['account.followup.report']
+        if partner == 'all':
+            domain = [('all_partners', '=', True)]
+            partner_name = 'all partners'
+        else:
+            domain = [('all_partners', '=', False), ('partner_id', '=', int(partner))]
+            partner_name = request.env['res.partner'].browse(int(partner)).name
+        context_id = context_obj.sudo(uid).search(domain, limit=1)
+        if not context_id:
+            if partner == 'all':
+                vals = {'all_partners': True}
+            else:
+                vals = {'all_partners': False, 'partner_id': int(partner)}
+            context_id = context_obj.create(vals)
+        if 'pdf' in kw:
+            return request.make_response(context_id.get_pdf(),
+                headers=[('Content-Type', 'application/pdf'),
+                         ('Content-Disposition', 'attachment; filename=' + partner_name + '.pdf;')])
+        if kw:
+            update = {}
+            for field in context_id._fields:
+                if kw.get(field):
+                    update[field] = kw[field]
+                    update[field] = False
+            context_id.write(update)
+        lines = report_obj.get_lines(context_id)
+        rcontext = {
+            'context': context_id,
+            'o': report_obj,
+            'lines': lines,
+            'mode': 'display',
+        }
+        return request.render(report_obj.get_template(), rcontext)
