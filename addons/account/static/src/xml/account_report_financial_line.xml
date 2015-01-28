@@ -11,23 +11,29 @@
     <t t-name="supFootNoteSeqNum">
          <sup><b style="position: absolute; margin-top: 6px;"><a t-att-href="'#footnote'+footNoteSeqNum"><t t-esc="footNoteSeqNum"/></a></b></sup>
     </t>
+    <t t-name="copyPublicLink">
+        <form class='form-inline'><input type='text' class="form-control" style="width: auto;" t-att-value='link' readonly='readonly' /><button class="btn btn-primary" id="closePublicLink">Close</button></form>
+    </t>
+    <t t-name="displayPublicLink">
+        <span id='public-link'><a>(copy public link)</a></span>
+    </t>
     <t t-name="savedFootNote">
         <p class="footnote" t-att-id="'footnote'+num">
             <span class='text'><t t-raw="num+'. '+note"/></span>
-            <span style="position: absolute; margin-left: 3px;"><i class="fa fa-pencil-square"></i><i class="fa fa-trash-o"></i> </span>
+            <span style="position: absolute; margin-left: 3px;"><i class="fa fa-fw fa-pencil-square"></i><i class="fa fa-fw fa-trash-o"></i> </span>
         </p>
     </t>
     <t t-name="foldable">
-        <span style="position: absolute; margin-left: 3px;" t-att-class="'foldable '+lineId"><i class="fa fa-caret-down"></i></span>
+        <span style="position: absolute; margin-left: 3px;" t-att-class="'foldable '+lineId"><i class="fa fa-fw fa-caret-down"></i></span>
     </t>
     <t t-name="unfoldable">
-        <span style="position: absolute; margin-left: 3px;" t-att-class="'unfoldable '+lineId"><i class="fa fa-caret-right"></i></span>
+        <span style="position: absolute; margin-left: 3px;" t-att-class="'unfoldable '+lineId"><i class="fa fa-fw fa-caret-right"></i></span>
     </t>
     <t t-name="pencilIcon">
-        <span style="position: absolute; margin-left: -15px; color: black;"><i class="fa fa-pencil-square"></i></span>
+        <span style="position: absolute; margin-left: -15px; color: black;"><i class="fa fa-fw fa-pencil-square"></i></span>
     </t>
     <t t-name="trashAndPencilIcon">
-        <span style="position: absolute; margin-left: 3px;"><i class="fa fa-pencil-square"></i><i class="fa fa-trash-o"></i> </span>
+        <span style="position: absolute; margin-left: 3px;"><i class="fa fa-fw fa-pencil-square"></i><i class="fa fa-fw fa-trash-o"></i> </span>
     </t>
     <t t-name="addSummary">
         <div class="alert alert-dismissible addSummary" role="alert">
@@ -42,7 +48,7 @@
     <t t-name="savedSummary">
         <div class="alert alert-dismissible savedSummary" role="alert">
             <button type="button" class="close closeSummary"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
-            <button type="button" class="close"><i style="font-size: 16px;" class="fa fa-pencil"></i> </button>
+            <button type="button" class="close"><i style="font-size: 16px;" class="fa fa-fw fa-pencil"></i> </button>
             <span><t t-raw="summary" /></span>
         </div>
     </t>

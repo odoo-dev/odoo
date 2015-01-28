@@ -38,10 +38,27 @@
                 'click .to_graph': 'displayMoveLinesByAccountGraph',
                 'click .to_net': 'displayNetTaxLines',
                 'click .to_tax': 'displayTaxLines',
+                'click #public-link a': 'clickPublicLink',
+                'click #closePublicLink': 'closePublicLink',
+            },
+            clickPublicLink: function (e) {
+                var $el = $(e.target);
+                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
+                var contextModel = new openerp.Model('account.report.context.followup');
+                contextModel.call('get_public_link', [[parseInt(context_id)]]).then(function (link) {
+                    $el.replaceWith(openerp.qweb.render("copyPublicLink", {link: link}));
+                    window.$("#public-link input").select();
+                });
+            },
+            closePublicLink: function (e) {
+                e.preventDefault();
+                var $el = $(e.target).parents('span#public-link');
+                $el.replaceWith(openerp.qweb.render("displayPublicLink"));
             },
             saveFootNote: function() {
-                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                 var note = $("#note").val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
                 var model = new openerp.Model('account.report.context.common');
                 model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
@@ -64,14 +81,15 @@
             },
             onClickSummary: function(e) {
                 e.stopPropagation();
-                this.$("div.summary").html(openerp.qweb.render("editSummary"));
+                $(e.target).parents("div.summary").html(openerp.qweb.render("editSummary"));
             },
             saveSummary: function(e) {
                 e.stopPropagation();
+                debugger;
+                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                 var summary = this.$("textarea[name='summary']").val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
-                this.$("div.summary").html(openerp.qweb.render("savedSummary", {summary : summary}));
-                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                $(e.target).parents("div.summary").html(openerp.qweb.render("savedSummary", {summary : summary}));
                 var model = new openerp.Model('account.report.context.common');
                 model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                     var contextModel = new openerp.Model(result);
@@ -121,8 +139,8 @@
                         }
                         break;
                     case 'last_year':
-                        var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                        var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                        var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                        var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                         var commonContext = new openerp.Model('account.report.context.common');
                         commonContext.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                             var contextObj = new openerp.Model(result);
@@ -169,8 +187,8 @@
                         this.$("input[name='date_to']").val(dt.toISOString().substr(0, 10)); 
                         break;
                     case 'this_year':
-                        var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                        var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                        var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                        var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                         var commonContext = new openerp.Model('account.report.context.common');
                         commonContext.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                             var contextObj = new openerp.Model(result);
@@ -286,8 +304,8 @@
             footnoteFromDropdown: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                 var model = new openerp.Model('account.report.context.common');
                 model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                     curFootNoteTarget = $(e.target).parents("div.dropdown").find("span.account_id");
@@ -329,8 +347,11 @@
                 e.stopPropagation();
                 e.preventDefault;
                 var $el = $(e.target);
+                var height = $el.height();
                 var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(\n\s*)+$/g, '');
+                var par = $el.parent()
                 $el.replaceWith(openerp.qweb.render("editContent", {num: 0, text: text}));
+                par.find("textarea").height(height);
             },
             clickPencil: function(e) {
                 e.stopPropagation();
@@ -347,13 +368,16 @@
                     }
                     else {
                         var $el = $(e.target).parents('div.savedSummary').children('span');
+                        var height = $el.height();
                         var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(\n\s*)+$/g, '');
+                        var par = $el.parent()
                         $el.replaceWith(openerp.qweb.render("editContent", {num: 0, text: text}));
+                        par.find("textarea").height(height);
                     }
                 }
                 else if ($(e.target).parent().parent().find("sup").length == 0) {
-                    var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                    var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                    var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                    var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                     var model = new openerp.Model('account.report.context.common');
                     model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                         curFootNoteTarget = $(e.target).parent().parent();
@@ -374,8 +398,8 @@
             saveContent: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                 var text = $(e.target).siblings('textarea').val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
                 var footNoteSeqNum = $(e.target).parents('p.footnote').text().split('.')[0];
                 if ($(e.target).parents("p.footnote").length > 0) {
@@ -401,8 +425,8 @@
                 e.preventDefault();
                 if ($(e.target).parents("div.summary").length > 0) {
                     $(e.target).parent().parent().replaceWith(openerp.qweb.render("addSummary"));
-                    var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                    var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                    var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                    var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                     var model = new openerp.Model('account.report.context.common');
                     model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                         var contextModel = new openerp.Model(result);
@@ -413,8 +437,8 @@
                     var num = $(e.target).parent().parent().text().split('.')[0];
                     this.$("sup:contains('" + num + "')").remove();
                     $(e.target).parent().parent().remove();
-                    var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                    var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                    var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                    var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                     var model = new openerp.Model('account.report.context.common');
                     model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                         var contextModel = new openerp.Model(result);
@@ -425,8 +449,8 @@
             fold: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                 var el;
                 var $el;
                 var $nextEls = $(e.target).parents('tr').nextAll();
@@ -450,8 +474,8 @@
             unfold: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
-                var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
+                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
+                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                 var active_id = $(e.target).parents('tr').find('td.unfoldable').attr("class").split(/\s+/)[1];
                 var commonContext = new openerp.Model('account.report.context.common');
                 commonContext.call('get_context_name_by_report_name', [report_name]).then(function (result) {
