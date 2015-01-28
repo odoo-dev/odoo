@@ -5,7 +5,7 @@
 .ui-dialog-titlebar {
     display:none
 }
-input#summary, div.dropdown, i.fa, div.savedSummary span, td.unfoldable, td.foldable {
+input#summary, div.dropdown, i.fa, div.savedSummary span, td.unfoldable, td.foldable, span#public-link {
     cursor: pointer; cursor: hand;
 }
 td i.fa-pencil-square{
@@ -18,5 +18,11 @@ p.footnote i.fa{
     visibility: hidden;
 }
 p.footnote:hover i.fa{
+    visibility: visible;
+}
+h2 i.fa{
+    visibility: hidden;
+}
+h2:hover i.fa{
     visibility: visible;
 }

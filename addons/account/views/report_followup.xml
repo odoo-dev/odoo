@@ -2,53 +2,34 @@
 <openerp>
 <data>
 
-<template id="report_followup_configurator" inherit_id="account.report_configurator" primary="True">
-    <xpath expr="//style" position="replace">
-    </xpath>
-    <xpath expr="//div[@class='row mt32']" position="replace">
-        <div class="row mt32">
-            <div class="col-sm-3">
-                <label for="partner">Partner :</label>
-                <select name="partner" class="form-control">
-                    <option t-if="'all' == context.partner" selected="selected" value="all">
-                        All Partners
-                    </option>
-                    <option t-if="'all' != context.partner" value="all">
-                        All Partners
-                    </option>
-                    <t t-foreach="context.get_partners()" t-as="p"> 
-                        <option t-if="'all' != context.partner and p.id == int(context.partner)" selected="selected" t-att-value="p.id">
-                            <t t-esc="p.name"></t>
-                        </option>
-                        <option t-if="'all' == context.partner or p.id != int(context.partner)" t-att-value="p.id">
-                            <t t-esc="p.name"></t>
-                        </option>
-                    </t>   
-                </select>
-            </div>
-        </div>
-    </xpath>
-</template>
 <template id="report_followup_line" inherit_id="account.report_financial_line" primary="True">
     <xpath expr="//div[@class='dropdown']" position="replace">
-        <div class="dropdown" t-if="a['type'] == 'invoice_id' and mode != 'print'">
+        <div class="dropdown" t-if="a['type'] == 'unreconciled_aml' and mode != 'print'">
             <a data-toggle="dropdown">
-                <span style="font-style: italic; margin-left: 70px" t-att-class="' '.join([a['type'], str(a['id'])])">
+                <span style="font-style: italic;" t-att-class="' '.join([a['type'], str(a['id'])])">
                     <t t-esc="a.get('name')"/>
                 </span>
                 <span class="caret"></span>
             </a>
             <t t-call="account.report_financial_footnote_sup" />
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" style="margin-left: 70px">
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
                 <li role="presentation"><a role="menuitem" tabindex="-1" class="to_invoice">View Invoice</a></li>
                 <li role="presentation"><a role="menuitem" tabindex="-1" class="change_exp_date">Change expected payment date/note</a></li>
                 <li role="presentation"><a role="menuitem" tabindex="-1" class="add_footnote">Add Footnote</a></li>
             </ul>
         </div>
     </xpath>    
-    <xpath expr="//td/t[@t-set='column']" position="after">
+    <xpath expr="//t/t[@t-set='column']" position="after">
         <t t-set="tooltip" t-value="''" />
         <t t-if="column == 3 and a['type'] == 'invoice_id'"><t t-set="tooltip" t-value="c[1]" /><t t-set="c" t-value="c[0]" /></t>
+    </xpath>
+    <xpath expr="//td[@class='text-right']" position="before">
+        <t t-if="column in [1, 2, 3]"><t t-set="align" t-value="'text-center'" /></t>
+        <t t-if="column in [4, 5]"><t t-set="align" t-value="'text-right'" /></t>
+    </xpath>
+    <xpath expr="//td[@class='text-right']" position="attributes">
+        <attribute name="class"></attribute>
+        <attribute name="t-att-class">align</attribute>
     </xpath>
     <xpath expr="//span[@class='annotable']" position="attributes">
         <attribute name="data-toggle">tooltip</attribute>
@@ -56,12 +37,29 @@
         <attribute name="t-att-title">tooltip</attribute>
     </xpath>
 </template>
+<template id="report_followup_line_public" inherit_id="account.report_followup_line" primary="True">
+    <xpath expr="//ul[@class='dropdown-menu']" position="replace"></xpath>
+    <xpath expr="//span[@class='caret']" position="replace"></xpath>
+    <xpath expr="//i[@class='fa fa-fw fa-pencil-square']" position='replace'></xpath>
+    <xpath expr="//i[@class='fa fa-fw fa-pencil-square']" position='replace'></xpath>
+    <xpath expr="//i[@class='fa fa-fw fa-pencil-square']" position='replace'></xpath>
+</template>
 <template id="report_followup" inherit_id="account.report_financial" primary="True">
+    <xpath expr="//h2" position="after">
+        <t t-if="mode != 'print'">
+            <span id='public-link'><a>(copy public link)</a></span>
+        </t>
+    </xpath>
+    <xpath expr="//h2" position="replace">
+        <h2>
+            <t t-esc='context.partner_id.name' />
+            <a style="position: absolute; margin-left: 3px;" t-att-href="'/web#id=' + str(context.partner_id.id) + '&amp;view_type=form&amp;model=res.partner'"><i class="fa fa-fw fa-share-square-o"></i></a>
+        </h2>
+    </xpath>
     <xpath expr="//t[@t-call='account.report_financial_line']" position="replace">
         <t t-call='account.report_followup_line' />
     </xpath>
     <xpath expr="//t[@t-call='account.report_configurator']" position="replace">
-        <t t-call='account.report_followup_configurator' />
     </xpath>
     <xpath expr="//div[@id='footnoteModal']" position="after">
         <div t-if="mode != 'print'" class="modal fade" id="paymentDateModal" tabindex="-1" role="dialog" aria-labelledby="paymentDateLabel" aria-hidden="true">
@@ -88,11 +86,55 @@
         </div>
     </xpath>
     <xpath expr="//div[@class='dropdown']" position="replace">
-        <div t-if="mode != 'print'" style="float: right; margin-bottom: 250px;">
-            <a class="btn btn-default" href="?pdf" role="button">Print Letter</a>
+    </xpath>
+    <xpath expr="//div[@class='summary']" position="before">
+        <div t-if="mode != 'print'" style='text-align: right;'>
+            <button type="button" class="btn btn-default" href="?pdf">Print Letter</button>
             <button type="button" class="btn btn-primary" href="?email">Send by email</button>
         </div>
     </xpath>
+</template>
+<template id="report_followup_letter2" inherit_id="account.report_followup" primary="True">
+    <xpath expr="//t[@t-call='report.html_container']" position="attributes">
+        <attribute name="t-call">report.external_layout</attribute>
+    </xpath>
+    <xpath expr="//h2" position="replace">
+        <div class="row">
+            <div class="col-xs-5 col-xs-offset-7">
+                <div t-field="context.partner_id" 
+                    t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true}'/>
+                 <span t-field="context.partner_id.vat"/>
+            </div>
+        </div>
+        <p>
+            Document: Customer account statement<br/>
+            Date: <span t-esc="today"/><br/>
+            Customer ref: <span t-field="context.partner_id.ref"/>
+        </p>
+    </xpath>
+</template>
+<template id="report_followup_public" inherit_id="account.report_followup" primary="True">
+    <xpath expr="//span[@id='public-link']" position="replace"></xpath>
+    <xpath expr="//button[@href='?pdf']" position="replace"></xpath>
+    <xpath expr="//button[@href='?email']" position="replace"></xpath>
+    <xpath expr="//div[@class='summary']" position="replace"></xpath>
+    <xpath expr="//div[@class='summary']" position="replace"></xpath>
+    <xpath expr="//h2/a" position="replace"></xpath>
+    <xpath expr="//t[@t-call='account.report_followup_line']" position="attributes">
+        <attribute name="t-call">account.report_followup_line_public</attribute>
+    </xpath>
+</template>
+<template id="report_followup_letter">
+    <t t-call="report.html_container">
+        <t t-call="account.report_followup_letter2" />
+    </t>
+</template>
+<template id="report_followup_all">
+    <t t-foreach='reports' t-as='data'>
+        <t t-set='context' t-value="data['context']" />
+        <t t-set='lines' t-value="data['lines']" />
+        <t t-call="account.report_followup" />
+    </t>
 </template>
 </data>
 </openerp>

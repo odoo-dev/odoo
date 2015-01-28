@@ -21,6 +21,7 @@
 
 from openerp import models, fields, api
 from datetime import datetime
+from hashlib import md5
 
 
 class report_account_followup_report(models.AbstractModel):
@@ -30,24 +31,25 @@ class report_account_followup_report(models.AbstractModel):
     @api.model
     def get_lines(self, context_id, line_id=None):
         lines = []
-        domain = [('reconciled', '=', False)]
-        if not context_id.all_partners:
-            domain.append(('partner_id', '=', int(context_id.partner_id)))
+        domain = [('partner_id', '=', int(context_id.partner_id)), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
+        # if not context_id.all_partners:
+        #     domain.append(('partner_id', '=', int(context_id.partner_id)))
         total_total = 0
         total_residual = 0
-        for invoice in self.env['account.invoice'].search(domain):
-            overdue = datetime.today().strftime('%Y-%m-%d') > invoice.date_due
-            date_due = overdue and (invoice.date_due, 'color: red;') or invoice.date_due
+        for aml in self.env['account.move.line'].search(domain):
+            overdue = datetime.today().strftime('%Y-%m-%d') > aml.date_maturity
+            date_due = overdue and (aml.date_maturity, 'color: red;') or aml.date_maturity
+            amount = aml.debit - aml.credit
             lines.append({
-                'id': invoice.id,
-                'name': invoice.number,
-                'type': 'invoice_id',
-                'footnotes': self._get_footnotes('invoice_id', invoice.id),
+                'id': aml.id,
+                'name': aml.name,
+                'type': 'unreconciled_aml',
+                'footnotes': self._get_footnotes('unreconciled_aml', aml.id, context_id),
                 'unfoldable': False,
-                'columns': [invoice.date_invoice, date_due, (invoice.expected_pay_date, invoice.internal_note), invoice.residual, invoice.amount_total],
+                'columns': [aml.date, date_due, aml.expected_pay_date and (aml.expected_pay_date, aml.internal_note) or '', aml.blocked, aml.amount_residual, amount],
             })
-            total_total += invoice.amount_total
-            total_residual += invoice.residual
+            total_total += amount
+            total_residual += aml.amount_residual
         lines.append({
             'id': 0,
             'name': 'Total',
@@ -55,7 +57,7 @@ class report_account_followup_report(models.AbstractModel):
             'footnotes': self._get_footnotes('line', 0, context_id),
             'unfoldable': False,
             'level': 0,
-            'columns': ['', '', '', total_residual, total_total],
+            'columns': ['', '', '', '', total_residual, total_total],
         })
         return lines
 
@@ -90,9 +92,8 @@ class account_report_context_followup(models.TransientModel):
     _inherit = "account.report.context.common"
 
     footnotes = fields.Many2many('account.report.footnote', 'account_context_footnote_followup', string='Footnotes')
-    all_partners = fields.Boolean()
     partner_id = fields.Many2one('res.partner', string='Partner')
-    summary = fields.Char(default=lambda s: s.env.user.company_id.overdue_msg.replace('\n', '<br />'))
+    summary = fields.Char(default=lambda s: s.env.user.company_id.overdue_msg and s.env.user.company_id.overdue_msg.replace('\n', '<br />') or s.env['res.company'].default_get(['overdue_msg'])['overdue_msg'])
 
     @api.multi
     def add_footnote(self, type, target_id, column, number, text):
@@ -127,7 +128,7 @@ class account_report_context_followup(models.TransientModel):
         return
 
     def get_columns_names(self):
-        return ['Date', 'Due Date', 'Expected Date', 'Remaining', 'Total Due']
+        return ['Date', 'Due Date', 'Expected Date', 'Litigated', 'Remaining', 'Total Due']
 
     def get_pdf(self):
         report_obj = self.get_report_obj()
@@ -135,16 +136,21 @@ class account_report_context_followup(models.TransientModel):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         rcontext = {
             'context': self,
-            'o': report_obj,
+            'report': report_obj,
             'lines': lines,
             'mode': 'print',
             'base_url': base_url,
             'css': '',
+            'o': self.env.user,
+            'today': datetime.today().strftime('%Y-%m-%d'),
         }
-        html = self.pool['ir.ui.view'].render(self._cr, self._uid, report_obj.get_template(), rcontext, context=self.env.context)
+        html = self.pool['ir.ui.view'].render(self._cr, self._uid, report_obj.get_template() + '_letter', rcontext, context=self.env.context)
 
-        landscape = False
-        if len(self.get_columns_names()) > 4:
-            landscape = True
+        return self.env['report']._run_wkhtmltopdf([], [], [(0, html)], False, self.env.user.company_id.paperformat_id)
 
-        return self.env['report']._run_wkhtmltopdf([], [], [(0, html)], landscape, self.env.user.company_id.paperformat_id)
+    @api.multi
+    def get_public_link(self):
+        db_uuid = self.env['ir.config_parameter'].get_param('database.uuid')
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        check = md5(str(db_uuid) + self.partner_id.name).hexdigest()
+        return base_url + '/account/public_followup_report/' + str(self.partner_id.id) + '/' + check

@@ -127,6 +127,8 @@ class account_move_line(models.Model):
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account')
     company_id = fields.Many2one('res.company', related='account_id.company_id', string='Company', store=True,
         default=lambda self: self.env['res.company']._company_default_get('account.move.line'))
+    expected_pay_date = fields.Date('Expected Payment Date')
+    internal_note = fields.Text('Internal Note')
 
     # TODO: put the invoice link and partner_id on the account_move
     invoice = fields.Many2one('account.invoice', string='Invoice')
