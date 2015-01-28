@@ -79,10 +79,10 @@ class signature_request(models.Model):
     _description = "Signature Request For An Attachment"
     _rec_name = 'attachment'
 
-    attachment = fields.Many2one('ir.attachment', required=True)
+    attachment = fields.Many2one('ir.attachment', required=True, ondelete='cascade')
     message = fields.Html()
     request_items = fields.One2many('signature.request.item', 'signature_request', 'Signers')
-    # signature_items = fields.One2many('signature.item', 'signature_request')
+    signature_items = fields.One2many('signature.item', 'signature_request')
     state = fields.Selection([
         ("draft", "Draft"),
         ("opened", "Waiting for completions"),
@@ -235,15 +235,24 @@ class signature_request(models.Model):
         print "\nTODO\n"
         return
 
+    @api.multi
+    def go_to_custom_document(self):
+        return {
+            'name': 'Signature Request Edit Field URL',
+            'type': 'ir.actions.act_url',
+            'url': '/custom/document/' + str(self[0].id),
+            'target': 'self',
+        }
+
 class signature_request_item(models.Model):
     _name = "signature.request.item"
     _description = "Signature Request Information For One Partner"
     _rec_name = 'partner_id'
 
-    partner_id = fields.Many2one('res.partner', 'Partner', required=True)
+    partner_id = fields.Many2one('res.partner', 'Partner', required=True, ondelete='cascade')
     signature_request = fields.Many2one('signature.request', ondelete='cascade', required=True, readonly=True)
     signature = fields.Binary()
-    # signature_values = fields.One2many('signature.item.value', 'signature_request_item', "Signature Item Values")
+    signature_values = fields.One2many('signature.item.value', 'signature_request_item', "Signature Item Values")
     
     signing_date = fields.Date('Signed on', readonly=True)
     # deadline_date = fields.Date(readonly=True)
@@ -309,36 +318,46 @@ class signature_request_item(models.Model):
     # def _onchange_partner(self):
     #     self.action_draft()
 
-# class signature_item(models.Model):
-#     _name = "signature.item"
-#     _description = "Signature Field For Document To Sign"
+class signature_item(models.Model):
+    _name = "signature.item"
+    _description = "Signature Field For Document To Sign"
 
-#     signature_request = fields.Many2one('signature.request', required=True)
-#     posx = fields.Float(digits=(3, 2), string="Position X", required=True)
-#     posy = fields.Float(digits=(3, 2), string="Position Y", required=True)
-#     width = fields.Float(digits=(3, 2), required=True)
-#     height = fields.Float(digits=(3, 2), required=True)
-#     isSignature = fields.Boolean(required=True, string="Signature field", default=False)
+    signature_request = fields.Many2one('signature.request', required=True, ondelete='cascade')
 
-# class signature_item_value(models.Model):
-#     _name = "signature.item.value"
-#     _description = "Signature Field Value For Document To Sign"
+    name = fields.Char()
+    type = fields.Selection([
+        ('text', 'Text'),
+        ('signature', 'Signature')
+    ], required=True)
 
-#     signature_request_item = fields.Many2one('signature.request.item', required=True)
-#     signature_item = fields.Many2one('signature.item', required=True)
-#     value = fields.Char()
-#     sign_img = fields.Binary('Signature image')
+    required = fields.Boolean(required=True, default=True)
+    responsible = fields.Many2one("signature.party")
 
-#     @api.one
-#     def setValue(self, value):
-#         if self.signature_item.isSignature:
-#             self.sign_img = value
-#         else:
-#             self.value = value
+    page = fields.Integer(string="Document Page", required=True, default=1)
+    posX = fields.Float(digits=(3, 2), string="Position X", required=True)
+    posY = fields.Float(digits=(3, 2), string="Position Y", required=True)
+    width = fields.Float(digits=(3, 2), required=True)
+    height = fields.Float(digits=(3, 2), required=True)
 
-#     @api.multi
-#     def getByItem(self):
-#         d = {}
-#         for v in self:
-#             d[v.signature_item.id] = v
-#         return d
+class signature_item_value(models.Model):
+    _name = "signature.item.value"
+    _description = "Signature Field Value For Document To Sign"
+
+    signature_request_item = fields.Many2one('signature.request.item', required=True, ondelete='cascade')
+    signature_item = fields.Many2one('signature.item', required=True, ondelete='cascade')
+    value = fields.Char()
+    sign_img = fields.Binary('Signature image')
+
+    @api.multi
+    def getByItem(self):
+        data = {}
+        for value in self:
+            data[value.signature_item.id] = value
+        return data
+
+    # @api.one
+    # def setValue(self, value):
+    #     if self.signature_item.isSignature:
+    #         self.sign_img = value
+    #     else:
+    #         self.value = value

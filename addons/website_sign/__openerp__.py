@@ -15,6 +15,7 @@ Select your recipients and follow the signature process easily.
     'data': [
         'security/ir.model.access.csv',
         'views/website_sign.xml',
+        'views/signature_editor.xml',
         'views/items_view.xml',
         'data/website_sign_data.xml',
         'data/workflows.xml',

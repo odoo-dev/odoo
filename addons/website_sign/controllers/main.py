@@ -52,9 +52,9 @@ class website_sign(http.Controller):
         else:
             record = http.request.env[signature_request.attachment.res_model].browse(signature_request.attachment.res_id)
 
-        # item_values = False
-        # if current_request_item:
-        #     item_values = current_request_item.signature_values.getByItem() 
+        item_values = False
+        if current_request_item:
+            item_values = current_request_item.signature_values.getByItem()
 
         values = {
             'signature_request': signature_request,
@@ -63,8 +63,8 @@ class website_sign(http.Controller):
             'token': token,
             'messages': record.message_ids,
             'message': message and int(message) or False,
-            # 'hasItems': len(signature_request.signature_items) > 0,
-            # 'itemsToValues': item_values
+            'hasItems': len(signature_request.signature_items) > 0,
+            'itemsToValues': item_values
         }
 
         return http.request.render('website_sign.doc_sign', values)
@@ -126,3 +126,27 @@ class website_sign(http.Controller):
         if message:
             self.__message_post(message, attach.res_model, attach.res_id, type='comment', subtype='mt_comment')
         return http.request.redirect("/sign/document/%s/%s?message=1" % (id, token))
+
+    @http.route(['/custom/document/<int:id>'], type="http", auth="user", website=True)
+    def custom_document(self, id, **post):
+        signature_request = http.request.env['signature.request'].browse(id)
+        if not signature_request:
+            http.request.not_found()
+
+        values = {
+            'signature_request': signature_request,
+        }
+        return http.request.render('website_sign.items_edit', values)
+
+    @http.route(['/website_sign/set_signature_items/<int:id>'], type='json', auth='user', website=True)
+    def set_signature_items(self, id, signature_items=None, **post):
+        signature_item_obj = http.request.env['signature.item']
+        for item in signature_items:
+            item.update({
+                'signature_request': id,
+                'name': "default_name",
+                'required': True,
+                # 'responsible': ,
+            })
+            signature_item_obj.create(item)
+        return True

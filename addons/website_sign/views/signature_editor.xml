@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<odoo>
+	<template t-name="website_sign.items_edit" name="Signature Request - Fields Edition">
+		<t t-call="website.layout">
+            <div id="signature-editor" class="container">
+            	<h2>Signature Request <strong><t t-esc="signature_request.attachment.name"/></strong> - Fields Edition</h2>
+            	<p>
+            		<em>Notice that if you leave your document without any fields, the signers will be requested for an unique signature alongside the document.</em>
+            	</p>
+
+        		<div class="col-md-3">
+        			<input id="input_signature_request_id" type="hidden" t-att-value="signature_request.id"/>
+        			<input id="input_attachment_location" type="hidden" t-att-value="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id)"/>
+
+        			<div class="bs-sidebar">
+        				<a t-att-href="'/web?#id=' + str(signature_request.id) + '&amp;view_type=form&amp;model=signature.request'" id="signature_fields_save" class="btn btn-primary btn-block fa fa-check">Save and come back to form view</a>
+	        			<button id="signature_page_before" class="btn btn-primary btn-block">Previous page</button>
+	        			<button id="signature_page_after" class="btn btn-primary btn-block">Next page</button>
+	        			<hr/>
+	        			<h4 class="modal-title">Field types</h4>
+	        			<em>Double click to add or delete elements</em>
+	        			<button id="signature_item_button_text" class="field_type_button btn btn-primary btn-block">Add Text</button>
+	        			<button id="signature_item_button_signature" class="field_type_button btn btn-primary btn-block">Add Signature</button>
+	        		</div>
+        		</div>
+        		<div id="canvas-container" class="col-md-9">
+	        		<canvas/>
+	        	</div>
+            </div>
+        </t>
+	</template>
+</odoo>

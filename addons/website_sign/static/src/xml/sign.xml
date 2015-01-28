@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<template>
+<templates>
     <t t-name="select.people">
         <input type="hidden" t-att-value="attachment.id" id="attach_id"/>
         <div class="col-md-12 oe_sign_title">
@@ -60,4 +60,4 @@
             <img t-att-id="'request_sign' + file.id" class="request_sign oe_sign" title="Request Signature" src="/website_sign/static/src/img/sign.png"/>
         </t>
     </t>
-</template>
+</templates>

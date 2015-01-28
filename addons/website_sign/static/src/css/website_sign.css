@@ -111,6 +111,26 @@
 }
 
 /* PDF View */
+#signature-editor #canvas-container {
+  position: relative;
+}
+
+#signature-editor #canvas-container canvas {
+  position: relative;
+  top: 0%;
+  left: 0%;
+  z-index: 0;
+
+  border: 1px solid silver;
+  cursor: pointer;
+}
+
+#signature-editor #canvas-container .sign_item {
+  position: absolute;
+  cursor: pointer;
+}
+
+/* PDF View */
 /*
 #website_sign_items_view {
   position: relative;

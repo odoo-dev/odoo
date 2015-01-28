@@ -10,9 +10,22 @@
 
     <template id="assets_frontend" inherit_id="website.assets_frontend">
         <xpath expr="." position="inside">
+            <link rel='stylesheet' href='/website_sign/static/src/css/website_sign.css'/>
             <script type="text/javascript" src="/website_sign/static/src/js/sign.js"></script>
             <script type="text/javascript" src="/website/static/lib/jSignature/jSignature.min.js"></script>
-            <link rel='stylesheet' href='/website_sign/static/src/css/website_sign.css'/>
+
+            <!-- In production, only one script (pdf.js) is necessary -->
+            <!-- In production, change the content of PDFJS.workerSrc below -->
+            <script src="/website_sign/static/lib/pdfjs/shared/util.js"></script>
+            <script src="/website_sign/static/lib/pdfjs/display/api.js"></script>
+            <script src="/website_sign/static/lib/pdfjs/display/metadata.js"></script>
+            <script src="/website_sign/static/lib/pdfjs/display/canvas.js"></script>
+            <script src="/website_sign/static/lib/pdfjs/display/webgl.js"></script>
+            <script src="/website_sign/static/lib/pdfjs/display/pattern_helper.js"></script>
+            <script src="/website_sign/static/lib/pdfjs/display/font_loader.js"></script>
+            <script src="/website_sign/static/lib/pdfjs/display/annotation_helper.js"></script>
+
+            <script src="/website_sign/static/src/js/signature_editor.js"></script>
         </xpath>
     </template> 
 
