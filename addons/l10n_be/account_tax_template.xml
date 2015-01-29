@@ -268,7 +268,7 @@
             <field name="description">VAT-IN-V82-00-S</field>
             <field name="name">TVA à l'entrée 0% - Services</field>
             <field name="price_include" eval="0"/>
-            <field name="amount">0</field>
+            <field name="amount">100</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -278,7 +278,7 @@
             <field name="description">VAT-IN-V82-00-G</field>
             <field name="name">TVA à l'entrée 0% - Biens divers</field>
             <field name="price_include" eval="0"/>
-            <field name="amount">0</field>
+            <field name="amount">100</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -290,7 +290,7 @@
             <field name="refund_account_id" ref="a411059"/>
             <field name="account_id" ref="a411059"/>
             <field name="price_include" eval="0"/>
-            <field name="amount">21</field>
+            <field name="amount">100</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -302,7 +302,7 @@
             <field name="refund_account_id" ref="a411059"/>
             <field name="account_id" ref="a411059"/>
             <field name="price_include" eval="0"/>
-            <field name="amount">12</field>
+            <field name="amount">100</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -314,7 +314,7 @@
             <field name="refund_account_id" ref="a411059"/>
             <field name="account_id" ref="a411059"/>
             <field name="price_include" eval="0"/>
-            <field name="amount">6</field>
+            <field name="amount">100</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -671,7 +671,7 @@
             <field name="refund_account_id" ref="a451056"/>
             <field name="account_id" ref="a451056"/>
             <field name="price_include" eval="0"/>
-            <field name="amount">9.5</field>
+            <field name="amount">1</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -683,7 +683,7 @@
             <field name="refund_account_id" ref="a411059"/>
             <field name="account_id" ref="a411059"/>
             <field name="price_include" eval="1"/>
-            <field name="amount">9.5</field>
+            <field name="amount">100</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
