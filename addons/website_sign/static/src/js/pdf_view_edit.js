@@ -1,8 +1,29 @@
 
 function check_pdf_items_completion(canvas) {
+    var ok = true;
     canvas.parent().find('.sign_item').each(function(i, el) {
+        var value = {
+            'text': $(el).val(),
+            'signature': $(el).data('signature'),
+        }[$(el).data('type')];
 
+        if(!value && $(el).data('required')) {
+            ok = false;
+            return;
+        }
     });
+
+    validateButton = $('#signature-validate-button');
+    if(ok) {
+        validateButton.prop("disabled", false);
+        validateButton.html("Validate")
+        validateButton.addClass("fa fa-check");
+    }
+    else {
+        $('#signature-validate-button').prop("disabled", true);
+        validateButton.html("Fields to complete")
+        validateButton.removeClass("fa fa-check");
+    }
 }
 
 function update_pdf_items(canvas, pageNo, config) {
@@ -73,7 +94,7 @@ function create_signature_item(canvas, type, required, posX, posY, width, height
     if(readonly) {
         elem = $({
             "text": "<div>" + value.text + "</div>",
-            "signature": (value.image)? "<div><img src='data:image/png;base64," + (value.image.substr(1, value.image.length-2)) + "'/></div>" : "<button type='button'>Sign Here</button>"
+            "signature": (value.image)? "<div><span class='helper'/><img src='data:image/png;base64," + (value.image.substr(1, value.image.length-2)) + "'/></div>" : "<button type='button'>Sign Here</button>"
         }[type]);
     }
     else {
@@ -90,6 +111,7 @@ function create_signature_item(canvas, type, required, posX, posY, width, height
                     var sign_img = $('#sign_diag').find('.sign').jSignature("getData",'image');
                     elem.html('<span class="helper"/><img src="data:'+sign_img[0]+','+sign_img[1]+'"/>');
                     elem.data('signature', JSON.stringify(sign_img[1]));
+                    elem.change();
                 });
             });
         }
@@ -118,6 +140,9 @@ $(document).ready(function() {
     var signature_request_id = $('#input_signature_request_id').val();
     var attachment_location = $('#input_attachment_location').val();
     var readonly = $('#input_field_readonly').val() || false;
+    var roles = $('#input_current_roles').val() || [];
+    if(typeof roles === "string")
+        roles = $.parseJSON(roles);
     var canvas = $('#signature-field-view canvas');;
     var pdf = false;
     var pageNo = 1;
@@ -201,12 +226,14 @@ $(document).ready(function() {
                         'text': $(el).data('item-value-text') || "",
                         'image': $(el).data('item-value-image') || "",
                     };
+
+                    var resp = parseInt($(el).data('responsible'));
                     
                     var elem = create_signature_item(canvas,
                         $(el).data('type'), $(el).data('required'),
                         $(el).data('posx'), $(el).data('posy'),
                         $(el).data('width'), $(el).data('height'),
-                        readonly, values);
+                        readonly || (resp !== 0 && !$.inArray(resp, roles)), values);
                     elem.data('item-id', $(el).data('item-id'));
 
                     if($('#canvas-edit').length == 1)
@@ -223,6 +250,7 @@ $(document).ready(function() {
                     configuration[parseInt($(el).data('page'))].push(elem);
                     canvas.after(elem);
                 });
+                check_pdf_items_completion(canvas);
                 update_pdf_items(canvas, pageNo, configuration);
             });
         }
@@ -236,7 +264,7 @@ $(document).ready(function() {
         var posY = (e.pageY - canvas.offset().top) / canvas.height();
         var WIDTH = 0.2, HEIGHT = 0.05;
 
-        var elem = create_signature_item(canvas, currentFieldType, required, posX, posY, WIDTH, HEIGHT);
+        var elem = create_signature_item(canvas, currentFieldType, required, posX, posY, WIDTH, HEIGHT, false);
         if(elem !== null) {
             elem.on('dblclick', function(e) {
                 var currentElem = $(e.currentTarget);

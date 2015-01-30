@@ -8,44 +8,46 @@
             		<em>Notice that if you leave your document without any fields, the signers will be requested for an unique signature alongside the document.</em>
             	</p>
 
-        		<div class="col-md-3">
-        			<input id="input_signature_request_id" type="hidden" t-att-value="signature_request.id"/>
-        			<input id="input_attachment_location" type="hidden" t-att-value="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id)"/>
+                <div class="row">
+            		<div class="col-md-3">
+            			<input id="input_signature_request_id" type="hidden" t-att-value="signature_request.id"/>
+            			<input id="input_attachment_location" type="hidden" t-att-value="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id)"/>
 
-        			<div class="panel panel-default">
-                        <div class="panel-heading">
-            				<a t-att-href="'/web?#id=' + str(signature_request.id) + '&amp;view_type=form&amp;model=signature.request'" id="signature_fields_save" class="btn btn-primary btn-block fa fa-check">Save</a>
+            			<div class="panel panel-default">
+                            <div class="panel-heading">
+                				<a t-att-href="'/web?#id=' + str(signature_request.id) + '&amp;view_type=form&amp;model=signature.request'" id="signature_fields_save" class="btn btn-primary btn-block fa fa-check">Save</a>
+                            </div>
+                            <div class="panel-body">
+        	        			<button id="signature_page_before" class="btn btn-primary btn-block">Previous page</button>
+        	        			<button id="signature_page_after" class="btn btn-primary btn-block">Next page</button>
+                                <div id="signature_pages"><input type="text"/><span>/</span><input type="text" disabled="1"/></div>
+                            </div>
                         </div>
-                        <div class="panel-body">
-    	        			<button id="signature_page_before" class="btn btn-primary btn-block">Previous page</button>
-    	        			<button id="signature_page_after" class="btn btn-primary btn-block">Next page</button>
-                            <div id="signature_pages"><input type="text"/><span>/</span><input type="text" disabled="1"/></div>
-                        </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <h4 class="panel-heading modal-title">Field types</h4>
-	        			<div class="panel-body">
-    	        			
-    	        			<p>Double click to add or delete</p>
-    	        			<button data-item-type="text" class="field_type_button btn btn-primary btn-block">Text</button>
-    	        			<button data-item-type="signature" class="field_type_button btn btn-primary btn-block">Signature</button>
-                        </div>
-	        		</div>
-        		</div>
+                        <div class="panel panel-default">
+                            <h4 class="panel-heading modal-title">Field types</h4>
+    	        			<div class="panel-body">
+        	        			
+        	        			<p>Double click to add or delete</p>
+        	        			<button data-item-type="text" class="field_type_button btn btn-primary btn-block">Text</button>
+        	        			<button data-item-type="signature" class="field_type_button btn btn-primary btn-block">Signature</button>
+                            </div>
+    	        		</div>
+            		</div>
 
-        		<div id="canvas-container" class="col-md-9">
-	        		<canvas id="canvas-edit"/>
-                    <t t-foreach="signature_request.signature_items" t-as="item">
-                        <input type="hidden"
-                            t-att-data-item-id="item.id"
-                            t-att-data-type="item.type"
-                            t-att-data-page="item.page"
-                            t-att-data-posx="item.posX"
-                            t-att-data-posy="item.posY"
-                            t-att-data-width="item.width"
-                            t-att-data-height="item.height"/>
-                    </t>
-	        	</div>
+            		<div id="canvas-container" class="col-md-9">
+    	        		<canvas id="canvas-edit"/>
+                        <t t-foreach="signature_request.signature_items" t-as="item">
+                            <input type="hidden"
+                                t-att-data-item-id="item.id"
+                                t-att-data-type="item.type"
+                                t-att-data-page="item.page"
+                                t-att-data-posx="item.posX"
+                                t-att-data-posy="item.posY"
+                                t-att-data-width="item.width"
+                                t-att-data-height="item.height"/>
+                        </t>
+    	        	</div>
+                </div>
             </div>
         </t>
 	</template>

@@ -34,139 +34,139 @@
             <div class="container">
                 <h2><strong><t t-esc="signature_request.attachment.name"/></strong> - Signature Request</h2>
 
-                <div class="col-md-3">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4>
-                                <t t-if="signature_request.nb_closed == len(signature_request.request_items)">
-                                    Signed(<t t-raw="str(signature_request.nb_closed) +'/'+ str(signature_request.nb_closed)"/>)
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4>
+                                    <t t-if="signature_request.nb_closed == len(signature_request.request_items)">
+                                        Signed(<t t-raw="str(signature_request.nb_closed) +'/'+ str(signature_request.nb_closed)"/>)
+                                    </t>
+                                    <t t-if="signature_request.nb_closed != len(signature_request.request_items)">
+                                        Waiting Signatures(<t t-raw="str(len(signature_request.request_items)-signature_request.nb_closed) +'/'+ str(len(signature_request.request_items))"/>)
+                                    </t>
+                                </h4>
+                            </div>
+                            <div class="panel-body">
+                                <t t-foreach="signature_request.request_items" t-as="sign">
+                                    <div t-if="sign.state != 'closed'"><span style="color:red;"><b><t t-raw="sign.partner_id.name"/></b> is requested to sign.</span> <em t-if="sign.state != 'opened'">(the mail access has not been sent yet)</em></div>
+                                    <div t-if="sign.state == 'closed'"><b><t t-raw="sign.partner_id.name"/></b> has signed the Document.</div>
                                 </t>
-                                <t t-if="signature_request.nb_closed != len(signature_request.request_items)">
-                                    Waiting Signatures(<t t-raw="str(len(signature_request.request_items)-signature_request.nb_closed) +'/'+ str(len(signature_request.request_items))"/>)
-                                </t>
-                            </h4>
+                            </div>
                         </div>
-                        <div class="panel-body">
-                            <t t-foreach="signature_request.request_items" t-as="sign">
-                                <div t-if="sign.state != 'closed'"><span style="color:red;"><b><t t-raw="sign.partner_id.name"/></b> is requested to sign.</span> <em t-if="sign.state != 'opened'">(the mail access has not been sent yet)</em></div>
-                                <div t-if="sign.state == 'closed'"><b><t t-raw="sign.partner_id.name"/></b> has signed the Document.</div>
-                            </t>
-                        </div>
-                    </div>
 
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <t t-if="not readonly">
-                                <a t-if="not hasItems" class="btn btn-primary btn-block fa fa-check" data-toggle="modal" data-target="#modesign">
-                                    Sign Document
-                                </a>
-                                <button t-if="hasItems" id="signature-validate-button" class="btn btn-primary btn-block fa fa-check">
-                                    Validate
-                                </button>
-                            </t>
-                            <t t-if="current_request_item and current_request_item.state == 'closed'">
-                                <h4 class="modal-title">You have signed the document.</h4>
-                            </t>
-                            <t t-if="not current_request_item">
-                                <h4 class="modal-title">Need to sign? Check your mail box to get your secure access !</h4>
-                            </t>
-                            
-                        </div>
-                        <div class="panel-body">
-                            <h4><t t-raw="signature_request.attachment.name"/></h4>
-                            <t t-if="signature_request.attachment.description"><t t-raw="signature_request.attachment.description"/></t>
-                        </div>
-                        <div t-if="hasItems" class="panel-body">
-                            <button id="signature_page_before" class="btn btn-primary btn-block">Previous page</button>
-                            <button id="signature_page_after" class="btn btn-primary btn-block">Next page</button>
-                            <div id="signature_pages"><input type="text"/><span>/</span><input type="text" disabled="1"/></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-9">
-                    <div t-if="message==1" class="alert alert-success alert-dismissable">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                        Your message has been successfully sent!
-                    </div>
-                    <div t-if="message==2" class="alert alert-success alert-dismissable">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                        You have successfully signed the document.
-                    </div>
-
-                    <t t-foreach="messages" t-as="message">
-                        <t t-foreach='message.attachment_ids' t-as='attach'>
-                            <t t-if="attach.id == signature_request.attachment.id">
-                                <div t-if="not hasItems">
-                                    <a t-att-href="'/mail/download_attachment?model=mail.message&amp;id='+str(message.id)+'&amp;method=download_attachment&amp;attachment_id='+str(signature_request.attachment.id)" target="_blank">
-                                        <t t-if="attach.file_type_icon == 'webimage'">
-                                            <img class="media-object" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id) + '&amp;resize=300,180'" style="width: 400px;"/>
-                                        </t>
-                                        <t t-if="attach.file_type_icon != 'webimage'">
-                                            <img class="media-object" t-att-src="'/mail/static/src/img/mimetypes/' + attach.file_type_icon + '.png'" style="width: 400px;"></img>
-                                        </t>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <t t-if="not readonly">
+                                    <a t-if="not hasItems" class="btn btn-primary btn-block fa fa-check" data-toggle="modal" data-target="#modesign">
+                                        Sign Document
                                     </a>
-                                </div>
-                                <t t-if="hasItems">
-                                    <t t-call="website_sign.items_view"/>
+                                    <button t-if="hasItems" id="signature-validate-button" class="btn btn-primary btn-block" type="button"/>
+                                </t>
+                                <t t-if="current_request_item and current_request_item.state == 'closed'">
+                                    <h4 class="modal-title">You have signed the document.</h4>
+                                </t>
+                                <t t-if="not current_request_item">
+                                    <h4 class="modal-title">Need to sign? Check your mail box to get your secure access !</h4>
+                                </t>
+                                
+                            </div>
+                            <div class="panel-body">
+                                <h4><t t-raw="signature_request.attachment.name"/></h4>
+                                <t t-if="signature_request.attachment.description"><t t-raw="signature_request.attachment.description"/></t>
+                            </div>
+                            <div t-if="hasItems" class="panel-body">
+                                <button id="signature_page_before" class="btn btn-primary btn-block">Previous page</button>
+                                <button id="signature_page_after" class="btn btn-primary btn-block">Next page</button>
+                                <div id="signature_pages"><input type="text"/><span>/</span><input type="text" disabled="1"/></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-9">
+                        <div t-if="message==1" class="alert alert-success alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                            Your message has been successfully sent!
+                        </div>
+                        <div t-if="message==2" class="alert alert-success alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                            You have successfully signed the document.
+                        </div>
+
+                        <t t-foreach="messages" t-as="message">
+                            <t t-foreach='message.attachment_ids' t-as='attach'>
+                                <t t-if="attach.id == signature_request.attachment.id">
+                                    <div t-if="not hasItems">
+                                        <a t-att-href="'/mail/download_attachment?model=mail.message&amp;id='+str(message.id)+'&amp;method=download_attachment&amp;attachment_id='+str(signature_request.attachment.id)" target="_blank">
+                                            <t t-if="attach.file_type_icon == 'webimage'">
+                                                <img class="media-object" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id) + '&amp;resize=300,180'" style="width: 400px;"/>
+                                            </t>
+                                            <t t-if="attach.file_type_icon != 'webimage'">
+                                                <img class="media-object" t-att-src="'/mail/static/src/img/mimetypes/' + attach.file_type_icon + '.png'" style="width: 400px;"></img>
+                                            </t>
+                                        </a>
+                                    </div>
+                                    <t t-if="hasItems">
+                                        <t t-call="website_sign.items_view"/>
+                                    </t>
                                 </t>
                             </t>
                         </t>
-                    </t>
 
-                    <t t-foreach="signature_request.request_items" t-as="sign">
-                        <div class="row" t-if="sign.state == 'closed'">
-                            <img class="media-object pull-left" t-att-src="'/web/binary/image?model=signature.request.item&amp;field=signature&amp;id=' + str(sign.id) + '&amp;resize=500,180'" style="width: 150px;"/>
-                            <div style="line-height:65px; font-weight:bold;">
-                                by <t t-raw="sign.signer_name"/> on <t t-raw="sign.signing_date"/>.
-                            </div>
-                        </div>
-                    </t>
-
-                    <section class="mt32 mb32 css_editable_mode_hidden hidden-print">
-                        <form id="comment" t-attf-action="/sign/document/{{signature_request.id}}/{{token}}/note" method="POST">
-                            <h1 class="page-header hidden-print">History</h1>
-                            <div class="pull left mb32 mt32" style="width: 75%">
-                                <t t-if="current_request_item">
-                                    <textarea rows="4" name="comment" class="form-control" placeholder="Send us a note..."></textarea>
-                                    <button type="submit" class="btn btn-primary mt8">Send</button>
-                                </t>
-                            </div>
-                            <t t-call="website_sign.chatter"/>
-                        </form>
-                    </section>
-                    <div class="clearfix"/>
-
-                    <div class="modal fade" id="modesign" role="dialog" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <form id="sign_doc" method="post" t-attf-action="/website_sign/signed/{{signature_request.id}}/{{token}}" class="js_sign_json modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
-                                    <h4 class="modal-title">Sign Document</h4>
+                        <t t-foreach="signature_request.request_items" t-as="sign">
+                            <div class="row" t-if="sign.state == 'closed'">
+                                <img t-if="sign.signature" class="media-object pull-left" t-att-src="'/web/binary/image?model=signature.request.item&amp;field=signature&amp;id=' + str(sign.id) + '&amp;resize=500,180'" style="width: 150px;"/>
+                                <div style="line-height:65px; font-weight:bold;">
+                                    <t t-if="not sign.signature">Signed </t>by <t t-raw="sign.signer_name"/> on <t t-raw="sign.signing_date"/>.
                                 </div>
-                                <div class="modal-body" id="sign-modal-dialog">
-                                    <p>
-                                        I agree, by signing this document.
-                                    </p>
-                                    <div id="signer" class="form-group" t-if="current_request_item">
-                                        <label class="control-label" for="name">Your Name:</label>
-                                        <input class="form-control" name="signer" id="signer_name" t-att-value="current_request_item.partner_id.name" type="text"/>
-                                        <div class="panel panel-default mt16 mb0" id="drawsign">
-                                            <div class="panel-heading">
-                                                <div class="pull-right">
-                                                    <a id="sign_clean" class="btn btn-xs">Clear</a>
+                            </div>
+                        </t>
+
+                        <section class="mt32 mb32 css_editable_mode_hidden hidden-print">
+                            <form id="comment" t-attf-action="/sign/document/{{signature_request.id}}/{{token}}/note" method="POST">
+                                <h1 class="page-header hidden-print">History</h1>
+                                <div class="pull left mb32 mt32" style="width: 75%">
+                                    <t t-if="current_request_item">
+                                        <textarea rows="4" name="comment" class="form-control" placeholder="Send us a note..."></textarea>
+                                        <button type="submit" class="btn btn-primary mt8">Send</button>
+                                    </t>
+                                </div>
+                                <t t-call="website_sign.chatter"/>
+                            </form>
+                        </section>
+                        <div class="clearfix"/>
+
+                        <div class="modal fade" id="modesign" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="sign_doc" method="post" t-attf-action="/website_sign/signed/{{signature_request.id}}/{{token}}" class="js_sign_json modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
+                                        <h4 class="modal-title">Sign Document</h4>
+                                    </div>
+                                    <div class="modal-body" id="sign-modal-dialog">
+                                        <p>
+                                            I agree, by signing this document.
+                                        </p>
+                                        <div id="signer" class="form-group" t-if="current_request_item">
+                                            <label class="control-label" for="name">Your Name:</label>
+                                            <input class="form-control" name="signer" id="signer_name" t-att-value="current_request_item.partner_id.name" type="text"/>
+                                            <div class="panel panel-default mt16 mb0" id="drawsign">
+                                                <div class="panel-heading">
+                                                    <div class="pull-right">
+                                                        <a id="sign_clean" class="btn btn-xs">Clear</a>
+                                                    </div>
+                                                    <strong>Draw your signature</strong>
                                                 </div>
-                                                <strong>Draw your signature</strong>
+                                                <div id="sign" class="panel-body" style="padding: 0"/>
                                             </div>
-                                            <div id="sign" class="panel-body" style="padding: 0"/>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" id="signed_req" t-attf-class="btn btn-primary">Sign Document</button> or
-                                    <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
-                                </div>
-                            </form>
+                                    <div class="modal-footer">
+                                        <button type="submit" id="signed_req" t-attf-class="btn btn-primary">Sign Document</button> or
+                                        <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

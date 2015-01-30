@@ -261,7 +261,6 @@ class signature_request_item(models.Model):
     partner_id = fields.Many2one('res.partner', 'Partner', required=True, ondelete='cascade')
     signature_request = fields.Many2one('signature.request', ondelete='cascade', required=True, readonly=True)
     signature = fields.Binary()
-    signature_values = fields.One2many('signature.item.value', 'signature_request_item', "Signature Item Values")
     
     signing_date = fields.Date('Signed on', readonly=True)
     # deadline_date = fields.Date(readonly=True)
@@ -277,6 +276,8 @@ class signature_request_item(models.Model):
 
     signer_name = fields.Char(size=256)
     signer_email = fields.Char(related='partner_id.email')
+
+    roles = fields.One2many('signature.item.party', 'request_item', string="Roles")
 
     @api.one
     def action_draft(self):
@@ -302,12 +303,11 @@ class signature_request_item(models.Model):
         if not isinstance(signature, dict):
             self.signature = signature
         else:
-            value_obj = self.env['signature.item.value']
             for itemId in signature:
-                item_value = value_obj.search([('signature_item.id', '=', itemId), ('signature_request_item.id', '=', self.id)], limit=1)
+                item_value = self.env['signature.item.value'].search([('signature_item', '=', int(itemId))])
                 if not item_value:
-                    item_value = value_obj.create({'signature_item': itemId, 'signature_request_item': self.id})
-                item_value.setValue(signature[itemId])
+                    item_value = self.env['signature.item.value'].create({'signature_item': int(itemId)})
+                item_value.set(signature[itemId])
 
         self.signal_workflow('signature_request_item_sign')
         return True
@@ -348,36 +348,30 @@ class signature_item(models.Model):
     width = fields.Float(digits=(3, 2), required=True)
     height = fields.Float(digits=(3, 2), required=True)
 
+    value = fields.One2many('signature.item.value', 'signature_item', string="Signature Item Values") # Let's keep the possibility of multiple values
+
 class signature_item_value(models.Model):
     _name = "signature.item.value"
     _description = "Signature Field Value For Document To Sign"
-
-    signature_request_item = fields.Many2one('signature.request.item', required=True, ondelete='cascade')
-    signature_item = fields.Many2one('signature.item', required=True, ondelete='cascade')
     
+    signature_item = fields.Many2one('signature.item', required=True, ondelete='cascade')
+
     text_value = fields.Char()
     image_value = fields.Binary()
 
-    @api.multi
-    def getByItem(self):
-        data = {}
-        for value in self:
-            data[value.signature_item.id] = value
-        return data
-
     @api.one
-    def setValue(self, value):
+    def set(self, value):
         {
-            'text': self.setTextValue,
-            'signature': self.setImageValue,
+            'text': self.setText,
+            'signature': self.setImage,
         }[self.signature_item.type](value)
 
     @api.one
-    def setTextValue(self, value):
+    def setText(self, value):
         self.text_value = value
 
     @api.one
-    def setImageValue(self, value):
+    def setImage(self, value):
         self.image_value = value
 
 class signature_item_party(models.Model):
@@ -385,3 +379,4 @@ class signature_item_party(models.Model):
     _description = "Type of partner which can access a particular signature field"
 
     name = fields.Char(required=True)
+    request_item = fields.Many2one('signature.request.item', string="Signer")

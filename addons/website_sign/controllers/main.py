@@ -52,10 +52,6 @@ class website_sign(http.Controller):
         else:
             record = http.request.env[signature_request.attachment.res_model].browse(signature_request.attachment.res_id)
 
-        item_values = False
-        if current_request_item:
-            item_values = current_request_item.signature_values.getByItem()
-
         values = {
             'signature_request': signature_request,
             'current_request_item': current_request_item,
@@ -64,7 +60,7 @@ class website_sign(http.Controller):
             'messages': record.message_ids,
             'message': message and int(message) or False,
             'hasItems': len(signature_request.signature_items) > 0,
-            'itemsToValues': item_values
+            'roles': current_request_item.roles.mapped('id')
         }
 
         return http.request.render('website_sign.doc_sign', values)

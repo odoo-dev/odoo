@@ -45,6 +45,10 @@ $(document).ready(function () {
         // $('#sign_item[data-item-id=' + id).html('Sign here');
     });
 
+    $('#sign_diag').on('hidden.bs.modal', function(e) {
+        $(e.currentTarget).find('#confirm_sign').off('click');
+    });
+
     $('#sign_doc_items').submit(function(ev){
         ev.preventDefault();
         var form = $(ev.currentTarget);
@@ -53,7 +57,7 @@ $(document).ready(function () {
         var sign_values = {};
         var sign_items = form.find('.sign_item');
         sign_items.each(function(i, el){
-            value = {
+            var value = {
                 'text': $(el).val(),
                 'signature': $(el).data('signature'),
             }[$(el).data('type')];
