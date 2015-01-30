@@ -55,67 +55,69 @@ class FinancialReportController(http.Controller):
         }
         return request.render(report_obj.get_template(), rcontext)
 
-    @http.route('/account/followup_report/<string:partner>/', type='http', auth='user')
+    @http.route(['/account/followup_report/all/', '/account/followup_report/all/page/<int:page>'], type='http', auth='user')
+    def followup_all(self, page=1, **kw):
+        uid = request.session.uid
+        context_obj = request.env['account.report.context.followup']
+        report_obj = request.env['account.followup.report']
+        reports = []
+        for partner in request.env['res.partner'].get_partners_in_need_of_action()[((page - 1) * 15):(page * 15)]:
+            context_id = context_obj.sudo(uid).search([('partner_id', '=', partner.id)], limit=1)
+            if not context_id:
+                context_id = context_obj.with_context(lang=partner.lang).create({'partner_id': partner.id})
+            lines = report_obj.with_context(lang=partner.lang).get_lines(context_id)
+            reports.append({
+                'context': context_id.with_context(lang=partner.lang),
+                'lines': lines,
+            })
+        rcontext = {
+            'reports': reports,
+            'report': report_obj,
+            'mode': 'display',
+            'page': page,
+        }
+        return request.render('account.report_followup_all', rcontext)
+
+    @http.route('/account/followup_report/<int:partner>/', type='http', auth='user')
     def followup(self, partner, **kw):
         uid = request.session.uid
         context_obj = request.env['account.report.context.followup']
         report_obj = request.env['account.followup.report']
-        if partner != 'all':
-            context_id = context_obj.sudo(uid).search([('partner_id', '=', int(partner))], limit=1)
-            if not context_id:
-                context_id = context_obj.create({'partner_id': int(partner)})
-            if 'pdf' in kw:
-                partner_name = request.env['res.partner'].browse(int(partner)).name
-                return request.make_response(context_id.get_pdf(),
-                    headers=[('Content-Type', 'application/pdf'),
-                             ('Content-Disposition', 'attachment; filename=' + partner_name + '.pdf;')])
-            lines = report_obj.get_lines(context_id)
-            rcontext = {
-                'context': context_id,
-                'report': report_obj,
-                'lines': lines,
-                'mode': 'display',
-            }
-            return request.render('account.report_followup', rcontext)
-        else:
-            reports = []
-            for partner in request.env['res.partner'].search([], limit=15):
-                context_id = context_obj.sudo(uid).search([('partner_id', '=', partner.id)], limit=1)
-                if not context_id:
-                    context_id = context_obj.create({'partner_id': partner.id})
-                lines = report_obj.get_lines(context_id)
-                reports.append({
-                    'context': context_id,
-                    'lines': lines,
-                })
-            rcontext = {
-                'reports': reports,
-                'report': report_obj,
-                'mode': 'display',
-            }
-            return request.render('account.report_followup_all', rcontext)
+        context_id = context_obj.sudo(uid).search([('partner_id', '=', partner)], limit=1)
+        partner = request.env['res.partner'].browse(partner)
+        if not context_id:
+            context_id = context_obj.with_context(lang=partner.lang).create({'partner_id': partner.id})
+        if 'pdf' in kw:
+            return request.make_response(context_id.with_context(lang=partner.lang).get_pdf(),
+                headers=[('Content-Type', 'application/pdf'),
+                         ('Content-Disposition', 'attachment; filename=' + partner.name + '.pdf;')])
+        lines = report_obj.with_context(lang=partner.lang).get_lines(context_id)
+        rcontext = {
+            'context': context_id.with_context(lang=partner.lang),
+            'report': report_obj.with_context(lang=partner.lang),
+            'lines': lines,
+            'mode': 'display',
+            'debug': True,
+        }
+        return request.render('account.report_followup', rcontext)
 
 
-    @http.route('/account/public_followup_report/<string:partner>/<string:password>', type='http', auth='none')
+    @http.route('/account/public_followup_report/<int:partner>/<string:password>', type='http', auth='none')
     def followup_public(self, partner, password, **kw):
-        partner_name = request.env['res.partner'].sudo().browse(int(partner)).name
+        partner = request.env['res.partner'].sudo().browse(partner)
         db_uuid = request.env['ir.config_parameter'].get_param('database.uuid')
-        check = md5(str(db_uuid) + partner_name).hexdigest()
+        check = md5(str(db_uuid) + partner.name).hexdigest()
         if check != password:
             return request.not_found()
         context_obj = request.env['account.report.context.followup']
         report_obj = request.env['account.followup.report']
         context_id = context_obj.sudo().search([('partner_id', '=', int(partner))], limit=1)
         if not context_id:
-            context_id = context_obj.sudo().create({'partner_id': int(partner)})
-        if 'pdf' in kw:
-            return request.make_response(context_id.get_pdf(),
-                headers=[('Content-Type', 'application/pdf'),
-                         ('Content-Disposition', 'attachment; filename=' + partner_name + '.pdf;')])
-        lines = report_obj.sudo().get_lines(context_id)
+            context_id = context_obj.sudo().with_context(lang=partner.lang).create({'partner_id': int(partner)})
+        lines = report_obj.sudo().with_context(lang=partner.lang).get_lines(context_id, public=True)
         rcontext = {
-            'context': context_id,
-            'report': report_obj,
+            'context': context_id.with_context(lang=partner.lang),
+            'report': report_obj.with_context(lang=partner.lang),
             'lines': lines,
             'mode': 'display',
         }

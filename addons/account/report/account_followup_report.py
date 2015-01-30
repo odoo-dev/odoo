@@ -29,9 +29,9 @@ class report_account_followup_report(models.AbstractModel):
     _description = "Followup Report"
 
     @api.model
-    def get_lines(self, context_id, line_id=None):
+    def get_lines(self, context_id, line_id=None, public=False):
         lines = []
-        domain = [('partner_id', '=', int(context_id.partner_id)), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
+        domain = [('partner_id', '=', context_id.partner_id.id), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
         # if not context_id.all_partners:
         #     domain.append(('partner_id', '=', int(context_id.partner_id)))
         total_total = 0
@@ -42,11 +42,11 @@ class report_account_followup_report(models.AbstractModel):
             amount = aml.debit - aml.credit
             lines.append({
                 'id': aml.id,
-                'name': aml.name,
+                'name': aml.ref,
                 'type': 'unreconciled_aml',
                 'footnotes': self._get_footnotes('unreconciled_aml', aml.id, context_id),
                 'unfoldable': False,
-                'columns': [aml.date, date_due, aml.expected_pay_date and (aml.expected_pay_date, aml.internal_note) or '', aml.blocked, aml.amount_residual, amount],
+                'columns': [aml.date, date_due, aml.expected_pay_date and (aml.expected_pay_date, aml.internal_note) or ('', ''), aml.blocked, aml.amount_residual, amount],
             })
             total_total += amount
             total_residual += aml.amount_residual
@@ -147,6 +147,26 @@ class account_report_context_followup(models.TransientModel):
         html = self.pool['ir.ui.view'].render(self._cr, self._uid, report_obj.get_template() + '_letter', rcontext, context=self.env.context)
 
         return self.env['report']._run_wkhtmltopdf([], [], [(0, html)], False, self.env.user.company_id.paperformat_id)
+
+    @api.multi
+    def send_email(self):
+        pdf = self.get_pdf().encode('base64')
+        name = self.partner_id.name + '_followup.pdf'
+        attachment = self.env['ir.attachment'].create({'name': name, 'datas_fname': name, 'datas': pdf, 'type': 'binary'})
+        email_template = self.env['email.template'].create({
+            'name': 'Followup ' + self.partner_id.name,
+            'email_from': self.env.user.email or '',
+            'model_id': 1,
+            'subject':  '%s Payment Reminder' % self.env.user.company_id.name,
+            'email_to': self.partner_id.email or ', '.join(self.env['res.partner'].search([('parent_id', '=', self.partner_id.id)]).email),
+            'lang': self.partner_id.lang,
+            'auto_delete': True,
+            'body_html': self.summary,
+            'attachment_ids': [(6, 0, [attachment.id])],
+        })
+        self.partner_id.update_next_action()
+        email_template.send_mail(self.id)
+        return
 
     @api.multi
     def get_public_link(self):

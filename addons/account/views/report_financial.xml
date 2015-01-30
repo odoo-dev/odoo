@@ -120,6 +120,47 @@
         </t>
     </tr>
 </template>
+<template id="report_financial_body">
+    <div t-att-class="' '.join(['page', 'oe_account_report_widgets', str(report.get_name()), str(context.id)])">
+        <h2 t-esc="report.get_title()"/>
+        <div t-if="mode != 'print' and context.summary == ''" class="summary">
+            <div class="addSummary" role="alert">
+                <span><input type='text' class="form-control" name='summary' placeholder='Click to add a summary' /></span>
+            </div>
+        </div>
+        <div t-if="mode != 'print' and context.summary != ''" class="summary">
+            <div class="savedSummary" role="alert">
+                <button type="button" class="close closeSummary"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
+                <button type="button" class="close"><i style="font-size: 16px;" class="fa fa-fw fa-pencil"></i> </button>
+                <span><t t-raw="context.summary" /></span>
+            </div>
+        </div>
+        <div t-if="mode == 'print' and context.summary != ''" class="savedSummary" role="alert">
+            <span><t t-raw="context.summary" /></span>
+        </div>
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th></th>
+                    <t t-foreach="context.get_columns_names()" t-as="column_name">
+                        <th class="text-center" t-raw="column_name" />
+                    </t>
+                </tr>
+            </thead>
+            <tbody>
+                <t t-foreach="lines" t-as="a">
+                    <t t-call="account.report_financial_line" />
+                </t>
+            </tbody>
+        </table>
+        <t t-foreach="context.footnotes" t-as="footnote">
+            <p class="footnote" t-att-id="'footnote' + str(footnote.number)">
+                <span class='text'><t t-raw="str(footnote.number) + '. ' + footnote.text"/></span>
+                <span style="position: absolute; margin-left: 3px;"><i class="fa fa-fw fa-pencil-square"></i><i class="fa fa-fw fa-trash-o"></i></span>
+            </p>
+        </t>
+    </div>
+</template>
 <template id="report_financial">
     <t t-if="mode == 'print'"><t t-raw="'&lt;base href=%s&gt;' % base_url"/></t>
     <t t-call="report.html_container">
@@ -132,45 +173,11 @@
             <link href="/web/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet"/>
             <link href="/website/static/src/css/website.css" rel="stylesheet"/>
             <link href="/web/static/lib/fontawesome/css/font-awesome.css" rel="stylesheet"/>
-            <div t-att-class="' '.join(['page', 'oe_account_report_widgets', str(report.get_name()), str(context.id)])">
-                <h2 t-esc="report.get_title()"/>
-                <div t-if="mode != 'print' and context.summary == ''" class="summary">
-                    <div class="alert alert-dismissible addSummary" role="alert">
-                        <span><input type='text' class="form-control" name='summary' placeholder='Click to add a summary' /></span>
-                    </div>
-                </div>
-                <div t-if="mode != 'print' and context.summary != ''" class="summary">
-                    <div class="alert alert-dismissible savedSummary" role="alert">
-                        <button type="button" class="close closeSummary"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
-                        <button type="button" class="close"><i style="font-size: 16px;" class="fa fa-fw fa-pencil"></i> </button>
-                        <span><t t-raw="context.summary" /></span>
-                    </div>
-                </div>
-                <div t-if="mode == 'print' and context.summary != ''" class="alert alert-dismissible savedSummary" role="alert">
-                    <span><t t-raw="context.summary" /></span>
-                </div>
-                <table class="table table-condensed">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <t t-foreach="context.get_columns_names()" t-as="column_name">
-                                <th class="text-center" t-raw="column_name" />
-                            </t>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="lines" t-as="a">
-                            <t t-call="account.report_financial_line" />
-                        </t>
-                    </tbody>
-                </table>
-                <t t-foreach="context.footnotes" t-as="footnote">
-                    <p class="footnote" t-att-id="'footnote' + str(footnote.number)">
-                        <span class='text'><t t-raw="str(footnote.number) + '. ' + footnote.text"/></span>
-                        <span style="position: absolute; margin-left: 3px;"><i class="fa fa-fw fa-pencil-square"></i><i class="fa fa-fw fa-trash-o"></i></span>
-                    </p>
-                </t>
-            </div>
+
+
+            <t t-call='account.report_financial_body' />
+
+
             <div t-if="mode != 'print'" class="dropdown" style="float: right; margin-bottom: 250px;">
                 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
                     Export

@@ -6,6 +6,7 @@ from openerp.exceptions import UserError
 
 from openerp import api, fields, models, _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from datetime import datetime, timedelta
 
 
 class account_fiscal_position(models.Model):
@@ -256,6 +257,29 @@ class res_partner(models.Model):
     @api.multi
     def mark_as_reconciled(self):
         return self.write({'last_time_entries_checked': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
+
+    def get_partners_in_need_of_action(self):
+        result = self.browse()
+        today = fields.Date.context_today(self)
+        for partner in self.search([]):
+            domain = [('partner_id', '=', partner.id), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
+            for aml in self.env['account.move.line'].search(domain):
+                if (aml.next_action_date and aml.next_action_date < today) or (not aml.next_action_date and aml.date_maturity < today):
+                    result = result | partner
+                    break
+        return result
+
+    @api.multi
+    def update_next_action(self):
+        today = fields.datetime.now()
+        next_action_date = today + timedelta(days=7)
+        next_action_date = next_action_date.strftime('%Y-%m-%d')
+        today = today.strftime('%Y-%m-%d')
+        domain = [('partner_id', '=', self.id), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
+        vals = {'next_action_date': next_action_date}
+        for aml in self.env['account.move.line'].search(domain):
+            if (aml.next_action_date and aml.next_action_date < today) or (not aml.next_action_date and aml.date_maturity < today):
+                aml.write(vals)
 
     vat_subjected = fields.Boolean('VAT Legal Statement', 
         help="Check this box if the partner is subjected to the VAT. It will be used for the VAT legal statement.")

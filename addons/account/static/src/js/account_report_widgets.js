@@ -16,7 +16,7 @@
                 'click .saveFootNote': 'saveFootNote',
                 'click .to_amls': 'displayMoveLinesByAccount',
                 'click span.user_type': 'displayMoveLinesByType',
-                'click span.partner_id': 'displayMoveLinesByPartner',
+                'click span.partner_id': 'displayFollowup',
                 'click span.aml': 'displayMoveLine',
                 'mouseleave td': 'rmPencil',
                 'mouseleave .footnote': 'rmPencil',
@@ -40,6 +40,45 @@
                 'click .to_tax': 'displayTaxLines',
                 'click #public-link a': 'clickPublicLink',
                 'click #closePublicLink': 'closePublicLink',
+                'click .followup-email': 'sendFollowupEmail',
+                'click .followup-letter': 'printFollowupLetter',
+                "change *[name='blocked']": 'onChangeBlocked',
+            },
+            onChangeBlocked: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var checkbox = $(e.target).is(":checked")
+                var target_id = $(e.target).parents('tr').attr("class").split(/\s+/)[1];
+                var model = new openerp.Model('account.move.line');
+                model.call('write', [[parseInt(target_id)], {'blocked': checkbox}])
+            },
+            onKeyPress: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var report_name = window.find("div.page").attr("class").split(/\s+/)[2];
+                if ((e.which === 13 || e.which === 10) && (e.ctrlKey || e.metaKey) && report_name == 'followup_report') {
+                    window.find('a.btn-primary').trigger('click');
+                }
+            },
+            printFollowupLetter: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var partner_id = $(e.target).attr("partner");
+                var url = $(e.target).attr("target");
+                window.open(url, '_blank');
+                var model = new openerp.Model('res.partner');
+                model.call('update_next_action', [[parseInt(partner_id)]]).then(function (result) {
+                    location.reload();
+                });
+            },
+            sendFollowupEmail: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
+                var contextModel = new openerp.Model('account.report.context.followup');
+                contextModel.call('send_email', [[parseInt(context_id)]]).then (function (result) {
+                    location.reload();
+                });
             },
             clickPublicLink: function (e) {
                 var $el = $(e.target);
@@ -56,9 +95,9 @@
                 var $el = $(e.target).parents('span#public-link');
                 $el.replaceWith(openerp.qweb.render("displayPublicLink"));
             },
-            saveFootNote: function() {
-                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
-                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
+            saveFootNote: function(e) {
+                var report_name = $(e.target).parents('#footnoteModal').siblings("div.page").attr("class").split(/\s+/)[2];
+                var context_id = $(e.target).parents('#footnoteModal').siblings("div.page").attr("class").split(/\s+/)[3];
                 var note = $("#note").val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
                 var model = new openerp.Model('account.report.context.common');
                 model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
@@ -76,7 +115,13 @@
                 openerp.qweb.add_template("/account/static/src/xml/account_report_financial_line.xml");
                 this.$('[data-toggle="tooltip"]').tooltip()
                 var res = this._super();
-                this.onChangeCmpDateFilter();
+                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
+                if(report_name != 'followup_report') {
+                    this.onChangeCmpDateFilter();
+                }
+                openerp.bus.bus.on("keypress", this, function(e) {
+                    this.onKeyPress(e);
+                });
                 return res;
             },
             onClickSummary: function(e) {
@@ -337,11 +382,11 @@
                 e.stopPropagation();
                 e.preventDefault();
                 var note = $("#internalNote").val().replace(/\r?\n/g, '<br />').replace(/\s+/g, ' ');
-                var invoiceModel = new openerp.Model('account.invoice');
+                var invoiceModel = new openerp.Model('account.move.line');
                 invoiceModel.call('write', [[parseInt($("#paymentDateModal #target_id").val())], {expected_pay_date: $("#expectedDate").val(), internal_note: note}]).then(function (result) {
                     $('#paymentDateModal').modal('hide');
                     location.reload(true);
-                });        
+                });
             },
             editSummary: function(e) {
                 e.stopPropagation();
@@ -424,9 +469,9 @@
                 e.stopPropagation();
                 e.preventDefault();
                 if ($(e.target).parents("div.summary").length > 0) {
-                    $(e.target).parent().parent().replaceWith(openerp.qweb.render("addSummary"));
                     var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
                     var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
+                    $(e.target).parent().parent().replaceWith(openerp.qweb.render("addSummary"));
                     var model = new openerp.Model('account.report.context.common');
                     model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                         var contextModel = new openerp.Model(result);
@@ -436,9 +481,9 @@
                 else {
                     var num = $(e.target).parent().parent().text().split('.')[0];
                     this.$("sup:contains('" + num + "')").remove();
-                    $(e.target).parent().parent().remove();
                     var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
                     var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
+                    $(e.target).parent().parent().remove();
                     var model = new openerp.Model('account.report.context.common');
                     model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
                         var contextModel = new openerp.Model(result);
@@ -546,13 +591,10 @@
                     window.open("/web?#page=0&limit=80&view_type=list&model=account.move.line&action=" + result[1] + "&active_id=" + active_id, "_self");
                 });
             },
-            displayMoveLinesByPartner: function(e) {
+            displayFollowup: function(e) {
                 e.stopPropagation();
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
-                var model = new openerp.Model('ir.model.data');
-                model.call('get_object_reference', ['account', 'action_move_line_select_by_partner']).then(function (result) {
-                    window.open("/web?#page=0&limit=80&view_type=list&model=account.move.line&action=" + result[1] + "&active_id=" + active_id, "_self");
-                });
+                window.open("/account/followup_report/" + active_id);
             },
             displayNetTaxLines: function(e) {
                 e.stopPropagation();
