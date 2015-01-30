@@ -9,7 +9,7 @@ openerp.website_sign = function (session) {
             this.attach_id = attachment_id;
             this.res_model = res_model;
             this.res_id = res_id;
-            this.send_directly = (typeof send_directly !== undefined)? (send_directly == true) : false;
+            this.send_directly = (send_directly !== undefined)? (send_directly == true) : false;
         },
         get_followers: function () {
             var self = this;
@@ -122,7 +122,7 @@ openerp.website_sign = function (session) {
             var checkedIds = [];
             self.$el.find("img.request_sign.oe_sign[src='/website_sign/static/src/img/check.png']")
                 .each(function(i, el){
-                    checkedIds.push(parseInt(el.id.substr("request_sign".length)));
+                    checkedIds.push(parseInt($(el).data('attachment-id')));
                 });
 
             this._super();
@@ -130,11 +130,11 @@ openerp.website_sign = function (session) {
             if(this.is_author || this.author_id === false){
                 attach_ids = _.map(this.attachment_ids, function (file) {return file.id;});
                 for (var id in attach_ids) {
-                    var sign_icon = self.$el.find("img.request_sign#request_sign" + attach_ids[id]);
+                    var sign_icon = self.$el.find("img.request_sign[data-attachment-id=" + attach_ids[id] + "]");
                     if($.inArray(attach_ids[id], checkedIds) > -1)
                         sign_icon.attr("src", "/website_sign/static/src/img/check.png");
                     sign_icon.on('click', function (ev) {
-                        var attach_id = parseInt(ev.currentTarget.id.substr("request_sign".length));
+                        var attach_id = parseInt($(ev.currentTarget).data('attachment-id'));
                         var signrequest = self.get_signrequest_dialog($(ev.currentTarget), attach_id);
                         signrequest.get_followers();
                     });
@@ -160,18 +160,18 @@ openerp.website_sign = function (session) {
             var checkedIds = [];
             self.$el.find("img.request_sign.oe_sign[src='/website_sign/static/src/img/check.png']")
                 .each(function(i, el){
-                    checkedIds.push(parseInt(el.id.substr("request_sign".length)));
+                    checkedIds.push(parseInt($(el).data('attachment-id')));
                 });
 
             self._super();
 
             this.read_name_values().then(function (ids) {
                 for (var id in ids) {
-                    var sign_icon = self.$el.find("img.request_sign#request_sign" + ids[id]);
+                    var sign_icon = self.$el.find("img.request_sign[data-attachment-id=" + ids[id] + "]");
                     if($.inArray(ids[id], checkedIds) > -1)
                         sign_icon.attr("src", "/website_sign/static/src/img/check.png");
                     sign_icon.on('click', function (ev) {
-                        var attach_id = parseInt(ev.currentTarget.id.substr("request_sign".length));
+                        var attach_id = parseInt($(ev.currentTarget).data('attachment-id'));
                         var signrequest = new session.web.SignRequest(self, $(ev.currentTarget), attach_id, self.field_manager.datarecord.model, self.field_manager.datarecord.res_id, false);
                         signrequest.get_followers();
                     });

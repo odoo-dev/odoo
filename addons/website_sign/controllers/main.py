@@ -38,7 +38,7 @@ class website_sign(http.Controller):
         "/sign/document/<int:id>/<token>"
     ], type='http', auth="user", website=True)
     def request_sign(self, id, token=None, message=False, **post):
-        signature_request = http.request.env['signature.request'].sudo().browse(id)
+        signature_request = http.request.env['signature.request'].sudo().search([('id', '=', id)]) # TODO browse return a record (empty) even if it does not exist! normal?
         if not signature_request:
             return http.request.not_found()
 
@@ -101,7 +101,7 @@ class website_sign(http.Controller):
         return res
 
     @http.route(['/website_sign/set_signers'], type='json', auth="user", website=True)
-    def set_signers(self, attachment_id=None, signer_ids=None, message=None, send_directly=False, **post):
+    def set_signers(self, attachment_id=None, signer_ids=None, message=None, **post):
         signature_request = http.request.env['signature.request'].search([('attachment', '=', attachment_id)])
         if not signature_request:
             signature_request = http.request.env['signature.request'].create({'attachment': attachment_id, 'message': message})
@@ -141,11 +141,11 @@ class website_sign(http.Controller):
     @http.route(['/website_sign/set_signature_items/<int:id>'], type='json', auth='user', website=True)
     def set_signature_items(self, id, signature_items=None, **post):
         signature_item_obj = http.request.env['signature.item']
+        signature_item_obj.search([('signature_request', '=', id)]).unlink(); # TODO maybe not delete not new ones and just update
         for item in signature_items:
             item.update({
                 'signature_request': id,
                 'name': "default_name",
-                'required': True,
                 # 'responsible': ,
             })
             signature_item_obj.create(item)

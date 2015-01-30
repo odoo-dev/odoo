@@ -94,6 +94,10 @@
                     <sheet>
                         <h2>Signature Request</h2>
 
+                        <div class="oe_button_box oe_right">
+                            <button string="View Signature Request" type="object" name="go_to_sign_document" class="oe_read_only"/>
+                        </div>
+
                         <group>
                             <field name="attachment"/>
                         </group>
@@ -192,6 +196,16 @@
                     <field name="responsible"/>
                 </tree>
             </field>
+        </record>
+
+        <record id="action_client_digital_signature_menu" model="ir.actions.client">
+            <field name="name">Open Digital Signatures Menu</field>
+            <field name="tag">reload</field>
+            <field name="params" eval="{'menu_id': ref('website_sign.menu_digital_signatures')}"/>
+        </record>
+        <record id="base.open_menu" model="ir.actions.todo">
+            <field name="action_id" ref="action_client_digital_signature_menu"/>
+            <field name="state">open</field>
         </record>
     </data>
 </openerp>

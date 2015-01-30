@@ -34,46 +34,50 @@ $(document).ready(function () {
         return false;
     });
 
-    // PDF signatures
-    // $('.sign_diag').on('shown.bs.modal', function(ev){
-    //     var id = ev.currentTarget.id.substr("sign_diag".length);
-    //     $(ev.currentTarget).find(".sign").empty().jSignature({'decor-color' : '#D1D0CE'});
-    //     $('#sign_item' + id).html('Sign here');
-    // });
+    // Fields signatures
+    $('#signature-validate-button').on('click', function(e) {
+        $('#sign_doc_items').submit();
+    });
 
-    // $('.confirm_sign').on('click', function(ev){
-    //     var id = ev.currentTarget.id.substr("confirm_sign".length);
-    //     var sign_img = $('#sign_diag' + id).find('.sign').jSignature("getData",'image');
-    //     $('#sign_item' + id).html('<span class="helper"/><img src="data:'+sign_img[0]+','+sign_img[1]+'"/>');
-    // });
+    $('#sign_diag').on('shown.bs.modal', function(ev){
+        // var id = $(ev.currentTarget.id.substr("sign_diag".length);
+        $(ev.currentTarget).find(".sign").empty().jSignature({'decor-color' : '#D1D0CE'});
+        // $('#sign_item[data-item-id=' + id).html('Sign here');
+    });
 
-    // $('#sign_doc_items').submit(function(ev){
-    //     ev.preventDefault();
-    //     var $link = $(ev.currentTarget);
+    $('#sign_doc_items').submit(function(ev){
+        ev.preventDefault();
+        var form = $(ev.currentTarget);
+        var ok = true;
 
-    //     var sign_items = $link.find('.sign_item');
-    //     var sign_values = {};
-    //     for(var i = 0 ; i < sign_items.length ; i++){
-    //         var id = parseInt(sign_items[i].id.substr('sign_item'.length));
-    //         var value = $(sign_items[i]).val();
-    //         if(!value){
-    //             try{
-    //                 value = JSON.stringify($('#sign_diag' + id).find('.sign').jSignature("getData",'image')[1]);
-    //             }catch(e){}
-    //         }
+        var sign_values = {};
+        var sign_items = form.find('.sign_item');
+        sign_items.each(function(i, el){
+            value = {
+                'text': $(el).val(),
+                'signature': $(el).data('signature'),
+            }[$(el).data('type')];
 
-    //         if(!value) return false; // TODO must warn the user
+            if(!value && $(el).data('required')) {
+                ok = false;
+                return;
+            }
 
-    //         sign_values[id] = value;
-    //     }
+            sign_values[parseInt($(el).data('item-id'))] = value;
+        });
 
-    //     openerp.jsonRpc($link.attr("action"), "call", {
-    //         'sign': sign_values,
-    //         'signer': $("#signer_name").val()
-    //     }).then(function (data) {
-    //         window.location.href = '/sign/document/'+data['id']+'/'+data['token']+'?message=2';
-    //     });
+        if(!ok) {
+            alert('Some required fields have not been completed')
+            return false;
+        }
 
-    //     return false;
-    // });
+        openerp.jsonRpc(form.attr("action"), "call", {
+            'sign': sign_values,
+            'signer': $("#signer_name").val()
+        }).then(function (data) {
+            window.location.href = '/sign/document/'+data['id']+'/'+data['token']+'?message=2';
+        });
+
+        return false;
+    });
 });

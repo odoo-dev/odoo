@@ -236,6 +236,15 @@ class signature_request(models.Model):
         return
 
     @api.multi
+    def go_to_sign_document(self):
+        return {
+            'name': 'Signature Request URL',
+            'type': 'ir.actions.act_url',
+            'url': '/sign/document/' + str(self[0].id),
+            'target': 'self',
+        }
+
+    @api.multi
     def go_to_custom_document(self):
         return {
             'name': 'Signature Request Edit Field URL',
@@ -292,13 +301,13 @@ class signature_request_item(models.Model):
 
         if not isinstance(signature, dict):
             self.signature = signature
-        # else:
-        #     value_obj = self.env['signature.item.value']
-        #     for itemId in signature:
-        #         item_value = value_obj.search([('signature_item.id', '=', itemId), ('signature_request_item.id', '=', self.id)], limit=1)
-        #         if not item_value:
-        #             item_value = value_obj.create({'signature_item': itemId, 'signature_request_item': self.id})
-        #         item_value.setValue(signature[itemId])
+        else:
+            value_obj = self.env['signature.item.value']
+            for itemId in signature:
+                item_value = value_obj.search([('signature_item.id', '=', itemId), ('signature_request_item.id', '=', self.id)], limit=1)
+                if not item_value:
+                    item_value = value_obj.create({'signature_item': itemId, 'signature_request_item': self.id})
+                item_value.setValue(signature[itemId])
 
         self.signal_workflow('signature_request_item_sign')
         return True
@@ -331,7 +340,7 @@ class signature_item(models.Model):
     ], required=True)
 
     required = fields.Boolean(required=True, default=True)
-    responsible = fields.Many2one("signature.party")
+    responsible = fields.Many2one("signature.item.party")
 
     page = fields.Integer(string="Document Page", required=True, default=1)
     posX = fields.Float(digits=(3, 2), string="Position X", required=True)
@@ -345,8 +354,9 @@ class signature_item_value(models.Model):
 
     signature_request_item = fields.Many2one('signature.request.item', required=True, ondelete='cascade')
     signature_item = fields.Many2one('signature.item', required=True, ondelete='cascade')
-    value = fields.Char()
-    sign_img = fields.Binary('Signature image')
+    
+    text_value = fields.Char()
+    image_value = fields.Binary()
 
     @api.multi
     def getByItem(self):
@@ -355,9 +365,23 @@ class signature_item_value(models.Model):
             data[value.signature_item.id] = value
         return data
 
-    # @api.one
-    # def setValue(self, value):
-    #     if self.signature_item.isSignature:
-    #         self.sign_img = value
-    #     else:
-    #         self.value = value
+    @api.one
+    def setValue(self, value):
+        {
+            'text': self.setTextValue,
+            'signature': self.setImageValue,
+        }[self.signature_item.type](value)
+
+    @api.one
+    def setTextValue(self, value):
+        self.text_value = value
+
+    @api.one
+    def setImageValue(self, value):
+        self.image_value = value
+
+class signature_item_party(models.Model):
+    _name = "signature.item.party"
+    _description = "Type of partner which can access a particular signature field"
+
+    name = fields.Char(required=True)

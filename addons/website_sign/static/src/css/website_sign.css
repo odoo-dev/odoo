@@ -1,4 +1,5 @@
 
+/* Attachment sign design */
 .openerp .oe_mail .oe_attachment .oe_sign, .oe_attachment .oe_sign {
   width: 21px;
   height: 21px;
@@ -45,53 +46,16 @@
   opacity: 1;
 }
 
-.bs-sidebar {
-  position: fixed;
-  z-index: 1;
-  background-color: #f7f5fa;
-  border-radius: 5px;
-}
-
-.media, .media-body {
-  overflow: hidden;
-  zoom: 1;
-  background-color: #f7f5fa;
-  width: 75%;
-  padding: 5px 5px;
-}
-
-@media (min-width: 992px) {
-  .bs-sidebar {
-    width: 213px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .bs-sidebar {
-    width: 263px;
-  }
-}
-
-@media print {
-  body {
-    padding: 0 !important;
-  }
-}
-
-.oe_lside_panel {
-  padding: 10px;
-  word-wrap: break-word;
-}
-
 .openerp .oe_email {
   color: #777777;
 }
 
 .openerp .oe_img {
-  width: 23px;
+  width: 25px;
 }
 
-.openerp .table.oe_sel_followers td {
+/* Followers diag */
+.openerp .table .oe_sel_followers td {
   border-top: 0;
   padding: 3px;
 }
@@ -110,12 +74,21 @@
   padding: 5px 20px;
 }
 
-/* PDF View */
-#signature-editor #canvas-container {
+/* Sign page */
+.media, .media-body {
+  overflow: hidden;
+  zoom: 1;
+  background-color: #f7f5fa;
+  width: 75%;
+  padding: 5px 5px;
+}
+
+/* Signature Fields View */
+#signature-field-view #canvas-container {
   position: relative;
 }
 
-#signature-editor #canvas-container canvas {
+#signature-field-view #canvas-container canvas {
   position: relative;
   top: 0%;
   left: 0%;
@@ -125,37 +98,39 @@
   cursor: pointer;
 }
 
-#signature-editor #canvas-container .sign_item {
+#signature-field-view #canvas-container .sign_item {
   position: absolute;
-  cursor: pointer;
+  border: 1px dashed silver;
+  text-align: center;
+  vertical-align: middle;
+  display: inline-block;
 }
 
-/* PDF View */
-/*
-#website_sign_items_view {
-  position: relative;
-  width: 100%;
-  min-height: 600px;
-  border: 1px solid silver;
+#signature-field-view #canvas-container .sign_item .helper {
+  vertical-align: middle;
+  height: 100%;
+  display: inline-block;
 }
 
-#website_sign_items_view .sign_item {
-  position: absolute;
-  resize: none;
-  border: 1px solid silver;
-}
-
-#website_sign_items_view .sign_item .helper {
-  vertical-align:middle;
-  height:100%;
-  display:inline-block;
-}
-
-#website_sign_items_view .sign_item img {
+#signature-field-view #canvas-container .sign_item img {
   max-width: 100%;
   max-height: 100%;
   vertical-align: middle;
-  display:inline-block;
+  display: inline-block;
 }
 
-*/
+#signature_pages {
+  margin-top: 5px;
+}
+
+#signature_pages input {
+  width: 45%;
+  text-align: center;
+  display: inline-block;
+}
+
+#signature_pages span {
+  width: 10%;
+  text-align: center;
+  display: inline-block;
+}
