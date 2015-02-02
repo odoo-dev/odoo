@@ -3,7 +3,7 @@ import copy
 
 from lxml import etree, html
 
-from openerp import SUPERUSER_ID
+from openerp import SUPERUSER_ID, api
 from openerp.addons.website.models import website
 from openerp.http import request
 from openerp.osv import osv, fields
@@ -87,10 +87,8 @@ class view(osv.osv):
         Model = self.pool[el.get('data-oe-model')]
         field = el.get('data-oe-field')
 
-        column = Model._all_columns[field].column
-        converter = self.pool['website.qweb'].get_converter_for(
-            el.get('data-oe-type'))
-        value = converter.from_html(cr, uid, Model, column, el)
+        converter = self.pool['website.qweb'].get_converter_for(el.get('data-oe-type'))
+        value = converter.from_html(cr, uid, Model, Model._fields[field], el)
 
         if value is not None:
             # TODO: batch writes?
@@ -130,6 +128,7 @@ class view(osv.osv):
 
         return arch
 
+    @api.cr_uid_ids_context
     def render(self, cr, uid, id_or_xml_id, values=None, engine='ir.qweb', context=None):
         if request and getattr(request, 'website_enabled', False):
             engine='website.qweb'

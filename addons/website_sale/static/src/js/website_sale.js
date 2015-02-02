@@ -7,10 +7,12 @@ $('.oe_website_sale').each(function () {
         var value = +$shippingDifferent.val();
         var data = $shippingDifferent.find("option:selected").data();
         var $snipping = $(".js_shipping", oe_website_sale);
-        var $inputs = $snipping.find("input,select");
+        var $inputs = $snipping.find("input");
+        var $selects = $snipping.find("select");
 
         $snipping.toggle(!!value);
         $inputs.attr("readonly", value <= 0 ? null : "readonly" ).prop("readonly", value <= 0 ? null : "readonly" );
+        $selects.attr("disabled", value <= 0 ? null : "disabled" ).prop("disabled", value <= 0 ? null : "disabled" );
 
         $inputs.each(function () {
             $(this).val( data[$(this).attr("name")] || "" );
@@ -60,7 +62,7 @@ $('.oe_website_sale').each(function () {
         return false;
     });
 
-    $('.a-submit', oe_website_sale).off('click').on('click', function () {
+    $('.oe_website_sale .a-submit, #comment .a-submit').off('click').on('click', function () {
         $(this).closest('form').submit();
     });
     $('form.js_attributes input, form.js_attributes select', oe_website_sale).on('change', function () {
@@ -95,7 +97,7 @@ $('.oe_website_sale').each(function () {
         $parent.find(".oe_default_price:first .oe_currency_value").html( price_to_str(+$(this).data('lst_price')) );
         $parent.find(".oe_price:first .oe_currency_value").html(price_to_str(+$(this).data('price')) );
 
-        var $img = $(this).closest('tr.js_product, .oe_website_sale').find('span[data-oe-model^="product."][data-oe-type="image"] img, img.product_detail_img');
+        var $img = $(this).closest('tr.js_product, .oe_website_sale').find('span[data-oe-model^="product."][data-oe-type="image"] img:first, img.product_detail_img');
         $img.attr("src", "/website/image/product.product/" + $(this).val() + "/image");
     });
 
@@ -129,7 +131,7 @@ $('.oe_website_sale').each(function () {
         }
 
         if (product_id) {
-            var $img = $(this).closest('tr.js_product, .oe_website_sale').find('span[data-oe-model^="product."][data-oe-type="image"] img, img.product_detail_img');
+            var $img = $(this).closest('tr.js_product, .oe_website_sale').find('span[data-oe-model^="product."][data-oe-type="image"] img:first, img.product_detail_img');
             $img.attr("src", "/website/image/product.product/" + product_id + "/image");
             $img.parent().attr('data-oe-model', 'product.product').attr('data-oe-id', product_id)
                 .data('oe-model', 'product.product').data('oe-id', product_id);

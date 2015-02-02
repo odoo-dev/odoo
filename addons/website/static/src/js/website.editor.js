@@ -1785,7 +1785,8 @@
                         .attr('data-size', size)
                         .addClass(size)
                         .addClass(no_sizes);
-                if ((size && _.contains(classes, size)) || (classes[2] === "" && !selected)) {
+
+                if ((size && _.contains(classes, size)) || (size === "" && !selected)) {
                     this.$preview.append($p.clone());
                     this.$('#fa-size').val(size);
                     $p.addClass('font-icons-selected');
@@ -1899,7 +1900,12 @@
             this._super();
         },
         clear: function () {
-            delete this.media.$.dataset.src;
+            if(this.media.$.dataset.ckeSavedSrc){
+                delete this.media.$.dataset.ckeSavedSrc;
+            }
+            if(this.media.$.dataset.src){
+                delete this.media.$.dataset.src;
+            }
             this.media.$.className = this.media.$.className.replace(/(^|\s)media_iframe_video(\s|$)/g, ' ');
         },
     });
