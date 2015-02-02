@@ -3,6 +3,9 @@
 <data>
 
 <template id="report_followup_line" inherit_id="account.report_financial_line" primary="True">
+    <xpath expr="//span[@style='font-style: italic; margin-left: 70px']" position='attributes'>
+        <attribute name="style">font-style: italic;</attribute>
+    </xpath>
     <xpath expr="//div[@class='dropdown']" position="replace">
         <div class="dropdown" t-if="a['type'] == 'unreconciled_aml' and mode != 'print'">
             <a data-toggle="dropdown">
@@ -13,17 +16,18 @@
             </a>
             <t t-call="account.report_financial_footnote_sup" />
             <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                <li role="presentation"><a role="menuitem" tabindex="-1" class="to_invoice">View Invoice</a></li>
+                <li role="presentation" t-if="a['view_type'] == 'invoice'"><a role="menuitem" tabindex="-1" class="to_invoice">View Invoice</a></li>
+                <li role="presentation" t-if="a['view_type'] == 'payment'"><a role="menuitem" tabindex="-1" class="to_payment">View Payment</a></li>
                 <li role="presentation"><a role="menuitem" tabindex="-1" class="change_exp_date">Change expected payment date/note</a></li>
             </ul>
         </div>
     </xpath>    
     <xpath expr="//tr/t/t[@t-set='column']" position="after">
         <t t-set="tooltip" t-value="''" />
-        <t t-if="column == 3 and a['type'] == 'unreconciled_aml'"><t t-set="tooltip" t-value="c[1]" /><t t-set="c" t-value="c[0]" /></t>
+        <t t-if="column == 3 and a['type'] == 'unreconciled_aml' and not context.env.context.get('public')"><t t-set="tooltip" t-value="c[1]" /><t t-set="c" t-value="c[0]" /></t>
     </xpath>
     <xpath expr="//tr/t/td/span" position="attributes">
-        <attribute name="t-if">column != 4 or a['type'] != 'unreconciled_aml'</attribute>
+        <attribute name="t-if">column != 4 or a['type'] != 'unreconciled_aml' or context.env.context.get('public')</attribute>
     </xpath>
     <xpath expr="//tr/t/td/span" position="after">
         <span t-att-class='align' t-if="column == 4 and a['type'] == 'unreconciled_aml'">
@@ -55,13 +59,13 @@
 <template id="report_followup_body" inherit_id="account.report_financial_body" primary="True">
     <xpath expr="//h2" position="after">
         <t t-if="mode != 'print'">
-            <span id='public-link'><a>(copy public link)</a></span>
+            <span id='public-link'><a t-att-href="context.get_public_link()">(go to public link)</a></span>
         </t>
     </xpath>
     <xpath expr="//h2" position="replace">
         <h2>
             <t t-esc='context.partner_id.name' />
-            <a style="position: absolute; margin-left: 3px;" t-att-href="'/web#id=' + str(context.partner_id.id) + '&amp;view_type=form&amp;model=res.partner'"><i class="fa fa-fw fa-share-square-o"></i></a>
+            <small><a t-att-href="'/web#id=' + str(context.partner_id.id) + '&amp;view_type=form&amp;model=res.partner'">(view)</a></small>
         </h2>
     </xpath>
     <xpath expr="//t[@t-call='account.report_financial_line']" position="replace">
@@ -69,8 +73,9 @@
     </xpath>
     <xpath expr="//div[@class='summary']" position="before">
         <div t-if="mode != 'print'" style='text-align: right;'>
-            <a type="button" class="btn btn-primary followup-letter" t-att-target="'/account/followup_report/' + str(context.partner_id.id) + '/?pdf'" t-att-partner="str(context.partner_id.id)">Print Letter</a>
-            <a type="button" class="btn btn-default followup-email">Send by email</a>
+            <a type="button" class="btn btn-default followup-skip" t-att-partner="str(context.partner_id.id)">Skip</a>
+            <a type="button" class="btn btn-primary followup-letter" t-att-target="'/account/followup_report/' + str(context.partner_id.id) + '/?pdf'">Print Letter</a>
+            <a type="button" class="btn btn-primary followup-email">Send by email</a>
         </div>
     </xpath>
 </template>
@@ -145,7 +150,7 @@
         <attribute name="t-if"></attribute>
         <attribute name="class"></attribute>
     </xpath>
-    <xpath expr="//h2/a" position="replace"></xpath>
+    <xpath expr="//h2/small" position="replace"></xpath>
     <xpath expr="//t[@t-call='account.report_followup_line']" position="attributes">
         <attribute name="t-call">account.report_followup_line_public</attribute>
     </xpath>
@@ -161,6 +166,11 @@
             <t t-if="page == 1"><i class="fa fa-fw fa-chevron-circle-left fa-2x disabled"></i></t>
             <t t-if="page > 1"><a t-att-href="'/account/followup_report/all/page/' + str(page - 1)"><i class="fa fa-fw fa-chevron-circle-left fa-2x"></i></a></t>
             <a t-att-href="'/account/followup_report/all/page/' + str(page + 1)"><i class="fa fa-fw fa-chevron-circle-right fa-2x"></i></a>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" t-att-aria-valuenow="progressbar.valuenow" aria-valuemin="0" t-att-aria-valuemax="progressbar.valuemax" t-att-style="'width: ' + str(progressbar.percentage) + '%;'">
+                    <span class="show"><t t-esc="str(progressbar.valuenow) + '/' + str(progressbar.valuemax)" /></span>
+                </div>
+            </div>
         </div>
         <t t-foreach='reports' t-as='data'>
             <t t-set='context' t-value="data['context']" />
@@ -168,7 +178,14 @@
             <t t-call='account.report_followup_body' />
         </t>
         <t t-if="len(reports) == 0 and page == 1">
-            <div class="container">
+            <div class="container" t-if="just_arrived">
+                <div class="row mt32">
+                    <div class="alert alert-info" role="alert">
+                        No followup to send !
+                    </div>
+                </div>
+            </div>
+            <div class="container" t-if="not just_arrived">
                 <div class="row mt32">
                     <div class="alert alert-success" role="alert">
                       <strong>Good job!</strong> All followup letters and emails have been sent.

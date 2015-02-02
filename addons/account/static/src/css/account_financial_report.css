@@ -5,6 +5,15 @@
 .ui-dialog-titlebar {
     display:none
 }
+div.summary i.fa {
+    visibility: hidden;
+}
+div.summary:hover i.fa {
+    visibility: visible;
+}
+div.summary:hover {
+    border-left: thin groove;
+}
 input#summary, div.dropdown, i.fa, div.savedSummary span, td.unfoldable, td.foldable, span#public-link {
     cursor: pointer; cursor: hand;
 }
@@ -25,4 +34,13 @@ h2 i.fa{
 }
 h2:hover i.fa{
     visibility: visible;
+}
+.progress {
+  position: relative;
+}
+.progress span {
+    position: absolute;
+    display: block;
+    width: 100%;
+    color: black;
 }

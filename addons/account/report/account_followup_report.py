@@ -22,6 +22,7 @@
 from openerp import models, fields, api
 from datetime import datetime
 from hashlib import md5
+from openerp.tools.misc import formatLang
 
 
 class report_account_followup_report(models.AbstractModel):
@@ -32,33 +33,50 @@ class report_account_followup_report(models.AbstractModel):
     def get_lines(self, context_id, line_id=None, public=False):
         lines = []
         domain = [('partner_id', '=', context_id.partner_id.id), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
-        # if not context_id.all_partners:
-        #     domain.append(('partner_id', '=', int(context_id.partner_id)))
-        total_total = 0
-        total_residual = 0
+        if public:
+            domain.append(('blocked', '=', False))
+        total = 0
+        total_issued = 0
+        currency_id = self.env.user.company_id.currency_id
         for aml in self.env['account.move.line'].search(domain):
-            overdue = datetime.today().strftime('%Y-%m-%d') > aml.date_maturity
+            overdue = aml.date_maturity and datetime.today().strftime('%Y-%m-%d') > aml.date_maturity
             date_due = overdue and (aml.date_maturity, 'color: red;') or aml.date_maturity
             amount = aml.debit - aml.credit
+            total += amount
+            if overdue:
+                total_issued += amount
+            view_type = total >= 0 and 'invoice' or 'payment'
+            amount = formatLang(self.env, amount, currency_obj=currency_id)
             lines.append({
                 'id': aml.id,
                 'name': aml.ref,
                 'type': 'unreconciled_aml',
+                'view_type': view_type,
                 'footnotes': self._get_footnotes('unreconciled_aml', aml.id, context_id),
                 'unfoldable': False,
-                'columns': [aml.date, date_due, aml.expected_pay_date and (aml.expected_pay_date, aml.internal_note) or ('', ''), aml.blocked, aml.amount_residual, amount],
+                'columns': [aml.date, date_due] + (not public and [aml.expected_pay_date and (aml.expected_pay_date, aml.internal_note) or ('', ''), aml.blocked] or []) + [amount],
             })
-            total_total += amount
-            total_residual += aml.amount_residual
+        total = formatLang(self.env, abs(total), currency_obj=currency_id)
         lines.append({
             'id': 0,
-            'name': 'Total',
+            'name': total >= 0 and 'Due Total' or '',
             'type': 'line',
             'footnotes': self._get_footnotes('line', 0, context_id),
             'unfoldable': False,
             'level': 0,
-            'columns': ['', '', '', '', total_residual, total_total],
+            'columns': ['', ''] + (not public and ['', ''] or []) + [total],
         })
+        if total_issued > 0:
+            total_issued = formatLang(self.env, total_issued, currency_obj=currency_id)
+            lines.append({
+                'id': 1,
+                'name': 'Issued Total',
+                'type': 'line',
+                'footnotes': self._get_footnotes('line', 1, context_id),
+                'unfoldable': False,
+                'level': 0,
+                'columns': ['', ''] + (not public and ['', ''] or []) + [total_issued],
+            })
         return lines
 
     @api.model
@@ -84,6 +102,20 @@ class report_account_followup_report(models.AbstractModel):
     @api.model
     def get_template(self):
         return 'account.report_followup'
+
+
+class account_report_followup_progressbar(models.TransientModel):
+    _name = "account.report.followup.progressbar"
+    _description = "A progress bar for followup reports"
+
+    valuenow = fields.Integer('current amount of invoices done', default=0)
+    valuemax = fields.Integer('total amount of invoices to do')
+    percentage = fields.Integer(compute='_compute_percentage')
+
+    @api.depends('valuenow', 'valuemax')
+    def _compute_percentage(self):
+        for progressbar in self:
+            progressbar.percentage = 100 * progressbar.valuenow / progressbar.valuemax
 
 
 class account_report_context_followup(models.TransientModel):
@@ -128,7 +160,9 @@ class account_report_context_followup(models.TransientModel):
         return
 
     def get_columns_names(self):
-        return ['Date', 'Due Date', 'Expected Date', 'Litigated', 'Remaining', 'Total Due']
+        if self.env.context.get('public'):
+            return ['Date', 'Due Date', 'Total Due']
+        return ['Date', 'Due Date', 'Expected Date', 'Litigated', 'Total Due']
 
     def get_pdf(self):
         report_obj = self.get_report_obj()
@@ -164,7 +198,6 @@ class account_report_context_followup(models.TransientModel):
             'body_html': self.summary,
             'attachment_ids': [(6, 0, [attachment.id])],
         })
-        self.partner_id.update_next_action()
         email_template.send_mail(self.id)
         return
 

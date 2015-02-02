@@ -129,9 +129,8 @@
             </div>
         </div>
         <div t-if="mode != 'print' and context.summary != ''" class="summary">
+            <i style="font-size: 16px; margin-left: -19px; position: absolute;" class="fa fa-fw fa-pencil"></i> 
             <div class="savedSummary" role="alert">
-                <button type="button" class="close closeSummary"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
-                <button type="button" class="close"><i style="font-size: 16px;" class="fa fa-fw fa-pencil"></i> </button>
                 <span><t t-raw="context.summary" /></span>
             </div>
         </div>

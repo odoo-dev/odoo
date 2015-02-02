@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <templates>
+    <t t-name="emailSent">
+        <div class="alert alert-info alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&amp;times;</span></button>
+            The followup report was successfully emailed !
+        </div>
+    </t>
     <t t-name="footNoteTextarea">
         <div class="mt32 mb32">
             <label t-att-for="'footnote' + footNoteSeqNum"><t t-esc="footNoteSeqNum"/></label>
@@ -10,12 +16,6 @@
     </t>
     <t t-name="supFootNoteSeqNum">
          <sup><b style="position: absolute; margin-top: 6px;"><a t-att-href="'#footnote'+footNoteSeqNum"><t t-esc="footNoteSeqNum"/></a></b></sup>
-    </t>
-    <t t-name="copyPublicLink">
-        <form class='form-inline'><input type='text' class="form-control" style="width: auto;" t-att-value='link' readonly='readonly' /><button class="btn btn-primary" id="closePublicLink">Close</button></form>
-    </t>
-    <t t-name="displayPublicLink">
-        <span id='public-link'><a>(copy public link)</a></span>
     </t>
     <t t-name="savedFootNote">
         <p class="footnote" t-att-id="'footnote'+num">

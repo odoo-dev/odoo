@@ -38,10 +38,13 @@
                 'click .to_graph': 'displayMoveLinesByAccountGraph',
                 'click .to_net': 'displayNetTaxLines',
                 'click .to_tax': 'displayTaxLines',
+                'click .to_invoice': 'displayInvoice',
+                'click .to_payment': 'displayPayment',
                 'click #public-link a': 'clickPublicLink',
                 'click #closePublicLink': 'closePublicLink',
                 'click .followup-email': 'sendFollowupEmail',
                 'click .followup-letter': 'printFollowupLetter',
+                'click .followup-skip': 'skipPartner',
                 "change *[name='blocked']": 'onChangeBlocked',
             },
             onChangeBlocked: function(e) {
@@ -60,16 +63,22 @@
                     window.find('a.btn-primary').trigger('click');
                 }
             },
+            skipPartner: function(e) {
+                var partner_id = $(e.target).attr("partner");
+                var model = new openerp.Model('res.partner');
+                model.call('update_next_action', [[parseInt(partner_id)]]).then(function (result) {
+                    window.open('?partner_done=' + partner_id, '_self');
+                });
+            },
             printFollowupLetter: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                var partner_id = $(e.target).attr("partner");
                 var url = $(e.target).attr("target");
                 window.open(url, '_blank');
-                var model = new openerp.Model('res.partner');
-                model.call('update_next_action', [[parseInt(partner_id)]]).then(function (result) {
-                    location.reload();
-                });
+                if ($(e.target).attr("class").split(/\s+/)[1] == 'btn-primary') {
+                    $(e.target).siblings('a.followup-skip').attr('class', 'btn btn-primary followup-skip')
+                    $(e.target).attr('class', 'btn btn-default followup-letter')
+                }
             },
             sendFollowupEmail: function(e) {
                 e.stopPropagation();
@@ -77,17 +86,11 @@
                 var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
                 var contextModel = new openerp.Model('account.report.context.followup');
                 contextModel.call('send_email', [[parseInt(context_id)]]).then (function (result) {
-                    location.reload();
-                });
-            },
-            clickPublicLink: function (e) {
-                var $el = $(e.target);
-                var report_name = $(e.target).parents("div.page").attr("class").split(/\s+/)[2];
-                var context_id = $(e.target).parents("div.page").attr("class").split(/\s+/)[3];
-                var contextModel = new openerp.Model('account.report.context.followup');
-                contextModel.call('get_public_link', [[parseInt(context_id)]]).then(function (link) {
-                    $el.replaceWith(openerp.qweb.render("copyPublicLink", {link: link}));
-                    window.$("#public-link input").select();
+                    window.$("div.page:first").prepend(openerp.qweb.render("emailSent"));
+                    if ($(e.target).attr("class").split(/\s+/)[1] == 'btn-primary') {
+                        $(e.target).siblings('a.followup-skip').attr('class', 'btn btn-primary followup-skip')
+                        $(e.target).attr('class', 'btn btn-default followup-email')
+                    }
                 });
             },
             closePublicLink: function (e) {
@@ -392,7 +395,7 @@
                 e.stopPropagation();
                 e.preventDefault;
                 var $el = $(e.target);
-                var height = $el.height();
+                var height = Math.max($el.height(), 100);
                 var text = $el.html().replace(/\s+/g, ' ').replace(/\r?\n/g, '').replace(/<br>/g, '\n').replace(/(\n\s*)+$/g, '');
                 var par = $el.parent()
                 $el.replaceWith(openerp.qweb.render("editContent", {num: 0, text: text}));
@@ -621,6 +624,24 @@
                 e.stopPropagation();
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
                 window.open("/web?#id=" + active_id + "&view_type=form&model=account.move.line", "_self");
+            },
+            displayInvoice: function(e) {
+                e.stopPropagation();
+                var active_id = $(e.target).parents("div.dropdown").find("span.unreconciled_aml").attr("class").split(/\s+/)[1];
+                var model = new openerp.Model('account.move.line');
+                model.query(['invoice'])
+                .filter([['id', '=', active_id]]).first().then(function (result) {
+                    window.open("/web#id=" + result.invoice[0] + "&view_type=form&model=account.invoice", "_self");
+                });
+            },
+            displayPayment: function(e) {
+                e.stopPropagation();
+                var active_id = $(e.target).parents("div.dropdown").find("span.unreconciled_aml").attr("class").split(/\s+/)[1];
+                var model = new openerp.Model('account.move.line');
+                model.query(['statement_id'])
+                .filter([['id', '=', active_id]]).first().then(function (result) {
+                    window.open("/web#id=" + result.statement_id[0] + "&view_type=form&model=account.bank.statement", "_self");
+                });
             },
         });
         var reportWidgets = new openerp.reportWidgets();

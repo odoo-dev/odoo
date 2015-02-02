@@ -262,7 +262,7 @@ class res_partner(models.Model):
         result = self.browse()
         today = fields.Date.context_today(self)
         for partner in self.search([]):
-            domain = [('partner_id', '=', partner.id), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
+            domain = [('partner_id', '=', partner.id), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable'), ('blocked', '=', False)]
             for aml in self.env['account.move.line'].search(domain):
                 if (aml.next_action_date and aml.next_action_date < today) or (not aml.next_action_date and aml.date_maturity < today):
                     result = result | partner
