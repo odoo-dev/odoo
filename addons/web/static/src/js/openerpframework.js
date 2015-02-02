@@ -468,6 +468,11 @@ openerp.PropertiesMixin = _.extend({}, openerp.EventDispatcherMixin, {
             var tmp = self.__getterSetterInternalMap[key];
             if (tmp === val)
                 return;
+            if (self.field && self.field.type === 'float' && tmp && val){
+                var precision = self.field.digits ? self.field.digits[1] : 2;
+                if (openerp.web.float_is_zero(tmp - val, precision))
+                return;
+            }
             changed = true;
             self.__getterSetterInternalMap[key] = val;
             if (! options.silent)
@@ -1058,11 +1063,11 @@ openerp.Session = openerp.Class.extend(openerp.PropertiesMixin, {
     },
     check_session_id: function() {
         var self = this;
-        if (this.avoid_recursion || self.use_cors)
+        if (this.avoid_recursion)
             return $.when();
         if (this.session_id)
             return $.when(); // we already have the session id
-        if (this.override_session || ! this.origin_server) {
+        if (!this.use_cors && (this.override_session || ! this.origin_server)) {
             // If we don't use the origin server we consider we should always create a new session.
             // Even if some browsers could support cookies when using jsonp that behavior is
             // not consistent and the browser creators are tending to removing that feature.

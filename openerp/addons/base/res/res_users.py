@@ -91,7 +91,7 @@ class res_groups(osv.osv):
     _columns = {
         'name': fields.char('Name', required=True, translate=True),
         'users': fields.many2many('res.users', 'res_groups_users_rel', 'gid', 'uid', 'Users'),
-        'model_access': fields.one2many('ir.model.access', 'group_id', 'Access Controls'),
+        'model_access': fields.one2many('ir.model.access', 'group_id', 'Access Controls', copy=True),
         'rule_groups': fields.many2many('ir.rule', 'rule_group_rel',
             'group_id', 'rule_group_id', 'Rules', domain=[('global', '=', False)]),
         'menu_access': fields.many2many('ir.ui.menu', 'ir_ui_menu_group_rel', 'gid', 'menu_id', 'Access Menu'),
@@ -377,7 +377,7 @@ class res_users(osv.osv):
     def context_get(self, cr, uid, context=None):
         user = self.browse(cr, SUPERUSER_ID, uid, context)
         result = {}
-        for k in self._all_columns.keys():
+        for k in self._fields:
             if k.startswith('context_'):
                 context_key = k[8:]
             elif k in ['lang', 'tz']:
@@ -729,6 +729,10 @@ class groups_view(osv.osv):
         # and introduces the reified group fields
         # we have to try-catch this, because at first init the view does not exist
         # but we are already creating some basic groups
+        if not context or context.get('install_mode'):
+            # use installation/admin language for translatable names in the view
+            context = dict(context or {})
+            context.update(self.pool['res.users'].context_get(cr, uid))
         view = self.pool['ir.model.data'].xmlid_to_object(cr, SUPERUSER_ID, 'base.user_groups_view', context=context)
         if view and view.exists() and view._name == 'ir.ui.view':
             xml1, xml2 = [], []

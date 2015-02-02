@@ -371,7 +371,7 @@ class stock_move(osv.osv):
         return invoice_line_id
 
     def _get_master_data(self, cr, uid, move, company, context=None):
-        if move.procurement_id and move.procurement_id.sale_line_id:
+        if move.procurement_id and move.procurement_id.sale_line_id and move.procurement_id.sale_line_id.order_id.order_policy == 'picking':
             sale_order = move.procurement_id.sale_line_id.order_id
             return sale_order.partner_invoice_id, sale_order.user_id.id, sale_order.pricelist_id.currency_id.id
         return super(stock_move, self)._get_master_data(cr, uid, move, company, context=context)
@@ -390,6 +390,8 @@ class stock_move(osv.osv):
                     sale_line.order_id.partner_id, context=context)[sale_line.order_id.pricelist_id.id]
             else:
                 res['price_unit'] = sale_line.price_unit
+            uos_coeff = move.product_uom_qty and move.product_uos_qty / move.product_uom_qty or 1.0
+            res['price_unit'] = res['price_unit'] / uos_coeff
         return res
 
 
@@ -409,7 +411,7 @@ class stock_picking(osv.osv):
         """
         saleorder_ids = self.pool['sale.order'].search(cr, uid, [('procurement_group_id' ,'=', picking.group_id.id)], context=context)
         saleorders = self.pool['sale.order'].browse(cr, uid, saleorder_ids, context=context)
-        if saleorders and saleorders[0]:
+        if saleorders and saleorders[0] and saleorders[0].order_policy == 'picking':
             saleorder = saleorders[0]
             return saleorder.partner_invoice_id.id
         return super(stock_picking, self)._get_partner_to_invoice(cr, uid, picking, context=context)
@@ -442,3 +444,16 @@ class stock_picking(osv.osv):
                     created_lines = sale_line_obj.invoice_line_create(cr, uid, sale_line_ids, context=context)
                     invoice_line_obj.write(cr, uid, created_lines, {'invoice_id': invoice_id}, context=context)
         return invoice_id
+
+    def _get_invoice_vals(self, cr, uid, key, inv_type, journal_id, move, context=None):
+        inv_vals = super(stock_picking, self)._get_invoice_vals(cr, uid, key, inv_type, journal_id, move, context=context)
+        sale = move.picking_id.sale_id
+        if sale:
+            inv_vals.update({
+                'fiscal_position': sale.fiscal_position.id,
+                'payment_term': sale.payment_term.id,
+                'user_id': sale.user_id.id,
+                'section_id': sale.section_id.id,
+                'name': sale.client_order_ref or '',
+                })
+        return inv_vals

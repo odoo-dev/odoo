@@ -20,9 +20,11 @@
 ##############################################################################
 
 from openerp import api
+from openerp import SUPERUSER_ID
 from openerp.exceptions import AccessError
 from openerp.osv import osv
-from openerp.tools import config, which
+from openerp.tools import config
+from openerp.tools.misc import find_in_path
 from openerp.tools.translate import _
 from openerp.addons.web.http import request
 from openerp.tools.safe_eval import safe_eval as eval
@@ -47,8 +49,10 @@ from pyPdf import PdfFileWriter, PdfFileReader
 _logger = logging.getLogger(__name__)
 
 def _get_wkhtmltopdf_bin():
-    defpath = os.environ.get('PATH', os.defpath).split(os.pathsep)
-    return which('wkhtmltopdf', path=os.pathsep.join(defpath))
+    wkhtmltopdf_bin = find_in_path('wkhtmltopdf')
+    if wkhtmltopdf_bin is None:
+        raise IOError
+    return wkhtmltopdf_bin
 
 
 #--------------------------------------------------------------------------
@@ -98,7 +102,7 @@ class Report(osv.Model):
         if context is None:
             context = {}
 
-        context.update(inherit_branding=True)  # Tell QWeb to brand the generated html
+        context = dict(context, inherit_branding=True)  # Tell QWeb to brand the generated html
 
         view_obj = self.pool['ir.ui.view']
 
@@ -199,7 +203,8 @@ class Report(osv.Model):
         headerhtml = []
         contenthtml = []
         footerhtml = []
-        base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
+        irconfig_obj = self.pool['ir.config_parameter']
+        base_url = irconfig_obj.get_param(cr, SUPERUSER_ID, 'report.url') or irconfig_obj.get_param(cr, SUPERUSER_ID, 'web.base.url')
 
         # Minimal page renderer
         view_obj = self.pool['ir.ui.view']
@@ -209,21 +214,22 @@ class Report(osv.Model):
         # in order to extract headers, bodies and footers.
         try:
             root = lxml.html.fromstring(html)
+            match_klass = "//div[contains(concat(' ', normalize-space(@class), ' '), ' {} ')]"
 
             for node in root.xpath("//html/head/style"):
                 css += node.text
 
-            for node in root.xpath("//div[@class='header']"):
+            for node in root.xpath(match_klass.format('header')):
                 body = lxml.html.tostring(node)
                 header = render_minimal(dict(css=css, subst=True, body=body, base_url=base_url))
                 headerhtml.append(header)
 
-            for node in root.xpath("//div[@class='footer']"):
+            for node in root.xpath(match_klass.format('footer')):
                 body = lxml.html.tostring(node)
                 footer = render_minimal(dict(css=css, subst=True, body=body, base_url=base_url))
                 footerhtml.append(footer)
 
-            for node in root.xpath("//div[@class='page']"):
+            for node in root.xpath(match_klass.format('page')):
                 # Previously, we marked some reports to be saved in attachment via their ids, so we
                 # must set a relation between report ids and report's content. We use the QWeb
                 # branding in order to do so: searching after a node having a data-oe-model
@@ -513,7 +519,7 @@ class Report(osv.Model):
 
         if specific_paperformat_args and specific_paperformat_args.get('data-report-margin-top'):
             command_args.extend(['--margin-top', str(specific_paperformat_args['data-report-margin-top'])])
-        elif paperformat.margin_top:
+        else:
             command_args.extend(['--margin-top', str(paperformat.margin_top)])
 
         if specific_paperformat_args and specific_paperformat_args.get('data-report-dpi'):
@@ -530,12 +536,9 @@ class Report(osv.Model):
         elif paperformat.header_spacing:
             command_args.extend(['--header-spacing', str(paperformat.header_spacing)])
 
-        if paperformat.margin_left:
-            command_args.extend(['--margin-left', str(paperformat.margin_left)])
-        if paperformat.margin_bottom:
-            command_args.extend(['--margin-bottom', str(paperformat.margin_bottom)])
-        if paperformat.margin_right:
-            command_args.extend(['--margin-right', str(paperformat.margin_right)])
+        command_args.extend(['--margin-left', str(paperformat.margin_left)])
+        command_args.extend(['--margin-bottom', str(paperformat.margin_bottom)])
+        command_args.extend(['--margin-right', str(paperformat.margin_right)])
         if paperformat.orientation:
             command_args.extend(['--orientation', str(paperformat.orientation)])
         if paperformat.header_line:

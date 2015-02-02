@@ -1,7 +1,0 @@
-==============
-Module Objects
-==============
-
-.. toctree::
-    :titlesonly:
-
