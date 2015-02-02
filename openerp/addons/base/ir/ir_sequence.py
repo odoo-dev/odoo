@@ -345,7 +345,6 @@ class ir_sequence_date_range(models.Model):
                     element.number_next_actual = last_value + increment_by
                 else:
                     element.number_next_actual = last_value
-
     def _set_number_next_actual(self):
         for record in self:
             record.write({'number_next': record.number_next_actual or 0})

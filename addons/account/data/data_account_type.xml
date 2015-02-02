@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data noupdate="1">
-        <record model="account.account.type" id="data_account_type_asset_view">
+        <!-- account.account.type -->
+        <record model="account.account.type" id="data_account_type_asset">
           <field name="name">Fixed Assets</field>
           <field name="close_method">none</field>
           <field name="report_type">fixed_assets</field>
