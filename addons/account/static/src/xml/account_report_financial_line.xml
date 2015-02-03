@@ -41,14 +41,12 @@
         </div>
     </t>
     <t t-name="editSummary">
-        <label for="summary">Edit summary :</label>
-        <textarea name="summary" rows='4' class="form-control"></textarea>
+        <textarea name="summary" rows='4' class="form-control"><t t-esc="summary" /></textarea>
         <button class="btn btn-primary saveSummary">Save</button>
     </t>
     <t t-name="savedSummary">
         <div class="savedSummary" role="alert">
-            <button type="button" class="close closeSummary"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
-            <button type="button" class="close"><i style="font-size: 16px;" class="fa fa-fw fa-pencil"></i> </button>
+            <i style="font-size: 16px; margin-left: -19px; position: absolute;" class="fa fa-fw fa-pencil"></i> 
             <span><t t-raw="summary" /></span>
         </div>
     </t>

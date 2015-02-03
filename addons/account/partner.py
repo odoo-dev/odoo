@@ -271,15 +271,16 @@ class res_partner(models.Model):
 
     @api.multi
     def update_next_action(self):
-        today = fields.datetime.now()
-        next_action_date = today + timedelta(days=7)
-        next_action_date = next_action_date.strftime('%Y-%m-%d')
-        today = today.strftime('%Y-%m-%d')
-        domain = [('partner_id', '=', self.id), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
-        vals = {'next_action_date': next_action_date}
-        for aml in self.env['account.move.line'].search(domain):
-            if (aml.next_action_date and aml.next_action_date < today) or (not aml.next_action_date and aml.date_maturity < today):
-                aml.write(vals)
+        for partner in self:
+            today = fields.datetime.now()
+            next_action_date = today + timedelta(days=7)
+            next_action_date = next_action_date.strftime('%Y-%m-%d')
+            today = today.strftime('%Y-%m-%d')
+            domain = [('partner_id', '=', partner.id), ('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
+            vals = {'next_action_date': next_action_date}
+            for aml in self.env['account.move.line'].search(domain):
+                if (aml.next_action_date and aml.next_action_date < today) or (not aml.next_action_date and aml.date_maturity < today):
+                    aml.write(vals)
 
     vat_subjected = fields.Boolean('VAT Legal Statement', 
         help="Check this box if the partner is subjected to the VAT. It will be used for the VAT legal statement.")

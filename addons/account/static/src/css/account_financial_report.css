@@ -11,10 +11,10 @@ div.summary i.fa {
 div.summary:hover i.fa {
     visibility: visible;
 }
-div.summary:hover {
+div.savedSummary:hover {
     border-left: thin groove;
 }
-input#summary, div.dropdown, i.fa, div.savedSummary span, td.unfoldable, td.foldable, span#public-link {
+input#summary, div.dropdown, i.fa, div.savedSummary span, td.unfoldable, td.foldable, span#public-link, input[type=checkbox] {
     cursor: pointer; cursor: hand;
 }
 td i.fa-pencil-square{

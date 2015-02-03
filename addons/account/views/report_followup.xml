@@ -134,6 +134,9 @@
             Customer ref: <span t-field="context.partner_id.ref"/>
         </p>
     </xpath>
+    <xpath expr="//t[@t-call='account.report_followup_line']" position="attributes">
+        <attribute name="t-call">account.report_followup_line_public</attribute>
+    </xpath>
 </template>
 <template id="report_followup_public" inherit_id="account.report_followup" primary="True">
     <xpath expr="//t[@t-call='account.report_followup_body']" position="replace">
@@ -166,6 +169,12 @@
             <t t-if="page == 1"><i class="fa fa-fw fa-chevron-circle-left fa-2x disabled"></i></t>
             <t t-if="page > 1"><a t-att-href="'/account/followup_report/all/page/' + str(page - 1)"><i class="fa fa-fw fa-chevron-circle-left fa-2x"></i></a></t>
             <a t-att-href="'/account/followup_report/all/page/' + str(page + 1)"><i class="fa fa-fw fa-chevron-circle-right fa-2x"></i></a>
+            <t t-foreach="progressbar.get_alerts()" t-as="alert">
+                <div class="alert alert-info alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&amp;times;</span></button>
+                    <b t-esc="alert['title']" /> <t t-esc="alert['message']" />
+                </div>
+            </t>
             <div class="progress">
                 <div class="progress-bar" role="progressbar" t-att-aria-valuenow="progressbar.valuenow" aria-valuemin="0" t-att-aria-valuemax="progressbar.valuemax" t-att-style="'width: ' + str(progressbar.percentage) + '%;'">
                     <span class="show"><t t-esc="str(progressbar.valuenow) + '/' + str(progressbar.valuemax)" /></span>
@@ -188,7 +197,9 @@
             <div class="container" t-if="not just_arrived">
                 <div class="row mt32">
                     <div class="alert alert-success" role="alert">
-                      <strong>Good job!</strong> All followup letters and emails have been sent.
+                        <p><strong>Good job!</strong> All followup letters and emails have been sent.</p>
+                        <p>You have sent <t t-esc="progressbar.valuemax" /> reports in <t t-esc="progressbar.get_total_time()" />s<br />
+                        That means you have spent on average <t t-esc="progressbar.get_time_per_report()" />s per report.</p>
                     </div>
                 </div>
             </div>

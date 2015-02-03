@@ -62,12 +62,18 @@ class FinancialReportController(http.Controller):
         report_obj = request.env['account.followup.report']
         progressbar_obj = request.env['account.report.followup.progressbar']
         reports = []
-        progressbar_id = progressbar_obj.sudo(uid).search([('create_uid', '=', uid)])
+        progressbar_id = progressbar_obj.sudo(uid).search([('create_uid', '=', uid)], limit=1)
         partners = request.env['res.partner'].get_partners_in_need_of_action()
         if not progressbar_id:
             progressbar_id = progressbar_obj.sudo(uid).create({'valuemax': len(partners)})
         if 'partner_done' in kw:
             progressbar_id.write({'valuenow': progressbar_id.valuenow + 1})
+            if kw['partner_done'] == 'all':
+                partners.update_next_action()
+                progressbar_id.write({'valuenow': progressbar_id.valuemax})
+                partners = partners - partners
+        if progressbar_id.valuemax != progressbar_id.valuenow + len(partners):
+            progressbar_id.write({'valuemax': progressbar_id.valuenow + len(partners)})
         for partner in partners[((page - 1) * 15):(page * 15)]:
             context_id = context_obj.sudo(uid).search([('partner_id', '=', partner.id)], limit=1)
             if not context_id:
@@ -92,17 +98,17 @@ class FinancialReportController(http.Controller):
         uid = request.session.uid
         context_obj = request.env['account.report.context.followup']
         report_obj = request.env['account.followup.report']
-        context_id = context_obj.sudo(uid).search([('partner_id', '=', partner)], limit=1)
         partner = request.env['res.partner'].browse(partner)
         if 'partner_done' in kw:
             partners = request.env['res.partner'].get_partners_in_need_of_action()
             if not partners:
-                return self.followup_all(kw=kw)
+                return self.followup_all(partner_done=kw['partner_done'])
             partner = partners[0]
+        context_id = context_obj.sudo(uid).search([('partner_id', '=', partner.id)], limit=1)
         if not context_id:
             context_id = context_obj.with_context(lang=partner.lang).create({'partner_id': partner.id})
         if 'pdf' in kw:
-            return request.make_response(context_id.with_context(lang=partner.lang).get_pdf(),
+            return request.make_response(context_id.with_context(lang=partner.lang, public=True).get_pdf(),
                 headers=[('Content-Type', 'application/pdf'),
                          ('Content-Disposition', 'attachment; filename=' + partner.name + '.pdf;')])
         lines = report_obj.with_context(lang=partner.lang).get_lines(context_id)
@@ -111,7 +117,6 @@ class FinancialReportController(http.Controller):
             'report': report_obj.with_context(lang=partner.lang),
             'lines': lines,
             'mode': 'display',
-            'debug': True,
         }
         return request.render('account.report_followup', rcontext)
 

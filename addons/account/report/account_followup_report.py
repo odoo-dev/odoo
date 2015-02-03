@@ -19,7 +19,7 @@
 #
 ##############################################################################
 
-from openerp import models, fields, api
+from openerp import models, fields, api, tools
 from datetime import datetime
 from hashlib import md5
 from openerp.tools.misc import formatLang
@@ -108,14 +108,36 @@ class account_report_followup_progressbar(models.TransientModel):
     _name = "account.report.followup.progressbar"
     _description = "A progress bar for followup reports"
 
-    valuenow = fields.Integer('current amount of invoices done', default=0)
-    valuemax = fields.Integer('total amount of invoices to do')
-    percentage = fields.Integer(compute='_compute_percentage')
-
     @api.depends('valuenow', 'valuemax')
     def _compute_percentage(self):
         for progressbar in self:
             progressbar.percentage = 100 * progressbar.valuenow / progressbar.valuemax
+
+    valuenow = fields.Integer('current amount of invoices done', default=0)
+    valuemax = fields.Integer('total amount of invoices to do')
+    percentage = fields.Integer(compute='_compute_percentage')
+    started = fields.Datetime('Starting time', default=lambda self: fields.datetime.now())
+
+    def get_total_time(self):
+        delta = fields.datetime.now() - datetime.strptime(self.started, tools.DEFAULT_SERVER_DATETIME_FORMAT)
+        return delta.seconds
+
+    def get_time_per_report(self):
+        return round(self.get_total_time() / self.valuemax, 2)
+
+    def get_alerts(self):
+        alerts = []
+        if self.valuemax > 4 and self.valuemax / 2 == self.valuenow:
+            alerts.append({
+                'title': 'Halfway through!',
+                'message': 'The first half took you %ss.' % str(self.get_total_time()),
+            })
+        if self.valuemax > 50 and round(self.valuemax * 0.9) == self.valuenow:
+            alerts.append({
+                'title': '10% remaining!',
+                'message': "Hang in there, you're nearly done.",
+            })
+        return alerts
 
 
 class account_report_context_followup(models.TransientModel):
@@ -166,7 +188,7 @@ class account_report_context_followup(models.TransientModel):
 
     def get_pdf(self):
         report_obj = self.get_report_obj()
-        lines = report_obj.get_lines(self)
+        lines = report_obj.get_lines(self, public=True)
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         rcontext = {
             'context': self,
