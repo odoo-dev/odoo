@@ -1,0 +1,27 @@
+
+.page {
+  position: relative;
+}
+
+.sign_item {
+  position: absolute;
+  border: 3px dashed #A24A8B;
+  text-align: center;
+  vertical-align: middle;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.sign_item .helper {
+  vertical-align: middle;
+  height: 100%;
+  display: inline-block;
+}
+
+.sign_item img {
+  max-width: 100%;
+  max-height: 100%;
+  vertical-align: middle;
+  display: inline-block;
+}

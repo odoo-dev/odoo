@@ -17,29 +17,26 @@
                             <div class="panel-heading">
                 				<a t-att-href="'/web?#id=' + str(signature_request.id) + '&amp;view_type=form&amp;model=signature.request'" id="signature_fields_save" class="btn btn-primary btn-block fa fa-check">Save</a>
                             </div>
-                            <div class="panel-body">
-        	        			<button id="signature_page_before" class="btn btn-primary btn-block">Previous page</button>
-        	        			<button id="signature_page_after" class="btn btn-primary btn-block">Next page</button>
-                                <div id="signature_pages"><input type="text"/><span>/</span><input type="text" disabled="1"/></div>
-                            </div>
                         </div>
                         <div class="panel panel-default">
                             <h4 class="panel-heading modal-title">Field types</h4>
     	        			<div class="panel-body">
         	        			
         	        			<p>Double click to add or delete</p>
+                                <button data-item-type="signature" class="field_type_button btn btn-primary btn-block">Signature</button>
         	        			<button data-item-type="text" class="field_type_button btn btn-primary btn-block">Text</button>
-        	        			<button data-item-type="signature" class="field_type_button btn btn-primary btn-block">Signature</button>
+                                <button data-item-type="date" class="field_type_button btn btn-primary btn-block">Date</button>
                             </div>
     	        		</div>
             		</div>
 
             		<div id="canvas-container" class="col-md-9">
-    	        		<canvas id="canvas-edit"/>
+    	        		<iframe id="iframe-edit"/>
                         <t t-foreach="signature_request.signature_items" t-as="item">
                             <input type="hidden"
                                 t-att-data-item-id="item.id"
                                 t-att-data-type="item.type"
+                                t-att-data-required="item.required"
                                 t-att-data-page="item.page"
                                 t-att-data-posx="item.posX"
                                 t-att-data-posy="item.posY"

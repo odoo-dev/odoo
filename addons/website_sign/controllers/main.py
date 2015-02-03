@@ -60,7 +60,7 @@ class website_sign(http.Controller):
             'messages': record.message_ids,
             'message': message and int(message) or False,
             'hasItems': len(signature_request.signature_items) > 0,
-            'roles': current_request_item.roles.mapped('id')
+            'role': current_request_item.role.id if current_request_item else 0
         }
 
         return http.request.render('website_sign.doc_sign', values)

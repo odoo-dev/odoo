@@ -13,16 +13,8 @@
             <link rel='stylesheet' href='/website_sign/static/src/css/website_sign.css'/>
             <script type="text/javascript" src="/website/static/lib/jSignature/jSignature.min.js"></script>
 
-            <!-- In production, only one script (pdf.js) is necessary -->
-            <!-- In production, change the content of PDFJS.workerSrc below -->
-            <script src="/website_sign/static/lib/pdfjs/shared/util.js"></script>
-            <script src="/website_sign/static/lib/pdfjs/display/api.js"></script>
-            <script src="/website_sign/static/lib/pdfjs/display/metadata.js"></script>
-            <script src="/website_sign/static/lib/pdfjs/display/canvas.js"></script>
-            <script src="/website_sign/static/lib/pdfjs/display/webgl.js"></script>
-            <script src="/website_sign/static/lib/pdfjs/display/pattern_helper.js"></script>
-            <script src="/website_sign/static/lib/pdfjs/display/font_loader.js"></script>
-            <script src="/website_sign/static/lib/pdfjs/display/annotation_helper.js"></script>
+            <script src="/website_sign/static/lib/pdfjs/build/pdf.js"/>
+            <script src="/website_sign/static/lib/pdfjs/build/pdf.worker.js"/>
 
             <script type="text/javascript" src="/website_sign/static/src/js/sign.js"></script>
             <script type="text/javascript" src="/website_sign/static/src/js/pdf_view_edit.js"></script>
@@ -40,10 +32,10 @@
                             <div class="panel-heading">
                                 <h4>
                                     <t t-if="signature_request.nb_closed == len(signature_request.request_items)">
-                                        Signed(<t t-raw="str(signature_request.nb_closed) +'/'+ str(signature_request.nb_closed)"/>)
+                                        Signed (<t t-raw="str(signature_request.nb_closed) +'/'+ str(signature_request.nb_closed)"/>)
                                     </t>
                                     <t t-if="signature_request.nb_closed != len(signature_request.request_items)">
-                                        Waiting Signatures(<t t-raw="str(len(signature_request.request_items)-signature_request.nb_closed) +'/'+ str(len(signature_request.request_items))"/>)
+                                        Waiting Signatures (<t t-raw="str(len(signature_request.request_items)-signature_request.nb_closed) +'/'+ str(len(signature_request.request_items))"/>)
                                     </t>
                                 </h4>
                             </div>
@@ -74,11 +66,6 @@
                             <div class="panel-body">
                                 <h4><t t-raw="signature_request.attachment.name"/></h4>
                                 <t t-if="signature_request.attachment.description"><t t-raw="signature_request.attachment.description"/></t>
-                            </div>
-                            <div t-if="hasItems" class="panel-body">
-                                <button id="signature_page_before" class="btn btn-primary btn-block">Previous page</button>
-                                <button id="signature_page_after" class="btn btn-primary btn-block">Next page</button>
-                                <div id="signature_pages"><input type="text"/><span>/</span><input type="text" disabled="1"/></div>
                             </div>
                         </div>
                     </div>

@@ -128,8 +128,10 @@ class signature_request(models.Model):
         for request_item in self.request_items:
             if request_item.state != 'draft':
                 ignored_partners.append(request_item.partner_id.id)
-        self.send_signature_accesses(ignored_partners=ignored_partners)
-        self.request_items.filtered(lambda r: r.partner_id.id not in ignored_partners).signal_workflow('signature_request_item_launch')
+        included_request_items = self.request_items.filtered(lambda r: r.partner_id.id not in ignored_partners)
+        included_request_items.signal_workflow('signature_request_item_launch')
+        if not self.send_signature_accesses(ignored_partners=ignored_partners):
+            included_request_items.signal_workflow('signature_request_item_cancel') # TODO and warn the user
         self.state = 'opened'
 
     @api.one
@@ -190,6 +192,13 @@ class signature_request(models.Model):
         signers_data = self.get_signers()
         if len(signers_data) <= 0:
             return
+
+        roles = self.request_items.mapped('role');
+        for item in self.signature_items:
+            if not item.responsible:
+                continue
+            if item.responsible not in roles:
+                return False
 
         for ignored in ignored_partners:
             del signers_data[ignored]
@@ -277,7 +286,7 @@ class signature_request_item(models.Model):
     signer_name = fields.Char(size=256)
     signer_email = fields.Char(related='partner_id.email')
 
-    roles = fields.One2many('signature.item.party', 'request_item', string="Roles")
+    role = fields.Many2one('signature.item.party', string="Role")
 
     @api.one
     def action_draft(self):
@@ -285,6 +294,9 @@ class signature_request_item(models.Model):
         self.signing_date = None
         self.access_token = self._default_access_token()
         self.signer_name = ""
+        for item in self.signature_request.signature_items:
+            if item.responsible == self.role:
+                item.value.set(None)
         self.state = 'draft'
 
     @api.one
@@ -335,8 +347,9 @@ class signature_item(models.Model):
 
     name = fields.Char()
     type = fields.Selection([
-        ('text', 'Text'),
-        ('signature', 'Signature')
+        ('text', "Text"),
+        ('signature', "Signature"),
+        ('date', "Date")
     ], required=True)
 
     required = fields.Boolean(required=True, default=True)
@@ -364,6 +377,7 @@ class signature_item_value(models.Model):
         {
             'text': self.setText,
             'signature': self.setImage,
+            'date': self.setText,
         }[self.signature_item.type](value)
 
     @api.one
@@ -379,4 +393,3 @@ class signature_item_party(models.Model):
     _description = "Type of partner which can access a particular signature field"
 
     name = fields.Char(required=True)
-    request_item = fields.Many2one('signature.request.item', string="Signer")

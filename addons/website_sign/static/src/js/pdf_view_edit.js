@@ -1,62 +1,50 @@
 
-function check_pdf_items_completion(canvas) {
+function whenPdfIsLoaded(iframe, fct) {
+    nbPages = iframe.contents().find('.page').length;
+    nbLayers = iframe.contents().find('.textLayer').length
+
+    if(nbPages > 0 && nbLayers > 0)
+        setTimeout(fct, 750, nbPages);
+    else
+        setTimeout(whenPdfIsLoaded, 250, iframe, fct);
+}
+
+function check_pdf_items_completion(iframe, role) {
     var ok = true;
-    canvas.parent().find('.sign_item').each(function(i, el) {
+    iframe.contents().find('.sign_item').each(function(i, el) {
         var value = {
             'text': $(el).val(),
             'signature': $(el).data('signature'),
+            'date': $(el).val()
         }[$(el).data('type')];
 
-        if(!value && $(el).data('required')) {
+        var resp = parseInt($(el).data('responsible')) || 0;
+
+        if(!value && $(el).data('required') && (resp <= 0 || resp == role))
             ok = false;
-            return;
-        }
     });
 
     validateButton = $('#signature-validate-button');
     if(ok) {
         validateButton.prop("disabled", false);
-        validateButton.html("Validate")
+        validateButton.html("Validate");
         validateButton.addClass("fa fa-check");
     }
     else {
         $('#signature-validate-button').prop("disabled", true);
-        validateButton.html("Fields to complete")
+        validateButton.html("Fields to complete");
         validateButton.removeClass("fa fa-check");
     }
 }
 
-function update_pdf_items(canvas, pageNo, config) {
-    canvas.parent().find('.sign_item').hide();
-    for(var i in config[pageNo])
-        config[pageNo][i].show();
-}
-
-function update_pdf_page(canvas, pdf, pageNo, config) {
-    if(!canvas || !pdf)
-        return false;
-
-    if(update_pdf_page.is_updating === true)
-        return false;
-    update_pdf_page.is_updating = true;
-
-    update_pdf_items(canvas, pageNo, config);
-
-    return pdf.getPage(pageNo).then(function(page) {
-        var scale = 1.25;
-        var viewport = page.getViewport(scale);
-
-        var context = canvas[0].getContext('2d');
-        canvas.attr('width', viewport.width);
-        canvas.attr('height', viewport.height);
-
-        var renderContext = {
-            canvasContext: context,
-            viewport: viewport
-        };
-        page.render(renderContext);
-        update_pdf_page.is_updating = false;
-    });
+function update_pdf_items(iframe, configuration) {
+    for(var page in configuration) {
+        pageContainer = iframe.contents().find('body #pageContainer' + page);
+        for(var i = 0 ; i < configuration[page].length ; i++) {
+            configuration[page][i].detach();
+            pageContainer.append(configuration[page][i]);
+        }
+    }
 }
 
 function save_pdf_configuration_and_quit(id, config, url) {
@@ -83,28 +71,26 @@ function save_pdf_configuration_and_quit(id, config, url) {
     });
 }
 
-function create_signature_item(canvas, type, required, posX, posY, width, height, readonly, value) {
+function create_signature_item(iframe, role, type, required, responsible, posX, posY, width, height, readonly, value) {
     readonly = (readonly === undefined)? false : readonly;
     value = (value === undefined)? {"text": "", "image": ""} : value;
-
-    var fx = canvas.width() / canvas.parent().width();
-    var fy = canvas.height() / canvas.parent().height();
 
     var elem = null;
     if(readonly) {
         elem = $({
-            "text": "<div>" + value.text + "</div>",
-            "signature": (value.image)? "<div><span class='helper'/><img src='data:image/png;base64," + (value.image.substr(1, value.image.length-2)) + "'/></div>" : "<button type='button'>Sign Here</button>"
+            "text": "<div><span class='helper'/>" + value.text + "</div>",
+            "signature": "<div><span class='helper'/>" + ((value.image)? "<img src='data:image/png;base64," + (value.image.substr(1, value.image.length-2)) + "'/>" : "Sign Here") + "</div>",
+            "date": "<div><span class='helper'/>" + value.text + "</div>",
         }[type]);
     }
     else {
         elem = $({
-            "text": "<textarea>" + value.text + "</textarea>",
-            "signature": "<button data-toggle='modal' data-target='#sign_diag'>Sign Here</button>",
+            "text": "<textarea/>",
+            "signature": "<button>Sign Here</button>",
+            "date": "<input type='date'/>",
         }[type]);
 
         if(type === "signature") {
-            elem.addClass("btn btn-block");
             elem.attr('type', "button");
             elem.on('click', function(e) {
                 $("#sign_diag #confirm_sign").one('click', function(e) {
@@ -113,41 +99,118 @@ function create_signature_item(canvas, type, required, posX, posY, width, height
                     elem.data('signature', JSON.stringify(sign_img[1]));
                     elem.change();
                 });
+
+                var sign_img = $('#sign_diag').find('.sign').jSignature("getData",'image');
+                if(sign_img && (elem.html() == "Sign Here" || 'data:'+sign_img[0]+','+sign_img[1] != elem.find('img').attr('src')))
+                    $("#sign_diag #confirm_sign").click();
+                else {
+                    $("#sign_diag").attr('data-target', '#sign_diag');
+                    $("#sign_diag").click();
+                    $("#sign_diag").removeAttr('data-target');
+                }
             });
         }
     }    
 
     if(elem !== null) {
+        if(posX < width/2)
+            posX = width/2;
+        else if(posX > 1.0-width/2)
+            posX = 1.0-width/2;
+        if(posY < height/2)
+            posY = height/2;
+        else if(posY > 1.0-height/2)
+            posY = 1.0-height/2;
+
         elem.addClass('sign_item');
-        elem.css('left', (posX-width/2)*100*fx + '%').css('top', (posY-height/2)*100*fy + '%');
-        elem.css('width', width*100*fx + '%').css('height', height*100*fy + '%');
-        elem.data('type', type).data('required', required).data('posx', posX).data('posy', posY).data('width', width).data('height', height);
+        elem.css('left', (posX-width/2)*100 + '%').css('top', (posY-height/2)*100 + '%');
+        elem.css('width', width*100 + '%').css('height', height*100 + '%');
+        elem.data('type', type).data('required', required).data('responsible', responsible).data('posx', posX).data('posy', posY).data('width', width).data('height', height);
+
+        elem.css('resize', 'none');
 
         elem.on('change', function(e) {
-            check_pdf_items_completion(canvas);
+            check_pdf_items_completion(iframe, role);
         });
     }
 
     return elem;
 }
 
-$(document).ready(function() {
+function enableCustom(elem) {
+    var width = elem.data('width');
+    var height = elem.data('height');
+
+    elem.css('resize', 'both');
+
+    elem.on('mousedown', function(e) {
+        var posX = (e.pageX - elem.offset().left) / parseFloat(elem.css('width'));
+        var posY = (e.pageY - elem.offset().top) / parseFloat(elem.css('height'));;
+        if(posX > 0.8 && posY > 0.8)
+            return true;
+
+        fct = function(e) {
+            var posX = (e.pageX - elem.parent().offset().left) / elem.parent().width();
+            var posY = (e.pageY - elem.parent().offset().top) / elem.parent().height();
+
+            if(posX < width/2)
+                posX = width/2;
+            else if(posX > 1.0-width/2)
+                posX = 1.0-width/2;
+            if(posY < height/2)
+                posY = height/2;
+            else if(posY > 1.0-height/2)
+                posY = 1.0-height/2;
+
+            elem.css('left', (posX-elem.data('width')/2)*100 + '%').css('top', (posY-elem.data('height')/2)*100 + '%');
+        };
+
+        elem.on('mousemove', fct);
+        elem.parent().on('mousemove', fct);
+    });
+
+    mouveup_fct = function(e) {
+        elem.off('mousemove');
+        elem.parent().off('mousemove');
+
+        var width = parseFloat(elem.css('width'))/parseFloat(elem.parent().css('width'));
+        var height = parseFloat(elem.css('height'))/parseFloat(elem.parent().css('height'));
+
+        elem.data('posx', parseFloat(elem.css('left'))/parseFloat(elem.parent().css('width')) + width/2);
+        elem.data('posy', parseFloat(elem.css('top'))/parseFloat(elem.parent().css('height')) + height/2);
+        elem.data('width', width);
+        elem.data('height', height);
+
+        elem.css('width', width*100 + '%').css('height', height*100 + '%');
+
+        if(elem.data('posx') + width/2 > 1) {
+            var newWidth = 1 - (elem.data('posx') - width/2);
+            elem.data('posx', 1 - newWidth/2);
+            elem.css('width', newWidth*100 + '%');
+        }
+        if(elem.data('posy') + height/2 > 1) {
+            var newHeight = 1 - (elem.data('posy') - height/2);
+            elem.data('posy', 1 - newHeight/2);
+            elem.css('height', newHeight*100 + '%');
+        }
+    };
+
+    elem.on('mouseup', mouveup_fct);
+}
+
+$(function() {
     // Specify the main script used to create a new PDF.JS web worker.      TODO
     // In production, leave this undefined or change it to point to the
     // combined `pdf.worker.js` file.
-    PDFJS.workerSrc = '/website_sign/static/lib/pdfjs/worker_loader.js';
+    PDFJS.workerSrc = '/website_sign/static/lib/pdfjs/build/pdf.worker.js';
 
     var signature_request_id = $('#input_signature_request_id').val();
     var attachment_location = $('#input_attachment_location').val();
-    var readonly = $('#input_field_readonly').val() || false;
-    var roles = $('#input_current_roles').val() || [];
-    if(typeof roles === "string")
-        roles = $.parseJSON(roles);
-    var canvas = $('#signature-field-view canvas');;
-    var pdf = false;
-    var pageNo = 1;
-    var currentFieldType = false;
+    var readonly = $('#input_field_readonly').val() == "True" || false;
+    var role = parseInt($('#input_current_role').val()) || 0;
+    var iframe = $('#signature-field-view iframe');;
 
+    var currentFieldType = false;
     var configuration = {};
 
     // Save button
@@ -155,44 +218,6 @@ $(document).ready(function() {
     button_save.on('click', function(e) {
         e.preventDefault();
         save_pdf_configuration_and_quit(signature_request_id, configuration, button_save.attr('href'));
-    });
-
-    // Pages buttons
-    button_before = $('#signature_page_before');
-    button_after = $('#signature_page_after');
-    page_fields = $('#signature_pages input');
-
-    page_fields.val(pageNo);
-    button_before.prop('disabled', true);
-
-    button_before.on('click', function(e){
-        if(pageNo > 1) {
-            pageNo--;
-            if(pageNo == 1)
-                button_before.prop('disabled', true);
-            button_after.prop('disabled', false);
-            $(page_fields[0]).val(pageNo);
-            update_pdf_page(canvas, pdf, pageNo, configuration);
-        }
-    });
-    button_after.on('click', function(e){
-        if(pageNo < pdf.numPages) {
-            pageNo++;
-            if(pageNo == pdf.numPages)
-                button_after.prop('disabled', true);
-            button_before.prop('disabled', false);
-            $(page_fields[0]).val(pageNo);
-            update_pdf_page(canvas, pdf, pageNo, configuration);
-        }
-    });
-    $(page_fields[0]).on('change', function(e) {
-        pageNo = parseInt($(e.currentTarget).val());
-        if(pageNo < 1)
-            pageNo = 1;
-        else if(pageNo > pdf.numPages)
-            pageNo = pdf.numPages;
-        $(e.currentTarget).val(pageNo);
-        update_pdf_page(canvas, pdf, pageNo, configuration);
     });
 
     // Fields button
@@ -206,78 +231,81 @@ $(document).ready(function() {
     });
     $(field_type_buttons[0]).click();
 
-    // Load PDF
-    PDFJS.getDocument(attachment_location).then(function(pdf_data) {
-        pdf = pdf_data;
-        
-        $(page_fields[1]).val(pdf.numPages);
-        if(pdf.numPages == 1) {
-            $(page_fields[0]).prop('disabled', true);
-            button_after.prop('disabled', true);
-        }
-        for(var i = 1 ; i <= pdf.numPages ; i++)
+    var viewerURL = "../../website_sign/static/lib/pdfjs/web/viewer.html?file=../../../../.." + encodeURIComponent(attachment_location).replace(/'/g,"%27").replace(/"/g,"%22");
+    if($('#iframe-view').length > 0)
+        viewerURL = "../" + viewerURL;
+    iframe.attr('src', viewerURL).css('width', '100%').css('height', '1000px');
+
+    whenPdfIsLoaded(iframe, function(nbPages) {
+        for(var i = 1 ; i <= nbPages ; i++)
             configuration[i] = [];
 
-        var task = update_pdf_page(canvas, pdf, pageNo, configuration);
-        if(task !== false) {
-            task.then(function(result){
-                canvas.parent().find("input[type='hidden']").each(function(i, el){
-                    var values = {
-                        'text': $(el).data('item-value-text') || "",
-                        'image': $(el).data('item-value-image') || "",
-                    };
-
-                    var resp = parseInt($(el).data('responsible'));
-                    
-                    var elem = create_signature_item(canvas,
-                        $(el).data('type'), $(el).data('required'),
-                        $(el).data('posx'), $(el).data('posy'),
-                        $(el).data('width'), $(el).data('height'),
-                        readonly || (resp !== 0 && !$.inArray(resp, roles)), values);
-                    elem.data('item-id', $(el).data('item-id'));
-
-                    if($('#canvas-edit').length == 1)
-                        elem.on('dblclick', function(e) {
-                            var currentElem = $(e.currentTarget);
-                            currentElem.remove();
-                            for(var i in configuration[pageNo]) {
-                                if(configuration[pageNo][i].data('posx') === currentElem.data('posx')
-                                    && configuration[pageNo][i].data('posy') === currentElem.data('posy'))
-                                    configuration[pageNo].splice(i, 1);
-                            }
-                        });
-
-                    configuration[parseInt($(el).data('page'))].push(elem);
-                    canvas.after(elem);
-                });
-                check_pdf_items_completion(canvas);
-                update_pdf_items(canvas, pageNo, configuration);
-            });
+        elemDblClickFct = function(e) {
+            var currentElem = $(e.currentTarget);
+            var pageNo = parseInt(currentElem.parent().attr('id').substr('pageContainer'.length));
+            currentElem.remove();
+            for(var i in configuration[pageNo]) {
+                if(configuration[pageNo][i].data('posx') === currentElem.data('posx')
+                    && configuration[pageNo][i].data('posy') === currentElem.data('posy'))
+                    configuration[pageNo].splice(i, 1);
+            }
+            return false;
         }
-    });
 
-    // Canvas actions
-    $('#canvas-edit').on('dblclick', function(e) {
-        var canvas = $(e.currentTarget);
-        var required = true;
-        var posX = (e.pageX - canvas.offset().left) / canvas.width();
-        var posY = (e.pageY - canvas.offset().top) / canvas.height();
-        var WIDTH = 0.2, HEIGHT = 0.05;
+        iframe.parent().find("input[type='hidden']").each(function(i, el){
+            var values = {
+                'text': $(el).data('item-value-text') || "",
+                'image': $(el).data('item-value-image') || "",
+            };
 
-        var elem = create_signature_item(canvas, currentFieldType, required, posX, posY, WIDTH, HEIGHT, false);
-        if(elem !== null) {
-            elem.on('dblclick', function(e) {
-                var currentElem = $(e.currentTarget);
-                currentElem.remove();
-                for(var i in configuration[pageNo]) {
-                    if(configuration[pageNo][i].data('posx') === currentElem.data('posx')
-                        && configuration[pageNo][i].data('posy') === currentElem.data('posy'))
-                        configuration[pageNo].splice(i, 1);
-                }
-            });
+            var resp = parseInt($(el).data('responsible')) || 0;
 
-            configuration[pageNo].push(elem);
-            canvas.after(elem);
-        }
+            var elem = create_signature_item(iframe, role,
+                $(el).data('type'), $(el).data('required') == "True", $(el).data('responsible') || 0,
+                $(el).data('posx'), $(el).data('posy'),
+                $(el).data('width'), $(el).data('height'),
+                readonly || (resp > 0 && resp != role), values);
+            elem.data('item-id', $(el).data('item-id'));
+
+            configuration[parseInt($(el).data('page'))].push(elem);
+
+            if($('#iframe-edit').length == 1) {
+                elem.on('dblclick', elemDblClickFct);
+                enableCustom(elem);
+            }
+        });
+
+        update_pdf_items(iframe, configuration);
+        check_pdf_items_completion(iframe, role);
+
+        // var update_timer = setInterval(update_pdf_items, 1000, iframe, configuration);
+        iframe.contents().find('#viewerContainer').on('scroll', function(e) {
+            update_pdf_items(iframe, configuration);
+            check_pdf_items_completion(iframe, role);
+        });
+        
+        // var cssLinks = $("head link[rel='stylesheet']"); 
+        // iframe.contents().find('head').append(cssLinks.clone());
+        var cssLink = $("<link rel='stylesheet' type='text/css' href='../../../../../website_sign/static/src/css/iframe_style.css'/>"); 
+        iframe.contents().find('head').append(cssLink);
+
+        $('#iframe-edit').contents().find('.page').on('dblclick', function(e) {
+            var parent = $(e.currentTarget);
+            var pageNo = parseInt(parent.attr('id').substr('pageContainer'.length));
+
+            var required = true;
+            var posX = (e.pageX - parent.offset().left) / parent.width();
+            var posY = (e.pageY - parent.offset().top) / parent.height();
+            var WIDTH = 0.2, HEIGHT = 0.05;
+
+            var elem = create_signature_item(iframe, role, currentFieldType, required, 0, posX, posY, WIDTH, HEIGHT, false);
+            if(elem !== null) {
+                elem.on('dblclick', elemDblClickFct);
+
+                configuration[pageNo].push(elem);
+                update_pdf_items(iframe, configuration);
+                enableCustom(elem);
+            }
+        });
     });
 });

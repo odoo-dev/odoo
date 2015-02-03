@@ -84,53 +84,23 @@
 }
 
 /* Signature Fields View */
-#signature-field-view #canvas-container {
-  position: relative;
-}
-
-#signature-field-view #canvas-container canvas {
-  position: relative;
-  top: 0%;
-  left: 0%;
-  z-index: 0;
-
-  border: 1px solid silver;
-  cursor: pointer;
-}
-
-#signature-field-view #canvas-container .sign_item {
+.sign_item {
   position: absolute;
-  border: 1px dashed silver;
+  border: 2px dashed orange;
   text-align: center;
   vertical-align: middle;
   display: inline-block;
 }
 
-#signature-field-view #canvas-container .sign_item .helper {
+.sign_item .helper {
   vertical-align: middle;
   height: 100%;
   display: inline-block;
 }
 
-#signature-field-view #canvas-container .sign_item img {
+.sign_item img {
   max-width: 100%;
   max-height: 100%;
   vertical-align: middle;
-  display: inline-block;
-}
-
-#signature_pages {
-  margin-top: 5px;
-}
-
-#signature_pages input {
-  width: 45%;
-  text-align: center;
-  display: inline-block;
-}
-
-#signature_pages span {
-  width: 10%;
-  text-align: center;
   display: inline-block;
 }

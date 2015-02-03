@@ -1,5 +1,5 @@
 
-$(document).ready(function () {
+$(function () {
     // Document signatures
     var empty_sign = false;
     $('#modesign').on('shown.bs.modal', function (e) {
@@ -40,9 +40,7 @@ $(document).ready(function () {
     });
 
     $('#sign_diag').on('shown.bs.modal', function(ev){
-        // var id = $(ev.currentTarget.id.substr("sign_diag".length);
         $(ev.currentTarget).find(".sign").empty().jSignature({'decor-color' : '#D1D0CE'});
-        // $('#sign_item[data-item-id=' + id).html('Sign here');
     });
 
     $('#sign_diag').on('hidden.bs.modal', function(e) {
@@ -54,15 +52,20 @@ $(document).ready(function () {
         var form = $(ev.currentTarget);
         var ok = true;
 
+        var role = parseInt($('#input_current_role').val()) || 0;
+
         var sign_values = {};
-        var sign_items = form.find('.sign_item');
+        var sign_items = form.find('iframe').contents().find('.sign_item');
         sign_items.each(function(i, el){
             var value = {
                 'text': $(el).val(),
                 'signature': $(el).data('signature'),
+                'date': $(el).val(),
             }[$(el).data('type')];
 
-            if(!value && $(el).data('required')) {
+            var resp = parseInt($(el).data('responsible')) || 0;
+
+            if(!value && $(el).data('required') && (resp <= 0 || resp == role)) {
                 ok = false;
                 return;
             }

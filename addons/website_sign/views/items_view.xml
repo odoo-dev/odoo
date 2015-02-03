@@ -6,16 +6,17 @@
                 <input id="input_signature_request_id" type="hidden" t-att-value="signature_request.id"/>
                 <input id="input_attachment_location" type="hidden" t-att-value="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id)"/>
                 <input id="input_field_readonly" type="hidden" t-att-value="readonly"/>
-                <input id="input_current_roles" type="hidden" t-att-value="roles"/>
+                <input id="input_current_role" type="hidden" t-att-value="role"/>
 
                 <div id="canvas-container">
-                    <canvas id="canvas-view"/>
+                    <iframe id="iframe-view"/>
                     <t t-foreach="signature_request.signature_items" t-as="item">
                         <t t-if="item.value">
                             <input type="hidden"
                             t-att-data-item-id="item.id"
                             t-att-data-type="item.type"
                             t-att-data-required="item.required"
+                            t-att-data-responsible="item.responsible.id"
                             t-att-data-page="item.page"
                             t-att-data-posx="item.posX"
                             t-att-data-posy="item.posY"
@@ -29,6 +30,7 @@
                             t-att-data-item-id="item.id"
                             t-att-data-type="item.type"
                             t-att-data-required="item.required"
+                            t-att-data-responsible="item.responsible.id"
                             t-att-data-page="item.page"
                             t-att-data-posx="item.posX"
                             t-att-data-posy="item.posY"
@@ -40,7 +42,7 @@
             </div>
         </form>
 
-        <div class="modal fade sign_diag" id="sign_diag" role="dialog" aria-hidden="true">
+        <div class="modal fade sign_diag" id="sign_diag" role="dialog" data-toggle="modal" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-body">
                     <div class="form-group">

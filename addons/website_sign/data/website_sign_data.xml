@@ -116,7 +116,7 @@
                             <button string="Edit fields" type="object" name="go_to_custom_document" class="oe_read_only"/>
                         </div>
                         <label for="signature_items"/>
-                        <field name="signature_items" readonly="1"/>
+                        <field name="signature_items"/>
                     </sheet>
                 </form>
             </field>
@@ -151,10 +151,11 @@
             <field name="name">Signature Request Item Tree View</field>
             <field name="model">signature.request.item</field>
             <field name="arch" type="xml">
-                <tree edit="0">
+                <tree>
                     <field name="partner_id"/>
-                    <field name="signer_email" class="oe_edit_only"/>
-                    <field name="state"/>
+                    <field name="signer_email" class="oe_read_only"/>
+                    <field name="role" class="oe_read_only"/>
+                    <field name="state" class="oe_read_only"/>
                 </tree>
             </field>
         </record>
@@ -179,6 +180,10 @@
                                 <field name="access_token"/>
                                 <field name="signing_date"/>
                             </group>
+                        </group>
+
+                        <group>
+                            <field name="role"/>
                         </group>
                     </sheet>
                 </form>
