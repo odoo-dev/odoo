@@ -209,7 +209,7 @@ class account_report_context_followup(models.TransientModel):
         pdf = self.get_pdf().encode('base64')
         name = self.partner_id.name + '_followup.pdf'
         attachment = self.env['ir.attachment'].create({'name': name, 'datas_fname': name, 'datas': pdf, 'type': 'binary'})
-        email_template = self.env['email.template'].create({
+        email_template = self.env['mail.template'].create({
             'name': 'Followup ' + self.partner_id.name,
             'email_from': self.env.user.email or '',
             'model_id': 1,
