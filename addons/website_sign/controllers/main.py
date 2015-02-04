@@ -131,6 +131,7 @@ class website_sign(http.Controller):
 
         values = {
             'signature_request': signature_request,
+            'signature_item_parties': http.request.env['signature.item.party'].search([])
         }
         return http.request.render('website_sign.items_edit', values)
 
@@ -142,7 +143,6 @@ class website_sign(http.Controller):
             item.update({
                 'signature_request': id,
                 'name': "default_name",
-                # 'responsible': ,
             })
             signature_item_obj.create(item)
         return True

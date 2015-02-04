@@ -356,10 +356,10 @@ class signature_item(models.Model):
     responsible = fields.Many2one("signature.item.party")
 
     page = fields.Integer(string="Document Page", required=True, default=1)
-    posX = fields.Float(digits=(3, 2), string="Position X", required=True)
-    posY = fields.Float(digits=(3, 2), string="Position Y", required=True)
-    width = fields.Float(digits=(3, 2), required=True)
-    height = fields.Float(digits=(3, 2), required=True)
+    posX = fields.Float(digits=(4, 3), string="Position X", required=True)
+    posY = fields.Float(digits=(4, 3), string="Position Y", required=True)
+    width = fields.Float(digits=(4, 3), required=True)
+    height = fields.Float(digits=(4, 3), required=True)
 
     value = fields.One2many('signature.item.value', 'signature_item', string="Signature Item Values") # Let's keep the possibility of multiple values
 

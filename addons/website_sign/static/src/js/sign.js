@@ -1,50 +1,54 @@
 
 $(function () {
-    // Document signatures
     var empty_sign = false;
-    $('#modesign').on('shown.bs.modal', function (e) {
-        $("#sign").empty().jSignature({'decor-color' : '#D1D0CE'});
+    var signature_dialog = $('#signature_dialog');
+
+    signature_dialog.on('shown.bs.modal', function (e) {
+        signature_dialog.find("#sign").empty().jSignature({'decor-color' : '#D1D0CE'});
         empty_sign = $("#sign").jSignature("getData",'image');
     });
 
-    $('#sign_clean').on('click', function (e) {
-        $("#sign").jSignature('reset');
+    if($('#sign_doc_items').length == 1) {
+        signature_dialog.on('hidden.bs.modal', function(e) {
+            signature_dialog.find('#confirm_sign').off('click');
+        });
+    }
+
+    signature_dialog.find('#sign_clean').on('click', function (e) {
+        signature_dialog.find("#sign").jSignature('reset');
+    });
+
+    if($('#sign_doc').length == 1) {
+        signature_dialog.find('#confirm_sign').on('click', function(e) {
+            $('#sign_doc').submit();
+        });
+    }
+
+    $('#signature-validate-button').on('click', function(e) {
+        $('#sign_doc_items').submit();
     });
 
     $('#sign_doc').submit(function(ev){
         ev.preventDefault();
         var $link = $(ev.currentTarget);
 
-        var sign = $("#sign").jSignature("getData",'image');
+        var sign = signature_dialog.find("#sign").jSignature("getData",'image');
         var is_empty = sign?empty_sign[1]==sign[1]:false;
-        $('#signer').toggleClass('has-error', ! signer_name);
-        $('#drawsign').toggleClass('panel-danger', is_empty).toggleClass('panel-default', ! is_empty);
+        signature_dialog.find('#signer_info').toggleClass('has-error', ! signer_name);
+        signature_dialog.find('#signature_draw').toggleClass('panel-danger', is_empty).toggleClass('panel-default', ! is_empty);
 
         if (is_empty || ! signer_name)
             return false;
-        $('#signed_req').prop('disabled',true);
+        $('#confirm_sign').prop('disabled', true);
 
         openerp.jsonRpc($link.attr("action"), "call", {
             'sign': sign?JSON.stringify(sign[1]):false,
-            'signer': $("#signer_name").val()
+            'signer': signature_dialog.find("#signer_name").val()
         }).then(function (data) {
-            $('#modesign').modal('hide');
+            signature_dialog.modal('hide');
             window.location.href = '/sign/document/'+data['id']+'/'+data['token']+'?message=2';
         });
         return false;
-    });
-
-    // Fields signatures
-    $('#signature-validate-button').on('click', function(e) {
-        $('#sign_doc_items').submit();
-    });
-
-    $('#sign_diag').on('shown.bs.modal', function(ev){
-        $(ev.currentTarget).find(".sign").empty().jSignature({'decor-color' : '#D1D0CE'});
-    });
-
-    $('#sign_diag').on('hidden.bs.modal', function(e) {
-        $(e.currentTarget).find('#confirm_sign').off('click');
     });
 
     $('#sign_doc_items').submit(function(ev){

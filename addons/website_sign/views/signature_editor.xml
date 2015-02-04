@@ -21,11 +21,10 @@
                         <div class="panel panel-default">
                             <h4 class="panel-heading modal-title">Field types</h4>
     	        			<div class="panel-body">
-        	        			
         	        			<p>Double click to add or delete</p>
-                                <button data-item-type="signature" class="field_type_button btn btn-primary btn-block">Signature</button>
-        	        			<button data-item-type="text" class="field_type_button btn btn-primary btn-block">Text</button>
-                                <button data-item-type="date" class="field_type_button btn btn-primary btn-block">Date</button>
+                                <button data-item-type="signature" type="button" class="field_type_button btn btn-primary btn-block">Signature</button>
+        	        			<button data-item-type="text" type="button" class="field_type_button btn btn-primary btn-block">Text</button>
+                                <button data-item-type="date" type="button" class="field_type_button btn btn-primary btn-block">Date</button>
                             </div>
     	        		</div>
             		</div>
@@ -37,6 +36,7 @@
                                 t-att-data-item-id="item.id"
                                 t-att-data-type="item.type"
                                 t-att-data-required="item.required"
+                                t-att-data-responsible="item.responsible.id"
                                 t-att-data-page="item.page"
                                 t-att-data-posx="item.posX"
                                 t-att-data-posy="item.posY"
@@ -44,6 +44,26 @@
                                 t-att-data-height="item.height"/>
                         </t>
     	        	</div>
+
+                    <div class="modal fade" id="responsibles_diag" role="dialog" data-toggle="modal" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <div class="panel panel-default mt16 mb0">
+                                        <div class="panel-heading">
+                                            <strong>Select the responsible</strong>
+                                        </div>
+                                        <div class="panel-body">
+                                            <button type="button" data-dismiss="modal" data-party="0" class="btn btn-primary btn-block">Everyone</button>
+                                            <t t-foreach="signature_item_parties" t-as="signature_item_party">
+                                                <button type="button" data-dismiss="modal" t-att-data-party="signature_item_party.id" class="btn btn-primary btn-block"><t t-esc="signature_item_party.name"/></button>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </t>

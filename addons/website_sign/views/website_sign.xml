@@ -50,10 +50,10 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <t t-if="not readonly">
-                                    <a t-if="not hasItems" class="btn btn-primary btn-block fa fa-check" data-toggle="modal" data-target="#modesign">
+                                    <a t-if="not hasItems" class="btn btn-primary btn-block fa fa-check" data-toggle="modal" data-target="#signature_dialog">
                                         Sign Document
                                     </a>
-                                    <button t-if="hasItems" id="signature-validate-button" class="btn btn-primary btn-block" type="button"/>
+                                    <button t-if="hasItems" id="signature-validate-button" class="btn btn-primary btn-block" type="button" disabled="disabled"/>
                                 </t>
                                 <t t-if="current_request_item and current_request_item.state == 'closed'">
                                     <h4 class="modal-title">You have signed the document.</h4>
@@ -123,42 +123,44 @@
                         </section>
                         <div class="clearfix"/>
 
-                        <div class="modal fade" id="modesign" role="dialog" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="sign_doc" method="post" t-attf-action="/website_sign/signed/{{signature_request.id}}/{{token}}" class="js_sign_json modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
-                                        <h4 class="modal-title">Sign Document</h4>
-                                    </div>
-                                    <div class="modal-body" id="sign-modal-dialog">
-                                        <p>
-                                            I agree, by signing this document.
-                                        </p>
-                                        <div id="signer" class="form-group" t-if="current_request_item">
-                                            <label class="control-label" for="name">Your Name:</label>
-                                            <input class="form-control" name="signer" id="signer_name" t-att-value="current_request_item.partner_id.name" type="text"/>
-                                            <div class="panel panel-default mt16 mb0" id="drawsign">
-                                                <div class="panel-heading">
-                                                    <div class="pull-right">
-                                                        <a id="sign_clean" class="btn btn-xs">Clear</a>
-                                                    </div>
-                                                    <strong>Draw your signature</strong>
-                                                </div>
-                                                <div id="sign" class="panel-body" style="padding: 0"/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" id="signed_req" t-attf-class="btn btn-primary">Sign Document</button> or
-                                        <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                        <form t-if="not hasItems" id="sign_doc" method="post" t-attf-action="/website_sign/signed/{{signature_request.id}}/{{token}}">
+                            <t t-call="website_sign.signature_dialog"/>
+                        </form>
                     </div>
                 </div>
             </div>
         </t>
+    </template>
+
+    <template id="website_sign.signature_dialog">
+        <div class="modal fade" id="signature_dialog" role="dialog" data-toggle="modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
+                        <h4 class="modal-title">Sign</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="signer_info" class="form-group">
+                            <label class="control-label" for="name">Your Name</label>
+                            <input class="form-control" name="signer" id="signer_name" t-att-value="current_request_item.partner_id.name" type="text"/>
+                            <div class="panel panel-default mt16 mb0" id="signature_draw">
+                                <div class="panel-heading">
+                                    <a id="sign_clean" class="pull-right btn btn-xs">Clear</a>
+                                    <a class="sign_mode btn btn-primary">Auto</a>
+                                    <a class="sign_mode btn btn-primary" disabled="disabled">Draw</a>
+                                </div>
+                                <div id="sign" class="panel-body" style="padding: 0"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="confirm_sign" data-dismiss="modal" class="btn btn-primary confirm_sign">Sign</button> or
+                        <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </template>
 
     <template id="website_sign.chatter">
