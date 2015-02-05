@@ -39,9 +39,13 @@
                         </t>
                     </t>
                 </div>
-
-                <t t-if="hasItems" t-call="website_sign.signature_dialog"/>
             </div>
         </form>
+        <t t-if="hasItems" t-call="website_sign.signature_dialog">
+            <t t-set="signer_name" t-value="Name"/>
+            <t t-if="current_request_item">
+                <t t-set="signer_name" t-value="current_request_item.partner_id.name"/>
+            </t> 
+        </t>
     </template>
 </data></openerp>

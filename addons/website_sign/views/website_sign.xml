@@ -11,7 +11,9 @@
     <template id="assets_frontend" inherit_id="website.assets_frontend">
         <xpath expr="." position="inside">
             <link rel='stylesheet' href='/website_sign/static/src/css/website_sign.css'/>
-            <script type="text/javascript" src="/website/static/lib/jSignature/jSignature.min.js"></script>
+
+            <!-- <script type="text/javascript" src="/website/static/lib/jSignature/jSignature.min.js"></script> -->
+            <script type="text/javascript" src="/website_sign/static/lib/jSignature/jSignature.min.js"></script>
 
             <script src="/website_sign/static/lib/pdfjs/build/pdf.js"/>
             <script src="/website_sign/static/lib/pdfjs/build/pdf.worker.js"/>
@@ -124,7 +126,12 @@
                         <div class="clearfix"/>
 
                         <form t-if="not hasItems" id="sign_doc" method="post" t-attf-action="/website_sign/signed/{{signature_request.id}}/{{token}}">
-                            <t t-call="website_sign.signature_dialog"/>
+                            <t t-call="website_sign.signature_dialog">
+                                <t t-set="signer_name" t-value="Name"/>
+                                <t t-if="current_request_item">
+                                    <t t-set="signer_name" t-value="current_request_item.partner_id.name"/>
+                                </t>  
+                            </t>
                         </form>
                     </div>
                 </div>
@@ -143,20 +150,29 @@
                     <div class="modal-body">
                         <div id="signer_info" class="form-group">
                             <label class="control-label" for="name">Your Name</label>
-                            <input class="form-control" name="signer" id="signer_name" t-att-value="current_request_item.partner_id.name" type="text"/>
+                            <input class="form-control" name="signer" id="signer_name" t-att-value="signer_name" type="text"/>
                             <div class="panel panel-default mt16 mb0" id="signature_draw">
                                 <div class="panel-heading">
+                                    <a id="sign_select_style" class="pull-right btn btn-xs">Select style</a>
                                     <a id="sign_clean" class="pull-right btn btn-xs">Clear</a>
-                                    <a class="sign_mode btn btn-primary">Auto</a>
-                                    <a class="sign_mode btn btn-primary" disabled="disabled">Draw</a>
+                                    <input type="file" name="files[]" id="sign_load" class="pull-right btn btn-xs" value="Load"/>
+                                    <a id="auto_sign_mode" class="sign_mode btn">Auto</a>
+                                    <a id="draw_sign_mode" class="sign_mode btn">Draw</a>
+                                    <a id="load_sign_mode" class="sign_mode btn">Load</a>
                                 </div>
                                 <div id="sign" class="panel-body" style="padding: 0"/>
+                                <p id="sign_instruction" class="panel-footer text-center"/>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" id="confirm_sign" data-dismiss="modal" class="btn btn-primary confirm_sign">Sign</button> or
                         <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
+                    </div>
+
+                    <div id="font_dialog" class="panel panel-default">
+                        <div class="panel-heading">Styles</div>
+                        <div id="sign_font_selection" class="panel-body"/>
                     </div>
                 </div>
             </div>

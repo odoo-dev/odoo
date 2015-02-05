@@ -1,6 +1,16 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <record id="action_client_digital_signature_menu" model="ir.actions.client">
+            <field name="name">Open Digital Signatures Menu</field>
+            <field name="tag">reload</field>
+            <field name="params" eval="{'menu_id': ref('website_sign.menu_digital_signatures')}"/>
+        </record>
+        <record id="base.open_menu" model="ir.actions.todo">
+            <field name="action_id" ref="action_client_digital_signature_menu"/>
+            <field name="state">open</field>
+        </record>
+
         <record id="request_sign_template" model="mail.template">
             <field name="name">Document Sign Request</field>
             <field name="model_id" ref="website_sign.model_signature_request_item"/>
@@ -141,20 +151,14 @@
             <field name="context" eval="{'search_default_draft_opened_signature_requests': 1}"/>
         </record>
 
-        <!-- <menuitem parent="knowledge.menu_document" id="website_sign.menu_digital_signatures" name="Digital Signature"/> -->
-        <!-- <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_requests" name="Signatures Requests" action="view_signature_requests_action"/> -->
-        <menuitem id="website_sign.menu_digital_signatures" name="Digital Signature"/>
-        <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_digital_signatures2" name="Digital Signature"/>
-        <menuitem parent="website_sign.menu_digital_signatures2" id="website_sign.menu_signature_requests" name="Signature Requests" action="view_signature_requests_action"/>
-
         <record model="ir.ui.view" id="signature_request_item_tree_view">
             <field name="name">Signature Request Item Tree View</field>
             <field name="model">signature.request.item</field>
             <field name="arch" type="xml">
                 <tree>
+                    <field name="role" class="oe_read_only"/>
                     <field name="partner_id"/>
                     <field name="signer_email" class="oe_read_only"/>
-                    <field name="role" class="oe_read_only"/>
                     <field name="state" class="oe_read_only"/>
                 </tree>
             </field>
@@ -172,6 +176,9 @@
                         <h2>Signer</h2>
 
                         <group>
+                            <field name="role"/>
+                        </group>
+                        <group>
                             <group>
                                 <field name="partner_id"/>
                                 <field name="signature_request"/>
@@ -180,10 +187,6 @@
                                 <field name="access_token"/>
                                 <field name="signing_date"/>
                             </group>
-                        </group>
-
-                        <group>
-                            <field name="role"/>
                         </group>
                     </sheet>
                 </form>
@@ -203,14 +206,39 @@
             </field>
         </record>
 
-        <record id="action_client_digital_signature_menu" model="ir.actions.client">
-            <field name="name">Open Digital Signatures Menu</field>
-            <field name="tag">reload</field>
-            <field name="params" eval="{'menu_id': ref('website_sign.menu_digital_signatures')}"/>
+        <record model="ir.ui.view" id="signature_party_tree_view">
+            <field name="name">Signature Party Tree View</field>
+            <field name="model">signature.item.party</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                </tree>
+            </field>
         </record>
-        <record id="base.open_menu" model="ir.actions.todo">
-            <field name="action_id" ref="action_client_digital_signature_menu"/>
-            <field name="state">open</field>
+
+        <record model="ir.ui.view" id="signature_party_form_view">
+            <field name="name">Signature Party Form View</field>
+            <field name="model">signature.item.party</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </form>
+            </field>
         </record>
+
+        <record model="ir.actions.act_window" id="view_signature_parties_action">
+            <field name="name">Signature Parties</field>
+            <field name="res_model">signature.item.party</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+         <!-- <menuitem parent="knowledge.menu_document" id="website_sign.menu_digital_signatures" name="Digital Signature"/> -->
+        <!-- <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_requests" name="Signatures Requests" action="view_signature_requests_action"/> -->
+        <menuitem id="website_sign.menu_digital_signatures" name="Digital Signature"/>
+        <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_digital_signatures2" name="Digital Signature"/>
+        <menuitem parent="website_sign.menu_digital_signatures2" id="website_sign.menu_signature_requests" name="Signature Requests" action="view_signature_requests_action"/>
+        <menuitem parent="website_sign.menu_digital_signatures2" id="website_sign.menu_signature_parties" name="Signature Parties" action="view_signature_parties_action"/>
     </data>
 </openerp>

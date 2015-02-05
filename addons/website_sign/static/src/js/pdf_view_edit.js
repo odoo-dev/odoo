@@ -151,6 +151,8 @@ function enableCustom(elem) {
     
     var relOuterSizeX = (elem.outerWidth() - elem.width()) / elem.parent().innerWidth();
     var relOuterSizeY = (elem.outerHeight() - elem.height()) / elem.parent().innerHeight();
+    var pageBorderX = (elem.parent().outerWidth() - elem.parent().innerWidth())/2;
+    var pageBorderY = (elem.parent().outerHeight() - elem.parent().innerHeight())/2;
 
     elem.on('mousedown', function(e) {
         var grabX = (e.pageX - elem.offset().left) / elem.outerWidth();
@@ -162,8 +164,8 @@ function enableCustom(elem) {
         var relHeight = elem.outerHeight()/elem.parent().innerHeight();
 
         move_fct = function(e) {
-            var posX = (e.pageX - (elem.parent().offset().left)) / elem.parent().innerWidth() - relWidth * grabX;
-            var posY = (e.pageY - (elem.parent().offset().top)) / elem.parent().innerHeight() - relHeight * grabY;
+            var posX = (e.pageX - (elem.parent().offset().left+pageBorderX)) / elem.parent().innerWidth() - relWidth * grabX;
+            var posY = (e.pageY - (elem.parent().offset().top+pageBorderY)) / elem.parent().innerHeight() - relHeight * grabY;
 
             elem.data('posx', posX).data('posy', posY);
             update_signature_element(elem);
@@ -281,8 +283,6 @@ $(function() {
             return false;
         }
 
-        // var cssLinks = $("head link[rel='stylesheet']"); 
-        // iframe.contents().find('head').append(cssLinks.clone());
         var cssLink = $("<link rel='stylesheet' type='text/css' href='../../../../../website_sign/static/src/css/iframe.css'/>");
         iframe.contents().find('head').append(cssLink);
 
@@ -300,6 +300,9 @@ $(function() {
                 $(el).data('width'), $(el).data('height'),
                 readonly || editMode || (resp > 0 && resp != role), values);
             elem.data('item-id', $(el).data('item-id'));
+
+            if(!editMode && resp > 0 && resp != role)
+                elem.removeClass('sign_item_required');
 
             configuration[parseInt($(el).data('page'))].push(elem);
         });
@@ -327,9 +330,12 @@ $(function() {
                 var parent = $(e.currentTarget);
                 var pageNo = parseInt(parent.attr('id').substr('pageContainer'.length));
 
+                var pageBorderX = (parent.outerWidth() - parent.innerWidth())/2;
+                var pageBorderY = (parent.outerHeight() - parent.innerHeight())/2;
+
                 var required = true;
-                var posX = (e.pageX - parent.offset().left) / parent.innerWidth();
-                var posY = (e.pageY - parent.offset().top) / parent.innerHeight();
+                var posX = (e.pageX - (parent.offset().left+pageBorderX)) / parent.innerWidth();
+                var posY = (e.pageY - (parent.offset().top+pageBorderY)) / parent.innerHeight();
                 var WIDTH = 0.2, HEIGHT = 0.05;
 
                 var elem = create_signature_item(iframe, role, currentFieldType, required, 0, posX-WIDTH/2, posY-HEIGHT/2, WIDTH, HEIGHT, true);

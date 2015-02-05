@@ -6,6 +6,9 @@ import time
 from openerp.addons.web.controllers.main import login_redirect
 from openerp.tools.translate import _
 
+import base64
+import os
+
 class website_sign(http.Controller):
 
     def __message_post(self, message, thread_model, thread_id, type='comment', subtype=False, attachments=[]):
@@ -146,3 +149,17 @@ class website_sign(http.Controller):
             })
             signature_item_obj.create(item)
         return True
+
+    @http.route(['/website_sign/get_fonts'], type='json', auth='user', website=True)
+    def get_fonts(self, **post):
+        fonts = []
+
+        fonts_directory = os.path.dirname(os.path.abspath(__file__)) + '/../static/src/font'
+        font_filenames = os.listdir(fonts_directory)
+
+        for filename in font_filenames:
+            font_file = open(fonts_directory + '/' + filename, 'r')
+            font = base64.b64encode(font_file.read())
+            fonts.append([filename[:-4], font])
+
+        return fonts
