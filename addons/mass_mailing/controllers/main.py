@@ -1,6 +1,7 @@
 
 import werkzeug
 
+from openerp.addons.website.controllers.main import Website
 from openerp import http, SUPERUSER_ID
 from openerp.http import request
 
@@ -75,3 +76,37 @@ class MassMailController(http.Controller):
         cr, uid, context = request.cr, request.uid, request.context
         request.registry['website.links.click'].add_click(cr, uid, code, request.httprequest.remote_addr, request.session['geoip'].get('country_code'), stat_id=stat_id, context=context)
         return werkzeug.utils.redirect(request.registry['website.links'].get_url_from_code(cr, uid, code, context=context), 301)
+
+    @http.route(['/website_mass_mailing/get_content'], type='json', auth="public")
+    def get_popup_content(self, newsletter_id, **post):
+        is_subscriber = False
+        email = None
+        if request.env.uid == request.session.uid:
+            email = request.env.user.email
+
+        if email:
+            contact_ids = request.env['mail.mass_mailing.contact'].sudo().search_count([('list_id', '=', int(newsletter_id)), ('email', '=', email)])
+            is_subscriber = contact_ids > 0
+
+        mass_mailing_list = request.env['mail.mass_mailing.list'].sudo().browse(int(newsletter_id))
+        return {'content': mass_mailing_list.popup_content, 'redirect_url': mass_mailing_list.popup_redirect_url, 'is_subscriber': is_subscriber, 'email': email}
+
+
+class Website(Website):
+
+    #------------------------------------------------------
+    # Backend popup content field
+    #------------------------------------------------------
+
+    @http.route('/website_mass_mailing/field/content', type='http', auth="public", website=True)
+    def FieldTextHtmlcontent(self, model=None, res_id=None, field=None, callback=None, **kwargs):
+        kwargs['template'] = "mass_mailing.FieldTextHtmlPopupContent"
+        return self.FieldTextHtml(model, res_id, field, callback, **kwargs)
+
+    @http.route(["/website_mass_mailing/field/popup_content"], type='http', auth="public", website=True)
+    def FieldTextHtmlPopupTemplate(self, model=None, res_id=None, field=None, callback=None, **kwargs):
+        cr, uid, context = request.cr, request.uid, request.context
+#        kwargs['theme'] = True
+        kwargs['snippets'] = 'snippets' not in kwargs and '/website_mail/snippets' or kwargs['snippets']
+        kwargs['dont_load_assets'] = not kwargs.get('enable_editor')
+        return self.FieldTextHtmlcontent(model, res_id, field, callback, **kwargs)
