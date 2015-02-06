@@ -2,10 +2,11 @@
 <openerp>
     <data noupdate="1">
         <!-- account.account.type -->
+
         <record model="account.account.type" id="data_account_type_asset">
           <field name="name">Fixed Assets</field>
           <field name="close_method">none</field>
-          <field name="report_type">fixed_assets</field>
+          <field name="include_initial_balance" eval="True"/>
         </record>
         <record model="account.account.type" id="data_account_type_receivable">
           <field name="name">Receivable</field>
