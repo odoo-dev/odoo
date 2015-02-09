@@ -2,7 +2,7 @@
 Stats for  md
 ------------------------------------------------------------
 
-CLA SIGNED 4673/4673 (100%)
+CLA SIGNED 4740/4751 (100%)
    2134 author-mail <xmo@odoo.com>
    1797 author-mail <fp@openerp.com>
     322 author-mail <al@openerp.com>
@@ -12,22 +12,28 @@ CLA SIGNED 4673/4673 (100%)
      29 author-mail <maxime.chambreuil@savoirfairelinux.com>
      26 author-mail <mat@odoo.com>
      19 author-mail <odo@openerp.com>
+     18 author-mail <moylop260@vauxoo.com>
      16 author-mail <erwin@bas-solutions.nl>
+     16 author-mail <csaba.toth@i3rendszerhaz.hu>
+     11 author-mail <wangbuke@gmail.com>
+     11 author-mail <the.clone.master@gmail.com>
+     11 author-mail <kiril@hacbee.com>
      11 author-mail <ccomb@free.fr>
      11 author-mail <alhashash@alhashash.net>
      11 author-mail <adrien.peiffer@acsone.eu>
       9 author-mail <nafex@gmx.net>
       1 author-mail <fva@openerp.com>
 
-CLA MISSING 0/4673 (0%)
+CLA MISSING 11/4751 (0%)
 
+     11 author-mail <npi@m4x.org>
 
 
 ------------------------------------------------------------
 Stats for  rst
 ------------------------------------------------------------
 
-CLA SIGNED 19991/20177 (99%)
+CLA SIGNED 19992/20177 (99%)
   13452 author-mail <xmo@odoo.com>
    3451 author-mail <rco@openerp.com>
     786 author-mail <jco@openerp.com>
@@ -53,8 +59,9 @@ CLA SIGNED 19991/20177 (99%)
       1 author-mail <qdp@odoo.com>
       1 author-mail <online@openerp.com>
       1 author-mail <odo@openerp.com>
+      1 author-mail <moylop260@vauxoo.com>
 
-CLA MISSING 186/20177 (1%)
+CLA MISSING 185/20177 (1%)
 
      66 author-mail <dgreis@sapo.pt>
      48 author-mail <t.motylewski@gmail.com>
@@ -64,7 +71,6 @@ CLA MISSING 186/20177 (1%)
       4 author-mail <chehax@gmail.com>
       2 author-mail <nicobustillos@users.noreply.github.com>
       1 author-mail <pchater@users.noreply.github.com>
-      1 author-mail <moylop260@vauxoo.com>
       1 author-mail <antoine.lorence@gmail.com>
 
 
@@ -72,34 +78,34 @@ CLA MISSING 186/20177 (1%)
 Stats for  py
 ------------------------------------------------------------
 
-CLA SIGNED 229871/237117 (97%)
-  23513 author-mail <tde@openerp.com>
-  18566 author-mail <rco@openerp.com>
+CLA SIGNED 230205/237198 (97%)
+  23501 author-mail <tde@openerp.com>
+  18571 author-mail <rco@openerp.com>
   15638 author-mail <chs@odoo.com>
-  13895 author-mail <qdp@odoo.com>
-  12258 author-mail <odo@openerp.com>
+  13886 author-mail <qdp@odoo.com>
+  12256 author-mail <odo@openerp.com>
   12252 author-mail <xmo@odoo.com>
   11710 author-mail <fp@openerp.com>
    8534 author-mail <al@openerp.com>
    6400 author-mail <rvo@tinyerp.com>
    6340 author-mail <vmt@openerp.com>
    5598 author-mail <xrg@openerp.com>
-   4496 author-mail <mat@odoo.com>
+   4495 author-mail <mat@odoo.com>
    4404 author-mail <jke@odoo.com>
    4392 author-mail <stw@openerp.com>
-   4376 author-mail <jco@openerp.com>
+   4388 author-mail <jco@openerp.com>
    4085 author-mail <mra@tinyerp.com>
    3944 author-mail <chm@odoo.com>
-   3578 author-mail <dle@odoo.com>
+   3587 author-mail <dle@odoo.com>
    3319 author-mail <fva@openerp.com>
    3190 author-mail <fme@openerp.com>
    3056 author-mail <pso@tinyerp.com>
    2924 author-mail <uco@tinyerp.com>
    2891 author-mail <sle@openerp.com>
-   2817 author-mail <hmo@tinyerp.com>
+   2812 author-mail <hmo@tinyerp.com>
    2791 author-mail <psi@tinyerp.com>
    2435 author-mail <rim@odoo.com>
-   1740 author-mail <niv@openerp.com>
+   1738 author-mail <niv@openerp.com>
    1578 author-mail <rpa@tinyerp.com>
    1491 author-mail <nch@tinyerp.com>
    1488 author-mail <abo@openerp.com>
@@ -108,7 +114,7 @@ CLA SIGNED 229871/237117 (97%)
    1226 author-mail <vir@tinyerp.com>
    1215 author-mail <csn@openerp.com>
    1172 author-mail <dsh@tinyerp.com>
-   1154 author-mail <mga@tinyerp.com>
+   1150 author-mail <mga@tinyerp.com>
    1095 author-mail <apa@tinyerp.com>
    1072 author-mail <jvo@tinyerp.com>
     952 author-mail <nel@odoo.com>
@@ -126,7 +132,7 @@ CLA SIGNED 229871/237117 (97%)
     641 author-mail <atp@tinyerp.com>
     588 author-mail <pap@tinyerp.com>
     582 author-mail <mtr@tinyerp.com>
-    569 author-mail <ssu@tinyerp.com>
+    568 author-mail <ssu@tinyerp.com>
     540 author-mail <ron@tinyerp.com>
     536 author-mail <jar@tinyerp.com>
     516 author-mail <mdi@tinyerp.com>
@@ -134,7 +140,7 @@ CLA SIGNED 229871/237117 (97%)
     502 author-mail <ara@tinyerp.com>
     424 author-mail <vro@tinyerp.com>
     406 author-mail <cha@tinyerp.com>
-    383 author-mail <ysa@tinyerp.com>
+    382 author-mail <ysa@tinyerp.com>
     367 author-mail <ksh@tinyerp.com>
     358 author-mail <jam@tinyerp.com>
     351 author-mail <tiny@tinyerp.com>
@@ -162,6 +168,7 @@ CLA SIGNED 229871/237117 (97%)
     185 author-mail <avo@tinyerp.com>
     173 author-mail <ddm@openerp.com>
     173 author-mail <ama@odoo.com>
+    162 author-mail <javier@vauxoo.com>
     154 author-mail <rga@tinyerp.com>
     152 author-mail <kum@tinyerp.com>
     150 author-mail <dka@tinyerp.com>
@@ -189,21 +196,23 @@ CLA SIGNED 229871/237117 (97%)
      75 author-mail <dja@tinyerp.com>
      74 author-mail <tch@tinyerp.com>
      73 author-mail <tta@tinyerp.com>
-     72 author-mail <skh@tinyerp.com>
      71 author-mail <gim@openerp.com>
+     69 author-mail <jle@odoo.com>
      66 author-mail <rma@tinyerp.com>
      63 author-mail <ssi@tinyerp.com>
+     62 author-mail <skh@tinyerp.com>
      62 author-mail <ggh@tinyerp.com>
+     61 author-mail <nhomar@vauxoo.com>
      61 author-mail <dmo@odoo.com>
      60 author-mail <jpr@tinyerp.com>
      58 author-mail <cod@tinyerp.com>
+     54 author-mail <avp@tinyerp.com>
      53 author-mail <nco@tinyerp.com>
      53 author-mail <jra@tinyerp.com>
      53 author-mail <jba@odoo.com>
      49 author-mail <ppa@tinyerp.com>
      46 author-mail <han@tinyerp.com>
      44 author-mail <dhr@tinyerp.com>
-     43 author-mail <jle@odoo.com>
      42 author-mail <rgo@tinyerp.com>
      40 author-mail <maxime.chambreuil@savoirfairelinux.com>
      37 author-mail <ypa@tinyerp.com>
@@ -223,6 +232,8 @@ CLA SIGNED 229871/237117 (97%)
      22 author-mail <ado@tinyerp.com>
      19 author-mail <aar@tinyerp.com>
      16 author-mail <msa@openerp.com>
+     15 author-mail <kiril@hacbee.com>
+     15 author-mail <hbto@vauxoo.com>
      14 author-mail <shp@tinyerp.com>
      14 author-mail <evv@openerp.com>
      13 author-mail <saz@tinyerp.com>
@@ -239,26 +250,31 @@ CLA SIGNED 229871/237117 (97%)
       9 author-mail <erwin@bas-solutions.nl>
       8 author-mail <sme@tinyerp.com>
       8 author-mail <rme@tinyerp.com>
+      8 author-mail <csaba.toth@i3rendszerhaz.hu>
       7 author-mail <kch@tinyerp.com>
       7 author-mail <ame@tinyerp.com>
       6 author-mail <ccomb@free.fr>
       5 author-mail <jpa@tinyerp.com>
       5 author-mail <asr@tinyerp.com>
+      4 author-mail <wangbuke@gmail.com>
+      4 author-mail <moylop260@vauxoo.com>
       4 author-mail <dbi@tinyerp.com>
       4 author-mail <bhumi@tinyerp.com>
       4 author-mail <aba@tinyerp.com>
+      3 author-mail <yanina.aular@vauxoo.com>
       3 author-mail <tgr@odoo.com>
       3 author-mail <ptr@tinyerp.com>
       3 author-mail <gan@openerp.com>
       3 author-mail <bpa@openerp.com>
+      3 author-mail <adrien.peiffer@acsone.eu>
       2 author-mail <yti@odoo.com>
+      2 author-mail <the.clone.master@gmail.com>
       2 author-mail <sma@tinyerp.com>
       2 author-mail <rda@openerp.com>
       2 author-mail <mmu@openerp.com>
       2 author-mail <jni@tinyerp.com>
       2 author-mail <hpa@tinyerp.com>
       2 author-mail <cpa@tinyerp.com>
-      2 author-mail <adrien.peiffer@acsone.eu>
       1 author-mail <sus@tinyerp.com>
       1 author-mail <pan@tinyerp.com>
       1 author-mail <nep@tinyerp.com>
@@ -267,7 +283,7 @@ CLA SIGNED 229871/237117 (97%)
       1 author-mail <htr@tinyerp.com>
       1 author-mail <hip@tinyerp.com>
 
-CLA MISSING 7246/237117 (3%)
+CLA MISSING 6993/237198 (3%)
 
     971 author-mail <ls@numerigraphe.fr>
     738 author-mail <nicolas.bessi@camptocamp.com>
@@ -278,8 +294,7 @@ CLA MISSING 7246/237117 (3%)
     207 author-mail <openerp@ubuntu>
     193 author-mail <yannick@serveur-perso>
     188 author-mail <guewen.baconnier@camptocamp.com>
-    182 author-mail <stefan@therp.nl>
-    162 author-mail <javier@vauxoo.com>
+    183 author-mail <stefan@therp.nl>
     159 author-mail <joel.grandguillaume@camptocamp.com>
     155 author-mail <yannick.vaucher@camptocamp.com>
     142 author-mail <rvalyi@gmail.com>
@@ -302,7 +317,6 @@ CLA MISSING 7246/237117 (3%)
      65 author-mail <stephane.bidoul@acsone.eu>
      65 author-mail <aaltinisik@altinkaya.com.tr>
      64 author-mail <tientranphuoc@gmail.com>
-     61 author-mail <nhomar@vauxoo.com>
      57 author-mail <rolv.raen@gmail.com>
      53 author-mail <marcelo.hamra@gmail.com>
      50 author-mail <ruchir@bizzappdev.com>
@@ -330,7 +344,6 @@ CLA MISSING 7246/237117 (3%)
      17 author-mail <kevin_327@163.com>
      15 author-mail <richierichrawr@users.noreply.github.com>
      15 author-mail <kitsunde@gmail.com>
-     15 author-mail <hbto@vauxoo.com>
      15 author-mail <fossoul.t@gmail.com>
      13 author-mail <pl@agaplan.eu>
      12 author-mail <olivier.laurent@acsone.eu>
@@ -346,7 +359,6 @@ CLA MISSING 7246/237117 (3%)
       9 author-mail <dgreis@sapo.pt>
       8 author-mail <mart@povi.ee>
       8 author-mail <jbq@cmlid.fr>
-      8 author-mail <csaba.toth@i3rendszerhaz.hu>
       8 author-mail <claude.brule@syleam.fr>
       8 author-mail <bogdanovidiu.stanciu@gmail.com>
       8 author-mail <andrius@versada.lt>
@@ -361,8 +373,8 @@ CLA MISSING 7246/237117 (3%)
       5 author-mail <qt@tempo-consulting.fr>
       5 author-mail <miku.laitinen@gmail.com>
       5 author-mail <hiekmann-fnordbedarf-de@users.noreply.github.com>
+      4 author-mail <signup@vivisci.com>
       4 author-mail <salvatore@trigluu.com>
-      4 author-mail <moylop260@vauxoo.com>
       4 author-mail <jesteve@zikzakmedia.com>
       4 author-mail <jean-baptiste.aubort@camptocamp.com>
       4 author-mail <grover.menacho@poiesisconsulting.com>
@@ -370,8 +382,6 @@ CLA MISSING 7246/237117 (3%)
       4 author-mail <dawn@catalyst.net.nz>
       4 author-mail <daniel.watkins@credativ.co.uk>
       4 author-mail <albert@nan-tic.com>
-      3 author-mail <yanina.aular@vauxoo.com>
-      3 author-mail <wangbuke@gmail.com>
       3 author-mail <sylvain.calador@gmail.com>
       3 author-mail <sebastien.lange@syleam.fr>
       3 author-mail <sebastien.alix@osiell.com>
@@ -381,7 +391,6 @@ CLA MISSING 7246/237117 (3%)
       3 author-mail <espo-tony@users.noreply.github.com>
       3 author-mail <carlos.vasquez@clearcorp.co.cr>
       3 author-mail <augustin.cisternekaas@elico-corp.com>
-      2 author-mail <the.clone.master@gmail.com>
       2 author-mail <popkar77@gmail.com>
       2 author-mail <martin@its.mu>
       2 author-mail <komsas@gmail.com>
@@ -408,10 +417,10 @@ CLA MISSING 7246/237117 (3%)
       1 author-mail <mariagr@europeanstonetile.com>
       1 author-mail <leonardo.pistone@camptocamp.com>
       1 author-mail <laetitia.gangloff@acsone.eu>
-      1 author-mail <kiril@hacbee.com>
       1 author-mail <jonatan.cloutier@savoirfairelinux.com>
       1 author-mail <jerome.keirse@gmail.com>
       1 author-mail <jcamacho@trey.es>
+      1 author-mail <info@tiedra.net>
       1 author-mail <guillem@alcarrer.net>
       1 author-mail <googuy@gmail.com>
       1 author-mail <github@yjmade.net>
@@ -434,10 +443,10 @@ CLA MISSING 7246/237117 (3%)
 Stats for  js
 ------------------------------------------------------------
 
-CLA SIGNED 210260/210565 (100%)
+CLA SIGNED 210323/210565 (100%)
   57583 author-mail <niv@openerp.com>
   25336 author-mail <xmo@odoo.com>
-  25089 author-mail <ged@odoo.com>
+  25088 author-mail <ged@odoo.com>
   23347 author-mail <fme@openerp.com>
   14553 author-mail <al@openerp.com>
   13912 author-mail <fva@openerp.com>
@@ -452,7 +461,7 @@ CLA SIGNED 210260/210565 (100%)
    1186 author-mail <noz@tinyerp.com>
     981 author-mail <mat@odoo.com>
     809 author-mail <csn@openerp.com>
-    775 author-mail <dle@odoo.com>
+    776 author-mail <dle@odoo.com>
     639 author-mail <vme@tinyerp.com>
     496 author-mail <ysa@tinyerp.com>
     479 author-mail <aja@tinyerp.com>
@@ -477,6 +486,7 @@ CLA SIGNED 210260/210565 (100%)
      57 author-mail <bth@tinyerp.com>
      56 author-mail <vda@tinyerp.com>
      48 author-mail <hsa@tinyerp.com>
+     48 author-mail <csaba.toth@i3rendszerhaz.hu>
      45 author-mail <qdc@openerp.com>
      44 author-mail <rga@tinyerp.com>
      36 author-mail <dka@tinyerp.com>
@@ -486,6 +496,7 @@ CLA SIGNED 210260/210565 (100%)
      24 author-mail <xal@openerp.com>
      23 author-mail <hmo@tinyerp.com>
      18 author-mail <jba@odoo.com>
+     15 author-mail <the.clone.master@gmail.com>
      15 author-mail <jra@tinyerp.com>
      14 author-mail <pan@tinyerp.com>
      12 author-mail <vmt@openerp.com>
@@ -529,11 +540,9 @@ CLA SIGNED 210260/210565 (100%)
       1 author-mail <avo@tinyerp.com>
       1 author-mail <aba@tinyerp.com>
 
-CLA MISSING 305/210565 (0%)
+CLA MISSING 242/210565 (0%)
 
     195 author-mail <mmakonnen@gmail.com>
-     48 author-mail <csaba.toth@i3rendszerhaz.hu>
-     15 author-mail <the.clone.master@gmail.com>
       8 author-mail <anthony.muschang@acsone.eu>
       7 author-mail <valentin.lab@kalysto.org>
       6 author-mail <edgartenesaca@gmail.com>
@@ -556,7 +565,7 @@ CLA MISSING 305/210565 (0%)
 Stats for  xml
 ------------------------------------------------------------
 
-CLA SIGNED 244183/306411 (80%)
+CLA SIGNED 247651/306419 (81%)
   36191 author-mail <niv@openerp.com>
   25734 author-mail <sgo@tinyerp.com>
   22915 author-mail <qdp@odoo.com>
@@ -565,12 +574,13 @@ CLA SIGNED 244183/306411 (80%)
   10838 author-mail <tde@openerp.com>
    7991 author-mail <stw@openerp.com>
    7615 author-mail <chm@odoo.com>
-   7484 author-mail <sle@openerp.com>
+   7480 author-mail <sle@openerp.com>
    5751 author-mail <odo@openerp.com>
    5534 author-mail <maxime.chambreuil@savoirfairelinux.com>
    4581 author-mail <mka@tinyerp.com>
    4165 author-mail <mdi@tinyerp.com>
    3782 author-mail <al@openerp.com>
+   3459 author-mail <nhomar@vauxoo.com>
    3442 author-mail <rpa@tinyerp.com>
    3273 author-mail <dle@odoo.com>
    3028 author-mail <fme@openerp.com>
@@ -597,7 +607,7 @@ CLA SIGNED 244183/306411 (80%)
     924 author-mail <vir@tinyerp.com>
     918 author-mail <apa@tinyerp.com>
     907 author-mail <qdc@openerp.com>
-    875 author-mail <atp@tinyerp.com>
+    872 author-mail <atp@tinyerp.com>
     826 author-mail <aja@tinyerp.com>
     796 author-mail <api@openerp.com>
     753 author-mail <pga@tinyerp.com>
@@ -640,8 +650,8 @@ CLA SIGNED 244183/306411 (80%)
     211 author-mail <hda@tinyerp.com>
     208 author-mail <nel@odoo.com>
     201 author-mail <rsi@tinyerp.com>
+    194 author-mail <dmo@odoo.com>
     190 author-mail <jap@tinyerp.com>
-    179 author-mail <dmo@odoo.com>
     150 author-mail <aag@tinyerp.com>
     148 author-mail <tta@tinyerp.com>
     147 author-mail <dja@tinyerp.com>
@@ -733,9 +743,10 @@ CLA SIGNED 244183/306411 (80%)
       2 author-mail <aar@tinyerp.com>
       1 author-mail <saz@tinyerp.com>
       1 author-mail <rda@openerp.com>
+      1 author-mail <csaba.toth@i3rendszerhaz.hu>
       1 author-mail <bpa@openerp.com>
 
-CLA MISSING 62228/306411 (20%)
+CLA MISSING 58768/306419 (19%)
 
    9628 author-mail <pedro.baeza@serviciosbaeza.com>
    4756 author-mail <parthivgls@gmail.com>
@@ -744,7 +755,6 @@ CLA MISSING 62228/306411 (20%)
    4141 author-mail <trunk@thinkopensolutions.com>
    3973 author-mail <office@erpsystems.ro>
    3881 author-mail <rolv.raen@gmail.com>
-   3459 author-mail <nhomar@vauxoo.com>
    2773 author-mail <aaltinisik@altinkaya.com.tr>
    2526 author-mail <renatonlima@gmail.com>
    2243 author-mail <tientranphuoc@gmail.com>
@@ -817,7 +827,6 @@ CLA MISSING 62228/306411 (20%)
       1 author-mail <kevin_327@163.com>
       1 author-mail <gbisheimer@bys-control.com.ar>
       1 author-mail <espo-tony@users.noreply.github.com>
-      1 author-mail <csaba.toth@i3rendszerhaz.hu>
       1 author-mail <bornspy@gmail.com>
       1 author-mail <blaggacao@users.noreply.github.com>
       1 author-mail <Yajo@users.noreply.github.com>
