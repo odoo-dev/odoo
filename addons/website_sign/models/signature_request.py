@@ -1,78 +1,10 @@
 # -*- coding: utf-8 -*-
-import uuid,re
-
 from openerp import tools
 from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
-import time
-from openerp.tools.translate import _
-from openerp import models, api, fields
+import time, uuid, re
 
-class signature_mail_message(models.Model):
-    _inherit = "mail.message"
-
-    def _message_read_dict_postprocess(self, cr, uid, messages, message_tree, context=None):
-        result = super(signature_mail_message, self)._message_read_dict_postprocess(cr, uid, messages, message_tree, context=context)
-
-        # Calculate total requested and signed on specific attachment
-        sign_obj = self.pool.get('signature.request.item').search(cr, uid, [], context=context)
-        request_items = self.pool.get('signature.request.item').browse(cr, SUPERUSER_ID, sign_obj)
-        doc_data = {}
-        for request_item in request_items:
-            if request_item.signature_request.attachment.id not in doc_data:
-                doc_data[request_item.signature_request.attachment.id] = {'nb_signed': 0, 'nb_toSign': 0}
-
-            doc_data[request_item.signature_request.attachment.id]['nb_toSign'] += 1
-            if request_item.state == 'closed':
-                doc_data[request_item.signature_request.attachment.id]['nb_signed'] += 1
-            doc_data[request_item.signature_request.attachment.id]['signature_request'] = request_item.signature_request.id
-
-        # Update message dictionaries (attach)
-        for message_dict in messages:
-            attachment_ids = message_dict.get('attachment_ids')
-            for attachment in attachment_ids:
-                if attachment['id'] in doc_data:
-                    attachment.update(doc_data[attachment['id']])
-
-        return result
-
-    # TODO -> should include a message with 'a signature request could be sent to you later'
-    def create(self, cr, uid, values, context=None):
-        # signers_data = []
-        # if (context == None or 'is_signature_request' not in context) and 'attachment_ids' in values:
-        #     signers_data = self.pool.get("ir.attachment").browse(cr, uid, map(lambda a: a[1], values['attachment_ids']), context=context).get_signers().keys()
-
-        # new_context = {'ignored_signers_for_mail': signers_data}
-        # if context != None:
-        #     new_context.update(context)
-
-        tmp = super(signature_mail_message, self).create(cr, uid, values, context=context)
-        if 'signature_request' not in context:
-            mess = self.pool.get("mail.message").browse(cr, uid, [tmp], context=context)
-            signature_request = self.pool.get("signature.request").search(cr, uid, [("attachment.id", "in", map(lambda d: d.id, mess.attachment_ids))], context=context)
-            signature_request = self.pool.get("signature.request").browse(cr, uid, signature_request, context=context)
-            signature_request.write({'message': mess.body})
-
-        # attachments = self.pool.get("ir.attachment").browse(cr, uid, map(lambda d: d.id, mess.attachment_ids), context=context)
-        # attachments.send_signature_accesses(mess.body)
-        return tmp
-
-# class signature_mail_notification(models.Model):
-#     _inherit = "mail.notification"
-
-#     def _notify(self, cr, uid, message_id, partners_to_notify=None, context=None, force_send=False, user_signature=True):
-#         if context != None and 'ignored_signers_for_mail' in context:
-#             partners_to_notify = list(set(partners_to_notify) - set(context['ignored_signers_for_mail']))
-#         super(signature_mail_notification, self)._notify(cr, uid, message_id, partners_to_notify=partners_to_notify, context=context, force_send=force_send, user_signature=user_signature)
-
-class ir_attachment(models.Model):
-    _inherit = 'ir.attachment'
-
-    signature_request = fields.One2many("signature.request", "attachment")
-
-    def set_name_and_description(self, cr, uid, id, name, description, context=None):
-        attach = self.browse(cr, uid, [id], context=context)
-        attach.write({'name': name, 'description': description})
+from openerp import models, api, fields, _
 
 class signature_request(models.Model):
     _name = "signature.request"
@@ -295,7 +227,7 @@ class signature_request_item(models.Model):
         self.access_token = self._default_access_token()
         self.signer_name = ""
         for item in self.signature_request.signature_items:
-            if item.responsible == self.role:
+            if item.responsible == self.role or not item.responsible:
                 item.value.set(None)
         self.state = 'draft'
 
@@ -339,57 +271,68 @@ class signature_request_item(models.Model):
     # def _onchange_partner(self):
     #     self.action_draft()
 
-class signature_item(models.Model):
-    _name = "signature.item"
-    _description = "Signature Field For Document To Sign"
+class signature_mail_message(models.Model):
+    _inherit = "mail.message"
 
-    signature_request = fields.Many2one('signature.request', required=True, ondelete='cascade')
+    def _message_read_dict_postprocess(self, cr, uid, messages, message_tree, context=None):
+        result = super(signature_mail_message, self)._message_read_dict_postprocess(cr, uid, messages, message_tree, context=context)
 
-    name = fields.Char()
-    type = fields.Selection([
-        ('text', "Text"),
-        ('signature', "Signature"),
-        ('date', "Date")
-    ], required=True)
+        # Calculate total requested and signed on specific attachment
+        sign_obj = self.pool.get('signature.request.item').search(cr, uid, [], context=context)
+        request_items = self.pool.get('signature.request.item').browse(cr, SUPERUSER_ID, sign_obj)
+        doc_data = {}
+        for request_item in request_items:
+            if request_item.signature_request.attachment.id not in doc_data:
+                doc_data[request_item.signature_request.attachment.id] = {'nb_signed': 0, 'nb_toSign': 0}
 
-    required = fields.Boolean(required=True, default=True)
-    responsible = fields.Many2one("signature.item.party")
+            doc_data[request_item.signature_request.attachment.id]['nb_toSign'] += 1
+            if request_item.state == 'closed':
+                doc_data[request_item.signature_request.attachment.id]['nb_signed'] += 1
+            doc_data[request_item.signature_request.attachment.id]['signature_request'] = request_item.signature_request.id
 
-    page = fields.Integer(string="Document Page", required=True, default=1)
-    posX = fields.Float(digits=(4, 3), string="Position X", required=True)
-    posY = fields.Float(digits=(4, 3), string="Position Y", required=True)
-    width = fields.Float(digits=(4, 3), required=True)
-    height = fields.Float(digits=(4, 3), required=True)
+        # Update message dictionaries (attach)
+        for message_dict in messages:
+            attachment_ids = message_dict.get('attachment_ids')
+            for attachment in attachment_ids:
+                if attachment['id'] in doc_data:
+                    attachment.update(doc_data[attachment['id']])
 
-    value = fields.One2many('signature.item.value', 'signature_item', string="Signature Item Values") # Let's keep the possibility of multiple values
+        return result
 
-class signature_item_value(models.Model):
-    _name = "signature.item.value"
-    _description = "Signature Field Value For Document To Sign"
-    
-    signature_item = fields.Many2one('signature.item', required=True, ondelete='cascade')
+    # TODO -> should include a message with 'a signature request could be sent to you later'
+    def create(self, cr, uid, values, context=None):
+        # signers_data = []
+        # if (context == None or 'is_signature_request' not in context) and 'attachment_ids' in values:
+        #     signers_data = self.pool.get("ir.attachment").browse(cr, uid, map(lambda a: a[1], values['attachment_ids']), context=context).get_signers().keys()
 
-    text_value = fields.Char()
-    image_value = fields.Binary()
+        # new_context = {'ignored_signers_for_mail': signers_data}
+        # if context != None:
+        #     new_context.update(context)
 
-    @api.one
-    def set(self, value):
-        {
-            'text': self.setText,
-            'signature': self.setImage,
-            'date': self.setText,
-        }[self.signature_item.type](value)
+        tmp = super(signature_mail_message, self).create(cr, uid, values, context=context)
+        if 'signature_request' not in context:
+            mess = self.pool.get("mail.message").browse(cr, uid, [tmp], context=context)
+            signature_request = self.pool.get("signature.request").search(cr, uid, [("attachment.id", "in", map(lambda d: d.id, mess.attachment_ids))], context=context)
+            signature_request = self.pool.get("signature.request").browse(cr, uid, signature_request, context=context)
+            signature_request.write({'message': mess.body})
 
-    @api.one
-    def setText(self, value):
-        self.text_value = value
+        # attachments = self.pool.get("ir.attachment").browse(cr, uid, map(lambda d: d.id, mess.attachment_ids), context=context)
+        # attachments.send_signature_accesses(mess.body)
+        return tmp
 
-    @api.one
-    def setImage(self, value):
-        self.image_value = value
+# class signature_mail_notification(models.Model):
+#     _inherit = "mail.notification"
 
-class signature_item_party(models.Model):
-    _name = "signature.item.party"
-    _description = "Type of partner which can access a particular signature field"
+#     def _notify(self, cr, uid, message_id, partners_to_notify=None, context=None, force_send=False, user_signature=True):
+#         if context != None and 'ignored_signers_for_mail' in context:
+#             partners_to_notify = list(set(partners_to_notify) - set(context['ignored_signers_for_mail']))
+#         super(signature_mail_notification, self)._notify(cr, uid, message_id, partners_to_notify=partners_to_notify, context=context, force_send=force_send, user_signature=user_signature)
 
-    name = fields.Char(required=True)
+class ir_attachment(models.Model):
+    _inherit = 'ir.attachment'
+
+    signature_request = fields.One2many("signature.request", "attachment")
+
+    def set_name_and_description(self, cr, uid, id, name, description, context=None):
+        attach = self.browse(cr, uid, [id], context=context)
+        attach.write({'name': name, 'description': description})

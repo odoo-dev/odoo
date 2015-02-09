@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-<data>
+<odoo>
     <template id="assets_backend" name="website_sign assets" inherit_id="web.assets_backend">
         <xpath expr="." position="inside">
-            <link rel="stylesheet" href="/website_sign/static/src/css/website_sign.css"/>
+            <link rel="stylesheet" href="/website_sign/static/src/css/backend.css"/>
             <script type="text/javascript" src="/website_sign/static/src/js/backend.js"></script>
         </xpath>
     </template>
 
     <template id="assets_frontend" inherit_id="website.assets_frontend">
         <xpath expr="." position="inside">
-            <link rel='stylesheet' href='/website_sign/static/src/css/website_sign.css'/>
+            <link rel='stylesheet' href='/website_sign/static/src/css/frontend.css'/>
 
             <!-- <script type="text/javascript" src="/website/static/lib/jSignature/jSignature.min.js"></script> -->
             <script type="text/javascript" src="/website_sign/static/lib/jSignature/jSignature.min.js"></script>
-
             <script src="/website_sign/static/lib/pdfjs/build/pdf.js"/>
             <script src="/website_sign/static/lib/pdfjs/build/pdf.worker.js"/>
 
             <script type="text/javascript" src="/website_sign/static/src/js/sign.js"></script>
             <script type="text/javascript" src="/website_sign/static/src/js/pdf_view_edit.js"></script>
         </xpath>
-    </template> 
+    </template>
 
     <template id="website_sign.doc_sign" name="Document Sign">
         <t t-call="website.layout">
@@ -55,7 +53,12 @@
                                     <a t-if="not hasItems" class="btn btn-primary btn-block fa fa-check" data-toggle="modal" data-target="#signature_dialog">
                                         Sign Document
                                     </a>
-                                    <button t-if="hasItems" id="signature-validate-button" class="btn btn-primary btn-block" type="button" disabled="disabled"/>
+                                    <t t-if="hasItems">
+                                        <button id="signature-validate-button" class="btn btn-primary btn-block" type="button" disabled="disabled"/>
+                                        <button class="other-sign-item-button btn btn-primary btn-block pull-left" type="button">Previous field</button>
+                                        <button class="other-sign-item-button btn btn-primary btn-block pull-right" type="button">Next field</button>
+                                        <div class="clearfix"/>
+                                    </t>
                                 </t>
                                 <t t-if="current_request_item and current_request_item.state == 'closed'">
                                     <h4 class="modal-title">You have signed the document.</h4>
@@ -67,7 +70,7 @@
                             </div>
                             <div class="panel-body">
                                 <h4><t t-raw="signature_request.attachment.name"/></h4>
-                                <t t-if="signature_request.attachment.description"><t t-raw="signature_request.attachment.description"/></t>
+                                <p t-if="signature_request.attachment.description"><t t-raw="signature_request.attachment.description"/></p>
                             </div>
                         </div>
                     </div>
@@ -82,24 +85,14 @@
                             You have successfully signed the document.
                         </div>
 
-                        <t t-foreach="messages" t-as="message">
-                            <t t-foreach='message.attachment_ids' t-as='attach'>
-                                <t t-if="attach.id == signature_request.attachment.id">
-                                    <div t-if="not hasItems">
-                                        <a t-att-href="'/mail/download_attachment?model=mail.message&amp;id='+str(message.id)+'&amp;method=download_attachment&amp;attachment_id='+str(signature_request.attachment.id)" target="_blank">
-                                            <t t-if="attach.file_type_icon == 'webimage'">
-                                                <img class="media-object" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id) + '&amp;resize=300,180'" style="width: 400px;"/>
-                                            </t>
-                                            <t t-if="attach.file_type_icon != 'webimage'">
-                                                <img class="media-object" t-att-src="'/mail/static/src/img/mimetypes/' + attach.file_type_icon + '.png'" style="width: 400px;"></img>
-                                            </t>
-                                        </a>
-                                    </div>
-                                    <t t-if="hasItems">
-                                        <t t-call="website_sign.items_view"/>
-                                    </t>
-                                </t>
-                            </t>
+                        <div t-if="not hasItems">
+                            <a t-att-href="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id)" target="_blank">
+                                <img t-if="signature_request.attachment.file_type_icon == 'webimage'" class="media-object" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id) + '&amp;resize=300,180'" style="width: 400px;"/>
+                                <img t-if="signature_request.attachment.file_type_icon != 'webimage'" class="media-object" t-att-src="'/mail/static/src/img/mimetypes/' + signature_request.attachment.file_type_icon + '.png'" style="width: 400px;"/>
+                            </a>
+                        </div>
+                        <t t-if="hasItems">
+                            <t t-call="website_sign.items_view"/>
                         </t>
 
                         <t t-foreach="signature_request.request_items" t-as="sign">
@@ -210,5 +203,4 @@
             </body>
         </t>
     </template>
-</data>
-</openerp>
+</odoo>

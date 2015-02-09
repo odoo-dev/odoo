@@ -12,11 +12,10 @@ function whenPdfIsLoaded(iframe, fct) {
 function check_pdf_items_completion(iframe, role) {
     var ok = true;
     iframe.contents().find('.sign_item').each(function(i, el) {
-        var value = {
-            'text': $(el).val(),
-            'signature': $(el).data('signature'),
-            'date': $(el).val()
-        }[$(el).data('type')];
+        var value = $(el).val();
+        if($(el).data('type') == 'signature' || $(el).data('type') == 'initial') {
+            value = $(el).data('signature');
+        }
 
         var resp = parseInt($(el).data('responsible')) || 0;
 
@@ -96,41 +95,58 @@ function update_signature_element(elem) {
 function create_signature_item(iframe, role, type, required, responsible, posX, posY, width, height, readonly, value) {
     value = (value === undefined)? {"text": "", "image": ""} : value;
 
+    var signature_dialog = $('#signature_dialog');
+
     var elem = $("<div><span class='helper'/></div>");
     if(!readonly) {
         elem = $({
-            "text": "<textarea/>",
             "signature": "<button type='button'><span class='helper'/></div>",
+            "initial": "<button type='button'><span class='helper'/></div>",
+            "text": "<input type='text'/>",
+            "textarea": "<textarea/>",
             "date": "<input type='date'/>",
         }[type]);
 
-        if(type === "signature") {
+        if(type === "signature" || type === "initial") {
             elem.on('click', function(e) {
-                $("#signature_dialog #confirm_sign").one('click', function(e) {
-                    var sign_img = $('#signature_dialog').find('#sign').jSignature("getData",'image');
-                    elem.html('<span class="helper"/><img src="data:'+sign_img[0]+','+sign_img[1]+'"/>');
-                    elem.data('signature', JSON.stringify(sign_img[1]));
-                    elem.change();
+                var signed_items = iframe.contents().find('.sign_item').filter(function(i) {
+                    return $(this).data('type') == type && $(this).data('signature') && $(this).data('signature') != elem.data('signature');
                 });
+                
+                if(signed_items.length > 0) {
+                    elem.data('signature', $(signed_items[0]).data('signature'));
+                    elem.html('<span class="helper"/><img src="' + elem.data('signature') + '"/>');
 
-                var sign_img = $('#signature_dialog').find('#sign').jSignature("getData",'image');
-                if(sign_img && (elem.html() == "Sign Here" || 'data:'+sign_img[0]+','+sign_img[1] != elem.find('img').attr('src')))
-                    $("#signature_dialog #confirm_sign").click();
+                    elem.change();
+                }
                 else {
-                    $("#signature_dialog").attr('data-target', '#signature_dialog');
-                    $("#signature_dialog").click();
-                    $("#signature_dialog").removeAttr('data-target');
+                    $("#signature_dialog #confirm_sign").one('click', function(e) {
+                        var sign_img = $('#signature_dialog').find('#sign').jSignature("getData",'image');
+                        elem.data('signature', 'data:'+sign_img[0]+','+sign_img[1]);
+                        elem.html('<span class="helper"/><img src="' + elem.data('signature') + '"/>');
+                        
+                        elem.change();
+                    });
+
+                    signature_dialog.data('signature-type', type);
+                    signature_dialog.data('signature-ratio', width/height);
+                    signature_dialog.attr('data-target', '#signature_dialog');
+                    signature_dialog.click();
+                    signature_dialog.removeAttr('data-target');
                 }
             });
         }
     }
 
+    if(type == 'textarea')
+        elem.css('text-align', 'left');
+
     elem.addClass('sign_item');
-    var v = {
-        "text": value.text,
-        "signature": (value.image)? "<img src='data:image/png;base64," + (value.image.substr(1, value.image.length-2)) + "'/>" : "Sign Here",
-        "date": value.text,
-    }[type];
+    var v = value.text;
+    if(type == 'signature')
+        v = (value.image)? "<img src='" + value.image + "'/>" : "Sign Here";
+    else if(type == 'initial')
+        v = (value.image)? "<img src='" + value.image + "'/>" : "Mark";
     elem.html(elem.html() + v);
     elem.val(v);
 
@@ -231,6 +247,41 @@ function enableCustom(elem) {
     elem.append(responsibleField);
 }
 
+function scrollToSignItem(iframe, itemNo) {
+    var sign_item_navigator = $(iframe.contents().find('.sign_item_navigator')[0]);
+    sign_item_navigator.detach();
+
+    var sign_items = iframe.contents().find('.sign_item').sort(function(a, b) {
+        if(Math.abs($(b).offset().top - $(a).offset().top) > $(a).parent().height()/100) {
+            return ($(b).offset().top < $(a).offset().top)? 1 : -1;
+        }
+        else {
+            return ($(b).offset().left < $(a).offset().left)? 1 : -1;
+        }
+    });
+
+    sign_items.removeClass('sign_item_selected');
+    $(sign_items[itemNo]).addClass('sign_item_selected');
+
+    $(iframe.contents().find('#viewerContainer')[0]).animate({
+        scrollTop: $(sign_items[itemNo]).offset().top - $(iframe.contents().find('#viewer')[0]).offset().top - $(iframe.contents().find('#viewerContainer')[0]).height()/4
+    }, 500);
+
+    sign_item_navigator.html({
+        'signature': "Sign !",
+        'initial': "Mark !",
+        'text': "Fill in !",
+        'textarea': "Fill in !",
+        'date': "Time ?",
+    }[$(sign_items[itemNo]).data('type')]);
+    sign_item_navigator.appendTo($(sign_items[itemNo]).parent()).animate({'top': $(sign_items[itemNo]).position().top/$(sign_items[itemNo]).parent().height()*100+'%'}, 500);
+}
+
+function updateFontSize(iframe) {
+    var size = $(iframe.contents().find('.page')[0]).height() / 75; // TODO
+    iframe.contents().find('.sign_item').css('font-size', size + 'px');
+}
+
 $(function() {
     PDFJS.workerSrc = '/website_sign/static/lib/pdfjs/build/pdf.worker.js';
 
@@ -267,6 +318,9 @@ $(function() {
         viewerURL = "../" + viewerURL;
     iframe.attr('src', viewerURL).css('width', '100%').css('height', '1000px');
 
+    var sign_item_navigator = $('<div/>');
+    sign_item_navigator.addClass('sign_item_navigator');
+
     whenPdfIsLoaded(iframe, function(nbPages) {
         for(var i = 1 ; i <= nbPages ; i++)
             configuration[i] = [];
@@ -286,7 +340,19 @@ $(function() {
         var cssLink = $("<link rel='stylesheet' type='text/css' href='../../../../../website_sign/static/src/css/iframe.css'/>");
         iframe.contents().find('head').append(cssLink);
 
-        iframe.parent().find("input[type='hidden']").each(function(i, el){
+        iframe.parent().find("input[type='hidden']").sort(function(a, b) {
+            if($(b).data('page') < $(a).data('page'))
+                return 1;
+            else if($(b).data('page') > $(a).data('page'))
+                return -1;
+
+            if(Math.abs($(b).data('posy') - $(a).data('posy')) > 0.01) {
+                return ($(b).data('posy') < $(a).data('posy'))? 1 : -1;
+            }
+            else {
+                return ($(b).data('posx') < $(a).data('posx'))? 1 : -1;
+            }
+        }).each(function(i, el){
             var values = {
                 'text': $(el).data('item-value-text') || "",
                 'image': $(el).data('item-value-image') || "",
@@ -317,12 +383,14 @@ $(function() {
                     enableCustom($(el));
                 }
             });
-        }, 0); // TODO why is this necessary...
+        }, 0); // TODO this fix a problem but not very nice code
 
         // var update_timer = setInterval(update_pdf_items, 1000, iframe, configuration);
         iframe.contents().find('#viewerContainer').on('scroll', function(e) {
             update_pdf_items(iframe, configuration);
             check_pdf_items_completion(iframe, role);
+            updateFontSize(iframe);
+            // TODO ? scrollToSignItem(iframe, 0);
         });
 
         if(editMode) {
@@ -336,7 +404,34 @@ $(function() {
                 var required = true;
                 var posX = (e.pageX - (parent.offset().left+pageBorderX)) / parent.innerWidth();
                 var posY = (e.pageY - (parent.offset().top+pageBorderY)) / parent.innerHeight();
-                var WIDTH = 0.2, HEIGHT = 0.05;
+                
+                var WIDTH = 0, HEIGHT = 0;
+                switch(currentFieldType) {
+                    case 'signature':
+                        WIDTH = 0.300;
+                        HEIGHT = 0.090;
+                        break;
+
+                    case 'initial':
+                        WIDTH = 0.100;
+                        HEIGHT = 0.045;
+                        break;
+
+                    case 'text':
+                        WIDTH = 0.200;
+                        HEIGHT = 0.015;
+                        break;
+
+                    case 'textarea':
+                        WIDTH = 0.500;
+                        HEIGHT = 0.200;
+                        break;
+
+                    case 'date':
+                        WIDTH = 0.150;
+                        HEIGHT = 0.015;
+                        break;
+                }
 
                 var elem = create_signature_item(iframe, role, currentFieldType, required, 0, posX-WIDTH/2, posY-HEIGHT/2, WIDTH, HEIGHT, true);
                 if(elem !== null) {
@@ -349,5 +444,24 @@ $(function() {
                 }
             });
         }
+
+        iframe.contents().find('#viewer').append(sign_item_navigator);
+    });
+
+    // Go to other sign item buttons
+    var nav_buttons = $('.other-sign-item-button');
+    var currentItemNo = 0;
+    $(nav_buttons[0]).on('click', function(e) {
+        currentItemNo--;
+        if(currentItemNo < 0)
+            currentItemNo = iframe.contents().find('.sign_item').length-1;
+    });
+    $(nav_buttons[1]).on('click', function(e) {
+        currentItemNo++;
+        if(currentItemNo >= iframe.contents().find('.sign_item').length)
+            currentItemNo = 0;
+    });
+    nav_buttons.on('click', function(e) {
+        scrollToSignItem(iframe, currentItemNo);
     });
 });

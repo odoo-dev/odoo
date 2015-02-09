@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-from openerp import http
 from openerp.addons.website.models import website
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 import time
 from openerp.addons.web.controllers.main import login_redirect
-from openerp.tools.translate import _
 
-import base64
-import os
+from openerp import http, _
+import base64, os
 
 class website_sign(http.Controller):
 
     def __message_post(self, message, thread_model, thread_id, type='comment', subtype=False, attachments=[]):
+        if not (thread_model and thread_id):
+            return False # TODO
+
         http.request.session.body = message
         user = http.request.env.user
         msgid = False
@@ -51,16 +52,22 @@ class website_sign(http.Controller):
             if not current_request_item:
                 return http.request.render('website_sign.deleted_sign_request', {'url': '/sign/document/' + str(id)})
 
-            record = http.request.env[signature_request.attachment.res_model].sudo().browse(signature_request.attachment.res_id)
+            if signature_request.attachment.res_model and signature_request.attachment.res_id:
+                record = http.request.env[signature_request.attachment.res_model].sudo().browse(signature_request.attachment.res_id)
+            else:
+                record = False
         else:
-            record = http.request.env[signature_request.attachment.res_model].browse(signature_request.attachment.res_id)
+            if signature_request.attachment.res_model and signature_request.attachment.res_id:
+                record = http.request.env[signature_request.attachment.res_model].browse(signature_request.attachment.res_id)
+            else:
+                record = False
 
         values = {
             'signature_request': signature_request,
             'current_request_item': current_request_item,
             'readonly': not (current_request_item and current_request_item.state == 'opened'),
             'token': token,
-            'messages': record.message_ids,
+            'messages': record.message_ids if record else [],
             'message': message and int(message) or False,
             'hasItems': len(signature_request.signature_items) > 0,
             'role': current_request_item.role.id if current_request_item else 0
@@ -145,7 +152,6 @@ class website_sign(http.Controller):
         for item in signature_items:
             item.update({
                 'signature_request': id,
-                'name': "default_name",
             })
             signature_item_obj.create(item)
         return True

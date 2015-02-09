@@ -50,11 +50,12 @@ function print_canvas_img(sign_field, imgSrc) {
 }
 
 function print_canvas_text(sign_field, font, text) {
+    var width = sign_field.find('canvas')[0].width, height = sign_field.find('canvas')[0].height
 
-    var svgStr = "<?xml version='1.0' encoding='utf-8' ?>"; // Need to
-    svgStr += "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='" + text.length*12 + "' height='40' viewBox='0 0 " + text.length*12 + " 40'>";
+    var svgStr = "<?xml version='1.0' encoding='utf-8' ?>";
+    svgStr += "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='" + width + "' height='" + height + "'>";
     svgStr += "<defs><style type='text/css'><![CDATA[ @font-face { font-family: 'font'; src: url(data:font/ttf;base64," + font + ") format('woff'); font-weight: normal; font-style: normal; } ]]></style></defs>";
-    svgStr += "<text x='50%' y='32' font-size='24' textLength='" + text.length*10 + "' lengthAdjust='spacingAndGlyphs' style='font-family:\"font\"' fill='black' text-anchor='middle'>" + text + "</text></svg>";
+    svgStr += "<text x='50%' y='" + (height*4/5) + "' font-size='" + (height*4/5) + "' textLength='" + (width*4/5) + "' lengthAdjust='spacingAndGlyphs' style='font-family:\"font\"' fill='black' text-anchor='middle'>" + text + "</text></svg>";
 
     var imgSrc = "data:image/svg+xml;base64," + btoa(svgStr);
 
@@ -62,6 +63,8 @@ function print_canvas_text(sign_field, font, text) {
 }
 
 $(function () {
+    var empty_sign = null;
+
     var signature_dialog = $('#signature_dialog');
     var sign_mode_buttons = signature_dialog.find('a.sign_mode');
     var sign_instruction = signature_dialog.find('#sign_instruction');
@@ -89,7 +92,7 @@ $(function () {
             });
             button.on('mouseover', function(e) {
                 currentFont = $(e.currentTarget).data('font-nb');
-                print_canvas_text(sign_field, get_sign_font(currentFont), signature_dialog.find("#signer_name").val());
+                signature_dialog.find("#signer_name").change();
             });
 
             sign_font_selection.append(button);
@@ -100,8 +103,10 @@ $(function () {
     sign_font_dialog.find('.btn').css('opacity', 0.0);
         
     signature_dialog.on('shown.bs.modal', function (e) {
-        sign_field.empty().jSignature({'decor-color': '#D1D0CE', 'lineWidth': 1});
-        var empty_sign = sign_field.jSignature("getData", 'image');
+        var width = sign_field.width(), height = width / signature_dialog.data('signature-ratio');
+
+        sign_field.empty().jSignature({'decor-color': '#D1D0CE', 'lineWidth': 3, 'width': width, 'height': height});
+        empty_sign = sign_field.jSignature("getData", 'image');
 
         var currentButton = sign_mode_buttons.filter('.btn-primary');
         if(currentButton.length == 0)
@@ -141,9 +146,16 @@ $(function () {
         sign_load.hide();
 
         signature_dialog.find('#signer_name').on('change', function(e) {
-            print_canvas_text(sign_field, get_sign_font(currentFont), signature_dialog.find("#signer_name").val());
+            var text = signature_dialog.find("#signer_name").val();
+            if(signature_dialog.data('signature-type') == 'initial') {
+                var words = text.split(' ');
+                text = "";
+                for(var i = 0 ; i < words.length ; i++)
+                    text += words[i][0] + '.';
+            }
+            print_canvas_text(sign_field, get_sign_font(currentFont), text);
         });
-        print_canvas_text(sign_field, get_sign_font(currentFont), signature_dialog.find("#signer_name").val());
+        signature_dialog.find('#signer_name').change();
     });
 
     sign_mode_buttons.filter('#draw_sign_mode').on('click', function(e) {
@@ -204,19 +216,19 @@ $(function () {
 
     $('#sign_doc').submit(function(ev){
         ev.preventDefault();
-        var $link = $(ev.currentTarget);
+        var form = $(ev.currentTarget);
 
         var sign = sign_field.jSignature("getData",'image');
-        var is_empty = sign?empty_sign[1]==sign[1]:false;
+        var is_empty = (sign)? empty_sign[1]==sign[1] : true;
         var signer_name = signature_dialog.find("#signer_name").val();
-        signature_dialog.find('#signer_info').toggleClass('has-error', ! signer_name);
-        signature_dialog.find('#signature_draw').toggleClass('panel-danger', is_empty).toggleClass('panel-default', ! is_empty);
+        signature_dialog.find('#signer_info').toggleClass('has-error', !signer_name);
+        signature_dialog.find('#signature_draw').toggleClass('panel-danger', is_empty).toggleClass('panel-default', !is_empty);
 
-        if (is_empty || ! signer_name)
+        if (is_empty || !signer_name)
             return false;
         $('#confirm_sign').prop('disabled', true);
 
-        openerp.jsonRpc($link.attr("action"), "call", {
+        openerp.jsonRpc(form.attr("action"), "call", {
             'sign': sign?JSON.stringify(sign[1]):false,
             'signer': signer_name
         }).then(function (data) {
@@ -237,8 +249,10 @@ $(function () {
         var sign_items = form.find('iframe').contents().find('.sign_item');
         sign_items.each(function(i, el){
             var value = {
+                'signature': ($(el).data('signature') != 'data:'+empty_sign[0]+','+empty_sign[1])? $(el).data('signature') : false,
+                'initial': ($(el).data('signature') != 'data:'+empty_sign[0]+','+empty_sign[1])? $(el).data('signature') : false,
                 'text': $(el).val(),
-                'signature': $(el).data('signature'),
+                'textarea': $(el).val(),
                 'date': $(el).val(),
             }[$(el).data('type')];
 
@@ -253,6 +267,7 @@ $(function () {
         });
 
         if(!ok) {
+            alert("Some fields must be completed !");
             return false;
         }
 

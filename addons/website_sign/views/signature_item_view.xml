@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="signature_item_view_list">
+        <field name="name">Signature Item Tree View</field>
+        <field name="model">signature.item</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="required"/>
+                <field name="responsible"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_party_view_list">
+        <field name="name">Signature Party Tree View</field>
+        <field name="model">signature.item.party</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_party_view_form">
+        <field name="name">Signature Party Form View</field>
+        <field name="model">signature.item.party</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="name"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="signature_party_action">
+        <field name="name">Signature Parties</field>
+        <field name="res_model">signature.item.party</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem parent="website_sign.menu_digital_signatures2" id="website_sign.menu_signature_party" name="Signature Parties" action="signature_party_action"/>
+</odoo>

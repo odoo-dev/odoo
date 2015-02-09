@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 {
     'name': 'Digital Signatures',
     'version': '1.0',
@@ -14,11 +13,14 @@ Select your recipients and follow the signature process easily.
     'depends': ['website'],
     'data': [
         'security/ir.model.access.csv',
-        'views/website_sign.xml',
-        'views/signature_editor.xml',
-        'views/items_view.xml',
-        'data/website_sign_data.xml',
-        'data/workflows.xml',
+
+        'views/signature_request_templates.xml',
+        'views/signature_item_templates.xml',
+
+        'views/signature_request_view.xml',
+        'views/signature_item_view.xml',
+
+        'data/signature_request.xml',
     ],
     'demo': [],
     'qweb': [
@@ -26,4 +28,3 @@ Select your recipients and follow the signature process easily.
     ],
     'installable': True,
 }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="signature_request_view_list">
+        <field name="name">Signature Request Tree View</field>
+        <field name="model">signature.request</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="attachment"/>
+                <field name="nb_draft"/>
+                <field name="nb_wait"/>
+                <field name="nb_closed"/>
+                <!-- <field name="signature_items"/> -->
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_request_view_form">
+        <field name="name">Signature Request Form View</field>
+        <field name="model">signature.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Send" type="workflow" states="draft" name="signature_request_launch" class="oe_highlight oe_read_only"/>
+                    <button string="Draft" type="workflow" states="canceled" name="signature_request_draft" class="oe_hightlight oe_read_only"/>
+                    <button string="Cancel" type="workflow" states="draft,opened,closed" name="signature_request_cancel" class="oe_read_only" confirm="This will delete all the already completed documents of this request and disable every sent accesses, are you sure?"/>
+                    <button string="Set as template" type="object" name="set_as_template" class="oe_read_only"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <h2>Signature Request</h2>
+
+                    <div class="oe_button_box oe_right">
+                        <button string="View Signature Request" type="object" name="go_to_sign_document" class="oe_read_only"/>
+                    </div>
+
+                    <group>
+                        <field name="attachment"/>
+                    </group>
+                    <label for="message"/><field name="message"/>
+
+                    <group col="4">
+                        <field name="request_items" context="{'default_signature_request': id}" nolabel="1" colspan="3"/>
+                        <group colspan="1">
+                            <field name="nb_draft"/>
+                            <field name="nb_wait"/>
+                            <field name="nb_closed"/>
+                        </group>
+                    </group>
+
+                    <div class="oe_button_box oe_right">
+                        <button string="Edit fields" type="object" name="go_to_custom_document" class="oe_read_only"/>
+                    </div>
+                    <label for="signature_items"/>
+                    <field name="signature_items"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_request_view_search">
+        <field name="name">Signature Request Search View</field>
+        <field name="model">signature.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="attachment"/>
+                <filter name="signature_request_draft_opened" string="Actif" domain="[('state', 'in', ['draft', 'opened'])]"/>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="signature_request_action">
+        <field name="name">Signature Request Action</field>
+        <field name="res_model">signature.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="signature_request_view_search"/>
+        <field name="context" eval="{'search_default_signature_request_draft_opened': 1}"/>
+    </record>
+
+    <record model="ir.ui.view" id="signature_request_item_view_list">
+        <field name="name">Signature Request Item Tree View</field>
+        <field name="model">signature.request.item</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="role" class="oe_read_only"/>
+                <field name="partner_id"/>
+                <field name="signer_email" class="oe_read_only"/>
+                <field name="state" class="oe_read_only"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_request_item_view_form">
+        <field name="name">Signature Request Item Form View</field>
+        <field name="model">signature.request.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <h2>Signer</h2>
+
+                    <group>
+                        <field name="role"/>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="signature_request"/>
+                        </group>
+                        <group>
+                            <field name="access_token"/>
+                            <field name="signing_date"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+     <!-- <menuitem parent="knowledge.menu_document" id="website_sign.menu_digital_signatures" name="Digital Signature"/> -->
+    <!-- <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_requests" name="Signatures Requests" action="view_signature_requests_action"/> -->
+    <menuitem id="website_sign.menu_digital_signatures" name="Digital Signature"/>
+    <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_digital_signatures2" name="Digital Signature"/>
+    <menuitem parent="website_sign.menu_digital_signatures2" id="website_sign.menu_signature_request" name="Signature Requests" action="signature_request_action"/>
+
+    <record id="action_client_digital_signature_menu" model="ir.actions.client">
+        <field name="name">Open Digital Signatures Menu</field>
+        <field name="tag">reload</field>
+        <field name="params" eval="{'menu_id': ref('website_sign.menu_digital_signatures')}"/>
+    </record>
+    <record id="base.open_menu" model="ir.actions.todo">
+        <field name="action_id" ref="action_client_digital_signature_menu"/>
+        <field name="state">open</field>
+    </record>
+</odoo>
