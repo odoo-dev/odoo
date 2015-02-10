@@ -68,12 +68,6 @@ class project_project(osv.osv):
                     res[id]['total_hours'] += total
                     res[id]['effective_hours'] += effective
                 id = child_parent[id]
-        # compute progress rates
-        for id in ids:
-            if res[id]['total_hours']:
-                res[id]['progress_rate'] = round(100.0 * res[id]['effective_hours'] / res[id]['total_hours'], 2)
-            else:
-                res[id]['progress_rate'] = 0.0
         return res
 
     def _get_projects_from_tasks(self, cr, uid, task_ids, context=None):
@@ -119,11 +113,6 @@ class project_project(osv.osv):
                 'project.task': (_get_projects_from_tasks, ['planned_hours', 'remaining_hours', 'timesheet_ids', 'stage_id'], 20),
             }),
         'total_hours': fields.function(_progress_rate, multi="progress", string='Total Time', help="Sum of total hours of all tasks related to this project and its child projects.",
-            store = {
-                'project.project': (_get_project_and_parents, ['tasks', 'parent_id', 'child_ids'], 10),
-                'project.task': (_get_projects_from_tasks, ['planned_hours', 'remaining_hours', 'timesheet_ids', 'stage_id'], 20),
-            }),
-        'progress_rate': fields.function(_progress_rate, multi="progress", string='Progress', type='float', group_operator="avg", help="Percent of tasks closed according to the total of tasks todo.",
             store = {
                 'project.project': (_get_project_and_parents, ['tasks', 'parent_id', 'child_ids'], 10),
                 'project.task': (_get_projects_from_tasks, ['planned_hours', 'remaining_hours', 'timesheet_ids', 'stage_id'], 20),
