@@ -5,7 +5,7 @@ class signature_item(models.Model):
     _name = "signature.item"
     _description = "Signature Field For Document To Sign"
 
-    signature_request = fields.Many2one('signature.request', required=True, ondelete='cascade')
+    signature_request = fields.Many2one('signature.request', required=True, readonly=True, ondelete='cascade')
 
     name = fields.Char(default="default_name")
     type = fields.Selection([
@@ -16,7 +16,7 @@ class signature_item(models.Model):
         ('date', "Date")
     ], required=True)
 
-    required = fields.Boolean(required=True, default=True)
+    required = fields.Boolean(default=True)
     responsible = fields.Many2one("signature.item.party")
 
     page = fields.Integer(string="Document Page", required=True, default=1)

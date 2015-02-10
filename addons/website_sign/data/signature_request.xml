@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <odoo>
-    <record id="request_sign_template" model="mail.template">
+    <record id="signature_access_mail_template" model="mail.template">
         <field name="name">Document Sign Request</field>
-        <field name="model_id" ref="website_sign.model_signature_request_item"/>
+        <field name="model_id" ref="website_sign.model_signature_request"/>
         <field name="auto_delete" eval="True"/>
         <field name="email_from">${ctx['email_from']|safe}</field>
         <field name="email_to">${ctx['email_to']|safe}</field>
@@ -62,6 +62,59 @@
         ]]>
         </field>
     </record>
+
+    <record id="completed_signature_mail_template" model="mail.template">
+        <field name="name">Document Sign Completed</field>
+        <field name="model_id" ref="website_sign.model_signature_request"/>
+        <field name="auto_delete" eval="True"/>
+        <field name="email_from">${ctx['email_from']|safe}</field>
+        <field name="email_to">${ctx['email_to']|safe}</field>
+        <field name="subject">Completed document ${ctx['docnames']}</field>
+        <field name="body_html"><![CDATA[
+            <center>
+                <table width="60%">
+                    <tbody>
+                        <tr>
+                            <td style="background-color:#ffffff;border:1px solid #ccc;padding:40px 40px 30px 40px" bgcolor="FFFFFF">
+                                <h1 style="font-size:18px;margin:0 0 10px 0;font-weight:bold">${ctx['docnames']}</h1>
+                                <p style="line-height:1.4em;font-size:14px;margin:10px 0px">
+                                    <span style="color:#8c8c8c">From: ${ctx['email_from_usr']}  -
+                                        <a href="mailto:${ctx['email_from']}?subject=RE:" style="color:#368bc6;text-decoration:none" target="_blank">Reply</a>
+                                    </span>
+                                </p>
+                                <hr style="color:#cccccc;background-color:#cccccc;min-height:1px;border:none"/>
+                                <div style="margin:20px 0px 20px 0px">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                % for link in ctx['links']:
+                                                    <td style='padding:9px 16px 9px 16px;font-size:16px;color:#f7fbfd;background-color:#0088cc'>
+                                                        <a style='text-decoration:none;font-size:16px;color:#f7fbfd' href=${link[0]}>
+                                                            <span style='color:#f7fbfd'>See document ${link[1]}</span>
+                                                        </a>
+                                                    </td>
+                                                % endfor
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </center>
+        ]]>
+        </field>
+    </record>
+
+    <report
+        id="signature_request_report"
+        model="signature.request"
+        string="Signature Request"
+        report_type="qweb-pdf"
+        name="website_sign.report_signature_request"
+        file="website_sign.report_signature_request"
+    />
 
     <!-- Signature request workflow -->
     <record model="workflow" id="wkf_signature_request">
@@ -140,53 +193,5 @@
         <field name="act_from" ref="signature_request_canceled"/>
         <field name="act_to" ref="signature_request_draft"/>
         <field name="signal">signature_request_draft</field>
-    </record>
-
-    <!-- Signature request item workflow -->
-    <record model="workflow" id="wkf_signature_request_item">
-        <field name="name">Signature request item workflow</field>
-        <field name="osv">signature.request.item</field>
-        <field name="on_create">True</field>
-    </record>
-
-    <record model="workflow.activity" id="signature_request_item_draft">
-        <field name="name">Draft</field>
-        <field name="wkf_id" ref="wkf_signature_request_item"/>
-        <field name="flow_start" eval="True"/>
-        <field name="kind">function</field>
-        <field name="action">action_draft()</field>
-    </record>
-    <record model="workflow.activity" id="signature_request_item_opened">
-        <field name="name">Opened</field>
-        <field name="wkf_id" ref="wkf_signature_request_item"/>
-        <field name="kind">function</field>
-        <field name="action">action_opened()</field>
-    </record>
-    <record model="workflow.activity" id="signature_request_item_closed">
-        <field name="name">Closed</field>
-        <field name="wkf_id" ref="wkf_signature_request_item"/>
-        <field name="kind">function</field>
-        <field name="action">action_closed()</field>
-    </record>
-
-    <record model="workflow.transition" id="signature_request_item_draft_to_opened">
-        <field name="act_from" ref="signature_request_item_draft"/>
-        <field name="act_to" ref="signature_request_item_opened"/>
-        <field name="signal">signature_request_item_launch</field>
-    </record>
-    <record model="workflow.transition" id="signature_request_item_opened_to_closed">
-        <field name="act_from" ref="signature_request_item_opened"/>
-        <field name="act_to" ref="signature_request_item_closed"/>
-        <field name="signal">signature_request_item_sign</field>
-    </record>
-    <record model="workflow.transition" id="signature_request_item_opened_to_draft">
-        <field name="act_from" ref="signature_request_item_opened"/>
-        <field name="act_to" ref="signature_request_item_draft"/>
-        <field name="signal">signature_request_item_cancel</field>
-    </record>
-    <record model="workflow.transition" id="signature_request_item_closed_to_draft">
-        <field name="act_from" ref="signature_request_item_closed"/>
-        <field name="act_to" ref="signature_request_item_draft"/>
-        <field name="signal">signature_request_item_cancel</field>
     </record>
 </odoo>

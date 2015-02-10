@@ -41,7 +41,7 @@ class website_sign(http.Controller):
         "/sign/document/<int:id>",
         "/sign/document/<int:id>/<token>"
     ], type='http', auth="user", website=True)
-    def request_sign(self, id, token=None, message=False, **post):
+    def request_sign(self, id, token=None, message=False, viewmode=False, **post):
         signature_request = http.request.env['signature.request'].sudo().search([('id', '=', id)]) # TODO browse return a record (empty) even if it does not exist! normal?
         if not signature_request:
             return http.request.not_found()
@@ -70,7 +70,8 @@ class website_sign(http.Controller):
             'messages': record.message_ids if record else [],
             'message': message and int(message) or False,
             'hasItems': len(signature_request.signature_items) > 0,
-            'role': current_request_item.role.id if current_request_item else 0
+            'role': current_request_item.role.id if current_request_item else 0,
+            'viewmode': viewmode and bool(viewmode) or False
         }
 
         return http.request.render('website_sign.doc_sign', values)

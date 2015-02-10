@@ -70,7 +70,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="signature_request_action">
-        <field name="name">Signature Request Action</field>
+        <field name="name">Signature Request</field>
         <field name="res_model">signature.request</field>
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="signature_request_view_search"/>
@@ -119,11 +119,8 @@
         </field>
     </record>
 
-     <!-- <menuitem parent="knowledge.menu_document" id="website_sign.menu_digital_signatures" name="Digital Signature"/> -->
-    <!-- <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_requests" name="Signatures Requests" action="view_signature_requests_action"/> -->
-    <menuitem id="website_sign.menu_digital_signatures" name="Digital Signature"/>
-    <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_digital_signatures2" name="Digital Signature"/>
-    <menuitem parent="website_sign.menu_digital_signatures2" id="website_sign.menu_signature_request" name="Signature Requests" action="signature_request_action"/>
+    <menuitem parent="knowledge.menu_document" id="website_sign.menu_digital_signatures" name="Digital Signature"/>
+    <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_request" name="Signature Requests" action="signature_request_action"/>
 
     <record id="action_client_digital_signature_menu" model="ir.actions.client">
         <field name="name">Open Digital Signatures Menu</field>

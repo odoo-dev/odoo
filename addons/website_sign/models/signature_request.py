@@ -61,18 +61,19 @@ class signature_request(models.Model):
             if request_item.state != 'draft':
                 ignored_partners.append(request_item.partner_id.id)
         included_request_items = self.request_items.filtered(lambda r: r.partner_id.id not in ignored_partners)
-        included_request_items.signal_workflow('signature_request_item_launch')
+        included_request_items.action_opened()
         if not self.send_signature_accesses(ignored_partners=ignored_partners):
-            included_request_items.signal_workflow('signature_request_item_cancel') # TODO and warn the user
+            included_request_items.action_draft() # TODO and warn the user
         self.state = 'opened'
 
     @api.one
     def action_closed(self):
+        self.send_completed_document()
         self.state = 'closed'
 
     @api.one
     def action_canceled(self):
-        self.request_items.signal_workflow('signature_request_item_cancel')
+        self.request_items.action_draft()
         self.state = 'canceled'
 
     @api.one
@@ -123,9 +124,9 @@ class signature_request(models.Model):
     def send_signature_accesses(self, ignored_partners=[]):
         signers_data = self.get_signers()
         if len(signers_data) <= 0:
-            return
+            return False
 
-        roles = self.request_items.mapped('role');
+        roles = self.request_items.mapped('role')
         for item in self.signature_items:
             if not item.responsible:
                 continue
@@ -136,7 +137,7 @@ class signature_request(models.Model):
             del signers_data[ignored]
 
         base_context = self.env.context
-        template_id = self.env.ref('website_sign.request_sign_template').id
+        template_id = self.env.ref('website_sign.signature_access_mail_template').id
         mail_template = self.env['mail.template'].browse(template_id)
 
         email_from_usr = self.env.user.partner_id.name
@@ -148,7 +149,7 @@ class signature_request(models.Model):
             docs, links = [], []
             for sign in signers_data[signer]:
                 docs.append(sign['name'])
-                link = _("sign/document/%s/%s") % (sign['id'], sign['token'])
+                link = "sign/document/%s/%s" % (sign['id'], sign['token'])
                 links.append([link, sign['fname'].split('.')[:-1][0]])
             docnames = ", ".join(docs)
 
@@ -166,6 +167,46 @@ class signature_request(models.Model):
             mail = self.env['mail.mail'].browse(mail_id)
             attachment_ids = list(mail.attachment_ids)
             attachment_ids.append((4, self.attachment.id)) # Could attach more (other attachment next to the document to sign?)
+            mail.attachment_ids = attachment_ids
+            mail.send(raise_exception=False)
+
+        return True
+
+    @api.multi
+    def send_completed_document(self):
+        signers_data = self.get_signers()
+        if len(signers_data) <= 0:
+            return False
+
+        base_context = self.env.context
+        template_id = self.env.ref('website_sign.completed_signature_mail_template').id
+        mail_template = self.env['mail.template'].browse(template_id)
+
+        email_from_usr = self.env.user.partner_id.name
+        email_from = str(self.env.user.partner_id.name) + "<" + str(self.env.user.partner_id.email) + ">"
+
+        for signer in signers_data.keys():
+            email_to = self.env['res.partner'].browse(signer).email
+
+            docs, links = [], []
+            for sign in signers_data[signer]:
+                docs.append(sign['name'])
+                link = "sign/document/%s?viewmode=1" % sign['id']
+                links.append([link, sign['fname'].split('.')[:-1][0]])
+            docnames = ", ".join(docs)
+
+            template = mail_template.sudo().with_context(base_context,
+                email_from_usr = email_from_usr,
+                email_from = email_from,
+                email_to = email_to,
+                docnames = docnames,
+                links = links,
+            )
+
+            mail_id = template.send_mail(None, force_send=False)
+            mail = self.env['mail.mail'].browse(mail_id)
+            attachment_ids = list(mail.attachment_ids)
+            # attachment_ids.append((4, self....)) TODO attach completed document
             mail.attachment_ids = attachment_ids
             mail.send(raise_exception=False)
 
@@ -209,7 +250,7 @@ class signature_request_item(models.Model):
         ("draft", "Draft"),
         ("opened", "Waiting for completion"),
         ("closed", "Completed")
-    ], readonly=True)
+    ], readonly=True, default="draft")
 
     def _default_access_token(self):
         return str(uuid.uuid4())
@@ -253,7 +294,7 @@ class signature_request_item(models.Model):
                     item_value = self.env['signature.item.value'].create({'signature_item': int(itemId)})
                 item_value.set(signature[itemId])
 
-        self.signal_workflow('signature_request_item_sign')
+        self.action_closed()
         return True
 
     # TODO : permit edition with this?

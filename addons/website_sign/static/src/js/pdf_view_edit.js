@@ -11,6 +11,7 @@ function whenPdfIsLoaded(iframe, fct) {
 
 function check_pdf_items_completion(iframe, role) {
     var ok = true;
+    var toComplete = [];
     iframe.contents().find('.sign_item').each(function(i, el) {
         var value = $(el).val();
         if($(el).data('type') == 'signature' || $(el).data('type') == 'initial') {
@@ -19,8 +20,10 @@ function check_pdf_items_completion(iframe, role) {
 
         var resp = parseInt($(el).data('responsible')) || 0;
 
-        if(!value && $(el).data('required') && (resp <= 0 || resp == role))
+        if(!value && $(el).data('required') && (resp <= 0 || resp == role)) {
             ok = false;
+            toComplete.push($(el));
+        }
     });
 
     validateButton = $('#signature-validate-button');
@@ -34,6 +37,8 @@ function check_pdf_items_completion(iframe, role) {
         validateButton.html("Fields to complete");
         validateButton.removeClass("fa fa-check");
     }
+
+    return toComplete;
 }
 
 function update_pdf_items(iframe, configuration) {
@@ -152,12 +157,16 @@ function create_signature_item(iframe, role, type, required, responsible, posX, 
 
     elem.on('change', function(e) {
         check_pdf_items_completion(iframe, role);
+        iframe.contents().find('.sign_item_navigator').html('<span class="helper"/>Next').focus();
     });
 
     if(required)
         elem.addClass('sign_item_required');
 
     elem.data('type', type).data('required', required).data('responsible', responsible).data('posx', posX).data('posy', posY).data('width', width).data('height', height);
+
+    if($('#document_viewmode').val())
+        elem.addClass('sign_item_viewmode');
 
     return elem;
 }
@@ -247,39 +256,36 @@ function enableCustom(elem) {
     elem.append(responsibleField);
 }
 
-function scrollToSignItem(iframe, itemNo) {
-    var sign_item_navigator = $(iframe.contents().find('.sign_item_navigator')[0]);
-    sign_item_navigator.detach();
+function scrollToSignItem(iframe, iNavigator, item) {
+    iNavigator.detach();
 
-    var sign_items = iframe.contents().find('.sign_item').sort(function(a, b) {
-        if(Math.abs($(b).offset().top - $(a).offset().top) > $(a).parent().height()/100) {
-            return ($(b).offset().top < $(a).offset().top)? 1 : -1;
-        }
-        else {
-            return ($(b).offset().left < $(a).offset().left)? 1 : -1;
-        }
-    });
+    if(item != null) {
+        iframe.contents().find('.sign_item_selected').removeClass('sign_item_selected');
+        item.addClass('sign_item_selected').focus();
 
-    sign_items.removeClass('sign_item_selected');
-    $(sign_items[itemNo]).addClass('sign_item_selected');
+        $(iframe.contents().find('#viewerContainer')[0]).animate({
+            scrollTop: item.offset().top - $(iframe.contents().find('#viewer')[0]).offset().top - $(iframe.contents().find('#viewerContainer')[0]).height()/4
+        }, 500);
 
-    $(iframe.contents().find('#viewerContainer')[0]).animate({
-        scrollTop: $(sign_items[itemNo]).offset().top - $(iframe.contents().find('#viewer')[0]).offset().top - $(iframe.contents().find('#viewerContainer')[0]).height()/4
-    }, 500);
+        iNavigator.html('<span class="helper"/>' + {
+            'signature': "Sign it",
+            'initial': "Mark it",
+            'text': "Fill in",
+            'textarea': "Fill in",
+            'date': "Time ?",
+        }[item.data('type')]);
 
-    sign_item_navigator.html({
-        'signature': "Sign !",
-        'initial': "Mark !",
-        'text': "Fill in !",
-        'textarea': "Fill in !",
-        'date': "Time ?",
-    }[$(sign_items[itemNo]).data('type')]);
-    sign_item_navigator.appendTo($(sign_items[itemNo]).parent()).animate({'top': $(sign_items[itemNo]).position().top/$(sign_items[itemNo]).parent().height()*100+'%'}, 500);
+        iNavigator.appendTo(item.parent()).css('top', item.position().top/item.parent().height()*100+'%'); // TODO would be nice to animate but impossible for now
+        iNavigator.data('parent', item.parent());
+        iNavigator.show();
+    }
+    else if(iNavigator.data('parent'))
+        iNavigator.appendTo(iNavigator.data('parent'));
 }
 
 function updateFontSize(iframe) {
     var size = $(iframe.contents().find('.page')[0]).height() / 75; // TODO
-    iframe.contents().find('.sign_item').css('font-size', size + 'px');
+    iframe.contents().find('.sign_item,.sign_item_navigator').css('font-size', size + 'px');
 }
 
 $(function() {
@@ -320,6 +326,7 @@ $(function() {
 
     var sign_item_navigator = $('<div/>');
     sign_item_navigator.addClass('sign_item_navigator');
+    var currentItemNo = 0;
 
     whenPdfIsLoaded(iframe, function(nbPages) {
         for(var i = 1 ; i <= nbPages ; i++)
@@ -346,12 +353,10 @@ $(function() {
             else if($(b).data('page') > $(a).data('page'))
                 return -1;
 
-            if(Math.abs($(b).data('posy') - $(a).data('posy')) > 0.01) {
+            if(Math.abs($(b).data('posy') - $(a).data('posy')) > 0.01)
                 return ($(b).data('posy') < $(a).data('posy'))? 1 : -1;
-            }
-            else {
+            else
                 return ($(b).data('posx') < $(a).data('posx'))? 1 : -1;
-            }
         }).each(function(i, el){
             var values = {
                 'text': $(el).data('item-value-text') || "",
@@ -384,13 +389,14 @@ $(function() {
                 }
             });
         }, 0); // TODO this fix a problem but not very nice code
+        updateFontSize(iframe);
 
         // var update_timer = setInterval(update_pdf_items, 1000, iframe, configuration);
-        iframe.contents().find('#viewerContainer').on('scroll', function(e) {
+        iframe.contents().find('#viewerContainer').on('scroll', function(e) { // TODO
             update_pdf_items(iframe, configuration);
             check_pdf_items_completion(iframe, role);
+            scrollToSignItem(iframe, sign_item_navigator, null);
             updateFontSize(iframe);
-            // TODO ? scrollToSignItem(iframe, 0);
         });
 
         if(editMode) {
@@ -408,28 +414,23 @@ $(function() {
                 var WIDTH = 0, HEIGHT = 0;
                 switch(currentFieldType) {
                     case 'signature':
-                        WIDTH = 0.300;
-                        HEIGHT = 0.090;
+                        WIDTH = 0.300; HEIGHT = 0.090;
                         break;
 
                     case 'initial':
-                        WIDTH = 0.100;
-                        HEIGHT = 0.045;
+                        WIDTH = 0.100; HEIGHT = 0.045;
                         break;
 
                     case 'text':
-                        WIDTH = 0.200;
-                        HEIGHT = 0.015;
+                        WIDTH = 0.200; HEIGHT = 0.015;
                         break;
 
                     case 'textarea':
-                        WIDTH = 0.500;
-                        HEIGHT = 0.200;
+                        WIDTH = 0.500; HEIGHT = 0.200;
                         break;
 
                     case 'date':
-                        WIDTH = 0.150;
-                        HEIGHT = 0.015;
+                        WIDTH = 0.150; HEIGHT = 0.015;
                         break;
                 }
 
@@ -444,24 +445,21 @@ $(function() {
                 }
             });
         }
-
-        iframe.contents().find('#viewer').append(sign_item_navigator);
     });
 
-    // Go to other sign item buttons
-    var nav_buttons = $('.other-sign-item-button');
-    var currentItemNo = 0;
-    $(nav_buttons[0]).on('click', function(e) {
-        currentItemNo--;
-        if(currentItemNo < 0)
-            currentItemNo = iframe.contents().find('.sign_item').length-1;
-    });
-    $(nav_buttons[1]).on('click', function(e) {
-        currentItemNo++;
-        if(currentItemNo >= iframe.contents().find('.sign_item').length)
-            currentItemNo = 0;
-    });
-    nav_buttons.on('click', function(e) {
-        scrollToSignItem(iframe, currentItemNo);
-    });
+    var completion_nav_fct = function(e) {
+        var toComplete = check_pdf_items_completion(iframe, role).sort(function(a, b) {
+            if(Math.abs($(b).offset().top - $(a).offset().top) > $(a).parent().height()/100)
+                return ($(b).offset().top < $(a).offset().top)? 1 : -1;
+            else
+                return ($(b).offset().left < $(a).offset().left)? 1 : -1;
+        });
+
+        if(toComplete.length > 0)
+            scrollToSignItem(iframe, sign_item_navigator, toComplete[0]);
+        else
+            sign_item_navigator.hide();
+    };
+    $('#start-completion-button').on('click', completion_nav_fct);
+    sign_item_navigator.on('click', completion_nav_fct);
 });

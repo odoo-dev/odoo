@@ -24,6 +24,7 @@
     <template id="website_sign.doc_sign" name="Document Sign">
         <t t-call="website.layout">
             <div class="container">
+                <input id="document_viewmode" type="hidden" t-att-value="viewmode"/>
                 <h2><strong><t t-esc="signature_request.attachment.name"/></strong> - Signature Request</h2>
 
                 <div class="row">
@@ -55,9 +56,7 @@
                                     </a>
                                     <t t-if="hasItems">
                                         <button id="signature-validate-button" class="btn btn-primary btn-block" type="button" disabled="disabled"/>
-                                        <button class="other-sign-item-button btn btn-primary btn-block pull-left" type="button">Previous field</button>
-                                        <button class="other-sign-item-button btn btn-primary btn-block pull-right" type="button">Next field</button>
-                                        <div class="clearfix"/>
+                                        <button id="start-completion-button" class="btn btn-primary btn-block" type="button">Start completion</button>
                                     </t>
                                 </t>
                                 <t t-if="current_request_item and current_request_item.state == 'closed'">
