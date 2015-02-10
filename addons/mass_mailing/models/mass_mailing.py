@@ -128,7 +128,22 @@ class MassMailingList(osv.Model):
             _get_contact_nbr, type='integer',
             string='Number of Contacts',
         ),
+        'popup_content': fields.html("Popup content", translate=True, sanitize=False),
+        'popup_redirect_url': fields.char("Popup Redirect URL"),
     }
+
+    def create(self, cr, uid, vals, context=None):
+        if not vals['popup_content']:
+            vals['popup_content'] = """
+                <div class="o_popup_modal_header text-center">
+                    <h3 class="o_popup_modal_title mt8">Odoo Presents</h3>
+                </div>
+                <div class="message">
+                    <font>7</font><strong>Business Hacks</strong>
+                    <span> to<br/>boost your marketing</span>
+                </div>
+                <p class="o_message_paragraph">Join our Marketing newsletter and get <strong>this white paper instantly</strong></p>"""
+        return super(MassMailingList, self).create(cr, uid, vals, context=context)
 
 
 class MassMailingStage(osv.Model):

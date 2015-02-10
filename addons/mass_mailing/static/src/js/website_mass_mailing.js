@@ -56,6 +56,68 @@
         },
     });
 
+    website.snippet.animationRegistry.banner = website.snippet.Animation.extend({
+        selector: ".banner_popup",
+        start: function (editable_mode) {
+            var self = this;
+            self.redirect_url = false;
+            var popupcontent = self.$target.find(".o_popup_content_dev").empty();
+
+            openerp.jsonRpc('/website_mass_mailing/get_content', 'call', {
+                newsletter_id: self.$target.data('list-id')
+            }).then(function (data) {
+                if (data.content) {
+                    $('<div></div>').append(data.content).appendTo(popupcontent)
+                }
+                self.$target.find('input.popup_subscribe_email').val(data.email || "")
+                self.redirect_url = data.redirect_url
+                if (!editable_mode && !data.is_subscriber) {
+                    $(document).on('mouseleave', _.bind(self.show_banner, self));
+
+                    self.$target.find('.popup_subscribe_btn').on('click', function (event) {
+                        event.preventDefault();
+                        self.on_click_subscribe();
+                    });
+                } else { $(document).off('mouseleave'); }
+            });
+        },
+        on_click_subscribe: function () {
+            var self = this;
+            var $email = self.$target.find(".popup_subscribe_email:visible");
+
+            if ($email.length && !$email.val().match(/.+@.+/)) {
+                self.$target.addClass('has-error');
+                return false;
+            }
+            self.$target.removeClass('has-error');
+
+            openerp.jsonRpc('/website_mass_mailing/subscribe', 'call', {
+                'list_id': self.$target.data('list-id'),
+                'email': $email.length ? $email.val() : false
+            }).then(function (subscribe) {
+                self.$target.find('#banner_popup').modal('hide');
+                $(document).off('mouseleave');
+                if (self.redirect_url) {
+                    if (_.contains(self.redirect_url.split('/'), window.location.host) || self.redirect_url.indexOf('/')== 0) {
+                        window.location.href = self.redirect_url
+                    } else if (self.redirect_url.indexOf('www') == 0) {
+                        window.open('http://' + self.redirect_url, '_blank')
+                    } else {  window.open(self.redirect_url, '_blank') }
+                }
+            });
+        },
+        show_banner: function() {
+            var self = this;
+            if (!openerp.get_cookie("popup-banner-"+ self.$target.data('list-id')) && self.$target) {
+               $('#banner_popup:first').modal('show').css({
+                    'margin-top': '70px',
+                    'position': 'fixed'
+                });
+                document.cookie = "popup-banner-"+ self.$target.data('list-id') +"=" + true + ";path=/"
+            }
+        }
+    });
+
     openerp.website.if_dom_contains('div.o_unsubscribe_form', function() {
         $('#unsubscribe_form').on('submit', function(e) {
             e.preventDefault();

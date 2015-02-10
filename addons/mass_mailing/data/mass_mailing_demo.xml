@@ -11,6 +11,16 @@
         <!-- Create mailing lists -->
         <record id="mass_mail_list_2" model="mail.mass_mailing.list">
             <field name="name">Imported Contacts</field>
+            <field name="popup_content"><![CDATA[
+                <div class="o_popup_modal_header text-center">
+                    <h3 class="o_popup_modal_title mt8">Odoo Presents</h3>
+                </div>
+                <div class="message">
+                    <font>7</font>
+                    <strong>Business Hacks</strong>
+                    <span> to<br/>boost your marketing</span>
+                </div>
+                <p class="o_message_paragraph">Join our Marketing newsletter and get <strong>this white paper instantly</strong></p>]]></field>
         </record>
 
         <!-- Create Contacts -->

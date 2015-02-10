@@ -8,6 +8,7 @@
 
 <template id="assets_frontend" inherit_id="website.assets_frontend" name="Mail Frontend Assets">
     <xpath expr="." position="inside">
+                <link rel="stylesheet" type="text/less" href="/mass_mailing/static/src/less/mass_mailing_popup.less" />
                 <script type="text/javascript" src="/mass_mailing/static/src/js/website_mass_mailing.js"></script>
             </xpath>
         </template>
