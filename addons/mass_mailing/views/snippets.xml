@@ -55,12 +55,7 @@
                                 <a href="#" class="o_popup_btn_close o_not_editable" data-dismiss="modal" contenteditable="false">&amp;times;</a>
 
                                 <div class="o_popup_modal_body text-center">
-                                    <!--
-=================================================================================
-                                        Here is the content you should display instead. -->
                                     <div class="o_popup_content_dev" data-oe-placeholder="Type Here ..."/>
-                                    <!--
-=================================================================================-->
                                     <div class="input-group o_not_editable o_popup_animated o_popup_bounce_del500ms o_popup_bounce_small" contenteditable="false">
                                         <input type="email" name="email" class="popup_subscribe_email form-control" placeholder="your email..." autofocus="autofocus"/>
                                         <span class="input-group-btn">
