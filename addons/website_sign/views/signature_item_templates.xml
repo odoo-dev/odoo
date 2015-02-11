@@ -119,12 +119,4 @@
             </div>
         </t>
 	</template>
-
-    <template id="report_signature_request">
-        <t t-call="report.html_container">
-            <t t-foreach="docs" t-as="o">
-                
-            </t>
-        </t>
-    </template>
 </odoo>

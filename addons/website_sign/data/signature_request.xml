@@ -72,6 +72,17 @@
         <field name="subject">Completed document ${ctx['docnames']}</field>
         <field name="body_html"><![CDATA[
             <center>
+                <table width = "60%">
+                    <tbody>
+                        <tr>
+                            <td style="background-color:#ffffff;border:1px solid #ccc;padding:10px 10px 5px 10px" bgcolor="FFFFFF" align="center">
+                                <h1 style="font-size:14px">
+                                    The document you signed has been completed by everyone !
+                                </h1>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
                 <table width="60%">
                     <tbody>
                         <tr>
@@ -90,7 +101,7 @@
                                                 % for link in ctx['links']:
                                                     <td style='padding:9px 16px 9px 16px;font-size:16px;color:#f7fbfd;background-color:#0088cc'>
                                                         <a style='text-decoration:none;font-size:16px;color:#f7fbfd' href=${link[0]}>
-                                                            <span style='color:#f7fbfd'>See document ${link[1]}</span>
+                                                            <span style='color:#f7fbfd'>Get completed document ${link[1]}</span>
                                                         </a>
                                                     </td>
                                                 % endfor
@@ -106,15 +117,6 @@
         ]]>
         </field>
     </record>
-
-    <report
-        id="signature_request_report"
-        model="signature.request"
-        string="Signature Request"
-        report_type="qweb-pdf"
-        name="website_sign.report_signature_request"
-        file="website_sign.report_signature_request"
-    />
 
     <!-- Signature request workflow -->
     <record model="workflow" id="wkf_signature_request">

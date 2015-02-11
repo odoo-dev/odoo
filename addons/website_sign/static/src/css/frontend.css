@@ -21,3 +21,82 @@ div#font_dialog #sign_font_selection {
   overflow: auto;
   height: 90%;
 }
+
+/* ============== */
+
+
+.page {
+  position: relative;
+}
+
+.sign_item {
+  position: absolute;
+  border: 1px dashed #A24A8B;
+  vertical-align: middle;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  box-shadow: 0px 0px 5px 2px #A24A8B;
+  resize: none;
+
+  text-align: center;
+  background: transparent;
+}
+
+.sign_item_required {
+  background-color: rgba(255, 200, 200, 0.3);
+}
+
+.sign_item .helper, .sign_item_navigator .helper{
+  vertical-align: middle;
+  height: 100%;
+  display: inline-block;
+}
+
+.sign_item img {
+  max-width: 100%;
+  max-height: 100%;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.sign_item input, .sign_item button {
+  font-size: 0.6em;
+  position: absolute;
+  top: 0px;
+}
+
+.sign_item input {
+  right: 0px;
+}
+
+.sign_item button {
+  left: 0px;
+}
+
+.sign_item_selected {
+  box-shadow: 0px 0px 10px 4px orange;
+}
+
+.sign_item_navigator {
+  position: absolute;
+  left: -8%;
+  background-image: url(../img/navigator.png);
+  background-size: 100% 100%;
+  width: 10%;
+  height: 2%;
+
+  text-align: left;
+  padding-left: 2%;
+  color: white;
+
+  cursor: pointer;
+}
+
+.sign_item_viewmode {
+  border: none;
+  box-shadow: 0px 0px 0px 0px white;
+  resize: none;
+  background: transparent;
+  background-color: none;
+}

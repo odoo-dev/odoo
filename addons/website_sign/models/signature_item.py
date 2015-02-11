@@ -27,6 +27,15 @@ class signature_item(models.Model):
 
     value = fields.One2many('signature.item.value', 'signature_item', string="Signature Item Values") # Let's keep the possibility of multiple values
 
+    @api.multi
+    def getByPage(self):
+        items = {};
+        for item in self:
+            if item.page not in items:
+                items[item.page] = []
+            items[item.page].append(item)
+        return items
+
 class signature_item_value(models.Model):
     _name = "signature.item.value"
     _description = "Signature Field Value For Document To Sign"

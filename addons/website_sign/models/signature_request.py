@@ -6,6 +6,11 @@ import time, uuid, re
 
 from openerp import models, api, fields, _
 
+from pyPdf import PdfFileWriter, PdfFileReader
+import os, StringIO, base64
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+
 class signature_request(models.Model):
     _name = "signature.request"
     _description = "Signature Request For An Attachment"
@@ -25,6 +30,8 @@ class signature_request(models.Model):
     nb_draft = fields.Integer(string="Draft requests", compute="_compute_nb_draft", store=True)
     nb_wait = fields.Integer(string="Sent requests", compute="_compute_nb_wait")
     nb_closed = fields.Integer(string="Completed requests", compute="_compute_nb_closed", store=True)
+
+    completed_document = fields.Binary(string="Completed PDF", readonly=True)
 
     @api.one
     @api.depends('request_items.state')
@@ -52,6 +59,7 @@ class signature_request(models.Model):
 
     @api.one
     def action_draft(self):
+        self.completed_document = None
         self.state = 'draft'
 
     @api.one
@@ -73,6 +81,7 @@ class signature_request(models.Model):
 
     @api.one
     def action_canceled(self):
+        self.completed_document = None
         self.request_items.action_draft()
         self.state = 'canceled'
 
@@ -178,6 +187,9 @@ class signature_request(models.Model):
         if len(signers_data) <= 0:
             return False
 
+        if not self.completed_document:
+            self.generate_completed_document()
+
         base_context = self.env.context
         template_id = self.env.ref('website_sign.completed_signature_mail_template').id
         mail_template = self.env['mail.template'].browse(template_id)
@@ -191,7 +203,7 @@ class signature_request(models.Model):
             docs, links = [], []
             for sign in signers_data[signer]:
                 docs.append(sign['name'])
-                link = "sign/document/%s?viewmode=1" % sign['id']
+                link = "website_sign/download/%s/completed" % sign['id']
                 links.append([link, sign['fname'].split('.')[:-1][0]])
             docnames = ", ".join(docs)
 
@@ -209,6 +221,60 @@ class signature_request(models.Model):
             # attachment_ids.append((4, self....)) TODO attach completed document
             mail.attachment_ids = attachment_ids
             mail.send(raise_exception=False)
+
+        return True
+
+    @api.one
+    def generate_completed_document(self):
+        if len(self.signature_items) <= 0:
+            self.completed_document = self.attachment.datas
+            return True
+
+        old_pdf = PdfFileReader(StringIO.StringIO(base64.b64decode(self.attachment.datas))) # file("http://localhost:8069/web/binary/image?model=ir.attachment&field=datas&id=" + str(self.attachment.id), "rb"))
+        box = old_pdf.getPage(0).mediaBox
+        width = box.getUpperRight_x()
+        height = box.getUpperRight_y()
+        font = "Helvetica"
+        fontsize = height/75 # TODO
+
+        packet = StringIO.StringIO()
+        can = canvas.Canvas(packet)
+        can.setFont(font, fontsize)
+        itemsByPage = self.signature_items.getByPage()
+        for p in range(0, old_pdf.getNumPages()):
+            if (p+1) not in itemsByPage:
+                can.showPage()
+                continue
+            items = itemsByPage[p+1]
+            for item in items:
+                if len(item.value) <= 0 or not (item.value[0].text_value or item.value[0].image_value):
+                    continue
+                if item.type == "text" or item.type == "date":
+                    can.drawCentredString(width*(item.posX+item.width/2), height*(1-item.posY)-fontsize, item.value[0].text_value)
+                elif item.type == "textarea":
+                    lines = item.value[0].text_value.split('\n')
+                    y = height*(1-item.posY)-fontsize
+                    for line in lines:
+                        can.drawString(width*item.posX, y, line)
+                        y -= fontsize*1.5
+                elif item.type == "signature" or item.type == "initial":
+                    img = base64.b64decode(item.value[0].image_value[item.value[0].image_value.find(',')+1:])
+                    can.drawImage(ImageReader(StringIO.StringIO(img)), width*item.posX, height*(1-item.posY-item.height), width*item.width, height*item.height, 'auto', True) 
+            can.showPage()
+        can.save()
+
+        item_pdf = PdfFileReader(packet)
+        new_pdf = PdfFileWriter()
+
+        for p in range(0, old_pdf.getNumPages()):
+            page = old_pdf.getPage(p)
+            page.mergePage(item_pdf.getPage(p))
+            new_pdf.addPage(page)
+
+        output = StringIO.StringIO()
+        new_pdf.write(output)
+        self.completed_document = base64.b64encode(output.getvalue())
+        output.close()
 
         return True
 
@@ -232,6 +298,18 @@ class signature_request(models.Model):
             'name': 'Signature Request Edit Field URL',
             'type': 'ir.actions.act_url',
             'url': '/custom/document/' + str(self[0].id),
+            'target': 'self',
+        }
+
+    @api.multi
+    def get_completed_document(self):
+        if not self.completed_document:
+            self.generate_completed_document()
+
+        return {
+            'name': 'Signature Request Completed Document URL',
+            'type': 'ir.actions.act_url',
+            'url': '/website_sign/download/' + str(self[0].id) + '/completed',
             'target': 'self',
         }
 

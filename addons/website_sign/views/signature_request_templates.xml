@@ -42,8 +42,8 @@
                             </div>
                             <div class="panel-body">
                                 <t t-foreach="signature_request.request_items" t-as="sign">
-                                    <div t-if="sign.state != 'closed'"><span style="color:red;"><b><t t-raw="sign.partner_id.name"/></b> is requested to sign.</span> <em t-if="sign.state != 'opened'">(the mail access has not been sent yet)</em></div>
-                                    <div t-if="sign.state == 'closed'"><b><t t-raw="sign.partner_id.name"/></b> has signed the Document.</div>
+                                    <div t-if="sign.state != 'closed'"><span style="color:red;"><b><t t-raw="sign.partner_id.name"/></b> has to sign.</span> <em t-if="sign.state != 'opened'">(the mail access has not been sent yet)</em></div>
+                                    <div t-if="sign.state == 'closed'"><b><t t-raw="sign.partner_id.name"/></b> signed on <t t-raw="sign.signing_date"/>.</div>
                                 </t>
                             </div>
                         </div>
@@ -85,7 +85,7 @@
                         </div>
 
                         <div t-if="not hasItems">
-                            <a t-att-href="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id)" target="_blank">
+                            <a t-att-href="'/website_sign/download/' + str(signature_request.id) + '/origin'" target="_blank">
                                 <img t-if="signature_request.attachment.file_type_icon == 'webimage'" class="media-object" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id) + '&amp;resize=300,180'" style="width: 400px;"/>
                                 <img t-if="signature_request.attachment.file_type_icon != 'webimage'" class="media-object" t-att-src="'/mail/static/src/img/mimetypes/' + signature_request.attachment.file_type_icon + '.png'" style="width: 400px;"/>
                             </a>

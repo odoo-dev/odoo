@@ -2,7 +2,8 @@
 from openerp.addons.website.models import website
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 import time
-from openerp.addons.web.controllers.main import login_redirect
+from openerp.addons.web.controllers.main import login_redirect, content_disposition
+import mimetypes
 
 from openerp import http, _
 import base64, os
@@ -170,3 +171,28 @@ class website_sign(http.Controller):
             fonts.append([filename[:-4], font])
 
         return fonts
+
+    @http.route(['/website_sign/download/<int:id>/<type>'], type='http', auth='user', website=True)
+    def download_completed_document(self, id, type=None, **post):
+        signature_request = http.request.env['signature.request'].browse(id)
+        document = None
+        if type == "origin":
+            document = signature_request.attachment.datas
+        elif type == "completed":
+            document = signature_request.completed_document
+
+        if not document:
+            return http.request.not_found()
+
+        filecontent = base64.b64decode(document)
+        filename = signature_request.attachment.name
+        if filename != signature_request.attachment.datas_fname:
+            filename += signature_request.attachment.datas_fname[signature_request.attachment.datas_fname.rfind('.'):]
+        content_type = mimetypes.guess_type(filename)
+        return http.request.make_response(
+            filecontent,
+            headers = [
+                ('Content-Type', content_type[0] or 'application/octet-stream'),
+                ('Content-Disposition', content_disposition(filename))
+            ]
+        )
