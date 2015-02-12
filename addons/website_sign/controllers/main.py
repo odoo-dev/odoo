@@ -61,6 +61,12 @@ class website_sign(http.Controller):
             else:
                 record = False
 
+        signature_item_types = http.request.env['signature.item.type'].sudo().search_read([])
+        if current_request_item:
+            for item_type in signature_item_types:
+                if item_type['auto_field']:
+                    item_type['auto_field'] = current_request_item.partner_id[item_type['auto_field']]
+
         values = {
             'signature_request': signature_request,
             'current_request_item': current_request_item,
@@ -70,7 +76,8 @@ class website_sign(http.Controller):
             'message': message and int(message) or False,
             'hasItems': len(signature_request.signature_items) > 0,
             'role': current_request_item.role.id if current_request_item else 0,
-            'viewmode': viewmode and bool(viewmode) or False
+            'viewmode': viewmode and bool(viewmode) or False,
+            'signature_item_types': signature_item_types,
         }
 
         return http.request.render('website_sign.doc_sign', values)
@@ -135,7 +142,8 @@ class website_sign(http.Controller):
 
         values = {
             'signature_request': signature_request,
-            'signature_item_parties': http.request.env['signature.item.party'].search([])
+            'signature_item_parties': http.request.env['signature.item.party'].search([]),
+            'signature_item_types': http.request.env['signature.item.type'].search([])
         }
         return http.request.render('website_sign.items_edit', values)
 

@@ -8,13 +8,7 @@ class signature_item(models.Model):
     signature_request = fields.Many2one('signature.request', required=True, readonly=True, ondelete='cascade')
 
     name = fields.Char(default="default_name")
-    type = fields.Selection([
-        ('signature', "Signature"),
-        ('initial', "Initial"),
-        ('text', "Text"),
-        ('textarea', "Multiline Text"),
-        ('date', "Date")
-    ], required=True)
+    type = fields.Many2one('signature.item.type', required=True)
 
     required = fields.Boolean(default=True)
     responsible = fields.Many2one("signature.item.party")
@@ -35,6 +29,23 @@ class signature_item(models.Model):
                 items[item.page] = []
             items[item.page].append(item)
         return items
+
+class signature_item_type(models.Model):
+    _name = "signature.item.type"
+    _description = "Specialized type for signature fields"
+
+    name = fields.Char(required=True)
+    tip = fields.Char(required=True, default="Fill")
+    type = fields.Selection([
+        ('signature', "Signature"),
+        ('initial', "Initial"),
+        ('text', "Text"),
+        ('textarea', "Multiline Text"),
+    ], required=True)
+
+    default_width = fields.Float(digits=(4, 3), required=True, default=0.200)
+    default_height = fields.Float(digits=(4, 3), required=True, default=0.020)
+    auto_field = fields.Char()
 
 class signature_item_value(models.Model):
     _name = "signature.item.value"

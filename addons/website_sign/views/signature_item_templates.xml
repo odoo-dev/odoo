@@ -8,13 +8,15 @@
                 <input id="input_field_readonly" type="hidden" t-att-value="readonly"/>
                 <input id="input_current_role" type="hidden" t-att-value="role"/>
 
+                <t t-call="website_sign.item_types_input_info"/>
+
                 <div id="canvas-container">
                     <iframe id="iframe-view"/>
                     <t t-foreach="signature_request.signature_items" t-as="item">
                         <t t-if="len(item.value) > 0 and item.value[0].value">
                             <input type="hidden"
                                 t-att-data-item-id="item.id"
-                                t-att-data-type="item.type"
+                                t-att-data-type="item.type.id"
                                 t-att-data-required="item.required"
                                 t-att-data-responsible="item.responsible.id"
                                 t-att-data-page="item.page"
@@ -27,7 +29,7 @@
                         <t t-if="not (len(item.value) > 0 and item.value[0].value)">
                             <input type="hidden"
                                 t-att-data-item-id="item.id"
-                                t-att-data-type="item.type"
+                                t-att-data-type="item.type.id"
                                 t-att-data-required="item.required"
                                 t-att-data-responsible="item.responsible.id"
                                 t-att-data-page="item.page"
@@ -61,6 +63,8 @@
             			<input id="input_signature_request_id" type="hidden" t-att-value="signature_request.id"/>
             			<input id="input_attachment_location" type="hidden" t-att-value="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id)"/>
 
+                        <t t-call="website_sign.item_types_input_info"/>
+
             			<div class="panel panel-default">
                             <div class="panel-heading">
                 				<a t-att-href="'/web?#id=' + str(signature_request.id) + '&amp;view_type=form&amp;model=signature.request'" id="signature_fields_save" class="btn btn-primary btn-block fa fa-check">Save</a>
@@ -70,11 +74,9 @@
                             <h4 class="panel-heading modal-title">Field types</h4>
     	        			<div class="panel-body">
         	        			<p>Double click to add or delete</p>
-                                <button data-item-type="signature" type="button" class="field_type_button btn btn-primary btn-block">Signature</button>
-                                <button data-item-type="initial" type="button" class="field_type_button btn btn-primary btn-block">Initial</button>
-        	        			<button data-item-type="text" type="button" class="field_type_button btn btn-primary btn-block">Text</button>
-                                <button data-item-type="textarea" type="button" class="field_type_button btn btn-primary btn-block">Multiline Text</button>
-                                <button data-item-type="date" type="button" class="field_type_button btn btn-primary btn-block">Date</button>
+                                <t t-foreach="signature_item_types" t-as="item_type">
+                                    <button type="button" class="field_type_button btn btn-primary btn-block" t-att-data-item-type-id="item_type.id"><t t-esc="item_type.name"/></button>
+                                </t>
                             </div>
     	        		</div>
             		</div>
@@ -84,7 +86,7 @@
                         <t t-foreach="signature_request.signature_items" t-as="item">
                             <input type="hidden"
                                 t-att-data-item-id="item.id"
-                                t-att-data-type="item.type"
+                                t-att-data-type="item.type.id"
                                 t-att-data-required="item.required"
                                 t-att-data-responsible="item.responsible.id"
                                 t-att-data-page="item.page"
@@ -118,4 +120,17 @@
             </div>
         </t>
 	</template>
+
+    <template t-name="website_sign.item_types_input_info" name="Item types input info">
+        <t t-foreach="signature_item_types" t-as="item_type">
+            <input type="hidden" class="field_type_input_info" 
+                t-att-data-item-type-id="item_type['id']"
+                t-att-data-item-type-name="item_type['name']"
+                t-att-data-item-type-tip="item_type['tip']"
+                t-att-data-item-type-type="item_type['type']"
+                t-att-data-item-type-width="item_type['default_width']"
+                t-att-data-item-type-height="item_type['default_height']"
+                t-att-data-item-type-auto="item_type['auto_field']"/>
+        </t>
+    </template>
 </odoo>

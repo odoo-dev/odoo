@@ -21,6 +21,7 @@ Select your recipients and follow the signature process easily.
         'views/signature_item_view.xml',
 
         'data/signature_request.xml',
+        'data/signature_item.xml',
     ],
     'demo': [],
     'qweb': [

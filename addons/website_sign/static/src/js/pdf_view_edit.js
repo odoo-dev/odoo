@@ -18,9 +18,11 @@ function PDFViewEdit()
     this.role = parseInt($('#input_current_role').val()) || 0;
 
     this.currentFieldType = false;
-    this.configuration = {}
+    this.configuration = {};
 
     this.sign_item_navigator = $('<div class="sign_item_navigator"/>');
+
+    this.types = {};
     
     this.run = function() {
         var self = this;
@@ -37,9 +39,9 @@ function PDFViewEdit()
         field_type_buttons.on('click', function(e) {
             field_type_buttons.removeClass('fa fa-check');
 
-            checkedButton = $(e.currentTarget);
+            var checkedButton = $(e.currentTarget);
             checkedButton.addClass('fa fa-check');
-            self.currentFieldType = checkedButton.data('item-type');
+            self.currentFieldType = checkedButton.data('item-type-id');
         });
         $(field_type_buttons[0]).click();
 
@@ -167,28 +169,8 @@ function PDFViewEdit()
                 var posX = (e.pageX - (parent.offset().left+pageBorderX)) / parent.innerWidth();
                 var posY = (e.pageY - (parent.offset().top+pageBorderY)) / parent.innerHeight();
                 
-                var WIDTH = 0, HEIGHT = 0;
-                switch(self.currentFieldType) {
-                    case 'signature':
-                        WIDTH = 0.300; HEIGHT = 0.090;
-                        break;
-
-                    case 'initial':
-                        WIDTH = 0.100; HEIGHT = 0.045;
-                        break;
-
-                    case 'text':
-                        WIDTH = 0.200; HEIGHT = 0.015;
-                        break;
-
-                    case 'textarea':
-                        WIDTH = 0.500; HEIGHT = 0.200;
-                        break;
-
-                    case 'date':
-                        WIDTH = 0.150; HEIGHT = 0.015;
-                        break;
-                }
+                var type = self.getTypeData(self.currentFieldType);
+                var WIDTH = type["default_width"], HEIGHT = type["default_height"];
 
                 var elem = self.create_signature_item(self.currentFieldType, required, 0, posX-WIDTH/2, posY-HEIGHT/2, WIDTH, HEIGHT);
                 if(elem !== null) {
@@ -209,8 +191,10 @@ function PDFViewEdit()
         var ok = true;
         var toComplete = [];
         self.iframe.contents().find('.sign_item').each(function(i, el) {
+            var type = self.getTypeData($(el).data('type'));
+
             var value = $(el).val();
-            if($(el).data('type') == 'signature' || $(el).data('type') == 'initial') {
+            if(type['type'] == 'signature' || type['type'] == 'initial') {
                 value = $(el).data('signature');
             }
 
@@ -299,9 +283,10 @@ function PDFViewEdit()
         elem.css('width', width*100 + '%').css('height', height*100 + '%');
     };
 
-    this.create_signature_item = function(type, required, responsible, posX, posY, width, height, value) {
+    this.create_signature_item = function(typeID, required, responsible, posX, posY, width, height, value) {
         var self = this;
 
+        var type = self.getTypeData(typeID);
         var readonly = self.readonly || self.editMode || (responsible > 0 && responsible != self.role);        
 
         var elem = $("<div><span class='helper'/></div>");
@@ -311,13 +296,12 @@ function PDFViewEdit()
                 "initial": "<button type='button'><span class='helper'/></div>",
                 "text": "<input type='text'/>",
                 "textarea": "<textarea/>",
-                "date": "<input type='text'/>",
-            }[type]);
+            }[type['type']]);
 
-            if(type === "signature" || type === "initial") {
+            if(type['type'] === "signature" || type['type'] === "initial") {
                 elem.on('click', function(e) {
                     var signed_items = self.iframe.contents().find('.sign_item').filter(function(i) {
-                        return ($(this).data('type') == type
+                        return ($(this).data('type') == type['id']
                                     && $(this).data('signature') && $(this).data('signature') != elem.data('signature')
                                     && ($(this).data('responsible') <= 0 || $(this).data('responsible') == elem.data('responsible')));
                     });
@@ -339,7 +323,7 @@ function PDFViewEdit()
                             elem.change();
                         });
 
-                        signature_dialog.data('signature-type', type);
+                        signature_dialog.data('signature-type', type['type']);
                         signature_dialog.data('signature-ratio', width/height);
                         signature_dialog.attr('data-target', '#signature_dialog');
                         signature_dialog.click();
@@ -347,32 +331,41 @@ function PDFViewEdit()
                     }
                 });
             }
+
+            if(type['auto_field']) {
+                elem.on('focus', function(e) {
+                    elem.val(type['auto_field']);
+                    elem.change();
+                });
+            }
         }
 
-        if(type === 'textarea')
+        if(type['type'] === 'textarea')
             elem.css('text-align', 'left');
 
         elem.addClass('sign_item');
 
         if(value !== undefined) {
-            if(type == 'signature' || type == 'initial') {
+            if(type['type'] == 'signature' || type['type'] == 'initial') {
                 elem.data('signature', value);
                 value = "<img src='" + value + "'/>";
             }
-            else if(type == 'textarea')
-                value = value.text.split('\n').join('<br/>');
+            else if(type['type'] == 'textarea' && readonly) {
+                elem.html("");
+                value = value.split('\n').join('<br/>');
+            }
 
             elem.append(value);
             elem.val(value);
         }
         else {
-            if(type == 'signature')
+            if(type['type'] == 'signature')
                 elem.append("Sign Here");
-            else if(type == 'initial')
+            else if(type['type'] == 'initial')
                 elem.append("Mark");
         }
 
-        elem.on('change', function(e) {
+        elem.on('change input', function(e) {
             self.check_pdf_items_completion(self.role);
             self.sign_item_navigator.html('<span class="helper"/>Next').focus();
         });
@@ -382,7 +375,7 @@ function PDFViewEdit()
         if(self.pdfView || (self.role != responsible && responsible > 0))
             elem.addClass('sign_item_viewmode');
 
-        elem.data('type', type).data('required', required).data('responsible', responsible).data('posx', posX).data('posy', posY).data('width', width).data('height', height);
+        elem.data('type', type['id']).data('required', required).data('responsible', responsible).data('posx', posX).data('posy', posY).data('width', width).data('height', height);
 
         return elem;
     };
@@ -487,13 +480,8 @@ function PDFViewEdit()
                 scrollTop: item.offset().top - $(self.iframe.contents().find('#viewer')[0]).offset().top - $(self.iframe.contents().find('#viewerContainer')[0]).height()/4
             }, 500);
 
-            self.sign_item_navigator.html('<span class="helper"/>' + {
-                'signature': "Sign it",
-                'initial': "Mark it",
-                'text': "Fill in",
-                'textarea': "Fill in",
-                'date': "Time ?",
-            }[item.data('type')]);
+            var type = self.getTypeData(item.data('type'));
+            self.sign_item_navigator.html('<span class="helper"/>' + type['tip']);
 
             self.sign_item_navigator.appendTo(item.parent()).css('top', item.position().top/item.parent().height()*100+'%'); // TODO would be nice to animate but impossible for now
             self.sign_item_navigator.data('parent', item.parent());
@@ -509,5 +497,25 @@ function PDFViewEdit()
         var size = $(self.iframe.contents().find('.page')[0]).height() / 75; // TODO
         self.iframe.contents().find('.sign_item').css('font-size', size + 'px');
         self.sign_item_navigator.css('font-size', size + 'px');
+    };
+
+    this.getTypeData = function(id) {
+        var self = this;
+
+        if($.isEmptyObject(self.types)) {
+            $("input[type='hidden'].field_type_input_info").each(function(i, el) {
+                self.types[$(el).data('item-type-id')] = {
+                    'id': $(el).data('item-type-id'),
+                    'name': $(el).data('item-type-name'),
+                    'tip': $(el).data('item-type-tip'),
+                    'type': $(el).data('item-type-type'),
+                    'default_width': $(el).data('item-type-width'),
+                    'default_height': $(el).data('item-type-height'),
+                    'auto_field': $(el).data('item-type-auto')
+                };
+            });
+        }
+
+        return self.types[id];
     };
 }

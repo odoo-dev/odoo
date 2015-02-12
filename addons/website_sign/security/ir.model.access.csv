@@ -9,3 +9,5 @@ access_signature_item_value_all,signature_item_value all,model_signature_item_va
 access_signature_item_value_group_user,signature_item_value group_user,model_signature_item_value,base.group_user,1,1,1,1
 access_signature_item_party_all,signature_item_party all,model_signature_item_party,,1,0,0,0
 access_signature_item_party_group_user,signature_item_party group_user,model_signature_item_party,base.group_user,1,1,1,1
+access_signature_item_type_all,signature_item_type all,model_signature_item_type,,1,0,0,0
+access_signature_item_type_group_user,signature_item_type group_user,model_signature_item_type,base.group_user,1,1,1,1

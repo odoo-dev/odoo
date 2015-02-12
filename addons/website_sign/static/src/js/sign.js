@@ -53,13 +53,9 @@ $(function () {
         var sign_values = {};
         var sign_items = form.find('iframe').contents().find('.sign_item:not(.sign_item_viewmode)');
         sign_items.each(function(i, el){
-            var value = {
-                'signature': ($(el).data('signature') != signatureDialog.empty_sign)? $(el).data('signature') : false,
-                'initial': ($(el).data('signature') != signatureDialog.empty_sign)? $(el).data('signature') : false,
-                'text': $(el).val(),
-                'textarea': $(el).val(),
-                'date': $(el).val(),
-            }[$(el).data('type')];
+            var value = $(el).val();
+            if($(el).data('signature'))
+                value = ($(el).data('signature') != signatureDialog.empty_sign)? $(el).data('signature') : false;
 
             var resp = parseInt($(el).data('responsible')) || 0;
 

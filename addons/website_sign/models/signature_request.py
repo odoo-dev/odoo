@@ -221,7 +221,7 @@ class signature_request(models.Model):
             self.completed_document = self.attachment.datas
             return True
 
-        old_pdf = PdfFileReader(StringIO.StringIO(base64.b64decode(self.attachment.datas))) # file("http://localhost:8069/web/binary/image?model=ir.attachment&field=datas&id=" + str(self.attachment.id), "rb"))
+        old_pdf = PdfFileReader(StringIO.StringIO(base64.b64decode(self.attachment.datas)))
         box = old_pdf.getPage(0).mediaBox
         width = box.getUpperRight_x()
         height = box.getUpperRight_y()
@@ -240,15 +240,15 @@ class signature_request(models.Model):
             for item in items:
                 if len(item.value) <= 0 or not item.value[0].value:
                     continue
-                if item.type == "text" or item.type == "date":
+                if item.type.type == "text":
                     can.drawCentredString(width*(item.posX+item.width/2), height*(1-item.posY)-fontsize, item.value[0].value)
-                elif item.type == "textarea":
+                elif item.type.type == "textarea":
                     lines = item.value[0].value.split('\n')
                     y = height*(1-item.posY)-fontsize
                     for line in lines:
                         can.drawString(width*item.posX, y, line)
                         y -= fontsize*1.5
-                elif item.type == "signature" or item.type == "initial":
+                elif item.type.type == "signature" or item.type.type == "initial":
                     img = base64.b64decode(item.value[0].value[item.value[0].value.find(',')+1:])
                     can.drawImage(ImageReader(StringIO.StringIO(img)), width*item.posX, height*(1-item.posY-item.height), width*item.width, height*item.height, 'auto', True) 
             can.showPage()
