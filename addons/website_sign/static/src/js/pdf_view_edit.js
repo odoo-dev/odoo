@@ -43,9 +43,10 @@ function PDFViewEdit()
         });
         $(field_type_buttons[0]).click();
 
-        var viewerURL = "../../website_sign/static/lib/pdfjs/web/viewer.html?file=../../../../.." + encodeURIComponent($('#input_attachment_location').val()).replace(/'/g,"%27").replace(/"/g,"%22");
+        var viewerURL = "../../website_sign/static/lib/pdfjs/web/viewer.html?file=";
         if(!self.editMode)
             viewerURL = "../" + viewerURL;
+        viewerURL += encodeURIComponent($('#input_attachment_location').val()).replace(/'/g,"%27").replace(/"/g,"%22");
         self.iframe.attr('src', viewerURL).css('width', '100%').css('height', '1000px');
 
         var completion_nav_fct = function(e) {
@@ -122,18 +123,13 @@ function PDFViewEdit()
             else
                 return ($(b).data('posx') < $(a).data('posx'))? 1 : -1;
         }).each(function(i, el){
-            var values = {
-                'text': $(el).data('item-value-text') || "",
-                'image': $(el).data('item-value-image') || "",
-            };
-
             var resp = parseInt($(el).data('responsible')) || 0;
 
             var elem = self.create_signature_item(
                 $(el).data('type'), $(el).data('required') == "True", resp,
                 $(el).data('posx'), $(el).data('posy'),
                 $(el).data('width'), $(el).data('height'),
-                values);
+                $(el).data('item-value'));
             elem.data('item-id', $(el).data('item-id'));
 
             self.configuration[parseInt($(el).data('page'))].push(elem);
@@ -321,7 +317,9 @@ function PDFViewEdit()
             if(type === "signature" || type === "initial") {
                 elem.on('click', function(e) {
                     var signed_items = self.iframe.contents().find('.sign_item').filter(function(i) {
-                        return $(this).data('type') == type && $(this).data('signature') && $(this).data('signature') != elem.data('signature');
+                        return ($(this).data('type') == type
+                                    && $(this).data('signature') && $(this).data('signature') != elem.data('signature')
+                                    && ($(this).data('responsible') <= 0 || $(this).data('responsible') == elem.data('responsible')));
                     });
                     
                     if(signed_items.length > 0) {
@@ -357,19 +355,21 @@ function PDFViewEdit()
         elem.addClass('sign_item');
 
         if(value !== undefined) {
-            var v = value.text;
-            if(type == 'signature') {
-                v = (value.image)? "<img src='" + value.image + "'/>" : "Sign Here";
-                elem.data('signature', value.image);
-            }
-            else if(type == 'initial') {
-                v = (value.image)? "<img src='" + value.image + "'/>" : "Mark";
-                elem.data('signature', value.image);
+            if(type == 'signature' || type == 'initial') {
+                elem.data('signature', value);
+                value = "<img src='" + value + "'/>";
             }
             else if(type == 'textarea')
-                v = value.text.split('\n').join('<br/>');
-            elem.html(elem.html() + v);
-            elem.val(v);
+                value = value.text.split('\n').join('<br/>');
+
+            elem.append(value);
+            elem.val(value);
+        }
+        else {
+            if(type == 'signature')
+                elem.append("Sign Here");
+            else if(type == 'initial')
+                elem.append("Mark");
         }
 
         elem.on('change', function(e) {
@@ -379,7 +379,7 @@ function PDFViewEdit()
 
         if(required && (self.editMode || responsible <= 0 || responsible == self.role))
             elem.addClass('sign_item_required');
-        if(self.pdfView || (self.role != responsible && responsible > 0 && self.role > 0))
+        if(self.pdfView || (self.role != responsible && responsible > 0))
             elem.addClass('sign_item_viewmode');
 
         elem.data('type', type).data('required', required).data('responsible', responsible).data('posx', posX).data('posy', posY).data('width', width).data('height', height);

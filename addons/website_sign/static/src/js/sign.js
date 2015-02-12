@@ -51,7 +51,7 @@ $(function () {
         var role = parseInt($('#input_current_role').val()) || 0;
 
         var sign_values = {};
-        var sign_items = form.find('iframe').contents().find('.sign_item');
+        var sign_items = form.find('iframe').contents().find('.sign_item:not(.sign_item_viewmode)');
         sign_items.each(function(i, el){
             var value = {
                 'signature': ($(el).data('signature') != signatureDialog.empty_sign)? $(el).data('signature') : false,

@@ -9,7 +9,6 @@
                 <field name="nb_draft"/>
                 <field name="nb_wait"/>
                 <field name="nb_closed"/>
-                <!-- <field name="signature_items"/> -->
                 <field name="state"/>
             </tree>
         </field>
@@ -50,7 +49,7 @@
                     </group>
 
                     <div class="oe_button_box oe_right">
-                        <button string="Edit fields" type="object" name="go_to_custom_document" class="oe_read_only"/>
+                        <button string="Edit fields" type="object" states="draft" name="go_to_custom_document" class="oe_read_only"/>
                     </div>
                     <label for="signature_items"/>
                     <field name="signature_items"/>

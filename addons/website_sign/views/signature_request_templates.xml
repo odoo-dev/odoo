@@ -85,7 +85,7 @@
                         </div>
 
                         <div t-if="not hasItems">
-                            <a t-att-href="'/website_sign/download/' + str(signature_request.id) + '/origin'" target="_blank">
+                            <a t-attf-href="/website_sign/download/{{signature_request.id}}/{{token}}/origin" target="_blank">
                                 <img t-if="signature_request.attachment.file_type_icon == 'webimage'" class="media-object" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id) + '&amp;resize=300,180'" style="width: 400px;"/>
                                 <img t-if="signature_request.attachment.file_type_icon != 'webimage'" class="media-object" t-att-src="'/mail/static/src/img/mimetypes/' + signature_request.attachment.file_type_icon + '.png'" style="width: 400px;"/>
                             </a>
@@ -196,7 +196,7 @@
                     <h3>Missing signature request</h3>
                     <p>
                         The signature access you are trying to reach does not exist. Maybe the signature request has been deleted or modified. <br/>
-                        If there still exists a signature request for this document, it's <a t-att-href="url">here</a>. If it exists you can check if you are in the asked signers there and get your access in your mail box!
+                        If there still exists a signature request for this document, check your access in your mail box!
                     </p>
                 </div>
             </body>

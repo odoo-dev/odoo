@@ -1,8 +1,8 @@
 
-openerp.website_sign = function (session) {
-    var QWeb = session.web.qweb, _t = session.web._t;
+openerp.website_sign = function(instance) {
+    var QWeb = instance.web.qweb, _t = instance.web._t;
 
-    session.web.SignRequest = session.web.Widget.extend({
+    instance.web.SignRequest = instance.web.Widget.extend({
         init: function (parent, sign_icon, attachment_id, res_model, res_id, send_directly) {
             this._super(parent);
             this.sign_icon = sign_icon;
@@ -20,7 +20,7 @@ openerp.website_sign = function (session) {
                 'res_id': self.res_id
             }).then(function (followers) {
                 if (followers.length === 0) {
-                    var dialog = new session.web.Dialog(this, {
+                    var dialog = new instance.web.Dialog(this, {
                         size: 'small',
                         title: _t("This document does not have any followers, please add them."),
                         buttons:[{
@@ -38,7 +38,7 @@ openerp.website_sign = function (session) {
                         .filter([['id', '=', parseInt(self.attach_id)]])
                         .first().then(function(attachment){
 
-                    self.$dialog = new session.web.Dialog(self, {
+                    self.$dialog = new instance.web.Dialog(self, {
                         size: 'medium',
                         title: _t('Signature Request'),
                     }, $('<div class="oe_edit_partner_list">' + QWeb.render('select.people', {"followers": followers, "attachment": attachment}) + "</div>")).open();
@@ -82,7 +82,7 @@ openerp.website_sign = function (session) {
                 }
             });
             if(sign_ids.length <= 0){
-                var dialog = new session.web.Dialog(this, {
+                var dialog = new instance.web.Dialog(this, {
                     size: 'medium',
                     title: _t("You must select at least one signer to send a sign request."),
                     buttons:[{
@@ -115,7 +115,7 @@ openerp.website_sign = function (session) {
         },
     });
 
-    session.mail.MessageCommon.include({
+    instance.mail.MessageCommon.include({
         display_attachments: function(){
             var self = this;
 
@@ -143,17 +143,17 @@ openerp.website_sign = function (session) {
         },
 
         get_signrequest_dialog: function(sign_icon, attach_id){
-            return new session.web.SignRequest(this, sign_icon, attach_id, this.model, this.res_id, true);
+            return new instance.web.SignRequest(this, sign_icon, attach_id, this.model, this.res_id, true);
         },
     });
 
-    session.mail.ThreadComposeMessage.include({
+    instance.mail.ThreadComposeMessage.include({
         get_signrequest_dialog: function(sign_icon, attach_id){
-            return new session.web.SignRequest(this, sign_icon, attach_id, this.model, this.res_id, false);
+            return new instance.web.SignRequest(this, sign_icon, attach_id, this.model, this.res_id, false);
         },
     });
 
-    session.web.form.FieldMany2ManyBinaryMultiFiles.include({
+    instance.web.form.FieldMany2ManyBinaryMultiFiles.include({
         render_value: function () {
             var self = this;
 
@@ -172,7 +172,7 @@ openerp.website_sign = function (session) {
                         sign_icon.attr("src", "/website_sign/static/src/img/check.png");
                     sign_icon.on('click', function (ev) {
                         var attach_id = parseInt($(ev.currentTarget).data('attachment-id'));
-                        var signrequest = new session.web.SignRequest(self, $(ev.currentTarget), attach_id, self.field_manager.datarecord.model, self.field_manager.datarecord.res_id, false);
+                        var signrequest = new instance.web.SignRequest(self, $(ev.currentTarget), attach_id, self.field_manager.datarecord.model, self.field_manager.datarecord.res_id, false);
                         signrequest.get_followers();
                     });
                 }

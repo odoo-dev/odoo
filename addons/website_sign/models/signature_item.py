@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-_
-from openerp import models, api, fields
+from openerp import models, fields, api, _
 
 class signature_item(models.Model):
     _name = "signature.item"
@@ -25,7 +25,7 @@ class signature_item(models.Model):
     width = fields.Float(digits=(4, 3), required=True)
     height = fields.Float(digits=(4, 3), required=True)
 
-    value = fields.One2many('signature.item.value', 'signature_item', string="Signature Item Values") # Let's keep the possibility of multiple values
+    value = fields.One2many('signature.item.value', 'signature_item', string="Signature Item Values")
 
     @api.multi
     def getByPage(self):
@@ -41,27 +41,7 @@ class signature_item_value(models.Model):
     _description = "Signature Field Value For Document To Sign"
     
     signature_item = fields.Many2one('signature.item', required=True, ondelete='cascade')
-
-    text_value = fields.Char()
-    image_value = fields.Binary()
-
-    @api.one
-    def set(self, value):
-        {
-            'signature': self.setImage,
-            'initial': self.setImage,
-            'text': self.setText,
-            'textarea' : self.setText,
-            'date': self.setText,
-        }[self.signature_item.type](value)
-
-    @api.one
-    def setText(self, value):
-        self.text_value = value
-
-    @api.one
-    def setImage(self, value):
-        self.image_value = value
+    value = fields.Text()
 
 class signature_item_party(models.Model):
     _name = "signature.item.party"

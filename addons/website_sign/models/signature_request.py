@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
+from openerp import models, fields, api, _
+
 from openerp import tools
 from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
-import time, uuid, re
-
-from openerp import models, api, fields, _
-
+import time, uuid, re, StringIO, base64
 from pyPdf import PdfFileWriter, PdfFileReader
-import os, StringIO, base64
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
@@ -31,7 +29,7 @@ class signature_request(models.Model):
     nb_wait = fields.Integer(string="Sent requests", compute="_compute_nb_wait")
     nb_closed = fields.Integer(string="Completed requests", compute="_compute_nb_closed", store=True)
 
-    completed_document = fields.Binary(string="Completed PDF", readonly=True)
+    completed_document = fields.Binary(readonly=True)
 
     @api.one
     @api.depends('request_items.state')
@@ -71,7 +69,7 @@ class signature_request(models.Model):
         included_request_items = self.request_items.filtered(lambda r: r.partner_id.id not in ignored_partners)
         included_request_items.action_opened()
         if not self.send_signature_accesses(ignored_partners=ignored_partners):
-            included_request_items.action_draft() # TODO and warn the user
+            included_request_items.action_draft() # TODO and warn the user when because of missing role
         self.state = 'opened'
 
     @api.one
@@ -175,10 +173,9 @@ class signature_request(models.Model):
             mail_id = template.send_mail(None, force_send=False)
             mail = self.env['mail.mail'].browse(mail_id)
             attachment_ids = list(mail.attachment_ids)
-            attachment_ids.append((4, self.attachment.id)) # Could attach more (other attachment next to the document to sign?)
+            attachment_ids.append((4, self.attachment.id))
             mail.attachment_ids = attachment_ids
             mail.send(raise_exception=False)
-
         return True
 
     @api.multi
@@ -203,7 +200,7 @@ class signature_request(models.Model):
             docs, links = [], []
             for sign in signers_data[signer]:
                 docs.append(sign['name'])
-                link = "website_sign/download/%s/completed" % sign['id']
+                link = "website_sign/download/%s/%s/completed" % (sign['id'], sign['token'])
                 links.append([link, sign['fname'].split('.')[:-1][0]])
             docnames = ", ".join(docs)
 
@@ -215,13 +212,7 @@ class signature_request(models.Model):
                 links = links,
             )
 
-            mail_id = template.send_mail(None, force_send=False)
-            mail = self.env['mail.mail'].browse(mail_id)
-            attachment_ids = list(mail.attachment_ids)
-            # attachment_ids.append((4, self....)) TODO attach completed document
-            mail.attachment_ids = attachment_ids
-            mail.send(raise_exception=False)
-
+            template.send_mail(None, force_send=True)
         return True
 
     @api.one
@@ -247,18 +238,18 @@ class signature_request(models.Model):
                 continue
             items = itemsByPage[p+1]
             for item in items:
-                if len(item.value) <= 0 or not (item.value[0].text_value or item.value[0].image_value):
+                if len(item.value) <= 0 or not item.value[0].value:
                     continue
                 if item.type == "text" or item.type == "date":
-                    can.drawCentredString(width*(item.posX+item.width/2), height*(1-item.posY)-fontsize, item.value[0].text_value)
+                    can.drawCentredString(width*(item.posX+item.width/2), height*(1-item.posY)-fontsize, item.value[0].value)
                 elif item.type == "textarea":
-                    lines = item.value[0].text_value.split('\n')
+                    lines = item.value[0].value.split('\n')
                     y = height*(1-item.posY)-fontsize
                     for line in lines:
                         can.drawString(width*item.posX, y, line)
                         y -= fontsize*1.5
                 elif item.type == "signature" or item.type == "initial":
-                    img = base64.b64decode(item.value[0].image_value[item.value[0].image_value.find(',')+1:])
+                    img = base64.b64decode(item.value[0].value[item.value[0].value.find(',')+1:])
                     can.drawImage(ImageReader(StringIO.StringIO(img)), width*item.posX, height*(1-item.posY-item.height), width*item.width, height*item.height, 'auto', True) 
             can.showPage()
         can.save()
@@ -280,7 +271,7 @@ class signature_request(models.Model):
 
     @api.one
     def set_as_template(self):
-        print "\nTODO\n"
+        # TODO add template functionnality
         return
 
     @api.multi
@@ -288,7 +279,7 @@ class signature_request(models.Model):
         return {
             'name': 'Signature Request URL',
             'type': 'ir.actions.act_url',
-            'url': '/sign/document/' + str(self[0].id),
+            'url': '/sign/document/' + str(self[0].id) + '?viewmode=1',
             'target': 'self',
         }
 
@@ -309,7 +300,7 @@ class signature_request(models.Model):
         return {
             'name': 'Signature Request Completed Document URL',
             'type': 'ir.actions.act_url',
-            'url': '/website_sign/download/' + str(self[0].id) + '/completed',
+            'url': '/website_sign/download/%s/%s/completed' % (self[0].id, self[0].request_items[0].access_token),
             'target': 'self',
         }
 
@@ -323,7 +314,6 @@ class signature_request_item(models.Model):
     signature = fields.Binary()
     
     signing_date = fields.Date('Signed on', readonly=True)
-    # deadline_date = fields.Date(readonly=True)
     state = fields.Selection([
         ("draft", "Draft"),
         ("opened", "Waiting for completion"),
@@ -347,7 +337,7 @@ class signature_request_item(models.Model):
         self.signer_name = ""
         for item in self.signature_request.signature_items:
             if item.responsible == self.role or not item.responsible:
-                item.value.set(None)
+                item.value.write({'value': None})
         self.state = 'draft'
 
     @api.one
@@ -370,25 +360,10 @@ class signature_request_item(models.Model):
                 item_value = self.env['signature.item.value'].search([('signature_item', '=', int(itemId))])
                 if not item_value:
                     item_value = self.env['signature.item.value'].create({'signature_item': int(itemId)})
-                item_value.set(signature[itemId])
+                item_value.value = signature[itemId]
 
         self.action_closed()
         return True
-
-    # TODO : permit edition with this?
-    # def write(self, cr, uid, ids, values, context):
-    #     tmp = super(signature_request_item, self).write(cr, uid, ids, values, context=context)
-    #     if 'partner_id' in values:
-    #         self.browse(cr, uid, ids, context=context).reset_to_draft()
-    #     return tmp
-
-    # @api.multi
-    # def reset_to_draft(self):
-    #     self.signal_workflow('signature_request_item_cancel')
-
-    # @api.onchange('partner_id')
-    # def _onchange_partner(self):
-    #     self.action_draft()
 
 class signature_mail_message(models.Model):
     _inherit = "mail.message"
@@ -418,34 +393,15 @@ class signature_mail_message(models.Model):
 
         return result
 
-    # TODO -> should include a message with 'a signature request could be sent to you later'
+    # TODO should include a message with 'a signature request could be sent to you later' ?
     def create(self, cr, uid, values, context=None):
-        # signers_data = []
-        # if (context == None or 'is_signature_request' not in context) and 'attachment_ids' in values:
-        #     signers_data = self.pool.get("ir.attachment").browse(cr, uid, map(lambda a: a[1], values['attachment_ids']), context=context).get_signers().keys()
-
-        # new_context = {'ignored_signers_for_mail': signers_data}
-        # if context != None:
-        #     new_context.update(context)
-
         tmp = super(signature_mail_message, self).create(cr, uid, values, context=context)
         if 'signature_request' not in context:
             mess = self.pool.get("mail.message").browse(cr, uid, [tmp], context=context)
             signature_request = self.pool.get("signature.request").search(cr, uid, [("attachment.id", "in", map(lambda d: d.id, mess.attachment_ids))], context=context)
             signature_request = self.pool.get("signature.request").browse(cr, uid, signature_request, context=context)
             signature_request.write({'message': mess.body})
-
-        # attachments = self.pool.get("ir.attachment").browse(cr, uid, map(lambda d: d.id, mess.attachment_ids), context=context)
-        # attachments.send_signature_accesses(mess.body)
         return tmp
-
-# class signature_mail_notification(models.Model):
-#     _inherit = "mail.notification"
-
-#     def _notify(self, cr, uid, message_id, partners_to_notify=None, context=None, force_send=False, user_signature=True):
-#         if context != None and 'ignored_signers_for_mail' in context:
-#             partners_to_notify = list(set(partners_to_notify) - set(context['ignored_signers_for_mail']))
-#         super(signature_mail_notification, self)._notify(cr, uid, message_id, partners_to_notify=partners_to_notify, context=context, force_send=force_send, user_signature=user_signature)
 
 class ir_attachment(models.Model):
     _inherit = 'ir.attachment'

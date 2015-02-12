@@ -1,25 +1,22 @@
 # -*- coding: utf-8 -*-
-from openerp.addons.website.models import website
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
-import time
-from openerp.addons.web.controllers.main import login_redirect, content_disposition
-import mimetypes
-
 from openerp import http, _
-import base64, os
+
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from openerp.addons.web.controllers.main import content_disposition
+import time, mimetypes, base64, os
 
 class website_sign(http.Controller):
 
     def __message_post(self, message, thread_model, thread_id, type='comment', subtype=False, attachments=[]):
         if not (thread_model and thread_id):
-            return False # TODO
+            return False # TODO if attachment is created outside chatter this happens
 
         http.request.session.body = message
         user = http.request.env.user
         msgid = False
         if 'body' in http.request.session and http.request.session.body:
             model = http.request.env[thread_model].with_context(notify_author=True)
-            try: # If only sudo, notes will be sent by mails by 'Administrator'
+            try: # TODO If only sudo, notes will be sent by mails by 'Administrator'
                 msgid = model.browse(thread_id).message_post(
                     body=http.request.session.body,
                     type=type,
@@ -38,12 +35,13 @@ class website_sign(http.Controller):
             http.request.session.body = False
         return msgid
 
-    @http.route([
-        "/sign/document/<int:id>",
-        "/sign/document/<int:id>/<token>"
-    ], type='http', auth="user", website=True)
-    def request_sign(self, id, token=None, message=False, viewmode=False, **post):
-        signature_request = http.request.env['signature.request'].sudo().search([('id', '=', id)]) # TODO browse return a record (empty) even if it does not exist! normal?
+    @http.route(["/sign/document/<int:id>"], type='http', auth="user", website=True)
+    def sign_document_user(self, id, message=False, viewmode=False, **post):
+        return self.sign_document_public(id, None, message, viewmode)
+
+    @http.route(["/sign/document/<int:id>/<token>"], type='http', auth="public", website=True)
+    def sign_document_public(self, id, token=None, message=False, viewmode=False, **post):
+        signature_request = http.request.env['signature.request'].sudo().search([('id', '=', id)]) # TODO why does browse create an empty record?
         if not signature_request:
             return http.request.not_found()
 
@@ -77,9 +75,9 @@ class website_sign(http.Controller):
 
         return http.request.render('website_sign.doc_sign', values)
 
-    @http.route(['/website_sign/signed/<int:id>/<token>'], type='json', auth="user", website=True)
+    @http.route(['/website_sign/signed/<int:id>/<token>'], type='json', auth="public", website=True)
     def signed(self, id=None, token=None, sign=None, signer=None, **post):
-        request_item = http.request.env['signature.request.item'].search([('signature_request', '=', id), ('access_token', '=', token)], limit=1)
+        request_item = http.request.env['signature.request.item'].sudo().search([('signature_request', '=', id), ('access_token', '=', token)], limit=1)
         if request_item:
             if request_item.sudo().sign(signer, sign):
                 attach = http.request.env['signature.request'].sudo().browse(id).attachment
@@ -114,22 +112,16 @@ class website_sign(http.Controller):
         if not signature_request:
             signature_request = http.request.env['signature.request'].create({'attachment': attachment_id, 'message': message})
         signers_in_common = signature_request.set_signers(signer_ids)[0]
-        
-        # if signers_in_common != False and send_directly:
-        #     attach = http.request.env['ir.attachment'].browse(attachment_id)
-        #     if len(signer_ids) > 0:
-        #         message = _("Signature request for document <b>%s</b> has been added/modified") % attach['name']
-        #         self.__message_post(message, attach.res_model, attach.res_id, type='notification')
-        #         signature_request.send_signature_accesses(message, ignored_partners=signers_in_common)
-        #     else:
-        #         message = _("Signature request for document <b>%s</b> has been deleted") % attach['name']
-        #         self.__message_post(message, attach.res_model, attach.res_id, type='notification')
-                
+       
         return True
 
-    @http.route(['/sign/document/<int:id>/<token>/note'], type='http', auth="user", website=True)
+    @http.route(['/sign/document/<int:id>/<token>/note'], type='http', auth="public", website=True)
     def post_note(self, id, token, **post):
-        attach = http.request.env['signature.request'].browse(id).attachment
+        request_item = http.request.env['signature.request.item'].sudo().search([('signature_request', '=', id), ('access_token', '=', token)], limit=1)
+        if not request_item:
+            return http.request.not_found()
+
+        attach = request_item.signature_request.attachment
         message = post.get('comment')
         if message:
             self.__message_post(message, attach.res_model, attach.res_id, type='comment', subtype='mt_comment')
@@ -137,7 +129,7 @@ class website_sign(http.Controller):
 
     @http.route(['/custom/document/<int:id>'], type="http", auth="user", website=True)
     def custom_document(self, id, **post):
-        signature_request = http.request.env['signature.request'].browse(id)
+        signature_request = http.request.env['signature.request'].sudo().search([('id', '=', id)])
         if not signature_request:
             http.request.not_found()
 
@@ -149,32 +141,33 @@ class website_sign(http.Controller):
 
     @http.route(['/website_sign/set_signature_items/<int:id>'], type='json', auth='user', website=True)
     def set_signature_items(self, id, signature_items=None, **post):
-        signature_item_obj = http.request.env['signature.item']
-        signature_item_obj.search([('signature_request', '=', id)]).unlink(); # TODO maybe not delete not new ones and just update
+        http.request.env['signature.item'].search([('signature_request', '=', id)]).unlink();
         for item in signature_items:
             item.update({
                 'signature_request': id,
             })
-            signature_item_obj.create(item)
+            http.request.env['signature.item'].create(item)
         return True
 
-    @http.route(['/website_sign/get_fonts'], type='json', auth='user', website=True)
+    @http.route(['/website_sign/get_fonts'], type='json', auth='public', website=True)
     def get_fonts(self, **post):
         fonts = []
-
-        fonts_directory = os.path.dirname(os.path.abspath(__file__)) + '/../static/src/font'
+        fonts_directory = os.path.dirname(os.path.abspath(__file__)) + '/../static/src/font' # TODO not filepath?
         font_filenames = os.listdir(fonts_directory)
 
         for filename in font_filenames:
             font_file = open(fonts_directory + '/' + filename, 'r')
             font = base64.b64encode(font_file.read())
             fonts.append([filename[:-4], font])
-
         return fonts
 
-    @http.route(['/website_sign/download/<int:id>/<type>'], type='http', auth='user', website=True)
-    def download_completed_document(self, id, type=None, **post):
-        signature_request = http.request.env['signature.request'].browse(id)
+    @http.route(['/website_sign/download/<int:id>/<token>/<type>'], type='http', auth='public', website=True)
+    def download_completed_document(self, id, token, type=None, **post):
+        signature_request_item = http.request.env['signature.request.item'].sudo().search([('signature_request.id', '=', id), ('access_token', '=', token)])
+        if not signature_request_item:
+            return http.request.not_found()
+
+        signature_request = signature_request_item.signature_request
         document = None
         if type == "origin":
             document = signature_request.attachment.datas
