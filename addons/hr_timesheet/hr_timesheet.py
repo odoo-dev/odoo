@@ -21,6 +21,7 @@
 
 import time
 
+from openerp import api
 from openerp.osv import fields
 from openerp.osv import osv
 from openerp.tools.translate import _
@@ -212,12 +213,10 @@ class account_analytic_account(osv.osv):
         'invoice_on_timesheets': fields.boolean('Timesheets', help="Check this field if this project manages timesheets"),
     }
 
-    def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):
-        res = super(account_analytic_account, self).on_change_template(cr, uid, ids, template_id, date_start=date_start, context=context)
-        if template_id and 'value' in res:
-            template = self.browse(cr, uid, template_id, context=context)
-            res['value']['invoice_on_timesheets'] = template.invoice_on_timesheets
-        return res
+    @api.onchange('template_id')
+    def on_change_template(self):
+        super(account_analytic_account, self).on_change_template()
+        self.invoice_on_timesheets = self.invoice_on_timesheets
 
     def onchange_invoice_on_timesheets(self, cr, uid, ids, invoice_on_timesheets, context=None):
         result = {}

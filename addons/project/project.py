@@ -24,6 +24,7 @@ from dateutil import relativedelta
 from lxml import etree
 import time
 
+from openerp import api
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.addons.resource.faces import task as Task
@@ -1233,12 +1234,10 @@ class account_analytic_account(osv.osv):
         'company_uom_id': fields.related('company_id', 'project_time_mode_id', string="Company UOM", type='many2one', relation='product.uom'),
     }
 
-    def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):
-        res = super(account_analytic_account, self).on_change_template(cr, uid, ids, template_id, date_start=date_start, context=context)
-        if template_id and 'value' in res:
-            template = self.browse(cr, uid, template_id, context=context)
-            res['value']['use_tasks'] = template.use_tasks
-        return res
+    @api.onchange('template_id')
+    def on_change_template(self):
+        super(account_analytic_account, self).on_change_template()
+        self.use_tasks = self.use_tasks
 
     def _trigger_project_creation(self, cr, uid, vals, context=None):
         '''

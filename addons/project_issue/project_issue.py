@@ -516,12 +516,10 @@ class account_analytic_account(osv.Model):
         'use_issues': fields.boolean('Issues', help="Check this box to manage customer activities through this project"),
     }
 
-    def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):
-        res = super(account_analytic_account, self).on_change_template(cr, uid, ids, template_id, date_start=date_start, context=context)
-        if template_id and 'value' in res:
-            template = self.browse(cr, uid, template_id, context=context)
-            res['value']['use_issues'] = template.use_issues
-        return res
+    @api.onchange('template_id')
+    def on_change_template(self):
+        super(account_analytic_account, self).on_change_template()
+        self.use_issues = self.use_issues
 
     def _trigger_project_creation(self, cr, uid, vals, context=None):
         if context is None:

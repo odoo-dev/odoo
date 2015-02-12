@@ -18,6 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import api
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 
@@ -114,13 +115,11 @@ class account_analytic_account(osv.osv):
             digits=0),
     }
 
-    def on_change_template(self, cr, uid, id, template_id, date_start=False, context=None):
-        res = super(account_analytic_account, self).on_change_template(cr, uid, id, template_id, date_start=date_start, context=context)
-        if template_id and 'value' in res:
-            template = self.browse(cr, uid, template_id, context=context)
-            res['value']['charge_expenses'] = template.charge_expenses
-            res['value']['est_expenses'] = template.est_expenses
-        return res
+    @api.onchange('template_id')
+    def on_change_template(self):
+        super(account_analytic_account, self).on_change_template()
+        self.charge_expenses = self.charge_expenses
+        self.est_expenses = self.est_expenses
 
     def open_hr_expense(self, cr, uid, ids, context=None):
         mod_obj = self.pool.get('ir.model.data')
