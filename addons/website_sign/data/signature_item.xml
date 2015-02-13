@@ -2,55 +2,65 @@
 <odoo>
 	<record model="signature.item.type" id="signature_item_type_signature">
 		<field name="name">Signature</field>
-		<field name="tip">Sign it</field>
 		<field name="type">signature</field>
+		<field name="tip">Sign it</field>
+		<field name="placeholder">Sign here</field>
 		<field name="default_width" type="float">0.300</field>
 		<field name="default_height" type="float">0.100</field>
-		<field name="auto_field"></field>
 	</record>
 
 	<record model="signature.item.type" id="signature_item_type_initial">
 		<field name="name">Initial</field>
-		<field name="tip">Mark it</field>
 		<field name="type">initial</field>
+		<field name="tip">Mark it</field>
+		<field name="placeholder">Mark</field>
 		<field name="default_width" type="float">0.100</field>
 		<field name="default_height" type="float">0.050</field>
-		<field name="auto_field"></field>
 	</record>
 
 	<record model="signature.item.type" id="signature_item_type_text">
-		<field name="name">Text</field>
-		<field name="tip">Fill</field>
-		<field name="type">text</field>
-		<field name="default_width" type="float">0.200</field>
-		<field name="default_height" type="float">0.020</field>
-		<field name="auto_field"></field>
+		<field name="name">Text</field> <!-- default: type 'text', tip 'Fill', empty placeholder, default_width and default_height, no auto_field -->
 	</record>
 
 	<record model="signature.item.type" id="signature_item_type_multiline_text">
 		<field name="name">Multiline text</field>
-		<field name="tip">Fill</field>
 		<field name="type">textarea</field>
 		<field name="default_width" type="float">0.500</field>
 		<field name="default_height" type="float">0.200</field>
-		<field name="auto_field"></field>
 	</record>
 
 	<record model="signature.item.type" id="signature_item_type_date">
 		<field name="name">Date</field>
-		<field name="tip">Time ?</field>
-		<field name="type">text</field>
+		<field name="tip">Date?</field>
+		<field name="placeholder">Date</field>
 		<field name="default_width" type="float">0.150</field>
-		<field name="default_height" type="float">0.020</field>
-		<field name="auto_field"></field>
 	</record>
 
 	<record model="signature.item.type" id="signature_item_type_name">
 		<field name="name">Name</field>
 		<field name="tip">Name ?</field>
-		<field name="type">text</field>
-		<field name="default_width" type="float">0.200</field>
-		<field name="default_height" type="float">0.020</field>
+		<field name="placeholder">Your name</field>
 		<field name="auto_field">name</field>
+	</record>
+
+	<record model="signature.item.type" id="signature_item_type_email">
+		<field name="name">Email</field>
+		<field name="tip">Email ?</field>
+		<field name="placeholder">Your email</field>
+		<field name="auto_field">email</field>
+	</record>
+
+	<record model="signature.item.type" id="signature_item_type_phone">
+		<field name="name">Phone</field>
+		<field name="tip">Phone ?</field>
+		<field name="placeholder">Your phone</field>
+		<field name="auto_field">phone</field>
+	</record>
+
+	<record model="signature.item.type" id="signature_item_type_company">
+		<field name="name">Company</field>
+		<field name="tip">Company ?</field>
+		<field name="placeholder">Your company</field>
+		<field name="auto_field">company_id.name</field>
 	</record>
 </odoo>

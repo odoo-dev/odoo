@@ -12,33 +12,7 @@
 
                 <div id="canvas-container">
                     <iframe id="iframe-view"/>
-                    <t t-foreach="signature_request.signature_items" t-as="item">
-                        <t t-if="len(item.value) > 0 and item.value[0].value">
-                            <input type="hidden"
-                                t-att-data-item-id="item.id"
-                                t-att-data-type="item.type.id"
-                                t-att-data-required="item.required"
-                                t-att-data-responsible="item.responsible.id"
-                                t-att-data-page="item.page"
-                                t-att-data-posx="item.posX"
-                                t-att-data-posy="item.posY"
-                                t-att-data-width="item.width"
-                                t-att-data-height="item.height"
-                                t-att-data-item-value="item.value[0].value"/>
-                        </t>
-                        <t t-if="not (len(item.value) > 0 and item.value[0].value)">
-                            <input type="hidden"
-                                t-att-data-item-id="item.id"
-                                t-att-data-type="item.type.id"
-                                t-att-data-required="item.required"
-                                t-att-data-responsible="item.responsible.id"
-                                t-att-data-page="item.page"
-                                t-att-data-posx="item.posX"
-                                t-att-data-posy="item.posY"
-                                t-att-data-width="item.width"
-                                t-att-data-height="item.height"/>
-                        </t>
-                    </t>
+                    <t t-call="website_sign.items_input_info"/>
                 </div>
             </div>
         </form>
@@ -54,9 +28,10 @@
 		<t t-call="website.layout">
             <div id="signature-field-view" class="container">
             	<h2><strong><t t-esc="signature_request.attachment.name"/></strong> - Signature Request - Fields Edition</h2>
-            	<p>
-            		<em>Notice that if you leave your document without any fields, the signers will be requested for an unique signature alongside the document.</em>
-            	</p>
+            	<ul>
+                    <li>Notice that if you leave your document without any fields, the signers will be requested for an unique signature alongside the document.</li>
+                    <li>Double click to add or delete fields</li>
+                </ul>
 
                 <div class="row">
             		<div class="col-md-3">
@@ -71,30 +46,26 @@
                             </div>
                         </div>
                         <div class="panel panel-default">
-                            <h4 class="panel-heading modal-title">Field types</h4>
+                            <h4 class="panel-heading modal-title">Basic Fields</h4>
     	        			<div class="panel-body">
-        	        			<p>Double click to add or delete</p>
                                 <t t-foreach="signature_item_types" t-as="item_type">
-                                    <button type="button" class="field_type_button btn btn-primary btn-block" t-att-data-item-type-id="item_type.id"><t t-esc="item_type.name"/></button>
+                                    <button t-if="not item_type.auto_field" type="button" class="field_type_button btn btn-primary btn-block" t-att-data-item-type-id="item_type.id"><t t-esc="item_type.name"/></button>
                                 </t>
                             </div>
     	        		</div>
+                        <div class="panel panel-default">
+                            <h4 class="panel-heading modal-title">Auto Fields</h4>
+                            <div class="panel-body">
+                                <t t-foreach="signature_item_types" t-as="item_type">
+                                    <button t-if="item_type.auto_field" type="button" class="field_type_button btn btn-primary btn-block" t-att-data-item-type-id="item_type.id"><t t-esc="item_type.name"/></button>
+                                </t>
+                            </div>
+                        </div>
             		</div>
 
             		<div id="canvas-container" class="col-md-9">
     	        		<iframe id="iframe-edit"/>
-                        <t t-foreach="signature_request.signature_items" t-as="item">
-                            <input type="hidden"
-                                t-att-data-item-id="item.id"
-                                t-att-data-type="item.type.id"
-                                t-att-data-required="item.required"
-                                t-att-data-responsible="item.responsible.id"
-                                t-att-data-page="item.page"
-                                t-att-data-posx="item.posX"
-                                t-att-data-posy="item.posY"
-                                t-att-data-width="item.width"
-                                t-att-data-height="item.height"/>
-                        </t>
+                        <t t-call="website_sign.items_input_info"/>
     	        	</div>
 
                     <div class="modal fade" id="responsibles_diag" role="dialog" data-toggle="modal" aria-hidden="true">
@@ -121,13 +92,30 @@
         </t>
 	</template>
 
+    <template t-name="website_sign.items_input_info" name="Items input info">
+        <t t-foreach="signature_request.signature_items" t-as="item">
+            <input type="hidden"
+                t-att-data-item-id="item.id"
+                t-att-data-type="item.type.id"
+                t-att-data-required="item.required"
+                t-att-data-responsible="item.responsible.id"
+                t-att-data-page="item.page"
+                t-att-data-posx="item.posX"
+                t-att-data-posy="item.posY"
+                t-att-data-width="item.width"
+                t-att-data-height="item.height"
+                t-att-data-item-value="item.value[0].value if (len(item.value) > 0 and item.value[0].value) else ''"/>
+        </t>
+    </template>
+
     <template t-name="website_sign.item_types_input_info" name="Item types input info">
         <t t-foreach="signature_item_types" t-as="item_type">
             <input type="hidden" class="field_type_input_info" 
                 t-att-data-item-type-id="item_type['id']"
                 t-att-data-item-type-name="item_type['name']"
-                t-att-data-item-type-tip="item_type['tip']"
                 t-att-data-item-type-type="item_type['type']"
+                t-att-data-item-type-tip="item_type['tip']"
+                t-att-data-item-type-placeholder="item_type['placeholder']"
                 t-att-data-item-type-width="item_type['default_width']"
                 t-att-data-item-type-height="item_type['default_height']"
                 t-att-data-item-type-auto="item_type['auto_field']"/>

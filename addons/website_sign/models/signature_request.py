@@ -304,6 +304,16 @@ class signature_request(models.Model):
             'target': 'self',
         }
 
+class signature_request_template(models.Model):
+    _name = "signature.request.template"
+    _description = "Signature Request Template"
+    _rec_name = "attachment"
+
+    attachment = fields.Many2one('ir.attachment', required=True, ondelete='cascade')
+    signature_items = fields.One2many('signature.item', 'signature_request')
+
+    # TODO need to attach items to template and each request to a template
+
 class signature_request_item(models.Model):
     _name = "signature.request.item"
     _description = "Signature Request Information For One Partner"

@@ -10,7 +10,7 @@ Select your recipients and follow the signature process easily.
     """,
     'author': 'OpenERP SA',
     'website': 'http://www.openerp.com',
-    'depends': ['website', 'knowledge'], # TODO : knowledge is not properly installed...
+    'depends': ['website'],
     'data': [
         'security/ir.model.access.csv',
 

@@ -119,13 +119,13 @@
         </field>
     </record>
 
-    <menuitem parent="knowledge.menu_document" id="website_sign.menu_digital_signatures" name="Digital Signature"/>
+    <menuitem parent="mail.mail_feeds_main" id="website_sign.menu_digital_signatures" name="Digital Signature"/>
     <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_request" name="Signature Requests" action="signature_request_action"/>
 
     <record id="action_client_digital_signature_menu" model="ir.actions.client">
         <field name="name">Open Digital Signatures Menu</field>
         <field name="tag">reload</field>
-        <field name="params" eval="{'menu_id': ref('knowledge.menu_document')}"/>
+        <field name="params" eval="{'menu_id': ref('mail.mail_feeds_main')}"/>
     </record>
     <record id="base.open_menu" model="ir.actions.todo">
         <field name="action_id" ref="action_client_digital_signature_menu"/>

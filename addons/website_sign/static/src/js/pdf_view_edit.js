@@ -70,6 +70,13 @@ function PDFViewEdit()
         self.waitForPDF(button_save.attr('href'));
     };
 
+    this.setNoSelectedType = function() {
+        var self = this;
+
+        $('#signature-field-view .field_type_button').removeClass('fa fa-check');
+        self.currentFieldType = false;
+    }
+
     this.waitForPDF = function(urlError) {
         var self = this;
 
@@ -158,9 +165,19 @@ function PDFViewEdit()
         });
 
         if(self.editMode) {
-            self.iframe.contents().find('.page').on('dblclick', function(e) {
+            self.iframe.contents().find('.page').on('mouseover', function(e) {
+                if(!self.currentFieldType)
+                    return true;
+
                 var parent = $(e.currentTarget);
                 var pageNo = parseInt(parent.attr('id').substr('pageContainer'.length));
+
+                if(self.iframe.contents().find('#sign_item_to_add').length >= 1) {
+                    if(pageNo == parseInt(self.iframe.contents().find('#sign_item_to_add').parent().attr('id').substr('pageContainer'.length)))
+                        return true;
+                    else
+                        self.iframe.contents().find('#sign_item_to_add').dblclick();
+                }
 
                 var pageBorderX = (parent.outerWidth() - parent.innerWidth())/2;
                 var pageBorderY = (parent.outerHeight() - parent.innerHeight())/2;
@@ -175,51 +192,28 @@ function PDFViewEdit()
                 var elem = self.create_signature_item(self.currentFieldType, required, 0, posX-WIDTH/2, posY-HEIGHT/2, WIDTH, HEIGHT);
                 if(elem !== null) {
                     elem.on('dblclick', elemDblClickFct);
+                    elem.attr('id', "sign_item_to_add");
 
                     self.configuration[pageNo].push(elem);
                     self.update_pdf_items();
                     self.update_signature_element(elem);
                     self.enableCustom(elem);
+                    elem.mousedown();
                 }
             });
+
+            self.iframe.on('mouseout', function(e) {
+                self.iframe.contents().find('#sign_item_to_add').dblclick();
+            });
+
+            var key_fct = function(e) {
+                if(e.which == 46)
+                    self.iframe.contents().find('.sign_item_selected').dblclick();
+            };
+            $(document).on('keyup', key_fct);
+            self.iframe.contents().on('keyup', key_fct);
         }
     }
-
-    this.check_pdf_items_completion = function() {
-        var self = this;
-
-        var ok = true;
-        var toComplete = [];
-        self.iframe.contents().find('.sign_item').each(function(i, el) {
-            var type = self.getTypeData($(el).data('type'));
-
-            var value = $(el).val();
-            if(type['type'] == 'signature' || type['type'] == 'initial') {
-                value = $(el).data('signature');
-            }
-
-            var resp = parseInt($(el).data('responsible')) || 0;
-
-            if(!value && $(el).data('required') && (resp <= 0 || resp == self.role)) {
-                ok = false;
-                toComplete.push($(el));
-            }
-        });
-
-        validateButton = $('#signature-validate-button');
-        if(ok) {
-            validateButton.prop("disabled", false);
-            validateButton.html("Validate");
-            validateButton.addClass("fa fa-check");
-        }
-        else {
-            $('#signature-validate-button').prop("disabled", true);
-            validateButton.html("Fields to complete");
-            validateButton.removeClass("fa fa-check");
-        }
-
-        return toComplete;
-    };
 
     this.update_pdf_items = function() {
         var self = this;
@@ -231,56 +225,6 @@ function PDFViewEdit()
                 pageContainer.append(self.configuration[page][i]);
             }
         }
-    };
-
-    this.save_pdf_configuration_and_quit = function(url) {
-        var self = this;
-
-        data = [];
-        for(var page in self.configuration) {
-            for(var i = 0 ; i < self.configuration[page].length ; i++) {
-                data.push({
-                    'type': self.configuration[page][i].data('type'),
-                    'required': self.configuration[page][i].data('required'),
-                    'responsible': self.configuration[page][i].data('responsible'),
-                    'page': page,
-                    'posX': self.configuration[page][i].data('posx'),
-                    'posY': self.configuration[page][i].data('posy'),
-                    'width': self.configuration[page][i].data('width'),
-                    'height': self.configuration[page][i].data('height'),
-                })
-            }
-        }
-
-        openerp.jsonRpc("/website_sign/set_signature_items/" + self.signature_request_id, "call", {
-            'signature_items': data,
-        }).then(function (result) {
-            window.location.href = url;
-        });
-    };
-
-    this.update_signature_element = function(elem) {
-        var self = this;
-
-        var relOuterSizeX = (elem.outerWidth() - elem.width()) / elem.parent().innerWidth();
-        var relOuterSizeY = (elem.outerHeight() - elem.height()) / elem.parent().innerHeight();
-
-        var posX = elem.data('posx'), posY = elem.data('posy');
-        var width = elem.data('width'), height = elem.data('height');
-
-        if(posX < 0)
-            posX = 0;
-        else if(posX+width+relOuterSizeX > 1.0)
-            posX = 1.0-width-relOuterSizeX;
-        if(posY < 0)
-            posY = 0;
-        else if(posY+height+relOuterSizeY > 1.0)
-            posY = 1.0-height-relOuterSizeY;
-
-        elem.data('posx', posX).data('posy', posY);
-
-        elem.css('left', posX*100 + '%').css('top', posY*100 + '%');
-        elem.css('width', width*100 + '%').css('height', height*100 + '%');
     };
 
     this.create_signature_item = function(typeID, required, responsible, posX, posY, width, height, value) {
@@ -358,12 +302,9 @@ function PDFViewEdit()
             elem.append(value);
             elem.val(value);
         }
-        else {
-            if(type['type'] == 'signature')
-                elem.append("Sign Here");
-            else if(type['type'] == 'initial')
-                elem.append("Mark");
-        }
+        else if(type['type'] == 'signature' || type['type'] == 'initial')
+            elem.append(type['placeholder']);
+        elem.attr('placeholder', type['placeholder']);
 
         elem.on('change input', function(e) {
             self.check_pdf_items_completion(self.role);
@@ -391,20 +332,24 @@ function PDFViewEdit()
         var pageBorderY = (elem.parent().outerHeight() - elem.parent().innerHeight())/2;
 
         elem.on('mousedown', function(e) {
-            var grabX = (e.pageX - elem.offset().left) / elem.outerWidth();
-            var grabY = (e.pageY - elem.offset().top) / elem.outerHeight();
+            var grabX = (e.pageX - elem.offset().left) / elem.outerWidth() || 0.5;
+            var grabY = (e.pageY - elem.offset().top) / elem.outerHeight() || 0.5;
             if((1-grabX)*elem.outerWidth() < 25 && (1-grabY)*elem.outerHeight() < 25)
                 return true;
 
             var relWidth = elem.outerWidth()/elem.parent().innerWidth();
             var relHeight = elem.outerHeight()/elem.parent().innerHeight();
 
-            move_fct = function(e) {
+            var move_fct = function(e) {
+                if(elem.parent().length <= 0) return false; // TODO this fix a strange jquery bug
+
                 var posX = (e.pageX - (elem.parent().offset().left+pageBorderX)) / elem.parent().innerWidth() - relWidth * grabX;
                 var posY = (e.pageY - (elem.parent().offset().top+pageBorderY)) / elem.parent().innerHeight() - relHeight * grabY;
 
                 elem.data('posx', posX).data('posy', posY);
                 self.update_signature_element(elem);
+
+                elem.addClass('sign_item_selected');
             };
 
             elem.on('mousemove', move_fct);
@@ -430,6 +375,12 @@ function PDFViewEdit()
             }
 
             self.update_signature_element(elem);
+            elem.removeAttr('id');
+
+            if(e.buttons == 1)
+                self.setNoSelectedType();
+
+            elem.toggleClass('sign_item_selected');
         });
 
         var requiredCheckbox = $("<input type='checkbox'/>");
@@ -467,6 +418,30 @@ function PDFViewEdit()
         elem.append(responsibleField);
     };
 
+    this.update_signature_element = function(elem) {
+        var self = this;
+
+        var relOuterSizeX = (elem.outerWidth() - elem.width()) / elem.parent().innerWidth();
+        var relOuterSizeY = (elem.outerHeight() - elem.height()) / elem.parent().innerHeight();
+
+        var posX = elem.data('posx'), posY = elem.data('posy');
+        var width = elem.data('width'), height = elem.data('height');
+
+        if(posX < 0)
+            posX = 0;
+        else if(posX+width+relOuterSizeX > 1.0)
+            posX = 1.0-width-relOuterSizeX;
+        if(posY < 0)
+            posY = 0;
+        else if(posY+height+relOuterSizeY > 1.0)
+            posY = 1.0-height-relOuterSizeY;
+
+        elem.data('posx', posX).data('posy', posY);
+
+        elem.css('left', posX*100 + '%').css('top', posY*100 + '%');
+        elem.css('width', width*100 + '%').css('height', height*100 + '%');
+    };
+
     this.scrollToSignItem = function(item) {
         var self = this;
 
@@ -499,6 +474,68 @@ function PDFViewEdit()
         self.sign_item_navigator.css('font-size', size + 'px');
     };
 
+    this.check_pdf_items_completion = function() {
+        var self = this;
+
+        var ok = true;
+        var toComplete = [];
+        self.iframe.contents().find('.sign_item').each(function(i, el) {
+            var type = self.getTypeData($(el).data('type'));
+
+            var value = $(el).val();
+            if(type['type'] == 'signature' || type['type'] == 'initial') {
+                value = $(el).data('signature');
+            }
+
+            var resp = parseInt($(el).data('responsible')) || 0;
+
+            if(!value && $(el).data('required') && (resp <= 0 || resp == self.role)) {
+                ok = false;
+                toComplete.push($(el));
+            }
+        });
+
+        validateButton = $('#signature-validate-button');
+        if(ok) {
+            validateButton.prop("disabled", false);
+            validateButton.html("Validate");
+            validateButton.addClass("fa fa-check");
+        }
+        else {
+            $('#signature-validate-button').prop("disabled", true);
+            validateButton.html("Fields to complete");
+            validateButton.removeClass("fa fa-check");
+        }
+
+        return toComplete;
+    };
+
+    this.save_pdf_configuration_and_quit = function(url) {
+        var self = this;
+
+        data = [];
+        for(var page in self.configuration) {
+            for(var i = 0 ; i < self.configuration[page].length ; i++) {
+                data.push({
+                    'type': self.configuration[page][i].data('type'),
+                    'required': self.configuration[page][i].data('required'),
+                    'responsible': self.configuration[page][i].data('responsible'),
+                    'page': page,
+                    'posX': self.configuration[page][i].data('posx'),
+                    'posY': self.configuration[page][i].data('posy'),
+                    'width': self.configuration[page][i].data('width'),
+                    'height': self.configuration[page][i].data('height'),
+                })
+            }
+        }
+
+        openerp.jsonRpc("/website_sign/set_signature_items/" + self.signature_request_id, "call", {
+            'signature_items': data,
+        }).then(function (result) {
+            window.location.href = url;
+        });
+    };
+
     this.getTypeData = function(id) {
         var self = this;
 
@@ -507,8 +544,9 @@ function PDFViewEdit()
                 self.types[$(el).data('item-type-id')] = {
                     'id': $(el).data('item-type-id'),
                     'name': $(el).data('item-type-name'),
-                    'tip': $(el).data('item-type-tip'),
                     'type': $(el).data('item-type-type'),
+                    'tip': $(el).data('item-type-tip'),
+                    'placeholder': $(el).data('item-type-placeholder'),
                     'default_width': $(el).data('item-type-width'),
                     'default_height': $(el).data('item-type-height'),
                     'auto_field': $(el).data('item-type-auto')

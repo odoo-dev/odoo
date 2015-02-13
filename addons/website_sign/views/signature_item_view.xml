@@ -44,8 +44,50 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="signature_party_view_list">
-        <field name="name">Signature Party Tree View</field>
+    <record model="ir.ui.view" id="signature_item_type_view_list">
+        <field name="name">Signature Item Type Tree View</field>
+        <field name="model">signature.item.type</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="auto_field"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_item_type_view_form">
+        <field name="name">Signature Item Type Form View</field>
+        <field name="model">signature.item.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="auto_field"/>
+                </group>
+                <group>
+                    <group>
+                        <field name="default_width"/>
+                        <field name="default_height"/>
+                    </group>
+                    <group>
+                        <field name="tip"/>
+                        <field name="placeholder"/>
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="signature_item_type_action">
+        <field name="name">Signature Item Type</field>
+        <field name="res_model">signature.item.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_item_party_view_list">
+        <field name="name">Signature Item Party Tree View</field>
         <field name="model">signature.item.party</field>
         <field name="arch" type="xml">
             <tree>
@@ -54,8 +96,8 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="signature_party_view_form">
-        <field name="name">Signature Party Form View</field>
+    <record model="ir.ui.view" id="signature_item_party_view_form">
+        <field name="name">Signature Item Party Form View</field>
         <field name="model">signature.item.party</field>
         <field name="arch" type="xml">
             <form>
@@ -66,11 +108,12 @@
         </field>
     </record>
 
-    <record model="ir.actions.act_window" id="signature_party_action">
-        <field name="name">Signature Party</field>
+    <record model="ir.actions.act_window" id="signature_item_party_action">
+        <field name="name">Signature Item Party</field>
         <field name="res_model">signature.item.party</field>
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_party" name="Signature Parties" action="signature_party_action"/>
+    <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_item_type" name="Signature Types" action="signature_item_type_action"/>
+    <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_item_party" name="Signature Parties" action="signature_item_party_action"/>
 </odoo>

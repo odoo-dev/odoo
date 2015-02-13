@@ -8,7 +8,7 @@ class signature_item(models.Model):
     signature_request = fields.Many2one('signature.request', required=True, readonly=True, ondelete='cascade')
 
     name = fields.Char(default="default_name")
-    type = fields.Many2one('signature.item.type', required=True)
+    type = fields.Many2one('signature.item.type', required=True, ondelete='cascade')
 
     required = fields.Boolean(default=True)
     responsible = fields.Many2one("signature.item.party")
@@ -35,13 +35,23 @@ class signature_item_type(models.Model):
     _description = "Specialized type for signature fields"
 
     name = fields.Char(required=True)
-    tip = fields.Char(required=True, default="Fill")
     type = fields.Selection([
         ('signature', "Signature"),
         ('initial', "Initial"),
         ('text', "Text"),
         ('textarea', "Multiline Text"),
-    ], required=True)
+    ], required=True, default='text')
+
+    @api.onchange('name')
+    def _default_tip(self):
+        self.tip = (str(self.name) + " ?")
+
+    @api.onchange('name', 'auto_field')
+    def _default_placeholder(self):
+        self.placeholder = ("Your " + str(self.name) if self.auto_field else "")
+
+    tip = fields.Char(required=True, default="Fill")
+    placeholder = fields.Char()
 
     default_width = fields.Float(digits=(4, 3), required=True, default=0.200)
     default_height = fields.Float(digits=(4, 3), required=True, default=0.020)

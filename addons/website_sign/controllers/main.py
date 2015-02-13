@@ -65,7 +65,11 @@ class website_sign(http.Controller):
         if current_request_item:
             for item_type in signature_item_types:
                 if item_type['auto_field']:
-                    item_type['auto_field'] = current_request_item.partner_id[item_type['auto_field']]
+                    fields = item_type['auto_field'].split('.')
+                    auto_field = current_request_item.partner_id
+                    for field in fields:
+                        auto_field = auto_field[field]
+                    item_type['auto_field'] = auto_field
 
         values = {
             'signature_request': signature_request,
