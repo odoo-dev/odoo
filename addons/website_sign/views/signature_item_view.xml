@@ -20,7 +20,7 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="signature_request"/>
+                        <field name="signature_request_template"/>
                     </group>
 
                     <group>

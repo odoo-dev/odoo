@@ -12,12 +12,12 @@ from reportlab.lib.utils import ImageReader
 class signature_request(models.Model):
     _name = "signature.request"
     _description = "Signature Request For An Attachment"
-    _rec_name = 'attachment'
+    _rec_name = 'template'
 
-    attachment = fields.Many2one('ir.attachment', required=True, ondelete='cascade')
+    template = fields.Many2one('signature.request.template')
+
     message = fields.Html()
     request_items = fields.One2many('signature.request.item', 'signature_request', 'Signers')
-    signature_items = fields.One2many('signature.item', 'signature_request')
     state = fields.Selection([
         ("draft", "Draft"),
         ("opened", "Waiting for completions"),
@@ -120,9 +120,9 @@ class signature_request(models.Model):
         for sri in signers:
             signers_data[sri.partner_id.id].append({
                 'id': sri.signature_request.id,
-                'name': sri.signature_request.attachment.name,
+                'name': sri.signature_request.template.attachment.name,
                 'token': sri.access_token,
-                'fname': sri.signature_request.attachment.datas_fname
+                'fname': sri.signature_request.template.attachment.datas_fname
             })
         
         return signers_data
@@ -134,7 +134,7 @@ class signature_request(models.Model):
             return False
 
         roles = self.request_items.mapped('role')
-        for item in self.signature_items:
+        for item in self.template.signature_items:
             if not item.responsible:
                 continue
             if item.responsible not in roles:
@@ -173,7 +173,7 @@ class signature_request(models.Model):
             mail_id = template.send_mail(None, force_send=False)
             mail = self.env['mail.mail'].browse(mail_id)
             attachment_ids = list(mail.attachment_ids)
-            attachment_ids.append((4, self.attachment.id))
+            attachment_ids.append((4, self.template.attachment.id))
             mail.attachment_ids = attachment_ids
             mail.send(raise_exception=False)
         return True
@@ -200,7 +200,7 @@ class signature_request(models.Model):
             docs, links = [], []
             for sign in signers_data[signer]:
                 docs.append(sign['name'])
-                link = "website_sign/download/%s/%s/completed" % (sign['id'], sign['token'])
+                link = "/sign/download/%s/%s/completed" % (sign['id'], sign['token'])
                 links.append([link, sign['fname'].split('.')[:-1][0]])
             docnames = ", ".join(docs)
 
@@ -217,11 +217,11 @@ class signature_request(models.Model):
 
     @api.one
     def generate_completed_document(self):
-        if len(self.signature_items) <= 0:
-            self.completed_document = self.attachment.datas
+        if len(self.template.signature_items) <= 0:
+            self.completed_document = self.template.attachment.datas
             return True
 
-        old_pdf = PdfFileReader(StringIO.StringIO(base64.b64decode(self.attachment.datas)))
+        old_pdf = PdfFileReader(StringIO.StringIO(base64.b64decode(self.template.attachment.datas)))
         box = old_pdf.getPage(0).mediaBox
         width = box.getUpperRight_x()
         height = box.getUpperRight_y()
@@ -231,25 +231,26 @@ class signature_request(models.Model):
         packet = StringIO.StringIO()
         can = canvas.Canvas(packet)
         can.setFont(font, fontsize)
-        itemsByPage = self.signature_items.getByPage()
+        itemsByPage = self.template.signature_items.getByPage()
         for p in range(0, old_pdf.getNumPages()):
             if (p+1) not in itemsByPage:
                 can.showPage()
                 continue
             items = itemsByPage[p+1]
             for item in items:
-                if len(item.value) <= 0 or not item.value[0].value:
+                value = item.valueFor(self.id)
+                if not value:
                     continue
                 if item.type.type == "text":
-                    can.drawCentredString(width*(item.posX+item.width/2), height*(1-item.posY)-fontsize, item.value[0].value)
+                    can.drawCentredString(width*(item.posX+item.width/2), height*(1-item.posY)-fontsize, value)
                 elif item.type.type == "textarea":
-                    lines = item.value[0].value.split('\n')
+                    lines = value.split('\n')
                     y = height*(1-item.posY)-fontsize
                     for line in lines:
                         can.drawString(width*item.posX, y, line)
                         y -= fontsize*1.5
                 elif item.type.type == "signature" or item.type.type == "initial":
-                    img = base64.b64decode(item.value[0].value[item.value[0].value.find(',')+1:])
+                    img = base64.b64decode(value[value.find(',')+1:])
                     can.drawImage(ImageReader(StringIO.StringIO(img)), width*item.posX, height*(1-item.posY-item.height), width*item.width, height*item.height, 'auto', True) 
             can.showPage()
         can.save()
@@ -284,15 +285,6 @@ class signature_request(models.Model):
         }
 
     @api.multi
-    def go_to_custom_document(self):
-        return {
-            'name': 'Signature Request Edit Field URL',
-            'type': 'ir.actions.act_url',
-            'url': '/custom/document/' + str(self[0].id),
-            'target': 'self',
-        }
-
-    @api.multi
     def get_completed_document(self):
         if not self.completed_document:
             self.generate_completed_document()
@@ -300,7 +292,7 @@ class signature_request(models.Model):
         return {
             'name': 'Signature Request Completed Document URL',
             'type': 'ir.actions.act_url',
-            'url': '/website_sign/download/%s/%s/completed' % (self[0].id, self[0].request_items[0].access_token),
+            'url': '/sign/download/%s/%s/completed' % (self[0].id, self[0].request_items[0].access_token),
             'target': 'self',
         }
 
@@ -310,9 +302,18 @@ class signature_request_template(models.Model):
     _rec_name = "attachment"
 
     attachment = fields.Many2one('ir.attachment', required=True, ondelete='cascade')
-    signature_items = fields.One2many('signature.item', 'signature_request')
+    signature_items = fields.One2many('signature.item', 'signature_request_template')
 
-    # TODO need to attach items to template and each request to a template
+    signature_requests = fields.One2many('signature.request', 'template')
+
+    @api.multi
+    def go_to_custom_template(self):
+        return {
+            'name': 'Signature Request Template Edit Field URL',
+            'type': 'ir.actions.act_url',
+            'url': '/sign/template/' + str(self[0].id),
+            'target': 'self',
+        }
 
 class signature_request_item(models.Model):
     _name = "signature.request.item"
@@ -345,9 +346,9 @@ class signature_request_item(models.Model):
         self.signing_date = None
         self.access_token = self._default_access_token()
         self.signer_name = ""
-        for item in self.signature_request.signature_items:
+        for item in self.signature_request.template.signature_items:
             if item.responsible == self.role or not item.responsible:
-                item.value.write({'value': None})
+                item.values.resetFor(self.signature_request.id)
         self.state = 'draft'
 
     @api.one
@@ -367,9 +368,9 @@ class signature_request_item(models.Model):
             self.signature = signature
         else:
             for itemId in signature:
-                item_value = self.env['signature.item.value'].search([('signature_item', '=', int(itemId))])
+                item_value = self.env['signature.item.value'].search([('signature_item', '=', int(itemId)), ('signature_request', '=', self.signature_request.id)])
                 if not item_value:
-                    item_value = self.env['signature.item.value'].create({'signature_item': int(itemId)})
+                    item_value = self.env['signature.item.value'].create({'signature_item': int(itemId), 'signature_request': self.signature_request.id})
                 item_value.value = signature[itemId]
 
         self.action_closed()
@@ -386,13 +387,13 @@ class signature_mail_message(models.Model):
         request_items = self.pool.get('signature.request.item').browse(cr, SUPERUSER_ID, sign_obj)
         doc_data = {}
         for request_item in request_items:
-            if request_item.signature_request.attachment.id not in doc_data:
-                doc_data[request_item.signature_request.attachment.id] = {'nb_signed': 0, 'nb_toSign': 0}
+            if request_item.signature_request.template.attachment.id not in doc_data:
+                doc_data[request_item.signature_request.template.attachment.id] = {'nb_signed': 0, 'nb_toSign': 0}
 
-            doc_data[request_item.signature_request.attachment.id]['nb_toSign'] += 1
+            doc_data[request_item.signature_request.template.attachment.id]['nb_toSign'] += 1
             if request_item.state == 'closed':
-                doc_data[request_item.signature_request.attachment.id]['nb_signed'] += 1
-            doc_data[request_item.signature_request.attachment.id]['signature_request'] = request_item.signature_request.id
+                doc_data[request_item.signature_request.template.attachment.id]['nb_signed'] += 1
+            doc_data[request_item.signature_request.template.attachment.id]['signature_request'] = request_item.signature_request.id
 
         # Update message dictionaries (attach)
         for message_dict in messages:
@@ -408,15 +409,13 @@ class signature_mail_message(models.Model):
         tmp = super(signature_mail_message, self).create(cr, uid, values, context=context)
         if 'signature_request' not in context:
             mess = self.pool.get("mail.message").browse(cr, uid, [tmp], context=context)
-            signature_request = self.pool.get("signature.request").search(cr, uid, [("attachment.id", "in", map(lambda d: d.id, mess.attachment_ids))], context=context)
+            signature_request = self.pool.get("signature.request").search(cr, uid, [("template.attachment.id", "in", map(lambda d: d.id, mess.attachment_ids))], context=context)
             signature_request = self.pool.get("signature.request").browse(cr, uid, signature_request, context=context)
             signature_request.write({'message': mess.body})
         return tmp
 
 class ir_attachment(models.Model):
     _inherit = 'ir.attachment'
-
-    signature_request = fields.One2many("signature.request", "attachment")
 
     def set_name_and_description(self, cr, uid, id, name, description, context=None):
         attach = self.browse(cr, uid, [id], context=context)

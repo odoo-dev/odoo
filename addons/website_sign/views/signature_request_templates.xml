@@ -25,7 +25,7 @@
         <t t-call="website.layout">
             <div class="container">
                 <input id="document_viewmode" type="hidden" t-att-value="viewmode"/>
-                <h2><strong><t t-esc="signature_request.attachment.name"/></strong> - Signature Request</h2>
+                <h2><strong><t t-esc="signature_request.template.attachment.name"/></strong> - Signature Request</h2>
 
                 <div class="row">
                     <div class="col-md-3">
@@ -68,8 +68,8 @@
                                 
                             </div>
                             <div class="panel-body">
-                                <h4><t t-raw="signature_request.attachment.name"/></h4>
-                                <p t-if="signature_request.attachment.description"><t t-raw="signature_request.attachment.description"/></p>
+                                <h4><t t-raw="signature_request.template.attachment.name"/></h4>
+                                <p t-if="signature_request.template.attachment.description"><t t-raw="signature_request.template.attachment.description"/></p>
                             </div>
                         </div>
                     </div>
@@ -86,8 +86,8 @@
 
                         <div t-if="not hasItems">
                             <a t-attf-href="/website_sign/download/{{signature_request.id}}/{{token}}/origin" target="_blank">
-                                <img t-if="signature_request.attachment.file_type_icon == 'webimage'" class="media-object" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id) + '&amp;resize=300,180'" style="width: 400px;"/>
-                                <img t-if="signature_request.attachment.file_type_icon != 'webimage'" class="media-object" t-att-src="'/mail/static/src/img/mimetypes/' + signature_request.attachment.file_type_icon + '.png'" style="width: 400px;"/>
+                                <img t-if="signature_request.template.attachment.file_type_icon == 'webimage'" class="media-object" t-att-src="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.template.attachment.id) + '&amp;resize=300,180'" style="width: 400px;"/>
+                                <img t-if="signature_request.template.attachment.file_type_icon != 'webimage'" class="media-object" t-att-src="'/mail/static/src/img/mimetypes/' + signature_request.template.attachment.file_type_icon + '.png'" style="width: 400px;"/>
                             </a>
                         </div>
                         <t t-if="hasItems">

@@ -5,7 +5,7 @@ class signature_item(models.Model):
     _name = "signature.item"
     _description = "Signature Field For Document To Sign"
 
-    signature_request = fields.Many2one('signature.request', required=True, readonly=True, ondelete='cascade')
+    signature_request_template = fields.Many2one('signature.request.template', required=True, readonly=True, ondelete='cascade')
 
     name = fields.Char(default="default_name")
     type = fields.Many2one('signature.item.type', required=True, ondelete='cascade')
@@ -19,7 +19,7 @@ class signature_item(models.Model):
     width = fields.Float(digits=(4, 3), required=True)
     height = fields.Float(digits=(4, 3), required=True)
 
-    value = fields.One2many('signature.item.value', 'signature_item', string="Signature Item Values")
+    values = fields.One2many('signature.item.value', 'signature_item', string="Signature Item Values")
 
     @api.multi
     def getByPage(self):
@@ -29,6 +29,14 @@ class signature_item(models.Model):
                 items[item.page] = []
             items[item.page].append(item)
         return items
+
+    @api.multi
+    def valueFor(self, signature_request_id):
+        value = self[0].values.filtered(lambda v: v.signature_request.id == signature_request_id)
+        if len(value) <= 0:
+            return ""
+        else:
+            return value[0].value
 
 class signature_item_type(models.Model):
     _name = "signature.item.type"
@@ -62,7 +70,13 @@ class signature_item_value(models.Model):
     _description = "Signature Field Value For Document To Sign"
     
     signature_item = fields.Many2one('signature.item', required=True, ondelete='cascade')
+    signature_request = fields.Many2one('signature.request', required=True, ondelete='cascade')
+
     value = fields.Text()
+
+    @api.multi
+    def resetFor(self, signature_request_id):
+        self.filtered(lambda v: v.signature_request.id == signature_request_id).write({'value': None})
 
 class signature_item_party(models.Model):
     _name = "signature.item.party"

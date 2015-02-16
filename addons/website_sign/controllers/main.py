@@ -35,12 +35,45 @@ class website_sign(http.Controller):
             http.request.session.body = False
         return msgid
 
+    @http.route(['/sign/get_followers'], type='json', auth="user", website=True)
+    def get_followers(self, attachment_id=None, res_model=None, res_id=None, **post):
+        current_id = http.request.env.user.partner_id.id
+        followers = http.request.env['mail.followers'].sudo().search([('res_model', '=', res_model), ('res_id', '=', res_id)])
+        request_items = http.request.env['signature.request'].search([('template.attachment','=', attachment_id)], limit=1).request_items
+        signers = map(lambda d: d.partner_id.id, request_items)
+
+        res = []
+        for follower in followers:
+            if current_id == follower.partner_id.id:
+                continue
+            res.append({
+                'id': follower.partner_id.id,
+                'name': follower.partner_id.name,
+                'email': follower.partner_id.email,
+                'selected': 'checked' if follower.partner_id.id in signers else None
+            })
+        
+        return res
+
+    @http.route(['/sign/set_signers'], type='json', auth="user", website=True)
+    def set_signers(self, attachment_id=None, signer_ids=None, message=None, **post):
+        template = http.request.env['signature.request.template'].search([('attachment', '=', attachment_id)])
+        if not template:
+            template =  http.request.env['signature.request.template'].create({'attachment': attachment_id})
+
+        signature_request = http.request.env['signature.request'].search([('template', '=', template.id)], limit=1) # TODO not singleton since templates !!!
+        if not signature_request:
+            signature_request = http.request.env['signature.request'].create({'template': template.id, 'message': message})
+        signers_in_common = signature_request.set_signers(signer_ids)[0]
+
+        return True
+
     @http.route(["/sign/document/<int:id>"], type='http', auth="user", website=True)
     def sign_document_user(self, id, message=False, viewmode=False, **post):
         return self.sign_document_public(id, None, message, viewmode)
 
     @http.route(["/sign/document/<int:id>/<token>"], type='http', auth="public", website=True)
-    def sign_document_public(self, id, token=None, message=False, viewmode=False, **post):
+    def sign_document_public(self, id, token, message=False, viewmode=False, **post):
         signature_request = http.request.env['signature.request'].sudo().search([('id', '=', id)]) # TODO why does browse create an empty record?
         if not signature_request:
             return http.request.not_found()
@@ -51,13 +84,13 @@ class website_sign(http.Controller):
             if not current_request_item:
                 return http.request.render('website_sign.deleted_sign_request', {'url': '/sign/document/' + str(id)})
 
-            if signature_request.attachment.res_model and signature_request.attachment.res_id:
-                record = http.request.env[signature_request.attachment.res_model].sudo().browse(signature_request.attachment.res_id)
+            if signature_request.template.attachment.res_model and signature_request.template.attachment.res_id:
+                record = http.request.env[signature_request.template.attachment.res_model].sudo().browse(signature_request.template.attachment.res_id)
             else:
                 record = False
         else:
-            if signature_request.attachment.res_model and signature_request.attachment.res_id:
-                record = http.request.env[signature_request.attachment.res_model].browse(signature_request.attachment.res_id)
+            if signature_request.template.attachment.res_model and signature_request.template.attachment.res_id:
+                record = http.request.env[signature_request.template.attachment.res_model].browse(signature_request.template.attachment.res_id)
             else:
                 record = False
 
@@ -78,7 +111,8 @@ class website_sign(http.Controller):
             'token': token,
             'messages': record.message_ids if record else [],
             'message': message and int(message) or False,
-            'hasItems': len(signature_request.signature_items) > 0,
+            'hasItems': len(signature_request.template.signature_items) > 0,
+            'signature_items': signature_request.template.signature_items,
             'role': current_request_item.role.id if current_request_item else 0,
             'viewmode': viewmode and bool(viewmode) or False,
             'signature_item_types': signature_item_types,
@@ -86,45 +120,16 @@ class website_sign(http.Controller):
 
         return http.request.render('website_sign.doc_sign', values)
 
-    @http.route(['/website_sign/signed/<int:id>/<token>'], type='json', auth="public", website=True)
+    @http.route(['/sign/signed/<int:id>/<token>'], type='json', auth="public", website=True)
     def signed(self, id=None, token=None, sign=None, signer=None, **post):
         request_item = http.request.env['signature.request.item'].sudo().search([('signature_request', '=', id), ('access_token', '=', token)], limit=1)
         if request_item:
             if request_item.sudo().sign(signer, sign):
-                attach = http.request.env['signature.request'].sudo().browse(id).attachment
+                attach = http.request.env['signature.request'].sudo().browse(id).template.attachment
                 message = _('Document <b>%s</b> signed by %s') % (attach.name, signer)
                 self.__message_post(message, attach.res_model, attach.res_id, type='comment', subtype='mt_comment')
 
         return {'id': id, 'token': token}
-
-    @http.route(['/website_sign/get_followers'], type='json', auth="user", website=True)
-    def get_followers(self, attachment_id=None, res_model=None, res_id=None, **post):
-        current_id = http.request.env.user.partner_id.id
-        followers = http.request.env['mail.followers'].sudo().search([('res_model', '=', res_model), ('res_id', '=', res_id)])
-        request_items = http.request.env['signature.request'].search([('attachment','=', attachment_id)], limit=1).request_items
-        signers = map(lambda d: d.partner_id.id, request_items)
-
-        res = []
-        for follower in followers:
-            if current_id == follower.partner_id.id:
-                continue
-            res.append({
-                'id': follower.partner_id.id,
-                'name': follower.partner_id.name,
-                'email': follower.partner_id.email,
-                'selected': 'checked' if follower.partner_id.id in signers else None
-            })
-        
-        return res
-
-    @http.route(['/website_sign/set_signers'], type='json', auth="user", website=True)
-    def set_signers(self, attachment_id=None, signer_ids=None, message=None, **post):
-        signature_request = http.request.env['signature.request'].search([('attachment', '=', attachment_id)])
-        if not signature_request:
-            signature_request = http.request.env['signature.request'].create({'attachment': attachment_id, 'message': message})
-        signers_in_common = signature_request.set_signers(signer_ids)[0]
-       
-        return True
 
     @http.route(['/sign/document/<int:id>/<token>/note'], type='http', auth="public", website=True)
     def post_note(self, id, token, **post):
@@ -132,36 +137,37 @@ class website_sign(http.Controller):
         if not request_item:
             return http.request.not_found()
 
-        attach = request_item.signature_request.attachment
+        attach = request_item.signature_request.template.attachment
         message = post.get('comment')
         if message:
             self.__message_post(message, attach.res_model, attach.res_id, type='comment', subtype='mt_comment')
         return http.request.redirect("/sign/document/%s/%s?message=1" % (id, token))
 
-    @http.route(['/custom/document/<int:id>'], type="http", auth="user", website=True)
-    def custom_document(self, id, **post):
-        signature_request = http.request.env['signature.request'].sudo().search([('id', '=', id)])
-        if not signature_request:
+    @http.route(['/sign/template/<int:template_id>'], type="http", auth="user", website=True)
+    def custom_template(self, template_id, **post):
+        signature_request_template = http.request.env['signature.request.template'].sudo().search([('id', '=', template_id)])
+        if not signature_request_template:
             http.request.not_found()
 
         values = {
-            'signature_request': signature_request,
+            'signature_request_template': signature_request_template,
+            'signature_items': signature_request_template.signature_items,
             'signature_item_parties': http.request.env['signature.item.party'].search([]),
             'signature_item_types': http.request.env['signature.item.type'].search([])
         }
         return http.request.render('website_sign.items_edit', values)
 
-    @http.route(['/website_sign/set_signature_items/<int:id>'], type='json', auth='user', website=True)
-    def set_signature_items(self, id, signature_items=None, **post):
-        http.request.env['signature.item'].search([('signature_request', '=', id)]).unlink();
+    @http.route(['/sign/set_signature_items/<int:template_id>'], type='json', auth='user', website=True)
+    def set_signature_items(self, template_id, signature_items=None, **post):
+        http.request.env['signature.item'].search([('signature_request_template', '=', template_id)]).unlink();
         for item in signature_items:
             item.update({
-                'signature_request': id,
+                'signature_request_template': template_id,
             })
             http.request.env['signature.item'].create(item)
         return True
 
-    @http.route(['/website_sign/get_fonts'], type='json', auth='public', website=True)
+    @http.route(['/sign/get_fonts'], type='json', auth='public', website=True)
     def get_fonts(self, **post):
         fonts = []
         fonts_directory = os.path.dirname(os.path.abspath(__file__)) + '/../static/src/font' # TODO not filepath?
@@ -173,16 +179,21 @@ class website_sign(http.Controller):
             fonts.append([filename[:-4], font])
         return fonts
 
-    @http.route(['/website_sign/download/<int:id>/<token>/<type>'], type='http', auth='public', website=True)
-    def download_completed_document(self, id, token, type=None, **post):
-        signature_request_item = http.request.env['signature.request.item'].sudo().search([('signature_request.id', '=', id), ('access_token', '=', token)])
+    @http.route(['/sign/download/<int:id>/<type>', '/website_sign/download/<int:id>/<token>/<type>'], type='http', auth='public', website=True)
+    def download_document(self, id, token=None, type=None, **post):
+        signature_request_item = None
+        if token:
+            signature_request_item = http.request.env['signature.request.item'].sudo().search([('signature_request.id', '=', id), ('access_token', '=', token)])
+        elif type == "origin":
+            signature_request_item = http.request.env['signature.request.item'].sudo().search([('signature_request.id', '=', id)], limit=1)
+
         if not signature_request_item:
             return http.request.not_found()
 
         signature_request = signature_request_item.signature_request
         document = None
         if type == "origin":
-            document = signature_request.attachment.datas
+            document = signature_request.template.attachment.datas
         elif type == "completed":
             document = signature_request.completed_document
 
@@ -190,9 +201,9 @@ class website_sign(http.Controller):
             return http.request.not_found()
 
         filecontent = base64.b64decode(document)
-        filename = signature_request.attachment.name
-        if filename != signature_request.attachment.datas_fname:
-            filename += signature_request.attachment.datas_fname[signature_request.attachment.datas_fname.rfind('.'):]
+        filename = signature_request.template.attachment.name
+        if filename != signature_request.template.attachment.datas_fname:
+            filename += signature_request.template.attachment.datas_fname[signature_request.template.attachment.datas_fname.rfind('.'):]
         content_type = mimetypes.guess_type(filename)
         return http.request.make_response(
             filecontent,

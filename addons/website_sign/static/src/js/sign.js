@@ -299,7 +299,7 @@ function SignatureDialog()
         var self = this;
 
         if(self.fonts == null) {
-            return openerp.jsonRpc('/website_sign/get_fonts', "call", {}).then(function (data) {
+            return openerp.jsonRpc('/sign/get_fonts', "call", {}).then(function (data) {
                 self.fonts = data;
                 return data;
             });

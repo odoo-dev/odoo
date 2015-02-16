@@ -4,7 +4,7 @@
         <form id="sign_doc_items" method="post" t-attf-action="/website_sign/signed/{{signature_request.id}}/{{token}}">
             <div id="signature-field-view">
                 <input id="input_signature_request_id" type="hidden" t-att-value="signature_request.id"/>
-                <input id="input_attachment_location" type="hidden" t-attf-value="/website_sign/download/{{signature_request.id}}/{{token}}/origin"/>
+                <input id="input_attachment_location" type="hidden" t-attf-value="/website_sign/download/{{signature_request.id}}/origin"/>
                 <input id="input_field_readonly" type="hidden" t-att-value="readonly"/>
                 <input id="input_current_role" type="hidden" t-att-value="role"/>
 
@@ -27,22 +27,21 @@
 	<template t-name="website_sign.items_edit" name="Signature Request - Fields Edition">
 		<t t-call="website.layout">
             <div id="signature-field-view" class="container">
-            	<h2><strong><t t-esc="signature_request.attachment.name"/></strong> - Signature Request - Fields Edition</h2>
+            	<h2><strong><t t-esc="signature_request_template.attachment.name"/></strong> - Signature Request - Fields Edition</h2>
             	<ul>
                     <li>Notice that if you leave your document without any fields, the signers will be requested for an unique signature alongside the document.</li>
-                    <li>Double click to add or delete fields</li>
                 </ul>
 
                 <div class="row">
             		<div class="col-md-3">
-            			<input id="input_signature_request_id" type="hidden" t-att-value="signature_request.id"/>
-            			<input id="input_attachment_location" type="hidden" t-att-value="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request.attachment.id)"/>
+            			<input id="input_signature_request_template_id" type="hidden" t-att-value="signature_request_template.id"/>
+            			<input id="input_attachment_location" type="hidden" t-att-value="'/web/binary/image?model=ir.attachment&amp;field=datas&amp;id=' + str(signature_request_template.attachment.id)"/>
 
                         <t t-call="website_sign.item_types_input_info"/>
 
             			<div class="panel panel-default">
                             <div class="panel-heading">
-                				<a t-att-href="'/web?#id=' + str(signature_request.id) + '&amp;view_type=form&amp;model=signature.request'" id="signature_fields_save" class="btn btn-primary btn-block fa fa-check">Save</a>
+                				<a t-att-href="'/web?#id=' + str(signature_request_template.id) + '&amp;view_type=form&amp;model=signature.request.template'" id="signature_fields_save" class="btn btn-primary btn-block fa fa-check">Save</a>
                             </div>
                         </div>
                         <div class="panel panel-default">
@@ -93,7 +92,7 @@
 	</template>
 
     <template t-name="website_sign.items_input_info" name="Items input info">
-        <t t-foreach="signature_request.signature_items" t-as="item">
+        <t t-foreach="signature_items" t-as="item">
             <input type="hidden"
                 t-att-data-item-id="item.id"
                 t-att-data-type="item.type.id"
@@ -104,7 +103,7 @@
                 t-att-data-posy="item.posY"
                 t-att-data-width="item.width"
                 t-att-data-height="item.height"
-                t-att-data-item-value="item.value[0].value if (len(item.value) > 0 and item.value[0].value) else ''"/>
+                t-att-data-item-value="item.valueFor(signature_request.id) if signature_request else ''"/>
         </t>
     </template>
 

@@ -14,7 +14,7 @@ openerp.website_sign = function(instance) {
         get_followers: function () {
             var self = this;
             $('div.oe_edit_partner_list').remove();
-            openerp.session.rpc("/website_sign/get_followers", {
+            openerp.session.rpc("/sign/get_followers", {
                 'attachment_id': parseInt(self.attach_id),
                 'res_model': self.res_model,
                 'res_id': self.res_id
@@ -102,7 +102,7 @@ openerp.website_sign = function(instance) {
             var Attachment = new openerp.Model("ir.attachment");
             Attachment.call("set_name_and_description", [parseInt(attachment_id), title, comments])
                     .then(function(){
-                openerp.session.rpc("/website_sign/set_signers", {
+                openerp.session.rpc("/sign/set_signers", {
                     'attachment_id': parseInt(attachment_id),
                     'signer_ids': sign_ids,
                     'send_directly': self.send_directly,

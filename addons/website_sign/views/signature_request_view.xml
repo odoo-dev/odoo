@@ -5,7 +5,7 @@
         <field name="model">signature.request</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="attachment"/>
+                <field name="template"/>
                 <field name="nb_draft"/>
                 <field name="nb_wait"/>
                 <field name="nb_closed"/>
@@ -35,7 +35,7 @@
                     </div>
 
                     <group>
-                        <field name="attachment"/>
+                        <field name="template"/>
                     </group>
                     <label for="message"/><field name="message"/>
 
@@ -47,12 +47,6 @@
                             <field name="nb_closed"/>
                         </group>
                     </group>
-
-                    <div class="oe_button_box oe_right">
-                        <button string="Edit fields" type="object" states="draft" name="go_to_custom_document" class="oe_read_only"/>
-                    </div>
-                    <label for="signature_items"/>
-                    <field name="signature_items"/>
                 </sheet>
             </form>
         </field>
@@ -63,7 +57,7 @@
         <field name="model">signature.request</field>
         <field name="arch" type="xml">
             <search>
-                <field name="attachment"/>
+                <field name="template"/>
                 <filter name="signature_request_draft_opened" string="Actif" domain="[('state', 'in', ['draft', 'opened'])]"/>
             </search>
         </field>
@@ -75,6 +69,56 @@
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="signature_request_view_search"/>
         <field name="context" eval="{'search_default_signature_request_draft_opened': 1}"/>
+    </record>
+
+    <record model="ir.ui.view" id="signature_request_template_view_list">
+        <field name="name">Signature Request Template Tree View</field>
+        <field name="model">signature.request.template</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="attachment"/>
+                <field name="signature_items"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_request_template_view_form">
+        <field name="name">Signature Request Template Form View</field>
+        <field name="model">signature.request.template</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h2>Signature Request Template</h2>
+
+                    <div class="oe_button_box oe_right">
+                        <button string="Edit fields" type="object" name="go_to_custom_template" class="oe_read_only"/>
+                    </div>
+
+                    <group>
+                        <field name="attachment"/>
+                    </group>
+
+                    <label for="signature_items"/><field name="signature_items"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="signature_request_template_view_search">
+        <field name="name">Signature Request Template Search View</field>
+        <field name="model">signature.request.template</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="attachment"/>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="signature_request_template_action">
+        <field name="name">Signature Request Template</field>
+        <field name="res_model">signature.request.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="signature_request_template_view_search"/>
     </record>
 
     <record model="ir.ui.view" id="signature_request_item_view_list">
@@ -121,6 +165,7 @@
 
     <menuitem parent="mail.mail_feeds_main" id="website_sign.menu_digital_signatures" name="Digital Signature"/>
     <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_request" name="Signature Requests" action="signature_request_action"/>
+    <menuitem parent="website_sign.menu_digital_signatures" id="website_sign.menu_signature_request_template" name="Signature Request Templates" action="signature_request_template_action"/>
 
     <record id="action_client_digital_signature_menu" model="ir.actions.client">
         <field name="name">Open Digital Signatures Menu</field>

@@ -7,7 +7,7 @@ $(function() {
 
 function PDFViewEdit()
 {
-    this.signature_request_id = $('#input_signature_request_id').val();
+    this.signature_request_template_id = $('#input_signature_request_template_id').val();
 
     this.iframe = $('#signature-field-view iframe');
 
@@ -529,7 +529,7 @@ function PDFViewEdit()
             }
         }
 
-        openerp.jsonRpc("/website_sign/set_signature_items/" + self.signature_request_id, "call", {
+        openerp.jsonRpc("/sign/set_signature_items/" + self.signature_request_template_id, "call", {
             'signature_items': data,
         }).then(function (result) {
             window.location.href = url;
