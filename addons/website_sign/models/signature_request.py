@@ -9,51 +9,87 @@ from pyPdf import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
+class signature_request_template(models.Model):
+    _name = "signature.request.template"
+    _description = "Signature Request Template"
+    _rec_name = "attachment"
+
+    # FP: Is this PDF document only or any format? Put a help="..."
+    attachment = fields.Many2one('ir.attachment', string="Document", required=True, ondelete='cascade')
+    signature_items = fields.One2many('signature.item', 'signature_request_template')
+
+    signature_requests = fields.One2many('signature.request', 'template')
+
+    @api.multi
+    def go_to_custom_template(self):
+        return {
+            'name': 'Edit Document To Sign',
+            'type': 'ir.actions.act_url',
+            'url': '/sign/template/' + str(self[0].id),
+            'target': 'self',
+        }
+
+
 class signature_request(models.Model):
     _name = "signature.request"
-    _description = "Signature Request For An Attachment"
+    _description = "Document To Sign"
     _rec_name = 'template'
 
     template = fields.Many2one('signature.request.template')
 
+    # FP: I would not put this on this document but on the wizard that sends the email.
     message = fields.Html()
+
     request_items = fields.One2many('signature.request.item', 'signature_request', 'Signers')
+
+    # I would rename the keys to: draft, sent, signed, canceled
     state = fields.Selection([
         ("draft", "Draft"),
-        ("opened", "Waiting for completions"),
-        ("closed", "Closed"),
+        ("opened", "Sent"),
+        ("closed", "Signed"),
         ("canceled", "Canceled")
     ], readonly=True)
 
-    nb_draft = fields.Integer(string="Draft requests", compute="_compute_nb_draft", store=True)
-    nb_wait = fields.Integer(string="Sent requests", compute="_compute_nb_wait")
-    nb_closed = fields.Integer(string="Completed requests", compute="_compute_nb_closed", store=True)
+    # FP: I don't think we need nb_draft! Remove this field
+    nb_draft = fields.Integer(string="Draft Requests", compute="_compute_count", store=True)
+    nb_wait = fields.Integer(string="Missing Signatures", compute="_compute_count", store=True)
+    nb_closed = fields.Integer(string="Completed Signatures", compute="_compute_count", store=True)
 
     completed_document = fields.Binary(readonly=True)
 
+    # FP: I change to use the same method for all fields
     @api.one
     @api.depends('request_items.state')
     def _compute_nb_draft(self):
-        self.nb_draft = 0
+        draft, wait, closed = 0, 0, 0
         for s in self.request_items:
             if s.state == "draft":
-                self.nb_draft += 1
-
-    @api.one
-    @api.depends('request_items.state')
-    def _compute_nb_wait(self):
-        self.nb_wait = 0
-        for s in self.request_items:
+                nb_draft += 1
             if s.state == "opened":
-                self.nb_wait += 1
-
-    @api.one
-    @api.depends('request_items.state')
-    def _compute_nb_closed(self):
-        self.nb_closed = 0
-        for s in self.request_items:
+                nb_wait += 1
             if s.state == "closed":
-                self.nb_closed += 1
+                nb_closed += 1
+        self.nb_draft = draft
+        self.nb_wait = wait
+        self.nb_closed = closed
+
+    # FP: you can remove, I merged 3 computations in 1 method
+    # FP: self.nb_wait += 1 is not good: it makes several .write in the DB!
+    # @api.one
+    # @api.depends('request_items.state')
+    # def _compute_nb_wait(self):
+    #     self.nb_wait = 0
+    #     for s in self.request_items:
+    #         if s.state == "opened":
+    #             self.nb_wait += 1
+
+    # @api.one
+    # @api.depends('request_items.state')
+    # def _compute_nb_closed(self):
+    #     self.nb_closed = 0
+    #     for s in self.request_items:
+    #         if s.state == "closed":
+    #             self.nb_closed += 1
 
     @api.one
     def action_draft(self):
@@ -278,7 +314,7 @@ class signature_request(models.Model):
     @api.multi
     def go_to_sign_document(self):
         return {
-            'name': 'Signature Request URL',
+            'name': 'Document to Sign',
             'type': 'ir.actions.act_url',
             'url': '/sign/document/' + str(self[0].id) + '?viewmode=1',
             'target': 'self',
@@ -290,51 +326,37 @@ class signature_request(models.Model):
             self.generate_completed_document()
 
         return {
-            'name': 'Signature Request Completed Document URL',
+            'name': 'Signed Document',
             'type': 'ir.actions.act_url',
             'url': '/sign/download/%s/%s/completed' % (self[0].id, self[0].request_items[0].access_token),
             'target': 'self',
         }
 
-class signature_request_template(models.Model):
-    _name = "signature.request.template"
-    _description = "Signature Request Template"
-    _rec_name = "attachment"
-
-    attachment = fields.Many2one('ir.attachment', required=True, ondelete='cascade')
-    signature_items = fields.One2many('signature.item', 'signature_request_template')
-
-    signature_requests = fields.One2many('signature.request', 'template')
-
-    @api.multi
-    def go_to_custom_template(self):
-        return {
-            'name': 'Signature Request Template Edit Field URL',
-            'type': 'ir.actions.act_url',
-            'url': '/sign/template/' + str(self[0].id),
-            'target': 'self',
-        }
-
 class signature_request_item(models.Model):
     _name = "signature.request.item"
-    _description = "Signature Request Information For One Partner"
+    _description = "Signature Request"
     _rec_name = 'partner_id'
 
     partner_id = fields.Many2one('res.partner', 'Partner', required=True, ondelete='cascade')
+
+    # FP: Why is this readonly? In the view maybe, but not in the object
     signature_request = fields.Many2one('signature.request', ondelete='cascade', required=True, readonly=True)
     signature = fields.Binary()
-    
+
     signing_date = fields.Date('Signed on', readonly=True)
+    # FP: rename closed into completed, opened into to do
     state = fields.Selection([
         ("draft", "Draft"),
         ("opened", "Waiting for completion"),
         ("closed", "Completed")
     ], readonly=True, default="draft")
 
+    # FP: Remove size=256, it's usually much lower than 256, better not put a size
     def _default_access_token(self):
         return str(uuid.uuid4())
     access_token = fields.Char('Security Token', size=256, required=True, default=_default_access_token, readonly=True)
 
+    # FP: Do we need those fields?
     signer_name = fields.Char(size=256)
     signer_email = fields.Char(related='partner_id.email')
 
@@ -376,6 +398,8 @@ class signature_request_item(models.Model):
         self.action_closed()
         return True
 
+# FP: I don't think it's correct to inherit mail.message. The template should CALL
+# FP: message with the right arguments directly. Remove this
 class signature_mail_message(models.Model):
     _inherit = "mail.message"
 
@@ -414,6 +438,8 @@ class signature_mail_message(models.Model):
             signature_request.write({'message': mess.body})
         return tmp
 
+# FP: can we remove this helper function? no need, it's just one write
+# FP: moreover, it's old API
 class ir_attachment(models.Model):
     _inherit = 'ir.attachment'
 
