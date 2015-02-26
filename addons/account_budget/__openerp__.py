@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
+#    Odoo, Open Source Management Solution
 #    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -46,15 +46,15 @@ Three reports are available:
     3. The last one is available from the Analytic Chart of Accounts. It gives 
        the spreading, for the selected Analytic Accounts of Budgets.
 """,
-    'author': 'OpenERP SA',
+    'author': 'Odoo SA',
     'website': 'https://www.odoo.com/page/accounting',
     'depends': ['account'],
     'data': [
         'security/ir.model.access.csv',
         'security/account_budget_security.xml',
-        'account_budget_view.xml',
-        'account_budget_report.xml',
-        'account_budget_workflow.xml',
+        'views/account_budget_view.xml',
+        'views/account_budget_report.xml',
+        'views/account_budget_workflow.xml',
         'wizard/account_budget_analytic_view.xml',
         'wizard/account_budget_report_view.xml',
         'wizard/account_budget_crossovered_summary_report_view.xml',
@@ -64,7 +64,7 @@ Three reports are available:
         'views/report_budget.xml',
         'views/report_crossoveredbudget.xml',
     ],
-    'demo': ['account_budget_demo.xml'],
+    'demo': ['data/account_budget_demo.xml'],
     'test': [
         'test/account_budget.yml',
         'test/account_budget_report.yml',
