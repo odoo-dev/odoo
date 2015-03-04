@@ -1,46 +1,12 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
-import time
-from openerp.osv import osv
-from openerp.report import report_sxw
+from openerp import api, fields, models
+from openerp.tools.misc import formatLang
 
+class BudgetReport(models.AbstractModel):
+    _name = 'report.account_budget.report_crossoveredbudget'
 
-class budget_report(report_sxw.rml_parse):
-    def __init__(self, cr, uid, name, context):
-        super(budget_report, self).__init__(cr, uid, name, context=context)
-        self.localcontext.update({
-            'funct': self.funct,
-            'funct_total': self.funct_total,
-            'time': time,
-        })
-        self.context = context
-
-    def funct(self, object, form, ids=None, done=None, level=1):
-        if ids is None:
-            ids = {}
-        if not ids:
-            ids = self.ids
-        if not done:
-            done = {}
+    def funct(self, object, form):
         global tot
         tot = {
             'theo':0.00,
@@ -49,35 +15,16 @@ class budget_report(report_sxw.rml_parse):
             'perc':0.00
         }
         result = []
-
-        budgets = self.pool.get('crossovered.budget').browse(self.cr, self.uid, [object.id], self.context.copy())
-        c_b_lines_obj = self.pool.get('crossovered.budget.lines')
-        acc_analytic_obj = self.pool.get('account.analytic.account')
-        for budget_id in budgets:
+        for budget in object:
             res = {}
-            budget_lines = []
-            budget_ids = []
-            d_from = form['date_from']
-            d_to = form['date_to']
-
-            for line in budget_id.crossovered_budget_line:
-                budget_ids.append(line.id)
-
-            if not budget_ids:
-                return []
-
-            self.cr.execute('SELECT DISTINCT(analytic_account_id) FROM crossovered_budget_lines WHERE id = ANY(%s)',(budget_ids,))
-            an_ids = self.cr.fetchall()
-
-            context = {'wizard_date_from': d_from, 'wizard_date_to': d_to}
-            for i in range(0, len(an_ids)):
-                if not an_ids[i][0]:
-                    continue
-                analytic_name = acc_analytic_obj.browse(self.cr, self.uid, [an_ids[i][0]])
+            budget_ids = budget.crossovered_budget_line
+            if not budget_ids: return []
+            analytic_accounts = set([budget_id.analytic_account_id for budget_id in budget_ids])
+            for analytic_account in analytic_accounts:
                 res={
                     'b_id': '-1',
                     'a_id': '-1',
-                    'name': analytic_name[0].name,
+                    'name': analytic_account.name,
                     'status': 1,
                     'theo': 0.00,
                     'pln': 0.00,
@@ -85,24 +32,21 @@ class budget_report(report_sxw.rml_parse):
                     'perc': 0.00
                 }
                 result.append(res)
-
-                line_ids = c_b_lines_obj.search(self.cr, self.uid, [('id', 'in', budget_ids), ('analytic_account_id','=',an_ids[i][0]), ('date_to', '>=', d_from), ('date_from', '<=', d_to)])
-                line_id = c_b_lines_obj.browse(self.cr, self.uid, line_ids)
+                lines = self.env['crossovered.budget.lines'].search([('id', 'in', budget_ids.ids), ('analytic_account_id', '=', analytic_account.id), ('date_to', '>=', form['date_from']), ('date_from', '<=', form['date_to'])])
                 tot_theo = tot_pln = tot_prac = tot_perc = 0.00
-
                 done_budget = []
-                for line in line_id:
-                    if line.id in budget_ids:
+                for line in lines:
+                    if line.id in budget_ids.ids:
                         theo = pract = 0.00
-                        theo = c_b_lines_obj._theo_amt(self.cr, self.uid, [line.id], context)[line.id]
-                        pract = c_b_lines_obj._prac_amt(self.cr, self.uid, [line.id], context)[line.id]
+                        theo = line._theo_amt()[line.id]
+                        pract = line._prac_amt()[line.id]
                         if line.general_budget_id.id in done_budget:
                             for record in result:
                                 if record['b_id'] == line.general_budget_id.id  and record['a_id'] == line.analytic_account_id.id:
                                     record['theo'] += theo
                                     record['pln'] += line.planned_amount
                                     record['prac'] += pract
-                                    if record['theo'] <> 0.00:
+                                    if record['theo'] != 0.00:
                                         perc = (record['prac'] / record['theo']) * 100
                                     else:
                                         perc = 0.00
@@ -112,7 +56,7 @@ class budget_report(report_sxw.rml_parse):
                                     tot_prac += pract
                                     tot_perc += perc
                         else:
-                            if theo <> 0.00:
+                            if theo != 0.00:
                                 perc = (pract / theo) * 100
                             else:
                                 perc = 0.00
@@ -181,17 +125,27 @@ class budget_report(report_sxw.rml_parse):
         result = []
         res = {}
         res = {
-             'tot_theo': tot['theo'],
-             'tot_pln': tot['pln'],
-             'tot_prac': tot['prac'],
-             'tot_perc': tot['perc']
+            'tot_theo': tot['theo'],
+            'tot_pln': tot['pln'],
+            'tot_prac': tot['prac'],
+            'tot_perc': tot['perc']
         }
         result.append(res)
         return result
 
-
-class report_crossoveredbudget(osv.AbstractModel):
-    _name = 'report.account_budget.report_crossoveredbudget'
-    _inherit = 'report.abstract_report'
-    _template = 'account_budget.report_crossoveredbudget'
-    _wrapped_report_class = budget_report
+    @api.multi
+    def render_html(self, data=None):
+        report = self.env['report']
+        followup_report = report._get_report_from_name('account_budget.report_crossoveredbudget')
+        selected_records = self.env['crossovered.budget'].browse(data['ids'])
+        docargs = {
+            'doc_ids': self.ids,
+            'doc_model': followup_report.model,
+            'docs': selected_records,
+            'funct': self.funct,
+            'funct_total': self.funct_total,
+            'data': data,
+            'formatLang': formatLang,
+            'date': fields.Date
+        }
+        return report.render('account_budget.report_crossoveredbudget', docargs)

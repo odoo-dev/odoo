@@ -1,5 +1,5 @@
-<?xml version="1.0" ?>
-<openerp>
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
 
     <!-- Budgetary Positions -->
     <data noupdate="1">
@@ -186,4 +186,4 @@
             <field eval="str(time.localtime(time.time())[0]+1)+'-12-31'" name="date_to"/>
         </record>
     </data>
-</openerp>
+</odoo>

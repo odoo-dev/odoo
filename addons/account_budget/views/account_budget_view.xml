@@ -1,6 +1,7 @@
-<?xml version="1.0" ?>
-<openerp>
-    <data>
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+        <menuitem name="Budgets" id="menu_action_account_budget_post_tree" parent="account.menu_finance_generic_reporting" sequence="6"/>
         <!--
     Budgets
     -->
@@ -297,7 +298,6 @@
             </field>
         </record>
 
-    </data>
-</openerp>
+</odoo>
 
 

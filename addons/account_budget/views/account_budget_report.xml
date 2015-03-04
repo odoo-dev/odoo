@@ -1,6 +1,5 @@
-<?xml version="1.0"?>
-<openerp>
-    <data>
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
         <report
             id="action_report_crossovered_budget" 
             model="crossovered.budget" 
@@ -30,5 +29,4 @@
             file="account_budget.report_analyticaccountbudget" 
             menu="False"
         />
-    </data>
-</openerp>
+</odoo>
