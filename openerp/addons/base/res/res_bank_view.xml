@@ -101,6 +101,8 @@
             <field name="arch" type="xml">
                 <form string="Bank account">
                     <group col="4">
+                        <field name="hide_state" invisible="1"/>
+                        <field name="state"/>
                         <field name="acc_number" placeholder="Account Number"/>
                         <field name="company_id" groups="base.group_multi_company" on_change="onchange_company_id(company_id)"
                             invisible="context.get('company_hide', True)" options="{'no_create': True}"/>
@@ -176,7 +178,7 @@
               </p>
               <p>
                 If you use the accounting application of Odoo, journals and accounts will be created automatically based on these data.
-              </p>  
+              </p>
             </field>
         </record>
         <menuitem action="action_res_partner_bank_account_form"

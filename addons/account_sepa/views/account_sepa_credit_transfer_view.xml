@@ -37,10 +37,13 @@
             <field name="arch" type="xml">
                 <tree colors="red:payment_state == 'failed'" delete="false" create="false" edit="false">
                     <field name="name"/>
-                    <field name="date_paid"/>
-                    <field name="payment_amount" widget="monetary"/>
-                    <!-- <field name="currency_id" groups="base.group_multi_currency"/> -->
-                    <field name="payment_state"/>
+                    <field name="date"/>
+                    <field name="partner_id"/>
+                    <field name="amount" widget="monetary"/>
+                    <field name="journal_id"/>
+                    <!-- <field name="currency_id" groups="base.group_multi_currency"/> ? -->
+                    <!-- <field name="company_id" groups="base.group_multi_company"/> ? -->
+                    <field name="payment_state" string="State"/>
                 </tree>
             </field>
         </record>
@@ -50,6 +53,7 @@
             <field name="res_model">account.payment</field>
             <field name="view_mode">tree</field>
             <field name="view_id" ref="view_sepa_credit_transfer_tree"/>
+            <field name="search_view_id" ref="view_sepa_credit_transfer_search"/>
             <field name="domain">[
                 ('payment_method.code', '=', 'sepa_ct'),
                 ('payment_state', 'in', ('todo', 'failed'))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    OpenERP, Open Source Management Solution
 #    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
 #
@@ -15,7 +15,7 @@
 #    GNU Affero General Public License for more details.
 #
 #    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.     
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
 
@@ -95,6 +95,11 @@ class res_partner_bank(osv.osv):
             result.append((bank_type.code, bank_type.name))
         return result
 
+    def _get_hide_state(self, cr, uid, ids, field_name, arg, context):
+        for i in ids:
+            res[i] = len(self._bank_type_get(cr, uid, context=context)) > 1
+        return res
+
     def _default_value(self, cursor, user, field, context=None):
         if context is None: context = {}
         if field in ('country_id', 'state_id'):
@@ -117,6 +122,8 @@ class res_partner_bank(osv.osv):
         'name': fields.char('Bank Account'), # to be removed in v6.2 ?
         'acc_number': fields.char('Account Number', size=64, required=True),
         'bank': fields.many2one('res.bank', 'Bank'),
+        # TODO: why not related fields on bank ? Looks much cleaner than redefining
+        # bank attributes on the bank account
         'bank_bic': fields.char('Bank Identifier Code', size=16),
         'bank_name': fields.char('Bank Name'),
         'owner_name': fields.char('Account Owner Name'),
@@ -130,6 +137,9 @@ class res_partner_bank(osv.osv):
         'company_id': fields.many2one('res.company', 'Company',
             ondelete='cascade', help="Only if this bank account belong to your company"),
         'partner_id': fields.many2one('res.partner', 'Account Holder', ondelete='cascade', select=True, domain=['|',('is_company','=',True),('parent_id','=',False)]),
+        # TODO: semantically incorrect and seemingly unused, probably should rename in 'type'
+        # required=True, default base.bank_normal ?
+        'hide_state' : fields.function(_get_hide_state, type='boolean', method=True),
         'state': fields.selection(_bank_type_get, 'Bank Account Type',
             change_default=True),
         'sequence': fields.integer('Sequence'),

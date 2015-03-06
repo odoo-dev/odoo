@@ -8,12 +8,12 @@
         In order to use the functionality, you must enable SEPA payments on the relevants bank journals.
 
         The generated files follow the implementation guidelines issued by the European Payment Council and are compatible with formats pain.001.001.04 and pain.001.001.05
-        For more informations about the SEPA standards : http://www.iso20022.org/
+        For more informations about the SEPA standards : http://www.iso20022.org/ and http://www.europeanpaymentscouncil.eu/
     """,
     'author': "Odoo SA",
     'category': 'Accounting &amp; Finance',
     'version': '1.0',
-    'depends': ['account'],
+    'depends': ['account', 'base_iban'],
     'data': [
         'views/account_views_additions.xml',
         'views/account_sepa_credit_transfer_view.xml',
