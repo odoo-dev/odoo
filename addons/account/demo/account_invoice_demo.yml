@@ -106,7 +106,7 @@
     date_invoice: !eval time.strftime('%Y')+'-01-01'
 -
   !python {model: account.invoice.line} : |
-      account_id = self.pool.get('account.account').search(cr, uid, [('user_type', '=', ref('data_account_type_overheads')), ('tag_ids', 'in', [ref('account_tag_operating')])])
+      account_id = self.pool.get('account.account').search(cr, uid, [('user_type', '=', ref('account.data_account_type_overheads')), ('tag_ids', 'in', [ref('account.account_tag_operating')])])
       line_vals = {
           'invoice_id': ref('demo_invoice_january_wages'),
           'name': "CEO wages",

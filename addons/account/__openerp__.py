@@ -84,7 +84,6 @@ You could use this simplified accounting in case you work with an (external) acc
         'demo/account_demo.xml',
         'demo/account_minimal.xml',
         'demo/account_bank_statement.xml',
-        'demo/account_invoice_demo.yml',
         'views/account_unit_test.xml',
     ],
     'test': [
