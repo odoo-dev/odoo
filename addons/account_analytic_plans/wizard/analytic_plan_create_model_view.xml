@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
+<odoo>
         <record id="view_analytic_plan_create_model_msg" model="ir.ui.view">
             <field name="name">analytic.plan.create.model.msg.form</field>
             <field name="model">analytic.plan.create.model</field>
@@ -37,5 +36,4 @@
             <field name="view_id" ref="view_analytic_plan_create_model_msg"/>
         </record>
 
-    </data>
-</openerp>
+</odoo>

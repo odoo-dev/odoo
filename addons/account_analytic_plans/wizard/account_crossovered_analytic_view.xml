@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
+<odoo>
 
         <record id="view_account_crossovered_analytic" model="ir.ui.view">
             <field name="name">account.crossovered.analytic.form</field>
@@ -42,5 +41,4 @@
             <field name="model">account.analytic.account</field>
         </record>
 
-    </data>
-</openerp>
+</odoo>

@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<openerp>
-<data>
+<odoo>
 
 <!-- Add plan_id after user_id in account.journal many2one with account.analytic.plan -->
 
@@ -253,5 +252,4 @@
             </xpath>
         </field>
     </record>
-</data>
-</openerp>
+</odoo>
