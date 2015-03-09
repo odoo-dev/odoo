@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
   <data noupdate="1">
         <record id="demo_followup_line4" model="account_followup.followup.line">
             <field name="name">Urging reminder email</field>
@@ -45,4 +45,4 @@ Best Regards,
             </field>
         </record>
     </data>
-</openerp>
+</odoo>

@@ -1,5 +1,5 @@
-<openerp>
-    <data>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
         
         <record id="view_account_followup_followup_line_tree" model="ir.ui.view">
             <field name="name">account_followup.followup.line.tree</field>
@@ -171,5 +171,4 @@
                 </field>
             </field>
         </record>
-    </data>
-</openerp>
+</odoo>

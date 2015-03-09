@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
+<odoo>
 
       <record id="view_account_followup_stat_pivot" model="ir.ui.view">
            <field name="name">account_followup.stat.pivot</field>
@@ -61,5 +60,4 @@
           sequence="5"/>
         <menuitem action="action_followup_stat" id="menu_action_followup_stat_follow" parent="account.menu_finance_reporting" groups="account.group_account_invoice" name="Follow-Ups Analysis" sequence="10"/>
 
-    </data>
-</openerp>
+</odoo>

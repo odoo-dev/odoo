@@ -1,6 +1,5 @@
-<?xml version="1.0"?>
-<openerp>
-    <data>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
         <report
             id="action_report_followup" 
             model="account_followup.followup" 
@@ -10,5 +9,4 @@
             file="account_followup.report_followup" 
             menu="False"
         />
-    </data>
-</openerp>
+</odoo>

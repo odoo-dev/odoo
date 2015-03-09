@@ -55,7 +55,7 @@ class TestAccountFollowup(TransactionCase):
         self.wizard_id = self.wizard.create(cr, uid, {'date':result.strftime(tools.DEFAULT_SERVER_DATE_FORMAT), 
                                                       'followup_id': self.followup_id
                                                       }, context={"followup_id": self.followup_id})
-        self.wizard.do_process(cr, uid, [self.wizard_id], context={"followup_id": self.followup_id})
+        self.wizard.do_process([self.wizard_id])
         self.assertFalse(self.partner.browse(cr, uid, self.partner_id).latest_followup_level_id)
         
     def run_wizard_three_times(self):
@@ -66,15 +66,15 @@ class TestAccountFollowup(TransactionCase):
         self.wizard_id = self.wizard.create(cr, uid, {'date':result.strftime(tools.DEFAULT_SERVER_DATE_FORMAT), 
                                                       'followup_id': self.followup_id
                                                       }, context={"followup_id": self.followup_id})
-        self.wizard.do_process(cr, uid, [self.wizard_id], context={"followup_id": self.followup_id, 'tz':'UTC'})
+        self.wizard.do_process([self.wizard_id])
         self.wizard_id = self.wizard.create(cr, uid, {'date':result.strftime(tools.DEFAULT_SERVER_DATE_FORMAT), 
                                                       'followup_id': self.followup_id
                                                       }, context={"followup_id": self.followup_id})
-        self.wizard.do_process(cr, uid, [self.wizard_id], context={"followup_id": self.followup_id, 'tz':'UTC'})
+        self.wizard.do_process([self.wizard_id])
         self.wizard_id = self.wizard.create(cr, uid, {'date':result.strftime(tools.DEFAULT_SERVER_DATE_FORMAT), 
                                                       'followup_id': self.followup_id, 
                                                       }, context={"followup_id": self.followup_id})
-        self.wizard.do_process(cr, uid, [self.wizard_id], context={"followup_id": self.followup_id, 'tz':'UTC'})
+        self.wizard.do_process([self.wizard_id])
         
     def test_01_send_followup_later_for_upgrade(self):
         """ Send one follow-up after 15 days to check it upgrades to level 1"""

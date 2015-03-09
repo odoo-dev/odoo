@@ -1,46 +1,18 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
 import time
 from collections import defaultdict
-from openerp.osv import osv
-from openerp.report import report_sxw
+from openerp import api, models
+from openerp.tools.translate import _
 from openerp.exceptions import UserError
 
 
-class report_rappel(report_sxw.rml_parse):
-    _name = "account_followup.report.rappel"
+class FollowupReport(models.AbstractModel):
+    _name = "report.account_followup.report_followup"
 
-    def __init__(self, cr, uid, name, context=None):
-        super(report_rappel, self).__init__(cr, uid, name, context=context)
-        self.localcontext.update({
-            'time': time,
-            'ids_to_objects': self._ids_to_objects,
-            'getLines': self._lines_get,
-            'get_text': self._get_text
-        })
-
-    def _ids_to_objects(self, ids):
+    def _ids_to_objects(self, partner_ids):
         all_lines = []
-        for line in self.pool['account_followup.stat.by.partner'].browse(self.cr, self.uid, ids):
+        for line in self.env['account_followup.stat.by.partner'].browse(partner_ids):
             if line not in all_lines:
                 all_lines.append(line)
         return all_lines
@@ -49,35 +21,32 @@ class report_rappel(report_sxw.rml_parse):
         return self._lines_get_with_partner(stat_by_partner_line.partner_id, stat_by_partner_line.company_id.id)
 
     def _lines_get_with_partner(self, partner, company_id):
-        moveline_obj = self.pool['account.move.line']
-        moveline_ids = moveline_obj.search(self.cr, self.uid, [
-                            ('partner_id', '=', partner.id),
-                            ('account_id.internal_type', '=', 'receivable'),
-                            ('reconciled', '=', False),
-                            ('company_id', '=', company_id),
-                        ])
+        moveline = self.env['account.move.line']
+        moveline_ids = moveline.search([('partner_id', '=', partner.id),
+                                        ('account_id.internal_type', '=', 'receivable'),
+                                        ('reconciled', '=', False),
+                                        ('company_id', '=', company_id.id), ])
 
         # lines_per_currency = {currency: [line data, ...], ...}
         lines_per_currency = defaultdict(list)
-        for line in moveline_obj.browse(self.cr, self.uid, moveline_ids):
-            currency = line.currency_id or line.company_id.currency_id
+        for line in moveline_ids:
+            currency_id = line.currency_id or line.company_id.currency_id
             line_data = {
                 'name': line.move_id.name,
                 'ref': line.ref,
                 'date': line.date,
                 'date_maturity': line.date_maturity,
-                'balance': line.amount_currency if currency != line.company_id.currency_id else line.debit - line.credit,
+                'balance': line.amount_currency if currency_id != line.company_id.currency_id else line.debit - line.credit,
                 'blocked': line.blocked,
-                'currency_id': currency,
+                'currency_id': currency_id,
             }
-            lines_per_currency[currency].append(line_data)
+            lines_per_currency[currency_id].append(line_data)
 
         return [{'line': lines, 'currency': currency} for currency, lines in lines_per_currency.items()]
 
-    def _get_text(self, stat_line, followup_id, context=None):
-        context = dict(context or {}, lang=stat_line.partner_id.lang)
-        fp_obj = self.pool['account_followup.followup']
-        fp_line = fp_obj.browse(self.cr, self.uid, followup_id, context=context).followup_line
+    def _get_text(self, stat_line, followup_id):
+        followup = self.env['account_followup.followup']
+        fp_line = followup.browse(followup_id).followup_line
         if not fp_line:
             raise UserError(_("The followup plan defined for the current company does not have any followup action."))
         #the default text will be the first fp_line in the sequence with a description.
@@ -88,31 +57,41 @@ class report_rappel(report_sxw.rml_parse):
                 default_text = line.description
             li_delay.append(line.delay)
         li_delay.sort(reverse=True)
-        a = {}
         #look into the lines of the partner that already have a followup level, and take the description of the higher level for which it is available
-        partner_line_ids = self.pool['account.move.line'].search(self.cr, self.uid, [('partner_id','=',stat_line.partner_id.id),('reconciled','=',False),('company_id','=',stat_line.company_id.id),('blocked','=',False),('state','!=','draft'),('debit','!=',False),('account_id.internal_type','=','receivable'),('followup_line_id','!=',False)])
+        partner_line_ids = self.env['account.move.line'].search([('partner_id', '=', stat_line.partner_id.id), ('reconciled', '=', False), ('company_id', '=', stat_line.company_id.id), ('blocked', '=', False), ('state', '!=', 'draft'), ('debit', '!=', False), ('account_id.internal_type', '=', 'receivable'), ('followup_line_id', '!=', False)])
         partner_max_delay = 0
         partner_max_text = ''
-        for i in self.pool['account.move.line'].browse(self.cr, self.uid, partner_line_ids, context=context):
+        for i in self.env['account.move.line'].browse(partner_line_ids):
             if i.followup_line_id.delay > partner_max_delay and i.followup_line_id.description:
                 partner_max_delay = i.followup_line_id.delay
                 partner_max_text = i.followup_line_id.description
         text = partner_max_delay and partner_max_text or default_text
         if text:
-            lang_obj = self.pool['res.lang']
-            lang_ids = lang_obj.search(self.cr, self.uid, [('code', '=', stat_line.partner_id.lang)], context=context)
-            date_format = lang_ids and lang_obj.browse(self.cr, self.uid, lang_ids[0], context=context).date_format or '%Y-%m-%d'
+            Language = self.pool['res.lang']
+            lang_ids = Language.search([('code', '=', stat_line.partner_id.lang)])
+            date_format = lang_ids and Language.browse(lang_ids[0]).date_format or '%Y-%m-%d'
             text = text % {
                 'partner_name': stat_line.partner_id.name,
                 'date': time.strftime(date_format),
                 'company_name': stat_line.company_id.name,
-                'user_signature': self.pool['res.users'].browse(self.cr, self.uid, self.uid, context).signature or '',
+                'user_signature': self.env.user.signature or '',
             }
+
         return text
 
-
-class report_followup(osv.AbstractModel):
-    _name = 'report.account_followup.report_followup'
-    _inherit = 'report.abstract_report'
-    _template = 'account_followup.report_followup'
-    _wrapped_report_class = report_rappel
+    @api.multi
+    def render_html(self, data=None):
+        report = self.env['report']
+        followup_report = report._get_report_from_name('account_followup.report_followup')
+        selected_records = self.env['account.followup'].browse(self.ids)
+        docargs = {
+            'doc_ids': self._ids,
+            'doc_model': followup_report.model,
+            'docs': selected_records,
+            'time': time,
+            'ids_to_objects': self._ids_to_objects(data['form']['partner_ids']),
+            'getLines': self._lines_get(data['form']['stat_by_partner_line']),
+            'get_text': self._get_text(data['form']['stat_line'], data['form']['followup_id']),
+            'data': data,
+        }
+        return report.render('account_followup.report_followup', docargs)
