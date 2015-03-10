@@ -127,19 +127,19 @@
 -
   I check the Stock Interim account (Received) is credit successfully.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to credit field is removed
-    # credit = self.browse(cr, uid, ref('account_anglo_stock_input_fifo')).credit
-    # assert float_compare(credit, 9, precision_digits=2) == 0, "Stock Interim account (Received) is not credited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_stock_input_fifo'))])
+    credit = sum([x.credit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(credit, 9, precision_digits=2) == 0, "Stock Interim account (Received) is not credited successfully."
 -
   I check the Stock valuation account is debit sucessfully.
 -
-  !python {model: account.account, id}: |
+  !python {model: account.move.line, id}: |
     from openerp.tools import float_compare
-    # Due to debit field is removed
-    # debit = self.browse(cr, uid, ref('account_anglo_stock_valuation_fifo')).debit
-    # assert float_compare(debit, 9, precision_digits=2) == 0, "Stock valuation account is not debited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_stock_valuation_fifo'))])
+    debit = sum([x.debit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(debit, 9, precision_digits=2) == 0, "Stock valuation account is not debited successfully."
 -
   I Validate Invoice of Purchase Order after having changed the price to 10.
 -
@@ -151,27 +151,27 @@
 -
   I check the Stock Interim account (Received) is debited sucessfully when Invoice validated.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to debit field is removed
-    # debit = self.browse(cr, uid, ref('account_anglo_stock_input_fifo')).debit
-    # assert float_compare(debit, 9, precision_digits=2) == 0, "Stock Interim account (Received) is not debited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_stock_input_fifo'))])
+    debit = sum([x.debit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(debit, 9, precision_digits=2) == 0, "Stock Interim account (Received) is not debited successfully."
 -
   I check the Price difference creditor Account is debited sucessfully when Invoice validated.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to debit field is removed
-    # debit = self.browse(cr, uid, ref('account_anglo_price_difference_fifo')).debit
-    # assert float_compare(debit, 1, precision_digits=2) == 0, "Price difference creditor Account is not debited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_price_difference_fifo'))])
+    debit = sum([x.debit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(debit, 1, precision_digits=2) == 0, "Price difference creditor Account is not debited successfully."
 -
   I check Payable(creditor) Account is Credited sucessfully when Invoice validated.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to credit field is removed
-    # credit = self.browse(cr, uid, ref('account_anglo_payable_fifo')).credit
-    # assert float_compare(credit, 10, precision_digits=2) == 0, "Payable(creditor) Account is not Credited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_payable_fifo'))])
+    credit = sum([x.credit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(credit, 10, precision_digits=2) == 0, "Payable(creditor) Account is not Credited successfully."
 -
   I pay the invoice.
 -
@@ -185,19 +185,19 @@
 -
   I check Payable(Creditors) Account is Debited sucessfully after invoice paid.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to debit field is removed
-    # debit = self.browse(cr, uid, ref('account_anglo_payable_fifo')).debit
-    # assert float_compare(debit, 10, precision_digits=2) == 0, "Payable(Creditors) Account is not Debited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_payable_fifo'))])
+    debit = sum([x.debit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(debit, 10, precision_digits=2) == 0, "Payable(Creditors) Account is not Debited successfully."
 -
   I check Bank/Cash account is credited sucessfully after invoice paid.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to debit field is removed
-    # credit = self.browse(cr, uid, ref('account_anglo_cash_fifo')).credit
-    # assert float_compare(credit, 10, precision_digits=2) == 0, "Bank/Cash account is not credited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_cash_fifo'))])
+    credit = sum([x.credit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(credit, 10, precision_digits=2) == 0, "Bank/Cash account is not credited successfully."
 -
   I create an Outgoing Picking order
 -
@@ -235,19 +235,19 @@
 - 
   I check Stock Interim account (Delivery) is debited successfully.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to debit field is removed
-    # debit = self.browse(cr, uid, ref('account_anglo_stock_output_fifo')).debit
-    # assert float_compare(debit, 9, precision_digits=2) == 0, "Stock Interim account (Delivery) is not debited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_stock_output_fifo'))])
+    debit = sum([x.debit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(debit, 9, precision_digits=2) == 0, "Stock Interim account (Delivery) is not debited successfully."
 -
   I check the Stock valuation account is credited sucessfully.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to credit field is removed
-    # credit = self.browse(cr, uid, ref('account_anglo_stock_valuation_fifo')).credit
-    # assert float_compare(credit, 9, precision_digits=2) == 0, "Stock valuation account is not credited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_stock_valuation_fifo'))])
+    credit = sum([x.credit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(credit, 9, precision_digits=2) == 0, "Stock valuation account is not credited successfully."
 -
   As the Invoice state of the picking order is To be invoiced. I create invoice for my outgoing picking order.
 -
@@ -278,35 +278,35 @@
 -
   I check Income Account is Credited sucessfully when Invoice validated.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to credit field is removed
-    # credit = self.browse(cr, uid, ref('account_anglo_income_fifo')).credit
-    # assert float_compare(credit, 20, precision_digits=2) == 0, "Income Account is not Credited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_income_fifo'))])
+    credit = sum([x.credit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(credit, 20, precision_digits=2) == 0, "Income Account is not Credited successfully."
 -
   I check Cost of goods sold account for debit.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to credit field is removed
-    # debit = self.browse(cr, uid, ref('account_anglo_cogs_fifo')).debit
-    # assert float_compare(debit, 9, precision_digits=2) == 0, "Cost of goods sale is not Debited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_cogs_fifo'))])
+    debit = sum([x.debit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(debit, 9, precision_digits=2) == 0, "Cost of goods sale is not Debited successfully."
 -
   I check Stock Interim account (Delivery)
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to credit field is removed
-    # credit = self.browse(cr, uid, ref('account_anglo_stock_output_fifo')).credit
-    # assert float_compare(credit, 9, precision_digits=2) == 0, "Stock Interim account (Delivery) is not credited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_stock_output_fifo'))])
+    credit = sum([x.credit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(credit, 9, precision_digits=2) == 0, "Stock Interim account (Delivery) is not credited successfully."
 -
   I check Receivable(Debtor) Account for debit.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to debit field is removed
-    # debit = self.browse(cr, uid, ref('account_anglo_receivable_fifo')).debit
-    # assert float_compare(debit, 20, precision_digits=2) == 0, "Receivable(Debtors) Account is not Debited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_receivable_fifo'))])
+    debit = sum([x.debit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(debit, 20, precision_digits=2) == 0, "Receivable(Debtors) Account is not Debited successfully."
 -
   I pay the invoice.
 -
@@ -321,19 +321,19 @@
 -
   I check Receivable(Debtor) Account for credit.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to credit field is removed
-    # credit = self.browse(cr, uid, ref('account_anglo_receivable_fifo')).credit
-    # assert float_compare(credit, 20, precision_digits=2) == 0, "Receivable(Debtors) Account is not Credited successfully."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_receivable_fifo'))])
+    credit = sum([x.credit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(credit, 20, precision_digits=2) == 0, "Receivable(Debtors) Account is not Credited successfully."
 -
   I check Bank/Cash account is debited sucessfully after invoice paid.
 -
-  !python {model: account.account}: |
+  !python {model: account.move.line}: |
     from openerp.tools import float_compare
-    # Due to debit field is removed
-    # debit = self.browse(cr, uid, ref('account_anglo_cash_fifo')).debit
-    # assert float_compare(debit, 20, precision_digits=2) == 0, "Bank/Cash account is not successfully credited."
+    line_ids = self.search(cr, uid, [('account_id', '=', ref('account_anglo_cash_fifo'))])
+    debit = sum([x.debit for x in self.browse(cr, uid, line_ids)])
+    assert float_compare(debit, 20, precision_digits=2) == 0, "Bank/Cash account is not successfully credited."
 -
   I reset the company to not use anglo saxon accounting.
 -
