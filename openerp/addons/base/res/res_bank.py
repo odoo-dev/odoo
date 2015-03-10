@@ -96,6 +96,7 @@ class res_partner_bank(osv.osv):
         return result
 
     def _get_hide_state(self, cr, uid, ids, field_name, arg, context):
+        res = {}
         for i in ids:
             res[i] = len(self._bank_type_get(cr, uid, context=context)) > 1
         return res

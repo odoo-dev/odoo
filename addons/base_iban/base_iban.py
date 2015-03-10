@@ -88,6 +88,7 @@ def _format_iban(iban_str):
     '''
     This function removes all characters from given 'iban_str' that isn't a alpha numeric and converts it to upper case.
     '''
+    import pudb; pudb.set_trace()
     res = ""
     if iban_str:
         for char in iban_str:

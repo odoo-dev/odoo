@@ -4,7 +4,7 @@
 
         <record model="ir.actions.server" id="action_account_download_sepa_sct_file">
             <field name="name">Download SEPA Payment</field>
-            <field name="model_id" ref="account.model_account_move_line"/>
+            <field name="model_id" ref="account.model_account_payment"/>
             <field name="code">
                 if context.get('active_model') == 'account.payment' and context.get('active_ids'):
                     self.pool['account.sepa'].create_sepa_ct(cr, uid, context['active_ids'], context=context)
@@ -12,7 +12,7 @@
         </record>
 
         <record model="ir.values" id="account_download_sepa_sct_file">
-            <field name="model_id" ref="account.model_account_move_line" />
+            <field name="model_id" ref="account.model_account_payment" />
             <field name="name">Download SEPA Payment</field>
             <field name="key2">client_action_multi</field>
             <field name="value" eval="'ir.actions.server,' +str(ref('action_account_download_sepa_sct_file'))" />
