@@ -2,12 +2,25 @@
 <openerp>
     <data>
 
+        <record id="view_sepa_credit_transfer_download" model="ir.ui.view">
+            <field name="name">account.sepa.credit.transfer.download</field>
+            <field name="model">account.sepa.credit.transfer</field>
+            <field name="arch" type="xml">
+                <form string="Download SEPA Credit Transfer File" version="7.0">
+                    <group>
+                        <field name="file" filename="filename"/>
+                        <field name="filename" invisible="True"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
         <record model="ir.actions.server" id="action_account_download_sepa_sct_file">
             <field name="name">Download SEPA Payment</field>
             <field name="model_id" ref="account.model_account_payment"/>
             <field name="code">
                 if context.get('active_model') == 'account.payment' and context.get('active_ids'):
-                    self.pool['account.sepa'].create_sepa_ct(cr, uid, context['active_ids'], context=context)
+                    action = self.pool['account.sepa.credit.transfer'].create_sepa_credit_transfer(cr, uid, context['active_ids'], context=context)
             </field>
         </record>
 
@@ -25,6 +38,7 @@
             <field name="model">account.payment</field>
             <field name="arch" type="xml">
                 <search string="SEPA Payments">
+                    <field name="journal_id" />
                     <filter string="To Send" domain="[('payment_state','=','todo')]"/>
                     <filter string="Failed" domain="[('payment_state','=','failed')]"/>
                 </search>
