@@ -27,39 +27,36 @@ class account_voucher(models.Model):
     _inherit = "account.voucher"
 
     @api.multi
-    def voucher_move_line_create(self, line_total, move_id, company_currency, current_currency, context=None):
+    def voucher_move_line_create(self):
         import pudb; pu.db
-        tot_line, rec_lst_ids = super(account_voucher, self).voucher_move_line_create(line_total, move_id, company_currency, current_currency)
+        rec_lst_ids = super(account_voucher, self).voucher_move_line_create()
 
-        _negative_values = False
-        for _lines in rec_lst_ids:
-            _origin_move = _lines[1]
-            if _origin_move.debit < 0.0 or _origin_move.credit < 0.0:
-                _negative_values = True
+        negative_values = False
+        for (x, y, line) in rec_lst_ids:
+            if line['debit'] < 0.0 or line['credit'] < 0.0:
+                negative_values = True
 
-        if _negative_values:
-            for _lines in rec_lst_ids:
-                _reconc_move = _lines[0]
-                _origin_move = _lines[1]
+        if negative_values:
+            for (x, y, line) in rec_lst_ids:
 
-                _credit = _reconc_move.credit
-                _debit = _reconc_move.debit
+                credit = line['credit']
+                debit = line['debit']
 
-                if _origin_move.credit and _origin_move.credit != 0.0:
-                    if _origin_move.credit > 0.0:
-                        _credit = abs(_reconc_move.credit + _reconc_move.debit) * -1
-                        _debit = False
+                if credit != 0.0:
+                    if credit > 0.0:
+                        credit = abs(credit + debit) * -1
+                        debit = False
                     else:
-                        _credit = abs(_reconc_move.credit + _reconc_move.debit)
-                        _debit = False
-                elif _origin_move.debit and _origin_move.debit != 0.0:
-                    if _origin_move.debit > 0.0:
-                        _debit = abs(_reconc_move.credit + _reconc_move.debit) * -1
-                        _credit = False
+                        credit = abs(credit + debit)
+                        debit = False
+                elif debit != 0.0:
+                    if debit > 0.0:
+                        debit = abs(credit + debit) * -1
+                        credit = False
                     else:
-                        _debit = abs(_reconc_move.credit + _reconc_move.debit)
-                        _credit = False
+                        debit = abs(credit + debit)
+                        credit = False
 
-                _reconc_move.write({'debit': _debit, 'credit': _credit})
+                line.write({'debit': debit, 'credit': credit})
 
-        return tot_line, rec_lst_ids
+        return rec_lst_ids
