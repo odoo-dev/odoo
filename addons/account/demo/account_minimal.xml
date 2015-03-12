@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data noupdate="0">
-        <record id="base.main_company" model="res.company">
-            <field name="bank_account_code_char">X1100</field>
-            <field name="accounts_code_digits">7</field>
-        </record>
 
         <!--
         Chart of Accounts
@@ -13,7 +9,7 @@
         <!-- Balance Sheet -->
 
 
-        <record id="xfa" model="account.account">
+<!--         <record id="xfa" model="account.account">
             <field name="code">X1000</field>
             <field name="name">Fixed Assets - (test)</field>
             <field name="user_type" ref="data_account_type_fixed_assets"/>
@@ -111,7 +107,7 @@
             <field name="user_type" ref="data_account_type_expenses"/>
         </record>
 
-        <!-- Profit and Loss -->
+        <!- Profit and Loss ->
 
         <record model="account.account" id="income_fx_income">
             <field name="name">Foreign Exchange Gain - (test)</field>
@@ -188,27 +184,7 @@
             <field name="code">X0000</field>
             <field name="name">Unaffected Earnings</field>
             <field name="user_type" ref="data_unaffected_earnings"/>
-        </record>
-
-        <!-- Properties -->
-        <record forcecreate="True" id="property_account_receivable" model="ir.property">
-            <field name="name">property_account_receivable</field>
-            <field name="fields_id" search="[('model','=','res.partner'),('name','=','property_account_receivable')]"/>
-            <field eval="'account.account,'+str(a_recv)" name="value"/>
-            <field name="company_id" ref="base.main_company"/>
-        </record>
-        <record forcecreate="True" id="property_account_payable" model="ir.property">
-            <field name="name">property_account_payable</field>
-            <field name="fields_id" search="[('model','=','res.partner'),('name','=','property_account_payable')]"/>
-            <field eval="'account.account,'+str(a_pay)" name="value"/>
-            <field name="company_id" ref="base.main_company"/>
-        </record>
-        <record forcecreate="True" id="property_account_position" model="ir.property">
-            <field name="name">property_account_position</field>
-            <field name="fields_id" search="[('model','=','res.partner'),('name','=','property_account_position')]"/>
-            <field eval="False" name="value"/>
-            <field name="company_id" ref="base.main_company"/>
-        </record>
+        </record> -->
 
         <!--
         Account Journal
@@ -283,22 +259,6 @@
         </record>
         <record id="base.main_company" model="res.company">
             <field name="currency_exchange_journal_id" ref="currency_diff_journal"/>
-        </record>
-        <!--
-        Product income and expense accounts, default parameters
-        -->
-
-        <record id="property_account_expense_categ" model="ir.property">
-            <field name="name">property_account_expense_categ</field>
-            <field name="fields_id" search="[('model','=','product.category'),('name','=','property_account_expense_categ')]"/>
-            <field eval="'account.account,'+str(ref('account.a_expense'))" name="value"/>
-            <field name="company_id" ref="base.main_company"/>
-        </record>
-        <record id="property_account_income_categ" model="ir.property">
-            <field name="name">property_account_income_categ</field>
-            <field name="fields_id" search="[('model','=','product.category'),('name','=','property_account_income_categ')]"/>
-            <field eval="'account.account,'+str(ref('account.a_sale'))" model="account.account" name="value"/>
-            <field name="company_id" ref="base.main_company"/>
         </record>
     </data>
 </openerp>

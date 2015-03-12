@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from openerp import fields, models, _
+from openerp import fields, models, api, _
 
 
 class ResCompany(models.Model):
@@ -32,12 +32,13 @@ If you have any queries regarding your account, Please contact us.
 Thank you in advance for your cooperation.
 Best Regards,''')
 
+    @api.multi
     def _create_bank_account_and_journal(self, account_number, currency_id=None):
         """ Create a journal and its account """
         MultiChartsAccounts = self.env['wizard.multi.charts.accounts']
 
         if currency_id is None:
-            currency_id = self.currency_id
+            currency_id = self.currency_id.id
 
         vals_account = {'currency_id': currency_id, 'acc_name': account_number, 'account_type': 'bank', 'currency_id': currency_id}
         vals_account = MultiChartsAccounts._prepare_bank_account(self, vals_account)
