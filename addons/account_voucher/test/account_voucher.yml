@@ -9,14 +9,14 @@
 -
   !record {model: account.voucher, id: account_voucher_voucherforaxelor0, view: view_sale_receipt_form}:
     voucher_type: sale
-    account_id: account.cash
+    account_id: a_cash
     amount: 1000.0
     company_id: base.main_company
-    journal_id: account.sales_journal
+    journal_id: sales_journal
     name: Voucher for Axelor
     narration: Basic Pc
     line_ids:
-      - account_id: account.a_recv
+      - account_id: a_recv
         price_unit: 1000.0
         name: Voucher for Axelor
     partner_id: base.res_partner_12
@@ -56,14 +56,14 @@
 -
   !record {model: account.voucher, id: account_voucher_voucheraxelor0}:
     voucher_type: purchase
-    account_id: account.cash
+    account_id: a_cash
     amount: 1000.0
     company_id: base.main_company
-    journal_id: account.bank_journal
+    journal_id: j_cash
     name: Voucher Axelor
     narration: PC Assemble SC234
     line_ids:
-      - account_id: account.cash
+      - account_id: a_cash
         price_unit: 1000.0
         name: Voucher Axelor
     partner_id: base.res_partner_12

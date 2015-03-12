@@ -57,6 +57,7 @@ This module manages:
     ],
     'test' : [
         'test/account_voucher_users.yml',
+        'test/account_voucher_chart.yml',
         'test/account_voucher.yml',
         'test/sales_receipt.yml',
     ],

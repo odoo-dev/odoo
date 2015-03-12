@@ -7,18 +7,17 @@
   Creating a Voucher Receipt for partner Seagate with amount 30000.0
 - 
   !record {model: account.voucher, id: account_voucher_seagate_0, view: view_sale_receipt_form}:
-    account_id: account.a_recv
+    account_id: a_recv
     amount: 30000.0
     company_id: base.main_company
-    journal_id: account.sales_journal
+    journal_id: sales_journal
     line_ids:
-      - account_id: account.a_sale
+      - account_id: a_sale
         price_unit: 30000.0
         name: Voucher Seagate
     partner_id: base.res_partner_19
     date: !eval time.strftime("%Y/%m/%d")
     voucher_type: sale
-    
 -
   I check that the voucher state is Draft
 -
@@ -35,7 +34,6 @@
 # -
 #   !assert {model: account.voucher, id: account_voucher_seagate_0}:
 #     - state == 'posted'
-    
 # -
 #   I check that move lines are validated but not reconciled
 # -
