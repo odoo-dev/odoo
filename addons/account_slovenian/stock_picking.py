@@ -26,15 +26,17 @@ class stock_picking(models.Model):
 
     @api.multi
     def action_invoice_create(self, journal_id=False, group=False, type='out_invoice', context=None):
+        import pudb; pu.db
         res = super(stock_picking,self).action_invoice_create(journal_id, group, type)
         if type == 'in_invoice' or type == 'in_refund':
-            for inv in res.values():
+            invs = self.env['account.invoice'].search([('id', 'in', res)])
+            for inv in invs:
                 for ol in inv.invoice_line:
                     if ol.product_id:
                         oa = ol.product_id.property_stock_account_input
                         if not oa:
                             oa = ol.product_id.categ_id.property_stock_account_input_categ
-                        if oa:
+                        if oa and ol.invoice_id.fiscal_position:
                             fpos = ol.invoice_id.fiscal_position
                             a = fpos.map_account()
                             ol.write({'account_id': a})

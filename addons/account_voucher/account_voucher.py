@@ -106,12 +106,11 @@ class AccountVoucher(models.Model):
 
                 partner = voucher.partner_id or False
 
-                total = voucher_amount
                 for tax in line.tax_ids.compute_all((line.price_unit * line.quantity), self.currency_id).get('taxes', []):
                     total_tax += tax.get('amount', 0.0)
-                total += total_tax
+                voucher_amount += total_tax
 
-            voucher.write({'amount': total, 'tax_amount': total_tax})
+            voucher.write({'amount': voucher_amount, 'tax_amount': total_tax})
         return True
 
     @api.onchange('partner_id')
@@ -259,7 +258,8 @@ class AccountVoucher(models.Model):
                     else:
                         move_line['credit'] = tax.get('amount', 0.0)
 
-                    move_lines.append((0, 0, move_line))
+                    if move_line['debit'] != 0 or move_line['credit'] != 0:
+                        move_lines.append((0, 0, move_line))
         return move_lines
         
         
@@ -332,7 +332,6 @@ class AccountVoucher(models.Model):
             return voucher.currency_id.id or voucher._get_company_currency()
 
     @api.multi
-    @api.multi
     def action_move_line_create(self):
         '''
         Confirm the vouchers given in ids and create the journal entries for each of them
@@ -341,6 +340,7 @@ class AccountVoucher(models.Model):
             local_context = dict(self._context, force_company=voucher.journal_id.company_id.id)
             if voucher.move_id:
                 continue
+            voucher.compute_tax()
             company_currency = voucher._get_company_currency()
             current_currency = voucher._get_current_currency()
             # we select the context to use accordingly if it's a multicurrency case or not

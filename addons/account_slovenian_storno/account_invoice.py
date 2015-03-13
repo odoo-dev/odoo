@@ -28,8 +28,6 @@ class account_invoice(models.Model):
 
     @api.multi
     def finalize_invoice_move_lines(self, move_lines):
-        move_lines = super(account_invoice, self).finalize_invoice_move_lines(move_lines)
-
         if self.type in ('in_refund', 'out_refund'):
             _move_lines = []
             for line in move_lines:

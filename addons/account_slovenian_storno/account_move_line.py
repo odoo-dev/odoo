@@ -29,4 +29,5 @@ class account_move_line(models.Model):
 
     _sql_constraints = [
         ('credit_debit1', 'CHECK (credit*debit=0)',  'Wrong credit or debit value in accounting entry !'),
+        ('credit_debit2', 'CHECK (1=1)', 'do not check credit and debit are positive')
     ]

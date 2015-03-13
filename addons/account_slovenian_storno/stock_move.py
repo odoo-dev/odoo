@@ -27,13 +27,12 @@ class stock_quant(models.Model):
 
     @api.model
     def _prepare_account_move_line(self, move, src_account_id, dest_account_id, reference_amount, reference_currency_id, context=None):
-        import pudb; pu.db
-        _move_lines = super(stock_quant, self)._prepare_account_move_line(move, src_account_id, dest_account_id, reference_amount, reference_currency_id, context)
+        _move_lines = super(stock_quant, self)._prepare_account_move_line(move, src_account_id, dest_account_id, reference_amount, reference_currency_id)
         _old_debit_lines = _move_lines[0][2]
         _old_credit_lines = _move_lines[1][2]
 
-        if (move.picking_id.type == 'in' and move.location_id.usage == 'customer') \
-           or (move.picking_id.type == 'out' and move.location_dest_id.usage == 'supplier'):
+        if (move.picking_id.picking_type_id.code == 'incoming' and move.location_id.usage == 'customer') \
+           or (move.picking_id.picking_type_id.code == 'outgoing' and move.location_dest_id.usage == 'supplier'):
             _new_debit_lines = _old_credit_lines.copy()
             _new_debit_lines['debit'] = _new_debit_lines['credit'] * -1
             _new_debit_lines['credit'] = 0.0

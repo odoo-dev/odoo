@@ -34,20 +34,20 @@ class account_invoice(models.Model):
         _res = []
         for _line in res:
             if _line.get('product_id', False):
-                _product_id = _line.product_id
-                if _product_id.valuation == 'real_time':
-                    acc_out = _product_id.property_stock_account_output 
+                product = self.env['product.product'].search([('id', '=', _line['product_id'])])
+                if product.valuation == 'real_time':
+                    acc_out = product.property_stock_account_output 
                     if not acc_out:
-                        acc_out = _product_id.categ_id.property_stock_account_output_categ 
+                        acc_out = product.categ_id.property_stock_account_output_categ 
 
-                    acc_in = _product_id.property_stock_account_input
+                    acc_in = product.property_stock_account_input
                     if not acc_in:
-                        acc_in = _product_id.categ_id.property_stock_account_input_categ
+                        acc_in = product.categ_id.property_stock_account_input_categ
 
                     if acc_out and acc_in:
-                        if inv.type == 'in_refund' and _line['account_id'] == acc_out:
+                        if self.type == 'in_refund' and _line['account_id'] == acc_out:
                             _line['account_id'] = acc_in
-                    if inv.type == 'out_refund' and _line['account_id'] == acc_in:
+                    if self.type == 'out_refund' and _line['account_id'] == acc_in:
                             _line['account_id'] = acc_out
             _res.append(_line)
         return _res
@@ -56,16 +56,18 @@ class account_invoice_line(models.Model):
     _inherit = 'account.invoice.line'
 
     @api.multi
-    def product_id_change(self, product, uom_id, qty=0, name='', type='out_invoice', partner_id=False, fposition_id=False, price_unit=False, currency_id=False, company_id=None):
-        res = super(account_invoice_line, self).product_id_change(product, uom_id, qty, name, type, partner_id, fposition_id, price_unit, currency_id, company_id)
+    def product_id_change(self, product_id, uom_id, qty=0, name='', type='out_invoice', partner_id=False, fposition_id=False, price_unit=False, currency_id=False, company_id=None):
+        res = super(account_invoice_line, self).product_id_change(product_id, uom_id, qty, name, type, partner_id, fposition_id, price_unit, currency_id, company_id)
+        product = self.env['product.product'].search([('id', '=', product_id)])
         if not product:
             return res
         if type in ('in_invoice','in_refund'):
             oa = product.property_stock_account_input
             if not oa:
                 oa = product.categ_id.property_stock_account_input_categ
-            if oa:
-                fpos = fposition_id or False
-                a = fpos.map_account(oa)
-                res['value'].update({'account_id': a})
+            if oa and fposition_id:
+                fpos = self.env['account.fiscal.position'].search([('id', '=', fposition_id)])
+                if fpos:
+                    a = fpos.map_account(oa)
+                    res['value'].update({'account_id': a})
         return res
