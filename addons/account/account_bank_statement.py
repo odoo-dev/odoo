@@ -106,7 +106,7 @@ class AccountBankStatement(models.Model):
             moves = self.env['account.move']
             for st_line in statement.line_ids:
                 if st_line.account_id and not st_line.journal_entry_ids.ids:
-                    sl_line.fast_counterpart_creation()
+                    st_line.fast_counterpart_creation()
                 elif not st_line.journal_entry_ids.ids:
                     raise UserError(_('All the account entries lines must be processed in order to close the statement.'))
                 moves = (moves | st_line.journal_entry_ids)

@@ -25,10 +25,19 @@
     balance_start: 0.0
     date: !eval time.strftime('%Y-%m-%d')
     company_id: base.main_company
-    line_ids:
-      - amount: 1000
-        partner_id: base.res_partner_4
-        name: 'EXT001'
+-
+  !python {model: account.bank.statement.line}: |
+    import time
+    account_id = self.pool.get('account.account').search(cr, uid, [('user_type.type', '=', 'liquidity'), ('currency_id', '=', False)])[0]
+    vals = {
+        'amount': 1000,
+        'date': time.strftime('%Y-%m-%d'),
+        'partner_id': ref('base.res_partner_4'),
+        'name': 'EXT001',
+        'statement_id': ref('account_bank_statement_0'),
+        'account_id': account_id,
+    }
+    self.create(cr, uid, vals)
 -
   I modify the bank statement and set the Closing Balance.
 -
