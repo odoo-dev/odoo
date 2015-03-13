@@ -22,6 +22,8 @@ class ResCompany(models.Model):
     expense_currency_exchange_account_id = fields.Many2one('account.account', related='currency_exchange_journal_id.default_debit_account_id',
         string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
     anglo_saxon_accounting = fields.Boolean(string="Use anglo-saxon accounting")
+    slovenian_accounting = fields.Boolean(string="Use slovenian accounting")
+    storno_accounting = fields.Boolean(string="Use storno accounting")
 
 
 class AccountPaymentTerm(models.Model):
@@ -832,6 +834,8 @@ class AccountChartTemplate(models.Model):
             "templates, this is useful when you want to generate accounts of this template only when loading its child template.")
     currency_id = fields.Many2one('res.currency', string='Currency')
     use_anglo_saxon = fields.Boolean(string="Use Anglo-Saxon accounting", default=False)
+    use_slovenian = fields.Boolean(string="Use Slovenian accounting", default=False)
+    use_storno = fields.Boolean(string="Use Storno accounting", default=False)
     complete_tax_set = fields.Boolean(string='Complete Set of Taxes', default=True,
         help="This boolean helps you to choose if you want to propose to the user to encode the sale and purchase rates or choose from list "
             "of taxes. This last choice assumes that the set of tax defined on this template is complete")
@@ -1284,6 +1288,8 @@ class WizardMultiChartsAccounts(models.TransientModel):
     purchase_tax = fields.Many2one('account.tax.template', string='Default Purchase Tax')
     sale_tax_rate = fields.Float(string='Sales Tax(%)')
     use_anglo_saxon = fields.Boolean(string='Use Anglo-Saxon Accounting', related='chart_template_id.use_anglo_saxon')
+    use_slovenian = fields.Boolean(string='Use Slovenian Accounting', related='chart_template_id.use_slovenian')
+    use_storno = fields.Boolean(string='Use Storno Accounting', related='chart_template_id.use_storno')
     purchase_tax_rate = fields.Float(string='Purchase Tax(%)')
     complete_tax_set = fields.Boolean('Complete Set of Taxes',
         help="This boolean helps you to choose if you want to propose to the user to encode the sales and purchase rates or use "
@@ -1436,6 +1442,8 @@ class WizardMultiChartsAccounts(models.TransientModel):
         self.company_id.write({'currency_id': self.currency_id.id,
                                'accounts_code_digits': self.code_digits,
                                'anglo_saxon_accounting': self.use_anglo_saxon,
+                               'slovenian_accounting': self.use_slovenian,
+                               'storno_accounting': self.use_storno,
                                'bank_account_code_char': self.bank_account_code_char})
 
         # When we install the CoA of first company, set the currency to price types and pricelists

@@ -29,6 +29,10 @@ class purchase_order(models.Model):
     @api.model
     def _choose_account_from_po_line(self, order_line):
         account_id = super(purchase_order, self)._choose_account_from_po_line(order_line)
+
+        if not order_line.order_id.company_id.slovenian_accounting:
+            return account_id
+        
         if order_line.product_id and not order_line.product_id.type == 'service':
             acc = order_line.product_id.property_stock_account_input
             if not acc:

@@ -28,6 +28,9 @@ class account_invoice(models.Model):
     def invoice_line_move_line_get(self):
         res = super(account_invoice,self).invoice_line_move_line_get()
 
+        if not self.company_id.slovenian_accounting:
+            return res
+            
         if self.type in ('in_invoice', 'out_invoice'):
             return res
 
@@ -58,6 +61,10 @@ class account_invoice_line(models.Model):
     @api.multi
     def product_id_change(self, product_id, uom_id, qty=0, name='', type='out_invoice', partner_id=False, fposition_id=False, price_unit=False, currency_id=False, company_id=None):
         res = super(account_invoice_line, self).product_id_change(product_id, uom_id, qty, name, type, partner_id, fposition_id, price_unit, currency_id, company_id)
+
+        if not self.invoice_id.company_id.slovenian_accounting:
+            return res
+        
         product = self.env['product.product'].search([('id', '=', product_id)])
         if not product:
             return res

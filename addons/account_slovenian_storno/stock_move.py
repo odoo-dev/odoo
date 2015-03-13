@@ -28,6 +28,10 @@ class stock_quant(models.Model):
     @api.model
     def _prepare_account_move_line(self, move, src_account_id, dest_account_id, reference_amount, reference_currency_id, context=None):
         _move_lines = super(stock_quant, self)._prepare_account_move_line(move, src_account_id, dest_account_id, reference_amount, reference_currency_id)
+
+        if not move.company_id.storno_accounting:
+            return _move_lines
+        
         _old_debit_lines = _move_lines[0][2]
         _old_credit_lines = _move_lines[1][2]
 
