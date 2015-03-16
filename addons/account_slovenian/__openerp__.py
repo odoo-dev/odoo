@@ -32,7 +32,7 @@ Slovenian accounting expansion uses same input and output interim accounts depen
 or customer document.
 """,
     'images': [],
-    'depends': ['purchase'],
+    'depends': ['account_anglo_saxon'],
     'category': 'Accounting & Finance',
     'demo': [],
     'data': [],

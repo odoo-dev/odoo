@@ -420,12 +420,12 @@ class AccountMoveLine(models.Model):
             total_amount_currency_str = ""
             if line_currency != company_currency:
                 total_amount = line.amount_currency
-                actual_debit = debit != 0 and amount_currency or 0.0
-                actual_credit = credit != 0 and -amount_currency or 0.0
+                actual_debit = debit > 0 and amount_currency or 0.0
+                actual_credit = credit > 0 and -amount_currency or 0.0
             else:
                 total_amount = abs(debit - credit)
-                actual_debit = debit != 0 and amount or 0.0
-                actual_credit = credit != 0 and -amount or 0.0
+                actual_debit = debit > 0 and amount or 0.0
+                actual_credit = credit > 0 and -amount or 0.0
             if line_currency != target_currency:
                 amount_currency_str = rml_parser.formatLang(actual_debit or actual_credit, currency_obj=line_currency)
                 total_amount_currency_str = rml_parser.formatLang(total_amount, currency_obj=line_currency)

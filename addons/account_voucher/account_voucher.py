@@ -104,8 +104,6 @@ class AccountVoucher(models.Model):
                     voucher.write({'amount': voucher_amount, 'tax_amount': 0.0})
                     continue
 
-                partner = voucher.partner_id or False
-
                 for tax in line.tax_ids.compute_all((line.price_unit * line.quantity), self.currency_id).get('taxes', []):
                     total_tax += tax.get('amount', 0.0)
                 voucher_amount += total_tax
