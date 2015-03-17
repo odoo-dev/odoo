@@ -11,7 +11,7 @@
       if account_id:
           vals['default_credit_account_id'] = account_id[0]
           vals['default_debit_account_id'] = account_id[0]
-          self.write(cr, uid, ref('account.sales_journal'), line_vals)
+          self.write(cr, uid, ref('sales_journal'), line_vals)
 -
   !record {model: account.journal, id: expenses_journal}:
     name: Expenses Journal - (test)
@@ -25,7 +25,7 @@
       if account_id:
           vals['default_credit_account_id'] = account_id[0]
           vals['default_debit_account_id'] = account_id[0]
-          self.write(cr, uid, ref('account.expenses_journal'), line_vals)
+          self.write(cr, uid, ref('expenses_journal'), line_vals)
 -
   !record {model: account.journal, id: miscellaneous_journal}:
     name: Miscellaneous Journal - (test)
