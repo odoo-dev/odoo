@@ -19,6 +19,7 @@ class TestQifFile(TransactionCase):
         bank_statement_id = self.BankStatementImport.create(dict(
             data_file=qif_file,
         ))
-        bank_statement_id.with_context(journal_id=self.env.ref('account.bank_journal').id).import_file()
+        journal = self.env.user.company_id._create_bank_account_and_journal('Bank Account (test import qif)')
+        bank_statement_id.with_context(journal_id=journal).import_file()
         line = self.BankStatementLine.search([('name', '=', 'YOUR LOCAL SUPERMARKET')], limit=1)
         assert float_compare(line.statement_id.balance_end_real, -1896.09, 2) == 0
