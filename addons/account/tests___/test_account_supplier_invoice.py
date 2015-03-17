@@ -14,8 +14,12 @@ class TestAccountSupplierInvoice(TestMail):
             'amount_type': 'fixed',
         })
 
+        # Should be changed by automatic on_change later
+        invoice_account = self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_receivable').id)])[0].id
+        invoice_line_account = self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_expenses').id)])[0].id
+
         invoice = self.env['account.invoice'].create({'partner_id': self.env.ref('base.res_partner_2').id,
-            'account_id': self.env.ref('account.a_recv').id,
+            'account_id': invoice_account,
             'type': 'in_invoice',
         })
 
@@ -24,7 +28,7 @@ class TestAccountSupplierInvoice(TestMail):
             'price_unit': 100.0,
             'invoice_id': invoice.id,
             'name': 'product that cost 100',
-            'account_id': self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_expenses').id)])[0].id,
+            'account_id': invoice_line_account,
             'invoice_line_tax_id':[(6, 0, [tax.id])],
         })
 
