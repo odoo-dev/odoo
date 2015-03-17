@@ -8,7 +8,7 @@
     type: 'out_invoice'
     date_invoice: !eval time.strftime('%Y-%m')+'-08'
 -
-  !python {model: account.invoice.line} : |
+  !python {model: ir.model.data} : |
       account_id = self.pool.get('account.account').search(cr, uid, [('user_type', '=', ref('account.data_account_type_fixed_assets'))])
       line_vals = {
           'invoice_id': ref('demo_invoice_invest_sale'),
@@ -17,7 +17,7 @@
       }
       if account_id:
           line_vals['account_id'] = account_id[0]
-          self.create(cr, uid, line_vals)
+          self._update(cr, uid, 'account.invoice.line', 'account', line_vals, 'sale_of_land_line')
 -
   !workflow {model: account.invoice, action: invoice_open, ref: demo_invoice_invest_sale}
 -
@@ -54,7 +54,7 @@
     type: 'in_invoice'
     date_invoice: !eval time.strftime('%Y')+'-01-01'
 -
-  !python {model: account.invoice.line} : |
+  !python {model: ir.model.data} : |
       line_vals = {
           'invoice_id': ref('demo_invoice_january_wages'),
           'name': "CEO wages",
@@ -67,7 +67,7 @@
           account_id = self.pool.get('account.account').search(cr, uid, [('user_type', '=', ref('account.data_account_type_expenses'))])
       if account_id:
           line_vals['account_id'] = account_id[0]
-          self.create(cr, uid, line_vals)
+          self._update(cr, uid, 'account.invoice.line', 'account', line_vals, 'ceo_wages_line')
 -
   !workflow {model: account.invoice, action: invoice_open, ref: demo_invoice_january_wages}
 -

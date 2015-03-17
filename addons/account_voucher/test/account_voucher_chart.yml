@@ -17,7 +17,7 @@
   !record {model: account.account, id: a_sale}:
         code: X1020
         name: Product Sales - (test)
-        user_type: account.data_account_type_sales
+        user_type: account.data_account_type_revenue
 -
     Create sales journal
 -

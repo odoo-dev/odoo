@@ -67,21 +67,21 @@
         <!-- Statement operation templates -->
         <record id="statement_operation_template_1" model="account.operation.template">
             <field name="name">Discount For Early Payment</field>
-            <field name="account_id" ref="a_expense"></field>
+            <field name="account_id" search="[('user_type', '=', ref('account.data_account_type_expenses')), ('tag_ids', '=', ref('account_tag_operating'))]" />
             <field name="label">Discount</field>
             <field name="amount_type">percentage</field>
             <field name="amount">-7</field>
         </record>
         <record id="statement_operation_template_2" model="account.operation.template">
             <field name="name">Bank Fees</field>
-            <field name="account_id" ref="a_expense"></field>
+            <field name="account_id" search="[('user_type', '=', ref('account.data_account_type_expenses')), ('tag_ids', '=', ref('account_tag_operating'))]" />
             <field name="label">Bank Fees</field>
             <field name="amount_type">percentage</field>
             <field name="amount">100.0</field>
         </record>
         <record id="statement_operation_template_3" model="account.operation.template">
             <field name="name">Profit / Loss</field>
-            <field name="account_id" ref="a_sale"></field>
+            <field name="account_id" search="[('user_type', '=', ref('account.data_account_type_revenue')), ('tag_ids', '=', ref('account_tag_operating'))]" />
             <field name="label">Profit / Loss</field>
             <field name="amount_type">percentage</field>
             <field name="amount">100.0</field>

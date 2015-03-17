@@ -3814,70 +3814,70 @@
         <record id="a7000" model="account.account.template">
             <field name="name">Ventes en Belgique</field>
             <field name="code">7000</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a7001" model="account.account.template">
             <field name="name">Ventes dans les pays membres de la C.E.E.</field>
             <field name="code">7001</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a7002" model="account.account.template">
             <field name="name">Ventes à l'exportation</field>
             <field name="code">7002</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a_sale" model="account.account.template">
             <field name="name">Ventes en Belgique</field>
             <field name="code">7010</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a7011" model="account.account.template">
             <field name="name">Ventes dans les pays membres de la C.E.E.</field>
             <field name="code">7011</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a7012" model="account.account.template">
             <field name="name">Ventes à l'exportation</field>
             <field name="code">7012</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a7020" model="account.account.template">
             <field name="name">Ventes en Belgique</field>
             <field name="code">7020</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a7021" model="account.account.template">
             <field name="name">Ventes dans les pays membres de la C.E.E.</field>
             <field name="code">7021</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a7022" model="account.account.template">
             <field name="name">Ventes à l'exportation</field>
             <field name="code">7022</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
         <record id="a703" model="account.account.template">
             <field name="name">Ventes d'emballages récupérables</field>
             <field name="code">703</field>
-            <field name="user_type" ref="account.data_account_type_sales"/>
+            <field name="user_type" ref="account.data_account_type_revenue"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
             <field name="tag_ids" eval="[(6,0,[ref('account.account_tag_operating')])]"/>
         </record>
