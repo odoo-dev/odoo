@@ -1,6 +1,6 @@
 -   |
     Tax Scenario:
-    In order to check that the accounting entries and tax engine works
+    In order to check that the accounting entries and tax engine work
     efficiently with all kind of price accuracies we run this test scenario.
 -  
     Given the price accuracy for the account module is configured with two
@@ -36,7 +36,7 @@
     When I press on the CREATE button on the invoice to open it.
 -  
     !python {model: account.invoice}: |
-        self.action_move_create(cr, uid, [ref("invoice1")])  
+        self.action_move_create(cr, uid, [ref("invoice1")])
 -  
     Then I should see an account entry linked to this invoice.
 -  
@@ -72,7 +72,7 @@
     When I press on the CREATE button on the invoice to open it.
 -  
     !python {model: account.invoice}: |
-        self.action_move_create(cr, uid, [ref("invoice2")])  
+        self.action_move_create(cr, uid, [ref("invoice2")])
 -    
     Then this account entry must have a credit equals to the debit
 -  
