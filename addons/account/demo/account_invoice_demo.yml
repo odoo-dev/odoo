@@ -102,7 +102,7 @@
     ref: 'Company Creation'
 -
   !python {model: ir.model.data} : |
-      bank_journal_id = self.pool.get('account.journal').search(cr, uid, [('name', '=', 'Bank Bank Account (test)')])
+      bank_journal_id = self.pool.get('account.journal').search(cr, uid, [('name', '=', 'Bank Bank Account (test)')])[0]
       bank_account_id = self.pool.get('account.journal').browse(cr, uid, bank_journal_id).default_debit_account_id.id
       fixed_asset_account_ids = self.pool.get('account.account').search(cr, uid, [('user_type', '=', ref('account.data_account_type_fixed_assets'))])
       equity_account_ids = self.pool.get('account.account').search(cr, uid, [('user_type', '=', ref('account.data_account_type_equity')), ('tag_ids', 'in', [ref('demo_capital_account')])])
