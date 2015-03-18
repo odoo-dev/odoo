@@ -149,7 +149,9 @@ class res_partner_bank(osv.osv):
             cursor, user, 'country_id', context=context),
         'state_id': lambda obj, cursor, user, context: obj._default_value(
             cursor, user, 'state_id', context=context),
-        'name': '/'
+        'name': '/',
+        'company_id': lambda obj, cursor, user, context: obj.pool.get('res.company')._company_default_get(
+            cursor, user, 'res.partner.bank', context=context)
     }
 
     def fields_get(self, cr, uid, allfields=None, context=None, write_access=True, attributes=None):
