@@ -11,6 +11,15 @@ from openerp import models, fields, api, _
 from openerp.tools import float_round
 from openerp.exceptions import UserError, ValidationError
 
+''' TODO
+    - Improve res.partner.bank
+    - Check base_iban is reliable (eg. get_bban_from_iban contains a TODO)
+    - Get more informations about this 'generic messages' thing
+    - Add bank_account in account_payment and set it onchange_invoice_id / partner_id
+    - Ask the community / an audit company to check this module can comply with weird bank practices
+    (- Maybe use etree instead of a list to generate the XML file, it's less readable but more extensible)
+'''
+
 class account_sepa_credit_transfer(models.TransientModel):
     _name = "account.sepa.credit.transfer"
     _description = "SEPA files generation facilities"
@@ -71,6 +80,9 @@ class account_sepa_credit_transfer(models.TransientModel):
             raise UserError(_("Configuration Error:\nThere more than one bank accounts linked to journal '%s'") % journal.name)
         if not bank_account.state or not bank_account.state == 'iban':
             raise UserError(_("The account %s, linked to journal '%s', is not of type IBAN.\nA valid IBAN account is required to use SEPA features.") % (bank_account.acc_number, journal.name))
+        for payment in payments:
+            if not payment.partner_id.bank_ids:
+                raise UserError(_("There is no bank account recorded for partner '%s'") % payment.partner_id.name)
 
         res = self.create({
             'journal_id': journal.id,
@@ -82,7 +94,10 @@ class account_sepa_credit_transfer(models.TransientModel):
         xml_doc = res._create_pain_001_001_03_document(payments)
         res.file = base64.encodestring(xml_doc)
 
-        payments.write({'payment_state': 'done'})
+        payments.write({
+            'payment_state': 'done',
+            'payment_reference': res.filename,
+        })
 
         # Alternatively, return the id of the transient and use a controller to download the file
         return {
@@ -253,7 +268,7 @@ class account_sepa_credit_transfer(models.TransientModel):
         self._add_line(ret, 1, "<Id>")
         if self.is_generic:
             self._add_line(ret, 2, "<Othr>")
-            self._add_line(ret, 3, "<Id>" + self.bank_account_id.get_bban_from_iban + "</Id>")
+            self._add_line(ret, 3, "<Id>" + self.bank_account_id.get_bban_from_iban()[self.bank_account_id.id] + "</Id>")
             self._add_line(ret, 2, "</Othr>")
         else:
             self._add_line(ret, 2, "<IBAN>" + self.bank_account_id.acc_number.replace(' ', '') + "</IBAN>")
@@ -277,8 +292,6 @@ class account_sepa_credit_transfer(models.TransientModel):
         if len(re.sub('\.', '', InstdAmt)) > max_digits:
             raise ValidationError(_("The amount of the payment '%s' is too high. The maximum permitted is %s.") % (payment.name, str(9)*(max_digits-3)+".99"))
         ChrgBr = self._get_ChrgBr()
-        if not payment.partner_id.bank_ids:
-            raise UserError(_("There is no bank account recorded for partner '%s'") % payment.partner_id.name)
         creditor_bank_account = payment.partner_id.bank_ids[0]
         CdtrAgt = self._get_CdtrAgt(creditor_bank_account)
         Nm = payment.partner_id.name[:70]
@@ -359,10 +372,9 @@ class account_sepa_credit_transfer(models.TransientModel):
 
     def _get_RmtInf(self, payment):
         ret = []
-        # TODO: requires communication in account.payment
-        #Ustrd = payment.communication
-        Ustrd = "TODO"
-        self._add_line(ret, 0, "<RmtInf>")
-        self._add_line(ret, 1, "<Ustrd>" + Ustrd + "</Ustrd>")
-        self._add_line(ret, 0, "</RmtInf>")
+        Ustrd = payment.sepa_communication
+        if Ustrd:
+            self._add_line(ret, 0, "<RmtInf>")
+            self._add_line(ret, 1, "<Ustrd>" + Ustrd + "</Ustrd>")
+            self._add_line(ret, 0, "</RmtInf>")
         return ret

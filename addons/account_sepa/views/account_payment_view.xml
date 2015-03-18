@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_account_payment_form_inherited" model="ir.ui.view">
+            <field name="name">account.payment.form.inherited</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form" />
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='reference']" position="after">
+                    <field name="sepa_payment_method_selected" invisible="1"/>
+                    <field name="sepa_communication" attrs="{'invisible':[('sepa_payment_method_selected','=',False)]}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>

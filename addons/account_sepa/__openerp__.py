@@ -15,6 +15,7 @@
     'version': '1.0',
     'depends': ['account', 'base_iban'],
     'data': [
+        'views/account_payment_view.xml',
         'views/res_company_view.xml',
         'views/account_sepa_credit_transfer_view.xml',
         'data/account_sepa.xml'
