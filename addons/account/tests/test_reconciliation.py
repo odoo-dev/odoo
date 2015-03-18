@@ -20,8 +20,8 @@ class TestReconciliation(TransactionCase):
         self.currency_swiss_id = self.env.ref("base.CHF").id
         self.currency_usd_id = self.env.ref("base.USD").id
         self.currency_euro_id = self.env.ref("base.EUR").id
-        self.account_rcv = self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_receivable').id)])[0].id
-        self.account_rsa = self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_current_liabilities').id)])[0].id
+        self.account_rcv = self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_receivable').id)])[0]
+        self.account_rsa = self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_payable').id)])[0]
         self.product = self.env.ref("product.product_product_4")
 
         self.bank_euro = self.env['res.partner.bank'].create({'acc_number': 'Reconciliation test', 'bank_name': 'Test Bank'})
