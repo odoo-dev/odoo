@@ -38,9 +38,10 @@ of the depreciation lines.
     'sequence': 32,
     'demo': [
         'account_asset_demo.yml',
-        'account_asset_demo.xml',
     ],
     'test': [
+        '../account/test/account_minimal_test.xml'
+        'test/account_asset_demo_test.xml',
         'test/account_asset_demo.yml',
         'test/account_asset.yml',
         'test/account_asset_wizard.yml',
