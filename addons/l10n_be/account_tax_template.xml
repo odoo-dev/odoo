@@ -358,6 +358,7 @@
             <field name="description">VAT-IN-V81-21-CC</field>
             <field name="name">TVA Déductible 21% Cocontract. - Approvisionn. et marchandises</field>
             <field name="price_include" eval="0"/>
+            <field name="amount">21</field>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V81-21-CC-C1'), ref('attn_VAT-IN-V81-21-CC-C2')])]"/>
@@ -393,6 +394,7 @@
             <field name="name">TVA Déductible 12% Cocontract. - Approvisionn. et marchandises</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
+            <field name="amount">12</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V81-12-CC-C1'), ref('attn_VAT-IN-V81-12-CC-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -427,6 +429,7 @@
             <field name="name">TVA Déductible 6% Cocontract. - Approvisionn. et marchandises</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
+            <field name="amount">6</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V81-06-CC-C1'), ref('attn_VAT-IN-V81-06-CC-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -507,6 +510,7 @@
             <field name="description">VAT-IN-V82-12-CC</field>
             <field name="name">TVA Déductible 12% Cocontract. - Services and other goods</field>
             <field name="price_include" eval="0"/>
+            <field name="amount">12</field>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V82-12-CC-C1'), ref('attn_VAT-IN-V82-12-CC-C2')])]"/>
@@ -671,7 +675,7 @@
             <field name="refund_account_id" ref="a451056"/>
             <field name="account_id" ref="a451056"/>
             <field name="price_include" eval="0"/>
-            <field name="amount">9.5</field>
+            <field name="amount">1</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -787,6 +791,7 @@
             <field name="description">VAT-IN-V81-12-EU</field>
             <field name="name">TVA Déductible 12% Intracomm. - Approvisionn. et marchandises</field>
             <field name="price_include" eval="0"/>
+            <field name="amount">12</field>
             <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V81-12-EU-C1'), ref('attn_VAT-IN-V81-12-EU-C2')])]"/>
@@ -821,6 +826,7 @@
             <field name="description">VAT-IN-V81-06-EU</field>
             <field name="name">TVA Déductible 6% Intracomm. - Approvisionn. et marchandises</field>
             <field name="price_include" eval="0"/>
+            <field name="amount">6</field>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V81-06-EU-C1'), ref('attn_VAT-IN-V81-06-EU-C2')])]"/>
@@ -866,6 +872,7 @@
             <field name="description">VAT-IN-V82-21-EU-S</field>
             <field name="name">TVA Déductible 21% Intracomm. - Services</field>
             <field name="price_include" eval="0"/>
+            <field name="amount">21</field>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V82-21-EU-S-C1'), ref('attn_VAT-IN-V82-21-EU-S-C2')])]"/>
@@ -900,6 +907,7 @@
             <field name="description">VAT-IN-V82-21-EU-G</field>
             <field name="name">TVA Déductible 21% Intracomm. - Biens divers</field>
             <field name="price_include" eval="0"/>
+            <field name="amount">21</field>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V82-21-EU-G-C1'), ref('attn_VAT-IN-V82-21-EU-G-C2')])]"/>
@@ -969,6 +977,7 @@
             <field name="description">VAT-IN-V82-12-EU-G</field>
             <field name="name">TVA Déductible 12% Intracomm. - Biens divers</field>
             <field name="price_include" eval="0"/>
+            <field name="amount">12</field>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V82-12-EU-G-C1'), ref('attn_VAT-IN-V82-12-EU-G-C2')])]"/>
@@ -1004,6 +1013,7 @@
             <field name="name">TVA Déductible 6% Intracomm. - Services</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
+            <field name="amount">6</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V82-06-EU-S-C1'), ref('attn_VAT-IN-V82-06-EU-S-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1128,6 +1138,7 @@
             <field name="name">TVA Déductible 12% Intracomm. - Biens d'investissement</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
+            <field name="amount">12</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V83-12-EU-C1'), ref('attn_VAT-IN-V83-12-EU-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1162,6 +1173,7 @@
             <field name="name">TVA Déductible 6% Intracomm. - Biens d'investissement</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
+            <field name="amount">6</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V83-06-EU-C1'), ref('attn_VAT-IN-V83-06-EU-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1205,6 +1217,7 @@
             <field name="description">VAT-IN-V81-21-ROW-CC</field>
             <field name="name">TVA Déductible 21% Hors EU - Approvisionn. et marchandises</field>
             <field name="price_include" eval="0"/>
+            <field name="amount">21</field>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V81-21-ROW-CC-C1'), ref('attn_VAT-IN-V81-21-ROW-CC-C2')])]"/>
@@ -1238,6 +1251,7 @@
             <field name="sequence">2120</field>
             <field name="description">VAT-IN-V81-12-ROW-CC</field>
             <field name="name">TVA Déductible 12% Hors EU - Approvisionn. et marchandises</field>
+            <field name="amount">12</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
@@ -1317,6 +1331,7 @@
             <field name="sequence">2210</field>
             <field name="description">VAT-IN-V82-21-ROW-CC</field>
             <field name="name">TVA Déductible 21% Hors EU - Services and other goods</field>
+            <field name="amount">21</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
@@ -1353,6 +1368,7 @@
             <field name="name">TVA Déductible 12% Hors EU - Services and other goods</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
+            <field name="amount">12</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V82-12-ROW-CC-C1'), ref('attn_VAT-IN-V82-12-ROW-CC-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1388,6 +1404,7 @@
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
+            <field name="amount">6</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V82-06-ROW-CC-C1'), ref('attn_VAT-IN-V82-06-ROW-CC-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
         </record>
@@ -1429,6 +1446,7 @@
             <field name="sequence">2310</field>
             <field name="description">VAT-IN-V83-21-ROW-CC</field>
             <field name="name">TVA Déductible 21% Hors EU - Biens d'investissement</field>
+            <field name="amount">21</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
@@ -1465,6 +1483,7 @@
             <field name="name">TVA Déductible 12% Hors EU - Biens d'investissement</field>
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
+            <field name="amount">12</field>
             <field name="type_tax_use">purchase</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V83-12-ROW-CC-C1'), ref('attn_VAT-IN-V83-12-ROW-CC-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1500,6 +1519,7 @@
             <field name="price_include" eval="0"/>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
+            <field name="amount">6</field>
             <field name="children_tax_ids" eval="[(6, 0, [ref('attn_VAT-IN-V83-06-ROW-CC-C1'), ref('attn_VAT-IN-V83-06-ROW-CC-C2')])]"/>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
         </record>

@@ -72,12 +72,14 @@ V2.2 specifications.
 If required, you can manually adjust the descriptions via the CODA configuration menu.
 ''',
     'depends': ['account_voucher', 'base_iban', 'l10n_be_invoice_bba', 'account_bank_statement_import'],
-    'demo': ['l10n_be_coda_demo.xml'],
+    'demo': [
+        'l10n_be_coda_demo.xml',
+    ],
     'data': [
         'l10n_be_coda_view.xml',
     ],
     'auto_install': False,
     'website': 'https://www.odoo.com/page/accounting',
-    'installable': False,
+    'installable': True,
     'license': 'AGPL-3',
 }

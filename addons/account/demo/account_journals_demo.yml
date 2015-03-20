@@ -1,0 +1,42 @@
+-
+  !record {model: account.journal, id: sales_journal}:
+    name: Sales Journal - (test)
+    code: TSAJ
+    type: sale
+    analytic_journal_id: analytic.cose_journal_sale
+    refund_sequence: !eval True
+-
+  !python {model: account.journal} : |
+      account_id = self.pool.get('account.account').search(cr, uid, [('user_type', '=', ref('account.data_account_type_revenue')), ('tag_ids', 'in', [ref('account.account_tag_operating')])])
+      if account_id:
+          vals['default_credit_account_id'] = account_id[0]
+          vals['default_debit_account_id'] = account_id[0]
+          self.write(cr, uid, ref('sales_journal'), line_vals)
+-
+  !record {model: account.journal, id: expenses_journal}:
+    name: Expenses Journal - (test)
+    code: TEXJ
+    type: purchase
+    analytic_journal_id: account.exp
+    refund_sequence: !eval True
+-
+  !python {model: account.journal} : |
+      account_id = self.pool.get('account.account').search(cr, uid, [('user_type', '=', ref('account.data_account_type_expenses')), ('tag_ids', 'in', [ref('account.account_tag_operating')])])
+      if account_id:
+          vals['default_credit_account_id'] = account_id[0]
+          vals['default_debit_account_id'] = account_id[0]
+          self.write(cr, uid, ref('expenses_journal'), line_vals)
+-
+  !record {model: account.journal, id: miscellaneous_journal}:
+    name: Miscellaneous Journal - (test)
+    code: TMIS
+    type: general
+    analytic_journal_id: analytic.sit
+-
+  !python {model: res.company} : |
+      company_id = self.pool.get('res.users').browse(cr, uid, uid).company_id.id
+      self._create_bank_account_and_journal(cr, uid, company_id, 'Bank Account (test)')
+-
+  !python {model: res.company} : |
+      company_id = self.pool.get('res.users').browse(cr, uid, uid).company_id.id
+      self._create_bank_account_and_journal(cr, uid, company_id, 'USD Bank Account (test)', currency_id=ref('base.USD'))

@@ -11,7 +11,7 @@
             <field name="name">Financing Activities</field>
         </record>
         <record id="account_tag_investing" model="account.account.tag">
-            <field name="name">Investing Activities</field>
+            <field name="name">Investing &amp; Extraordinary Activities</field>
         </record>
 
         <!-- Analytic journals -->

@@ -308,7 +308,7 @@
             <field name="groupby">account_id</field>
         </record>
         <record id="account_financial_report_cashsummary_investing0" model="account.financial.report.line">
-            <field name="name">Cash flows from investing activities</field>
+            <field name="name">Cash flows from investing &amp; extraordinary activities</field>
             <field name="code">IN</field>
             <field name="sequence" eval="2"/>
             <field name="parent_id" ref='account_financial_report_cashsummary_net_increase0'/>

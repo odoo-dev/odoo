@@ -20,20 +20,20 @@ class TestReconciliation(TransactionCase):
         self.currency_swiss_id = self.env.ref("base.CHF").id
         self.currency_usd_id = self.env.ref("base.USD").id
         self.currency_euro_id = self.env.ref("base.EUR").id
-        self.account_rcv = self.env.ref("account.a_recv")
-        self.account_rsa = self.env.ref("account.rsa")
+        self.account_rcv = self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_receivable').id)])[0]
+        self.account_rsa = self.env['account.account'].search([('user_type', '=', self.env.ref('account.data_account_type_payable').id)])[0]
         self.product = self.env.ref("product.product_product_4")
 
-        self.bank_journal_usd = self.env.ref('account.bank_journal_usd')
-        self.account_usd = self.env.ref('account.usd_bnk')
-        self.bank_journal_euro = self.env.ref('account.bank_journal')
-        self.account_euro = self.env.ref('account.bnk')
+        self.bank_euro = self.env['res.partner.bank'].create({'acc_number': 'Reconciliation test', 'bank_name': 'Test Bank'})
+        self.bank_journal_euro = self.bank_euro.journal_id
+        self.account_euro = self.bank_journal_euro.default_debit_account_id
 
-        # set expense_currency_exchange_account_id and income_currency_exchange_account_id to a random account
-        self.env.ref('base.main_company').write({
-            'expense_currency_exchange_account_id': self.account_rsa.id,
-            'income_currency_exchange_account_id': self.account_rsa.id
-        })
+        self.bank_usd = self.env['res.partner.bank'].create({'acc_number': 'Reconciliation test USD',
+                                                             'bank_name': 'Test Bank USD'})
+        self.bank_journal_usd = self.bank_usd.journal_id
+        self.account_usd = self.bank_journal_usd.default_debit_account_id
+        self.account_usd.write({'currency_id': self.currency_usd_id})
+        self.bank_journal_usd.write({'currency': self.currency_usd_id})
 
     def create_invoice(self, type='out_invoice', currency_id=None):
         #we create an invoice in given currency
