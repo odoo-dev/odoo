@@ -33,13 +33,7 @@ class TestReconciliation(TransactionCase):
         self.bank_journal_usd = self.bank_usd.journal_id
         self.account_usd = self.bank_journal_usd.default_debit_account_id
         self.account_usd.write({'currency_id': self.currency_usd_id})
-        self.bank_journal_usd.write({'currency_id': self.currency_usd_id})
-
-        # set expense_currency_exchange_account_id and income_currency_exchange_account_id to a random account
-        self.env.ref('base.main_company').write({
-            'expense_currency_exchange_account_id': self.account_rsa.id,
-            'income_currency_exchange_account_id': self.account_rsa.id
-        })
+        self.bank_journal_usd.write({'currency': self.currency_usd_id})
 
     def create_invoice(self, type='out_invoice', currency_id=None):
         #we create an invoice in given currency

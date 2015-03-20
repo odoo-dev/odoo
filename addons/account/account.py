@@ -857,6 +857,10 @@ class AccountChartTemplate(models.Model):
     transfer_account_id = fields.Many2one('account.account.template',
         domain=lambda self: [('reconcile', '=', True), ('user_type.id', '=', self.env.ref('account.data_account_type_current_assets').id)],
         help="Intermediary account used when moving money from a liquidity account to another")
+    income_currency_exchange_account_id = fields.Many2one('account.account.template',
+        string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
+    expense_currency_exchange_account_id = fields.Many2one('account.account.template',
+        string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
     property_account_receivable = fields.Many2one('account.account.template', string='Receivable Account')
     property_account_payable = fields.Many2one('account.account.template', string='Payable Account')
     property_account_expense_categ = fields.Many2one('account.account.template', string='Expense Category Account')
@@ -893,7 +897,9 @@ class AccountChartTemplate(models.Model):
         JournalObj = self.env['account.journal']
         rec_list = JournalObj.search([('name', '=', vals_journal['name']), ('company_id', '=', company.id)], limit=1)
         if not rec_list:
-            JournalObj.create(vals_journal)
+            journal = JournalObj.create(vals_journal)
+            if vals_journal['type'] == 'general' and vals_journal['name'] == _('Exchange Rate Journal'):
+                company.write({'currency_exchange_journal_id': journal.id})
         return True
 
     @api.model
@@ -917,47 +923,46 @@ class AccountChartTemplate(models.Model):
             # Get the analytic journal
             data = False
             try:
-                if journal_type == 'sale':
+                if journal['type'] == 'sale':
                     data = self.env.ref('account.analytic_journal_sale')
-                elif journal_type == 'purchase':
+                elif journal['type'] == 'purchase':
                     data = self.env.ref('account.exp')
-                elif journal_type == 'general':
+                elif journal['type'] == 'general':
                     pass
             except ValueError:
                 pass
             return data and data.id or False
 
-        def _get_default_account(journal_type, type='debit'):
+        def _get_default_account(journal_vals, type='debit'):
             # Get the default accounts
             default_account = False
-            if journal_type == 'sale':
+            if journal['type'] == 'sale':
                 default_account = acc_template_ref.get(self.property_account_income_categ.id)
-            elif journal_type == 'purchase':
+            elif journal['type'] == 'purchase':
                 default_account = acc_template_ref.get(self.property_account_expense_categ.id)
+            elif journal['type'] == 'general' and journal['name'] == _('Exchange Rate Journal'):
+                if type=='credit':
+                    default_account = acc_template_ref.get(self.income_currency_exchange_account_id.id)
+                else:
+                    default_account = acc_template_ref.get(self.expense_currency_exchange_account_id.id)
             return default_account
 
-        journal_names = {
-            'sale': _('Sales Journal'),
-            'purchase': _('Purchase Journal'),
-            'general': _('Miscellaneous Journal'),
-        }
-        journal_codes = {
-            'sale': _('SAJ'),
-            'purchase': _('EXJ'),
-            'general': _('MISC'),
-        }
+        journals = [{'name': _('Sale Journal'), 'type': 'sale', 'code': _('SAJ')},
+                    {'name': _('Purchase Journal'), 'type': 'purchase', 'code': _('EXJ')},
+                    {'name': _('Miscellaneous Journal'), 'type': 'general', 'code': _('MISC')},
+                    {'name': _('Exchange Rate Journal'), 'type': 'general', 'code': _('EXCH')}]
 
         self.ensure_one()
         journal_data = []
-        for journal_type in ['sale', 'purchase', 'general']:
+        for journal in journals:
             vals = {
-                'type': journal_type,
-                'name': journal_names[journal_type],
-                'code': journal_codes[journal_type],
+                'type': journal['type'],
+                'name': journal['name'],
+                'code': journal['code'],
                 'company_id': company.id,
-                'analytic_journal_id': _get_analytic_journal(journal_type),
-                'default_credit_account_id': _get_default_account(journal_type, 'credit'),
-                'default_debit_account_id': _get_default_account(journal_type, 'debit'),
+                'analytic_journal_id': _get_analytic_journal(journal),
+                'default_credit_account_id': _get_default_account(journal, 'credit'),
+                'default_debit_account_id': _get_default_account(journal, 'debit'),
                 'refund_sequence': True,
             }
             journal_data.append(vals)
