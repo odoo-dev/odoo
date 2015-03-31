@@ -6,6 +6,8 @@ from openerp.exceptions import UserError
 
 from openerp import api, fields, models, _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from datetime import datetime, timedelta
+from openerp.tools.misc import formatLang
 
 
 class AccountFiscalPosition(models.Model):
@@ -96,7 +98,7 @@ class AccountFiscalPosition(models.Model):
         return accounts
 
     @api.model
-    def get_fiscal_position(self, company_id, partner_id, delivery_id=None):
+    def get_fiscal_position(self, partner_id, delivery_id=None):
         if not partner_id:
             return False
         # This can be easily overriden to apply more complex fiscal rules
@@ -113,22 +115,25 @@ class AccountFiscalPosition(models.Model):
         else:
             delivery = partner
 
-        domain = [
-            ('auto_apply', '=', True),
-            '|', ('vat_required', '=', False), ('vat_required', '=', partner.vat_subjected),
-        ]
+        domains = [[('auto_apply', '=', True), ('vat_required', '=', partner.vat_subjected)]]
+        if partner.vat_subjected:
+            # Possibly allow fallback to non-VAT positions, if no VAT-required position matches
+            domains += [[('auto_apply', '=', True), ('vat_required', '=', False)]]
 
-        if delivery.country_id.id:
-            fiscal_position = self.search(domain + [('country_id', '=', delivery.country_id.id)], limit=1)
+        for domain in domains:
+            if delivery.country_id.id:
+                fiscal_position = self.search(domain + [('country_id', '=', delivery.country_id.id)], limit=1)
+                if fiscal_position:
+                    return fiscal_position.id
+
+                fiscal_position = self.search(domain + [('country_group_id.country_ids', '=', delivery.country_id.id)], limit=1)
+                if fiscal_position:
+                    return fiscal_position.id
+
+            fiscal_position = self.search(domain + [('country_id', '=', None), ('country_group_id', '=', None)], limit=1)
             if fiscal_position:
-                return fiscal_position
-
-            fiscal_position = self.search(domain + [('country_group_id.country_ids', '=', delivery.country_id.id)], limit=1)
-            if fiscal_position:
-                return fiscal_position
-
-        fiscal_position = self.search(domain + [('country_id', '=', None), ('country_group_id', '=', None)], limit=1)
-        return fiscal_position.id or False
+                return fiscal_position.id
+        return False
 
 
 class AccountFiscalPositionTax(models.Model):
@@ -243,7 +248,7 @@ class ResPartner(models.Model):
             self.total_invoiced = 0.0
             return True
         for partner in self:
-            invoices = account_invoice_report.search([('partner_id', 'child_of', partner.id)])
+            invoices = account_invoice_report.search([('partner_id', 'child_of', partner.id), ('state', 'not in', ['draft', 'cancel'])])
             partner.total_invoiced = sum(inv.user_currency_price_total for inv in invoices)
 
     @api.multi
@@ -253,9 +258,70 @@ class ResPartner(models.Model):
             partner.contracts_count = self.env['account.analytic.account'].search_count([('partner_id', '=', partner.id)])
 
     @api.multi
+    def _compute_issued_total(self):
+        """ Returns the issued total as will be displayed on partner view """
+        today = fields.Date.context_today(self)
+        for partner in self:
+            domain = partner.get_followup_lines_domain(today, overdue_only=True)
+            issued_total = 0
+            for aml in self.env['account.move.line'].search(domain):
+                issued_total += aml.amount_residual
+            partner.issued_total = formatLang(self.env, issued_total, currency_obj=self.env.user.company_id.currency_id)
+
+    @api.multi
     def mark_as_reconciled(self):
         return self.write({'last_time_entries_checked': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
 
+    def get_partners_in_need_of_action(self, overdue_only=False):
+        result = self.ids
+        today = fields.Date.context_today(self)
+        partners = self.search(['|', ('payment_next_action_date', '=', False), ('payment_next_action_date', '<=', today)])
+        domain = partners.get_followup_lines_domain(today, overdue_only=overdue_only, only_unblocked=True)
+        for line in self.env['account.move.line'].read_group(domain, ['partner_id'], ['partner_id']):
+            result.append(line['partner_id'][0])
+        return self.browse(result)
+
+    def get_followup_lines_domain(self, date, overdue_only=False, only_unblocked=False):
+        #TODO use expression.OR 
+        domain = [('reconciled', '=', False), ('account_id.deprecated', '=', False), ('account_id.internal_type', '=', 'receivable')]
+        if only_unblocked:
+            domain += [('blocked', '=', False)]
+        if self.ids:
+            domain += [('partner_id', 'in', self.ids)]
+        #adding the overdue lines
+        overdue_domain = ['|', '&', ('date_maturity', '!=', False), ('date_maturity', '<=', date), '&', ('date_maturity', '=', False), ('date', '<=', date)]
+        if overdue_only:
+            domain += overdue_domain
+        else:
+            domain += ['|', '&', ('next_action_date', '=', False)] + overdue_domain + ['&', ('next_action_date', '!=', False), ('next_action_date', '<=', date)]
+        return domain
+
+    @api.multi
+    def update_next_action(self):
+        """Updates the next_action_date of the right account move lines"""
+        today = fields.datetime.now()
+        next_action_date = today + timedelta(days=self.env.user.company_id.days_between_two_followups)
+        next_action_date = next_action_date.strftime('%Y-%m-%d')
+        today = fields.Date.context_today(self)
+        domain = self.get_followup_lines_domain(today)
+        aml = self.env['account.move.line'].search(domain)
+        aml.write({'next_action_date': next_action_date})
+
+    @api.multi
+    def button_go_to_followup(self):
+        return {
+            'name': _('Partner followup'),
+            'url': '/account/followup_report/' + str(self.id),
+            'target': 'self',
+            'type': 'ir.actions.act_url',
+        }
+
+    payment_next_action = fields.Text('Next Action', copy=False, track_visibility="onchange", company_dependent=True,
+                                      help="Note regarding the next action.")
+    payment_next_action_date = fields.Date('Next Action Date', copy=False, company_dependent=True,
+                                           help="The date before which no action should be taken.")
+    unreconciled_aml_ids = fields.One2many('account.move.line', 'partner_id', domain=['&', ('reconciled', '=', False), '&',
+                                           ('account_id.deprecated', '=', False), '&', ('account_id.internal_type', '=', 'receivable')])
     vat_subjected = fields.Boolean('VAT Legal Statement',
         help="Check this box if the partner is subjected to the VAT. It will be used for the VAT legal statement.")
     credit = fields.Float(compute='_credit_debit_get', search=_credit_search,
@@ -268,6 +334,7 @@ class ResPartner(models.Model):
 
     contracts_count = fields.Integer(compute='_journal_item_count', string="Contracts", type='integer')
     journal_item_count = fields.Integer(compute='_journal_item_count', string="Journal Items", type="integer")
+    issued_total = fields.Char(compute='_compute_issued_total', string="Journal Items")
     property_account_payable = fields.Many2one('account.account', company_dependent=True,
         string="Account Payable",
         domain="[('internal_type', '=', 'payable'), ('deprecated', '=', False)]",

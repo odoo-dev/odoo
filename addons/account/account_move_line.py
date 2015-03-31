@@ -124,7 +124,7 @@ class AccountMoveLine(models.Model):
     account_id = fields.Many2one('account.account', string='Account', required=True, index=True,
         ondelete="cascade", domain=[('deprecated', '=', False)], default=lambda self: self._context.get('account_id', False))
     move_id = fields.Many2one('account.move', string='Journal Entry', ondelete="cascade",
-        help="The move of this entry line.", index=True, required=True)
+        help="The move of this entry line.", index=True, required=True, auto_join=True)
     narration = fields.Text(related='move_id.narration', string='Internal Note')
     ref = fields.Char(related='move_id.ref', string='Reference', store=True, copy=False)
     payment_id = fields.Many2one('account.payment', string="Originator Payment", help="Payment that created this entry")
@@ -148,6 +148,9 @@ class AccountMoveLine(models.Model):
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account')
     company_id = fields.Many2one('res.company', related='account_id.company_id', string='Company', store=True,
         default=lambda self: self.env['res.company']._company_default_get('account.move.line'))
+    expected_pay_date = fields.Date('Expected Payment Date')
+    internal_note = fields.Text('Internal Note')
+    next_action_date = fields.Date('Next Action Date')
 
     counterpart = fields.Char("Counterpart", compute='_get_counterpart')
 
@@ -817,6 +820,9 @@ class AccountMoveLine(models.Model):
             raise UserError(_('You cannot use deprecated account.'))
         if any(key in vals for key in ('account_id', 'journal_id', 'date', 'move_id', 'debit', 'credit', 'amount_currency', 'currency_id')):
             self._update_check()
+        if vals.get('expected_pay_date'):
+            msg = _('New expected payment date: ') + vals['expected_pay_date'] + '.\n' + vals.get('internal_note', '')
+            self.invoice.message_post(body=msg)
 
         result = super(AccountMoveLine, self).write(vals)
         if self._context.get('check_move_validity', True):

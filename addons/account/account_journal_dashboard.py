@@ -36,7 +36,7 @@ class account_journal(models.Model):
         data = []
         today = datetime.today()
         last_month = today + timedelta(days=-30)
-        bank_stmt = ac_bnk_stmt = self.env['account.bank.statement'].search([('journal_id', 'in', self.ids),('date', '>=', last_month.strftime(DEFAULT_SERVER_DATE_FORMAT)),('date', '<=', today.strftime(DEFAULT_SERVER_DATE_FORMAT))], order="date asc")
+        bank_stmt = self.env['account.bank.statement'].search([('journal_id', 'in', self.ids),('date', '>', last_month.strftime(DEFAULT_SERVER_DATE_FORMAT)),('date', '<=', today.strftime(DEFAULT_SERVER_DATE_FORMAT))], order="date asc")
         last_bank_stmt = self.env['account.bank.statement'].search([('journal_id', 'in', self.ids),('date', '<=', last_month.strftime(DEFAULT_SERVER_DATE_FORMAT))], order="date desc", limit=1)
         start_balance = last_bank_stmt and last_bank_stmt[0].balance_end or 0
         locale = self._context.get('lang', 'en_US')
@@ -47,25 +47,22 @@ class account_journal(models.Model):
         data.append({'x':short_name,'y':start_balance, 'name':name})
 
         for stmt in bank_stmt:
-            if stmt.date == show_date.strftime(DEFAULT_SERVER_DATE_FORMAT):
-                #add value to last data
-                data[len(data)-1]['y'] += stmt.balance_end
-            else:
-                #we are above, fill the gap between date and add new one
-                number_day_to_add = (datetime.strptime(stmt.date, DEFAULT_SERVER_DATE_FORMAT) - show_date).days
-                last_balance = data[len(data)-1]['y']
-                for day in range(0,number_day_to_add+1):
-                    show_date = show_date + timedelta(days=1)
-                    #get date in locale format
-                    name = format_date(show_date, 'd LLLL Y', locale=locale)
-                    short_name = format_date(show_date, 'd MMM', locale=locale)
-                    data.append({'x': short_name, 'y':last_balance, 'name': name})
-                #add new stmt value
-                data[len(data)-1]['y'] = stmt.balance_end
+            #fill the gap between last data and the new one
+            number_day_to_add = (datetime.strptime(stmt.date, DEFAULT_SERVER_DATE_FORMAT) - show_date).days
+            last_balance = data[len(data) - 1]['y']
+            for day in range(0,number_day_to_add + 1):
+                show_date = show_date + timedelta(days=1)
+                #get date in locale format
+                name = format_date(show_date, 'd LLLL Y', locale=locale)
+                short_name = format_date(show_date, 'd MMM', locale=locale)
+                data.append({'x': short_name, 'y':last_balance, 'name': name})
+            #add new stmt value
+            data[len(data) - 1]['y'] = stmt.balance_end
 
+        #continue the graph if the last statement isn't today
         if show_date != today:
             number_day_to_add = (today - show_date).days
-            last_balance = data[len(data)-1]['y']
+            last_balance = data[len(data) - 1]['y']
             for day in range(0,number_day_to_add):
                 show_date = show_date + timedelta(days=1)
                 #get date in locale format
@@ -230,7 +227,6 @@ class account_journal(models.Model):
             'bank': 'bank',
             'cash': 'cash',
             'general': 'general',
-            'opening': 'opening',
         }
         invoice_type = _journal_invoice_type_map[self.type]
 
@@ -247,6 +243,31 @@ class account_journal(models.Model):
         action = self.pool[model].read(self._cr, self._uid, action_id, context=self._context)
         action['context'] = ctx
         return action
+
+    @api.multi
+    def open_spend_money(self):
+        return self.open_payments_action('outbound')
+
+    @api.multi
+    def open_collect_money(self):
+        return self.open_payments_action('inbound')
+
+    @api.multi
+    def open_transfer_money(self):
+        return self.open_payments_action('transfer')
+
+    @api.multi
+    def open_payments_action(self, payment_type):
+        ctx = self._context.copy()
+        ctx.update({
+            'default_payment_type': payment_type,
+            'default_journal_id': self.id
+        })
+        action_rec = self.env['ir.model.data'].xmlid_to_object('account.action_account_dashboard_payments')
+        if action_rec:
+            action = action_rec.read([])[0]
+            action['context'] = ctx
+            return action
 
     @api.multi
     def import_statement(self):

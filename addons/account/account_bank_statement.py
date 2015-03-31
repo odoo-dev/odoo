@@ -4,7 +4,7 @@ from openerp import api, fields, models, _
 from openerp.osv import osv, expression
 from openerp.report import report_sxw
 from openerp.tools import float_compare, float_round
-from openerp.exceptions import UserError, ValidationError
+from openerp.exceptions import UserError, ValidationError, RedirectWarning
 
 import time
 
@@ -167,7 +167,7 @@ class AccountBankStatement(models.Model):
         # Try to automatically reconcile statement lines
         automatic_reconciliation_entries = []
         st_lines_left = self.env['account.bank.statement.line']
-        for st_line in bsl_obj.search(st_lines_filter, order='statement_id, id'):
+        for st_line in bsl_obj.search(st_lines_filter):
             res = st_line.auto_reconcile()
             if not res:
                 st_lines_left = (st_lines_left | st_line)
@@ -458,7 +458,7 @@ class AccountBankStatementLine(models.Model):
         if not self.partner_id:
             return self.env['account.move.line']
 
-        # Look for a set of move line whose amount is <= to the line's amount
+        # Select move lines until their total amount is greater than the statement line amount
         domain = [('reconciled', '=', False)]  # Make sure we can't mix reconciliation and 'rapprochement'
         domain += [('account_id.user_type.type', '=', amount > 0 and 'receivable' or 'payable')]  # Make sure we can't mix receivable and payable
         domain += amount_domain_maker('<', amount)  # Will also enforce > 0
@@ -468,9 +468,8 @@ class AccountBankStatementLine(models.Model):
         total = 0
         for line in mv_lines:
             total += line.currency_id and line.amount_residual_currency or line.amount_residual
-            if float_compare(total, abs(amount), precision_digits=st_line_currency.rounding) != 1:
-                ret = (ret | line)
-            else:
+            ret = (ret | line)
+            if float_compare(total, abs(amount), precision_digits=st_line_currency.rounding) != -1:
                 break
         return ret
 
@@ -575,7 +574,6 @@ class AccountBankStatementLine(models.Model):
                 amount_currency = self.amount * ratio
             elif st_line_currency != company_currency:
                 amount_currency = self.amount_currency * ratio
-
         return {
             'name': self.name,
             'date': self.date,

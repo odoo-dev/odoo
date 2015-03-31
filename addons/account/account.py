@@ -76,14 +76,11 @@ class AccountPaymentTermLine(models.Model):
             ('percent', 'Percent'),
             ('fixed', 'Fixed Amount')
         ], string='Computation', required=True, default='balance',
-        help="Select here the kind of valuation related to this payment term line. Note that you should have your last "
-            "line with the type 'Balance' to ensure that the whole amount will be treated.")
+        help="Select here the kind of valuation related to this payment term line.")
     value_amount = fields.Float(string='Amount To Pay', digits=dp.get_precision('Payment Term'), help="For percent enter a ratio between 0-100.")
-    days = fields.Integer(string='Number of Days', required=True, default=30, help="Number of days to add before computation of the day of month." \
-        "If Date=15/01, Number of Days=22, Day of Month=-1, then the due date is 28/02.")
+    days = fields.Integer(string='Number of Days', required=True, default=30, help="Number of days to add before computing the day of the month.")
     days2 = fields.Integer(string='Day of the Month', required=True, default='0',
-        help="Day of the month, set -1 for the last day of the current month. If it's positive, it gives the day of the next month. "
-            "Set 0 for net days (otherwise it's based on the beginning of the month).")
+        help="Day of the month \n\n Set : \n1)-1 for the last day of the current month. \n2) 0 for net days\n3) A positive number for the specific day of the next month.\n\nExample : if Date=15/01, Number of Days=22, Day of Month=-1, then the due date is 28/02.")
     payment_id = fields.Many2one('account.payment.term', string='Payment Term', required=True, index=True, ondelete='cascade')
 
     @api.one
@@ -233,6 +230,12 @@ class AccountJournal(models.Model):
     _description = "Journal"
     _order = 'sequence, code'
 
+    def _default_inbound_payment_methods(self):
+        return [(4, self.env.ref('account.account_payment_method_manual_in').id, None)]
+
+    def _default_outbound_payment_methods(self):
+        return [(4, self.env.ref('account.account_payment_method_manual_out').id, None)]
+
     name = fields.Char(string='Journal Name', required=True)
     code = fields.Char(size=5, required=True, help="The code will be displayed on reports.")
     type = fields.Selection([
@@ -273,9 +276,9 @@ class AccountJournal(models.Model):
     refund_sequence = fields.Boolean(string='Dedicated Refund Sequence', help="Check this box if you don't want to share the same sequence for invoices and refunds made from this journal")
 
     inbound_payment_methods = fields.Many2many('account.payment.method', 'account_journal_inbound_payment_method_rel', 'journal_id', 'inbound_payment_method',
-        domain=[('payment_type', '=', 'inbound')], string='Inbound Payment Methods', default=lambda self: [self.env.ref('account.account_payment_method_manual_in').id])
+        domain=[('payment_type', '=', 'inbound')], string='Inbound Payment Methods', default=lambda self: self._default_inbound_payment_methods())
     outbound_payment_methods = fields.Many2many('account.payment.method', 'account_journal_outbound_payment_method_rel', 'journal_id', 'outbound_payment_method',
-        domain=[('payment_type', '=', 'outbound')], string='Outbound Payment Methods', default=lambda self: [self.env.ref('account.account_payment_method_manual_out').id])
+        domain=[('payment_type', '=', 'outbound')], string='Outbound Payment Methods', default=lambda self: self._default_outbound_payment_methods())
     at_least_one_inbound = fields.Boolean(compute='_methods_compute', store=True)
     at_least_one_outbound = fields.Boolean(compute='_methods_compute', store=True)
 
@@ -852,7 +855,6 @@ class AccountChartTemplate(models.Model):
     bank_account_code_char = fields.Char(string='Code of the main bank account')
     transfer_account_id = fields.Many2one('account.account.template', string='Transfer Account',
         domain=lambda self: [('reconcile', '=', True), ('user_type.id', '=', self.env.ref('account.data_account_type_current_assets').id)],
-        default=lambda self: self.env.ref('account.transfer_account_id'),
         help="Intermediary account used when moving money from a liquidity account to another")
     property_account_receivable = fields.Many2one('account.account.template', string='Receivable Account')
     property_account_payable = fields.Many2one('account.account.template', string='Payable Account')
@@ -1300,7 +1302,7 @@ class WizardMultiChartsAccounts(models.TransientModel):
     bank_accounts_id = fields.One2many('account.bank.accounts.wizard', 'bank_account_id', string='Cash and Banks', required=True)
     bank_account_code_char = fields.Char('Bank Accounts Code')
     code_digits = fields.Integer(string='# of Digits', required=True, help="No. of Digits to use for account code")
-    sale_tax = fields.Many2one('account.tax.template', string='Default Sale Tax')
+    sale_tax = fields.Many2one('account.tax.template', string='Default Sales Tax')
     purchase_tax = fields.Many2one('account.tax.template', string='Default Purchase Tax')
     sale_tax_rate = fields.Float(string='Sales Tax(%)')
     use_anglo_saxon = fields.Boolean(string='Use Anglo-Saxon Accounting', related='chart_template_id.use_anglo_saxon')
@@ -1441,10 +1443,10 @@ class WizardMultiChartsAccounts(models.TransientModel):
         if not self.chart_template_id.complete_tax_set:
             value = self.sale_tax_rate
             ref_taxs = obj_tax_temp.search([('type_tax_use', '=', 'sale'), ('chart_template_id', 'in', all_parents)], order="sequence, id desc", limit=1)
-            ref_taxs.write({'amount': value/100.0, 'name': _('Tax %.2f%%') % value})
+            ref_taxs.write({'amount': value, 'name': _('Tax %.2f%%') % value})
             value = self.purchase_tax_rate
             ref_taxs = obj_tax_temp.search([('type_tax_use', '=', 'purchase'), ('chart_template_id', 'in', all_parents)], order="sequence, id desc", limit=1)
-            ref_taxs.write({'amount': value/100.0, 'name': _('Purchase Tax %.2f%%') % value})
+            ref_taxs.write({'amount': value, 'name': _('Purchase Tax %.2f%%') % value})
         return True
 
     @api.multi

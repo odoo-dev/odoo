@@ -47,7 +47,7 @@
                 <form string="Register Payment" version="7">
                     <header>
                         <button name="post" class="oe_highlight" states="draft" string="Confirm" type="object"/>
-                        <button name="cancel" class="oe_highlight" states="confirmed" string="Cancel" type="object"/>
+                        <button name="cancel" states="confirmed" string="Cancel" type="object"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -62,9 +62,6 @@
                             <h1><field name="name"/></h1>
                         </div>
                         <group>
-                            <group colspan="4">
-                                <field name="invoice_id" attrs="{'invisible': ['|', ('state', '=', 'draft'), '&amp;', ('state', '=', 'confirmed'), ('invoice_id', '=', False)], 'readonly': [('state', '=', 'confirmed')]}"/>
-                            </group>
                             <group>
                                 <field name="payment_type" widget="radio" attrs="{'readonly': [('state', '=', 'confirmed')]}"/>
                             </group>
@@ -74,8 +71,7 @@
                             <group>
                                 <field name="date" attrs="{'readonly': [('state', '=', 'confirmed')]}"/>
                                 <field name="partner_id" attrs="{'required': [('payment_type', '!=', 'transfer')], 'invisible': [('payment_type', 'not in', ('inbound', 'outbound'))], 'readonly': [('state', '=', 'confirmed')]}"/>
-                                <field name="journal_id" widget="selection" domain="[('type', '=', 'bank'), ('at_least_one_inbound', '=', True)]" attrs="{'readonly': [('state', '=', 'confirmed')], 'invisible': [('payment_type', 'in', ('outbound','transfer'))]}"/>
-                                <field name="journal_id" widget="selection" domain="[('type', '=', 'bank'), ('at_least_one_outbound', '=', True)]" attrs="{'readonly': [('state', '=', 'confirmed')], 'invisible': [('payment_type', '=', 'inbound')]}"/>
+                                <field name="journal_id" widget="selection" attrs="{'readonly': [('state', '=', 'confirmed')],}"/>
                                 <field name="destination_journal_id" widget="selection" attrs="{'required': [('payment_type', '=', 'transfer')], 'invisible': [('payment_type', '!=', 'transfer')], 'readonly': [('state', '=', 'confirmed')]}"/>
                                 <label for="amount"/>
                                 <div>
@@ -85,10 +81,22 @@
                                 <field name="payment_method" widget="radio" attrs="{'invisible': [('journal_id', '=', False)], 'readonly': [('state', '=', 'confirmed')]}"/>
                                 <field name="reference" attrs="{'invisible': [('state', '=', 'confirmed'), ('reference', '=', False)], 'readonly': [('state', '=', 'confirmed')]}"/>
                             </group>
-                            <group attrs="{'invisible': ['|', ('invoice_id', '=', False), ('payment_difference', '&lt;=', 0.0)]}">
+                            <group attrs="{'invisible': ['|', ('invoice_ids', '=', []), ('payment_difference', '&lt;=', 0.0)]}">
                                 <field name="payment_difference" attrs="{'readonly': [('state', '=', 'confirmed')]}"/>
-                                <field name="payment_difference_handling" widget="radio" attrs="{'required': [('invoice_id', '!=', False)], 'readonly': [('state', '=', 'confirmed')]}"/>
+                                <field name="payment_difference_handling" widget="radio" attrs="{'required': [('invoice_ids', '!=', [])], 'readonly': [('state', '=', 'confirmed')]}"/>
                                 <field name="writeoff_account" attrs="{'required': [('payment_difference_handling', '=', 'reconcile')], 'invisible': [('payment_difference_handling', '!=', 'reconcile')], 'readonly': [('state', '=', 'confirmed')]}"/>
+                            </group>
+                            <group colspan="4">
+                                <field name="invoice_ids" widget="one2many_list" attrs="{'invisible': [('invoice_ids', '=', [])]}">
+                                    <tree string="Invoices" colors="blue:state=='open'">
+                                        <field name="number"/>
+                                        <field name="date_invoice" />
+                                        <field name="type" />
+                                        <field name="amount_total" />
+                                        <field name="residual" />
+                                        <field name="state" invisible="1" />
+                                    </tree>
+                                </field>
                             </group>
                         </group>
                     </sheet>
@@ -96,6 +104,20 @@
             </field>
         </record>
 
+        <record id="action_account_dashboard_payments" model="ir.actions.act_window">
+            <field name="name">Payments</field>
+            <field name="res_model">account.payment</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form,tree</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                  Click to register a payment
+                </p><p>
+                  Payments are used to register liquidity movements (send, collect or transfer money).
+                  You can then process those payments by your own means or by using installed facilities.
+                </p>
+            </field>
+        </record>
         <record id="action_account_payments" model="ir.actions.act_window">
             <field name="name">Payments</field>
             <field name="res_model">account.payment</field>
@@ -122,7 +144,7 @@
                         <group>
                             <field name="payment_type" invisible="1"/>
                             <field name="partner_type" invisible="1"/>
-                            <field name="invoice_id" invisible="1"/>
+                            <field name="invoice_ids" invisible="1"/>
                             <field name="partner_id" invisible="1"/>
                             <field name="state" invisible="1"/>
                             <group>
@@ -160,7 +182,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="view_account_payment_invoice_form"/>
-            <field name="context">{'default_invoice_id': active_id}</field>
+            <field name="context">{'default_invoice_ids': [(4, active_id, None)]}</field>
             <field name="target">new</field>
         </record>
 
@@ -179,6 +201,7 @@
                             <field name="payment_method" widget="radio" create="false" class="oe_no_button" attrs="{'invisible': [('journal_id', '=', False)]}"/>
                         </group>
                         <group>
+                            <field name="amount" widget="monetary" />
                             <field name="date"/>
                         </group>
                     </group>
@@ -193,7 +216,7 @@
 
         <act_window
             id="action_account_payment_from_invoices"
-            name="Register Payments"
+            name="Register Payment"
             res_model="account.register.payments"
             src_model="account.invoice"
             view_mode="form"
