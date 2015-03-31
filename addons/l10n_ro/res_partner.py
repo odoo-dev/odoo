@@ -2,6 +2,7 @@
 ##############################################################################
 #
 #    @author -  Fekete Mihai <feketemihai@gmail.com>
+#    Copyright (C) 2015 FOREST AND BIOMASS SERVICES ROMANIA (http://www.forbiom.eu). 
 #    Copyright (C) 2011 TOTAL PC SYSTEMS (http://www.www.erpsystems.ro). 
 #    Copyright (C) 2009 (<http://www.filsystem.ro>)
 #
