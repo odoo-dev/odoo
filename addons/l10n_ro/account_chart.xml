@@ -102,49 +102,49 @@
     <record id="pcg_1043" model="account.account.template">
         <field name="name">Prime de aport</field>
         <field name="code">1043</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1044" model="account.account.template">
         <field name="name">Prime de conversie a obligaţiunilor în acţiuni</field>
         <field name="code">1044</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_105" model="account.account.template">
         <field name="name">Rezerve din reevaluare</field>
         <field name="code">105</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1061" model="account.account.template">
         <field name="name">Rezerve legale</field>
         <field name="code">1061</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1063" model="account.account.template">
         <field name="name">Rezerve statutare sau contractuale</field>
         <field name="code">1063</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
     <record id="pcg_1068" model="account.account.template">
         <field name="name">Alte rezerve</field>
         <field name="code">1068</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_107" model="account.account.template">
         <field name="name">Diferenţe de curs valutar din conversie</field>
         <field name="code">107</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="note">Acest cont apare numai in situatiile financiare anuale consolidate</field>
     </record>
@@ -152,49 +152,49 @@
     <record id="pcg_1081" model="account.account.template">
         <field name="name">Interese care nu controlează - rezultatul exerciţiului financiar</field>
         <field name="code">1081</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1082" model="account.account.template">
         <field name="name">Interese care nu controlează - alte capitaluri proprii</field>
         <field name="code">1082</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1091" model="account.account.template">
         <field name="name">Acţiuni proprii deţinute pe termen scurt</field>
         <field name="code">1091</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1092" model="account.account.template">
         <field name="name">Acţiuni proprii deţinute pe termen lung</field>
         <field name="code">1092</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1095" model="account.account.template">
         <field name="name">Acţiuni proprii reprezentând titluri deţinute de societatea absorbită la societatea absorbantă</field>
         <field name="code">1095</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1171" model="account.account.template">
         <field name="name">Rezultatul reportat reprezentând profitul nerepartizat sau pierderea neacoperită</field>
         <field name="code">1171</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1172" model="account.account.template">
         <field name="name">Rezultatul reportat provenit din adoptarea pentru prima dată a IAS, mai puţin IAS 29</field>
         <field name="code">1172</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="note">Acest cont apare doar la agentii economici care au aplicat Reglementarile contabile aprobate prin OMFP nr. 94/2001 si panã la inchiderea soldului acestui cont</field>
     </record>
@@ -202,98 +202,98 @@
     <record id="pcg_1173" model="account.account.template">
         <field name="name">Rezultatul reportat provenit din modificările politicilor contabile</field>
         <field name="code">1173</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1174" model="account.account.template">
         <field name="name">Rezultatul reportat provenit din corectarea erorilor contabile</field>
         <field name="code">1174</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1175" model="account.account.template">
         <field name="name">Rezultatul reportat reprezentând surplusul realizat din rezerve din reevaluare</field>
         <field name="code">1175</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1176" model="account.account.template">
         <field name="name">Rezultatul reportat provenit din trecerea la aplicarea reglementărilor contabile conforme cu directivele europene</field>
         <field name="code">1176</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_121" model="account.account.template">
         <field name="name">Profit sau pierdere</field>
         <field name="code">121</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_129" model="account.account.template">
         <field name="name">Repartizarea profitului</field>
         <field name="code">129</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_equity"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1411" model="account.account.template">
         <field name="name">Câştiguri legate de vânzarea instrumentelor de capitaluri proprii</field>
         <field name="code">1411</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_unaffected_earnings"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1412" model="account.account.template">
         <field name="name">Câştiguri legate de anularea instrumentelor de capitaluri proprii</field>
         <field name="code">1412</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_unaffected_earnings"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1491" model="account.account.template">
         <field name="name">Pierderi rezultate din vânzarea instrumentelor de capitaluri proprii</field>
         <field name="code">1491</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_overheads"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1495" model="account.account.template">
         <field name="name">Pierderi rezultate din reorganizări, care sunt determinate de anularea titlurilor deţinute</field>
         <field name="code">1495</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_overheads"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1498" model="account.account.template">
         <field name="name">Alte pierderi legate de instrumentele de capitaluri proprii</field>
         <field name="code">1498</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_overheads"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1511" model="account.account.template">
         <field name="name">Provizioane pentru litigii</field>
         <field name="code">1511</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1512" model="account.account.template">
         <field name="name">Provizioane pentru garanţii acordate clienţilor</field>
         <field name="code">1512</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1513" model="account.account.template">
         <field name="name">Provizioane pentru dezafectare imobilizări corporale și alte acțiuni similare legate de acestea</field>
         <field name="code">1513</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="note">Acest cont apare doar la agentii economici care au aplicat Reglementarile contabile aprobate prin OMFP nr. 94/2001 si pana la scoaterea din evidenta a imobilizarilor corporale in valoarea carora au fost incluse aceste provizioane. Ca urmare, aceste provizioane nu se mai pot constitui in baza prezentelor reglementari.</field>
     </record>
@@ -301,35 +301,35 @@
     <record id="pcg_1514" model="account.account.template">
         <field name="name">Provizioane pentru restructurare</field>
         <field name="code">1514</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1515" model="account.account.template">
         <field name="name">Provizioane pentru pensii și obligații similare</field>
         <field name="code">1515</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1516" model="account.account.template">
         <field name="name">Provizioane pentru impozite</field>
         <field name="code">1516</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1517" model="account.account.template">
         <field name="name">Provizioane pentru terminarea contractului de muncă</field>
         <field name="code">1517</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_1518" model="account.account.template">
         <field name="name">Alte provizioane</field>
         <field name="code">1518</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
@@ -483,35 +483,35 @@
     <record id="pcg_201" model="account.account.template">
         <field name="name">Cheltuieli de constituire</field>
         <field name="code">201</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_203" model="account.account.template">
         <field name="name">Cheltuieli de dezvoltare</field>
         <field name="code">203</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_205" model="account.account.template">
         <field name="name">Concesiuni, brevete, licenţe, mărci comerciale, drepturi şi active similare</field>
         <field name="code">205</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_206" model="account.account.template">
         <field name="name">Active necorporale de explorare şi evaluare a resurselor minerale</field>
         <field name="code">206</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2071" model="account.account.template">
         <field name="name">Fond comercial pozitiv</field>
         <field name="code">2071</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="note">Acest cont apare, de regula, in situatiile financiare anuale consolidate</field>
     </record>
@@ -519,7 +519,7 @@
     <record id="pcg_2075" model="account.account.template">
         <field name="name">Fond comercial negativ</field>
         <field name="code">2075</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="note">Acest cont apare numai in situatiile financiare anuale consolidate</field>
     </record>
@@ -527,7 +527,7 @@
     <record id="pcg_208" model="account.account.template">
         <field name="name">Alte imobilizări necorporale</field>
         <field name="code">208</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
@@ -618,49 +618,49 @@
     <record id="pcg_227" model="account.account.template">
         <field name="name">Active biologice productive în curs de aprovizionare</field>
         <field name="code">227</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
     <record id="pcg_231" model="account.account.template">
         <field name="name">Imobilizări corporale în curs de execuţie</field>
         <field name="code">231</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_235" model="account.account.template">
         <field name="name">Investiţii imobiliare în curs de execuţie</field>
         <field name="code">235</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_261" model="account.account.template">
         <field name="name">Acţiuni deţinute la entităţile afiliate</field>
         <field name="code">261</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_262" model="account.account.template">
         <field name="name">Acţiuni deţinute la entităţi asociate</field>
         <field name="code">262</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_263" model="account.account.template">
         <field name="name">Acţiuni deţinute la entităţi controlate în comun</field>
         <field name="code">263</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_264" model="account.account.template">
         <field name="name">Titluri puse în echivalenţă</field>
         <field name="code">264</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="note">Acest cont apare numai in situatiile financiare anuale consolidate</field>
     </record>
@@ -668,140 +668,140 @@
     <record id="pcg_265" model="account.account.template">
         <field name="name">Alte titluri imobilizate</field>
         <field name="code">265</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_266" model="account.account.template">
         <field name="name">Certificate verzi amânate</field>
         <field name="code">266</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
  
     <record id="pcg_2671" model="account.account.template">
         <field name="name">Sume de încasat de la entităţile afiliate</field>
         <field name="code">2671</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2672" model="account.account.template">
         <field name="name">Dobânda aferentă sumelor de încasat de la entităţile afiliate</field>
         <field name="code">2672</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2673" model="account.account.template">
         <field name="name">Creanţe faţă de entităţile asociate şi entităţile controlate în comun</field>
         <field name="code">2673</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2674" model="account.account.template">
         <field name="name">Dobânda aferentă creanţelor faţă de entităţile asociate şi entităţile controlate în comun</field>
         <field name="code">2674</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2675" model="account.account.template">
         <field name="name">Împrumuturi acordate pe termen lung</field>
         <field name="code">2675</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2676" model="account.account.template">
         <field name="name">Dobânda aferentă împrumuturilor acordate pe termen lung</field>
         <field name="code">2676</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2677" model="account.account.template">
         <field name="name">Obligaţiuni achiziţionate cu ocazia emisiunilor efectuate de terţi</field>
         <field name="code">2677</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2678" model="account.account.template">
         <field name="name">Alte creanţe imobilizate</field>
         <field name="code">2678</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2679" model="account.account.template">
         <field name="name">Dobânzi aferente altor creanţe imobilizate</field>
         <field name="code">2679</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2691" model="account.account.template">
         <field name="name">Vărsăminte de efectuat privind acţiunile deţinute la entităţile afiliate</field>
         <field name="code">2691</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2692" model="account.account.template">
         <field name="name">Vărsăminte de efectuat privind acţiunile deţinute la entităţi asociate</field>
         <field name="code">2692</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2693" model="account.account.template">
         <field name="name">Vărsăminte de efectuat privind acţiunile deţinute la entităţi controlate în comun</field>
         <field name="code">2693</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2695" model="account.account.template">
         <field name="name">Vărsăminte de efectuat pentru alte imobilizări financiare</field>
         <field name="code">2695</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2801" model="account.account.template">
         <field name="name">Amortizarea cheltuielilor de constituire</field>
         <field name="code">2801</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2803" model="account.account.template">
         <field name="name">Amortizarea cheltuielilor de dezvoltare</field>
         <field name="code">2803</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2805" model="account.account.template">
         <field name="name">Amortizarea concesiunilor, brevetelor, licenţelor, mărcilor comerciale, drepturilor şi activelor similare</field>
         <field name="code">2805</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2806" model="account.account.template">
         <field name="name">Amortizarea activelor necorporale de explorare şi evaluare a resurselor minerale</field>
         <field name="code">2806</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2807" model="account.account.template">
         <field name="name">Amortizarea fondului comercial</field>
         <field name="code">2807</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="note">Acest cont apare, de regula, in situatiile financiare anuale consolidate</field>
     </record>
@@ -809,196 +809,196 @@
     <record id="pcg_2808" model="account.account.template">
         <field name="name">Amortizarea altor imobilizări necorporale</field>
         <field name="code">2808</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2811" model="account.account.template">
         <field name="name">Amortizarea amenajărilor de terenuri</field>
         <field name="code">2811</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2812" model="account.account.template">
         <field name="name">Amortizarea construcţiilor</field>
         <field name="code">2812</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2813" model="account.account.template">
         <field name="name">Amortizarea instalaţiilor şi mijloacelor de transport</field>
         <field name="code">2813</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2814" model="account.account.template">
         <field name="name">Amortizarea altor imobilizări corporale</field>
         <field name="code">2814</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2815" model="account.account.template">
         <field name="name">Amortizarea investiţiilor imobiliare</field>
         <field name="code">2815</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2816" model="account.account.template">
         <field name="name">Amortizarea activelor corporale de explorare şi evaluare a resurselor minerale</field>
         <field name="code">2816</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2817" model="account.account.template">
         <field name="name">Amortizarea activelor biologice productive</field>
         <field name="code">2817</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2903" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea cheltuielilor de dezvoltare</field>
         <field name="code">2903</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2905" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea concesiunilor, brevetelor, licenţelor, mărcilor comerciale, drepturilor şi activelor similare</field>
         <field name="code">2905</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2906" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea activelor necorporale de explorare şi evaluare a resurselor minerale</field>
         <field name="code">2906</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2908" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea altor imobilizări necorporale</field>
         <field name="code">2908</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2911" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea terenurilor şi amenajărilor de terenuri</field>
         <field name="code">2911</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2912" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea construcţiilor</field>
         <field name="code">2912</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2913" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea instalaţiilor şi mijloacelor de transport</field>
         <field name="code">2913</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2914" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea altor imobilizări corporale</field>
         <field name="code">2914</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2915" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea investiţiilor imobiliare</field>
         <field name="code">2915</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2916" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea activelor corporale de explorare şi evaluare a resurselor minerale</field>
         <field name="code">2916</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2917" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea activelor biologice productive</field>
         <field name="code">2917</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2931" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea imobilizărilor corporale în curs de execuţie</field>
         <field name="code">2931</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2935" model="account.account.template">
         <field name="name">Ajustări pentru deprecierea investiţii lor imobiliare în curs de execuţie</field>
         <field name="code">2935</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2961" model="account.account.template">
         <field name="name">Ajustări pentru pierderea de valoare a acţiunilor deţinute la entităţile afiliate</field>
         <field name="code">2961</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2962" model="account.account.template">
         <field name="name">Ajustări pentru pierderea de valoare a acţiunilor deţinute la entităţi asociate şi entităţi controlate în comun</field>
         <field name="code">2962</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2963" model="account.account.template">
         <field name="name">Ajustări pentru pierderea de valoare a altor titluri imobilizate</field>
         <field name="code">2963</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2964" model="account.account.template">
         <field name="name">Ajustări pentru pierderea de valoare a sumelor de încasat de la entităţile afiliate</field>
         <field name="code">2964</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2965" model="account.account.template">
         <field name="name">Ajustări pentru pierderea de valoare a creanţelor faţă de entităţile asociate şi entităţile controlate în comun</field>
         <field name="code">2965</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2966" model="account.account.template">
         <field name="name">Ajustări pentru pierderea de valoare a împrumuturilor acordate pe termen lung</field>
         <field name="code">2966</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_2968" model="account.account.template">
         <field name="name">Ajustări pentru pierderea de valoare a altor creanţe</field>
         <field name="code">2968</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_depreciation"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
@@ -1511,7 +1511,7 @@
     <record id="pcg_425" model="account.account.template">
         <field name="name">Avansuri acordate personalului</field>
         <field name="code">425</field>
-        <field name="user_type" ref="account.data_account_type_payable"/>
+        <field name="user_type" ref="account.data_account_type_receivable"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="reconcile" eval="True"/>
     </record>
@@ -1597,7 +1597,7 @@
     <record id="pcg_4382" model="account.account.template">
         <field name="name">Alte creanţe sociale</field>
         <field name="code">4382</field> 
-        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
@@ -1625,28 +1625,28 @@
     <record id="pcg_4424" model="account.account.template">
         <field name="name">TVA de recuperat</field>
         <field name="code">4424</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_4426" model="account.account.template">
         <field name="name">TVA deductibilă</field>
         <field name="code">4426</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_4427" model="account.account.template">
         <field name="name">TVA colectată</field>
         <field name="code">4427</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_non_current_assets"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
     <record id="pcg_44281" model="account.account.template">
         <field name="name">TVA neexigibilă - Colectată</field>
         <field name="code">44281</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_non_current_liabilities"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
@@ -1806,14 +1806,14 @@
     <record id="pcg_471" model="account.account.template">
         <field name="name">Cheltuieli înregistrate în avans</field>
         <field name="code">471</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_prepayments"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
     <record id="pcg_472" model="account.account.template">
         <field name="name">Venituri înregistrate în avans</field>
         <field name="code">472</field>
-        <field name="user_type" ref="account.data_account_type_current_liabilities"/>
+        <field name="user_type" ref="account.data_account_type_prepayments"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
@@ -1827,42 +1827,42 @@
     <record id="pcg_4751" model="account.account.template">
         <field name="name">Subvenţii guvernamentale pentru investiţii</field>
         <field name="code">4751</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_other_income"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
      <record id="pcg_4752" model="account.account.template">
         <field name="name">Împrumuturi nerambursabile cu caracter de subvenţii pentru investiţii</field>
         <field name="code">4752</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_other_income"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
      <record id="pcg_4753" model="account.account.template">
         <field name="name">Donaţii pentru investiţii</field>
         <field name="code">4753</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_other_income"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
     <record id="pcg_4754" model="account.account.template">
         <field name="name">Plusuri de inventar de natura imobilizărilor</field>
         <field name="code">4754</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_other_income"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
      <record id="pcg_4758" model="account.account.template">
         <field name="name">Alte sume primite cu caracter de subvenţii pentru investiţii</field>
         <field name="code">4758</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_other_income"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
     
      <record id="pcg_478" model="account.account.template">
         <field name="name">Venituri în avans aferente activelor primite prin transfer de la clienţi</field>
         <field name="code">478</field>
-        <field name="user_type" ref="account.data_account_type_current_assets"/>
+        <field name="user_type" ref="account.data_account_type_other_income"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
 
