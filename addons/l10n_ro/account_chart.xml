@@ -3250,7 +3250,6 @@
             <field name="property_account_income" ref="ro_pcg_sale"/> <!-- 707 -->
             <field name="transfer_account_id" ref="pcg_581"/> <!-- 581 -->
             <field name="bank_account_code_char">512</field>
-            <field name="complete_tax_set">True</field>
             <field name="currency_id" ref="base.RON"/>
             <field name="code_digits">6</field>
         </record>
