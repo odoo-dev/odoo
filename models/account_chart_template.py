@@ -29,7 +29,7 @@ class AccountChartTemplate(models.Model):
         self.ensure_one()
         """
             Set localization to company when installing chart of account
-            """
+        """
         if not company.localization:
             company.localization = self.localization
         return super(AccountChartTemplate, self)._load_template(

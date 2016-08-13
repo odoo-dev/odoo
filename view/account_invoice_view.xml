@@ -3,7 +3,7 @@
     <data>
 
         <record id="view_account_invoice_filter" model="ir.ui.view">
-            <field name="name">l10n_ar.invoice.search</field>
+            <field name="name">invoice.search</field>
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.view_account_invoice_filter"/>
             <field name="arch" type="xml">
@@ -13,7 +13,7 @@
                 <field name="partner_id" position="after">
                     <field name="document_type_id"/>
                 </field>
-                <group string="Group By">
+                <group position="inside">
                     <filter string="Document Type" domain="[]" context="{'group_by':'document_type_id'}"/>
                 </group>
             </field>
