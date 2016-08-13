@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.ui.view" id="view_account_config_settings">
+            <field name="name">account.documents.config.form.inherit</field>
+            <field name="inherit_id" ref="account.view_account_config_settings"/>
+            <field name="model">account.config.settings</field>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="localization" invisible="1"/>
+                </form>
+                <xpath expr="//group[2]/div/div[2]" position="after">
+                    <div name="sale_use_documents">
+                        <label for="sale_use_documents" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
+                        <field name="sale_use_documents" class="oe_inline" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
+                    </div>
+                    <div name="purchase_use_documents">
+                        <label for="purchase_use_documents" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
+                        <field name="purchase_use_documents" class="oe_inline" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>
