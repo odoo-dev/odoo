@@ -26,10 +26,10 @@ class AccountChartTemplate(models.Model):
     def _load_template(
             self, company, code_digits=None, transfer_account_id=None,
             account_ref=None, taxes_ref=None):
-        self.ensure_one()
         """
         Set localization to company when installing chart of account.
         """
+        self.ensure_one()
         if not company.localization:
             company.localization = self.localization
         return super(AccountChartTemplate, self)._load_template(
