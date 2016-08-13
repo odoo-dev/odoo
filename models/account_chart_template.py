@@ -28,7 +28,7 @@ class AccountChartTemplate(models.Model):
             account_ref=None, taxes_ref=None):
         self.ensure_one()
         """
-            Set localization to company when installing chart of account
+        Set localization to company when installing chart of account.
         """
         if not company.localization:
             company.localization = self.localization
