@@ -56,6 +56,7 @@
                     <field name="use_documents" invisible="1"/>
                     <field name="document_sequence_id" invisible="1"/>
                     <field name="localization" invisible="1"/>
+                    <field name="document_type_internal_type" invisible="1"/>
                 </form>
 
                 <field name="date_invoice" position="before">
@@ -99,6 +100,7 @@
                     <field name="use_documents" invisible="1"/>
                     <field name="document_sequence_id" invisible="1"/>
                     <field name="localization" invisible="1"/>
+                    <field name="document_type_internal_type" invisible="1"/>
                 </form>
 
                 <field name="date_invoice" position="before">

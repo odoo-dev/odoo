@@ -71,6 +71,10 @@ class AccountInvoice(models.Model):
     localization = fields.Selection(
         related='company_id.localization',
     )
+    document_type_internal_type = fields.Selection(
+        related='document_type_id.internal_type',
+        readonly=True,
+    )
 
     @api.multi
     def _get_tax_amount_by_group(self):
