@@ -141,32 +141,23 @@ setup(
         'decorator',
         'docutils',
         'feedparser',
-        'gevent',
         'Jinja2',
         'lxml',  # windows binary http://www.lfd.uci.edu/~gohlke/pythonlibs/
         'mako',
         'mock',
-        'ofxparse',
         'passlib',
         'pillow',  # windows binary http://www.lfd.uci.edu/~gohlke/pythonlibs/
         'psutil',  # windows binary code.google.com/p/psutil/downloads/list
-        'psycogreen',
         'psycopg2 >= 2.2',
-        'python-chart',
         'pydot',
         'pyparsing',
         'pypdf',
-        'pyserial',
         'python-dateutil',
-        'python-ldap',  # optional
-        'python-openid',
         'pytz',
-        'pyusb >= 1.0.0b1',
         'pyyaml',
-        'qrcode',
         'reportlab',  # windows binary pypi.python.org/pypi/reportlab
         'requests',
-        'suds-jurko',
+        'suds',
         'vatnumber',
         'vobject',
         'werkzeug',
