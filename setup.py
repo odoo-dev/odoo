@@ -136,6 +136,9 @@ setup(
     packages=find_packages(),
     package_dir={'%s' % lib_name: 'odoo'},
     include_package_data=True,
+    namespace_packages=[
+        'odoo.addons',
+    ],
     install_requires=[
         'babel >= 1.0',
         'decorator',
