@@ -142,7 +142,6 @@ def initialize_sys_path():
         ad_paths.append(base_path)
 
     # add odoo.addons.__path__
-    pkg_resources.declare_namespace('odoo.addons')
     try:
         for ad in __import__('odoo.addons').addons.__path__:
             ad = os.path.abspath(ad)
