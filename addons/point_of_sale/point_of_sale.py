@@ -988,8 +988,8 @@ class pos_order(osv.osv):
             if picking_type:
                 picking_vals = {
                     'origin': order.name,
-                    'partner_id': addr.get('delivery', False),
-                    'date_done': order.date_order,
+                    'partner_id': addr.get('delivery',False),
+                    'date_done' : order.date_order,
                     'picking_type_id': picking_type.id,
                     'company_id': order.company_id.id,
                     'move_type': 'direct',
@@ -1010,7 +1010,7 @@ class pos_order(osv.osv):
                     'name': line.name,
                     'product_uom': line.product_id.uom_id.id,
                     'picking_id': picking_id,
-                    'picking_type_id': picking_type.id,
+                    'picking_type_id': picking_type.id, 
                     'product_id': line.product_id.id,
                     'product_uom_qty': abs(line.qty),
                     'state': 'draft',
