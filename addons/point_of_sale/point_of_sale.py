@@ -971,9 +971,8 @@ class pos_order(osv.osv):
                 continue
             addr = order.partner_id and partner_obj.address_get(cr, uid, [order.partner_id.id], ['delivery']) or {}
             picking_type = order.picking_type_id
-            picking_id = False
-            return_picking_id = False
             order_picking_id = False
+            return_picking_id = False
             location_id = order.location_id.id
             if order.partner_id:
                 destination_id = order.partner_id.property_stock_customer.id
@@ -999,8 +998,7 @@ class pos_order(osv.osv):
                 }
                 pos_qty = any([x.qty >= 0 for x in order.lines])
                 if pos_qty:
-                    picking_id = picking_obj.create(cr, uid, picking_vals, context=context)
-                    order_picking_id = picking_id
+                    order_picking_id = picking_obj.create(cr, uid, picking_vals, context=context)
 
             move_list = []
             for line in order.lines:
@@ -1009,7 +1007,7 @@ class pos_order(osv.osv):
                 move_id = move_obj.create(cr, uid, {
                     'name': line.name,
                     'product_uom': line.product_id.uom_id.id,
-                    'picking_id': picking_id,
+                    'picking_id': order_picking_id,
                     'picking_type_id': picking_type.id, 
                     'product_id': line.product_id.id,
                     'product_uom_qty': abs(line.qty),
@@ -1033,8 +1031,8 @@ class pos_order(osv.osv):
 
             if return_picking_id:
                 self._force_picking_done(cr, uid, return_picking_id, context=context)
-            if picking_id:
-                self._force_picking_done(cr, uid, picking_id, context=context)
+            if order_picking_id:
+                self._force_picking_done(cr, uid, order_picking_id, context=context)
             elif move_list:
                 move_obj.action_confirm(cr, uid, move_list, context=context)
                 move_obj.force_assign(cr, uid, move_list, context=context)
