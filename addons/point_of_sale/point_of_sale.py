@@ -1028,9 +1028,8 @@ class pos_order(osv.osv):
                         })
                         return_picking_id = picking_obj.create(cr, uid, picking_vals, context=context)
                     move_obj.write(cr, uid, [move_id], {'picking_id': return_picking_id}, context=context)
-            if not order_picking_id and return_picking_id:
-                order_picking_id = return_picking_id
-            self.write(cr, uid, [order.id], {'picking_id': order_picking_id}, context=context)
+
+            self.write(cr, uid, [order.id], {'picking_id': order_picking_id or return_picking_id}, context=context)
 
             if return_picking_id:
                 self._force_picking_done(cr, uid, return_picking_id, context=context)
