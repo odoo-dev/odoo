@@ -999,7 +999,7 @@ class pos_order(osv.osv):
                 }
                 pos_qty = any([x.qty >= 0 for x in order.lines])
                 if pos_qty:
-                    picking_id = picking_obj.create(cr, uid, picking_vals.copy(), context=context)
+                    picking_id = picking_obj.create(cr, uid, picking_vals, context=context)
                     order_picking_id = picking_id
 
             move_list = []
