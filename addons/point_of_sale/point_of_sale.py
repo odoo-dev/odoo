@@ -1027,16 +1027,20 @@ class pos_order(osv.osv):
                         return_picking_id = picking_obj.create(cr, uid, picking_vals, context=context)
                     move_obj.write(cr, uid, [move_id], {'picking_id': return_picking_id}, context=context)
 
+            # prefer associating the regular order picking, not the return
             self.write(cr, uid, [order.id], {'picking_id': order_picking_id or return_picking_id}, context=context)
 
             if return_picking_id:
                 self._force_picking_done(cr, uid, return_picking_id, context=context)
             if order_picking_id:
                 self._force_picking_done(cr, uid, order_picking_id, context=context)
-            elif move_list:
+
+            # when the pos.config has no picking_type_id set only the moves will be created
+            if move_list and not return_picking_id and not order_picking_id:
                 move_obj.action_confirm(cr, uid, move_list, context=context)
                 move_obj.force_assign(cr, uid, move_list, context=context)
                 move_obj.action_done(cr, uid, move_list, context=context)
+
         return True
 
     def cancel_order(self, cr, uid, ids, context=None):
