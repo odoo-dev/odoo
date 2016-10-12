@@ -1019,12 +1019,18 @@ class pos_order(osv.osv):
                 # If the move has not the correct destination we need to create another picking for the return use case
                 if picking_type and move.location_dest_id.id != destination_id:
                     if not return_picking_id:
+                        return_pick_type = picking_type.return_picking_type_id
                         picking_vals.update({
                             'location_id': destination_id,
-                            'location_dest_id': location_id
+                            'location_dest_id': return_pick_type and return_pick_type.default_location_dest_id.id or location_id,
+                            'picking_type_id': return_pick_type and return_pick_type.id or picking_type.id
                         })
                         return_picking_id = picking_obj.create(cr, uid, picking_vals, context=context)
-                    move_obj.write(cr, uid, [move_id], {'picking_id': return_picking_id}, context=context)
+                    move_obj.write(cr, uid, [move_id], {
+                        'picking_id': return_picking_id,
+                        'picking_type_id': return_pick_type and return_pick_type.id or picking_type.id,
+                        'location_dest_id': return_pick_type and return_pick_type.default_location_dest_id.id or location_id,
+                    }, context=context)
 
             # prefer associating the regular order picking, not the return
             self.write(cr, uid, [order.id], {'picking_id': order_picking_id or return_picking_id}, context=context)
