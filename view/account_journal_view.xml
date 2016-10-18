@@ -31,7 +31,7 @@
                             <field name='document_sequence_type' attrs="{'required': [('use_documents', '=', True),('type', 'in', ['purchase','sale'])]}"/>
                         </group>
                         <button name="update_journal_document_types" type="object" string="Update Documents"/>
-                        <field name='journal_document_type_ids' context="{'default_journal_id': id}"/>
+                        <field name='journal_document_type_ids' context="{'default_journal_id': id, 'editable': 1}"/>
                     </page>
                 </notebook>
             </field>
@@ -62,8 +62,8 @@
                         <field name="journal_id" invisible="1"/>
                         <group>
                             <group>
-                                <field name="document_type_id"/>
-                                <field name="sequence_id"/>
+                                <field name="document_type_id" readonly="not context.get('editable')"/>
+                                <field name="sequence_id" readonly="not context.get('editable')"/>
                             </group>
                         </group>
                     </sheet>
