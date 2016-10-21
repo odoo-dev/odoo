@@ -26,6 +26,7 @@ from openupgradelib import openupgrade
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     install_original_modules(env)
+    set_company_loc_ar(env)
 
 
 def install_original_modules(env):
@@ -35,3 +36,14 @@ def install_original_modules(env):
         SET state = 'to install'
         WHERE name in ('l10n_ar_account', 'l10n_ar_partner')
         """)
+
+
+def set_company_loc_ar(env):
+    cr = env.cr
+    openupgrade.map_values(
+        cr,
+        # openupgrade.get_legacy_name('type_tax_use'), 'localization',
+        'use_argentinian_localization', 'localization',
+        # [('all', 'none')],
+        [(True, 'argentina')],
+        table='res_company', write='sql')

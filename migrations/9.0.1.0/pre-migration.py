@@ -7,21 +7,33 @@ from openupgradelib.openupgrade import logged_query
 model_renames = [
     # a account_document
     ('afip.document_class', 'account.document.type'),
+    ('account.journal.afip_document_class', 'account.journal.document.type'),
     # a l10n_ar_account
     ('afip.document_letter', 'account.document.letter'),
     ('afip.responsability', 'afip.responsability.type'),
     # a l10n_ar_partner
     ('afip.document_type', 'res.partner.id_category'),
 ]
+
 table_renames = [
-    ('afip_document_letter', 'account_document_letter'),
     ('afip_document_class', 'account_document_type'),
+    ('account_journal_afip_document_class', 'account_journal_document_type'),
+    ('afip_document_letter', 'account_document_letter'),
     ('afip_responsability', 'afip_responsability_type'),
     ('afip_document_type', 'res_partner_id_category'),
+    # m2m fields
+    ('afip_doc_letter_issuer_rel', 'account_doc_let_responsability_issuer_rel'),
+    ('afip_doc_letter_receptor_rel', 'account_doc_let_responsability_receptor_rel'),
 ]
 
 # campos renombrados en l10n_ar_invoice
 column_renames = {
+    'account_doc_let_responsability_issuer_rel': [
+        ('responsability_id', 'afip_responsability_type_id'),
+    ],
+    'account_doc_let_responsability_receptor_rel': [
+        ('responsability_id', 'afip_responsability_type_id'),
+    ],
     'account_document_type': [
         ('afip_code', 'code'),
         ('document_type', 'internal_type'),
@@ -29,6 +41,20 @@ column_renames = {
     'res_partner': [
         ('document_type_id', 'main_id_category_id'),
         ('responsability_id', 'afip_responsability_type_id'),
+    ],
+    'account_invoice': [
+        ('journal_document_class_id', 'journal_document_type_id'),
+        ('afip_document_class_id', 'document_type_id'),
+        ('afip_document_number', 'document_number'),
+    ],
+    'account_move': [
+        ('document_class_id', 'document_type_id'),
+        # backup old doc number column so we can create new column
+        ('document_number', None),
+        ('afip_document_number', 'document_number'),
+    ],
+    'account_journal_document_type': [
+        ('afip_document_class_id', 'document_type_id'),
     ],
 }
 
