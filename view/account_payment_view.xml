@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Tree Recibos (Customer and vendor)-->
+        <record id="view_account_payment_form" model="ir.ui.view">
+            <field name="name">account.payment.inherit.view</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="document_sequence_id" invisible="1"/> 
+                    <field name="localization" invisible="1"/>
+                    <field name="company_id" invisible="1"/>
+                </form> 
+                <field name="payment_date" position="before">
+
+                    <!-- only required on posted state for compatibility if you install this module with payments already created -->
+                    <field name="receiptbook_id" attrs="{'invisible': [('localization', '=', False)], 'required':[('localization', '!=', False), ('state', '=', 'draft')]}" domain="[('payment_type', '=', payment_type), ('company_id', '=', company_id)]"/>
+                    <field name="document_number" attrs="{'invisible': ['|', ('document_sequence_id', '!=', False), ('localization', '=', False)], 'required': [('document_sequence_id', '=', False), ('localization', '!=', False)]}"/>
+                    <!-- por ahora no agregamos esto, vamos a ver si alguien lo pide -->
+                    <!-- <field name="manual_prefix" attrs="{'invisible':['|',('document_sequence_id', '!=', False), ('state','!=','draft')]}"/> -->
+                    <!-- <field name="manual_sufix" attrs="{'invisible':['|',('document_sequence_id', '!=', False), ('state', '!=', 'draft')], 'required':[('document_sequence_id', '=', False), ('localization', '!=', False)]}"/> -->
+                    <!-- <field name="next_receipt_number" attrs="{'invisible':['|',('receiptbook_sequence_type','!=','automatic'), ('state','!=','draft')]}"/> -->
+                    <!-- we disable for now, probably depreciated, used by sirpeco yet -->
+                    <!-- <field name="force_number" attrs="{'invisible':['|',('receiptbook_sequence_type','!=','automatic'),('state','!=','draft')]}"/> -->
+                </field>
+
+                <!-- similar a en facturas -->
+                <!-- sacamos el attrs para que sea visible siempre -->
+                <div class="oe_title" position="attributes">
+                    <attribute name="attrs"></attribute>
+                </div>
+                <field name="name" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+
+                <field name="name" position="before">
+                    <field name="display_name" attrs="{'invisible': [('display_name', '=', False)]}" class="oe_inline"/>
+                    <label string="- Next Number: " attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
+                    <field name="next_number" attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
+                </field>
+            </field>
+        </record>   
+
+        <!-- Search view -->
+<!--         <record id="view_payment_filter_customer_pay" model="ir.ui.view">
+            <field name="name">receipt.payment.customer.inherit.select</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account_payment.view_payment_filter_customer_pay"/>
+            <field name="arch" type="xml">
+                <field name="number" position="after">
+                    <field name="reference"/>
+                </field>
+                <xpath expr="/search/field[@name='date']" position="after">
+                    <field name="receiptbook_id" string="Receiptbook" />
+                </xpath>
+                <filter string="Journal" position="after">
+                    <filter string="Receiptbook" context="{'group_by':'receiptbook_id'}"/>
+                </filter>
+            </field>
+        </record>    -->
+          
+<!--         <record id="view_payment_filter_vendor_pay" model="ir.ui.view">
+            <field name="name">payment.filter.vendor.proof.inherit</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account_payment.view_payment_filter_vendor_pay"/>
+            <field name="arch" type="xml">
+                <field name="number" position="after">
+                    <field name="reference"/>
+                </field>
+                <xpath expr="/search/field[@name='date']" position="after">
+                    <field name="receiptbook_id" string="Receiptbook" />
+                </xpath>
+                <filter string="Journal" position="after">
+                    <filter string="Receiptbook" context="{'group_by':'receiptbook_id'}"/>
+                </filter>
+            </field>
+        </record>     -->        
+    </data>
+</openerp>

@@ -18,6 +18,8 @@
         'view/res_partner_view.xml',
         'view/report_invoice.xml',
         'view/account_chart_template_view.xml',
+        'view/account_payment_view.xml',
+        'view/account_payment_receiptbook_view.xml',
         'res_config_view.xml',
         'security/ir.model.access.csv',
     ],

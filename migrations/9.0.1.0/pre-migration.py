@@ -67,6 +67,20 @@ def migrate(cr, version):
     openupgrade.rename_columns(cr, column_renames)
     fix_data_on_l10n_ar_account(cr)
     fix_data_on_l10n_ar_partner(cr)
+    delete_payment_views(cr)
+
+
+def delete_payment_views(cr):
+    """
+    Vorramos todas las vistas de voucher porque da un error y porque no
+    vamos a usar voucher
+    """
+    cr.execute(
+        """\
+        DELETE FROM ir_ui_view
+        WHERE model = 'account.voucher'
+        """
+    )
 
 
 def fix_data_on_l10n_ar_account(cr):
