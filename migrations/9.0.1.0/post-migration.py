@@ -27,6 +27,7 @@ from openupgradelib import openupgrade
 def migrate(env, version):
     install_original_modules(env)
     set_company_loc_ar(env)
+    migrate_voucher_data(env)
 
 
 def install_original_modules(env):
@@ -47,3 +48,21 @@ def set_company_loc_ar(env):
         # [('all', 'none')],
         [(True, 'argentina')],
         table='res_company', write='sql')
+
+
+def migrate_voucher_data(env):
+    # migrate voucher data (usamos mismo whare que migrador)
+    cr = env.cr
+    query = (
+        "SELECT id, receiptbook_id "
+        "FROM account_voucher "
+        "WHERE voucher_type IN ('receipt', 'payment') "
+        "AND state in ('draft', 'posted')")
+    # if table_exists(cr, 'account_voucher'):
+    cr.execute(query)
+    for id, receiptbook_id in cr.fetchall():
+        env['account.payment'].browse(receiptbook_id).write({
+            # 'manual_sufix': manual_sufix,
+            # 'force_number': force_number,
+            'receiptbook_id': receiptbook_id,
+        })

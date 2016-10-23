@@ -138,11 +138,11 @@ class AccountPayment(models.Model):
     @api.multi
     def _get_receiptbook(self):
         self.ensure_one()
+        payment_type = self.payment_type or self._context.get(
+            'payment_type', self._context.get('default_payment_type', False))
         receiptbook = self.env[
             'account.payment.receiptbook'].search([
-                ('payment_type', '=', self._context.get(
-                    'payment_type', self._context.get(
-                        'default_payment_type', False))),
+                ('payment_type', '=', payment_type),
                 ('company_id', '=', self.company_id.id),
             ], limit=1)
         return receiptbook
@@ -150,7 +150,8 @@ class AccountPayment(models.Model):
     @api.multi
     def post(self):
         for rec in self:
-            if rec.localization:
+            # TODO ver si lo agregamos a las transfers o no
+            if rec.localization and rec.payment_type != 'transfer':
                 if not rec.document_number:
                     if not rec.receiptbook_id.sequence_id:
                         raise UserError(_(

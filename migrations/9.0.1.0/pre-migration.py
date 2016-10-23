@@ -110,8 +110,8 @@ def fix_data_on_l10n_ar_account(cr):
     l10n_ar_account_models = [
         'afip.responsability.type',
         'afip.incoterm',
-        'account.document.letter'
-        'account.payment.receiptbook'
+        'account.document.letter',
+        'account.payment.receiptbook',
     ]
 
     update_data_module_name(
