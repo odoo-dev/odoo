@@ -22,8 +22,10 @@ table_renames = [
     ('afip_responsability', 'afip_responsability_type'),
     ('afip_document_type', 'res_partner_id_category'),
     # m2m fields
-    ('afip_doc_letter_issuer_rel', 'account_doc_let_responsability_issuer_rel'),
-    ('afip_doc_letter_receptor_rel', 'account_doc_let_responsability_receptor_rel'),
+    ('afip_doc_letter_issuer_rel',
+        'account_doc_let_responsability_issuer_rel'),
+    ('afip_doc_letter_receptor_rel',
+        'account_doc_let_responsability_receptor_rel'),
 ]
 
 # campos renombrados en l10n_ar_invoice
