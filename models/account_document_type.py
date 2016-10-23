@@ -46,6 +46,8 @@ class AccountDocmentType(models.Model):
         ('credit_note', 'Credit Notes'),
         ('ticket', 'Ticket'),
         ('receipt_invoice', 'Receipt Invoice'),
+        ('inbound_payment_voucher', 'Inbound Payment Voucer'),
+        ('outbound_payment_voucher', 'Outbound Payment Voucer'),
         ('in_document', 'In Document'),
     ],
         string='Internal Type',

@@ -3,7 +3,7 @@
 # For copyright and license notices, see __openerp__.py file in module root
 # directory
 ##############################################################################
-from openerp import models, api, fields
+from openerp import models, api, fields, _
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -32,9 +32,80 @@ class AccountChartTemplate(models.Model):
         self.ensure_one()
         if not company.localization:
             company.localization = self.localization
+        if company.localization:
+            self.generate_receiptbooks(company)
         return super(AccountChartTemplate, self)._load_template(
             company, code_digits, transfer_account_id,
             account_ref, taxes_ref)
+
+    @api.model
+    def generate_receiptbooks(
+            self, company):
+        """
+        Overwrite this function so that no journal is created on chart
+        installation
+        """
+        receiptbook_data = self._prepare_all_receiptbook_data(company)
+        for receiptbook_vals in receiptbook_data:
+            self.check_created_receiptbooks(receiptbook_vals, company)
+        return True
+
+    @api.model
+    def check_created_receiptbooks(self, receiptbook_vals, company):
+        """
+        This method used for checking new receipbooks already created or not.
+        If not then create new receipbook.
+        """
+        receipbook = self.env['account.payment.receiptbook'].search([
+            ('name', '=', receiptbook_vals['name']),
+            ('company_id', '=', company.id)])
+        if not receipbook:
+            receipbook.create(receiptbook_vals)
+        return True
+
+    @api.model
+    def _prepare_all_receiptbook_data(self, company):
+        """
+        This method can be inherited by different localizations
+        """
+        receiptbook_data = []
+        payment_types = {
+            'inbound': _('Inbound'),
+            'outbound': _('Outbound'),
+        }
+        sequence_types = {
+            'automatic': _(''),
+            'manual': _('Manuales'),
+        }
+        # we use for sequences and for prefix
+        sequences = {
+            'automatic': 1,
+            'manual': 2,
+        }
+        for sequence_type in ['automatic', 'manual']:
+            # for internal_type in [
+            #        'inbound_payment_voucher', 'outbound_payment_voucher']:
+            for payment_type in ['inbound', 'outbound']:
+                document_type = self.env['account.document.type'].search([
+                    ('internal_type', '=', '%s_payment_voucher' % payment_type)
+                ], limit=1)
+                if not document_type:
+                    continue
+                vals = {
+                    'name': "%s %s" % (
+                        payment_types[payment_type],
+                        sequence_types[sequence_type],),
+                    'payment_type': payment_type,
+                    'sequence_type': sequence_type,
+                    'padding': 8,
+                    'company_id': company.id,
+                    'document_type_id': document_type.id,
+                    'prefix': (
+                        '%%0%sd-' % 4 % sequences[sequence_type]),
+                    'sequence': sequences[sequence_type],
+                }
+                receiptbook_data.append(vals)
+        return receiptbook_data
 
     @api.model
     def _prepare_all_journals(

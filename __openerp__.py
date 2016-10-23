@@ -22,6 +22,7 @@
         'view/account_payment_receiptbook_view.xml',
         'res_config_view.xml',
         'security/ir.model.access.csv',
+        'security/security.xml',
     ],
     "demo": [
     ],
