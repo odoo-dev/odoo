@@ -3,8 +3,8 @@
 from openupgradelib import openupgrade
 from openupgradelib.openupgrade import logged_query
 
-# modelos renombrados en l10n_ar_invoice
 model_renames = [
+    # modelos renombrados en l10n_ar_invoice
     # a account_document
     ('afip.document_class', 'account.document.type'),
     ('account.journal.afip_document_class', 'account.journal.document.type'),
@@ -13,6 +13,9 @@ model_renames = [
     ('afip.responsability', 'afip.responsability.type'),
     # a l10n_ar_partner
     ('afip.document_type', 'res.partner.id_category'),
+    # modelos renombrados en l10n_ar_account_voucher
+    # a l10n_ar_account
+    ('account.voucher.receiptbook', 'account.payment.receiptbook'),
 ]
 
 table_renames = [
@@ -26,6 +29,7 @@ table_renames = [
         'account_doc_let_responsability_issuer_rel'),
     ('afip_doc_letter_receptor_rel',
         'account_doc_let_responsability_receptor_rel'),
+    ('account_voucher_receiptbook', 'account_payment_receiptbook'),
 ]
 
 # campos renombrados en l10n_ar_invoice
@@ -57,6 +61,11 @@ column_renames = {
     ],
     'account_journal_document_type': [
         ('afip_document_class_id', 'document_type_id'),
+    ],
+    'account_payment_receiptbook': [
+        ('type', 'payment_type'),
+        ('manual_prefix', 'prefix'),
+        ('document_class_id', 'document_type_id'),
     ],
 }
 
@@ -102,6 +111,7 @@ def fix_data_on_l10n_ar_account(cr):
         'afip.responsability.type',
         'afip.incoterm',
         'account.document.letter'
+        'account.payment.receiptbook'
     ]
 
     update_data_module_name(

@@ -127,9 +127,13 @@ class AccountPayment(models.Model):
         ('name_uniq', 'unique(document_number, receiptbook_id)',
             'Document number must be unique per receiptbook!')]
 
+    @api.one
+    @api.constrains('company_id')
     @api.onchange('company_id')
     def _change_company(self):
-        self.receiptbook_id = self._get_receiptbook()
+        # we add cosntrins to fix odoo tests and also help in inmpo of data
+        if not self.receiptbook_id:
+            self.receiptbook_id = self._get_receiptbook()
 
     @api.multi
     def _get_receiptbook(self):
