@@ -109,12 +109,11 @@ class AccountPayment(models.Model):
     )
     def _get_display_name(self):
         """
-        If move_line_ids then payment has been validated, then:
         * If document number and document type, we show them
         * Else, we show name
         """
         if (
-                self.move_line_ids and self.document_number and
+                self.state == 'posted' and self.document_number and
                 self.document_type_id):
             display_name = ("%s%s" % (
                 self.document_type_id.doc_code_prefix or '',
