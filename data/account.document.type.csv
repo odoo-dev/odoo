@@ -1,0 +1,4 @@
+id,code,name,report_name,internal_type,doc_code_prefix,localization
+dc_inv,,INVOICE,INVOICE,invoice,IN ,generic
+dc_cn,,CREDIT NOTE,CREDIT NOTE,credit_note,CN ,generic
+dc_dn,,DEBIT NOTE,DEBIT NOTE,debit_note,DB ,generic
