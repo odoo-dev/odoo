@@ -11,7 +11,7 @@ class ResCompany(models.Model):
 
     @api.model
     def _get_localizations(self):
-        return []
+        return [('generic', 'Generic')]
 
     _localization_selection = (
         lambda self, *args, **kwargs: self._get_localizations(

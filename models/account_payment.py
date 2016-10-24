@@ -69,6 +69,7 @@ class AccountPayment(models.Model):
     )
     display_name = fields.Char(
         compute='_get_display_name',
+        string='Document Reference',
     )
 
     @api.multi

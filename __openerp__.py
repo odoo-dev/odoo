@@ -20,6 +20,7 @@
         'view/account_chart_template_view.xml',
         'view/account_payment_view.xml',
         'view/account_payment_receiptbook_view.xml',
+        'data/account.document.type.csv',
         'res_config_view.xml',
         'security/ir.model.access.csv',
         'security/security.xml',

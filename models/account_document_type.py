@@ -15,10 +15,11 @@ class AccountDocmentType(models.Model):
         _get_localizations,
         'Localization',
         help='If you set a localization here then it will be available only '
-        'for companies of this localization'
+        'for companies of this localization',
     )
     name = fields.Char(
         'Name',
+        required=True,
     )
     company_id = fields.Many2one(
         'res.company',
@@ -70,6 +71,16 @@ class AccountDocmentType(models.Model):
         'Active',
         default=True
     )
+
+    @api.multi
+    def name_get(self):
+        result = []
+        for rec in self:
+            name = rec.name
+            if rec.code:
+                name = '(%s) %s' % (rec.code, name)
+            result.append((rec.id, name))
+        return result
 
     @api.multi
     def get_document_sequence_vals(self, journal):

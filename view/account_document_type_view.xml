@@ -8,8 +8,8 @@
             <field name="arch" type="xml">
                 <form string="Document Type">
                     <group>
-                        <field name="name"/>
                         <field name='code'/>
+                        <field name="name"/>
                         <field name='doc_code_prefix'/>
                         <field name='report_name'/>
                         <field name='internal_type'/>
@@ -25,8 +25,8 @@
             <field name="model">account.document.type</field>
             <field name="arch" type="xml">
                 <tree string="Document Type">
-                    <field name="name"/>
                     <field name="code"/>
+                    <field name="name"/>
                     <field name="doc_code_prefix"/>
                     <field name='report_name'/>
                     <field name='internal_type'/>

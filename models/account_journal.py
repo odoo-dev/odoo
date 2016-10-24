@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from openerp import fields, models, api
-# from openerp.exceptions import UserError
+from openerp import fields, models, api, _
+from openerp.exceptions import UserError
 
 
 class AccountJournalDocumentType(models.Model):
@@ -87,4 +87,49 @@ class AccountJournal(models.Model):
         """
         Function to be inherited by different localizations
         """
+        self.ensure_one()
+        if self.localization != 'generic':
+            return True
+
+        if not self.use_documents:
+            return True
+
+        if self.type in ['purchase', 'sale']:
+            internal_types = ['invoice', 'debit_note', 'credit_note']
+        else:
+            raise UserError(_('Type %s not implemented yet' % self.type))
+
+        document_types = self.env['account.document.type'].search([
+            ('internal_type', 'in', internal_types),
+            ('localization', '=', self.localization),
+        ])
+
+        # take out documents that already exists
+        document_types = document_types - self.mapped(
+            'journal_document_type_ids.document_type_id')
+
+        sequence = 10
+        for document_type in document_types:
+            sequence_id = False
+            if self.type == 'sale':
+                # Si es nota de debito nota de credito y same sequence,
+                # no creamos la secuencia, buscamos una que exista
+                if (
+                        document_type.internal_type in [
+                        'debit_note', 'credit_note'] and
+                        self.document_sequence_type == 'same_sequence'
+                ):
+                    journal_document = self.journal_document_type_ids.search([
+                        ('journal_id', '=', self.id)], limit=1)
+                    sequence_id = journal_document.sequence_id.id
+                else:
+                    sequence_id = self.env['ir.sequence'].create(
+                        document_type.get_document_sequence_vals(self)).id
+            self.journal_document_type_ids.create({
+                'document_type_id': document_type.id,
+                'sequence_id': sequence_id,
+                'journal_id': self.id,
+                'sequence': sequence,
+            })
+            sequence += 10
         return True

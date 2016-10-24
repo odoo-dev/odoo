@@ -32,6 +32,20 @@
                 </field>
             </field>
         </record>
+
+        <record id="invoice_supplier_tree" model="ir.ui.view">
+            <field name="name">account.document.invoice.supplier.tree</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_tree"/>
+            <field name="arch" type="xml">
+                <field name="number" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <field name="number" position="after">
+                    <field name="display_name"/>
+                </field>
+            </field>
+        </record>
             
         <!-- add document number on paymentrs tree view. We make it in a separete view because portal users cant see this tag -->
 <!--         <record id="view_invoice_payment_doc_number_form" model="ir.ui.view">

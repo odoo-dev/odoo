@@ -58,6 +58,7 @@ class AccountInvoice(models.Model):
     )
     display_name = fields.Char(
         compute='_get_display_name',
+        string='Document Reference',
     )
     next_number = fields.Integer(
         compute='_get_next_number',
@@ -325,6 +326,13 @@ class AccountInvoice(models.Model):
         # As default we return every journal document type, and if one exists
         # then we return the first one as suggested
         journal_document_types = self.journal_id.journal_document_type_ids
+        # if invoice is a refund only show credit_notes, else, not credit note
+        if self.type in ['out_refund', 'in_refund']:
+            journal_document_types = journal_document_types.filtered(
+                lambda x: x.document_type_id.internal_type == 'credit_note')
+        else:
+            journal_document_types = journal_document_types.filtered(
+                lambda x: x.document_type_id.internal_type != 'credit_note')
         journal_document_type = (
             journal_document_types and journal_document_types[0] or
             journal_document_types)
