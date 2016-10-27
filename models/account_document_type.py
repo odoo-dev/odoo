@@ -6,11 +6,16 @@ from openerp import fields, models, api
 class AccountDocmentType(models.Model):
     _name = 'account.document.type'
     _description = 'Account Document Type'
+    _order = 'sequence, id asc'
 
     _get_localizations = (
         lambda self, *args, **kwargs: self.env[
             'res.company']._get_localizations(*args, **kwargs))
 
+    sequence = fields.Integer(
+        default=10,
+        required=True,
+    )
     localization = fields.Selection(
         _get_localizations,
         'Localization',

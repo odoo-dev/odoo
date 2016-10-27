@@ -25,6 +25,7 @@
             <field name="model">account.document.type</field>
             <field name="arch" type="xml">
                 <tree string="Document Type">
+                    <field name="sequence" widget="handle"/>
                     <field name="code"/>
                     <field name="name"/>
                     <field name="doc_code_prefix"/>
