@@ -45,7 +45,8 @@ class AccountConfigSettings(models.TransientModel):
         'Purchase Use Documents'
     )
     localization = fields.Selection(
-        related='chart_template_id.localization'
+        related='chart_template_id.localization',
+        readonly=True,
     )
 
     @api.onchange('chart_template_id')

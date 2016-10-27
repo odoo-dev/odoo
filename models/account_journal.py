@@ -40,7 +40,8 @@ class AccountJournal(models.Model):
     _inherit = "account.journal"
 
     localization = fields.Selection(
-        related='company_id.localization'
+        related='company_id.localization',
+        readonly=True,
     )
     journal_document_type_ids = fields.One2many(
         'account.journal.document.type',

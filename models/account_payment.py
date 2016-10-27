@@ -26,9 +26,11 @@ class AccountPayment(models.Model):
     )
     document_sequence_id = fields.Many2one(
         related='receiptbook_id.sequence_id',
+        readonly=True,
     )
     localization = fields.Selection(
         related='company_id.localization',
+        readonly=True,
     )
     # por ahora no agregamos esto, vamos a ver si alguien lo pide
     # manual_prefix = fields.Char(
@@ -65,7 +67,6 @@ class AccountPayment(models.Model):
         # related='receiptbook_id.sequence_id.number_next_actual',
         compute='_get_next_number',
         string='Next Number',
-        readonly=True
     )
     display_name = fields.Char(
         compute='_get_display_name',

@@ -49,6 +49,7 @@ class AccountInvoice(models.Model):
     )
     document_sequence_id = fields.Many2one(
         related='journal_document_type_id.sequence_id',
+        readonly=True,
     )
     document_number = fields.Char(
         string='Document Number',
@@ -71,6 +72,7 @@ class AccountInvoice(models.Model):
     )
     localization = fields.Selection(
         related='company_id.localization',
+        readonly=True,
     )
     document_type_internal_type = fields.Selection(
         related='document_type_id.internal_type',
@@ -302,19 +304,23 @@ class AccountInvoice(models.Model):
         should add:
 
         @api.depends('new_field')
-        def _get_available_journal_document_types(self):
+        def _get_available_journal_document_types(
+                self, journal, invoice_type, partner):
             return super(
-                AccountInvoice, self)._get_available_journal_document_types()
+                AccountInvoice, self)._get_available_journal_document_types(
+                    journal, invoice_type, partner)
         """
         for invoice in self:
-            res = self._get_available_journal_document_types()
+            res = invoice._get_available_journal_document_types(
+                invoice.journal_id, invoice.type, invoice.partner_id)
             invoice.available_journal_document_type_ids = res[
                 'available_journal_document_types']
             invoice.journal_document_type_id = res[
                 'journal_document_type']
 
-    @api.multi
-    def _get_available_journal_document_types(self):
+    @api.model
+    def _get_available_journal_document_types(
+            self, journal, invoice_type, partner):
         """
         This function is to be inherited by differents localizations and MUST
         return a dictionary with two keys:
@@ -322,12 +328,11 @@ class AccountInvoice(models.Model):
         this invoice
         * 'journal_document_type': suggested document type on this invoice
         """
-        self.ensure_one()
         # As default we return every journal document type, and if one exists
         # then we return the first one as suggested
-        journal_document_types = self.journal_id.journal_document_type_ids
+        journal_document_types = journal.journal_document_type_ids
         # if invoice is a refund only show credit_notes, else, not credit note
-        if self.type in ['out_refund', 'in_refund']:
+        if invoice_type in ['out_refund', 'in_refund']:
             journal_document_types = journal_document_types.filtered(
                 lambda x: x.document_type_id.internal_type == 'credit_note')
         else:
