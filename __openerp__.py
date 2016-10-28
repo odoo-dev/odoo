@@ -7,6 +7,7 @@
     "category": "Accounting",
     "depends": [
         "account",
+        "base_validator",
     ],
     "data": [
         'view/account_journal_view.xml',
