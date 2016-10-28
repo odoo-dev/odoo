@@ -76,6 +76,17 @@ class AccountDocmentType(models.Model):
         'Active',
         default=True
     )
+    validator_id = fields.Many2one(
+        'base.validator',
+        'Validator',
+    )
+
+    @api.multi
+    def validate_document_number(self, document_number):
+        self.ensure_one()
+        if self.validator_id:
+            return self.validator_id.validate_value(document_number)
+        return False
 
     @api.multi
     def name_get(self):

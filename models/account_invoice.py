@@ -345,3 +345,19 @@ class AccountInvoice(models.Model):
             'available_journal_document_types': journal_document_types,
             'journal_document_type': journal_document_type,
         }
+
+    @api.multi
+    @api.constrains('document_type_id', 'document_number')
+    def validate_document_number(self):
+        for rec in self:
+            # if we have a sequence, number is set by sequence and we dont
+            # check this
+            if rec.document_sequence_id:
+                continue
+            document_type = rec.document_type_id
+
+            if rec.document_type_id:
+                res = document_type.validate_document_number(
+                    rec.document_number)
+                if res and res != rec.document_number:
+                    rec.document_number = res
