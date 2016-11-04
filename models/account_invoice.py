@@ -14,6 +14,7 @@ _logger = logging.getLogger(__name__)
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
+    _order = "document_number desc, number desc, id desc"
 
     report_amount_tax = fields.Monetary(
         string='Tax',
@@ -38,6 +39,7 @@ class AccountInvoice(models.Model):
         'Document Type',
         readonly=True,
         ondelete='restrict',
+        copy=False,
         states={'draft': [('readonly', False)]}
     )
     # we add this fields so we can search, group and analyze by this one

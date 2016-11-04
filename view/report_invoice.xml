@@ -35,14 +35,13 @@
         <attribute name="t-field">o.report_amount_untaxed</attribute>
     </xpath>
 
-    <!-- desactivamos porque da error en v10 y no lo usamos por ahora -->
-<!--     <xpath expr="//div[@t-if='o.tax_line_ids']" position="attributes">
+    <xpath expr="//div[@t-if='o.tax_line_ids']" position="attributes">
         <attribute name="t-if">o.report_tax_line_ids</attribute>
-    </xpath> -->
+    </xpath>
 
-<!--     <xpath expr="//tr[@t-foreach='o.tax_line_ids']" position="attributes">
+    <xpath expr="//tr[@t-foreach='o.tax_line_ids']" position="attributes">
         <attribute name="t-foreach">o.report_tax_line_ids</attribute>
-    </xpath> -->
+    </xpath>
 </template>
 
 </data>
