@@ -20,6 +20,10 @@ class account_invoice_line(models.Model):
         string='Amount',
         compute='_compute_report_prices_and_taxes'
     )
+    report_price_net = fields.Monetary(
+        string='Net Amount',
+        compute='_compute_report_prices_and_taxes'
+    )
     report_invoice_line_tax_ids = fields.One2many(
         compute="_compute_report_prices_and_taxes",
         comodel_name='account.tax',
@@ -47,6 +51,11 @@ class account_invoice_line(models.Model):
                     line.price_unit, invoice.currency_id, 1.0, line.product_id,
                     invoice.partner_id)['total_included']
                 report_price_subtotal = report_price_unit * line.quantity
+
+            report_price_net = report_price_unit * (
+                1 - (line.discount or 0.0) / 100.0)
+
             line.report_price_subtotal = report_price_subtotal
             line.report_price_unit = report_price_unit
+            line.report_price_net = report_price_net
             line.report_invoice_line_tax_ids = not_included_taxes
