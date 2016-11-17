@@ -23,6 +23,7 @@
         'view/account_payment_receiptbook_view.xml',
         'report/invoice_report_view.xml',
         'data/account.document.type.csv',
+        'data/mail_template_invoice.xml',
         'wizards/account_invoice_refund_view.xml',
         'res_config_view.xml',
         'security/ir.model.access.csv',
