@@ -290,15 +290,11 @@ class AccountInvoice(models.Model):
                 # also use this for supplier invoices
                 else:
                     document_number = invoice.document_number
-                print 'aaaaaaaaa'
-                print 'aaaaaaaaa', invoice
-                print 'aaaaaaaaa move_id', invoice.move_id
                 invoice.move_id.write({
                     'document_type_id': (
                         journal_document_type.document_type_id.id),
                     'document_number': document_number,
                 })
-                print 'aaaaaaaaa move_id', invoice.move_id.document_type_id
             invoice.write(inv_vals)
         return True
 
