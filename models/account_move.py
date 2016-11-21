@@ -40,7 +40,6 @@ class AccountMove(models.Model):
     )
     def _compute_display_name(self):
         for rec in self:
-            print 'iii', rec
             if rec.document_number and rec.document_type_id:
                 display_name = (
                     rec.document_type_id.doc_code_prefix or '') + \
