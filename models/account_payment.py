@@ -124,9 +124,11 @@ class AccountPayment(models.Model):
             display_name = self.name
         self.display_name = display_name
 
-    _sql_constraints = [
-        ('name_uniq', 'unique(document_number, receiptbook_id)',
-            'Document number must be unique per receiptbook!')]
+    # TODO esta constraint si la creamos hay que borrarla en
+    # account_payment_group_document
+    # _sql_constraints = [
+    #     ('document_number_uniq', 'unique(document_number, receiptbook_id)',
+    #         'Document number must be unique per receiptbook!')]
 
     @api.one
     @api.constrains('company_id', 'partner_type')

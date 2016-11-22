@@ -69,17 +69,13 @@ class AccountChartTemplate(models.Model):
         This method can be inherited by different localizations
         """
         receiptbook_data = []
-        voucher_type_name_map = {
-            'receipt_voucher': _('Receipts'),
-            'payment_voucher': _('Payments'),
-        }
-        voucher_type_partner_type_map = {
-            'receipt_voucher': _('Receipts'),
-            'payment_voucher': _('Payments'),
+        partner_type_name_map = {
+            'customer': _('%s Customer Receipts'),
+            'supplier': _('%s Supplier Payments'),
         }
         sequence_types = {
-            'automatic': _(''),
-            'manual': _('Manuales'),
+            'automatic': _('Automatic'),
+            'manual': _('Manual'),
         }
         # we use for sequences and for prefix
         sequences = {
@@ -89,18 +85,16 @@ class AccountChartTemplate(models.Model):
         for sequence_type in ['automatic', 'manual']:
             # for internal_type in [
             #        'inbound_payment_voucher', 'outbound_payment_voucher']:
-            for voucher_type in ['receipt_voucher', 'payment_voucher']:
+            for partner_type in ['supplier', 'customer']:
                 document_type = self.env['account.document.type'].search([
-                    ('internal_type', '=', voucher_type)
+                    ('internal_type', '=', '%s_payment' % partner_type)
                 ], limit=1)
                 if not document_type:
                     continue
                 vals = {
-                    'name': "%s %s" % (
-                        voucher_type_name_map[voucher_type],
-                        sequence_types[sequence_type],),
-                    'partner_type': voucher_type_partner_type_map[
-                        voucher_type],
+                    'name': partner_type_name_map[partner_type] % (
+                        sequence_types[sequence_type]),
+                    'partner_type': partner_type,
                     'sequence_type': sequence_type,
                     'padding': 8,
                     'company_id': company.id,
