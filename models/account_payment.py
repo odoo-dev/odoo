@@ -129,24 +129,24 @@ class AccountPayment(models.Model):
             'Document number must be unique per receiptbook!')]
 
     @api.one
-    @api.constrains('company_id', 'payment_type')
+    @api.constrains('company_id', 'partner_type')
     def _force_receiptbook(self):
         # we add cosntrins to fix odoo tests and also help in inmpo of data
         if not self.receiptbook_id:
             self.receiptbook_id = self._get_receiptbook()
 
-    @api.onchange('company_id', 'payment_type')
+    @api.onchange('company_id', 'partner_type')
     def get_receiptbook(self):
         self.receiptbook_id = self._get_receiptbook()
 
     @api.multi
     def _get_receiptbook(self):
         self.ensure_one()
-        payment_type = self.payment_type or self._context.get(
-            'payment_type', self._context.get('default_payment_type', False))
+        partner_type = self.partner_type or self._context.get(
+            'partner_type', self._context.get('default_partner_type', False))
         receiptbook = self.env[
             'account.payment.receiptbook'].search([
-                ('payment_type', '=', payment_type),
+                ('partner_type', '=', partner_type),
                 ('company_id', '=', self.company_id.id),
             ], limit=1)
         return receiptbook

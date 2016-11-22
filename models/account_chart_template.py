@@ -69,9 +69,13 @@ class AccountChartTemplate(models.Model):
         This method can be inherited by different localizations
         """
         receiptbook_data = []
-        payment_types = {
-            'inbound': _('Inbound'),
-            'outbound': _('Outbound'),
+        voucher_type_name_map = {
+            'receipt_voucher': _('Receipts'),
+            'payment_voucher': _('Payments'),
+        }
+        voucher_type_partner_type_map = {
+            'receipt_voucher': _('Receipts'),
+            'payment_voucher': _('Payments'),
         }
         sequence_types = {
             'automatic': _(''),
@@ -85,17 +89,18 @@ class AccountChartTemplate(models.Model):
         for sequence_type in ['automatic', 'manual']:
             # for internal_type in [
             #        'inbound_payment_voucher', 'outbound_payment_voucher']:
-            for payment_type in ['inbound', 'outbound']:
+            for voucher_type in ['receipt_voucher', 'payment_voucher']:
                 document_type = self.env['account.document.type'].search([
-                    ('internal_type', '=', '%s_payment_voucher' % payment_type)
+                    ('internal_type', '=', voucher_type)
                 ], limit=1)
                 if not document_type:
                     continue
                 vals = {
                     'name': "%s %s" % (
-                        payment_types[payment_type],
+                        voucher_type_name_map[voucher_type],
                         sequence_types[sequence_type],),
-                    'payment_type': payment_type,
+                    'partner_type': voucher_type_partner_type_map[
+                        voucher_type],
                     'sequence_type': sequence_type,
                     'padding': 8,
                     'company_id': company.id,
