@@ -29,6 +29,8 @@ class Partner(models.Model):
     street_number = fields.Char('House Number', compute='_split_street', inverse='_set_street', store=True)
     street_number2 = fields.Char('Door Number', compute='_split_street', inverse='_set_street', store=True)
 
+    city_id = fields.Many2one('res.city', 'City')
+    city = fields.Char('City', related='city_id.name', store=True)
 
     def get_street_fields(self):
         """Returns the fields that can be used in a street format. Overwrite this function if you want to add your own fields."""
