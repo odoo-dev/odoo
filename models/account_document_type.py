@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp import fields, models, api
+from res_company import ResCompany
 # from openerp.exceptions import UserError
 
 
@@ -8,16 +9,17 @@ class AccountDocmentType(models.Model):
     _description = 'Account Document Type'
     _order = 'sequence, id asc'
 
-    _get_localizations = (
-        lambda self, *args, **kwargs: self.env[
-            'res.company']._get_localizations(*args, **kwargs))
+    # _get_localizations = (
+    #     lambda self, *args, **kwargs: self.env[
+    #         'res.company']._get_localizations(*args, **kwargs))
 
     sequence = fields.Integer(
         default=10,
         required=True,
     )
     localization = fields.Selection(
-        _get_localizations,
+        # _get_localizations,
+        ResCompany._localization_selection,
         'Localization',
         help='If you set a localization here then it will be available only '
         'for companies of this localization',

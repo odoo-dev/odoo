@@ -4,6 +4,7 @@
 # directory
 ##############################################################################
 from openerp import models, api, fields, _
+from res_company import ResCompany
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -11,12 +12,13 @@ _logger = logging.getLogger(__name__)
 class AccountChartTemplate(models.Model):
     _inherit = 'account.chart.template'
 
-    _get_localizations = (
-        lambda self, *args, **kwargs: self.env[
-            'res.company']._get_localizations(*args, **kwargs))
+    # _get_localizations = (
+    #     lambda self, *args, **kwargs: self.env[
+    #         'res.company']._get_localizations(*args, **kwargs))
 
     localization = fields.Selection(
-        _get_localizations,
+        # _get_localizations,
+        ResCompany._localization_selection,
         'Localization',
         help='If you set the localization here, then when installing '
         'this chart, this localization will be set on company'
