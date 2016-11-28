@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp import fields, models, api
-from res_company import ResCompany
+from openerp.addons.account_document.models.res_company import ResCompany
 # from openerp.exceptions import UserError
 
 

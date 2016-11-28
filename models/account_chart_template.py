@@ -4,7 +4,7 @@
 # directory
 ##############################################################################
 from openerp import models, api, fields, _
-from res_company import ResCompany
+from openerp.addons.account_document.models.res_company import ResCompany
 import logging
 _logger = logging.getLogger(__name__)
 
