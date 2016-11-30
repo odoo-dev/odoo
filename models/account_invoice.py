@@ -201,7 +201,9 @@ class AccountInvoice(models.Model):
                 self.available_journal_document_type_ids
         ):
             self.journal_document_type_id = (
-                self.available_journal_document_type_ids[0])
+                self._get_available_journal_document_types(
+                    self.journal_id, self.type, self.partner_id
+                ).get('journal_document_type'))
 
     @api.one
     @api.depends(
