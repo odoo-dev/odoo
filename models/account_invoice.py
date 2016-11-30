@@ -13,6 +13,18 @@ _logger = logging.getLogger(__name__)
 
 
 class AccountInvoice(models.Model):
+    """
+    about name_get and display name:
+    * in this model name_get and name_search are re-defined so we overwrite
+    them
+    * we add display_name to replace name field use, we add
+     with search funcion. This field is used then for name_get and name_search
+
+    Acccoding this https://www.odoo.com/es_ES/forum/ayuda-1/question/
+    how-to-override-name-get-method-in-new-api-61228
+    we should modify name_get, we do that by creating a helper display_name
+    field and also overwriting name_get to use it
+    """
     _inherit = "account.invoice"
     _order = "document_number desc, number desc, id desc"
 

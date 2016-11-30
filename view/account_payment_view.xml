@@ -44,38 +44,38 @@
         </record>   
 
         <!-- Search view -->
-<!--         <record id="view_payment_filter_customer_pay" model="ir.ui.view">
-            <field name="name">receipt.payment.customer.inherit.select</field>
+        <record id="view_account_payment_search" model="ir.ui.view">
+            <field name="name">account.payment.search</field>
             <field name="model">account.payment</field>
-            <field name="inherit_id" ref="account_payment.view_payment_filter_customer_pay"/>
+            <field name="inherit_id" ref="account.view_account_payment_search"/>
             <field name="arch" type="xml">
-                <field name="number" position="after">
-                    <field name="reference"/>
+                <field name="name" position="attributes">
+                    <!-- in this case display_name has the or logic -->
+                    <attribute name="filter_domain">['|', ('display_name','ilike',self), ('communication','ilike',self)]</attribute>
                 </field>
-                <xpath expr="/search/field[@name='date']" position="after">
-                    <field name="receiptbook_id" string="Receiptbook" />
-                </xpath>
-                <filter string="Journal" position="after">
+
+                <field name="company_id">
+                    <field name="receiptbook_id"/>
+                </field>
+
+                <search>
                     <filter string="Receiptbook" context="{'group_by':'receiptbook_id'}"/>
-                </filter>
+                </search>
             </field>
-        </record>    -->
+        </record>   
           
-<!--         <record id="view_payment_filter_vendor_pay" model="ir.ui.view">
-            <field name="name">payment.filter.vendor.proof.inherit</field>
+        <record id="view_account_payment_tree" model="ir.ui.view">
+            <field name="name">account.payment.tree</field>
             <field name="model">account.payment</field>
-            <field name="inherit_id" ref="account_payment.view_payment_filter_vendor_pay"/>
+            <field name="inherit_id" ref="account.view_account_payment_tree"/>
             <field name="arch" type="xml">
-                <field name="number" position="after">
-                    <field name="reference"/>
+                <field name="name" position="after">
+                    <field name="display_name"/>
                 </field>
-                <xpath expr="/search/field[@name='date']" position="after">
-                    <field name="receiptbook_id" string="Receiptbook" />
-                </xpath>
-                <filter string="Journal" position="after">
-                    <filter string="Receiptbook" context="{'group_by':'receiptbook_id'}"/>
-                </filter>
+                <field name="name" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
             </field>
-        </record>     -->        
+        </record>            
     </data>
 </openerp>

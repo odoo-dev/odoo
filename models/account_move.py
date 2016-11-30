@@ -5,6 +5,19 @@ from openerp.osv import expression
 
 
 class AccountMove(models.Model):
+    """
+    about name_get and display name:
+    * in this model name_get and name_search are re-defined so we overwrite
+    them
+    * we add display_name to replace name field use, we add
+     with search funcion. This field is used then for name_get and name_search
+
+
+    Acccoding this https://www.odoo.com/es_ES/forum/ayuda-1/question/
+    how-to-override-name-get-method-in-new-api-61228
+    we should modify name_get, we do that by creating a helper display_name
+    field and also overwriting name_get to use it
+    """
     _inherit = "account.move"
 
     document_type_id = fields.Many2one(
@@ -21,7 +34,7 @@ class AccountMove(models.Model):
     # this fields exists automatically and was computed by name_get,
     # no we compute with a function so it can be computed by document
     # we store it so we can search over it. we dont make a name_search directly
-    # over document_number becaouse we want search with wildcards
+    # over document_number becaouse we want to search with wildcards
     # using doc_code_prefix, for eg, 'fa-a%0001%'
     display_name = fields.Char(
         compute='_compute_display_name',
