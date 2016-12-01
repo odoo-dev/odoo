@@ -74,7 +74,7 @@
                 </form>
 
                 <field name="date_invoice" position="before">
-                    <field name="journal_document_type_id" attrs="{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}" domain="[('id', 'in', available_journal_document_type_ids[0][2])]"/>
+                    <field name="journal_document_type_id" attrs="{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}" domain="[('id', 'in', available_journal_document_type_ids and available_journal_document_type_ids[0][2] or [])]"/>
                     <field name="document_number" attrs="{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}"/>
                 </field>
 
@@ -118,7 +118,7 @@
                 </form>
 
                 <field name="date_invoice" position="before">
-                    <field name="journal_document_type_id" attrs="{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}" domain="[('id', 'in', available_journal_document_type_ids[0][2])]"/>
+                    <field name="journal_document_type_id" attrs="{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}" domain="[('id', 'in', available_journal_document_type_ids and available_journal_document_type_ids[0][2] or [])]"/>
                     <field name="document_number" attrs="{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}"/>
                 </field>
 
