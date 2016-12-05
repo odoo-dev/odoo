@@ -37,7 +37,8 @@ def install_original_modules(env):
     openupgrade.logged_query(cr, """
         UPDATE ir_module_module
         SET state = 'to install'
-        WHERE name in ('l10n_ar_account', 'l10n_ar_partner')
+        -- , 'l10n_ar_partner' (now installed automatically)
+        WHERE name in ('l10n_ar_account')
         """)
 
 

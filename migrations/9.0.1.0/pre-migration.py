@@ -8,13 +8,8 @@ model_renames = [
     # a account_document
     ('afip.document_class', 'account.document.type'),
     ('account.journal.afip_document_class', 'account.journal.document.type'),
-    # a l10n_ar_account
     ('afip.document_letter', 'account.document.letter'),
     ('afip.responsability', 'afip.responsability.type'),
-    # a l10n_ar_partner
-    ('afip.document_type', 'res.partner.id_category'),
-    # modelos renombrados en l10n_ar_account_voucher
-    # a l10n_ar_account
     ('account.voucher.receiptbook', 'account.payment.receiptbook'),
 ]
 
@@ -23,13 +18,14 @@ table_renames = [
     ('account_journal_afip_document_class', 'account_journal_document_type'),
     ('afip_document_letter', 'account_document_letter'),
     ('afip_responsability', 'afip_responsability_type'),
-    ('afip_document_type', 'res_partner_id_category'),
+    ('account_voucher_receiptbook', 'account_payment_receiptbook'),
     # m2m fields
     ('afip_doc_letter_issuer_rel',
         'account_doc_let_responsability_issuer_rel'),
     ('afip_doc_letter_receptor_rel',
         'account_doc_let_responsability_receptor_rel'),
-    ('account_voucher_receiptbook', 'account_payment_receiptbook'),
+    ('res_partner_afip_doc_class_rel',
+        'res_partner_document_type_rel'),
 ]
 
 # campos renombrados en l10n_ar_invoice
@@ -40,12 +36,14 @@ column_renames = {
     'account_doc_let_responsability_receptor_rel': [
         ('responsability_id', 'afip_responsability_type_id'),
     ],
+    'res_partner_document_type_rel': [
+        ('document_class_id', 'document_type_id'),
+    ],
     'account_document_type': [
         ('afip_code', 'code'),
         ('document_type', 'internal_type'),
     ],
     'res_partner': [
-        ('document_type_id', 'main_id_category_id'),
         ('responsability_id', 'afip_responsability_type_id'),
     ],
     'account_invoice': [
@@ -77,7 +75,6 @@ def migrate(cr, version):
     openupgrade.rename_tables(cr, table_renames)
     openupgrade.rename_columns(cr, column_renames)
     fix_data_on_l10n_ar_account(cr)
-    fix_data_on_l10n_ar_partner(cr)
     delete_payment_views(cr)
 
 
@@ -97,16 +94,22 @@ def delete_payment_views(cr):
 def fix_data_on_l10n_ar_account(cr):
     """
     because in apriori we rename l10n_ar_invoice to account_document, but
-    not some things are done on l10n_ar_account, we fix this
+    some things are done on l10n_ar_account, we fix this
     """
     # pasamos de a account_account a l10n_ar_account
     old_name = 'account_document'
     new_name = 'l10n_ar_account'
 
+    # only update data
     l10n_ar_account_data_models = [
         'afip.responsability.type',
         'account.document.type',
+        'account.payment.term',
+        'account.account.type',
+        'account.fiscal.position',
+        'res.partner',
     ]
+    # update data, fields and models
     l10n_ar_account_models = [
         'afip.responsability.type',
         'afip.incoterm',
@@ -119,20 +122,34 @@ def fix_data_on_l10n_ar_account(cr):
     update_models_module_name(
         cr, l10n_ar_account_models, old_name, new_name)
 
-
-def fix_data_on_l10n_ar_partner(cr):
-    # pasamos de a account_account a l10n_ar_partner
-    old_name = 'account_document'
-    new_name = 'l10n_ar_partner'
-
-    l10n_ar_partner_data_models = [
-        'res.partner',
-        'res.partner.id_category',
-        'res.partner.title',
+    # this fields are on account_document but they are created by
+    # l10n_ar_account
+    fields = [
+        # 'field_afip_document_class_document_letter_id',
+        'field_account_invoice_afip_incoterm_id',
+        'field_account_invoice_afip_service_start',
+        'field_account_invoice_afip_service_end',
+        'field_account_invoice_point_of_sale_type',
+        'field_account_invoice_point_of_sale_number',
+        'field_product_uom_afip_code',
+        'field_res_country_afip_code',
+        'field_res_country_cuit_fisica',
+        'field_res_country_cuit_juridica',
+        'field_res_country_cuit_otro',
+        'field_res_currency_afip_code',
+        'field_res_partner_gross_income_number',
+        'field_res_partner_gross_income_type',
+        'field_res_partner_start_date',
+        'field_account_fiscal_position_afip_code',
     ]
-
-    update_data_module_name(
-        cr, l10n_ar_partner_data_models, old_name, new_name)
+    xmlid_renames = [(
+        'account_document.%s' % field,
+        'l10n_ar_account.%s' % field) for field in fields]
+    xmlid_renames += [(
+        'account_document.field_afip_document_class_document_letter_id',
+        'l10n_ar_account.field_account_document_type_document_letter_id',
+    )]
+    openupgrade.rename_xmlids(cr, xmlid_renames)
 
 
 def update_data_module_name(cr, models, old_name, new_name):
