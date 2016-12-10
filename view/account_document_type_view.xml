@@ -47,8 +47,8 @@
                     <field name='internal_type'/>
                     <field name='localization'/>
                     <group expand="1" string="Group By...">
-                        <filter string="Internal Type" name="internal_type" context="{'group_by':'internal_type'}"/>
-                        <filter string="Localization" name="localization" context="{'group_by':'localization'}"/>
+                        <filter string="Internal Type" name="group_by_internal_type" context="{'group_by':'internal_type'}"/>
+                        <filter string="Localization" name="group_by_localization" context="{'group_by':'localization'}"/>
                     </group>
                 </search>
             </field>

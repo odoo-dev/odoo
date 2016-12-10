@@ -27,9 +27,28 @@ from openupgradelib import openupgrade
 def migrate(env, version):
     install_original_modules(env)
     set_company_loc_ar(env)
+    update_receiptbook_type(env)
+    remove_base_vat_module(env)
     # al final lo hacemos en l10n_ar_account porque account_voucher se
     # actualiza después de este módulo y los pagos todavía no están registrados
     # migrate_voucher_data(env)
+
+
+def remove_base_vat_module(env):
+    # TODO mejorar, por alguna razon se desinstala y luego se vuelve a instalar
+    domain = [('name', 'in', ['base_vat', 'l10n_ar_base_vat']),
+              ('state', 'in', ('installed', 'to install', 'to upgrade'))]
+    env['ir.module.module'].search(domain).module_uninstall()
+
+
+def update_receiptbook_type(env):
+    cr = env.cr
+    openupgrade.map_values(
+        cr,
+        'type', 'partner_type',
+        # openupgrade.get_legacy_name('type'), 'partner_type',
+        [('receipt', 'customer'), ('payment', 'supplier')],
+        table='account_payment_receiptbook', write='sql')
 
 
 def install_original_modules(env):
@@ -37,8 +56,14 @@ def install_original_modules(env):
     openupgrade.logged_query(cr, """
         UPDATE ir_module_module
         SET state = 'to install'
-        -- , 'l10n_ar_partner' (now installed automatically)
         WHERE name in ('l10n_ar_account')
+        -- habiamos agregado estos modulos para forzar instalacion pero de
+        -- alguna manera openupgrade se da cuenta y los instala automaticamente
+        -- hasta antes que instalar account_document. Sin importar si
+        -- l10n_ar_partner_title estaba instalado o no (ahí si tendria sentido
+        -- porque se hace el rename a l10n_ar_partner)
+        -- WHERE name in ('l10n_ar_account', 'l10n_ar_partner',
+        -- 'partner_identification', 'l10n_ar_states')
         """)
 
 

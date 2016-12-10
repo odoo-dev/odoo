@@ -61,20 +61,45 @@ column_renames = {
         ('afip_document_class_id', 'document_type_id'),
     ],
     'account_payment_receiptbook': [
-        ('type', 'payment_type'),
+        # ('type', 'partner_type'),
         ('manual_prefix', 'prefix'),
         ('document_class_id', 'document_type_id'),
     ],
 }
 
+# column_copies = {
+#     'account_payment_receiptbook': [
+#         ('type', None, None),
+#     ],
+# }
+# def delete_views(cr):
+#     """
+#     We delete all views created by l10n_ar_ modules (and the renamed ones to
+#     account_document) because they raise an error on update.
+#     The views that brings the error where at least:
+#     * l10n_ar_invoice.view_invoice_supplier_payment_doc_number_form
+#     * l10n_ar_invoice.view_invoice_payment_doc_number_form
+#     TODO: perhups we need to improove this and delete any custom view that
+#     depend on this views, because it can raise an error because the
+#     inherit_id constraint
+#     """
+#     openupgrade.logged_query(cr, """
+#         delete from ir_ui_view iv
+#         using ir_model_data d where iv.id=d.res_id
+#         and d.model = 'ir.ui.view'
+#         and d.module in ('account_document')
+#         """, ('l10n_ar_%',))
+
 
 @openupgrade.migrate()
 def migrate(cr, version):
-
+    # delete_views(cr)
     openupgrade.rename_models(cr, model_renames)
     openupgrade.rename_tables(cr, table_renames)
+    # openupgrade.copy_columns(cr, column_copies)
     openupgrade.rename_columns(cr, column_renames)
     fix_data_on_l10n_ar_account(cr)
+    # TODO si mantenemos lo de borrar todo no haria falta
     delete_payment_views(cr)
 
 
@@ -145,10 +170,14 @@ def fix_data_on_l10n_ar_account(cr):
     xmlid_renames = [(
         'account_document.%s' % field,
         'l10n_ar_account.%s' % field) for field in fields]
-    xmlid_renames += [(
-        'account_document.field_afip_document_class_document_letter_id',
-        'l10n_ar_account.field_account_document_type_document_letter_id',
-    )]
+    xmlid_renames += [
+        ('account_document.field_afip_document_class_document_letter_id',
+            'l10n_ar_account.field_account_document_type_document_letter_id',),
+        ('account_document.field_afip_document_letter_issuer_ids',
+            'l10n_ar_account.field_account_document_letter_issuer_ids',),
+        ('account_document.field_afip_document_letter_receptor_ids',
+            'l10n_ar_account.field_account_document_letter_receptor_ids',)
+    ]
     openupgrade.rename_xmlids(cr, xmlid_renames)
 
 
