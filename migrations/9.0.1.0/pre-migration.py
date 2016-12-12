@@ -72,35 +72,32 @@ column_renames = {
 #         ('type', None, None),
 #     ],
 # }
-# def delete_views(cr):
+
+
+# def delete_invoice_views(cr):
 #     """
-#     We delete all views created by l10n_ar_ modules (and the renamed ones to
-#     account_document) because they raise an error on update.
-#     The views that brings the error where at least:
-#     * l10n_ar_invoice.view_invoice_supplier_payment_doc_number_form
-#     * l10n_ar_invoice.view_invoice_payment_doc_number_form
-#     TODO: perhups we need to improove this and delete any custom view that
-#     depend on this views, because it can raise an error because the
-#     inherit_id constraint
+#     We delete this views that are not deleted automatically and raise an error
+#     if we still find some erros we can delete all views by enable remove_views
+#     of pre-migration of base 9.0.1.4
 #     """
 #     openupgrade.logged_query(cr, """
-#         delete from ir_ui_view iv
-#         using ir_model_data d where iv.id=d.res_id
-#         and d.model = 'ir.ui.view'
-#         and d.module in ('account_document')
-#         """, ('l10n_ar_%',))
-
-
-@openupgrade.migrate()
-def migrate(cr, version):
-    # delete_views(cr)
-    openupgrade.rename_models(cr, model_renames)
-    openupgrade.rename_tables(cr, table_renames)
-    # openupgrade.copy_columns(cr, column_copies)
-    openupgrade.rename_columns(cr, column_renames)
-    fix_data_on_l10n_ar_account(cr)
-    # TODO si mantenemos lo de borrar todo no haria falta
-    delete_payment_views(cr)
+#         DELETE from ir_ui_view iv
+#         USING ir_model_data d WHERE iv.id=d.res_id
+#         and d.name in (
+#             'view_invoice_supplier_payment_doc_number_form',
+#             'view_invoice_payment_doc_number_form',
+#             'view_move_line_form',
+#             'view_account_move_line_filter',
+#             'view_move_line_tree',
+#             'view_res_partner_form',
+#             'view_res_partner_filter',
+#             'view_res_partner_tree',
+#             'view_partner_form',
+#             'view_company_inherit_form',
+#             'view_account_journal_ar_form')
+#         and d.module in ('account_document','l10n_ar_padron_afip')
+#         """,)
+#     # view_partner_form is from l10n_ar_padron_afip
 
 
 def delete_payment_views(cr):
@@ -114,6 +111,20 @@ def delete_payment_views(cr):
         WHERE model = 'account.voucher'
         """
     )
+
+
+@openupgrade.migrate()
+def migrate(cr, version):
+    # muchos errores en invoice_views, borramos todo con remove_views en
+    # base upgrade 9.0.1.4
+    # delete_invoice_views(cr)
+    # delete_payment_views(cr)
+    openupgrade.rename_models(cr, model_renames)
+    openupgrade.rename_tables(cr, table_renames)
+    # openupgrade.copy_columns(cr, column_copies)
+    openupgrade.rename_columns(cr, column_renames)
+    fix_data_on_l10n_ar_account(cr)
+    # TODO si mantenemos lo de borrar todo no haria falta
 
 
 def fix_data_on_l10n_ar_account(cr):
