@@ -76,9 +76,9 @@ column_renames = {
 
 # def delete_invoice_views(cr):
 #     """
-#     We delete this views that are not deleted automatically and raise an error
-#     if we still find some erros we can delete all views by enable remove_views
-#     of pre-migration of base 9.0.1.4
+#     We delete this views that are not deleted automatically and raise an
+#     error if we still find some erros we can delete all views by enable
+#     remove_views of pre-migration of base 9.0.1.4
 #     """
 #     openupgrade.logged_query(cr, """
 #         DELETE from ir_ui_view iv
