@@ -17,7 +17,7 @@
 
                     <!-- only required on posted state for compatibility if you install this module with payments already created -->
                     <field name="receiptbook_id" attrs="{'invisible': ['|', ('localization', '=', False), ('payment_type', '=', 'transfer')], 'required':[('payment_type', '!=', 'transfer'), ('localization', '!=', False), ('state', '=', 'draft')]}" domain="[('partner_type', '=', partner_type), ('company_id', '=', company_id)]"/>
-                    <field name="document_number" attrs="{'invisible': ['|', ('document_sequence_id', '!=', False), ('localization', '=', False)], 'required': [('document_sequence_id', '=', False), ('localization', '!=', False)]}"/>
+                    <field name="document_number" attrs="{'invisible': ['|', ('payment_type', '=', 'transfer'), '|', ('document_sequence_id', '!=', False), ('localization', '=', False)], 'required': [('payment_type', '!=', 'transfer'), ('document_sequence_id', '=', False), ('localization', '!=', False)]}"/>
                     <!-- por ahora no agregamos esto, vamos a ver si alguien lo pide -->
                     <!-- <field name="manual_prefix" attrs="{'invisible':['|',('document_sequence_id', '!=', False), ('state','!=','draft')]}"/> -->
                     <!-- <field name="manual_sufix" attrs="{'invisible':['|',('document_sequence_id', '!=', False), ('state', '!=', 'draft')], 'required':[('document_sequence_id', '=', False), ('localization', '!=', False)]}"/> -->
