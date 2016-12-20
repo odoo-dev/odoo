@@ -4,7 +4,7 @@
 # directory
 ##############################################################################
 from openerp import models, fields, api, _
-from openerp.exceptions import UserError
+from openerp.exceptions import UserError, ValidationError
 from openerp.osv import expression
 import logging
 _logger = logging.getLogger(__name__)
