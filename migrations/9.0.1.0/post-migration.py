@@ -29,9 +29,18 @@ def migrate(env, version):
     set_company_loc_ar(env)
     update_receiptbook_type(env)
     remove_base_vat_module(env)
+    set_no_gap_to_documents_sequences(env)
     # al final lo hacemos en l10n_ar_account porque account_voucher se
     # actualiza después de este módulo y los pagos todavía no están registrados
     # migrate_voucher_data(env)
+
+
+def set_no_gap_to_documents_sequences(env):
+    # we set no_gap for all journal document sequence
+    env['account.journal'].search(
+        [('type', 'in', ['sale', 'purchase'])]).mapped(
+        'journal_document_type_ids.sequence_id').write(
+        {'implementation': 'no_gap'})
 
 
 def remove_base_vat_module(env):

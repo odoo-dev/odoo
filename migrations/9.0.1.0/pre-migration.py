@@ -213,6 +213,14 @@ def fix_data_on_l10n_ar_account(cr):
     ]
     openupgrade.rename_xmlids(cr, xmlid_renames)
 
+    # on v8 fiscal position are created by data and also, in some cases, they
+    # were created without noupdate=trur, so we deelte external ids
+    logged_query(cr, """
+        DELETE FROM ir_model_data
+        WHERE model = 'account.fiscal.position'
+        AND module = 'l10n_ar_account'
+        """,)
+
 
 def update_data_module_name(cr, models, old_name, new_name):
     """
