@@ -378,3 +378,23 @@ class AccountInvoice(models.Model):
                     rec.document_number)
                 if res and res != rec.document_number:
                     rec.document_number = res
+
+    @api.multi
+    @api.constrains('type', 'document_type_id')
+    def check_invoice_type_document_type(self):
+        for rec in self:
+            internal_type = rec.document_type_internal_type
+            invoice_type = rec.type
+            if not internal_type:
+                continue
+            elif internal_type in [
+                    'debit_note', 'invoice'] and invoice_type in [
+                    'out_refund', 'in_refund']:
+                raise Warning(_(
+                    'You can not use a % document type with a refund '
+                    'invoice') % internal_type)
+            elif internal_type == 'credit_note' and invoice_type in [
+                    'out_invoice', 'in_invoice']:
+                raise Warning(_(
+                    'You can not use a % document type with a invoice') % (
+                    internal_type))
