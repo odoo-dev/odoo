@@ -124,7 +124,29 @@ def migrate(cr, version):
     # openupgrade.copy_columns(cr, column_copies)
     openupgrade.rename_columns(cr, column_renames)
     fix_data_on_l10n_ar_account(cr)
+    fix_data_of_l10n_ar_account_voucher(cr)
     # TODO si mantenemos lo de borrar todo no haria falta
+
+
+def fix_data_of_l10n_ar_account_voucher(cr):
+    """
+    Some modes where from l10n_ar_account_voucher and go to account_document
+    Account voucher is deleted so we dont care about that, only receiptbook
+    remains
+    """
+    # on v8 we upload reciptbooks as data, now they come from chart account
+    # we delete external ids so they are not deleted
+    logged_query(cr, """
+        DELETE FROM ir_model_data
+        WHERE model in ('account.payment.receiptbook', 'ir.sequence')
+        AND module = 'l10n_ar_account_voucher'
+        """,)
+
+    old_name = 'l10n_ar_account_voucher'
+    new_name = 'account_document'
+    # update data, fields and models
+    update_models_module_name(
+        cr, ['account.voucher.receiptbook'], old_name, new_name)
 
 
 def fix_data_on_l10n_ar_account(cr):
@@ -150,7 +172,7 @@ def fix_data_on_l10n_ar_account(cr):
         'afip.responsability.type',
         'afip.incoterm',
         'account.document.letter',
-        'account.payment.receiptbook',
+        # 'account.payment.receiptbook',
     ]
 
     update_data_module_name(
