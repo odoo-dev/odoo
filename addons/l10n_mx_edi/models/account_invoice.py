@@ -36,7 +36,7 @@ def call_soap_service(url, service, caller_func, timeout=20):
     try:
         client = Client(url, timeout=timeout, faults=False)
         service_func = getattr(client.service, service)
-        return {'response': call_func(service_func)}  
+        return {'response': caller_func(service_func)}  
     except Exception as e:
         return {'error': _('Failed to call the suds client: %s') % str(e)}
 
@@ -48,7 +48,7 @@ def create_list_html(array):
     msg = ''
     for item in array:
         msg += '<li>' + item + '</li>'
-    return '<ul>' + msg + '<\ul>'
+    return '<ul>' + msg + '</ul>'
 
 def check_with_xsd(cfdi_tree):
     xml_schema_doc = etree.parse(tools.file_open(CFDI_XSD))
@@ -124,7 +124,7 @@ class AccountInvoice(models.Model):
             pac_test_env = company_id.l10n_mx_edi_pac_test_env
             pac_username = company_id.l10n_mx_edi_pac_username
             pac_password = company_id.l10n_mx_edi_pac_password
-            if not pac_test_env and not (pac_username and pac_username):
+            if not pac_test_env and not (pac_username and pac_password):
                 error_log.append(_('No PAC credentials specified.'))
         else:
             error_log.append(_('No PAC specified.'))

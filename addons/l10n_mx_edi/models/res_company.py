@@ -15,6 +15,7 @@ from StringIO import StringIO
 from OpenSSL import crypto
 from datetime import datetime
 
+_logger = logging.getLogger(__name__)
 CER_TO_PEM_CMD = 'openssl x509 -in %s -inform der -outform pem -out %s'
 KEY_TO_PEM_CMD = 'openssl pkcs8 -in %s -inform der -outform pem -out %s -passin file:%s'
 
@@ -34,7 +35,6 @@ def convert_CER_to_PEM(cer):
     os.popen(CER_TO_PEM_CMD % (cer_file_path, cerpem_file_path))
     with open(cerpem_file_path, 'r') as f:
         cer_pem = f.read()
-        f.close()
     
     unlink_temporary_files([cer_file_path, cerpem_file_path])
     return cer_pem
