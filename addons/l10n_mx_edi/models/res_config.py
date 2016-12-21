@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models, _
+from odoo import fields, models
+
 
 class AccountConfigSettings(models.TransientModel):
     _inherit = 'account.config.settings'

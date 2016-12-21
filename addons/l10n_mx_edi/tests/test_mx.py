@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-from odoo import tools, _
-from odoo.tests import common
-from odoo.exceptions import ValidationError
-
-import logging
 import base64
+import logging
 
 from lxml import etree
 
+from odoo import _, tools
+from odoo.exceptions import ValidationError
+from odoo.tests import common
+
 _logger = logging.getLogger(__name__)
 
+
 class TestMX(common.TransactionCase):
+
     def test_mx_invoice(self):
         Invoice = self.env['account.invoice']
         invoices_ids = Invoice.search([('state', 'in', ['open', 'paid'])])
@@ -32,5 +34,4 @@ class TestMX(common.TransactionCase):
                                 error_pattern = 'The generate file %s is unvalid:\n%s'
                                 error = reduce(lambda x, y: x + y, map(lambda z: z.message + '\n', xml_errors.error_log))
                                 raise ValidationError(_(error_pattern % (attachment_id.name, error)))
-                            _logger.info('File %s for invoice %s is valid' % (attachment_id.name, invoice.number))
-
+                            _logger.info('File %s for invoice %s is valid', attachment_id.name, invoice.number)

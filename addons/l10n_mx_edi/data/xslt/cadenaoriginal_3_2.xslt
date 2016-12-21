@@ -11,13 +11,13 @@
   <!-- Con el siguiente método se establece que la salida deberá ser en texto -->
   <xsl:output encoding="UTF-8" indent="no" method="text" version="1.0"/>
   <!--
-		En esta sección se define la inclusión de las plantillas de utilerías para colapsar espacios
-	-->
+        En esta sección se define la inclusión de las plantillas de utilerías para colapsar espacios
+    -->
   <xsl:include href="utilerias.xslt"/>
   <!-- 
-		En esta sección se define la inclusión de las demás plantillas de transformación para 
-		la generación de las cadenas originales de los complementos fiscales 
-	-->
+        En esta sección se define la inclusión de las demás plantillas de transformación para 
+        la generación de las cadenas originales de los complementos fiscales 
+    -->
   <xsl:include href="ecc.xslt"/>
   <xsl:include href="psgecfd.xslt"/>
   <xsl:include href="donat11.xslt"/>
@@ -97,8 +97,8 @@
       <xsl:with-param name="valor" select="./@MontoFolioFiscalOrig"/>
     </xsl:call-template>
     <!--
-			Llamadas para procesar al los sub nodos del comprobante
-		-->
+            Llamadas para procesar al los sub nodos del comprobante
+        -->
     <xsl:apply-templates select="./cfdi:Emisor"/>
     <xsl:apply-templates select="./cfdi:Receptor"/>
     <xsl:apply-templates select="./cfdi:Conceptos"/>
@@ -115,8 +115,8 @@
       <xsl:with-param name="valor" select="./@nombre"/>
     </xsl:call-template>
     <!--
-			Llamadas para procesar al los sub nodos del comprobante
-		-->
+            Llamadas para procesar al los sub nodos del comprobante
+        -->
     <xsl:apply-templates select="./cfdi:DomicilioFiscal"/>
     <xsl:if test="./cfdi:ExpedidoEn">
       <xsl:call-template name="Domicilio">
@@ -139,8 +139,8 @@
       <xsl:with-param name="valor" select="./@nombre"/>
     </xsl:call-template>
     <!--
-			Llamadas para procesar al los sub nodos del Receptor
-		-->
+            Llamadas para procesar al los sub nodos del Receptor
+        -->
     <xsl:if test="./cfdi:Domicilio">
       <xsl:call-template name="Domicilio">
         <xsl:with-param name="Nodo" select="./cfdi:Domicilio"/>
@@ -197,8 +197,8 @@
     </xsl:for-each>
   </xsl:template>
   <!--
-		Manejador de nodos tipo Concepto
-	-->
+        Manejador de nodos tipo Concepto
+    -->
   <xsl:template match="cfdi:Concepto">
     <!-- Iniciamos el tratamiento de los atributos del Concepto -->
     <xsl:call-template name="Requerido">
@@ -220,9 +220,9 @@
       <xsl:with-param name="valor" select="./@importe"/>
     </xsl:call-template>
     <!--
-			Manejo de los distintos sub nodos de información aduanera de forma indistinta 
-			a su grado de dependencia
-		-->
+            Manejo de los distintos sub nodos de información aduanera de forma indistinta 
+            a su grado de dependencia
+        -->
     <xsl:for-each select=".//cfdi:InformacionAduanera">
       <xsl:apply-templates select="."/>
     </xsl:for-each>

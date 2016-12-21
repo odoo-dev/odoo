@@ -1,22 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models, api, _
-from odoo.exceptions import ValidationError
-
 import base64
-import ssl
 import os
 import tempfile
-import logging
-import re
-
 from contextlib import closing
-from StringIO import StringIO
+
 from OpenSSL import crypto
-from datetime import datetime
+
+from odoo import api, fields, models
 
 CER_TO_PEM_CMD = 'openssl x509 -in %s -inform der -outform pem -out %s'
 KEY_TO_PEM_CMD = 'openssl pkcs8 -in %s -inform der -outform pem -out %s -passin file:%s'
+
 
 def unlink_temporary_files(temporary_files):
     for temporary_file in temporary_files:
@@ -24,6 +19,7 @@ def unlink_temporary_files(temporary_files):
             os.unlink(temporary_file)
         except (OSError, IOError):
             _logger.error('Error when trying to remove file %s' % temporary_file)
+
 
 def convert_CER_to_PEM(cer):
     cer_file_fd, cer_file_path = tempfile.mkstemp(suffix='.cer', prefix='edi.mx.tmp.')
@@ -35,9 +31,10 @@ def convert_CER_to_PEM(cer):
     with open(cerpem_file_path, 'r') as f:
         cer_pem = f.read()
         f.close()
-    
+
     unlink_temporary_files([cer_file_path, cerpem_file_path])
     return cer_pem
+
 
 def convert_key_CER_to_PEM(key, password):
     key_file_fd, key_file_path = tempfile.mkstemp(suffix='.key', prefix='edi.mx.tmp.')
@@ -56,6 +53,7 @@ def convert_key_CER_to_PEM(key, password):
     unlink_temporary_files([key_file_path, keypem_file_path, pwd_file_path])
     return key_pem
 
+
 class ResCompany(models.Model):
     _inherit = "res.company"
 
@@ -69,7 +67,7 @@ class ResCompany(models.Model):
         string='Certificate Password',
         help='Password for the Certificate Key')
     l10n_mx_edi_pac = fields.Selection(
-        selection=[('solfact', 'Solucion Factible')], 
+        selection=[('solfact', 'Solucion Factible')],
         string='PAC',
         help='The PAC that will sign/cancel the invoices')
     l10n_mx_edi_pac_test_env = fields.Boolean(
