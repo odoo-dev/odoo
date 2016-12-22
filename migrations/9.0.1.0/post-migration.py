@@ -30,6 +30,11 @@ def migrate(env, version):
     update_receiptbook_type(env)
     remove_base_vat_module(env)
     set_no_gap_to_documents_sequences(env)
+
+    # we do this here because all our customers that has account_transfer
+    # will have this module installed
+    migrate_account_transfer_module(env)
+
     # al final lo hacemos en l10n_ar_account porque account_voucher se
     # actualiza después de este módulo y los pagos todavía no están registrados
     # migrate_voucher_data(env)
@@ -87,21 +92,86 @@ def set_company_loc_ar(env):
         table='res_company', write='sql')
 
 
-# def migrate_voucher_data(env):
-#     """
-#     Para los vouchers existentes, traemos la data que falta
-#     """
-#     cr = env.cr
-#     for payment in env['account.payment'].search([]):
-#         openupgrade.logged_query(cr, """
-#             SELECT receiptbook_id, document_number
-#             FROM account_voucher
-#             WHERE id = %s
-#             """)
-#         recs = cr.fetchall()
-#         if recs:
-#             receiptbook_id, document_number = recs[0]
-#             payment.write({
-#                 'receiptbook_id': receiptbook_id,
-#                 'document_number': document_number,
-#             })
+def migrate_account_transfer_module(env):
+    if openupgrade.table_exists(env.cr, 'account_transfer'):
+        migrate_transfer_account(env)
+        migrate_transfers(env)
+
+
+def migrate_transfer_account(env):
+    cr = env.cr
+    for company in env['res.company'].search([]):
+        transfer_account = company.transfer_account_id
+        if not transfer_account:
+            continue
+        current_assets = env.ref('account.data_account_type_current_assets')
+        openupgrade.logged_query(cr, """
+            UPDATE account_account
+                set reconcile = True, user_type_id = %s
+            WHERE id = %s
+            """, (current_assets.id, transfer_account.id))
+        # recompute amounts for lines of this account
+        env['account.move.line'].search(
+            [('account_id', '=', transfer_account.id)])._amount_residual()
+        # reconcile unreconciled lines
+        aml = env['account.move.line'].search([
+            ('account_id', '=', transfer_account.id),
+            ('reconciled', '=', False)])
+        if aml:
+            aml.reconcile()
+            aml.compute_full_after_batch_reconcile()
+
+
+def migrate_transfers(env):
+    cr = env.cr
+    openupgrade.logged_query(cr, """
+        SELECT
+            id,
+            source_journal_id,
+            target_journal_id,
+            company_id,
+            note,
+            ref,
+            date,
+            source_move_id,
+            target_move_id,
+            amount,
+            state
+        FROM account_transfer
+        """)
+    for rec in cr.fetchall():
+        (
+            id,
+            source_journal_id,
+            target_journal_id,
+            company_id,
+            note,
+            ref,
+            date,
+            source_move_id,
+            target_move_id,
+            amount,
+            state) = rec
+
+        if state == 'confirmed':
+            state = 'posted'
+        elif state == 'cancel':
+            state = 'draft'
+
+        payment_method = env['account.journal'].browse(
+            source_journal_id).outbound_payment_method_ids
+        payment = env['account.payment'].create({
+            'payment_type': 'transfer',
+            'payment_method_id': payment_method and payment_method[
+                0].id or False,
+            'amount': amount,
+            'payment_date': date,
+            'communication': ref,
+            'journal_id': source_journal_id,
+            'destination_journal_id': target_journal_id,
+            'state': state,
+            'name': 'Transferencia migrada desde id %s' % id,
+        })
+        env['account.move.line'].search([
+            ('move_id', 'in', [source_move_id, target_move_id])]).write(
+            {'payment_id': payment.id})
