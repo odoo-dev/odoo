@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp import fields, models, api, _
-from openerp.exceptions import UserError
+from openerp.exceptions import ValidationError
 
 
 class AccountJournalDocumentType(models.Model):
@@ -98,7 +98,7 @@ class AccountJournal(models.Model):
         if self.type in ['purchase', 'sale']:
             internal_types = ['invoice', 'debit_note', 'credit_note']
         else:
-            raise UserError(_('Type %s not implemented yet' % self.type))
+            raise ValidationError(_('Type %s not implemented yet' % self.type))
 
         document_types = self.env['account.document.type'].search([
             ('internal_type', 'in', internal_types),
@@ -134,3 +134,27 @@ class AccountJournal(models.Model):
             })
             sequence += 10
         return True
+
+    @api.model
+    def merge_journals(self, from_journal, to_journal, delete_from=True):
+        cr = self.env.cr
+        tables = [
+            'account_move', 'account_move_line', 'account_invoice',
+            'account_journal_document_type']
+        if from_journal.type not in ['sale', 'purchase']:
+            raise ValidationError(_(
+                'Only sale or purchase journals can be merged'))
+        if from_journal.type != to_journal.type:
+            raise ValidationError(_(
+                'Journals Must be of the same type'))
+
+        for table in tables:
+            cr.execute("""
+                UPDATE
+                    %s
+                SET
+                    journal_id=%s
+                WHERE journal_id = %s
+                """ % (table, to_journal.id, from_journal.id))
+        if delete_from:
+            from_journal.unlink()

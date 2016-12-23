@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_account_journal_merge_wizard_form" model="ir.ui.view">
+            <field name="name">account.journal.merge.wizard.view</field>
+            <field name="model">account.journal.merge.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Merge Journal">
+                    <group>
+                        <p>All Journal entries, invoices, etc will be moved from "From Journal" to "To journal"</p>
+                        <field name="from_journal_id"/>
+                        <field name="to_journal_id"/>
+                        <field name="delete_from_journal"/>
+                    </group>
+                    <footer>
+                        <button string="Confirm" name="confirm" type="object" class="oe_highlight" confirm="Are you sure? This can not be undone, please be sure to understand what you are doing"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window
+            id="action_account_journal_merge_wizard_1"
+            name="Merge Journal"
+            view_mode="form"
+            key2="client_action_multi"
+            target="new"
+            context="{'default_from_journal_id': active_id}"
+            res_model="account.journal.merge.wizard"
+            src_model="account.journal"/>
+
+    </data>
+</openerp>
