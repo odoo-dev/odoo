@@ -7,11 +7,13 @@
             <field name="model">account.journal.merge.wizard</field>
             <field name="arch" type="xml">
                 <form string="Merge Journal">
+                    <p>All Journal entries, invoices, etc will be moved from "From Journal" to "To journal"</p>
                     <group>
-                        <p>All Journal entries, invoices, etc will be moved from "From Journal" to "To journal"</p>
                         <field name="from_journal_id"/>
                         <field name="to_journal_id"/>
                         <field name="delete_from_journal"/>
+                        <field name="from_type" invisible="1"/>
+                        <field name="from_company_id" invisible="1"/>
                     </group>
                     <footer>
                         <button string="Confirm" name="confirm" type="object" class="oe_highlight" confirm="Are you sure? This can not be undone, please be sure to understand what you are doing"/>
