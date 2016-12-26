@@ -153,7 +153,7 @@ class AccountJournal(models.Model):
             raise ValidationError(_(
                 'Journals Must be of the same company'))
 
-        if from_journal != to_journal:
+        if from_journal == to_journal:
             raise ValidationError(_(
                 'Journals can not be the same'))
 
