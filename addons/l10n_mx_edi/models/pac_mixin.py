@@ -24,6 +24,23 @@ class PacMixin(models.Model):
             'password': 'timbrado.SF.16672' if test else password,
         }
 
+    #---------------------------------------------------------------------------
+    # Finkok PAC
+    #---------------------------------------------------------------------------
+
+    @api.multi
+    def _l10n_mx_edi_get_pac_infos_finkok(self, company_id, url_type=None):
+        test = company_id.l10n_mx_edi_pac_test_env
+        username = company_id.l10n_mx_edi_pac_username
+        password = company_id.l10n_mx_edi_pac_password
+        url = 'http://demo-facturacion.finkok.com/servicios/soap/stamp.wsdl'\
+            if test else 'http://facturacion.finkok.com/servicios/soap/stamp.wsdl'
+        return {
+            'url': url,
+            'username': 'cfdi@vauxoo.com' if test else username,
+            'password': 'vAux00__' if test else password,
+        }
+
     #---------------------------------------------------------------------------            
     # Common methods
     #---------------------------------------------------------------------------   

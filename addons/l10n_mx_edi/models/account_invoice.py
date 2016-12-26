@@ -492,3 +492,58 @@ class AccountInvoice(models.Model):
             'msg': msg,
             'success': cancelled
         }
+
+    # ---------------------------------------------------------------------------
+    # Finkok PAC
+    # ---------------------------------------------------------------------------
+
+    @api.multi
+    def _l10n_mx_edi_get_sign_params_finkok(self, username, password, client, record):
+        values = record._l10n_mx_edi_get_pac_values()
+        return 'stamp', [values['cfdi'], username, password]
+
+
+    @api.multi
+    def _l10n_mx_edi_get_sign_results_finkok(self, response):
+        msg = ''
+        code = 0
+        if response.Incidencias:
+            code = getattr(response.Incidencias[0][0], 'CodigoError', None)
+            msg = getattr(response.Incidencias[0][0], 'MensajeIncidencia', None)
+        xml_signed = getattr(response, 'xml', None)
+        import pdb;
+        pdb.set_trace()
+        return {
+            'code': code,
+            'msg': msg,
+            # This conversion to xml_signed is necessary but I do not know yet why is comming a suds.sax.text.Text()
+            # Type but is the recommended way by the PAC, as the designed api I am forcing the second encoding to
+            # base64, if you think the api should manage this type conversion I am open to it.
+            'xml_signed': xml_signed.encode('ascii', 'xmlcharrefreplace').encode('base64'),
+            'success': xml_signed is not None
+        }
+
+
+    @api.multi
+    def _l10n_mx_edi_get_cancel_params_finkok(self, username, password, client, record):
+        # TODO: Test properly with real data not possible to test in demo.
+        values = record._l10n_mx_edi_get_pac_values()
+        invoices_list = client.factory.create("UUIDS")
+        invoices_list.uuids.string = [values['uuid']]
+        company_id = record.company_id
+        certificate = company_id.l10n_mx_edi_cer
+        certificate_key = company_id.l10n_mx_edi_cer_key
+        return 'cancel', [invoices_list, username, password, certificate, company_id.vat, certificate, certificate_key]
+
+
+    @api.multi
+    def _l10n_mx_edi_get_cancel_results_finkok(self, response):
+        # TODO: Test properly with real data not possible to test in demo.
+        code = getattr(response.Folios[0].Folio, 'EstatusUUID', None)
+        cancelled = code == 201 or code == 202  # cancelled or previously cancelled
+        msg = code != 201 and code != 202 and "Cancelling get an error"
+        return {
+            'code': code,
+            'msg': msg,
+            'success': cancelled
+        }
