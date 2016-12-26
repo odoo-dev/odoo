@@ -119,7 +119,7 @@ class AccountInvoice(models.Model):
         values['rfc'] = lambda p: p.vat[2:].replace(' ', '')
         values['subtotal_wo_discount'] = lambda l: l.quantity * l.price_unit
 
-        values['total_tax_amount'] = sum([tax.amout for tax in self.tax_line_ids])
+        values['total_tax_amount'] = sum([tax.amount for tax in self.tax_line_ids])
 
         return values
 
@@ -545,7 +545,7 @@ class AccountInvoice(models.Model):
             msg = getattr(response.Incidencias[0][0], 'MensajeIncidencia', None)
         xml_signed = getattr(response, 'xml', None)
         if xml_signed:
-            xml_signed = base64.encodestring(xml_signed)
+            xml_signed = base64.encodestring(xml_signed.encode('ascii', 'xmlcharrefreplace'))
         self._l10n_mx_edi_post_sign_process(xml_signed, code, msg)
 
     @api.multi
