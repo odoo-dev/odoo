@@ -13,7 +13,7 @@ import odoo.addons.decimal_precision as dp
 class HrExpense(models.Model):
 
     _name = "hr.expense"
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread']
     _description = "Expense"
     _order = "date desc, id desc"
 
@@ -132,6 +132,7 @@ class HrExpense(models.Model):
             'amount_currency': line['price'] > 0 and abs(line.get('amount_currency')) or - abs(line.get('amount_currency')),
             'currency_id': line.get('currency_id'),
             'tax_line_id': line.get('tax_line_id'),
+            'tax_ids': line.get('tax_ids'),
             'quantity': line.get('quantity', 1.00),
             'product_id': line.get('product_id'),
             'product_uom_id': line.get('uom_id'),
@@ -364,7 +365,7 @@ class HrExpense(models.Model):
 class HrExpenseSheet(models.Model):
 
     _name = "hr.expense.sheet"
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread']
     _description = "Expense Report"
     _order = "accounting_date desc, id desc"
 

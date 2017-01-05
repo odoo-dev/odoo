@@ -63,18 +63,17 @@ class AuthSignupHome(Home):
                 qcontext['error'] = _("Could not reset your password")
                 _logger.exception('error when resetting password')
             except Exception, e:
-                qcontext['error'] = e.message
-
+                qcontext['error'] = e.message or e.name
 
         return request.render('auth_signup.reset_password', qcontext)
 
     def get_auth_signup_config(self):
         """retrieve the module config (which features are enabled) for the login page"""
 
-        IrConfigParam = request.env['ir.config_parameter']
+        get_param = request.env['ir.config_parameter'].sudo().get_param
         return {
-            'signup_enabled': IrConfigParam.sudo().get_param('auth_signup.allow_uninvited') == 'True',
-            'reset_password_enabled': IrConfigParam.sudo().get_param('auth_signup.reset_password') == 'True',
+            'signup_enabled': get_param('auth_signup.allow_uninvited') == 'True',
+            'reset_password_enabled': get_param('auth_signup.reset_password') == 'True',
         }
 
     def get_auth_signup_qcontext(self):

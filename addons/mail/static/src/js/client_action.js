@@ -78,6 +78,9 @@ var PartnerInviteDialog = Dialog.extend({
                     var names = _.escape(_.pluck(data, 'text').join(', '));
                     var notification = _.str.sprintf(_t('You added <b>%s</b> to the conversation.'), names);
                     self.do_notify(_t('New people'), notification);
+                    // Clear the members_deferred to fetch again the partner
+                    // when get_mention_partner_suggestions from the chat_manager is triggered
+                    delete chat_manager.get_channel(self.channel_id).members_deferred;
                 });
         }
     },
@@ -441,9 +444,13 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
 
             // Update control panel
             self.set("title", '#' + channel.name);
+            // Hide 'unsubscribe' button in state channels and DM and channels with group-based subscription
+            self.$buttons
+                .find('.o_mail_chat_button_unsubscribe')
+                .toggle(channel.type !== "dm" && channel.type !== 'static' && ! channel.group_based_subscription);
             // Hide 'invite', 'unsubscribe' and 'settings' buttons in static channels and DM
             self.$buttons
-                .find('.o_mail_chat_button_invite, .o_mail_chat_button_unsubscribe, .o_mail_chat_button_settings')
+                .find('.o_mail_chat_button_invite, .o_mail_chat_button_settings')
                 .toggle(channel.type !== "dm" && channel.type !== 'static');
             self.$buttons
                 .find('.o_mail_chat_button_mark_read')

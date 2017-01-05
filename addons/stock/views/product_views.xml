@@ -123,39 +123,46 @@
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
-                <page name="general_information" position="after">
-                    <page string="Inventory">
-                        <group name="inventory">
-                            <group>
-                                <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}"/>
-                                <field name="route_from_categ_ids" widget="many2many_tags" readonly="1" attrs="{'invisible':[('route_from_categ_ids', '=', [])]}"/>
-                            </group>
-                            <group name="group_lots_and_weight">
-                                <label for="weight" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}"/>
-                                <div class="o_row" name="weight" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}">
-                                    <field name="weight"/>
-                                </div>
-                                <field name="tracking" widget="radio" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}" groups="stock.group_production_lot"/>
-                                <label for="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}"/>
-                                <div class="o_row" name="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}">
-                                    <field name="volume" string="Volume"/>
-                                </div>
-                            </group>
-                            <group>
-                                <field name="categ_id" string="Internal Category"/>
-                            </group>
-                            <group name="stock_property" groups="base.group_no_one">
-                                <field name="property_stock_procurement" domain="[('usage','=','procurement')]"/>
-                                <field name="property_stock_production" domain="[('usage','=','production')]"/>
-                                <field name="property_stock_inventory" domain="[('usage','=','inventory')]"/>
-                            </group>
+                <group name="packaging" position="before">
+                    <group name="inventory">
+                        <group>
+                            <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}"/>
+                            <field name="route_from_categ_ids" widget="many2many_tags" readonly="1" attrs="{'invisible':[('route_from_categ_ids', '=', [])]}"/>
                         </group>
-                    </page>
-                </page>
-                <field name="description_sale" position="after">
-                    <separator string="Description for Pickings" colspan="4"/>
-                    <field name="description_picking" placeholder="Description for Pickings (Rack, Row and Case Information)" nolabel="1" colspan="4"/>
-                </field>
+                        <group name="group_lots_and_weight">
+                            <label for="weight" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}"/>
+                            <div class="o_row" name="weight" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}">
+                                <field name="weight"/>
+                            </div>
+                            <field name="tracking" widget="radio" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}" groups="stock.group_production_lot"/>
+                            <label for="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}"/>
+                            <div class="o_row" name="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}">
+                                <field name="volume" string="Volume"/>
+                            </div>
+                        </group>
+                        <group>
+                            <field name="categ_id" string="Internal Category"/>
+                        </group>
+                        <group name="stock_property" groups="base.group_no_one">
+                            <field name="property_stock_procurement" domain="[('usage','=','procurement')]"/>
+                            <field name="property_stock_production" domain="[('usage','=','production')]"/>
+                            <field name="property_stock_inventory" domain="[('usage','=','inventory')]"/>
+                        </group>
+                    </group>
+                </group>
+                <group name="description" position="after">
+                    <group>
+                        <group string="Description for Internal Transfers">
+                            <field name="description_picking" placeholder="Description for Internal Transfers (Rack, Row and Case Information)" nolabel="1"/>
+                        </group>
+                        <group string="Description for Delivery Orders">
+                            <field name="description_pickingout" nolabel="1" placeholder="This note will be displayed on Delivery orders."/>
+                        </group>
+                    </group>
+                    <group string="Description for Receptions">
+                        <field name="description_pickingin" nolabel="1" placeholder="This note will be displayed on the Receptions."/>
+                    </group>
+                </group>
                 <group name="email_template_and_project" position="before">
                     <group name="sale_condition" string="Sale Conditions">
                         <label for="warranty" groups="stock.group_stock_production_lot"/>
@@ -380,7 +387,7 @@
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="view_type">form</field>
-        <field name="context">{"search_default_products": 1, 'default_type': 'product'}</field>
+        <field name="context">{"search_default_consumable": 1, 'default_type': 'product'}</field>
         <field name="help" type="html">
             <p class="oe_view_nocontent_create">
                 Click to define a new product.
@@ -391,6 +398,7 @@
         parent="stock.menu_stock_inventory_control" sequence="1"/>
     <menuitem id="product_product_menu" name="Product Variants" action="product.product_normal_action"
         parent="menu_stock_inventory_control" sequence="2" groups="product.group_product_variant"/>
+    <menuitem id="menu_product_packagings" name="Product Packaging" parent="stock.menu_packages_config" action="product.action_packaging_view" groups="product.group_stock_packaging"/>
 
     </data>
 </odoo>

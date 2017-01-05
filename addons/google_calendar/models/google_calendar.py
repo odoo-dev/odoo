@@ -194,8 +194,8 @@ class GoogleCalendar(models.AbstractModel):
 
     def generate_data(self, event, isCreating=False):
         if event.allday:
-            start_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(event.start)).isoformat('T').split('T')[0]
-            final_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(event.stop) + timedelta(days=1)).isoformat('T').split('T')[0]
+            start_date = event.start_date
+            final_date = (datetime.strptime(event.stop_date, tools.DEFAULT_SERVER_DATE_FORMAT) + timedelta(days=1)).strftime(tools.DEFAULT_SERVER_DATE_FORMAT)
             type = 'date'
             vstype = 'dateTime'
         else:
@@ -906,14 +906,14 @@ class GoogleCalendar(models.AbstractModel):
         self.env.user.sudo().write(vals)
 
     def get_minTime(self):
-        number_of_week = self.env['ir.config_parameter'].get_param('calendar.week_synchro', default=13)
+        number_of_week = self.env['ir.config_parameter'].sudo().get_param('calendar.week_synchro', default=13)
         return datetime.now() - timedelta(weeks=number_of_week)
 
     def get_need_synchro_attendee(self):
-        return self.env['ir.config_parameter'].get_param('calendar.block_synchro_attendee', default=True)
+        return self.env['ir.config_parameter'].sudo().get_param('calendar.block_synchro_attendee', default=True)
 
     def get_disable_since_synchro(self):
-        return self.env['ir.config_parameter'].get_param('calendar.block_since_synchro', default=False)
+        return self.env['ir.config_parameter'].sudo().get_param('calendar.block_since_synchro', default=False)
 
     def get_print_log(self):
-        return self.env['ir.config_parameter'].get_param('calendar.debug_print', default=False)
+        return self.env['ir.config_parameter'].sudo().get_param('calendar.debug_print', default=False)

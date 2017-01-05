@@ -59,9 +59,9 @@
                                         <field name="address_id"
                                             context="{'show_address': 1}"
                                             options='{"always_reload": True, "highlight_first_line": True}'/>
-                                        <field name="mobile_phone"/>
                                         <field name="work_location"/>
                                         <field name="work_email" widget="email"/>
+                                        <field name="mobile_phone"/>
                                         <field name="work_phone"/>
                                     </group>
                                     <group string="Position">

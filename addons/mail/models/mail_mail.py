@@ -60,6 +60,8 @@ class MailMail(models.Model):
         # notification field: if not set, set if mail comes from an existing mail.message
         if 'notification' not in values and values.get('mail_message_id'):
             values['notification'] = True
+        if not values.get('mail_message_id'):
+            self = self.with_context(message_create_from_mail_mail=True)
         return super(MailMail, self).create(values)
 
     @api.multi
@@ -210,7 +212,7 @@ class MailMail(models.Model):
             try:
                 # TDE note: remove me when model_id field is present on mail.message - done here to avoid doing it multiple times in the sub method
                 if mail.model:
-                    model = self.env['ir.model'].sudo().search([('model', '=', mail.model)])[0]
+                    model = self.env['ir.model']._get(mail.model)[0]
                 else:
                     model = None
                 if model:
@@ -231,8 +233,9 @@ class MailMail(models.Model):
 
                 # headers
                 headers = {}
-                bounce_alias = self.env['ir.config_parameter'].get_param("mail.bounce.alias")
-                catchall_domain = self.env['ir.config_parameter'].get_param("mail.catchall.domain")
+                ICP = self.env['ir.config_parameter'].sudo()
+                bounce_alias = ICP.get_param("mail.bounce.alias")
+                catchall_domain = ICP.get_param("mail.catchall.domain")
                 if bounce_alias and catchall_domain:
                     if mail.model and mail.res_id:
                         headers['Return-Path'] = '%s+%d-%s-%d@%s' % (bounce_alias, mail.id, mail.model, mail.res_id, catchall_domain)

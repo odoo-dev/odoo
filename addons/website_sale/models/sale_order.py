@@ -112,7 +112,7 @@ class SaleOrder(models.Model):
         order_line = False
         if self.state != 'draft':
             request.session['sale_order_id'] = None
-            raise UserError(_('It is forbidden to modify a sale order which is not in draft status'))
+            raise UserError(_('It is forbidden to modify a sales order which is not in draft status'))
         if line_id is not False:
             order_lines = self._cart_find_product_line(product_id, line_id, **kwargs)
             order_line = order_lines and order_lines[0]
@@ -167,7 +167,7 @@ class Website(models.Model):
     pricelist_id = fields.Many2one('product.pricelist', compute='_compute_pricelist_id', string='Default Pricelist')
     currency_id = fields.Many2one('res.currency', related='pricelist_id.currency_id', string='Default Currency')
     salesperson_id = fields.Many2one('res.users', string='Salesperson')
-    salesteam_id = fields.Many2one('crm.team', string='Sales Team')
+    salesteam_id = fields.Many2one('crm.team', string='Sales Channel')
     pricelist_ids = fields.One2many('product.pricelist', compute="_compute_pricelist_ids",
                                     string='Price list available for this Ecommerce/Website')
 
@@ -304,13 +304,13 @@ class Website(models.Model):
 
     @api.multi
     def sale_get_order(self, force_create=False, code=None, update_pricelist=False, force_pricelist=False):
-        """ Return the current sale order after mofications specified by params.
-        :param bool force_create: Create sale order if not already existing
+        """ Return the current sales order after mofications specified by params.
+        :param bool force_create: Create sales order if not already existing
         :param str code: Code to force a pricelist (promo code)
                          If empty, it's a special case to reset the pricelist with the first available else the default.
-        :param bool update_pricelist: Force to recompute all the lines from sale order to adapt the price with the current pricelist.
+        :param bool update_pricelist: Force to recompute all the lines from sales order to adapt the price with the current pricelist.
         :param int force_pricelist: pricelist_id - if set,  we change the pricelist with this one
-        :returns: browse record for the current sale order
+        :returns: browse record for the current sales order
         """
         self.ensure_one()
         partner = self.env.user.partner_id
@@ -343,7 +343,7 @@ class Website(models.Model):
             else:
                 salesperson_id = request.website.salesperson_id.id
             addr = partner.address_get(['delivery', 'invoice'])
-            sale_order = self.env['sale.order'].sudo().create({
+            so_data = {
                 'partner_id': partner.id,
                 'pricelist_id': pricelist_id,
                 'payment_term_id': self.sale_get_payment_term(partner),
@@ -351,7 +351,12 @@ class Website(models.Model):
                 'partner_invoice_id': addr['invoice'],
                 'partner_shipping_id': addr['delivery'],
                 'user_id': salesperson_id or self.salesperson_id.id,
-            })
+            }
+            company = self.company_id or self.env['product.pricelist'].browse(pricelist_id).sudo().company_id
+            if company:
+                so_data['company_id'] = company.id
+
+            sale_order = self.env['sale.order'].sudo().create(so_data)
 
             # set fiscal position
             if request.website.partner_id.id != partner.id:
@@ -465,4 +470,4 @@ class ResCountry(models.Model):
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    last_website_so_id = fields.Many2one('sale.order', string='Last Online Sale Order')
+    last_website_so_id = fields.Many2one('sale.order', string='Last Online Sales Order')

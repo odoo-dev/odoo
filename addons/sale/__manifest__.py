@@ -32,7 +32,7 @@ You can choose flexible invoicing methods:
 * *On Delivery Order*: Invoices are generated from picking (delivery)
 * *Before Delivery*: A Draft invoice is created and must be paid before delivery
 
-With this module you can personnalize the sale order and invoice report with
+With this module you can personnalize the sales order and invoice report with
 categories, subtotals or page-breaks.
 
 The Dashboard for the Sales Manager will include
@@ -57,9 +57,9 @@ The Dashboard for the Sales Manager will include
         'views/sale_views.xml',
         'views/sales_team_views.xml',
         'views/res_partner_views.xml',
-        'views/sale_config_settings_views.xml',
         'views/sale_templates.xml',
         'views/sale_layout_category_view.xml',
+        'views/sale_config_settings_views.xml',
     ],
     'demo': [
         'data/sale_demo.xml',

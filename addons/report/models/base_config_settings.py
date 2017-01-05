@@ -7,7 +7,9 @@ from odoo import fields, models
 class BaseConfigSettings(models.TransientModel):
     _inherit = 'base.config.settings'
 
-    paperformat_id = fields.Many2one(related="company_id.paperformat_id", string='Paper format *')
+    paperformat_id = fields.Many2one(related="company_id.paperformat_id", string='Paper format')
+    default_custom_header_footer = fields.Boolean("Custom Layout",
+        help='Define your custom header & footer.', default_model='base.config.settings')
 
     def edit_external_header(self):
         return self.company_id.edit_external_header()

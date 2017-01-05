@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import UserError, ValidationError
+
 
 class PosSession(models.Model):
     _name = 'pos.session'
@@ -24,7 +26,7 @@ class PosSession(models.Model):
             orders.with_context(force_company=company_id)._create_account_move_line(session, move)
             for order in session.order_ids.filtered(lambda o: o.state != 'done'):
                 if order.state not in ('paid', 'invoiced'):
-                    raise UserError(_("You cannot confirm all orders of this session, because they have not the 'paid' status"))
+                    raise UserError(_("You cannot confirm all orders of this session, because they don't have the 'paid' status"))
                 order.action_pos_order_done()
 
     config_id = fields.Many2one(
@@ -52,7 +54,7 @@ class PosSession(models.Model):
     sequence_number = fields.Integer(string='Order Sequence Number', help='A sequence number that is incremented with each order', default=1)
     login_number = fields.Integer(string='Login Sequence Number', help='A sequence number that is incremented each time a user resumes the pos session', default=0)
 
-    cash_control = fields.Boolean(compute='_compute_cash_all',    string='Has Cash Control')
+    cash_control = fields.Boolean(compute='_compute_cash_all', string='Has Cash Control')
     cash_journal_id = fields.Many2one('account.journal', compute='_compute_cash_all', string='Cash Journal', store=True)
     cash_register_id = fields.Many2one('account.bank.statement', compute='_compute_cash_all', string='Cash Register', store=True)
 
@@ -70,7 +72,7 @@ class PosSession(models.Model):
         related='cash_register_id.total_entry_encoding',
         string='Total Cash Transaction',
         readonly=True,
-        help="Total of all paid sale orders")
+        help="Total of all paid sales orders")
     cash_register_balance_end = fields.Monetary(
         related='cash_register_id.balance_end',
         digits=0,
@@ -149,7 +151,7 @@ class PosSession(models.Model):
             default_journals = pos_config.with_context(ctx).default_get(['journal_id', 'invoice_journal_id'])
             if (not default_journals.get('journal_id') or
                     not default_journals.get('invoice_journal_id')):
-                raise UserError(_("Unable to open the session. You have to assign a sale journal to your point of sale."))
+                raise UserError(_("Unable to open the session. You have to assign a sales journal to your point of sale."))
             pos_config.with_context(ctx).sudo().write({
                 'journal_id': default_journals['journal_id'],
                 'invoice_journal_id': default_journals['invoice_journal_id']})
@@ -165,6 +167,8 @@ class PosSession(models.Model):
             pos_config.sudo().write({'journal_ids': [(6, 0, journals.ids)]})
 
         pos_name = self.env['ir.sequence'].with_context(ctx).next_by_code('pos.session')
+        if values.get('name'):
+            pos_name += ' ' + values['name']
 
         statements = []
         ABS = self.env['account.bank.statement']
@@ -247,7 +251,7 @@ class PosSession(models.Model):
             for st in session.statement_ids:
                 if abs(st.difference) > st.journal_id.amount_authorized_diff:
                     # The pos manager can close statements with maximums.
-                    if not self.env['ir.model.access'].check_groups("point_of_sale.group_pos_manager"):
+                    if not self.user_has_groups("point_of_sale.group_pos_manager"):
                         raise UserError(_("Your ending balance is too different from the theoretical cash closing (%.2f), the maximum allowed is: %.2f. You can contact your manager to force it.") % (st.difference, st.journal_id.amount_authorized_diff))
                 if (st.journal_id.type not in ['bank', 'cash']):
                     raise UserError(_("The type of the journal for your payment method should be bank or cash "))
@@ -273,3 +277,33 @@ class PosSession(models.Model):
             'target': 'self',
             'url':   '/pos/web/',
         }
+
+    @api.multi
+    def open_cashbox(self):
+        self.ensure_one()
+        context = dict(self._context)
+        balance_type = context.get('balance') or 'start'
+        context['bank_statement_id'] = self.cash_register_id.id
+        context['balance'] = balance_type
+        context['default_pos_id'] = self.config_id.id
+
+        action = {
+            'name': _('Cash Control'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'account.bank.statement.cashbox',
+            'view_id': self.env.ref('account.view_account_bnk_stmt_cashbox').id,
+            'type': 'ir.actions.act_window',
+            'context': context,
+            'target': 'new'
+        }
+
+        cashbox_id = None
+        if balance_type == 'start':
+            cashbox_id = self.cash_register_id.cashbox_start_id.id
+        else:
+            cashbox_id = self.cash_register_id.cashbox_end_id.id
+        if cashbox_id:
+            action['res_id'] = cashbox_id
+
+        return action

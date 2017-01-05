@@ -298,6 +298,7 @@
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
                 </form>
@@ -320,6 +321,18 @@
                     <filter name="not_invoiced" string="Waiting Bills" domain="[('invoice_status','=', 'to invoice')]" help="Purchase orders that include lines not invoiced."/>
                     <filter name="invoiced" string="Bills Received" domain="[('invoice_status','=', 'invoiced')]" help="Purchase orders that have been invoiced."/>
                     <filter string="New Mail" name="message_unread" domain="[('message_unread','=',True)]"/>
+                    <separator/>
+                    <filter string="My Activities" name="activities_my"
+                        domain="[('activity_ids.user_id', '=', uid)]"/>
+                    <filter string="Today Activities" name="activities_today"
+                        domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="Upcoming Activities (7 days)" name="activities_week"
+                        domain="['&amp;', ('activity_ids.date_deadline', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                 ('activity_ids.date_deadline', '&lt;=', (context_today()+datetime.timedelta(days=7)).strftime('%Y-%m-%d'))
+                        ]"/>
+                    <filter string="Overdue Activities" name="activities_overdue"
+                        domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all records which has next action date is before today"/>
                     <group expand="0" string="Group By">
                         <filter string="Vendor" domain="[]" context="{'group_by':'partner_id'}"/>
                         <filter string="Order Date" domain="[]" context="{'group_by':'date_order'}"/>
@@ -384,6 +397,7 @@
                     <field name="origin"/>
                     <field name="amount_untaxed" sum="Total Untaxed amount" string="Untaxed" widget="monetary"/>
                     <field name="amount_total" sum="Total amount" widget="monetary"/>
+                    <field name="currency_id" invisible="1"/>
                     <field name="state"/>
                     <field name="invoice_status" invisible="not context.get('show_purchase', False)"/>
                 </tree>
@@ -546,54 +560,22 @@
                 <group name="inventory" position="after">
                     <separator string="Vendors"/>
                     <field name="seller_ids" context="{'default_product_tmpl_id': context.get('product_tmpl_id', active_id)}"/>
-                    <group name="packaging" string="Packaging"
-                        colspan="4"
-                        attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}"
-                        groups="product.group_stock_packaging">
-                        <field name="packaging_ids" nolabel="1"/>
-                    </group>
                 </group>
                 <field name="uom_po_id" position="after">
                     <field name="purchase_method" widget="radio" groups="purchase.group_purchase_manager"/>
                 </field>
-                <group name="description" position="after">
-                    <group string="Warning when Purchasing this Product" colspan="2" groups="purchase.group_warning_purchase">
+                <group name="warning" position="inside">
+                    <group string="Warning when Purchasing this Product" groups="purchase.group_warning_purchase">
                         <field name="purchase_line_warn" nolabel="1"/>
                         <field name="purchase_line_warn_msg" colspan="3" nolabel="1"
                                 attrs="{'required':[('purchase_line_warn','!=','no-message')],'readonly':[('purchase_line_warn','=','no-message')]}"/>
                     </group>
                 </group>
-                <field name="description_sale" position="after">
-                    <separator string="Description for Vendors" colspan="4"/>
-                    <field name="description_purchase" nolabel="1"
-                        placeholder="This note will be displayed on requests for quotation." colspan="4"/>
-                </field>
-            </field>
-        </record>
-
-        <record id="product_product_supplier_form_inherit" model="ir.ui.view">
-            <field name="name">product.product.supplier.form.inherit</field>
-            <field name="model">product.product</field>
-            <field name="inherit_id" ref="product.product_normal_form_view"/>
-            <field name="arch" type="xml">
-                <field name="seller_ids" position="attributes">
-                    <attribute name="readonly">True</attribute>
-                </field>
-                <field name="seller_ids" position="after">
-                    <separator string="Variant Vendors"/>
-                    <field name="product_seller_ids"/>
-                </field>
-            </field>
-        </record>
-
-        <record id="product_variant_supplier_easy_edit_view" model="ir.ui.view">
-            <field name="name">product.product.supplier.view.form.easy</field>
-            <field name="model">product.product</field>
-            <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
-            <field name="arch" type="xml">
-                <group name="pricing_and_weight" position="after">
-                    <separator string="Vendors"/>
-                    <field name="product_seller_ids"/>
+                <group name="description" position="inside">
+                    <group string="Description for Vendors">
+                       <field name="description_purchase" nolabel="1"
+                            placeholder="This note will be displayed for vendors."/>
+                    </group>
                 </group>
             </field>
         </record>

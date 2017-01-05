@@ -53,7 +53,7 @@ class Survey(models.Model):
     _name = 'survey.survey'
     _description = 'Survey'
     _rec_name = 'title'
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     def _default_stage(self):
         return self.env['survey.stage'].search([], limit=1).id
@@ -104,7 +104,8 @@ class Survey(models.Model):
 
     def _compute_survey_url(self):
         """ Computes a public URL for the survey """
-        base_url = '/' if self.env.context.get('relative_url') else self.env['ir.config_parameter'].get_param('web.base.url')
+        base_url = '/' if self.env.context.get('relative_url') else \
+                   self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for survey in self:
             survey.public_url = urljoin(base_url, "survey/start/%s" % (slug(survey)))
             survey.print_url = urljoin(base_url, "survey/print/%s" % (slug(survey)))

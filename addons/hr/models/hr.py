@@ -126,7 +126,7 @@ class Employee(models.Model):
         ('divorced', 'Divorced')
     ], string='Marital Status')
     department_id = fields.Many2one('hr.department', string='Department')
-    address_id = fields.Many2one('res.partner', string='Working Address')
+    address_id = fields.Many2one('res.partner', string='Work Address')
     address_home_id = fields.Many2one('res.partner', string='Home Address')
     bank_account_id = fields.Many2one('res.partner.bank', string='Bank Account Number',
         domain="[('partner_id', '=', address_home_id)]", help='Employee bank salary account')
@@ -229,12 +229,17 @@ class Employee(models.Model):
                 user_field_lst.append(name)
         return user_field_lst
 
+    @api.multi
+    def _message_auto_subscribe_notify(self, partner_ids):
+        # Do not notify user it has been marked as follower of its employee.
+        return
+
 
 class Department(models.Model):
 
     _name = "hr.department"
-    _description = "Hr Department"
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _description = "HR Department"
+    _inherit = ['mail.thread']
     _order = "name"
 
     name = fields.Char('Department Name', required=True)

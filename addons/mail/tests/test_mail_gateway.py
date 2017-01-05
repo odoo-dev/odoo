@@ -291,7 +291,7 @@ class TestMailgateway(TestMail):
     def setUp(self):
         super(TestMailgateway, self).setUp()
         # groups@.. will cause the creation of new mail.channels
-        self.mail_channel_model = self.env['ir.model'].search([('model', '=', 'mail.channel')], limit=1)
+        self.mail_channel_model = self.env['ir.model']._get('mail.channel')
         self.alias = self.env['mail.alias'].create({
             'alias_name': 'groups',
             'alias_user_id': False,
@@ -299,7 +299,7 @@ class TestMailgateway(TestMail):
             'alias_contact': 'everyone'})
 
         # test@.. will cause the creation of new mail.test
-        self.mail_test_model = self.env['ir.model'].search([('model', '=', 'mail.test')], limit=1)
+        self.mail_test_model = self.env['ir.model']._get('mail.test')
         self.alias_2 = self.env['mail.alias'].create({
             'alias_name': 'test',
             'alias_user_id': False,
@@ -533,6 +533,20 @@ class TestMailgateway(TestMail):
     @mute_logger('odoo.addons.mail.models.mail_thread', 'odoo.models')
     def test_message_process_references(self):
         """ Incoming email using references should go into the right destination even with a wrong destination """
+        self.format_and_process(
+            MAIL_TEMPLATE, to='erroneous@example.com',
+            extra='References: <2233@a.com>\r\n\t<3edss_dsa@b.com> %s' % self.fake_email.message_id,
+            msg_id='<1198923581.41972151344608186800.JavaMail.4@agrolait.com>')
+
+        self.assertEqual(len(self.group_public.message_ids), 2, 'message_process: group should contain one new message')
+        self.assertEqual(len(self.fake_email.child_ids), 1, 'message_process: new message should be children of the existing one')
+
+    def test_message_process_references_external(self):
+        """ Incoming email being a reply to an external email processed by odoo should update thread accordingly """
+        new_message_id = '<ThisIsTooMuchFake.MonsterEmail.789@agrolait.com>'
+        self.fake_email.write({
+            'message_id': new_message_id
+        })
         self.format_and_process(
             MAIL_TEMPLATE, to='erroneous@example.com',
             extra='References: <2233@a.com>\r\n\t<3edss_dsa@b.com> %s' % self.fake_email.message_id,

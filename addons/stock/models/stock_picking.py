@@ -157,7 +157,7 @@ class PickingType(models.Model):
 
 class Picking(models.Model):
     _name = "stock.picking"
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Transfer"
     _order = "priority desc, date asc, id desc"
 
@@ -381,7 +381,7 @@ class Picking(models.Model):
             elif self.partner_id:
                 location_dest_id = self.partner_id.property_stock_customer.id
             else:
-                customerloc, location_dest_id = self.env['stock.warehouse']._get_partner_locations()
+                location_dest_id, supplierloc = self.env['stock.warehouse']._get_partner_locations()
 
             self.location_id = location_id
             self.location_dest_id = location_dest_id
@@ -987,7 +987,7 @@ class Picking(models.Model):
         return backorders
 
     @api.multi
-    def put_in_pack(self):
+    def _put_in_pack(self):
         # TDE FIXME: reclean me
         QuantPackage = self.env["stock.quant.package"]
         package = False
@@ -1018,6 +1018,11 @@ class Picking(models.Model):
             else:
                 raise UserError(_('Please process some quantities to put in the pack first!'))
         return package
+
+
+    @api.multi
+    def put_in_pack(self):
+        return self._put_in_pack()
 
     @api.multi
     def button_scrap(self):

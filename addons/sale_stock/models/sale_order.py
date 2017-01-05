@@ -75,7 +75,7 @@ class SaleOrder(models.Model):
     @api.model
     def _prepare_procurement_group(self):
         res = super(SaleOrder, self)._prepare_procurement_group()
-        res.update({'move_type': self.picking_policy, 'partner_id': self.partner_shipping_id.id})
+        res.update({'move_type': self.picking_policy, 'partner_id': self.partner_shipping_id.id, 'sale_order_id': self.id})
         return res
 
     @api.model
@@ -176,7 +176,7 @@ class SaleOrderLine(models.Model):
 
     @api.multi
     def _get_delivered_qty(self):
-        """Computes the delivered quantity on sale order lines, based on done stock moves related to its procurements
+        """Computes the delivered quantity on sales order lines, based on done stock moves related to its procurements
         """
         self.ensure_one()
         super(SaleOrderLine, self)._get_delivered_qty()

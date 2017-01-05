@@ -234,20 +234,20 @@ actual arch.
     def _compute_model_data_id(self):
         # get the first ir_model_data record corresponding to self
         domain = [('model', '=', 'ir.ui.view'), ('res_id', 'in', self.ids)]
-        for data in self.env['ir.model.data'].search_read(domain, ['res_id'], order='id desc'):
+        for data in self.env['ir.model.data'].sudo().search_read(domain, ['res_id'], order='id desc'):
             view = self.browse(data['res_id'])
             view.model_data_id = data['id']
 
     def _search_model_data_id(self, operator, value):
         name = 'name' if isinstance(value, basestring) else 'id'
         domain = [('model', '=', 'ir.ui.view'), (name, operator, value)]
-        data = self.env['ir.model.data'].search(domain)
+        data = self.env['ir.model.data'].sudo().search(domain)
         return [('id', 'in', data.mapped('res_id'))]
 
     def _compute_xml_id(self):
         xml_ids = collections.defaultdict(list)
         domain = [('model', '=', 'ir.ui.view'), ('res_id', 'in', self.ids)]
-        for data in self.env['ir.model.data'].search_read(domain, ['module', 'name', 'res_id']):
+        for data in self.env['ir.model.data'].sudo().search_read(domain, ['module', 'name', 'res_id']):
             xml_ids[data['res_id']].append("%s.%s" % (data['module'], data['name']))
         for view in self:
             view.xml_id = xml_ids.get(view.id, [''])[0]
@@ -278,7 +278,7 @@ actual arch.
                         self.raise_view_error(message, self.id)
         return True
 
-    @api.constrains('arch', 'arch_base')
+    @api.constrains('arch_db')
     def _check_xml(self):
         # Sanity checks: the view should not break anything upon rendering!
         # Any exception raised below will cause a transaction rollback.
@@ -466,7 +466,7 @@ actual arch.
         :return: a node in the source matching the spec
         """
         if spec.tag == 'xpath':
-            nodes = arch.xpath(spec.get('expr'))
+            nodes = etree.ETXPath(spec.get('expr'))(arch)
             return nodes[0] if nodes else None
         elif spec.tag == 'field':
             # Only compare the field name: a field can be only once in a given view
@@ -994,7 +994,7 @@ actual arch.
     @tools.ormcache('self.id')
     def get_view_xmlid(self):
         domain = [('model', '=', 'ir.ui.view'), ('res_id', '=', self.id)]
-        xmlid = self.env['ir.model.data'].search_read(domain, ['module', 'name'])[0]
+        xmlid = self.env['ir.model.data'].sudo().search_read(domain, ['module', 'name'])[0]
         return '%s.%s' % (xmlid['module'], xmlid['name'])
 
     @api.model

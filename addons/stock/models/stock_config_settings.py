@@ -25,11 +25,11 @@ class StockSettings(models.TransientModel):
         'res.company', 'Company',
         default=lambda self: self.env.user.company_id, required=True)
     module_procurement_jit = fields.Selection([
-        (1, 'Reserve products immediately after the sale order confirmation'),
+        (1, 'Reserve products immediately after the sales order confirmation'),
         (0, 'Reserve products manually or based on automatic scheduler')
         ], "Procurements",
         help="""Allows you to automatically reserve the available
-        products when confirming a sale order.
+        products when confirming a sales order.
             This installs the module procurement_jit.""")
     module_product_expiry = fields.Selection([
         (0, 'Do not use Expiration Date on serial numbers'),
@@ -103,7 +103,6 @@ class StockSettings(models.TransientModel):
     module_stock_barcode = fields.Boolean("Barcode scanner support")
     module_delivery_dhl = fields.Boolean("DHL integration")
     module_delivery_fedex = fields.Boolean("Fedex integration")
-    module_delivery_temando = fields.Boolean("Temando integration")
     module_delivery_ups = fields.Boolean("UPS integration")
     module_delivery_usps = fields.Boolean("USPS integration")
     # Warehouse and location usage_level

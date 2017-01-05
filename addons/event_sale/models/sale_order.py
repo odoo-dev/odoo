@@ -36,7 +36,7 @@ class SaleOrderLine(models.Model):
 
     @api.multi
     def _update_registrations(self, confirm=True, registration_data=None):
-        """ Create or update registrations linked to a sale order line. A sale
+        """ Create or update registrations linked to a sales order line. A sale
         order line has a product_uom_qty attribute that will be the number of
         registrations linked to this line. This method update existing registrations
         and create new one for missing one. """
@@ -61,4 +61,4 @@ class SaleOrderLine(models.Model):
 
     @api.onchange('event_ticket_id')
     def _onchange_event_ticket_id(self):
-        self.price_unit = self.event_ticket_id.price
+        self.price_unit = (self.event_id.company_id or self.env.user.company_id).currency_id.compute(self.event_ticket_id.price, self.order_id.currency_id)

@@ -116,6 +116,7 @@
                     <field name="partner_id"/>
                     <field name="user_id"/>
                     <field name="amount_total" sum="Total Tax Included" widget="monetary"/>
+                    <field name="currency_id" invisible="1"/>
                     <field name="invoice_status"/>
                     <field name="state" invisible="1"/>
                 </tree>
@@ -134,6 +135,7 @@
                     <field name="partner_id"/>
                     <field name="user_id"/>
                     <field name="amount_total" sum="Total Tax Included" widget="monetary"/>
+                    <field name="currency_id" invisible="1"/>
                     <field name="state"/>
                     <field name="currency_id" invisible="True"/>
                 </tree>
@@ -355,6 +357,7 @@
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
                 </form>
@@ -367,7 +370,7 @@
             <field name="name">sale.order.form.editable.list</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
-            <field name="groups_id" eval="[(4, ref('product.group_stock_packaging')), (4, ref('sale.group_mrp_properties'))]"/>
+            <field name="groups_id" eval="[(4, ref('product.group_stock_packaging'))]"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree" position="attributes">
                     <attribute name="editable"/>
@@ -383,12 +386,24 @@
                     <field name="name" string="Sales Order" filter_domain="['|',('name','ilike',self),('client_order_ref','ilike',self)]"/>
                     <field name="partner_id" operator="child_of"/>
                     <field name="user_id"/>
-                    <field name="team_id" string="Sales Team"/>
+                    <field name="team_id" string="Sales Channel"/>
                     <field name="project_id"/>
                     <field name="product_id"/>
                     <filter string="My Orders" domain="[('user_id','=',uid)]" name="my_sale_orders_filter"/>
                     <separator/>
                     <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
+                    <separator/>
+                    <filter string="My Activities" name="activities_my"
+                        domain="[('activity_ids.user_id', '=', uid)]"/>
+                    <filter string="Today Activities" name="activities_today"
+                        domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="Upcoming Activities (7 days)" name="activities_week"
+                        domain="['&amp;', ('activity_ids.date_deadline', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                 ('activity_ids.date_deadline', '&lt;=', (context_today()+datetime.timedelta(days=7)).strftime('%Y-%m-%d'))
+                        ]"/>
+                    <filter string="Overdue Activities" name="activities_overdue"
+                        domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all records which has next action date is before today"/>
                     <group expand="0" string="Group By">
                         <filter string="Salesperson" domain="[]" context="{'group_by':'user_id'}"/>
                         <filter name="customer" string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
@@ -519,9 +534,9 @@
                 Create a Quotation, the first step of a new sale.
               </p><p>
                 Your next actions should flow efficiently: confirm the Quotation
-                to a Sale Order, then create the Invoice and collect the Payment.
+                to a Sales Order, then create the Invoice and collect the Payment.
               </p><p>
-                Note that once a Quotation becomes a Sale Order, it will be moved
+                Note that once a Quotation becomes a Sales Order, it will be moved
                 from the Quotations list to the Sales Order list.
               </p>
             </field>
@@ -573,7 +588,7 @@
         </record>
 
         <record id="action_product_sale_list" model="ir.actions.act_window">
-            <field name="name">Sale Order Lines</field>
+            <field name="name">Sales Order Lines</field>
             <field name="res_model">sale.order.line</field>
             <field name="view_mode">tree</field>
             <field name="context">{'search_default_product_id': [active_id], 'default_product_id': active_id}</field>
@@ -607,8 +622,8 @@
                         <field string="Sales" name="sales_count" widget="statinfo" />
                     </button>
                 </button>
-                <group name="description" position="after">
-                    <group string="Warning when Selling this Product" colspan="2" groups="sale.group_warning_sale">
+                <group name="warning" position="inside">
+                    <group string="Warning when Selling this Product" groups="sale.group_warning_sale">
                         <field name="sale_line_warn" nolabel="1"/>
                         <field name="sale_line_warn_msg" colspan="3" nolabel="1"
                                 attrs="{'required':[('sale_line_warn','!=','no-message')],'readonly':[('sale_line_warn','=','no-message')]}"/>
@@ -643,7 +658,7 @@
                     <field name="team_id"/>
                 </xpath>
                 <xpath expr="//group/filter[@name='status']" position="after">
-                    <filter string="Sales Team" domain="[]" context="{'group_by':'team_id'}"/>
+                    <filter string="Sales Channel" domain="[]" context="{'group_by':'team_id'}"/>
                 </xpath>
             </field>
         </record>
@@ -721,9 +736,9 @@
               <p class="oe_view_nocontent_create">
                 Create a Quotation, the first step of a new sale.
               </p><p>
-                Your next actions should flow efficiently: confirm the Quotation to a Sale Order, then create the Invoice and collect the Payment.
+                Your next actions should flow efficiently: confirm the Quotation to a Sales Order, then create the Invoice and collect the Payment.
               </p><p>
-                Note that once a Quotation becomes a Sale Order, it will be moved from the Quotations list to the Sales Order list.
+                Note that once a Quotation becomes a Sales Order, it will be moved from the Quotations list to the Sales Order list.
               </p>
             </field>
         </record>
@@ -763,9 +778,9 @@
                 Create a Quotation, the first step of a new sale.
               </p><p>
                 Your next actions should flow efficiently: confirm the Quotation
-                to a Sale Order, then create the Invoice and collect the Payment.
+                to a Sales Order, then create the Invoice and collect the Payment.
               </p><p>
-                Note that once a Quotation becomes a Sale Order, it will be moved
+                Note that once a Quotation becomes a Sales Order, it will be moved
                 from the Quotations list to the Sales Order list.
               </p>
             </field>

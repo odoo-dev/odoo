@@ -9,7 +9,7 @@ from odoo.tools.safe_eval import safe_eval
 class ProjectIssue(models.Model):
     _name = "project.issue"
     _description = "Project Issue"
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = "priority desc, create_date desc"
     _mail_post_access = 'read'
 
@@ -105,7 +105,7 @@ class ProjectIssue(models.Model):
     def _compute_inactivity_days(self):
         current_datetime = fields.Datetime.from_string(fields.Datetime.now())
         for issue in self:
-            dt_create_date = fields.Datetime.from_string(issue.create_date)
+            dt_create_date = fields.Datetime.from_string(issue.create_date) or current_datetime
             issue.days_since_creation = (current_datetime - dt_create_date).days
 
             if issue.date_action_last:
@@ -123,14 +123,16 @@ class ProjectIssue(models.Model):
 
     @api.onchange('project_id')
     def _onchange_project_id(self):
+        default_partner_id = self.env.context.get('default_partner_id')
+        default_partner = self.env['res.partner'].browse(default_partner_id) if default_partner_id else self.env['res.partner']
         if self.project_id:
             if not self.partner_id and not self.email_from:
                 self.partner_id = self.project_id.partner_id.id
                 self.email_from = self.project_id.partner_id.email
             self.stage_id = self.stage_find(self.project_id.id, [('fold', '=', False)])
         else:
-            self.partner_id = False
-            self.email_from = False
+            self.partner_id = default_partner
+            self.email_from = default_partner.email
             self.stage_id = False
 
     @api.onchange('task_id')

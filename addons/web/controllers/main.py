@@ -18,6 +18,7 @@ import os
 import re
 import sys
 import time
+import werkzeug
 import werkzeug.utils
 import werkzeug.wrappers
 import zlib
@@ -777,6 +778,17 @@ class Session(http.Controller):
         request.session.check_security()
         return None
 
+    @http.route('/web/session/account', type='json', auth="user")
+    def account(self):
+        ICP = request.env['ir.config_parameter'].sudo()
+        params = {
+            'response_type': 'token',
+            'client_id': ICP.get_param('database.uuid') or '',
+            'state': json.dumps({'d': request.db, 'u': ICP.get_param('web.base.url')}),
+            'scope': 'userinfo',
+        }
+        return 'https://accounts.odoo.com/oauth2/auth?' + werkzeug.url_encode(params)
+
     @http.route('/web/session/destroy', type='json', auth="user")
     def destroy(self):
         request.session.logout()
@@ -786,16 +798,6 @@ class Session(http.Controller):
         request.session.logout(keep_db=True)
         return werkzeug.utils.redirect(redirect, 303)
 
-class Menu(http.Controller):
-
-    @http.route('/web/menu/load_needaction', type='json', auth="user")
-    def load_needaction(self, menu_ids):
-        """ Loads needaction counters for specific menu ids.
-
-            :return: needaction data
-            :rtype: dict(menu_id: {'needaction_enabled': boolean, 'needaction_counter': int})
-        """
-        return request.env['ir.ui.menu'].browse(menu_ids).get_needaction_data()
 
 class DataSet(http.Controller):
 

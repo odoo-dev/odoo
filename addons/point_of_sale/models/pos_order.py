@@ -53,36 +53,29 @@ class PosOrder(models.Model):
         }
 
     # This deals with orders that belong to a closed session. In order
-    # to recover from this we:
-    # - assign the order to another compatible open session
-    # - if that doesn't exist, create a new one
+    # to recover from this situation we create a new rescue session,
+    # making it obvious that something went wrong.
+    # A new, separate, rescue session is preferred for every such recovery,
+    # to avoid adding unrelated orders to live sessions.
     def _get_valid_session(self, order):
         PosSession = self.env['pos.session']
         closed_session = PosSession.browse(order['pos_session_id'])
-        open_session = PosSession.search(
-            [('state', '=', 'opened'),
-             ('config_id', '=', closed_session.config_id.id),
-             ('user_id', '=', closed_session.user_id.id)],
-            limit=1, order="start_at DESC")
 
         _logger.warning('session %s (ID: %s) was closed but received order %s (total: %s) belonging to it',
                         closed_session.name,
                         closed_session.id,
                         order['name'],
                         order['amount_total'])
+        _logger.warning('attempting to create recovery session for saving order %s', order['name'])
+        new_session = PosSession.create({
+            'config_id': closed_session.config_id.id,
+            'name': _('(RESCUE FOR %(session)s)') % {'session': closed_session.name},
+            'rescue': True,    # avoid conflict with live sessions
+        })
+        # bypass opening_control (necessary when using cash control)
+        new_session.action_pos_session_open()
 
-        if open_session:
-            _logger.warning('using session %s (ID: %s) for order %s instead',
-                            open_session.name,
-                            open_session.id,
-                            order['name'])
-            return open_session
-        else:
-            _logger.warning('attempting to create new session for order %s', order['name'])
-            new_session = PosSession.create({'config_id': closed_session.config_id.id})
-            # bypass opening_control (necessary when using cash control)
-            new_session.action_pos_session_open()
-            return new_session
+        return new_session
 
     def _match_payment_to_invoice(self, order):
         account_precision = self.env['decimal.precision'].precision_get('Account')
@@ -361,7 +354,7 @@ class PosOrder(models.Model):
     note = fields.Text(string='Internal Notes')
     nb_print = fields.Integer(string='Number of Print', readonly=True, copy=False, default=0)
     pos_reference = fields.Char(string='Receipt Ref', readonly=True, copy=False)
-    sale_journal = fields.Many2one('account.journal', related='session_id.config_id.journal_id', string='Sale Journal', store=True, readonly=True)
+    sale_journal = fields.Many2one('account.journal', related='session_id.config_id.journal_id', string='Sales Journal', store=True, readonly=True)
     fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', default=lambda self: self._default_session().config_id.default_fiscal_position_id)
 
     @api.depends('statement_ids', 'lines.price_subtotal_incl', 'lines.discount')
@@ -408,7 +401,7 @@ class PosOrder(models.Model):
             # set name based on the sequence specified on the config
             session = self.env['pos.session'].browse(values['session_id'])
             values['name'] = session.config_id.sequence_id._next()
-            values.setdefault('session_id', session.config_id.pricelist_id.id)
+            values.setdefault('pricelist_id', session.config_id.pricelist_id.id)
         else:
             # fallback on any pos.order sequence
             values['name'] = self.env['ir.sequence'].next_by_code('pos.order')
@@ -873,8 +866,9 @@ class ReportSaleDetails(models.AbstractModel):
                 if line.tax_ids_after_fiscal_position:
                     line_taxes = line.tax_ids_after_fiscal_position.compute_all(line.price_unit * (1-(line.discount or 0.0)/100.0), currency, line.qty, product=line.product_id, partner=line.order_id.partner_id or False)
                     for tax in line_taxes['taxes']:
-                        taxes.setdefault(tax['id'], {'name': tax['name'], 'total':0.0})
-                        taxes[tax['id']]['total'] += tax['amount']
+                        taxes.setdefault(tax['id'], {'name': tax['name'], 'tax_amount':0.0, 'base_amount':0.0})
+                        taxes[tax['id']]['tax_amount'] += tax['amount']
+                        taxes[tax['id']]['base_amount'] += line.price_subtotal
 
         st_line_ids = self.env["account.bank.statement.line"].search([('pos_statement_id', 'in', orders.ids)]).ids
         if st_line_ids:
@@ -910,9 +904,7 @@ class ReportSaleDetails(models.AbstractModel):
 
     @api.multi
     def render_html(self, docids, data=None):
-        company = request.env.user.company_id
-        date_start = self.env.context.get('date_start', False)
-        date_stop = self.env.context.get('date_stop', False)
-        data = dict(data or {}, date_start=date_start, date_stop=date_stop)
-        data.update(self.get_sale_details(date_start, date_stop, company))
+        data = dict(data or {})
+        configs = self.env['pos.config'].browse(data['config_ids'])
+        data.update(self.get_sale_details(data['date_start'], data['date_stop'], configs))
         return self.env['report'].render('point_of_sale.report_saledetails', data)

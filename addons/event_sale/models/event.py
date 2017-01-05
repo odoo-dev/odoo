@@ -36,7 +36,8 @@ class EventTicket(models.Model):
     name = fields.Char(string='Name', required=True, translate=True)
     event_id = fields.Many2one('event.event', string="Event", required=True, ondelete='cascade')
     product_id = fields.Many2one('product.product', string='Product',
-        required=True, domain=[("event_ok", "=", True)], default=_default_product_id)
+        required=True, domain=["|", ("event_type_id", "!=", False), ("event_ok", "=", True)],
+        default=_default_product_id)
     registration_ids = fields.One2many('event.registration', 'event_ticket_id', string='Registrations')
     price = fields.Float(string='Price', digits=dp.get_precision('Product Price'))
     deadline = fields.Date(string="Sales End")
@@ -116,10 +117,10 @@ class EventRegistration(models.Model):
 
     event_ticket_id = fields.Many2one('event.event.ticket', string='Event Ticket')
     # in addition to origin generic fields, add real relational fields to correctly
-    # handle attendees linked to sale orders and their lines
+    # handle attendees linked to sales orders and their lines
     # TDE FIXME: maybe add an onchange on sale_order_id + origin
-    sale_order_id = fields.Many2one('sale.order', string='Source Sale Order', ondelete='cascade')
-    sale_order_line_id = fields.Many2one('sale.order.line', string='Sale Order Line', ondelete='cascade')
+    sale_order_id = fields.Many2one('sale.order', string='Source Sales Order', ondelete='cascade')
+    sale_order_line_id = fields.Many2one('sale.order.line', string='Sales Order Line', ondelete='cascade')
 
     @api.multi
     @api.constrains('event_ticket_id', 'state')

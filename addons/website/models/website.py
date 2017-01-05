@@ -174,9 +174,10 @@ class Website(models.Model):
     social_youtube = fields.Char('Youtube Account')
     social_googleplus = fields.Char('Google+ Account')
     google_analytics_key = fields.Char('Google Analytics Key')
+    google_management_client_id = fields.Char('Google Client ID')
+    google_management_client_secret = fields.Char('Google Client Secret')
 
     user_id = fields.Many2one('res.users', string='Public User', default=lambda self: self.env.ref('base.public_user').id)
-    compress_html = fields.Boolean('Compress HTML') # TODO: REMOVE ME IN SAAS-14
     cdn_activated = fields.Boolean('Activate CDN for assets')
     cdn_url = fields.Char('CDN Base URL', default='')
     cdn_filters = fields.Text('CDN Filters', default=lambda s: '\n'.join(DEFAULT_CDN_FILTERS), help="URL matching those filters will be rewritten using the CDN Base URL")
@@ -526,6 +527,7 @@ class Website(models.Model):
                       of the same.
             :rtype: list({name: str, url: str})
         """
+        request.context = dict(request.context, **context)
         router = request.httprequest.app.get_db_router(request.db)
         # Force enumeration to be performed as public user
         url_set = set()

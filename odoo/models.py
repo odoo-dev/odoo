@@ -308,7 +308,7 @@ class BaseModel(object):
         Fields = self.env['ir.model.fields']
 
         # sparse fields should be created at the end, as they depend on their serialized field
-        model_fields = sorted(self._fields.itervalues(), key=lambda field: field.type == 'sparse')
+        model_fields = sorted(self._fields.itervalues(), key=lambda field: bool(field.sparse))
         for field in model_fields:
             vals = {
                 'model_id': model.id,
@@ -332,11 +332,11 @@ class BaseModel(object):
                 'column1': field.column1 if field.type == 'many2many' else None,
                 'column2': field.column2 if field.type == 'many2many' else None,
             }
-            if getattr(field, 'serialization_field', None):
+            if field.sparse:
                 # resolve link to serialization_field if specified by name
-                serialization_field = Fields.search([('model', '=', vals['model']), ('name', '=', field.serialization_field)])
+                serialization_field = Fields.search([('model', '=', vals['model']), ('name', '=', field.sparse)])
                 if not serialization_field:
-                    raise UserError(_("Serialization field `%s` not found for sparse field `%s`!") % (field.serialization_field, field.name))
+                    raise UserError(_("Serialization field `%s` not found for sparse field `%s`!") % (field.sparse, field.name))
                 vals['serialization_field_id'] = serialization_field.id
 
             if field.name not in cols:
@@ -664,8 +664,12 @@ class BaseModel(object):
         cls = type(self)
         methods = []
         for attr, func in getmembers(cls, is_constraint):
-            if not all(name in cls._fields for name in func._constrains):
-                _logger.warning("@constrains%r parameters must be field names", func._constrains)
+            for name in func._constrains:
+                field = cls._fields.get(name)
+                if not field:
+                    _logger.warning("method %s.%s: @constrains parameter %r is not a field name", cls._name, attr, name)
+                if not (field.store or field.inverse):
+                    _logger.warning("method %s.%s: @constrains parameter %r is not writeable", cls._name, attr, name)
             methods.append(func)
 
         # optimization: memoize result on cls, it will not be recomputed
@@ -1333,23 +1337,8 @@ class BaseModel(object):
         return result
 
     @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        """ fields_view_get([view_id | view_type='form'])
-
-        Get the detailed composition of the requested view like fields, model, view architecture
-
-        :param view_id: id of the view or None
-        :param view_type: type of the view to return if view_id is None ('form', 'tree', ...)
-        :param toolbar: true to include contextual actions
-        :param submenu: deprecated
-        :return: dictionary describing the composition of the requested view (including inherited views and extensions)
-        :raise AttributeError:
-                            * if the inherited view has unknown position to work with other than 'before', 'after', 'inside', 'replace'
-                            * if some tag other than 'position' is found in parent view
-        :raise Invalid ArchitectureError: if there is view type other than form, tree, calendar, search etc defined on the structure
-        """
+    def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         View = self.env['ir.ui.view']
-
         result = {
             'model': self._name,
             'field_parent': False,
@@ -1377,7 +1366,6 @@ class BaseModel(object):
                 # otherwise try to find the lowest priority matching ir.ui.view
                 view_id = View.default_view(self._name, view_type)
 
-        # context for post-processing might be overriden
         if view_id:
             # read the view with inherited views applied
             root_view = View.browse(view_id).read_combined(['id', 'name', 'field_parent', 'type', 'model', 'arch'])
@@ -1386,9 +1374,7 @@ class BaseModel(object):
             result['type'] = root_view['type']
             result['view_id'] = root_view['id']
             result['field_parent'] = root_view['field_parent']
-            # override context from postprocessing
-            if root_view['model'] != self._name:
-                View = View.with_context(base_model_name=root_view['model'])
+            result['base_model'] = root_view['model']
         else:
             # fallback on default views methods if no ir.ui.view could be found
             try:
@@ -1398,6 +1384,32 @@ class BaseModel(object):
                 result['name'] = 'default'
             except AttributeError:
                 raise UserError(_("No default view of type '%s' could be found !") % view_type)
+        return result
+
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        """ fields_view_get([view_id | view_type='form'])
+
+        Get the detailed composition of the requested view like fields, model, view architecture
+
+        :param view_id: id of the view or None
+        :param view_type: type of the view to return if view_id is None ('form', 'tree', ...)
+        :param toolbar: true to include contextual actions
+        :param submenu: deprecated
+        :return: dictionary describing the composition of the requested view (including inherited views and extensions)
+        :raise AttributeError:
+                            * if the inherited view has unknown position to work with other than 'before', 'after', 'inside', 'replace'
+                            * if some tag other than 'position' is found in parent view
+        :raise Invalid ArchitectureError: if there is view type other than form, tree, calendar, search etc defined on the structure
+        """
+        View = self.env['ir.ui.view']
+
+        # Get the view arch and all other attributes describing the composition of the view
+        result = self._fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+
+        # Override context for postprocessing
+        if view_id and result.get('base_model', self._name) != self._name:
+            View = View.with_context(base_model_name=result['base_model'])
 
         # Apply post processing, groups and modifiers etc...
         xarch, xfields = View.postprocess_and_fields(self._name, etree.fromstring(result['arch']), view_id)
@@ -3503,6 +3515,8 @@ class BaseModel(object):
                     record._cache.update(record._convert_to_cache(new_vals, update=True))
                 for key in new_vals:
                     self._fields[key].determine_inverse(self)
+                # check Python constraints for inversed fields
+                self._validate_fields(set(new_vals) - set(old_vals))
 
         return True
 
@@ -3761,6 +3775,8 @@ class BaseModel(object):
         with self.env.protecting(protected_fields, record):
             for key in new_vals:
                 self._fields[key].determine_inverse(record)
+            # check Python constraints for inversed fields
+            record._validate_fields(set(new_vals) - set(old_vals))
 
         return record
 
@@ -4418,7 +4434,7 @@ class BaseModel(object):
         """
         result = {record.id: [] for record in self}
         domain = [('model', '=', self._name), ('res_id', 'in', self.ids)]
-        for data in self.env['ir.model.data'].search_read(domain, ['module', 'name', 'res_id']):
+        for data in self.env['ir.model.data'].sudo().search_read(domain, ['module', 'name', 'res_id']):
             result[data['res_id']].append('%(module)s.%(name)s' % data)
         return result
 

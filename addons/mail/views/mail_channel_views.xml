@@ -51,6 +51,7 @@
                 <kanban>
                     <field name="description"/>
                     <field name="is_subscribed"/>
+                    <field name="group_ids"/>
                     <templates>
                         <t t-name="kanban-description">
                             <div class="oe_group_description" t-if="record.description.raw_value">
@@ -65,8 +66,8 @@
                                     <p class="oe_module_name">
                                         <field name="description"/>
                                     </p>
-                                    <button type="object" attrs="{'invisible':[('is_subscribed','=',True)]}" class="btn btn-primary pull-right btn-sm" name="channel_join_and_get_info">Join</button>
-                                    <button type="object" attrs="{'invisible':[('is_subscribed','=',False)]}" class="btn btn-default pull-right btn-sm" name="action_unfollow">Leave</button>
+                                    <button type="object" attrs="{'invisible':['|', ('is_subscribed','=',True), ('group_ids', '!=', [])]}" class="btn btn-primary pull-right btn-sm" name="channel_join_and_get_info">Join</button>
+                                    <button type="object" attrs="{'invisible':['|', ('is_subscribed','=',False), ('group_ids', '!=', [])]}" class="btn btn-default pull-right btn-sm" name="action_unfollow">Leave</button>
                                 </div>
                             </div>
                         </t>
@@ -127,6 +128,7 @@
                                     </tree>
                                 </field>
                             </page>
+                            <page string="Integrations" invisible="0" name="mail_channel_integrations"></page>
                         </notebook>
                         <div class="oe_chatter" groups="base.group_no_one">
                             <field name="message_follower_ids" widget="mail_followers"/>
@@ -189,6 +191,16 @@
         web_icon="mail,static/description/icon.png"
         groups="base.group_user"
         sequence="1"/>
+
+    <!--
+        This menuitem will be activated by integrations modules (like github, twitter, ...). It
+        is a hook to ease other modules to plug into mail.
+    -->
+    <record id="mail.mail_channel_integrations_menu" model="ir.ui.menu">
+        <field name="name">Integrations</field>
+        <field name="parent_id" ref="mail.mail_channel_menu_root_chat"></field>
+        <field name="active" eval="False"></field>
+    </record>
 
     </data>
 </odoo>

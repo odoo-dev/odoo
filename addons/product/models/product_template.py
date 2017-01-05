@@ -37,7 +37,7 @@ class ProductTemplate(models.Model):
     description_sale = fields.Text(
         'Sale Description', translate=True,
         help="A description of the Product that you want to communicate to your customers. "
-             "This description will be copied to every Sale Order, Delivery Order and Customer Invoice/Refund")
+             "This description will be copied to every Sales Order, Delivery Order and Customer Invoice/Refund")
     type = fields.Selection([
         ('consu', _('Consumable')),
         ('service', _('Service'))], string='Product Type', default='consu', required=True,
@@ -70,7 +70,7 @@ class ProductTemplate(models.Model):
         'Cost', compute='_compute_standard_price',
         inverse='_set_standard_price', search='_search_standard_price',
         digits=dp.get_precision('Product Price'), groups="base.group_user",
-        help="The cost price is used for valuate stocks or to assess the price of manufacturing a product. The purchase orders are fetching the vendor prices.")
+        help="Cost of the product, in the default unit of measure of the product.")
 
     volume = fields.Float(
         'Volume', compute='_compute_volume', inverse='_set_volume',
@@ -100,9 +100,8 @@ class ProductTemplate(models.Model):
         'res.company', 'Company',
         default=lambda self: self.env['res.company']._company_default_get('product.template'), index=1)
     packaging_ids = fields.One2many(
-        'product.packaging', 'product_tmpl_id', 'Logistical Units',
-        help="Gives the different ways to package the same product. This has no impact on "
-             "the picking order and is mainly used if you use the EDI module.")
+        'product.packaging', string="Packaging", compute="_compute_packaging_ids", inverse="_set_packaging_ids",
+        help="Gives the different ways to package the same product.")
     seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', 'Vendors')
 
     active = fields.Boolean('Active', default=True, help="If unchecked, it will allow you to hide the product without removing it.")
@@ -245,6 +244,17 @@ class ProductTemplate(models.Model):
     def _set_default_code(self):
         if len(self.product_variant_ids) == 1:
             self.product_variant_ids.default_code = self.default_code
+
+    @api.depends('product_variant_ids', 'product_variant_ids.packaging_ids')
+    def _compute_packaging_ids(self):
+        for p in self:
+            if len(p.product_variant_ids) == 1:
+                p.packaging_ids = p.product_variant_ids.packaging_ids
+
+    def _set_packaging_ids(self):
+        for p in self:
+            if len(p.product_variant_ids) == 1:
+                p.product_variant_ids.packaging_ids = p.packaging_ids
 
     @api.constrains('categ_id')
     def _check_category(self):

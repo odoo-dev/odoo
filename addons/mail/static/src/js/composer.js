@@ -474,6 +474,8 @@ var BasicComposer = Widget.extend({
         // Return a deferred as this function is extended with asynchronous
         // behavior for the chatter composer
         var value = _.escape(this.$input.val()).replace(/\n|\r/g, '<br/>');
+        // prevent html space collapsing
+        value = value.replace(/ /g, '&nbsp;').replace(/([^>])&nbsp;([^<])/g, '$1 $2');
         var commands = this.options.commands_enabled ? this.mention_manager.get_listener_selection('/') : [];
         return $.when({
             content: this.mention_manager.generate_links(value),
@@ -488,17 +490,24 @@ var BasicComposer = Widget.extend({
             return;
         }
 
+        clearTimeout(this.canned_timeout);
         var self = this;
         this.preprocess_message().then(function (message) {
             self.trigger('post_message', message);
-
-            // Empty input, selected partners and attachments
-            self.$input.val('');
-            self.mention_manager.reset_selections();
-            self.set('attachment_ids', []);
-
+            self.clear_composer_on_send();
             self.$input.focus();
         });
+    },
+
+    clear_composer: function() {
+        // Empty input, selected partners and attachments
+        this.$input.val('');
+        this.mention_manager.reset_selections();
+        this.set('attachment_ids', []);
+    },
+
+    clear_composer_on_send: function() {
+        this.clear_composer();
     },
 
     // Events
@@ -705,12 +714,18 @@ var BasicComposer = Widget.extend({
         });
     },
     mention_get_canned_responses: function (search) {
-        var canned_responses = chat_manager.get_canned_responses();
-        var matches = fuzzy.filter(utils.unaccent(search), _.pluck(canned_responses, 'source'));
-        var indexes = _.pluck(matches.slice(0, this.options.mention_fetch_limit), 'index');
-        return _.map(indexes, function (i) {
-            return canned_responses[i];
-        });
+        var self = this;
+        var def = $.Deferred();
+        clearTimeout(this.canned_timeout);
+        this.canned_timeout = setTimeout(function() {
+            var canned_responses = chat_manager.get_canned_responses();
+            var matches = fuzzy.filter(utils.unaccent(search), _.pluck(canned_responses, 'source'));
+            var indexes = _.pluck(matches.slice(0, self.options.mention_fetch_limit), 'index');
+            def.resolve(_.map(indexes, function (i) {
+                return canned_responses[i];
+            }));
+        }, 500);
+        return def;
     },
     mention_get_commands: function (search) {
         var search_regexp = new RegExp(_.str.escapeRegExp(utils.unaccent(search)), 'i');

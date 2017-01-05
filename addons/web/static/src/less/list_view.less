@@ -94,6 +94,9 @@
                 }
             }
         }
+        > td.oe_number{
+            text-align: right;
+        }
     }
     tbody + tbody {
         border-top: none;  // Override bootstrap for grouped list views
@@ -125,6 +128,11 @@
             visibility: hidden;  // Hide row's content during edition
             &.o_list_record_selector, &.o_list_record_delete, &.o_list_button {
                 visibility: visible;
+            }
+
+            &.o_list_record_delete {
+                opacity: 0.5;
+                pointer-events: none;
             }
 
             &.o_readonly {
