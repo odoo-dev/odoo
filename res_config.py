@@ -45,13 +45,20 @@ class AccountConfigSettings(models.TransientModel):
         'Purchase Use Documents'
     )
     localization = fields.Selection(
-        related='chart_template_id.localization',
-        readonly=True,
+        related='company_id.localization',
+        # readonly=True,
     )
 
     @api.onchange('chart_template_id')
     def account_documentonchange_chart_template(self):
-        if self.chart_template_id.localization:
+        # if user already set localization on company we dont want to overwrite
+        # it
+        if not self.localization and self.chart_template_id.localization:
+            self.localization = self.chart_template_id.localization
+
+    @api.onchange('localization')
+    def account_documentonchange_localization(self):
+        if self.localization:
             self.sale_use_documents = True
             self.purchase_use_documents = True
 

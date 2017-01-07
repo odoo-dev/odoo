@@ -7,10 +7,11 @@
             <field name="inherit_id" ref="account.view_account_config_settings"/>
             <field name="model">account.config.settings</field>
             <field name="arch" type="xml">
-                <form>
-                    <field name="localization" invisible="1"/>
-                </form>
                 <xpath expr="//group[2]/div/div[2]" position="after">
+                    <div name="localization" attrs="{'invisible':[('has_chart_of_accounts','!=',False)]}">
+                        <label for="localization"/>
+                        <field name="localization" class="oe_inline"/>
+                    </div>
                     <div name="sale_use_documents">
                         <label for="sale_use_documents" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
                         <field name="sale_use_documents" class="oe_inline" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
