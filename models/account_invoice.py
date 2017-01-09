@@ -351,7 +351,9 @@ class AccountInvoice(models.Model):
         # if invoice is a refund only show credit_notes, else, not credit note
         if invoice_type in ['out_refund', 'in_refund']:
             journal_document_types = journal_document_types.filtered(
-                lambda x: x.document_type_id.internal_type == 'credit_note')
+                # lambda x: x.document_type_id.internal_type == 'credit_note')
+                lambda x: x.document_type_id.internal_type in [
+                    'credit_note', 'in_document'])
         else:
             journal_document_types = journal_document_types.filtered(
                 lambda x: x.document_type_id.internal_type != 'credit_note')
