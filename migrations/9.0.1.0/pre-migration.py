@@ -50,6 +50,7 @@ column_renames = {
         ('journal_document_class_id', 'journal_document_type_id'),
         ('afip_document_class_id', 'document_type_id'),
         ('afip_document_number', 'document_number'),
+        ('responsability_id', 'afip_responsability_type_id'),
     ],
     'account_move': [
         ('document_class_id', 'document_type_id'),
@@ -189,6 +190,7 @@ def fix_data_on_l10n_ar_account(cr):
         'field_account_invoice_afip_service_end',
         'field_account_invoice_point_of_sale_type',
         'field_account_invoice_point_of_sale_number',
+        'field_account_invoice_afip_responsability_type_id',
         'field_product_uom_afip_code',
         'field_res_country_afip_code',
         'field_res_country_cuit_fisica',
