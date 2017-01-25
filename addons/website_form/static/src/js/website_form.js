@@ -180,6 +180,12 @@ odoo.define('website_form.animation', function (require) {
                 $field.removeClass('has-error');
                 if(invalid_inputs.length || error_fields.indexOf(field_name) >= 0){
                     $field.addClass('has-error');
+                    if (_.isString(error_fields)){
+                        $field.popover({content: error_fields, trigger: 'hover', container: 'body', placement: 'top'});
+                        // update error message and show it.
+                        $field.data("bs.popover").options.content = error_fields;
+                        $field.popover('show');
+                    }
                     form_valid = false;
                 }
             });
