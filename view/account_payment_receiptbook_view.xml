@@ -48,7 +48,7 @@
                             <group>
                                 <field name="document_type_id"/>
                                 <field name="sequence_id" attrs="{'invisible':[('sequence_type','!=','automatic')]}"/>
-                                <field name="next_number"/>
+                                <field name="next_number" attrs="{'invisible':[('sequence_type','!=','automatic')]}"/>
                                 <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                                 <field name="active"/>
                             </group>

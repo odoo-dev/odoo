@@ -12,11 +12,11 @@
                         <label for="localization"/>
                         <field name="localization" class="oe_inline"/>
                     </div>
-                    <div name="sale_use_documents">
+                    <div name="sale_use_documents" groups="base.group_no_one">
                         <label for="sale_use_documents" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
                         <field name="sale_use_documents" class="oe_inline" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
                     </div>
-                    <div name="purchase_use_documents">
+                    <div name="purchase_use_documents" groups="base.group_no_one">
                         <label for="purchase_use_documents" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
                         <field name="purchase_use_documents" class="oe_inline" attrs="{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}"/>
                     </div>
