@@ -29,6 +29,10 @@ class AccountPaymentReceiptbook(models.Model):
         [('customer', 'Customer'), ('supplier', 'Vendor')],
         required=True,
     )
+    next_number = fields.Integer(
+        related='sequence_id.number_next_actual'
+    )
+
     # payment_type = fields.Selection(
     #     [('inbound', 'Inbound'), ('outbound', 'Outbound')],
     #     # [('receipt', 'Receipt'), ('payment', 'Payment')],
@@ -76,6 +80,20 @@ class AccountPaymentReceiptbook(models.Model):
         'Document Type',
         required=True,
     )
+
+    @api.multi
+    def write(self, vals):
+        """
+        If user change prefix we change prefix of sequence.
+        TODO: we can use related field but we need to implement manual
+        receipbooks with sequences. We should also make padding
+        related to sequence
+        """
+        prefix = vals.get('prefix')
+        for rec in self:
+            if prefix and rec.sequence_id:
+                rec.sequence_id.prefix = prefix
+        return super(AccountPaymentReceiptbook, self).write(vals)
 
     @api.model
     def create(self, vals):

@@ -36,6 +36,9 @@ class AccountJournalDocumentType(models.Model):
     sequence = fields.Integer(
         'Sequence',
     )
+    next_number = fields.Integer(
+        related='sequence_id.number_next_actual'
+    )
 
 
 class AccountJournal(models.Model):
