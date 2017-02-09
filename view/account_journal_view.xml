@@ -41,10 +41,11 @@
             <field name="name">Journal Documents Type Mapping Tree</field>
             <field name="model">account.journal.document.type</field>
             <field name="arch" type="xml">
-                <tree string="Journal Documents Types">
+                <tree string="Journal Documents Types" editable="top">
                     <field name="sequence" widget="handle"/>
                     <field name="document_type_id"/>
                     <field name="sequence_id"/>
+                    <field name="next_number"/>
                     <field name="journal_type" invisible="1"/>
                 </tree>
             </field>
