@@ -84,6 +84,11 @@ class AccountDocmentType(models.Model):
         'base.validator',
         'Validator',
     )
+    taxes_included = fields.Boolean(
+        'Taxes Included?',
+        help='Documents of this type will include taxes on reports. This '
+        'behaviour could be overwritten by localizations!',
+    )
 
     @api.multi
     def validate_document_number(self, document_number):
@@ -121,4 +126,4 @@ class AccountDocmentType(models.Model):
         document type
         """
         self.ensure_one()
-        return False
+        return self.taxes_included

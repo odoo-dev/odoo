@@ -385,7 +385,8 @@ class AccountInvoice(models.Model):
     @api.constrains('journal_document_type_id', 'journal_id')
     def check_journal_document_type_journal(self):
         for rec in self:
-            if rec.journal_document_type_id.journal_id != rec.journal_id:
+            if rec.journal_document_type_id and (
+                    rec.journal_document_type_id.journal_id != rec.journal_id):
                 raise Warning(_(
                     'El Tipo de Documento elegido "%s" no pertenece al diario'
                     ' "%s". Por favor pruebe elegir otro tipo de documento.'
