@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Accounting Documents Management",
-    "version": "9.0.1.4.0",
+    "version": "9.0.1.5.0",
     "author": "Moldeo Interactive,ADHOC SA",
     "license": "AGPL-3",
     "category": "Accounting",
