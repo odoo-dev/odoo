@@ -126,4 +126,5 @@ class AccountDocmentType(models.Model):
         document type
         """
         self.ensure_one()
-        return self.taxes_included
+        return self.taxes_included and self.env[
+            'account.tax'].search([]) or self.env['account.tax']
