@@ -335,6 +335,26 @@ class AccountInvoice(models.Model):
             invoice.journal_document_type_id = res[
                 'journal_document_type']
 
+    @api.multi
+    def write(self, vals):
+        """
+        If someone change the type (for eg from sale order), we update
+        de document type
+        """
+        inv_type = vals.get('type')
+        # if len(vals) == 1 and vals.get('type'):
+        # podrian pasarse otras cosas ademas del type
+        if inv_type:
+            for rec in self:
+                res = rec._get_available_journal_document_types(
+                    rec.journal_id, inv_type, rec.partner_id)
+                vals['journal_document_type_id'] = res[
+                    'journal_document_type'].id
+                # call write for each inoice
+                super(AccountInvoice, rec).write(vals)
+                return True
+        return super(AccountInvoice, self).write(vals)
+
     @api.model
     def _get_available_journal_document_types(
             self, journal, invoice_type, partner):
@@ -407,10 +427,10 @@ class AccountInvoice(models.Model):
                     'debit_note', 'invoice'] and invoice_type in [
                     'out_refund', 'in_refund']:
                 raise Warning(_(
-                    'You can not use a % document type with a refund '
+                    'You can not use a %s document type with a refund '
                     'invoice') % internal_type)
             elif internal_type == 'credit_note' and invoice_type in [
                     'out_invoice', 'in_invoice']:
                 raise Warning(_(
-                    'You can not use a % document type with a invoice') % (
+                    'You can not use a %s document type with a invoice') % (
                     internal_type))
