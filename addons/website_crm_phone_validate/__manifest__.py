@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    'name': 'Phone Numbers Validation',
-    'summary': 'Validate and transform phone numbers according to the country format',
+    'name': 'Contact Numbers Validation on Website',
+    'summary': 'Validate and transform contact numbers according to the country format',
     'sequence': '19',
     'category': 'Website',
     'description': """
-Phone Number Validation
-=======================
+Contact Number Validation on Website
+==================================
 
-Validate phone numbers and normalize them on leads and contacts:
+Validate contact (phone,mobile,fax) numbers and normalize them on leads and contacts:
 - use the national format for your company country
 - use the international format for all others
         """,
