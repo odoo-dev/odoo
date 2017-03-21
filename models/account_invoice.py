@@ -69,7 +69,8 @@ class AccountInvoice(models.Model):
         string='Document Number',
         copy=False,
         readonly=True,
-        states={'draft': [('readonly', False)]}
+        states={'draft': [('readonly', False)]},
+        track_visibility='onchange',
     )
     display_name = fields.Char(
         compute='_get_display_name',
