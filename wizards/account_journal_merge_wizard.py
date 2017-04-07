@@ -16,9 +16,11 @@ class AccountJournalMergeWizard(models.TransientModel):
     )
     from_company_id = fields.Many2one(
         related='from_journal_id.company_id',
+        readonly=True,
     )
     from_type = fields.Selection(
         related='from_journal_id.type',
+        readonly=True,
     )
     to_journal_id = fields.Many2one(
         'account.journal',
