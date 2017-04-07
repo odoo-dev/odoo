@@ -230,7 +230,11 @@ class AccountInvoice(models.Model):
         * If document number and document type, we show them
         * Else, we show move_name
         """
-        if self.document_number and self.document_type_id and self.move_name:
+        # al final no vimos porque necesiamos que este el move name, es util
+        # mostrar igual si existe el numero, por ejemplo si es factura de
+        # proveedor
+        # if self.document_number and self.document_type_id and self.move_name:
+        if self.document_number and self.document_type_id:
             display_name = ("%s%s" % (
                 self.document_type_id.doc_code_prefix or '',
                 self.document_number))
