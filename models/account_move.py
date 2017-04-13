@@ -24,6 +24,7 @@ class AccountMove(models.Model):
         'account.document.type',
         'Document Type',
         copy=False,
+        auto_join=True,
         states={'posted': [('readonly', True)]}
     )
     document_number = fields.Char(
