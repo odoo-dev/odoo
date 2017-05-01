@@ -52,6 +52,7 @@ class AccountInvoice(models.Model):
         readonly=True,
         ondelete='restrict',
         copy=False,
+        auto_join=True,
         states={'draft': [('readonly', False)]}
     )
     # we add this fields so we can search, group and analyze by this one
@@ -60,6 +61,7 @@ class AccountInvoice(models.Model):
         copy=False,
         readonly=True,
         store=True,
+        auto_join=True,
     )
     document_sequence_id = fields.Many2one(
         related='journal_document_type_id.sequence_id',
