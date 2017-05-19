@@ -17,6 +17,7 @@ condition/math builtins.
 
 from opcode import HAVE_ARGUMENT, opmap, opname
 
+import dis
 import functools
 from psycopg2 import OperationalError
 from types import CodeType
@@ -85,6 +86,8 @@ def _get_opcodes(codeobj):
     >>> _get_opcodes(c)
     [100, 100, 23, 100, 100, 102, 103, 83]
     """
+    if hasattr(dis, 'get_instructions'):
+        return (i.opcode for i in dis.get_instructions(codeobj))
     i = 0
     byte_codes = codeobj.co_code
     while i < len(byte_codes):

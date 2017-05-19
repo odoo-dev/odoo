@@ -1673,7 +1673,7 @@ class AccountPartialReconcile(models.Model):
         #make sure that all partial reconciliations share the same secondary currency otherwise it's not
         #possible to compute the exchange difference entry and it has to be done manually.
         currency = list(partial_rec_set)[0].currency_id
-        maxdate = None
+        maxdate = ''
         aml_to_balance = None
         for partial_rec in partial_rec_set:
             if partial_rec.currency_id != currency:
