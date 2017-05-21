@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import models, api
+from openerp import models, api, fields
 # from openerp.exceptions import UserError
 from openerp.osv import expression
 
@@ -11,6 +11,15 @@ class AccountMoveLine(models.Model):
     """
 
     _inherit = 'account.move.line'
+
+    # useful to group by this field
+    document_type_id = fields.Many2one(
+        related='move_id.document_type_id',
+        readonly=True,
+        auto_join=True,
+        # stored required to group by
+        store=True,
+    )
 
     @api.v8
     def prepare_move_lines_for_reconciliation_widget(
