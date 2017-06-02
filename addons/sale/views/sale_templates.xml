@@ -1,9 +1,221 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <!-- inherits from sales_team.assets_backend to override certain attributes defined in sales_team -->
-        <template id="assets_backend" name="project assets" inherit_id="sales_team.assets_backend">
-            <xpath expr="." position="inside">
-                <script type="text/javascript" src="/sale/static/src/js/sale.js"></script>
-            </xpath>
-        </template>
+    <!-- inherits from sales_team.assets_backend to override certain attributes defined in sales_team -->
+    <template id="assets_backend" name="project assets" inherit_id="sales_team.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/sale/static/src/js/sale.js"></script>
+        </xpath>
+    </template>
+
+    <template id="assets_frontend" name="quotation assets" inherit_id="web.assets_frontend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/web/static/lib/jSignature/jSignatureCustom.js"></script>
+            <script type="text/javascript" src="/sale/static/src/js/quotation_view.js"></script>
+            <link rel="stylesheet" type="text/less" href="/sale/static/src/less/sale.less"/>
+        </xpath>
+    </template>
+
+    <template id="so_quotation" name="Quotation">
+        <span class="o_quotation_extend_layout">
+            <t t-call="payment.layout">
+                <t t-call="sale.so_quotation_payment"/>
+            </t>
+        </span>
+    </template>
+
+    <template id="quote_status_message" name="Quotation Content">
+        <div class="alert alert-success alert-dismissable" t-if="message==1">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                Your message has been successfully sent!
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="message==2">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                This quotation has been rejected. <a href="#discussion">Contact us</a> if you want a new one.
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="message==3">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                This order has been validated. Thanks for your trust
+                and do not hesitate to <a href="#discussion">contact us</a> for
+                any question.
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'done'">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                Your payment has been received, thank you for your trust.
+            <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'pending'">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                Your transaction is waiting confirmation.
+            <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'authorized'">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                Your payment has been authorized.
+            <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="message==4 and quotation.state != 'sent'">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                This order
+            <t t-if="quotation.state=='draft'">has not yet been sent</t>
+            <t t-if="quotation.state=='cancel'">has already been cancelled</t>
+            <t t-if="quotation.state not in ('cancel','draft')">has already been validated</t>
+            ! You can <a href="#discussion">contact us</a> for
+            any question.
+        </div>
+    </template>
+
+    <template id="so_quotation_detail" name="Quotation Detail">
+        <div id="wrap">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="o_quote_report_html">
+                        <iframe id="print_quote"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="quotation_sign_modal" name="Quotation Sign and Confirm">
+        <div class="modal fade" id="modalpayment" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+              <form id="accept" method="POST" t-att-data-order-id="quotation.id" t-att-data-token="payment_request.access_token" class="js_accept_json modal-content js_website_submit_form">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
+                  <h4 class="modal-title">Validate Order</h4>
+                </div>
+                <div class="modal-body" id="sign-dialog">
+                    <p>
+                        <span>I agree that by signing this proposal, I
+                        accept it on the behalf of </span><b t-field="quotation.partner_id.commercial_partner_id"/><span>, for an amount of </span>
+                        <b data-id="total_amount" t-field="quotation.amount_total"
+                            t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                        <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
+                    </p>
+                    <div id="signer" class="form-group">
+                        <label class="control-label" for="name">Your Name:</label>
+                        <input type="text" name="signer" id="name" class="form-control"/>
+                    </div>
+                    <div class="panel panel-default mt16 mb0" id="drawsign">
+                        <div class="panel-heading">
+                            <div class="pull-right">
+                                <a id="sign_clean" class="btn btn-xs">Clear</a>
+                            </div>
+                            <strong>Draw your signature</strong>
+                        </div>
+                        <div id="signature" class="panel-body" style="padding: 0"/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div t-if="not acquirers or not quotation_pay">
+                      <button type="submit" t-attf-class="btn btn-primary">Sign &amp; Confirm</button>
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+              </form>
+            </div>
+        </div>
+    </template>
+
+    <template id="so_quotation_payment" name="Quotation Payment">
+        <div id="wrap">
+            <div class="o_so_quotation">
+                <div class="oe_structure"/>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <h2>
+                                Your Quotation<br></br>
+                                <em t-esc="quotation.name"/>
+                                <small t-field="quotation.state"/>
+                            </h2>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-10 hidden-print text-right" id="pay_button" t-ignore="true">
+                            <div>
+                                <ul class="list-inline pull-right">
+                                    <li class="o_divider">
+                                         <h2>
+                                            <span t-esc="payment_request.amount_total" t-options="{'widget': 'monetary', 'display_currency': payment_request.currency_id}"/>
+                                        </h2>
+                                        <t t-if="payment_request.due_date">
+                                            <h4>Due by<span class="ml4" t-esc="payment_request.due_date" t-options='{"widget": "date"}'/></h4>
+                                        </t>
+                                    </li>
+                                    <li>
+                                        <a target="_blank" t-att-href="'/quote/%s' % payment_request.access_token+'?pdf=True'" t-att-title="payment_request.reference">
+                                            <i class="fa fa-download fa-2x" aria-hidden="true"/>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a id="print_quote_iframe" t-att-title="payment_request.reference">
+                                            <i class="fa fa-print fa-2x" aria-hidden="true"/>
+                                        </a>
+                                    </li>
+                                    <li t-if="payment_request.state != 'paid'">
+                                        <h3>
+                                            <a class="btn btn-primary btn-lg o_paynow_button"  data-toggle="modal" data-target="#modalpayment">
+                                                <i class="fa fa-arrow fa-5x" aria-hidden="true"/><t t-if="order_valid and quotation.require_payment">Pay Now</t><t t-if="order_valid and not quotation.require_payment">Confirm</t>
+                                            </a>
+                                        </h3>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb4" t-if="message">
+                        <div class="col-md-12">
+                            <t t-call="sale.quote_status_message"/>
+                        </div>
+                    </div>
+                    <div class="row mb16">
+                        <div class="col-md-12 hidden-sm hidden-xs">
+                            <t t-call="sale.so_quotation_detail"/>
+                        </div>
+                    </div>
+                    <t t-if="not quotation.require_payment and not need_payment">
+                        <t t-call="sale.quotation_sign_modal"/>
+                    </t>
+                    <t t-if="quotation.require_payment or need_payment">
+                        <div id="online_qoutation_payment">
+                            <input type='hidden' name="access_token" t-att-value="payment_request.access_token" t-if="payment_request.access_token"/>
+                            <t t-call="payment.payment"/>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="qoutation_sign-dialog" name="Qoutation Sign Dialog" inherit_id="payment.payment">
+        <xpath expr="//div[@id='sign-dialog']" position="inside">
+            <t t-if="quotation and quotation.require_payment or need_payment">
+                <p>
+                    <span>I agree that by paying this proposal, I
+                    accept it on the behalf of </span><b t-field="quotation.partner_id.commercial_partner_id"/><span>, for an amount of </span>
+                    <b data-id="total_amount" t-field="quotation.amount_total"
+                    t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                    <t t-if="payment_request.order_id.payment_term_id">
+                        <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
+                    </t>
+                </p>
+            </t>
+        </xpath>
+        <xpath expr="//div[@id='payment_method']" position="inside">
+            <t t-if="quotation and quotation.require_payment or need_payment">
+                <div class="col-md-6">
+                    <t t-call="payment.save_payment_data"/>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="save_payment_data" inherit_id="payment.save_payment_data">
+        <xpath expr="//div[@id='payment_data']" position="inside">
+            <t t-if="show_button_modal_cancel">
+                <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
+            </t>
+        </xpath>
+    </template>
+
 </odoo>

@@ -118,6 +118,9 @@ odoo.define('payment_stripe.stripe', function(require) {
             if($("#online_invoice_payment").length){
                 stripe_payment.attachTo($("#online_invoice_payment"));
             }
+            if($("#online_qoutation_payment").length){
+                stripe_payment.attachTo($("#online_qoutation_payment"));
+            }
         }
     });
     return StripePaymentMethod;

@@ -5,91 +5,59 @@ import werkzeug
 
 from odoo import fields, http, _
 from odoo.http import request
-from odoo.addons.website_mail.controllers.main import _message_post_helper
+from odoo.addons.payment.controllers.main import _message_post_helper
 from odoo.addons.website_portal.controllers.main import get_records_pager
+from odoo.addons.sale.controllers.sale_quotation import SaleQuotation
 
 
-class sale_quote(http.Controller):
-    @http.route("/quote/<int:order_id>", type='http', auth="user", website=True)
-    def view_user(self, *args, **kwargs):
-        return self.view(*args, **kwargs)
+class WebsiteSaleQuotation(SaleQuotation):
 
-    @http.route("/quote/<int:order_id>/<token>", type='http', auth="public", website=True)
-    def view(self, order_id, pdf=None, token=None, message=False, **post):
+    def _get_quotation_value(self, order_sudo, transaction, token=None, **post):
+        values = super(WebsiteSaleQuotation, self)._get_quotation_value(
+            order_sudo, transaction, token, **post)
+
+        history = request.session.get('my_quotes_history', [])
+        values.update(get_records_pager(history, order_sudo))
+        values.update({
+            'breadcrumb': request.env.user.partner_id == order_sudo.partner_id,
+            'option': any(not x.line_id for x in order_sudo.options),
+            'need_payment': order_sudo.invoice_status == 'to invoice' and transaction.state in ['draft', 'cancel', 'error'],
+            'save_option': True,
+        })
+        return values
+
+    @http.route()
+    def quote_view(self, payment_request_id=None, pdf=None, token=None, message=False, **post):
         # use sudo to allow accessing/viewing orders for public user
         # only if he knows the private token
+        payment_request = self._get_invoice_payment_request(payment_request_id, token, **post)
+
+        if not payment_request or (payment_request and not payment_request.order_id):
+            return request.render('website.404')
+
+        Order = payment_request.order_id
         now = fields.Date.today()
-        if token:
-            Order = request.env['sale.order'].sudo().search([('id', '=', order_id), ('access_token', '=', token)])
-        else:
-            Order = request.env['sale.order'].search([('id', '=', order_id)])
-        # Log only once a day
+
         if Order and request.session.get('view_quote') != now and request.env.user.share:
             request.session['view_quote'] = now
             body = _('Quotation viewed by customer')
-            _message_post_helper(res_model='sale.order', res_id=Order.id, message=body, token=token, token_field="access_token", message_type='notification', subtype="mail.mt_note", partner_ids=Order.user_id.sudo().partner_id.ids)
-        if not Order:
-            return request.render('website.404')
+            _message_post_helper(
+                res_model='sale.order', res_id=Order.id,
+                message=body, token=token, token_field="access_token",
+                message_type='notification', subtype="mail.mt_note",
+                partner_ids=Order.user_id.sudo().partner_id.ids)
 
         # Token or not, sudo the order, since portal user has not access on
         # taxes, required to compute the total_amout of SO.
         order_sudo = Order.sudo()
 
-        days = 0
-        if order_sudo.validity_date:
-            days = (fields.Date.from_string(order_sudo.validity_date) - fields.Date.from_string(fields.Date.today())).days + 1
         if pdf:
-            pdf = request.env.ref('website_quote.report_web_quote').sudo().with_context(set_viewport_size=True).render_qweb_pdf([order_sudo.id])[0]
-            pdfhttpheaders = [('Content-Type', 'application/pdf'), ('Content-Length', len(pdf))]
-            return request.make_response(pdf, headers=pdfhttpheaders)
-        transaction_id = request.session.get('quote_%s_transaction_id' % order_sudo.id)
-        if not transaction_id:
-            Transaction = request.env['payment.transaction'].sudo().search([('reference', '=', order_sudo.name)])
-        else:
-            Transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
-        values = {
-            'quotation': order_sudo,
-            'message': message and int(message) or False,
-            'option': any(not x.line_id for x in order_sudo.options),
-            'order_valid': (not order_sudo.validity_date) or (now <= order_sudo.validity_date),
-            'days_valid': days,
-            'action': request.env.ref('sale.action_quotations').id,
-            'breadcrumb': request.env.user.partner_id == order_sudo.partner_id,
-            'tx_id': Transaction.id if Transaction else False,
-            'tx_state': Transaction.state if Transaction else False,
-            'tx_post_msg': Transaction.acquirer_id.post_msg if Transaction else False,
-            'need_payment': order_sudo.invoice_status == 'to invoice' and Transaction.state in ['draft', 'cancel', 'error'],
-            'token': token,
-            'show_button_modal_cancel': True,
-        }
+            return self._print_invoice_pdf(order_sudo.id, 'website_quote.report_web_quote')
 
-        if order_sudo.require_payment or values['need_payment']:
-            render_values = {
-                'return_url': '/quote/%s/%s' % (order_id, token) if token else '/quote/%s' % order_id,
-                'type': 'form',
-                'alias_usage': _('If we store your payment information on our server, subscription payments will be made automatically.'),
-                'partner_id': order_sudo.partner_id.id,
-            }
+        return super(WebsiteSaleQuotation, self).quote_view(payment_request_id=payment_request_id, pdf=pdf, token=token, **post)
 
-            values.update(order_sudo.with_context(submit_class="btn btn-primary", submit_txt=_('Pay & Confirm'))._prepare_payment_acquirer(values=render_values))
-            values['save_option'] = False
 
-        history = request.session.get('my_quotes_history', [])
-        values.update(get_records_pager(history, order_sudo))
-        return request.render('website_quote.so_quotation', values)
-
-    @http.route(['/quote/accept'], type='json', auth="public", website=True)
-    def accept(self, order_id, token=None, signer=None, sign=None, **post):
-        Order = request.env['sale.order'].sudo().browse(order_id)
-        if token != Order.access_token or Order.require_payment:
-            return request.render('website.404')
-        if Order.state != 'sent':
-            return False
-        attachments = [('signature.png', sign.decode('base64'))] if sign else []
-        Order.action_confirm()
-        message = _('Order signed by %s') % (signer,)
-        _message_post_helper(message=message, res_id=order_id, res_model='sale.order', attachments=attachments, **({'token': token, 'token_field': 'access_token'} if token else {}))
-        return True
+class sale_quote(http.Controller):
 
     @http.route(['/quote/<int:order_id>/<token>/decline'], type='http', auth="public", methods=['POST'], website=True)
     def decline(self, order_id, token, **post):
@@ -97,12 +65,12 @@ class sale_quote(http.Controller):
         if token != Order.access_token:
             return request.render('website.404')
         if Order.state != 'sent':
-            return werkzeug.utils.redirect("/quote/%s/%s?message=4" % (order_id, token))
+            return werkzeug.utils.redirect("/quote/%s?message=4" % token)
         Order.action_cancel()
         message = post.get('decline_message')
         if message:
             _message_post_helper(message=message, res_id=order_id, res_model='sale.order', **{'token': token, 'token_field': 'access_token'} if token else {})
-        return werkzeug.utils.redirect("/quote/%s/%s?message=2" % (order_id, token))
+        return werkzeug.utils.redirect("/quote/%s?message=2" % token)
 
     @http.route(['/quote/update_line'], type='json', auth="public", website=True)
     def update(self, line_id, remove=False, unlink=False, order_id=None, token=None, **post):
@@ -149,46 +117,3 @@ class sale_quote(http.Controller):
         OrderLine._compute_tax_id()
         Option.write({'line_id': OrderLine.id})
         return werkzeug.utils.redirect("/quote/%s/%s#pricing" % (Order.id, token))
-
-    # note dbo: website_sale code
-    @http.route(['/quote/<int:order_id>/transaction/<int:acquirer_id>'], type='json', auth="public", website=True)
-    def payment_transaction(self, acquirer_id, order_id):
-        return self.payment_transaction_token(acquirer_id, order_id, None)
-
-    @http.route(['/quote/<int:order_id>/transaction/<int:acquirer_id>/<token>'], type='json', auth="public", website=True)
-    def payment_transaction_token(self, acquirer_id, order_id, token):
-        """ Json method that creates a payment.transaction, used to create a
-        transaction when the user clicks on 'pay now' button. After having
-        created the transaction, the event continues and the user is redirected
-        to the acquirer website.
-
-        :param int acquirer_id: id of a payment.acquirer record. If not set the
-                                user is redirected to the checkout page
-        """
-        Order = request.env['sale.order'].sudo().browse(order_id)
-        if not Order or not Order.order_line or acquirer_id is None:
-            return request.redirect("/quote/%s" % order_id)
-
-        # find an already existing transaction
-        Transaction = request.env['payment.transaction'].sudo().search([('reference', '=', Order.name)])
-        Transaction = Order._prepare_payment_transaction(acquirer_id, transaction=Transaction, token=token)
-
-        if not Transaction.callback_model_id:
-            Transaction.write({
-                'callback_model_id': request.env['ir.model'].sudo().search([('model', '=', Order._name)], limit=1).id,
-                'callback_res_id': Order.id,
-                'callback_method': '_confirm_online_quote',
-            })
-        request.session['quote_%s_transaction_id' % Order.id] = Transaction.id
-        return Transaction.acquirer_id.with_context(submit_class='btn btn-primary', submit_txt=_('Pay & Confirm')).render(
-            Transaction.reference,
-            Order.amount_total,
-            Order.pricelist_id.currency_id.id,
-            values={
-                'return_url': '/quote/%s/%s' % (order_id, token) if token else '/quote/%s' % order_id,
-                'type': Order._get_payment_type(),
-                'alias_usage': _('If we store your payment information on our server, subscription payments will be made automatically.'),
-                'partner_id': Order.partner_shipping_id.id or Order.partner_invoice_id.id,
-                'billing_partner_id': Order.partner_invoice_id.id,
-            },
-        )

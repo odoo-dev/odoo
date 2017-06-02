@@ -24,6 +24,7 @@ class Payment(Payment):
             return request.render("website.403")
         return super(Payment, self).pay(payment_request_id=payment_request_id, token=token, pdf=pdf, **kwargs)
 
+
 class WebsitePayment(http.Controller):
     @http.route(['/my/payment_method'], type='http', auth="user", website=True)
     def payment_method(self, **kwargs):
