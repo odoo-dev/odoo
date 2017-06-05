@@ -21,7 +21,7 @@ class AccountMoveLine(models.Model):
         store=True,
     )
 
-    @api.v8
+    @api.multi
     def prepare_move_lines_for_reconciliation_widget(
             self, target_currency=False, target_date=False):
         res = super(
