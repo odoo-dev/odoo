@@ -37,7 +37,6 @@
                 </div>
             </xpath>
             <xpath expr="//field[@name='client_order_ref']" position="after">
-                <field name="require_payment" widget="radio"/>
                 <field name="website_description" invisible="1"/>
             </xpath>
         </field>

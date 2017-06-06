@@ -28,7 +28,12 @@ class SaleConfiguration(models.TransientModel):
     module_sale_margin = fields.Boolean("Margins")
     group_sale_layout = fields.Boolean("Sections on Sales Orders", implied_group='sale.group_sale_layout')
     group_warning_sale = fields.Boolean("Warnings", implied_group='sale.group_warning_sale')
-    module_website_quote = fields.Boolean("Online Quotations & Templates")
+    module_website_quote = fields.Boolean("Quotation Templates")
+    sale_quote_pay = fields.Boolean("Online Signature & Payment")
+    quote_mode_type = fields.Selection([
+        ('signature', 'Signature'),
+        ('payment', 'Payment'),
+    ], string="Quotation Signature & Payment", default='signature')
     group_sale_delivery_address = fields.Boolean("Customer Addresses", implied_group='sale.group_delivery_invoice_address')
     multi_sales_price = fields.Boolean("Multiple sales price per product", default_model='sale.config.settings')
     multi_sales_price_method = fields.Selection([
@@ -104,6 +109,15 @@ class SaleConfiguration(models.TransientModel):
             'multi_sales_price_method': multi_sales_price and sale_pricelist_setting or False
         }
 
+    @api.model
+    def get_default_sale_quote_pay(self, fields):
+        sale_quote_pay = self.env['ir.config_parameter'].sudo().get_param('sale.sale_quote_pay', default=False)
+        return dict(sale_quote_pay=sale_quote_pay)
+
+    @api.multi
+    def set_default_sale_quote_pay(self):
+        self.env['ir.config_parameter'].sudo().set_param("sale.sale_quote_pay", self.sale_quote_pay)
+
     @api.onchange('multi_sales_price', 'multi_sales_price_method')
     def _onchange_sale_price(self):
         if self.multi_sales_price and not self.multi_sales_price_method:
@@ -130,6 +144,11 @@ class SaleConfiguration(models.TransientModel):
                 'group_pricelist_item': False,
             })
 
+    @api.onchange("module_website_quote")
+    def _onchange_module_website_quote(self):
+        if self.module_website_quote:
+            self.sale_quote_pay = True
+
     def set_default_sale_pricelist_setting(self):
         return self.env['ir.values'].sudo().set_default('sale.config.settings', 'sale_pricelist_setting', self.sale_pricelist_setting)
 
@@ -141,6 +160,9 @@ class SaleConfiguration(models.TransientModel):
 
     def set_sale_tax_defaults(self):
         return self.env['ir.values'].sudo().set_default('sale.config.settings', 'sale_show_tax', self.sale_show_tax)
+
+    def set_quote_mode_type_defaults(self):
+        return self.env['ir.values'].sudo().set_default('sale.config.settings', 'quote_mode_type', self.quote_mode_type)
 
     @api.onchange('sale_show_tax')
     def _onchange_sale_tax(self):

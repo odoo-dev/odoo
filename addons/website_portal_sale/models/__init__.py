@@ -4,4 +4,3 @@
 from . import account_invoice
 from . import crm_team
 from . import sale_order
-from . import payment

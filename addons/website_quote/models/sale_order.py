@@ -53,8 +53,8 @@ class SaleOrder(models.Model):
                 so.website_url = '/quote/%s' % (so.id)
 
     access_token = fields.Char(
-        'Security Token', copy=False, default=lambda self: str(uuid.uuid4()),
-        required=True)
+        related="payment_request_id.access_token",
+        string='Security Token', copy=False, required=True)
     template_id = fields.Many2one(
         'sale.quote.template', 'Quotation Template',
         readonly=True,
@@ -64,14 +64,11 @@ class SaleOrder(models.Model):
         'sale.order.option', 'order_id', 'Optional Products Lines',
         copy=True, readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
-    amount_undiscounted = fields.Float(
-        'Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
     quote_viewed = fields.Boolean('Quotation Viewed')
-    require_payment = fields.Selection([
+    require_payment = fields.Selection(selection_add=[
         (0, 'Not mandatory on website quote validation'),
         (1, 'Immediate after website order validation'),
-        (2, 'Immediate after website order validation and save a token'),
-    ], 'Payment', help="Require immediate payment by the customer when validating the order from the website quote")
+        (2, 'Immediate after website order validation and save a token')])
 
     @api.multi
     def copy(self, default=None):
@@ -79,13 +76,6 @@ class SaleOrder(models.Model):
             default = dict(default or {})
             default['validity_date'] = fields.Date.to_string(datetime.now() + timedelta(self.template_id.number_of_days))
         return super(SaleOrder, self).copy(default=default)
-
-    @api.one
-    def _compute_amount_undiscounted(self):
-        total = 0.0
-        for line in self.order_line:
-            total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??
-        self.amount_undiscounted = total
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -167,7 +157,7 @@ class SaleOrder(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'target': 'self',
-            'url': '/quote/%s/%s' % (self.id, self.access_token)
+            'url': '/quote/%s' % self.access_token
         }
 
     @api.multi
@@ -178,21 +168,10 @@ class SaleOrder(models.Model):
             return super(SaleOrder, self).get_access_action()
         return {
             'type': 'ir.actions.act_url',
-            'url': '/quote/%s/%s' % (self.id, self.access_token),
+            'url': '/quote/%s' % self.access_token,
             'target': 'self',
             'res_id': self.id,
         }
-
-    @api.multi
-    def _confirm_online_quote(self, transaction):
-        """ Payment callback: validate the order and write transaction details in chatter """
-        # create draft invoice if transaction is ok
-        if transaction and transaction.state == 'done':
-            transaction._confirm_so()
-            message = _('Order paid by %s. Transaction: %s. Amount: %s.') % (transaction.partner_id.name, transaction.acquirer_reference, transaction.amount)
-            self.message_post(body=message)
-            return True
-        return False
 
     @api.multi
     def action_confirm(self):
@@ -201,14 +180,6 @@ class SaleOrder(models.Model):
             if order.template_id and order.template_id.mail_template_id:
                 self.template_id.mail_template_id.send_mail(order.id)
         return res
-
-    @api.multi
-    def _get_payment_type(self):
-        self.ensure_one()
-        if self.require_payment == 2:
-            return 'form_save'
-        else:
-            return 'form'
 
 
 class SaleOrderOption(models.Model):

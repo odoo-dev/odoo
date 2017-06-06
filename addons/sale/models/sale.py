@@ -157,6 +157,41 @@ class SaleOrder(models.Model):
     procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
 
     product_id = fields.Many2one('product.product', related='order_line.product_id', string='Product')
+    amount_undiscounted = fields.Float(
+        'Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
+    payment_request_id = fields.Many2one('account.payment.request', string='Request for Online Payment', copy=False)
+    quote_mode_type = fields.Selection([
+        ('signature', 'Signature'),
+        ('payment', 'Payment'),
+    ], string="Quotation Signature & Payment", default='signature', compute='_get_quotation_mode_type')
+    require_payment = fields.Selection([
+        (0, 'Not mandatory on online quote validation'),
+        (1, 'Immediate after online order validation'),
+    ], string="Payment", help="Require immediate payment by the customer when validating the order from the online quote")
+
+    @api.one
+    def _compute_amount_undiscounted(self):
+        total = 0.0
+        for line in self.order_line:
+            total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??
+        self.amount_undiscounted = total
+
+    @api.multi
+    def _get_quotation_mode_type(self):
+        """ Get Quotation mode type, which is define in sale config.
+            that configuration use for set payment require option in quotation
+            and also update frontend view(if we choose payment then
+            show all published payment method for payment process else just
+            open modal for confirmation process with sign option for quotation.
+        """
+        sale_quote_pay = self.env['ir.config_parameter'].get_param('sale.sale_quote_pay')
+        modetype = self.env['ir.values'].sudo().get_default('sale.config.settings', 'quote_mode_type')
+        for order in self:
+            if modetype == 'signature' and sale_quote_pay:
+                order.quote_mode_type = modetype
+                order.require_payment = False
+            else:
+                order.quote_mode_type = modetype or 'signature'
 
     @api.model
     def _get_customer_lead(self, product_tmpl_id):
@@ -388,6 +423,33 @@ class SaleOrder(models.Model):
         return [inv.id for inv in pycompat.values(invoices)]
 
     @api.multi
+    def get_access_action(self):
+        """ Instead of the classic form view, redirect to the online quote if it exists. """
+        self.ensure_one()
+        if not self.env.user.share and not self.env.context.get('force_website'):
+            return super(SaleOrder, self).get_access_action()
+        if not self.payment_request_id:
+            payment_request = self.env['account.payment.request'].create({
+                'order_id': self.id,
+                'due_date': self.validity_date,
+                'currency_id': self.pricelist_id.currency_id.id,
+                'company_id': self.company_id.id,
+                'partner_id': self.partner_id.id,
+                'reference': self.name,
+                'amount_total': self.amount_total,
+            })
+            # when we use self.payment_request_id = payment_request
+            # in that case record doesn't update with payment_request_id
+            # so that, we call write method to store the payment request into the sale order
+            self.write({'payment_request_id': payment_request.id})
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/quote/%s' % self.payment_request_id.access_token,
+            'target': 'self',
+            'res_id': self.id,
+        }
+
+    @api.multi
     def action_draft(self):
         orders = self.filtered(lambda s: s.state in ['cancel', 'sent'])
         orders.write({
@@ -528,6 +590,25 @@ class SaleOrder(models.Model):
     # ==============
     # Payment #
     # ==============
+
+    @api.multi
+    def _get_payment_type(self):
+        self.ensure_one()
+        if self.require_payment == 2:
+            return 'form_save'
+        else:
+            return 'form'
+
+    @api.multi
+    def _confirm_online_quote(self, transaction):
+        """ Payment callback: validate the order and write transaction details in chatter """
+        # create draft invoice if transaction is ok
+        if transaction and transaction.state == 'done':
+            transaction._confirm_so()
+            message = _('Order paid by %s. Transaction: %s. Amount: %s.') % (transaction.partner_id.name, transaction.acquirer_reference, transaction.amount)
+            self.message_post(body=message)
+            return True
+        return False
 
     @api.multi
     def _prepare_payment_acquirer(self, values=None):
