@@ -62,7 +62,7 @@ class AccountJournal(models.Model):
             ('same_sequence', 'Same Invoice Sequence')],
         string='Document Sequence Type',
         default='own_sequence',
-        required=True,
+        required=False,
         help="Use own sequence or invoice sequence on Debit and Credit Notes?"
     )
 
@@ -175,7 +175,7 @@ class AccountJournal(models.Model):
             try:
                 rep_journal_doc.unlink()
                 rep_journal_doc._cr.commit()
-            except:
+            except Exception:
                 # TODO mejorar log que nos daba error
                 _logger.info('Could not unlink doc type')
 
