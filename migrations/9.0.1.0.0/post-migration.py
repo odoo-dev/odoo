@@ -26,7 +26,7 @@ from openupgradelib import openupgrade
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     install_original_modules(env)
-    set_company_loc_ar(env)
+    set_companies_data(env)
     update_receiptbook_type(env)
     remove_base_vat_module(env)
     set_no_gap_to_documents_sequences(env)
@@ -35,9 +35,25 @@ def migrate(env, version):
     # will have this module installed
     migrate_account_transfer_module(env)
 
+    # borramos precision decimal para account (depreciada)
+    decimal_account = env.ref('product.decimal_account', False)
+    if decimal_account:
+        decimal_account.unlink()
+
     # al final lo hacemos en l10n_ar_account porque account_voucher se
     # actualiza después de este módulo y los pagos todavía no están registrados
     # migrate_voucher_data(env)
+
+
+def set_companies_data(env):
+    # seteamos todo suponiendo que todas las cias son ar
+    # en loc ar queremos usar round globally
+    env['res.company'].search([]).write({
+        'tax_calculation_rounding_method': 'round_globally',
+        'accounts_code_digits': 6,
+        'cash_account_code_prefix': '1.1.10.00.',
+        'bank_account_code_prefix': '1.1.10.00.',
+    })
 
 
 def set_no_gap_to_documents_sequences(env):
@@ -81,17 +97,6 @@ def install_original_modules(env):
         """)
 
 
-def set_company_loc_ar(env):
-    cr = env.cr
-    openupgrade.map_values(
-        cr,
-        # openupgrade.get_legacy_name('type_tax_use'), 'localization',
-        'use_argentinian_localization', 'localization',
-        # [('all', 'none')],
-        [(True, 'argentina')],
-        table='res_company', write='sql')
-
-
 def migrate_account_transfer_module(env):
     if openupgrade.table_exists(env.cr, 'account_transfer'):
         migrate_transfer_account(env)
@@ -99,17 +104,16 @@ def migrate_account_transfer_module(env):
 
 
 def migrate_transfer_account(env):
-    cr = env.cr
+    # cr = env.cr
     for company in env['res.company'].search([]):
         transfer_account = company.transfer_account_id
         if not transfer_account:
             continue
         current_assets = env.ref('account.data_account_type_current_assets')
-        openupgrade.logged_query(cr, """
-            UPDATE account_account
-                set reconcile = True, user_type_id = %s
-            WHERE id = %s
-            """, (current_assets.id, transfer_account.id))
+        # we use _write to avoid check of already existing move lines
+        transfer_account._write(
+            {'reconcile': True, 'user_type_id': current_assets.id})
+
         # recompute amounts for lines of this account
         env['account.move.line'].search(
             [('account_id', '=', transfer_account.id)])._amount_residual()
