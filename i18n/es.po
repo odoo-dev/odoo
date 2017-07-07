@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-21 12:49+0000\n"
-"PO-Revision-Date: 2017-05-21 12:49+0000\n"
+"POT-Creation-Date: 2017-07-07 11:37+0000\n"
+"PO-Revision-Date: 2017-07-07 11:37+0000\n"
 "Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
@@ -1220,9 +1220,7 @@ msgstr ""
 
 #. module: account_document
 #: field:account.journal.merge.wizard,from_journal_id:0
-#: field:account.journal.merge.wizard,to_journal_id:0
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_from_journal_id
-#: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_to_journal_id
 msgid "From Journal"
 msgstr "Diario desde"
 
@@ -1685,6 +1683,12 @@ msgstr ""
 #: selection:account.document.type,internal_type:0
 msgid "Ticket"
 msgstr "Ticket"
+
+#. module: account_document
+#: field:account.journal.merge.wizard,to_journal_id:0
+#: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_to_journal_id
+msgid "To Journal"
+msgstr ""
 
 #. module: account_document
 #: field:account.journal.document.type,journal_type:0
