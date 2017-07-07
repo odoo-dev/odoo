@@ -24,7 +24,7 @@ class AccountJournalMergeWizard(models.TransientModel):
     )
     to_journal_id = fields.Many2one(
         'account.journal',
-        'From Journal',
+        'To Journal',
         ondelete='cascade',
         required=True,
         domain="[('type', '=', from_type), ('id', '!=', from_journal_id), "
