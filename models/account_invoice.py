@@ -441,3 +441,21 @@ class AccountInvoice(models.Model):
                 raise Warning(_(
                     'You can not use a %s document type with a invoice') % (
                     internal_type))
+
+    @api.model
+    def _prepare_refund(
+            self, invoice, date_invoice=None,
+            date=None, description=None, journal_id=None):
+        values = super(AccountInvoice, self)._prepare_refund(
+            invoice, date_invoice=date_invoice,
+            date=date, description=description, journal_id=journal_id)
+        refund_journal_document_type_id = self._context.get(
+            'refund_journal_document_type_id', False)
+        refund_document_number = self._context.get(
+            'refund_document_number', False)
+        if refund_journal_document_type_id:
+            values['journal_document_type_id'] = \
+                refund_journal_document_type_id
+        if refund_document_number:
+            values['document_number'] = refund_document_number
+        return values

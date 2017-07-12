@@ -66,6 +66,6 @@ class AccountInvoiceRefund(models.TransientModel):
     @api.multi
     def compute_refund(self, mode='refund'):
         return super(AccountInvoiceRefund, self.with_context(
-            default_journal_document_type_id=self.journal_document_type_id.id,
-            default_document_number=self.document_number,
+            refund_journal_document_type_id=self.journal_document_type_id.id,
+            refund_document_number=self.document_number,
         )).compute_refund(mode=mode)
