@@ -59,7 +59,8 @@ class AccountMove(models.Model):
                     rec.document_type_id.doc_code_prefix or '') + \
                     rec.document_number
             else:
-                display_name = rec.name
+                # si tiene solo document number, lo usamos
+                display_name = rec.document_number or rec.name
             rec.display_name = display_name
 
     @api.multi

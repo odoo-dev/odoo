@@ -196,7 +196,14 @@ class AccountPayment(models.Model):
     def _get_move_vals(self, journal=None):
         vals = super(AccountPayment, self)._get_move_vals()
         vals['document_type_id'] = self.document_type_id.id
-        vals['document_number'] = self.document_number
+        # en las transfer no esta implementado el uso de documentos pero
+        # queremos llevar igual el nro de transfer como doc number para que
+        # sea facil desde los asientos enteder a que hacen referencia
+        if self.payment_type == 'transfer':
+            document_number = self.name
+        else:
+            document_number = self.document_number
+        vals['document_number'] = document_number
         return vals
 
     @api.one
