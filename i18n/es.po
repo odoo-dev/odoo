@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-07 11:37+0000\n"
-"PO-Revision-Date: 2017-07-07 11:37+0000\n"
+"POT-Creation-Date: 2017-07-20 18:37+0000\n"
+"PO-Revision-Date: 2017-07-20 18:37+0000\n"
 "Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
@@ -31,939 +31,11 @@ msgid "%s Supplier Payments"
 msgstr "%s Pagos de Proveedor"
 
 #. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_res_partner_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<!-- add other documents -->\n"
-"                <xpath expr=\"//page[@name='accounting']/group\" position=\"after\">\n"
-"                    <label for=\"other_document_type_ids\"/>\n"
-"                    <field name=\"other_document_type_ids\"/>\n"
-"                </xpath>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<!-- add other documents -->\n"
-"                <xpath expr=\"//page[@name='accounting']/group\" position=\"after\">\n"
-"                    <label for=\"other_document_type_ids\"/>\n"
-"                    <field name=\"other_document_type_ids\"/>\n"
-"                </xpath>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.report_invoice_document
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data inherit_id=\"account.report_invoice_document\">\n"
-"\n"
-"    <xpath expr=\"//h2\" position=\"attributes\">\n"
-"        <attribute name=\"t-if\">not o.use_documents</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//h2\" position=\"after\">\n"
-"        <h2 t-if=\"o.use_documents\">\n"
-"            <span t-field=\"o.document_type_id.report_name\"/>\n"
-"            <span t-field=\"o.document_number\"/>\n"
-"        </h2>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//span[@t-field='l.price_unit']\" position=\"attributes\">\n"
-"        <attribute name=\"t-field\">l.report_price_unit</attribute>\n"
-"    </xpath>\n"
-"\n"
-"<!-- TODO aca podriamos imprimir los report_tax_ids -->\n"
-"<!--     <xpath expr=\"//thead/tr/th[5]\" position=\"attributes\">\n"
-"        <attribute name=\"t-if\">l.report_invoice_line_tax_ids</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//tr[@t-foreach='o.invoice_line_ids']/td[5]\" position=\"attributes\">\n"
-"        <attribute name=\"t-if\">l.report_invoice_line_tax_ids</attribute>\n"
-"    </xpath> -->\n"
-"\n"
-"    <xpath expr=\"//span[@t-field='l.price_subtotal']\" position=\"attributes\">\n"
-"        <attribute name=\"t-field\">l.report_price_subtotal</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//span[@t-field='o.amount_untaxed']\" position=\"attributes\">\n"
-"        <attribute name=\"t-field\">o.report_amount_untaxed</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//div[@t-if='o.tax_line_ids']\" position=\"attributes\">\n"
-"        <attribute name=\"t-if\">o.report_tax_line_ids</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//tr[@t-foreach='o.tax_line_ids']\" position=\"attributes\">\n"
-"        <attribute name=\"t-foreach\">o.report_tax_line_ids</attribute>\n"
-"    </xpath>\n"
-"</data>\n"
-"\n"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data inherit_id=\"account.report_invoice_document\">\n"
-"\n"
-"    <xpath expr=\"//h2\" position=\"attributes\">\n"
-"        <attribute name=\"t-if\">not o.use_documents</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//h2\" position=\"after\">\n"
-"        <h2 t-if=\"o.use_documents\">\n"
-"            <span t-field=\"o.document_type_id.report_name\"/>\n"
-"            <span t-field=\"o.document_number\"/>\n"
-"        </h2>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//span[@t-field='l.price_unit']\" position=\"attributes\">\n"
-"        <attribute name=\"t-field\">l.report_price_unit</attribute>\n"
-"    </xpath>\n"
-"\n"
-"<!-- TODO aca podriamos imprimir los report_tax_ids -->\n"
-"<!--     <xpath expr=\"//thead/tr/th[5]\" position=\"attributes\">\n"
-"        <attribute name=\"t-if\">l.report_invoice_line_tax_ids</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//tr[@t-foreach='o.invoice_line_ids']/td[5]\" position=\"attributes\">\n"
-"        <attribute name=\"t-if\">l.report_invoice_line_tax_ids</attribute>\n"
-"    </xpath> -->\n"
-"\n"
-"    <xpath expr=\"//span[@t-field='l.price_subtotal']\" position=\"attributes\">\n"
-"        <attribute name=\"t-field\">l.report_price_subtotal</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//span[@t-field='o.amount_untaxed']\" position=\"attributes\">\n"
-"        <attribute name=\"t-field\">o.report_amount_untaxed</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//div[@t-if='o.tax_line_ids']\" position=\"attributes\">\n"
-"        <attribute name=\"t-if\">o.report_tax_line_ids</attribute>\n"
-"    </xpath>\n"
-"\n"
-"    <xpath expr=\"//tr[@t-foreach='o.tax_line_ids']\" position=\"attributes\">\n"
-"        <attribute name=\"t-foreach\">o.report_tax_line_ids</attribute>\n"
-"    </xpath>\n"
-"</data>\n"
-"\n"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_move_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"journal_id\" position=\"before\">\n"
-"                <field name=\"display_name\"/>\n"
-"            </field>\n"
-"            <field name=\"ref\" position=\"before\">\n"
-"                <field name=\"document_type_id\"/>\n"
-"                <field name=\"document_number\"/>\n"
-"            </field>\n"
-"        </data>"
-msgstr ""
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_payment_tree
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"name\" position=\"after\">\n"
-"                    <field name=\"display_name\"/>\n"
-"                </field>\n"
-"                <field name=\"name\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"            </data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"name\" position=\"after\">\n"
-"                    <field name=\"display_name\"/>\n"
-"                </field>\n"
-"                <field name=\"name\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"            </data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_payment_search
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"name\" position=\"attributes\">\n"
-"                    <!-- in this case display_name has the or logic -->\n"
-"                    <attribute name=\"filter_domain\">['|', ('display_name','ilike',self), ('communication','ilike',self)]</attribute>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"company_id\">\n"
-"                    <field name=\"receiptbook_id\"/>\n"
-"                </field>\n"
-"\n"
-"                <search>\n"
-"                    <filter string=\"Receiptbook\" context=\"{'group_by':'receiptbook_id'}\"/>\n"
-"                </search>\n"
-"            </data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"name\" position=\"attributes\">\n"
-"                    <!-- in this case display_name has the or logic -->\n"
-"                    <attribute name=\"filter_domain\">['|', ('display_name','ilike',self), ('communication','ilike',self)]</attribute>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"company_id\">\n"
-"                    <field name=\"receiptbook_id\"/>\n"
-"                </field>\n"
-"\n"
-"                <search>\n"
-"                    <filter string=\"Receiptbook\" context=\"{'group_by':'receiptbook_id'}\"/>\n"
-"                </search>\n"
-"            </data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_move_filter
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"name\" position=\"attributes\">\n"
-"                <!-- we keep name on domain just in case we want to search by name but display_name is computed with document_number -->\n"
-"                <attribute name=\"filter_domain\">['|', '|', ('display_name','ilike',self), ('name','ilike',self), ('ref','ilike',self)]</attribute>\n"
-"            </field>\n"
-"<!--                 <field name=\"name\" position=\"after\">\n"
-"                <field name=\"document_number\"/>\n"
-"            </field> -->\n"
-"            <field name=\"partner_id\" position=\"after\">\n"
-"                <field name=\"document_type_id\"/>\n"
-"            </field>\n"
-"            <group>\n"
-"                <filter string=\"Document Type\" domain=\"[]\" context=\"{'group_by':'document_type_id'}\"/>\n"
-"            </group>\n"
-"        </data>"
-msgstr ""
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_move_tree
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"name\" position=\"attributes\">\n"
-"                <attribute name=\"invisible\">1</attribute>\n"
-"            </field>\n"
-"            <field name=\"name\" position=\"after\">\n"
-"                <field name=\"display_name\"/>\n"
-"            </field>\n"
-"<!--                 <field name=\"name\" position=\"after\">\n"
-"                <field name=\"document_type_id\"/>\n"
-"                <field name=\"document_number\"/>\n"
-"            </field> -->\n"
-"        </data>"
-msgstr ""
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_invoice_filter
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"number\" position=\"attributes\">\n"
-"                    <attribute name=\"filter_domain\">['|','|','|','|', ('document_number','ilike',self), ('number','ilike',self), ('origin','ilike',self), ('reference', 'ilike', self), ('partner_id', 'child_of', self)]</attribute>\n"
-"                </field>\n"
-"                <field name=\"partner_id\" position=\"after\">\n"
-"                    <field name=\"document_type_id\"/>\n"
-"                </field>\n"
-"                <group position=\"inside\">\n"
-"                    <filter string=\"Document Type\" domain=\"[]\" context=\"{'group_by':'document_type_id'}\"/>\n"
-"                </group>\n"
-"            </data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"number\" position=\"attributes\">\n"
-"                    <attribute name=\"filter_domain\">['|','|','|','|', ('document_number','ilike',self), ('number','ilike',self), ('origin','ilike',self), ('reference', 'ilike', self), ('partner_id', 'child_of', self)]</attribute>\n"
-"                </field>\n"
-"                <field name=\"partner_id\" position=\"after\">\n"
-"                    <field name=\"document_type_id\"/>\n"
-"                </field>\n"
-"                <group position=\"inside\">\n"
-"                    <filter string=\"Document Type\" domain=\"[]\" context=\"{'group_by':'document_type_id'}\"/>\n"
-"                </group>\n"
-"            </data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.invoice_supplier_tree
-#: model:ir.ui.view,arch_db:account_document.invoice_tree
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"number\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"                <field name=\"number\" position=\"after\">\n"
-"                    <field name=\"display_name\"/>\n"
-"                </field>\n"
-"            </data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><field name=\"number\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"                <field name=\"number\" position=\"after\">\n"
-"                    <field name=\"display_name\"/>\n"
-"                </field>\n"
-"            </data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_invoice_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>\n"
-"                    <field name=\"available_journal_document_type_ids\" invisible=\"1\"/>\n"
-"                    <field name=\"use_documents\" invisible=\"1\"/>\n"
-"                    <field name=\"document_sequence_id\" invisible=\"1\"/>\n"
-"                    <field name=\"localization\" invisible=\"1\"/>\n"
-"                    <field name=\"document_type_internal_type\" invisible=\"1\"/>\n"
-"                </form>\n"
-"\n"
-"                <field name=\"date_invoice\" position=\"before\">\n"
-"                    <field name=\"journal_document_type_id\" attrs=\"{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}\" domain=\"[('id', 'in', available_journal_document_type_ids and available_journal_document_type_ids[0][2] or [])]\"/>\n"
-"                    <field name=\"document_number\" attrs=\"{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}\"/>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"number\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"number\" position=\"before\">\n"
-"                    <field name=\"display_name\" attrs=\"{'invisible': [('display_name', '=', False)]}\" class=\"oe_inline\"/>\n"
-"                    <label string=\"- Next Number: \" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                    <field name=\"next_number\" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                </field>\n"
-"           \n"
-"            </data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>\n"
-"                    <field name=\"available_journal_document_type_ids\" invisible=\"1\"/>\n"
-"                    <field name=\"use_documents\" invisible=\"1\"/>\n"
-"                    <field name=\"document_sequence_id\" invisible=\"1\"/>\n"
-"                    <field name=\"localization\" invisible=\"1\"/>\n"
-"                    <field name=\"document_type_internal_type\" invisible=\"1\"/>\n"
-"                </form>\n"
-"\n"
-"                <field name=\"date_invoice\" position=\"before\">\n"
-"                    <field name=\"journal_document_type_id\" attrs=\"{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}\" domain=\"[('id', 'in', available_journal_document_type_ids and available_journal_document_type_ids[0][2] or [])]\"/>\n"
-"                    <field name=\"document_number\" attrs=\"{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}\"/>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"number\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"number\" position=\"before\">\n"
-"                    <field name=\"display_name\" attrs=\"{'invisible': [('display_name', '=', False)]}\" class=\"oe_inline\"/>\n"
-"                    <label string=\"- Next Number: \" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                    <field name=\"next_number\" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                </field>\n"
-"           \n"
-"            </data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_supplier_invoice_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>\n"
-"                    <field name=\"available_journal_document_type_ids\" invisible=\"1\"/>\n"
-"                    <field name=\"use_documents\" invisible=\"1\"/>\n"
-"                    <field name=\"document_sequence_id\" invisible=\"1\"/>\n"
-"                    <field name=\"localization\" invisible=\"1\"/>\n"
-"                    <field name=\"document_type_internal_type\" invisible=\"1\"/>\n"
-"                </form>\n"
-"\n"
-"                <field name=\"date_invoice\" position=\"before\">\n"
-"                    <field name=\"journal_document_type_id\" attrs=\"{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}\" domain=\"[('id', 'in', available_journal_document_type_ids and available_journal_document_type_ids[0][2] or [])]\"/>\n"
-"                    <field name=\"document_number\" attrs=\"{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}\"/>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"number\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"\n"
-"                <h1 class=\"mt0\" position=\"before\">\n"
-"                    <label string=\"- Next Number: \" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                    <field name=\"next_number\" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                </h1>\n"
-"                <field name=\"number\" position=\"before\">\n"
-"                    <field name=\"display_name\" attrs=\"{'invisible': [('display_name', '=', False)]}\" class=\"oe_inline\"/>\n"
-"                </field>\n"
-"\n"
-"            </data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>\n"
-"                    <field name=\"available_journal_document_type_ids\" invisible=\"1\"/>\n"
-"                    <field name=\"use_documents\" invisible=\"1\"/>\n"
-"                    <field name=\"document_sequence_id\" invisible=\"1\"/>\n"
-"                    <field name=\"localization\" invisible=\"1\"/>\n"
-"                    <field name=\"document_type_internal_type\" invisible=\"1\"/>\n"
-"                </form>\n"
-"\n"
-"                <field name=\"date_invoice\" position=\"before\">\n"
-"                    <field name=\"journal_document_type_id\" attrs=\"{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}\" domain=\"[('id', 'in', available_journal_document_type_ids and available_journal_document_type_ids[0][2] or [])]\"/>\n"
-"                    <field name=\"document_number\" attrs=\"{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}\"/>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"number\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"\n"
-"                <h1 class=\"mt0\" position=\"before\">\n"
-"                    <label string=\"- Next Number: \" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                    <field name=\"next_number\" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                </h1>\n"
-"                <field name=\"number\" position=\"before\">\n"
-"                    <field name=\"display_name\" attrs=\"{'invisible': [('display_name', '=', False)]}\" class=\"oe_inline\"/>\n"
-"                </field>\n"
-"\n"
-"            </data>"
-
-#. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_account_payment_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>\n"
-"                    <field name=\"document_sequence_id\" invisible=\"1\"/> \n"
-"                    <field name=\"localization\" invisible=\"1\"/>\n"
-"                    <field name=\"company_id\" invisible=\"1\"/>\n"
-"                </form> \n"
-"                <field name=\"payment_date\" position=\"before\">\n"
-"\n"
-"                    <!-- only required on posted state for compatibility if you install this module with payments already created -->\n"
-"                    <field name=\"receiptbook_id\" attrs=\"{'invisible': ['|', ('localization', '=', False), ('payment_type', '=', 'transfer')], 'required':[('payment_type', '!=', 'transfer'), ('localization', '!=', False), ('state', '=', 'draft')]}\" domain=\"[('partner_type', '=', partner_type), ('company_id', '=', company_id)]\"/>\n"
-"                    <field name=\"document_number\" attrs=\"{'invisible': ['|', ('payment_type', '=', 'transfer'), '|', ('document_sequence_id', '!=', False), ('localization', '=', False)], 'required': [('payment_type', '!=', 'transfer'), ('document_sequence_id', '=', False), ('localization', '!=', False)]}\"/>\n"
-"                    <!-- por ahora no agregamos esto, vamos a ver si alguien lo pide -->\n"
-"                    <!-- <field name=\"manual_prefix\" attrs=\"{'invisible':['|',('document_sequence_id', '!=', False), ('state','!=','draft')]}\"/> -->\n"
-"                    <!-- <field name=\"manual_sufix\" attrs=\"{'invisible':['|',('document_sequence_id', '!=', False), ('state', '!=', 'draft')], 'required':[('document_sequence_id', '=', False), ('localization', '!=', False)]}\"/> -->\n"
-"                    <!-- <field name=\"next_receipt_number\" attrs=\"{'invisible':['|',('receiptbook_sequence_type','!=','automatic'), ('state','!=','draft')]}\"/> -->\n"
-"                    <!-- we disable for now, probably depreciated, used by sirpeco yet -->\n"
-"                    <!-- <field name=\"force_number\" attrs=\"{'invisible':['|',('receiptbook_sequence_type','!=','automatic'),('state','!=','draft')]}\"/> -->\n"
-"                </field>\n"
-"\n"
-"                <!-- similar a en facturas -->\n"
-"                <!-- sacamos el attrs para que sea visible siempre -->\n"
-"                <div class=\"oe_title\" position=\"attributes\">\n"
-"                    <attribute name=\"attrs\"/>\n"
-"                </div>\n"
-"                <field name=\"name\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"name\" position=\"before\">\n"
-"                    <field name=\"display_name\" attrs=\"{'invisible': [('display_name', '=', False)]}\" class=\"oe_inline\"/>\n"
-"                    <label string=\"- Next Number: \" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                    <field name=\"next_number\" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                </field>\n"
-"            </data>"
+#: model:ir.ui.view,arch_db:account_document.view_invoice_form
+#: model:ir.ui.view,arch_db:account_document.view_supplier_invoice_form
+msgid "- Next Number:"
 msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>\n"
-"                    <field name=\"document_sequence_id\" invisible=\"1\"/> \n"
-"                    <field name=\"localization\" invisible=\"1\"/>\n"
-"                    <field name=\"company_id\" invisible=\"1\"/>\n"
-"                </form> \n"
-"                <field name=\"payment_date\" position=\"before\">\n"
-"\n"
-"                    <!-- only required on posted state for compatibility if you install this module with payments already created -->\n"
-"                    <field name=\"receiptbook_id\" attrs=\"{'invisible': ['|', ('localization', '=', False), ('payment_type', '=', 'transfer')], 'required':[('payment_type', '!=', 'transfer'), ('localization', '!=', False), ('state', '=', 'draft')]}\" domain=\"[('partner_type', '=', partner_type), ('company_id', '=', company_id)]\"/>\n"
-"                    <field name=\"document_number\" attrs=\"{'invisible': ['|', ('payment_type', '=', 'transfer'), '|', ('document_sequence_id', '!=', False), ('localization', '=', False)], 'required': [('payment_type', '!=', 'transfer'), ('document_sequence_id', '=', False), ('localization', '!=', False)]}\"/>\n"
-"                    <!-- por ahora no agregamos esto, vamos a ver si alguien lo pide -->\n"
-"                    <!-- <field name=\"manual_prefix\" attrs=\"{'invisible':['|',('document_sequence_id', '!=', False), ('state','!=','draft')]}\"/> -->\n"
-"                    <!-- <field name=\"manual_sufix\" attrs=\"{'invisible':['|',('document_sequence_id', '!=', False), ('state', '!=', 'draft')], 'required':[('document_sequence_id', '=', False), ('localization', '!=', False)]}\"/> -->\n"
-"                    <!-- <field name=\"next_receipt_number\" attrs=\"{'invisible':['|',('receiptbook_sequence_type','!=','automatic'), ('state','!=','draft')]}\"/> -->\n"
-"                    <!-- we disable for now, probably depreciated, used by sirpeco yet -->\n"
-"                    <!-- <field name=\"force_number\" attrs=\"{'invisible':['|',('receiptbook_sequence_type','!=','automatic'),('state','!=','draft')]}\"/> -->\n"
-"                </field>\n"
-"\n"
-"                <!-- similar a en facturas -->\n"
-"                <!-- sacamos el attrs para que sea visible siempre -->\n"
-"                <div class=\"oe_title\" position=\"attributes\">\n"
-"                    <attribute name=\"attrs\"/>\n"
-"                </div>\n"
-"                <field name=\"name\" position=\"attributes\">\n"
-"                    <attribute name=\"invisible\">1</attribute>\n"
-"                </field>\n"
-"\n"
-"                <field name=\"name\" position=\"before\">\n"
-"                    <field name=\"display_name\" attrs=\"{'invisible': [('display_name', '=', False)]}\" class=\"oe_inline\"/>\n"
-"                    <label string=\"- Next Number: \" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                    <field name=\"next_number\" attrs=\"{'invisible': [('next_number', 'in', (0, False))]}\" class=\"oe_inline\"/>\n"
-"                </field>\n"
-"            </data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_journal_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>\n"
-"                    <field name=\"id\" invisible=\"1\"/>\n"
-"                    <field name=\"localization\" invisible=\"1\"/>\n"
-"                </form>\n"
-"\n"
-"                <!-- This was just in case we want to replace  -->\n"
-"<!--                 <field name=\"refund_sequence\" position=\"attributes\">\n"
-"                    <attribute name=\"attrs\">{'invisible': ['|', ('type', 'not in', ['sale', 'purchase']), ('use_documents', '=', True)]}</attribute>\n"
-"                </field>\n"
-"                <field name=\"sequence_id\" position=\"attributes\">\n"
-"                    <attribute name=\"attrs\">{'invisible': [('type', 'in', ['sale', 'purchase']), ('use_documents', '=', True)]}</attribute>\n"
-"                </field>\n"
-"                <field name=\"refund_sequence_id\" position=\"attributes\">\n"
-"                    <attribute name=\"attrs\">{'invisible': ['|', '|', ('type', 'not in', ['sale', 'purchase']), ('refund_sequence', '!=', True), ('use_documents', '=', True)]}</attribute>\n"
-"                </field> -->\n"
-"\n"
-"                <field name=\"type\" position=\"after\">\n"
-"                    <field name=\"use_documents\" attrs=\"{'invisible': [('type','not in',['purchase','sale','purchase_refund','sale_refund'])]}\"/>\n"
-"                </field>\n"
-"                <notebook position=\"inside\">\n"
-"                    <page string=\"Documents\" attrs=\"{'invisible': ['|',('use_documents','=',False),('type','not in',['purchase','sale','purchase_refund','sale_refund'])]}\">\n"
-"                        <group>\n"
-"                            <field name=\"document_sequence_type\" attrs=\"{'required': [('use_documents', '=', True),('type', 'in', ['purchase','sale'])]}\"/>\n"
-"                        </group>\n"
-"                        <button name=\"update_journal_document_types\" type=\"object\" string=\"Update Documents\"/>\n"
-"                        <field name=\"journal_document_type_ids\" context=\"{'default_journal_id': id, 'editable': 1}\"/>\n"
-"                    </page>\n"
-"                </notebook>\n"
-"            </data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>\n"
-"                    <field name=\"id\" invisible=\"1\"/>\n"
-"                    <field name=\"localization\" invisible=\"1\"/>\n"
-"                </form>\n"
-"\n"
-"                <!-- This was just in case we want to replace  -->\n"
-"<!--                 <field name=\"refund_sequence\" position=\"attributes\">\n"
-"                    <attribute name=\"attrs\">{'invisible': ['|', ('type', 'not in', ['sale', 'purchase']), ('use_documents', '=', True)]}</attribute>\n"
-"                </field>\n"
-"                <field name=\"sequence_id\" position=\"attributes\">\n"
-"                    <attribute name=\"attrs\">{'invisible': [('type', 'in', ['sale', 'purchase']), ('use_documents', '=', True)]}</attribute>\n"
-"                </field>\n"
-"                <field name=\"refund_sequence_id\" position=\"attributes\">\n"
-"                    <attribute name=\"attrs\">{'invisible': ['|', '|', ('type', 'not in', ['sale', 'purchase']), ('refund_sequence', '!=', True), ('use_documents', '=', True)]}</attribute>\n"
-"                </field> -->\n"
-"\n"
-"                <field name=\"type\" position=\"after\">\n"
-"                    <field name=\"use_documents\" attrs=\"{'invisible': [('type','not in',['purchase','sale','purchase_refund','sale_refund'])]}\"/>\n"
-"                </field>\n"
-"                <notebook position=\"inside\">\n"
-"                    <page string=\"Documents\" attrs=\"{'invisible': ['|',('use_documents','=',False),('type','not in',['purchase','sale','purchase_refund','sale_refund'])]}\">\n"
-"                        <group>\n"
-"                            <field name=\"document_sequence_type\" attrs=\"{'required': [('use_documents', '=', True),('type', 'in', ['purchase','sale'])]}\"/>\n"
-"                        </group>\n"
-"                        <button name=\"update_journal_document_types\" type=\"object\" string=\"Update Documents\"/>\n"
-"                        <field name=\"journal_document_type_ids\" context=\"{'default_journal_id': id, 'editable': 1}\"/>\n"
-"                    </page>\n"
-"                </notebook>\n"
-"            </data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_invoice
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>   \n"
-"                    <field name=\"available_journal_document_type_ids\" invisible=\"1\"/>\n"
-"                    <field name=\"use_documents\" invisible=\"1\"/>\n"
-"                    <field name=\"document_sequence_id\" invisible=\"1\"/>\n"
-"                    <field name=\"invoice_id\" invisible=\"1\"/>\n"
-"                </form>           \n"
-"                <field name=\"date_invoice\" position=\"before\">           \n"
-"                    <field name=\"journal_document_type_id\" attrs=\"{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)]}\" domain=\"[('id', 'in', available_journal_document_type_ids and available_journal_document_type_ids[0][2] or [])]\"/>\n"
-"                    <field name=\"document_number\" attrs=\"{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)]}\"/>\n"
-"                </field>\n"
-"            </data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><form>   \n"
-"                    <field name=\"available_journal_document_type_ids\" invisible=\"1\"/>\n"
-"                    <field name=\"use_documents\" invisible=\"1\"/>\n"
-"                    <field name=\"document_sequence_id\" invisible=\"1\"/>\n"
-"                    <field name=\"invoice_id\" invisible=\"1\"/>\n"
-"                </form>           \n"
-"                <field name=\"date_invoice\" position=\"before\">           \n"
-"                    <field name=\"journal_document_type_id\" attrs=\"{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)]}\" domain=\"[('id', 'in', available_journal_document_type_ids and available_journal_document_type_ids[0][2] or [])]\"/>\n"
-"                    <field name=\"document_number\" attrs=\"{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)]}\"/>\n"
-"                </field>\n"
-"            </data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_invoice_report_search_inherit
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><search>\n"
-"\t\t\t\t\t<field name=\"document_type_id\"/>\n"
-"\t\t\t\t</search>\n"
-"\t\t\t\t<filter name=\"user\" position=\"after\">\n"
-"\t\t\t\t\t<filter domain=\"[]\" string=\"Document Type\" context=\"{'group_by':'document_type_id'}\"/>\n"
-"\t\t\t\t</filter>\n"
-"\t\t\t</data>"
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<data><search>\n"
-"\t\t\t\t\t<field name=\"document_type_id\"/>\n"
-"\t\t\t\t</search>\n"
-"\t\t\t\t<filter name=\"user\" position=\"after\">\n"
-"\t\t\t\t\t<filter domain=\"[]\" string=\"Document Type\" context=\"{'group_by':'document_type_id'}\"/>\n"
-"\t\t\t\t</filter>\n"
-"\t\t\t</data>"
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_move_line_filter
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<data><separator position=\"before\">\n"
-"                <field name=\"document_type_id\"/>\n"
-"            </separator>\n"
-"            <group>\n"
-"                <filter string=\"Document Type\" domain=\"[]\" context=\"{'group_by':'document_type_id'}\"/>\n"
-"            </group>\n"
-"        </data>"
-msgstr ""
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_chart_template_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<field name=\"name\" position=\"after\">\n"
-"                    <field name=\"localization\"/>\n"
-"                </field>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<field name=\"name\" position=\"after\">\n"
-"                    <field name=\"localization\"/>\n"
-"                </field>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_company_inherit_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<field name=\"partner_id\" position=\"before\">\n"
-"                    <field name=\"localization\" widget=\"selection\"/>\n"
-"                </field>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<field name=\"partner_id\" position=\"before\">\n"
-"                    <field name=\"localization\" widget=\"selection\"/>\n"
-"                </field>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_document_type_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<form string=\"Document Type\">\n"
-"                    <group>\n"
-"                        <field name=\"code\"/>\n"
-"                        <field name=\"name\"/>\n"
-"                        <field name=\"doc_code_prefix\"/>\n"
-"                        <field name=\"report_name\"/>\n"
-"                        <field name=\"internal_type\"/>\n"
-"                        <field name=\"localization\"/>\n"
-"                        <field name=\"validator_id\"/>\n"
-"                        <field name=\"taxes_included\"/>\n"
-"                        <field name=\"active\"/>\n"
-"                    </group>\n"
-"                </form>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<form string=\"Document Type\">\n"
-"                    <group>\n"
-"                        <field name=\"code\"/>\n"
-"                        <field name=\"name\"/>\n"
-"                        <field name=\"doc_code_prefix\"/>\n"
-"                        <field name=\"report_name\"/>\n"
-"                        <field name=\"internal_type\"/>\n"
-"                        <field name=\"localization\"/>\n"
-"                        <field name=\"validator_id\"/>\n"
-"                        <field name=\"taxes_included\"/>\n"
-"                        <field name=\"active\"/>\n"
-"                    </group>\n"
-"                </form>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_journal_document_type_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<form string=\"Journal Documents Types\">\n"
-"                    <header>\n"
-"                    </header>\n"
-"                    <sheet>\n"
-"                        <field name=\"journal_type\" invisible=\"1\"/>\n"
-"                        <field name=\"journal_id\" invisible=\"1\"/>\n"
-"                        <group>\n"
-"                            <group>\n"
-"                                <field name=\"document_type_id\" readonly=\"not context.get('editable')\"/>\n"
-"                                <field name=\"sequence_id\" readonly=\"not context.get('editable')\"/>\n"
-"                            </group>\n"
-"                        </group>\n"
-"                    </sheet>\n"
-"                </form>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<form string=\"Journal Documents Types\">\n"
-"                    <header>\n"
-"                    </header>\n"
-"                    <sheet>\n"
-"                        <field name=\"journal_type\" invisible=\"1\"/>\n"
-"                        <field name=\"journal_id\" invisible=\"1\"/>\n"
-"                        <group>\n"
-"                            <group>\n"
-"                                <field name=\"document_type_id\" readonly=\"not context.get('editable')\"/>\n"
-"                                <field name=\"sequence_id\" readonly=\"not context.get('editable')\"/>\n"
-"                            </group>\n"
-"                        </group>\n"
-"                    </sheet>\n"
-"                </form>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<form string=\"Merge Journal\">\n"
-"                    <p>All Journal entries, invoices, etc will be moved from \"From Journal\" to \"To journal\"</p>\n"
-"                    <group>\n"
-"                        <field name=\"from_journal_id\"/>\n"
-"                        <field name=\"to_journal_id\"/>\n"
-"                        <field name=\"delete_from_journal\"/>\n"
-"                        <field name=\"from_type\" invisible=\"1\"/>\n"
-"                        <field name=\"from_company_id\" invisible=\"1\"/>\n"
-"                    </group>\n"
-"                    <footer>\n"
-"                        <button string=\"Confirm\" name=\"confirm\" type=\"object\" class=\"oe_highlight\" confirm=\"Are you sure? This can not be undone, please be sure to understand what you are doing\"/>\n"
-"                        or\n"
-"                        <button string=\"Cancel\" class=\"oe_link\" special=\"cancel\"/>\n"
-"                    </footer>\n"
-"                </form>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<form string=\"Merge Journal\">\n"
-"                    <p>All Journal entries, invoices, etc will be moved from \"From Journal\" to \"To journal\"</p>\n"
-"                    <group>\n"
-"                        <field name=\"from_journal_id\"/>\n"
-"                        <field name=\"to_journal_id\"/>\n"
-"                        <field name=\"delete_from_journal\"/>\n"
-"                        <field name=\"from_type\" invisible=\"1\"/>\n"
-"                        <field name=\"from_company_id\" invisible=\"1\"/>\n"
-"                    </group>\n"
-"                    <footer>\n"
-"                        <button string=\"Confirm\" name=\"confirm\" type=\"object\" class=\"oe_highlight\" confirm=\"Are you sure? This can not be undone, please be sure to understand what you are doing\"/>\n"
-"                        or\n"
-"                        <button string=\"Cancel\" class=\"oe_link\" special=\"cancel\"/>\n"
-"                    </footer>\n"
-"                </form>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_form
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<form string=\"Receipt Books\"> \n"
-"                    <sheet string=\"Receipt Books\">\n"
-"                        <group>\n"
-"                            <group>\n"
-"                                <field name=\"name\"/>\n"
-"                                <field name=\"partner_type\"/>\n"
-"                                <field name=\"sequence_type\"/>\n"
-"                                <field name=\"padding\" attrs=\"{'invisible':[('sequence_type','!=','manual')],'required':[('sequence_type','=','manual')]}\"/>\n"
-"                                <field name=\"prefix\"/>\n"
-"                            </group>\n"
-"                            <group>\n"
-"                                <field name=\"document_type_id\"/>\n"
-"                                <field name=\"sequence_id\" attrs=\"{'invisible':[('sequence_type','!=','automatic')]}\"/>\n"
-"                                <field name=\"next_number\" attrs=\"{'invisible':[('sequence_type','!=','automatic')]}\"/>\n"
-"                                <field name=\"company_id\" widget=\"selection\" groups=\"base.group_multi_company\"/>\n"
-"                                <field name=\"active\"/>\n"
-"                            </group>\n"
-"                        </group>\n"
-"                    </sheet>\n"
-"                </form>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<form string=\"Receipt Books\"> \n"
-"                    <sheet string=\"Receipt Books\">\n"
-"                        <group>\n"
-"                            <group>\n"
-"                                <field name=\"name\"/>\n"
-"                                <field name=\"partner_type\"/>\n"
-"                                <field name=\"sequence_type\"/>\n"
-"                                <field name=\"padding\" attrs=\"{'invisible':[('sequence_type','!=','manual')],'required':[('sequence_type','=','manual')]}\"/>\n"
-"                                <field name=\"prefix\"/>\n"
-"                            </group>\n"
-"                            <group>\n"
-"                                <field name=\"document_type_id\"/>\n"
-"                                <field name=\"sequence_id\" attrs=\"{'invisible':[('sequence_type','!=','automatic')]}\"/>\n"
-"                                <field name=\"next_number\" attrs=\"{'invisible':[('sequence_type','!=','automatic')]}\"/>\n"
-"                                <field name=\"company_id\" widget=\"selection\" groups=\"base.group_multi_company\"/>\n"
-"                                <field name=\"active\"/>\n"
-"                            </group>\n"
-"                        </group>\n"
-"                    </sheet>\n"
-"                </form>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<search string=\"Document Type\">\n"
-"                    <field name=\"name\"/>\n"
-"                    <field name=\"code\"/>\n"
-"                    <field name=\"internal_type\"/>\n"
-"                    <field name=\"localization\"/>\n"
-"                    <group expand=\"1\" string=\"Group By...\">\n"
-"                        <filter string=\"Internal Type\" name=\"group_by_internal_type\" context=\"{'group_by':'internal_type'}\"/>\n"
-"                        <filter string=\"Localization\" name=\"group_by_localization\" context=\"{'group_by':'localization'}\"/>\n"
-"                    </group>\n"
-"                </search>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<search string=\"Document Type\">\n"
-"                    <field name=\"name\"/>\n"
-"                    <field name=\"code\"/>\n"
-"                    <field name=\"internal_type\"/>\n"
-"                    <field name=\"localization\"/>\n"
-"                    <group expand=\"1\" string=\"Group By...\">\n"
-"                        <filter string=\"Internal Type\" name=\"group_by_internal_type\" context=\"{'group_by':'internal_type'}\"/>\n"
-"                        <filter string=\"Localization\" name=\"group_by_localization\" context=\"{'group_by':'localization'}\"/>\n"
-"                    </group>\n"
-"                </search>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_search
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<search string=\"Receipt Books\">\n"
-"                    <field name=\"name\"/>\n"
-"                    <field name=\"sequence_type\"/>\n"
-"                    <field name=\"partner_type\"/>\n"
-"                    <field name=\"document_type_id\"/>\n"
-"                    <field name=\"company_id\" widget=\"selection\" groups=\"base.group_multi_company\"/>\n"
-"                </search>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<search string=\"Receipt Books\">\n"
-"                    <field name=\"name\"/>\n"
-"                    <field name=\"sequence_type\"/>\n"
-"                    <field name=\"partner_type\"/>\n"
-"                    <field name=\"document_type_id\"/>\n"
-"                    <field name=\"company_id\" widget=\"selection\" groups=\"base.group_multi_company\"/>\n"
-"                </search>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_document_type_tree
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<tree string=\"Document Type\">\n"
-"                    <field name=\"sequence\" widget=\"handle\"/>\n"
-"                    <field name=\"code\"/>\n"
-"                    <field name=\"name\"/>\n"
-"                    <field name=\"doc_code_prefix\"/>\n"
-"                    <field name=\"report_name\"/>\n"
-"                    <field name=\"internal_type\"/>\n"
-"                    <field name=\"localization\"/>\n"
-"                </tree>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<tree string=\"Document Type\">\n"
-"                    <field name=\"sequence\" widget=\"handle\"/>\n"
-"                    <field name=\"code\"/>\n"
-"                    <field name=\"name\"/>\n"
-"                    <field name=\"doc_code_prefix\"/>\n"
-"                    <field name=\"report_name\"/>\n"
-"                    <field name=\"internal_type\"/>\n"
-"                    <field name=\"localization\"/>\n"
-"                </tree>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_journal_document_type_tree
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<tree string=\"Journal Documents Types\" editable=\"top\">\n"
-"                    <field name=\"sequence\" widget=\"handle\"/>\n"
-"                    <field name=\"document_type_id\"/>\n"
-"                    <field name=\"sequence_id\"/>\n"
-"                    <field name=\"next_number\"/>\n"
-"                    <field name=\"journal_type\" invisible=\"1\"/>\n"
-"                </tree>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<tree string=\"Journal Documents Types\" editable=\"top\">\n"
-"                    <field name=\"sequence\" widget=\"handle\"/>\n"
-"                    <field name=\"document_type_id\"/>\n"
-"                    <field name=\"sequence_id\"/>\n"
-"                    <field name=\"next_number\"/>\n"
-"                    <field name=\"journal_type\" invisible=\"1\"/>\n"
-"                </tree>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_tree
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<tree string=\"Receipt Books\">\n"
-"                    <field name=\"sequence\" widget=\"handle\"/>\n"
-"                    <field name=\"name\"/>\n"
-"                    <field name=\"sequence_type\"/>\n"
-"                    <field name=\"partner_type\"/>\n"
-"                    <field name=\"document_type_id\"/>\n"
-"                    <field name=\"company_id\" widget=\"selection\" groups=\"base.group_multi_company\"/>\n"
-"                </tree>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<tree string=\"Receipt Books\">\n"
-"                    <field name=\"sequence\" widget=\"handle\"/>\n"
-"                    <field name=\"name\"/>\n"
-"                    <field name=\"sequence_type\"/>\n"
-"                    <field name=\"partner_type\"/>\n"
-"                    <field name=\"document_type_id\"/>\n"
-"                    <field name=\"company_id\" widget=\"selection\" groups=\"base.group_multi_company\"/>\n"
-"                </tree>\n"
-"            "
-
-#. module: account_document
-#: model:ir.ui.view,arch_db:account_document.view_account_config_settings
-msgid ""
-"<?xml version=\"1.0\"?>\n"
-"<xpath expr=\"//group[2]/div/div[2]\" position=\"after\">\n"
-"                    <div name=\"localization\" attrs=\"{'invisible':[('has_chart_of_accounts','!=',False)]}\">\n"
-"                        <label for=\"localization\"/>\n"
-"                        <field name=\"localization\" class=\"oe_inline\"/>\n"
-"                    </div>\n"
-"                    <div name=\"sale_use_documents\" groups=\"base.group_no_one\">\n"
-"                        <label for=\"sale_use_documents\" attrs=\"{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}\"/>\n"
-"                        <field name=\"sale_use_documents\" class=\"oe_inline\" attrs=\"{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}\"/>\n"
-"                    </div>\n"
-"                    <div name=\"purchase_use_documents\" groups=\"base.group_no_one\">\n"
-"                        <label for=\"purchase_use_documents\" attrs=\"{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}\"/>\n"
-"                        <field name=\"purchase_use_documents\" class=\"oe_inline\" attrs=\"{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}\"/>\n"
-"                    </div>\n"
-"                </xpath>\n"
-"            "
-msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<xpath expr=\"//group[2]/div/div[2]\" position=\"after\">\n"
-"                    <div name=\"localization\" attrs=\"{'invisible':[('has_chart_of_accounts','!=',False)]}\">\n"
-"                        <label for=\"localization\"/>\n"
-"                        <field name=\"localization\" class=\"oe_inline\"/>\n"
-"                    </div>\n"
-"                    <div name=\"sale_use_documents\" groups=\"base.group_no_one\">\n"
-"                        <label for=\"sale_use_documents\" attrs=\"{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}\"/>\n"
-"                        <field name=\"sale_use_documents\" class=\"oe_inline\" attrs=\"{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}\"/>\n"
-"                    </div>\n"
-"                    <div name=\"purchase_use_documents\" groups=\"base.group_no_one\">\n"
-"                        <label for=\"purchase_use_documents\" attrs=\"{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}\"/>\n"
-"                        <field name=\"purchase_use_documents\" class=\"oe_inline\" attrs=\"{'invisible':['|', ('has_chart_of_accounts','!=',False), ('localization','=',False)]}\"/>\n"
-"                    </div>\n"
-"                </xpath>\n"
-"            "
 
 #. module: account_document
 #: model:ir.model,name:account_document.model_account_document_type
@@ -981,18 +53,29 @@ msgid "Account payment Receiptbook"
 msgstr "Talonario de Pago"
 
 #. module: account_document
-#: field:account.document.type,active:0
-#: field:account.payment.receiptbook,active:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_active
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_active
 msgid "Active"
 msgstr "Activo"
 
 #. module: account_document
-#: field:account.invoice.line,report_price_subtotal:0
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
+msgid ""
+"All Journal entries, invoices, etc will be moved from \"From Journal\" to "
+"\"To journal\""
+msgstr ""
+
+#. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_price_subtotal
 msgid "Amount"
 msgstr "Importe"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
+msgid ""
+"Are you sure? This can not be undone, please be sure to understand what you "
+"are doing"
+msgstr ""
 
 #. module: account_document
 #: selection:account.payment.receiptbook,sequence_type:0
@@ -1002,21 +85,22 @@ msgid "Automatic"
 msgstr "Automático"
 
 #. module: account_document
-#: field:account.invoice,available_journal_document_type_ids:0
-#: field:account.invoice.refund,available_journal_document_type_ids:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_available_journal_document_type_ids
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_available_journal_document_type_ids
 msgid "Available Journal Document Types"
 msgstr "Tipos de Documentos Disponibles"
 
 #. module: account_document
-#: field:account.document.type,code:0
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
+msgid "Cancel"
+msgstr ""
+
+#. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_code
 msgid "Code"
 msgstr "Código"
 
 #. module: account_document
-#: help:account.document.type,code:0
 #: model:ir.model.fields,help:account_document.field_account_document_type_code
 msgid "Code used by differents localizations"
 msgstr "Código utilizado por diferentes localizaciones"
@@ -1027,9 +111,6 @@ msgid "Companies"
 msgstr "Compañías"
 
 #. module: account_document
-#: field:account.document.type,company_id:0
-#: field:account.journal.merge.wizard,from_company_id:0
-#: field:account.payment.receiptbook,company_id:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_company_id
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_from_company_id
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_company_id
@@ -1037,16 +118,16 @@ msgid "Company"
 msgstr "Compañía"
 
 #. module: account_document
-#: help:account.journal.merge.wizard,from_company_id:0
 #: model:ir.model.fields,help:account_document.field_account_journal_merge_wizard_from_company_id
 msgid "Company related to this journal"
 msgstr "Compañía relacionada a este diario"
 
 #. module: account_document
-#: field:account.document.type,create_uid:0
-#: field:account.journal.document.type,create_uid:0
-#: field:account.journal.merge.wizard,create_uid:0
-#: field:account.payment.receiptbook,create_uid:0
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
+msgid "Confirm"
+msgstr ""
+
+#. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_create_uid
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_create_uid
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_create_uid
@@ -1055,10 +136,6 @@ msgid "Created by"
 msgstr "Creado por"
 
 #. module: account_document
-#: field:account.document.type,create_date:0
-#: field:account.journal.document.type,create_date:0
-#: field:account.journal.merge.wizard,create_date:0
-#: field:account.payment.receiptbook,create_date:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_create_date
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_create_date
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_create_date
@@ -1087,16 +164,11 @@ msgid "Debit Notes"
 msgstr "Notas de Débito"
 
 #. module: account_document
-#: field:account.journal.merge.wizard,delete_from_journal:0
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_delete_from_journal
 msgid "Delete from journal"
 msgstr "Borrar diario desde"
 
 #. module: account_document
-#: field:account.document.type,display_name:0
-#: field:account.journal.document.type,display_name:0
-#: field:account.journal.merge.wizard,display_name:0
-#: field:account.payment.receiptbook,display_name:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_display_name
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_display_name
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_display_name
@@ -1105,16 +177,11 @@ msgid "Display Name"
 msgstr "Nombre a Mostrar"
 
 #. module: account_document
-#: field:account.document.type,doc_code_prefix:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_doc_code_prefix
 msgid "Document Code Prefix"
 msgstr "Prefijo del Código de Impuesto"
 
 #. module: account_document
-#: field:account.invoice,document_number:0
-#: field:account.invoice.refund,document_number:0
-#: field:account.move,document_number:0
-#: field:account.payment,document_number:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_document_number
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_document_number
 #: model:ir.model.fields,field_description:account_document.field_account_move_document_number
@@ -1123,21 +190,11 @@ msgid "Document Number"
 msgstr "Número de documento"
 
 #. module: account_document
-#: field:account.journal,document_sequence_type:0
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_sequence_type
 msgid "Document Sequence Type"
 msgstr "Tipo de Secuencia del documento"
 
 #. module: account_document
-#: field:account.invoice,document_type_id:0
-#: field:account.invoice,journal_document_type_id:0
-#: field:account.invoice.refund,journal_document_type_id:0
-#: field:account.invoice.report,document_type_id:0
-#: field:account.journal.document.type,document_type_id:0
-#: field:account.move,document_type_id:0
-#: field:account.move.line,document_type_id:0
-#: field:account.payment,document_type_id:0
-#: field:account.payment.receiptbook,document_type_id:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_document_type_id
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_journal_document_type_id
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_journal_document_type_id
@@ -1147,6 +204,13 @@ msgstr "Tipo de Secuencia del documento"
 #: model:ir.model.fields,field_description:account_document.field_account_move_line_document_type_id
 #: model:ir.model.fields,field_description:account_document.field_account_payment_document_type_id
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_document_type_id
+#: model:ir.ui.view,arch_db:account_document.view_account_invoice_filter
+#: model:ir.ui.view,arch_db:account_document.view_account_invoice_report_search_inherit
+#: model:ir.ui.view,arch_db:account_document.view_account_move_filter
+#: model:ir.ui.view,arch_db:account_document.view_account_move_line_filter
+#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
+#: model:ir.ui.view,arch_db:account_document.view_document_type_form
+#: model:ir.ui.view,arch_db:account_document.view_document_type_tree
 msgid "Document Type"
 msgstr "Tipo de Documento"
 
@@ -1157,13 +221,16 @@ msgid "Document Types"
 msgstr "Tipos de Documentos"
 
 #. module: account_document
-#: field:account.journal,journal_document_type_ids:0
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_form
+msgid "Documents"
+msgstr ""
+
+#. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_journal_journal_document_type_ids
 msgid "Documents Types"
 msgstr "Tipos de Documentos"
 
 #. module: account_document
-#: help:account.document.type,taxes_included:0
 #: model:ir.model.fields,help:account_document.field_account_document_type_taxes_included
 msgid ""
 "Documents of this type will include taxes on reports. This behaviour could "
@@ -1185,11 +252,6 @@ msgstr ""
 "documentos disponibles cambiando el diario o el partner."
 
 #. module: account_document
-#: field:account.invoice,document_sequence_id:0
-#: field:account.invoice.refund,document_sequence_id:0
-#: field:account.journal.document.type,sequence_id:0
-#: field:account.payment,document_sequence_id:0
-#: field:account.payment.receiptbook,sequence_id:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_document_sequence_id
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_document_sequence_id
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_sequence_id
@@ -1219,7 +281,6 @@ msgstr ""
 "pago o establezca un número de documento."
 
 #. module: account_document
-#: field:account.journal.merge.wizard,from_journal_id:0
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_from_journal_id
 msgid "From Journal"
 msgstr "Diario desde"
@@ -1232,9 +293,11 @@ msgid "Generic"
 msgstr "Genérico"
 
 #. module: account_document
-#: field:account.document.type,id:0 field:account.journal.document.type,id:0
-#: field:account.journal.merge.wizard,id:0
-#: field:account.payment.receiptbook,id:0
+#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
+msgid "Group By..."
+msgstr ""
+
+#. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_id
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_id
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_id
@@ -1243,7 +306,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_document
-#: help:account.document.type,localization:0
 #: model:ir.model.fields,help:account_document.field_account_document_type_localization
 msgid ""
 "If you set a localization here then it will be available only for companies "
@@ -1253,7 +315,6 @@ msgstr ""
 "compañías de esta localización"
 
 #. module: account_document
-#: help:account.chart.template,localization:0
 #: model:ir.model.fields,help:account_document.field_account_chart_template_localization
 msgid ""
 "If you set the localization here, then when installing this chart, this "
@@ -1268,15 +329,13 @@ msgid "In Document"
 msgstr "Documento Entrante"
 
 #. module: account_document
-#: field:account.document.type,internal_type:0
-#: field:account.invoice,document_type_internal_type:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_internal_type
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_document_type_internal_type
+#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
 msgid "Internal Type"
 msgstr "Tipo interno"
 
 #. module: account_document
-#: field:account.invoice.refund,invoice_id:0
 #: code:addons/account_document/models/account_invoice.py:176
 #: model:ir.model,name:account_document.model_account_invoice
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_invoice_id
@@ -1305,7 +364,6 @@ msgid "Invoices Statistics"
 msgstr "Estadísticas de facturas"
 
 #. module: account_document
-#: field:account.journal.document.type,journal_id:0
 #: model:ir.model,name:account_document.model_account_journal
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_journal_id
 msgid "Journal"
@@ -1315,6 +373,12 @@ msgstr "Diario"
 #: model:ir.model,name:account_document.model_account_journal_document_type
 msgid "Journal Document Types Mapping"
 msgstr "Mapeo de Tipos de Documentos del Diario"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_journal_document_type_form
+#: model:ir.ui.view,arch_db:account_document.view_journal_document_type_tree
+msgid "Journal Documents Types"
+msgstr ""
 
 #. module: account_document
 #: model:ir.model,name:account_document.model_account_move_line
@@ -1340,10 +404,6 @@ msgid "Journals can not be the same"
 msgstr "Los diarios no pueden ser el mismo"
 
 #. module: account_document
-#: field:account.document.type,__last_update:0
-#: field:account.journal.document.type,__last_update:0
-#: field:account.journal.merge.wizard,__last_update:0
-#: field:account.payment.receiptbook,__last_update:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type___last_update
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type___last_update
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard___last_update
@@ -1352,10 +412,6 @@ msgid "Last Modified on"
 msgstr "Última Modificación en"
 
 #. module: account_document
-#: field:account.document.type,write_uid:0
-#: field:account.journal.document.type,write_uid:0
-#: field:account.journal.merge.wizard,write_uid:0
-#: field:account.payment.receiptbook,write_uid:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_write_uid
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_write_uid
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_write_uid
@@ -1364,10 +420,6 @@ msgid "Last Updated by"
 msgstr "Última actualización por"
 
 #. module: account_document
-#: field:account.document.type,write_date:0
-#: field:account.journal.document.type,write_date:0
-#: field:account.journal.merge.wizard,write_date:0
-#: field:account.payment.receiptbook,write_date:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_write_date
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_write_date
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_write_date
@@ -1376,11 +428,6 @@ msgid "Last Updated on"
 msgstr "Última actualización el"
 
 #. module: account_document
-#: field:account.chart.template,localization:0
-#: field:account.config.settings,localization:0
-#: field:account.document.type,localization:0
-#: field:account.invoice,localization:0 field:account.journal,localization:0
-#: field:account.payment,localization:0
 #: model:ir.model.fields,field_description:account_document.field_account_chart_template_localization
 #: model:ir.model.fields,field_description:account_document.field_account_config_settings_localization
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_localization
@@ -1388,7 +435,7 @@ msgstr "Última actualización el"
 #: model:ir.model.fields,field_description:account_document.field_account_journal_localization
 #: model:ir.model.fields,field_description:account_document.field_account_payment_localization
 #: model:ir.model.fields,field_description:account_document.field_res_company_localization
-#: field:res.company,localization:0
+#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
 msgid "Localization"
 msgstr "Localización"
 
@@ -1401,39 +448,32 @@ msgstr "Manual"
 
 #. module: account_document
 #: model:ir.actions.act_window,name:account_document.action_account_journal_merge_wizard_1
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
 msgid "Merge Journal"
 msgstr "Unificar Diarios"
 
 #. module: account_document
-#: field:account.document.type,name:0 field:account.payment.receiptbook,name:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_name
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_name
 msgid "Name"
 msgstr "Nombre"
 
 #. module: account_document
-#: field:account.document.type,report_name:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_report_name
 msgid "Name on Reports"
 msgstr "Nombre en los Reportes"
 
 #. module: account_document
-#: help:account.document.type,report_name:0
 #: model:ir.model.fields,help:account_document.field_account_document_type_report_name
 msgid "Name that will be printed in reports, for example \"CREDIT NOTE\""
 msgstr "Nombre que será impreso en los reportes, por ejemplo \"NOTA DE CRÉDITO\""
 
 #. module: account_document
-#: field:account.invoice.line,report_price_net:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_price_net
 msgid "Net Amount"
 msgstr "Importe Neto"
 
 #. module: account_document
-#: field:account.invoice,next_number:0
-#: field:account.journal.document.type,next_number:0
-#: field:account.payment,next_number:0
-#: field:account.payment.receiptbook,next_number:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_next_number
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_next_number
 #: model:ir.model.fields,field_description:account_document.field_account_payment_next_number
@@ -1442,8 +482,6 @@ msgid "Next Number"
 msgstr "Próximo número"
 
 #. module: account_document
-#: help:account.journal.document.type,next_number:0
-#: help:account.payment.receiptbook,next_number:0
 #: model:ir.model.fields,help:account_document.field_account_journal_document_type_next_number
 #: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_next_number
 msgid ""
@@ -1454,14 +492,11 @@ msgstr ""
 "frecuentemente por lo que que el valor mostrado capaz que ya esté obsoleto."
 
 #. module: account_document
-#: field:account.payment.receiptbook,padding:0
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_padding
 msgid "Number Padding"
 msgstr "Relleno del Número"
 
 #. module: account_document
-#: help:account.document.type,internal_type:0
-#: help:account.invoice,document_type_internal_type:0
 #: model:ir.model.fields,help:account_document.field_account_document_type_internal_type
 #: model:ir.model.fields,help:account_document.field_account_invoice_document_type_internal_type
 msgid "On each localization each document type may have a different use"
@@ -1475,7 +510,6 @@ msgstr "Solo diarios de ventas o compras pueden ser unificados"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_res_partner_other_document_type_ids
-#: field:res.partner,other_document_type_ids:0
 msgid "Other Documents"
 msgstr "Otros documentos"
 
@@ -1490,7 +524,6 @@ msgid "Partner"
 msgstr "Partner"
 
 #. module: account_document
-#: field:account.payment.receiptbook,partner_type:0
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_partner_type
 msgid "Partner type"
 msgstr "Tipo de Partner"
@@ -1501,13 +534,11 @@ msgid "Payments"
 msgstr "Pagos"
 
 #. module: account_document
-#: field:account.payment.receiptbook,prefix:0
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_prefix
 msgid "Prefix"
 msgstr "Prefijo"
 
 #. module: account_document
-#: help:account.document.type,doc_code_prefix:0
 #: model:ir.model.fields,help:account_document.field_account_document_type_doc_code_prefix
 msgid ""
 "Prefix for Documents Codes on Invoices and Account Moves. For eg. 'FA ' will"
@@ -1517,10 +548,16 @@ msgstr ""
 " 'FA ' va a mostrar el número de documento 'FA 0001-0000001' "
 
 #. module: account_document
-#: field:account.config.settings,purchase_use_documents:0
 #: model:ir.model.fields,field_description:account_document.field_account_config_settings_purchase_use_documents
 msgid "Purchase Use Documents"
 msgstr "Las compras usan documentos"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_form
+#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_search
+#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_tree
+msgid "Receipt Books"
+msgstr ""
 
 #. module: account_document
 #: selection:account.document.type,internal_type:0
@@ -1528,10 +565,14 @@ msgid "Receipt Invoice"
 msgstr "Factura Recibo"
 
 #. module: account_document
-#: field:account.payment,receiptbook_id:0
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_id_3734
 msgid "ReceiptBook"
 msgstr "Talonario de recibo"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_account_payment_search
+msgid "Receiptbook"
+msgstr ""
 
 #. module: account_document
 #: model:ir.actions.act_window,name:account_document.action_receiptbook_form
@@ -1552,7 +593,6 @@ msgid "Refund wizard must be call only from one invoice"
 msgstr "El asistencia de Reembolso solo puede ser utilizado desde una factura"
 
 #. module: account_document
-#: field:account.config.settings,sale_use_documents:0
 #: model:ir.model.fields,field_description:account_document.field_account_config_settings_sale_use_documents
 msgid "Sale Use Documents"
 msgstr "La venta usa documentos"
@@ -1563,8 +603,6 @@ msgid "Same Invoice Sequence"
 msgstr "Misma secuencia de factura"
 
 #. module: account_document
-#: help:account.journal.document.type,journal_type:0
-#: help:account.journal.merge.wizard,from_type:0
 #: model:ir.model.fields,help:account_document.field_account_journal_document_type_journal_type
 #: model:ir.model.fields,help:account_document.field_account_journal_merge_wizard_from_type
 msgid ""
@@ -1582,9 +620,6 @@ msgstr ""
 "ejercicio fiscal."
 
 #. module: account_document
-#: field:account.document.type,sequence:0
-#: field:account.journal.document.type,sequence:0
-#: field:account.payment.receiptbook,sequence:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_sequence
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_sequence
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_sequence
@@ -1592,14 +627,12 @@ msgid "Sequence"
 msgstr "Secuencia"
 
 #. module: account_document
-#: field:account.payment.receiptbook,sequence_type:0
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_sequence_type
 msgid "Sequence Type"
 msgstr "Tipo de secuencia"
 
 #. module: account_document
 #: model:ir.model.fields,help:account_document.field_res_partner_other_document_type_ids
-#: help:res.partner,other_document_type_ids:0
 msgid ""
 "Set here if this partner can issue other documents further than invoices, "
 "credit notes and debit notes"
@@ -1623,21 +656,17 @@ msgid "Supplier Invoice"
 msgstr "Factura de Proveedor"
 
 #. module: account_document
-#: field:account.invoice,report_amount_tax:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_report_amount_tax
 msgid "Tax"
 msgstr "Impuesto"
 
 #. module: account_document
-#: field:account.invoice,report_tax_line_ids:0
-#: field:account.invoice.line,report_invoice_line_tax_ids:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_invoice_line_tax_ids
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_report_tax_line_ids
 msgid "Taxes"
 msgstr "Impuestos"
 
 #. module: account_document
-#: field:account.document.type,taxes_included:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_taxes_included
 msgid "Taxes Included?"
 msgstr "¿Impuestos incluídos?"
@@ -1648,15 +677,12 @@ msgid "Templates for Account Chart"
 msgstr "Plantillas para el Plan de Cuentas"
 
 #. module: account_document
-#: code:addons/account_document/models/account_payment.py:210
+#: code:addons/account_document/models/account_payment.py:217
 #, python-format
 msgid "The company of the receiptbook and of the payment must be the same!"
 msgstr "La compañía del talonario y el del pago deben ser la misma!"
 
 #. module: account_document
-#: help:account.invoice,document_sequence_id:0
-#: help:account.invoice.refund,document_sequence_id:0
-#: help:account.journal.document.type,sequence_id:0
 #: model:ir.model.fields,help:account_document.field_account_invoice_document_sequence_id
 #: model:ir.model.fields,help:account_document.field_account_invoice_refund_document_sequence_id
 #: model:ir.model.fields,help:account_document.field_account_journal_document_type_sequence_id
@@ -1668,8 +694,6 @@ msgstr ""
 " de este tipo de documento."
 
 #. module: account_document
-#: help:account.payment,document_sequence_id:0
-#: help:account.payment.receiptbook,sequence_id:0
 #: model:ir.model.fields,help:account_document.field_account_payment_document_sequence_id
 #: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_sequence_id
 msgid ""
@@ -1685,14 +709,11 @@ msgid "Ticket"
 msgstr "Ticket"
 
 #. module: account_document
-#: field:account.journal.merge.wizard,to_journal_id:0
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_to_journal_id
 msgid "To Journal"
 msgstr ""
 
 #. module: account_document
-#: field:account.journal.document.type,journal_type:0
-#: field:account.journal.merge.wizard,from_type:0
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_journal_type
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_from_type
 msgid "Type"
@@ -1705,21 +726,21 @@ msgid "Type %s not implemented yet"
 msgstr "El tipo %s todavía no está implementado"
 
 #. module: account_document
-#: field:account.invoice.line,report_price_unit:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_price_unit
 msgid "Unit Price"
 msgstr "Precio unitario"
 
 #. module: account_document
-#: field:account.invoice,report_amount_untaxed:0
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_report_amount_untaxed
 msgid "Untaxed Amount"
 msgstr "Importe sin impuesto"
 
 #. module: account_document
-#: field:account.invoice,use_documents:0
-#: field:account.invoice.refund,use_documents:0
-#: field:account.journal,use_documents:0
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_form
+msgid "Update Documents"
+msgstr ""
+
+#. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_use_documents
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_use_documents
 #: model:ir.model.fields,field_description:account_document.field_account_journal_use_documents
@@ -1727,7 +748,6 @@ msgid "Use Documents?"
 msgstr "¿Usa documentos?"
 
 #. module: account_document
-#: help:account.journal,document_sequence_type:0
 #: model:ir.model.fields,help:account_document.field_account_journal_document_sequence_type
 msgid "Use own sequence or invoice sequence on Debit and Credit Notes?"
 msgstr ""
@@ -1735,13 +755,11 @@ msgstr ""
 " y Débito?"
 
 #. module: account_document
-#: help:account.payment.receiptbook,sequence:0
 #: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_sequence
 msgid "Used to order the receiptbooks"
 msgstr "Utilizado para ordenar los talonarios de recibo"
 
 #. module: account_document
-#: field:account.document.type,validator_id:0
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_validator_id
 msgid "Validator"
 msgstr "Validador"
@@ -1777,7 +795,16 @@ msgstr ""
 "No puede utilizar un tipo de documento %s con una factura rectificativa"
 
 #. module: account_document
-#: help:account.payment.receiptbook,padding:0
+#: model:ir.model,name:account_document.model_account_config_settings
+msgid "account.config.settings"
+msgstr ""
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_journal_merge_wizard
+msgid "account.journal.merge.wizard"
+msgstr ""
+
+#. module: account_document
 #: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_padding
 msgid ""
 "automatically adds some '0' on the left of the 'Number' to get the required "
@@ -1787,26 +814,11 @@ msgstr ""
 "el relleno requerido."
 
 #. module: account_document
-#: view:website:account.report_invoice_document
-msgid "l.report_price_subtotal"
-msgstr "l.report_price_subtotal"
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
+msgid "or"
+msgstr ""
 
 #. module: account_document
-#: view:website:account.report_invoice_document
-msgid "l.report_price_unit"
-msgstr "l.report_price_unit"
-
-#. module: account_document
-#: view:website:account.report_invoice_document
-msgid "not o.use_documents"
-msgstr "not o.use_documents"
-
-#. module: account_document
-#: view:website:account.report_invoice_document
-msgid "o.report_amount_untaxed"
-msgstr "o.report_amount_untaxed"
-
-#. module: account_document
-#: view:website:account.report_invoice_document
-msgid "o.report_tax_line_ids"
-msgstr "o.report_tax_line_ids"
+#: model:ir.model,name:account_document.model_wizard_multi_charts_accounts
+msgid "wizard.multi.charts.accounts"
+msgstr ""
