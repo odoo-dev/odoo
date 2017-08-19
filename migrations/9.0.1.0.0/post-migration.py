@@ -48,7 +48,9 @@ def migrate(env, version):
 def set_companies_data(env):
     # seteamos todo suponiendo que todas las cias son ar
     # en loc ar queremos usar round globally
-    env['res.company'].search([]).write({
+    # lo hacemos con _write para que no refleje el cambio ya que podría cambiar
+    # la codificación con el método "reflect_code_prefix_change"
+    env['res.company'].search([])._write({
         'tax_calculation_rounding_method': 'round_globally',
         'accounts_code_digits': 6,
         'cash_account_code_prefix': '1.1.10.00.',
