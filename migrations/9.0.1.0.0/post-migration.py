@@ -159,10 +159,21 @@ def migrate_transfers(env):
             amount,
             state) = rec
 
+        # no migramos las canceladas o las que sean en cero
+        if state == 'cancel' or not amount:
+            continue
+
+        # los payments tienen que ser positivos, si hay transfer en negativo
+        # la damos vuelta
+        if amount < 0.0:
+            amount = -amount
+            source_journal_id = target_journal_id
+            target_journal_id = source_journal_id
+
         if state == 'confirmed':
             state = 'posted'
-        elif state == 'cancel':
-            state = 'draft'
+        # elif state == 'cancel':
+        #     state = 'draft'
 
         payment_method = env['account.journal'].browse(
             source_journal_id).outbound_payment_method_ids
