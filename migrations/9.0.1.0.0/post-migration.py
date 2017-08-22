@@ -120,12 +120,14 @@ def migrate_transfer_account(env):
         env['account.move.line'].search(
             [('account_id', '=', transfer_account.id)])._amount_residual()
         # reconcile unreconciled lines
-        aml = env['account.move.line'].search([
-            ('account_id', '=', transfer_account.id),
-            ('reconciled', '=', False)])
-        if aml:
-            aml.reconcile()
-            aml.compute_full_after_batch_reconcile()
+        # esto nos está dando errores diversos, no lo hacemos por ahora
+        # aml = env['account.move.line'].search([
+        #     ('account_id', '=', transfer_account.id),
+        #     ('reconciled', '=', False)])
+        # if aml:
+        #     aml.auto_reconcile_lines()
+        #     # aml.reconcile()
+        #     aml.compute_full_after_batch_reconcile()
 
 
 def migrate_transfers(env):
