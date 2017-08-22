@@ -106,6 +106,17 @@ def migrate_account_transfer_module(env):
 
 
 def migrate_transfer_account(env):
+
+    # si habia periodos cerrados se migra con lock date y da error al re
+    # calcular, hacemos bypass a dicha funcion ya que el cambio de lock date
+    # no nos funcionó
+    def _check_lock_date(self):
+        return True
+
+    from openerp.addons.account.models.account_move import AccountMove
+    original_check_lock_date = AccountMove._check_lock_date
+    AccountMove._check_lock_date = _check_lock_date
+
     # cr = env.cr
     for company in env['res.company'].search([]):
         transfer_account = company.transfer_account_id
@@ -116,18 +127,27 @@ def migrate_transfer_account(env):
         transfer_account._write(
             {'reconcile': True, 'user_type_id': current_assets.id})
 
+        # fiscalyear_lock_date = company.fiscalyear_lock_date
+        # period_lock_date = company.period_lock_date
+        # 2017-08-22
+        # company.fiscalyear_lock_date = False
+        # company.period_lock_date = False
         # recompute amounts for lines of this account
         env['account.move.line'].search(
             [('account_id', '=', transfer_account.id)])._amount_residual()
         # reconcile unreconciled lines
         # esto nos está dando errores diversos, no lo hacemos por ahora
-        # aml = env['account.move.line'].search([
-        #     ('account_id', '=', transfer_account.id),
-        #     ('reconciled', '=', False)])
-        # if aml:
-        #     aml.auto_reconcile_lines()
-        #     # aml.reconcile()
-        #     aml.compute_full_after_batch_reconcile()
+        aml = env['account.move.line'].search([
+            ('account_id', '=', transfer_account.id),
+            ('reconciled', '=', False)])
+        if aml:
+            aml.auto_reconcile_lines()
+            # aml.reconcile()
+            aml.compute_full_after_batch_reconcile()
+
+        # company.fiscalyear_lock_date = fiscalyear_lock_date
+        # company.period_lock_date = period_lock_date
+    AccountMove._check_lock_date = original_check_lock_date
 
 
 def migrate_transfers(env):
