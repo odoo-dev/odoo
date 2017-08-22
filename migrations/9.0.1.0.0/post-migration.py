@@ -21,6 +21,8 @@
 ##############################################################################
 
 from openupgradelib import openupgrade
+import logging
+_logger = logging.getLogger(__name__)
 
 
 @openupgrade.migrate(use_env=True)
@@ -125,15 +127,23 @@ def migrate_transfer_account(env):
         env['account.move.line'].search(
             [('account_id', '=', transfer_account.id)])._amount_residual()
         # reconcile unreconciled lines
-        # esto nos está dando errores diversos, no lo hacemos por ahora
+        # lo partimos de a 50 para que sea mas rapido y no de error ademas
         aml = env['account.move.line'].search([
             ('account_id', '=', transfer_account.id),
-            ('reconciled', '=', False)])
-        if aml:
+            ('reconciled', '=', False)], limit=50)
+        # definimos un max iterations para que termine saliendo
+        max_iterations = aml and (len(aml) / 50 * 2) or 0
+        iteration = 0
+        while aml and iteration < max_iterations:
+            _logger.info('Reconciling aml %s, iteration %s, max iter %s' % (
+                len(aml), iteration, max_iterations))
             aml.auto_reconcile_lines()
             # aml.reconcile()
             aml.compute_full_after_batch_reconcile()
-
+            aml = env['account.move.line'].search([
+                ('account_id', '=', transfer_account.id),
+                ('reconciled', '=', False)], limit=50)
+            iteration += 1
         # company.fiscalyear_lock_date = fiscalyear_lock_date
         # company.period_lock_date = period_lock_date
 
