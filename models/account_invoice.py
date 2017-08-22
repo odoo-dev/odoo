@@ -394,6 +394,7 @@ class AccountInvoice(models.Model):
 
     @api.multi
     @api.constrains('document_type_id', 'document_number')
+    @api.onchange('document_type_id', 'document_number')
     def validate_document_number(self):
         for rec in self:
             # if we have a sequence, number is set by sequence and we dont
