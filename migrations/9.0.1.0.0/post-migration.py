@@ -106,17 +106,6 @@ def migrate_account_transfer_module(env):
 
 
 def migrate_transfer_account(env):
-
-    # si habia periodos cerrados se migra con lock date y da error al re
-    # calcular, hacemos bypass a dicha funcion ya que el cambio de lock date
-    # no nos funcionó
-    def _check_lock_date(self):
-        return True
-
-    from openerp.addons.account.models.account_move import AccountMove
-    original_check_lock_date = AccountMove._check_lock_date
-    AccountMove._check_lock_date = _check_lock_date
-
     # cr = env.cr
     for company in env['res.company'].search([]):
         transfer_account = company.transfer_account_id
@@ -147,7 +136,6 @@ def migrate_transfer_account(env):
 
         # company.fiscalyear_lock_date = fiscalyear_lock_date
         # company.period_lock_date = period_lock_date
-    AccountMove._check_lock_date = original_check_lock_date
 
 
 def migrate_transfers(env):
