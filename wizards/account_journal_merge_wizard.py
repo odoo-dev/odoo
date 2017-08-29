@@ -12,7 +12,6 @@ class AccountJournalMergeWizard(models.TransientModel):
         'From Journal',
         ondelete='cascade',
         required=True,
-        domain=[('type', 'in', ['sale', 'purchase'])],
     )
     from_company_id = fields.Many2one(
         related='from_journal_id.company_id',
