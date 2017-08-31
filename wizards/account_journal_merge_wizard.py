@@ -37,3 +37,4 @@ class AccountJournalMergeWizard(models.TransientModel):
         self.env['account.journal'].merge_journals(
             self.from_journal_id, self.to_journal_id, self.delete_from_journal,
             do_not_raise=False)
+        return True
