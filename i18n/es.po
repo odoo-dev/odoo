@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-20 18:37+0000\n"
-"PO-Revision-Date: 2017-07-20 18:37+0000\n"
+"POT-Creation-Date: 2017-08-29 22:15+0000\n"
+"PO-Revision-Date: 2017-08-29 22:15+0000\n"
 "Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
@@ -89,6 +89,12 @@ msgstr "Automático"
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_available_journal_document_type_ids
 msgid "Available Journal Document Types"
 msgstr "Tipos de Documentos Disponibles"
+
+#. module: account_document
+#: code:addons/account_document/models/account_journal.py:152
+#, python-format
+msgid "Can not merge from a journal that has cash/bank statements"
+msgstr ""
 
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
@@ -240,7 +246,7 @@ msgstr ""
 "comportamiento podría ser sobrescrito por localizaciones!"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:417
+#: code:addons/account_document/models/account_invoice.py:418
 #, python-format
 msgid ""
 "El Tipo de Documento elegido \"%s\" no pertenece al diario \"%s\". Por favor"
@@ -386,19 +392,19 @@ msgid "Journal Item"
 msgstr "Elementos del diario"
 
 #. module: account_document
-#: code:addons/account_document/models/account_journal.py:156
+#: code:addons/account_document/models/account_journal.py:160
 #, python-format
 msgid "Journals Must be of the same company"
 msgstr "Los diarios deben ser de la misma compañía"
 
 #. module: account_document
-#: code:addons/account_document/models/account_journal.py:152
+#: code:addons/account_document/models/account_journal.py:156
 #, python-format
 msgid "Journals Must be of the same type"
 msgstr "Los diarios deben ser del mismo tipo"
 
 #. module: account_document
-#: code:addons/account_document/models/account_journal.py:160
+#: code:addons/account_document/models/account_journal.py:164
 #, python-format
 msgid "Journals can not be the same"
 msgstr "Los diarios no pueden ser el mismo"
@@ -501,12 +507,6 @@ msgstr "Relleno del Número"
 #: model:ir.model.fields,help:account_document.field_account_invoice_document_type_internal_type
 msgid "On each localization each document type may have a different use"
 msgstr "En cada localización cada tipo de documento tendría un uso diferente."
-
-#. module: account_document
-#: code:addons/account_document/models/account_journal.py:149
-#, python-format
-msgid "Only sale or purchase journals can be merged"
-msgstr "Solo diarios de ventas o compras pueden ser unificados"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_res_partner_other_document_type_ids
@@ -782,13 +782,13 @@ msgid "Vendor Refund"
 msgstr "Reembolso a proveedor"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:441
+#: code:addons/account_document/models/account_invoice.py:442
 #, python-format
 msgid "You can not use a %s document type with a invoice"
 msgstr "No puede utilizar un tipo de documento %s con una factura"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:436
+#: code:addons/account_document/models/account_invoice.py:437
 #, python-format
 msgid "You can not use a %s document type with a refund invoice"
 msgstr ""
