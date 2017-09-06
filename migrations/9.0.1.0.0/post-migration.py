@@ -21,6 +21,8 @@
 ##############################################################################
 
 from openupgradelib import openupgrade
+import logging
+_logger = logging.getLogger(__name__)
 
 
 @openupgrade.migrate(use_env=True)
@@ -48,7 +50,9 @@ def migrate(env, version):
 def set_companies_data(env):
     # seteamos todo suponiendo que todas las cias son ar
     # en loc ar queremos usar round globally
-    env['res.company'].search([]).write({
+    # lo hacemos con _write para que no refleje el cambio ya que podría cambiar
+    # la codificación con el método "reflect_code_prefix_change"
+    env['res.company'].search([])._write({
         'tax_calculation_rounding_method': 'round_globally',
         'accounts_code_digits': 6,
         'cash_account_code_prefix': '1.1.10.00.',
@@ -114,16 +118,34 @@ def migrate_transfer_account(env):
         transfer_account._write(
             {'reconcile': True, 'user_type_id': current_assets.id})
 
+        # fiscalyear_lock_date = company.fiscalyear_lock_date
+        # period_lock_date = company.period_lock_date
+        # 2017-08-22
+        # company.fiscalyear_lock_date = False
+        # company.period_lock_date = False
         # recompute amounts for lines of this account
         env['account.move.line'].search(
             [('account_id', '=', transfer_account.id)])._amount_residual()
         # reconcile unreconciled lines
+        # lo partimos de a 50 para que sea mas rapido y no de error ademas
         aml = env['account.move.line'].search([
             ('account_id', '=', transfer_account.id),
-            ('reconciled', '=', False)])
-        if aml:
-            aml.reconcile()
+            ('reconciled', '=', False)], limit=50)
+        # definimos un max iterations para que termine saliendo
+        max_iterations = aml and (len(aml) / 50 * 2) or 0
+        iteration = 0
+        while aml and iteration < max_iterations:
+            _logger.info('Reconciling aml %s, iteration %s, max iter %s' % (
+                len(aml), iteration, max_iterations))
+            aml.auto_reconcile_lines()
+            # aml.reconcile()
             aml.compute_full_after_batch_reconcile()
+            aml = env['account.move.line'].search([
+                ('account_id', '=', transfer_account.id),
+                ('reconciled', '=', False)], limit=50)
+            iteration += 1
+        # company.fiscalyear_lock_date = fiscalyear_lock_date
+        # company.period_lock_date = period_lock_date
 
 
 def migrate_transfers(env):
@@ -157,10 +179,21 @@ def migrate_transfers(env):
             amount,
             state) = rec
 
+        # no migramos las canceladas o las que sean en cero
+        if state == 'cancel' or not amount:
+            continue
+
+        # los payments tienen que ser positivos, si hay transfer en negativo
+        # la damos vuelta
+        if amount < 0.0:
+            amount = -amount
+            source_journal_id = target_journal_id
+            target_journal_id = source_journal_id
+
         if state == 'confirmed':
             state = 'posted'
-        elif state == 'cancel':
-            state = 'draft'
+        # elif state == 'cancel':
+        #     state = 'draft'
 
         payment_method = env['account.journal'].browse(
             source_journal_id).outbound_payment_method_ids

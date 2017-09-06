@@ -26,7 +26,8 @@ class AccountInvoice(models.Model):
     field and also overwriting name_get to use it
     """
     _inherit = "account.invoice"
-    _order = "document_number desc, number desc, id desc"
+    _order = "date_invoice desc, document_number desc, number desc, id desc"
+    # _order = "document_number desc, number desc, id desc"
 
     report_amount_tax = fields.Monetary(
         string='Tax',
@@ -394,6 +395,7 @@ class AccountInvoice(models.Model):
 
     @api.multi
     @api.constrains('document_type_id', 'document_number')
+    @api.onchange('document_type_id', 'document_number')
     def validate_document_number(self):
         for rec in self:
             # if we have a sequence, number is set by sequence and we dont

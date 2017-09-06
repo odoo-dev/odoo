@@ -145,9 +145,13 @@ class AccountJournal(models.Model):
             self, from_journal, to_journal, delete_from=True,
             do_not_raise=True):
         cr = self.env.cr
-        if from_journal.type not in ['sale', 'purchase']:
+
+        if from_journal.type in ('bank', 'cash') and self.env[
+                'account.bank.statement'].search([
+                    ('journal_id', '=', from_journal.id)]):
             raise ValidationError(_(
-                'Only sale or purchase journals can be merged'))
+                'Can not merge from a journal that has cash/bank statements'))
+
         if from_journal.type != to_journal.type:
             raise ValidationError(_(
                 'Journals Must be of the same type'))
@@ -166,39 +170,46 @@ class AccountJournal(models.Model):
             to_types = to_journal.journal_document_type_ids.mapped(
                 'document_type_id')
             return from_types & to_types
-        repeated_types = get_repeated_types(from_journal, to_journal)
 
-        rep_journal_docs = self.env['account.journal.document.type'].search([
-            ('journal_id', 'in', [from_journal.id, to_journal.id]),
-            ('document_type_id', 'in', repeated_types.ids)])
-        for rep_journal_doc in rep_journal_docs:
-            try:
-                rep_journal_doc.unlink()
-                rep_journal_doc._cr.commit()
-            except Exception:
-                # TODO mejorar log que nos daba error
-                _logger.info('Could not unlink doc type')
+        if from_journal.type in ['sale', 'purchase']:
+            repeated_types = get_repeated_types(from_journal, to_journal)
 
-        # TODO mejorar y tratar de evitar esto
-        self._cr.commit()
-        from_journal.invalidate_cache()
-        to_journal.invalidate_cache()
-        repeated_types = get_repeated_types(from_journal, to_journal)
+            rep_journal_docs = self.env[
+                'account.journal.document.type'].search([
+                    ('journal_id', 'in', [from_journal.id, to_journal.id]),
+                    ('document_type_id', 'in', repeated_types.ids)])
+            for rep_journal_doc in rep_journal_docs:
+                try:
+                    rep_journal_doc.unlink()
+                    rep_journal_doc._cr.commit()
+                except Exception:
+                    # TODO mejorar log que nos daba error
+                    _logger.info('Could not unlink doc type')
 
-        if repeated_types:
-            msg = (
-                'Could not merge journal %s into journal %s because we could '
-                'not delete the following repeated types: %s' % (
-                    from_journal.name, to_journal.name,
-                    repeated_types.mapped('name')))
-            if do_not_raise:
-                _logger.warning(msg)
-            else:
-                raise ValidationError(msg)
+            # TODO mejorar y tratar de evitar esto
+            self._cr.commit()
+            from_journal.invalidate_cache()
+            to_journal.invalidate_cache()
+            repeated_types = get_repeated_types(from_journal, to_journal)
+
+            if repeated_types:
+                msg = (
+                    'Could not merge journal %s into journal %s because we '
+                    'could not delete the following repeated types: %s' % (
+                        from_journal.name, to_journal.name,
+                        repeated_types.mapped('name')))
+                if do_not_raise:
+                    _logger.warning(msg)
+                else:
+                    raise ValidationError(msg)
 
         tables = [
-            'account_move', 'account_move_line', 'account_invoice',
-            'account_journal_document_type']
+            'account_move', 'account_move_line', 'account_invoice']
+        if from_journal.type in ['sale', 'purchase']:
+            tables.append('account_journal_document_type')
+        elif from_journal.type in ['bank', 'cash']:
+            tables.append('account_payment')
+
         for table in tables:
             cr.execute("""
                 UPDATE

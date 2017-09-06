@@ -12,7 +12,6 @@ class AccountJournalMergeWizard(models.TransientModel):
         'From Journal',
         ondelete='cascade',
         required=True,
-        domain=[('type', 'in', ['sale', 'purchase'])],
     )
     from_company_id = fields.Many2one(
         related='from_journal_id.company_id',
@@ -38,3 +37,4 @@ class AccountJournalMergeWizard(models.TransientModel):
         self.env['account.journal'].merge_journals(
             self.from_journal_id, self.to_journal_id, self.delete_from_journal,
             do_not_raise=False)
+        return True
