@@ -4,13 +4,14 @@
 # 
 # Translators:
 # Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016
+# Gonzalo Ruzafa <gr@ingadhoc.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-29 22:15+0000\n"
-"PO-Revision-Date: 2017-08-29 22:15+0000\n"
-"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016\n"
+"POT-Creation-Date: 2017-09-06 22:21+0000\n"
+"PO-Revision-Date: 2017-09-06 22:21+0000\n"
+"Last-Translator: Gonzalo Ruzafa <gr@ingadhoc.com>, 2017\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,7 +36,7 @@ msgstr "%s Pagos de Proveedor"
 #: model:ir.ui.view,arch_db:account_document.view_invoice_form
 #: model:ir.ui.view,arch_db:account_document.view_supplier_invoice_form
 msgid "- Next Number:"
-msgstr ""
+msgstr "Proximo numero:"
 
 #. module: account_document
 #: model:ir.model,name:account_document.model_account_document_type
@@ -64,6 +65,8 @@ msgid ""
 "All Journal entries, invoices, etc will be moved from \"From Journal\" to "
 "\"To journal\""
 msgstr ""
+"Todas las entradas de diario, facturas, etc seran movidas \"Desde el "
+"Diario\" a \"Al diario\""
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_price_subtotal
@@ -76,6 +79,8 @@ msgid ""
 "Are you sure? This can not be undone, please be sure to understand what you "
 "are doing"
 msgstr ""
+"Esta seguro? Esta operacion no puede ser revertida, por favor este seguro de"
+" entender lo que está haciendo"
 
 #. module: account_document
 #: selection:account.payment.receiptbook,sequence_type:0
@@ -94,12 +99,12 @@ msgstr "Tipos de Documentos Disponibles"
 #: code:addons/account_document/models/account_journal.py:152
 #, python-format
 msgid "Can not merge from a journal that has cash/bank statements"
-msgstr ""
+msgstr "No puede fusionar desde un diario que tenga registros de caja/banco"
 
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_code
@@ -131,7 +136,7 @@ msgstr "Compañía relacionada a este diario"
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
 msgid "Confirm"
-msgstr ""
+msgstr "Confirmar"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_create_uid
@@ -229,7 +234,7 @@ msgstr "Tipos de Documentos"
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_account_journal_form
 msgid "Documents"
-msgstr ""
+msgstr "Documentos"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_journal_journal_document_type_ids
@@ -246,7 +251,7 @@ msgstr ""
 "comportamiento podría ser sobrescrito por localizaciones!"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:418
+#: code:addons/account_document/models/account_invoice.py:438
 #, python-format
 msgid ""
 "El Tipo de Documento elegido \"%s\" no pertenece al diario \"%s\". Por favor"
@@ -267,7 +272,7 @@ msgid "Entry Sequence"
 msgstr "Secuencia de Asiento"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:302
+#: code:addons/account_document/models/account_invoice.py:322
 #, python-format
 msgid ""
 "Error!. Please define sequence on the journal related documents to this "
@@ -301,7 +306,7 @@ msgstr "Genérico"
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_document_type_filter
 msgid "Group By..."
-msgstr ""
+msgstr "Agrupar por..."
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_id
@@ -342,7 +347,7 @@ msgid "Internal Type"
 msgstr "Tipo interno"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:176
+#: code:addons/account_document/models/account_invoice.py:196
 #: model:ir.model,name:account_document.model_account_invoice
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_invoice_id
 #, python-format
@@ -384,7 +389,7 @@ msgstr "Mapeo de Tipos de Documentos del Diario"
 #: model:ir.ui.view,arch_db:account_document.view_journal_document_type_form
 #: model:ir.ui.view,arch_db:account_document.view_journal_document_type_tree
 msgid "Journal Documents Types"
-msgstr ""
+msgstr "Tipos de documentos de diarios"
 
 #. module: account_document
 #: model:ir.model,name:account_document.model_account_move_line
@@ -557,7 +562,7 @@ msgstr "Las compras usan documentos"
 #: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_search
 #: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_tree
 msgid "Receipt Books"
-msgstr ""
+msgstr "Libros de recibo"
 
 #. module: account_document
 #: selection:account.document.type,internal_type:0
@@ -572,7 +577,7 @@ msgstr "Talonario de recibo"
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_account_payment_search
 msgid "Receiptbook"
-msgstr ""
+msgstr "Libro de Recibo"
 
 #. module: account_document
 #: model:ir.actions.act_window,name:account_document.action_receiptbook_form
@@ -581,7 +586,7 @@ msgid "Receiptbooks"
 msgstr "Talonarios de recibos"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:178
+#: code:addons/account_document/models/account_invoice.py:198
 #, python-format
 msgid "Refund"
 msgstr "Reembolso"
@@ -641,7 +646,7 @@ msgstr ""
 "facturas, notas de crédito y notas de débito."
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:257
+#: code:addons/account_document/models/account_invoice.py:277
 #, python-format
 msgid ""
 "Some invoices have a journal that require a document but not document type has been selected.\n"
@@ -711,7 +716,7 @@ msgstr "Ticket"
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_journal_merge_wizard_to_journal_id
 msgid "To Journal"
-msgstr ""
+msgstr "A diario"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_journal_type
@@ -738,7 +743,7 @@ msgstr "Importe sin impuesto"
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_account_journal_form
 msgid "Update Documents"
-msgstr ""
+msgstr "Actualizar documentos"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_use_documents
@@ -770,25 +775,25 @@ msgid "Vendor"
 msgstr "Proveedor"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:177
+#: code:addons/account_document/models/account_invoice.py:197
 #, python-format
 msgid "Vendor Bill"
 msgstr "Factura de Proveedor"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:179
+#: code:addons/account_document/models/account_invoice.py:199
 #, python-format
 msgid "Vendor Refund"
 msgstr "Reembolso a proveedor"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:442
+#: code:addons/account_document/models/account_invoice.py:462
 #, python-format
 msgid "You can not use a %s document type with a invoice"
 msgstr "No puede utilizar un tipo de documento %s con una factura"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:437
+#: code:addons/account_document/models/account_invoice.py:457
 #, python-format
 msgid "You can not use a %s document type with a refund invoice"
 msgstr ""
@@ -797,12 +802,12 @@ msgstr ""
 #. module: account_document
 #: model:ir.model,name:account_document.model_account_config_settings
 msgid "account.config.settings"
-msgstr ""
+msgstr "account.config.settings"
 
 #. module: account_document
 #: model:ir.model,name:account_document.model_account_journal_merge_wizard
 msgid "account.journal.merge.wizard"
-msgstr ""
+msgstr "account.journal.merge.wizard"
 
 #. module: account_document
 #: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_padding
@@ -816,9 +821,9 @@ msgstr ""
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_account_journal_merge_wizard_form
 msgid "or"
-msgstr ""
+msgstr "o"
 
 #. module: account_document
 #: model:ir.model,name:account_document.model_wizard_multi_charts_accounts
 msgid "wizard.multi.charts.accounts"
-msgstr ""
+msgstr "wizard.multi.charts.accounts"
