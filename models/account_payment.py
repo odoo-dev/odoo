@@ -24,7 +24,6 @@ class AccountPayment(models.Model):
     _rec_name we are changing _name_get
     """
     _inherit = "account.payment"
-    _rec_name = "display_name"
 
     # document_number = fields.Char(
     #     string=_('Document Number'),
@@ -128,7 +127,7 @@ class AccountPayment(models.Model):
                     seq_date = sequence._create_date_range_seq(dt)
                 payment.next_number = seq_date.number_next_actual
 
-    @api.one
+    @api.multi
     @api.depends(
         # 'move_name',
         'document_number',
@@ -139,15 +138,16 @@ class AccountPayment(models.Model):
         * If document number and document type, we show them
         * Else, we show name
         """
-        if (
-                self.state == 'posted' and self.document_number and
-                self.document_type_id):
-            display_name = ("%s%s" % (
-                self.document_type_id.doc_code_prefix or '',
-                self.document_number))
-        else:
-            display_name = self.name
-        self.display_name = display_name
+        for rec in self:
+            if (
+                    rec.state == 'posted' and rec.document_number and
+                    rec.document_type_id):
+                display_name = ("%s%s" % (
+                    rec.document_type_id.doc_code_prefix or '',
+                    rec.document_number))
+            else:
+                display_name = rec.name
+            rec.display_name = display_name
 
     # TODO esta constraint si la creamos hay que borrarla en
     # account_payment_group_document
@@ -155,12 +155,13 @@ class AccountPayment(models.Model):
     #     ('document_number_uniq', 'unique(document_number, receiptbook_id)',
     #         'Document number must be unique per receiptbook!')]
 
-    @api.one
+    @api.multi
     @api.constrains('company_id', 'partner_type')
     def _force_receiptbook(self):
         # we add cosntrins to fix odoo tests and also help in inmpo of data
-        if not self.receiptbook_id:
-            self.receiptbook_id = self._get_receiptbook()
+        for rec in self:
+            if not rec.receiptbook_id:
+                rec.receiptbook_id = rec._get_receiptbook()
 
     @api.onchange('company_id', 'partner_type')
     def get_receiptbook(self):
@@ -206,14 +207,15 @@ class AccountPayment(models.Model):
         vals['document_number'] = document_number
         return vals
 
-    @api.one
+    @api.multi
     @api.constrains('receiptbook_id', 'company_id')
     def _check_company_id(self):
         """
         Check receiptbook_id and voucher company
         """
-        if (self.receiptbook_id and
-                self.receiptbook_id.company_id != self.company_id):
-            raise ValidationError(_(
-                'The company of the receiptbook and of the '
-                'payment must be the same!'))
+        for rec in self:
+            if (rec.receiptbook_id and
+                    rec.receiptbook_id.company_id != rec.company_id):
+                raise ValidationError(_(
+                    'The company of the receiptbook and of the '
+                    'payment must be the same!'))

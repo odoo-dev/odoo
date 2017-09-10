@@ -200,7 +200,7 @@ class AccountInvoice(models.Model):
             recs = self.search([('name', operator, name)] + args, limit=limit)
         return recs.name_get()
 
-    @api.one
+    @api.multi
     @api.constrains(
         'journal_id',
         'partner_id',
@@ -212,16 +212,17 @@ class AccountInvoice(models.Model):
         y como con la funcion anterior solo se almacenan solo si se crea desde
         interfaz, hacemos este hack de constraint para computarlos si no estan
         computados"""
-        if (
-                not self.journal_document_type_id and
-                self.available_journal_document_type_ids
-        ):
-            self.journal_document_type_id = (
-                self._get_available_journal_document_types(
-                    self.journal_id, self.type, self.partner_id
-                ).get('journal_document_type'))
+        for rec in self:
+            if (
+                    not rec.journal_document_type_id and
+                    rec.available_journal_document_type_ids
+            ):
+                rec.journal_document_type_id = (
+                    rec._get_available_journal_document_types(
+                        rec.journal_id, rec.type, rec.partner_id
+                    ).get('journal_document_type'))
 
-    @api.one
+    @api.multi
     @api.depends(
         'move_name',
         'document_number',
@@ -237,13 +238,14 @@ class AccountInvoice(models.Model):
         # mostrar igual si existe el numero, por ejemplo si es factura de
         # proveedor
         # if self.document_number and self.document_type_id and self.move_name:
-        if self.document_number and self.document_type_id:
-            display_name = ("%s%s" % (
-                self.document_type_id.doc_code_prefix or '',
-                self.document_number))
-        else:
-            display_name = self.move_name
-        self.display_name = display_name
+        for rec in self:
+            if rec.document_number and rec.document_type_id:
+                display_name = ("%s%s" % (
+                    rec.document_type_id.doc_code_prefix or '',
+                    rec.document_number))
+            else:
+                display_name = rec.move_name
+            rec.display_name = display_name
 
     @api.multi
     def check_use_documents(self):
