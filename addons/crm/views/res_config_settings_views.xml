@@ -30,10 +30,10 @@
                                 <field name="generate_lead_from_alias"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label string="Manually Assignation of Incoming Emails"/>
+                                <label string="Manual Assignation of Leads"/>
                                 <div class="text-muted">
-                                    Generate unassigned leads from incoming emails. Leads coming from
-                                    that email will be assigned manually.
+                                    Generate leads from incoming emails and assign them
+                                    to a sales channel manually.
                                 </div>
                                 <div class="content-group" attrs="{'invisible': [('generate_lead_from_alias','=',False)]}">
                                     <div class="mt16">
