@@ -180,17 +180,16 @@ class AccountPayment(models.Model):
 
     @api.multi
     def post(self):
-        for rec in self:
-            # TODO ver si lo agregamos a las transfers o no
-            if rec.localization and rec.payment_type != 'transfer':
-                if not rec.document_number:
-                    if not rec.receiptbook_id.sequence_id:
-                        raise UserError(_(
-                            'Error!. Please define sequence on the receiptbook'
-                            ' related documents to this payment or set the '
-                            'document number.'))
-                    rec.document_number = (
-                        rec.receiptbook_id.sequence_id.next_by_id())
+        # si no ha receiptbook no exigimos el numero, esto por ej. en sipreco.
+        for rec in self.filtered(
+                lambda x: x.receiptbook_id and not x.document_number):
+            if not rec.receiptbook_id.sequence_id:
+                raise UserError(_(
+                    'Error!. Please define sequence on the receiptbook'
+                    ' related documents to this payment or set the '
+                    'document number.'))
+            rec.document_number = (
+                rec.receiptbook_id.sequence_id.next_by_id())
         return super(AccountPayment, self).post()
 
     def _get_move_vals(self, journal=None):

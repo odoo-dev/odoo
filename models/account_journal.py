@@ -181,13 +181,14 @@ class AccountJournal(models.Model):
             for rep_journal_doc in rep_journal_docs:
                 try:
                     rep_journal_doc.unlink()
-                    rep_journal_doc._cr.commit()
+                    rep_journal_doc.\
+                        _cr.commit()  # pylint: disable=invalid-commit
                 except Exception:
                     # TODO mejorar log que nos daba error
                     _logger.info('Could not unlink doc type')
 
             # TODO mejorar y tratar de evitar esto
-            self._cr.commit()
+            self._cr.commit()  # pylint: disable=invalid-commit
             from_journal.invalidate_cache()
             to_journal.invalidate_cache()
             repeated_types = get_repeated_types(from_journal, to_journal)

@@ -2,7 +2,7 @@
 {
     "name": "Accounting Documents Management",
     "version": "9.0.1.9.0",
-    "author": "Moldeo Interactive,ADHOC SA",
+    "author": "Moldeo Interactive,ADHOC SA,Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "category": "Accounting",
     "depends": [
