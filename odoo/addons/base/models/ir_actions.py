@@ -198,7 +198,6 @@ class IrActionsActWindow(models.Model):
                 if model in self.env:
                     rec = self.filtered(lambda r: r.id == values['id'])
                     eval_ctx = dict(self.env.context)
-                    eval_ctx.update({'context': dict(self.env.context)})
                     try:
                         ctx = safe_eval(rec.context, eval_ctx)
                     except:

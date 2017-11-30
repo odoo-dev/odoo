@@ -61,15 +61,6 @@ var KanbanColumnProgressBar = Widget.extend({
         this.$counter = this.$('.o_kanban_counter_side');
         this.$number = this.$counter.find('b');
 
-        if (this.progressBarHelp) {
-            this.$el.attr('data-original-title', this.progressBarHelp);
-            this.$el.tooltip({
-                delay: '0',
-                trigger:'hover',
-                placement: 'top'
-            });
-        }
-
         if (this.currency) {
             var $currency = $('<span/>', {
                 text: this.currency.symbol,
