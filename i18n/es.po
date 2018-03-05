@@ -4,14 +4,13 @@
 # 
 # Translators:
 # Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016
-# Gonzalo Ruzafa <gr@ingadhoc.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-06 22:21+0000\n"
-"PO-Revision-Date: 2017-09-06 22:21+0000\n"
-"Last-Translator: Gonzalo Ruzafa <gr@ingadhoc.com>, 2017\n"
+"POT-Creation-Date: 2018-03-05 13:08+0000\n"
+"PO-Revision-Date: 2018-03-05 13:08+0000\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -52,6 +51,11 @@ msgstr "Asiento contable"
 #: model:ir.model,name:account_document.model_account_payment_receiptbook
 msgid "Account payment Receiptbook"
 msgstr "Talonario de Pago"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_res_partner_form
+msgid "Accounting Documents"
+msgstr ""
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_active
@@ -251,7 +255,7 @@ msgstr ""
 "comportamiento podría ser sobrescrito por localizaciones!"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:438
+#: code:addons/account_document/models/account_invoice.py:447
 #, python-format
 msgid ""
 "El Tipo de Documento elegido \"%s\" no pertenece al diario \"%s\". Por favor"
@@ -282,7 +286,7 @@ msgstr ""
 "relacionado a esta factura o establezca un número de documento."
 
 #. module: account_document
-#: code:addons/account_document/models/account_payment.py:188
+#: code:addons/account_document/models/account_payment.py:187
 #, python-format
 msgid ""
 "Error!. Please define sequence on the receiptbook related documents to this "
@@ -570,7 +574,7 @@ msgid "Receipt Invoice"
 msgstr "Factura Recibo"
 
 #. module: account_document
-#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_id_3734
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_id_3738
 msgid "ReceiptBook"
 msgstr "Talonario de recibo"
 
@@ -682,7 +686,7 @@ msgid "Templates for Account Chart"
 msgstr "Plantillas para el Plan de Cuentas"
 
 #. module: account_document
-#: code:addons/account_document/models/account_payment.py:217
+#: code:addons/account_document/models/account_payment.py:216
 #, python-format
 msgid "The company of the receiptbook and of the payment must be the same!"
 msgstr "La compañía del talonario y el del pago deben ser la misma!"
@@ -787,13 +791,13 @@ msgid "Vendor Refund"
 msgstr "Reembolso a proveedor"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:462
+#: code:addons/account_document/models/account_invoice.py:471
 #, python-format
 msgid "You can not use a %s document type with a invoice"
 msgstr "No puede utilizar un tipo de documento %s con una factura"
 
 #. module: account_document
-#: code:addons/account_document/models/account_invoice.py:457
+#: code:addons/account_document/models/account_invoice.py:466
 #, python-format
 msgid "You can not use a %s document type with a refund invoice"
 msgstr ""
