@@ -340,6 +340,17 @@ class AccountInvoice(models.Model):
         return True
 
     @api.multi
+    # creo que por el parche de del def onchange no estaria funcionando
+    # y por eseo repetimos onchnage de cada elemento
+    # TODO analizar en v11
+    # @api.onchange('available_journal_document_type_ids')
+    @api.onchange('journal_id', 'partner_id', 'company_id')
+    def onchange_available_journal_document_types(self):
+        self.journal_document_type_id = self.\
+            available_journal_document_type_ids and self.\
+            available_journal_document_type_ids[0] or False
+
+    @api.multi
     @api.depends('journal_id', 'partner_id', 'company_id')
     def get_available_journal_document_types(self):
         """
@@ -359,8 +370,6 @@ class AccountInvoice(models.Model):
                 invoice.journal_id, invoice.type, invoice.partner_id)
             invoice.available_journal_document_type_ids = res[
                 'available_journal_document_types']
-            invoice.journal_document_type_id = res[
-                'journal_document_type']
 
     @api.multi
     def write(self, vals):
