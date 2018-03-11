@@ -346,9 +346,15 @@ class AccountInvoice(models.Model):
     # @api.onchange('available_journal_document_type_ids')
     @api.onchange('journal_id', 'partner_id', 'company_id')
     def onchange_available_journal_document_types(self):
-        self.journal_document_type_id = self.\
-            available_journal_document_type_ids and self.\
-            available_journal_document_type_ids[0] or False
+        res = self._get_available_journal_document_types(
+            self.journal_id, self.type, self.partner_id)
+        self.journal_document_type_id = res['journal_document_type']
+        # las localizaciones no siempre devuelven el primero como el que debe
+        # sugerir por defecto, si cambiamos para que asi sea entonces podemos
+        # cambiar esto aca
+        # self.journal_document_type_id = self.\
+        #     available_journal_document_type_ids and self.\
+        #     available_journal_document_type_ids[0] or False
 
     @api.multi
     @api.depends('journal_id', 'partner_id', 'company_id')
@@ -370,6 +376,12 @@ class AccountInvoice(models.Model):
                 invoice.journal_id, invoice.type, invoice.partner_id)
             invoice.available_journal_document_type_ids = res[
                 'available_journal_document_types']
+            # esto antes lo haciamos aca pero computaba mal el proximo numero
+            # de factura cuando se seleccionaba otro tipo de doc que no sea
+            # el por defecto (por ej, nota de debito), lo separamos en un
+            # onchange aparte
+            # invoice.journal_document_type_id = res[
+            #     'journal_document_type']
 
     @api.multi
     def write(self, vals):
