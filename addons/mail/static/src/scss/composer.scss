@@ -61,7 +61,7 @@
         }
         @media (max-width: $screen-xs-max) {
             .o_composer_button_send {
-                color: $odoo-brand-optional;
+                color: $o-brand-optional;
             }
         }
     }
@@ -79,13 +79,13 @@
 
     // Both inline and not-inline design. Mini-composer disabled.
     &:not(.o_chat_mini_composer) {
-        padding:  $mail-thread-avatar-size*0.5;
-        padding-left: $grid-gutter-width*0.5 + $mail-thread-avatar-size + $o-mail-chatter-gap;
+        padding:  $o-mail-thread-avatar-size*0.5;
+        padding-left: $grid-gutter-width*0.5 + $o-mail-thread-avatar-size + $o-mail-chatter-gap;
         border: 1px solid $gray-lighter-dark;
         border-top: none;
 
         .o_chatter_avatar {
-            @include o-position-absolute(0, $left:  -$mail-thread-avatar-size - $o-mail-chatter-gap);
+            @include o-position-absolute(0, $left:  -$o-mail-thread-avatar-size - $o-mail-chatter-gap);
         }
 
         .o_chatter_composer_info, .o_composer_suggested_partners {
@@ -177,7 +177,7 @@
                 border-radius: 0 3px 3px 0;
                 // Make the button appear as the same size as the subject input
                 padding: 10px $padding-base-horizontal;
-                border: 1px solid darken($odoo-brand-optional, 5%);
+                border: 1px solid darken($o-brand-optional, 5%);
                 border-left-width: 0;
             }
         }
@@ -231,27 +231,26 @@
 // Attachment Icons (common for chat thread and chat composer)
 // ------------------------------------------------------------------
 @-webkit-keyframes oe_mail_attach_loading_anim {
-    0% { background: $odoo-brand-optional }
-    50% { background: darken($odoo-brand-optional, 10%) }
-    100% { background: $odoo-brand-optional }
+    0% { background: $o-brand-optional }
+    50% { background: darken($o-brand-optional, 10%) }
+    100% { background: $o-brand-optional }
 }
 @-moz-keyframes oe_mail_attach_loading_anim {
-    0% { background: $odoo-brand-optional }
-    50% { background: darken($odoo-brand-optional, 10%) }
-    100% { background: $odoo-brand-optional }
+    0% { background: $o-brand-optional }
+    50% { background: darken($o-brand-optional, 10%) }
+    100% { background: $o-brand-optional }
 }
 @-o-keyframes oe_mail_attach_loading_anim {
-    0% { background: $odoo-brand-optional }
-    50% { background: darken($odoo-brand-optional, 10%) }
-    100% { background: $odoo-brand-optional }
+    0% { background: $o-brand-optional }
+    50% { background: darken($o-brand-optional, 10%) }
+    100% { background: $o-brand-optional }
 }
 @keyframes oe_mail_attach_loading_anim {
-    0% { background: $odoo-brand-optional }
-    50% { background: darken($odoo-brand-optional, 10%) }
-    100% { background: $odoo-brand-optional }
+    0% { background: $o-brand-optional }
+    50% { background: darken($o-brand-optional, 10%) }
+    100% { background: $o-brand-optional }
 }
 
-$o-mail-attachment-image-size: 100px;
 .o_attachment {
     position: relative;
     vertical-align: top;
@@ -298,7 +297,7 @@ $o-mail-attachment-image-size: 100px;
         overflow: hidden;
         padding: 5px;
         a {
-            color: $odoo-main-text-color;
+            color: $o-main-text-color;
         }
     }
     .o_attachment_progress_bar {
@@ -306,7 +305,7 @@ $o-mail-attachment-image-size: 100px;
     }
     .o_attachment_delete {
         @include o-position-absolute($top: -10px, $right: -8px);
-        color: $odoo-main-text-color;
+        color: $o-main-text-color;
         cursor: pointer;
         opacity: 0;
         @include o-transition(opacity, 0.2s, linear);
@@ -320,7 +319,7 @@ $o-mail-attachment-image-size: 100px;
             color: white;
             border-radius: $border-radius-base;
             border: solid 1px grey;
-            box-shadow: 0px 1px 10px $odoo-shadow-color;
+            box-shadow: 0px 1px 10px $o-shadow-color;
             @include o-animation($name: oe_mail_attach_loading_anim, $duration: 1s, $timing-function: linear, $iteration-count: infinite);
         }
         .o_attachment_delete {

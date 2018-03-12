@@ -409,7 +409,9 @@ class AssetsBundle(object):
 
         if atype == ScssStylesheetAsset:
             try:
-                result = sass.compile(string=source.encode('utf-8'), include_paths=[get_resource_path('web', 'static', 'lib', 'bootstrap', 'scss')])
+                path_to_bs = get_resource_path('web', 'static', 'lib', 'bootstrap', 'scss')
+                path_to_bs_components = get_resource_path('web', 'static', 'lib', 'bootstrap', 'scss', 'bootstrap')
+                result = sass.compile(string=source.encode('utf-8'), include_paths=[path_to_bs, path_to_bs_components])
                 compiled = result.strip()
             except sass.CompileError as e:
                 return handle_compile_error(e, source=source)
