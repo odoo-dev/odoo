@@ -355,7 +355,7 @@ class TestAssetsBundleInBrowser(HttpCase):
         )
 
 
-class TestAssetsBundleWithIRAMock(TransactionCase):
+class TestAssetsBundleWithIRAMock(TransactionCase): # FIXME ?
     def setUp(self):
         super(TestAssetsBundleWithIRAMock, self).setUp()
         self.lessbundle_xmlid = 'test_assetsbundle.bundle3'
