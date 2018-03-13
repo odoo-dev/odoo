@@ -15,7 +15,6 @@ Depends:
  ${python3:Depends},
  adduser,
  lsb-base,
- node-less,
  postgresql-client,
  python3-babel,
  python3-dateutil,
