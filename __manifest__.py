@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 {
     "name": "Accounting Documents Management",
     "version": "9.0.1.9.0",

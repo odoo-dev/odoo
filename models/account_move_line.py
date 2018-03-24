@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-from openerp import models, api, fields
-# from openerp.exceptions import UserError
-from openerp.osv import expression
-from openerp.addons.account.models.account_move import AccountMoveLine
+from odoo import models, api, fields
+# from odoo.exceptions import UserError
+from odoo.osv import expression
+from odoo.addons.account.models.account_move import AccountMoveLine
 
 old_method = AccountMoveLine.domain_move_lines_for_reconciliation
 

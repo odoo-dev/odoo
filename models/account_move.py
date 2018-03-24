@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-from openerp import fields, models, api
-# from openerp.exceptions import UserError
-from openerp.osv import expression
+from odoo import fields, models, api
+# from odoo.exceptions import UserError
+from odoo.osv import expression
 
 
 class AccountMove(models.Model):
