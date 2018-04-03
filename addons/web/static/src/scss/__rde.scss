@@ -1,0 +1,45 @@
+$line-height-base_rde:        1.428571429; // 20/14
+$reward-size-mobile: 300px;
+/***expended precision8 ****/
+.test {
+    padding: -5px -25px;
+    margin: -5px -$reward-size-mobile;
+}
+.rde {
+    position: relative!important;
+
+    border: 0 solid rgba(0, 0, 0, 0);
+
+    line-height: $line-height-base_rde;
+
+    a, b {
+      z1, z2 {
+        color:red;
+      }
+    }
+
+    margin: -5% auto 0 -($reward-size-mobile / 2);
+    margin: -5% auto 20px -($reward-size-mobile / 2);
+    padding: -5% auto 20px (-($reward-size-mobile / 2));
+
+    background-image: url('/web/static/src/img/mimetypes/image.png');
+}
+
+$roboto-font-path: '../fonts/Roboto';
+@font-face {
+    font-family: 'Roboto';
+    src: url('@{roboto-font-path}/Roboto-@{type}-webfont.eot');
+}
+
+
+
+
+.rde2 {
+    background-image: url(../img/checked.svg);
+}
+
+.a{color: rgba(0, 0, 0, 0);}
+.a{color: rgba(0, 0, 0, 1);}
+.a{color: rgba(0, 255, 0, 0.5);}
+.a{color: rgba(255, 0, 0, 1);}
+.a{color: rgba(123, 17, 42, 1);}
