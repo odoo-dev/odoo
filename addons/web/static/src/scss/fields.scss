@@ -229,6 +229,26 @@
         cursor: ns-resize;
     }
 
+    &.o_radio_badge_widget {
+        display : inline;
+        .o_radio_badge {
+            min-width: 10px;
+            padding: 3px 7px;
+            border: 1px solid $o-form-lightsecondary;
+            background-color:white;
+            color: $o-form-lightsecondary;
+            font-size: 12px;
+            cursor: pointer;
+            &.active{
+                border: 1px solid $o-brand-optional;
+                color: $o-brand-optional;
+            }
+            &:hover {
+                color:$gray-light;
+                border: 1px solid $gray-light;
+            }
+        }
+    }
     // Radio buttons
     &.o_field_radio {
         .o_radio_input {

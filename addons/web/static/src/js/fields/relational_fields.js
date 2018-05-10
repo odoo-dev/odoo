@@ -2304,6 +2304,55 @@ var FieldRadio = FieldSelection.extend({
     },
 });
 
+var FieldRadioBadge = FieldRadio.extend({
+    events: _.extend({}, FieldRadio.prototype.events, {
+        'click span.o_radio_badge': '_onBadgeClicked',
+    }),
+
+    /**
+     * @private
+     * @override
+     */
+    _renderEdit: function () {
+        var self = this; 
+        var currentValue;
+        if (this.field.type === 'many2one') {
+            currentValue = this.value && this.value.data.id;
+        } else {
+            currentValue = this.value;
+        }
+        this.$el.addClass('o_radio_badge_widget');
+        this.$el.empty();
+        _.each(this.values, function (value, index) {
+            self.$el.append(qweb.render('FieldRadioBadge', {
+                checked: value[0] === currentValue,
+                id: self.unique_id + '_' + value[0],
+                index: index,
+                value: value,
+            }));
+        });
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {MouseEvent} event
+     */
+    _onBadgeClicked: function (event) {
+        var index = $(event.target).data('index');
+        var value = this.values[index];
+        if (this.field.type === 'many2one') {
+            this._setValue({id: value[0], display_name: value[1]});
+        } else {
+            this._setValue(value[0]);
+        }
+    }
+
+});
+
 /**
  * The FieldReference is a combination of a select (for the model) and
  * a FieldMany2one for its value.
@@ -2464,6 +2513,7 @@ return {
     KanbanFieldMany2ManyTags: KanbanFieldMany2ManyTags,
 
     FieldRadio: FieldRadio,
+    FieldRadioBadge: FieldRadioBadge,
     FieldSelection: FieldSelection,
     FieldStatus: FieldStatus,
 
