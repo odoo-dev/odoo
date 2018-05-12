@@ -22,7 +22,7 @@
        &nbsp;&nbsp;Order reference: ${object.origin}<br />
        % endif
        % if object.user_id:
-       &nbsp;&nbsp;Your contact: <a href="mailto:${object.user_id.email or ''}?subject=Invoice%20${object.number}">${object.user_id.name}</a>
+       &nbsp;&nbsp;Your contact: <a href="mailto:${object.user_id.email or ''}?subject=Invoice%20${object.display_name}">${object.user_id.name}</a>
        % endif
     </p>  
     

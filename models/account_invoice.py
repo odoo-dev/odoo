@@ -11,6 +11,35 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+from openerp.addons.account.models.account_invoice import AccountInvoice
+
+
+@api.multi
+def invoice_validate(self):
+    """
+    We make reference only unique if you are not using documents as documents
+    already guarantee to not enode twice same vendor bill.
+    TODO: mejorar esto en v11, ahora es con monkey patch pero en v11 el codigo
+    de odoo es heredable
+    """
+    for invoice in self.filtered(lambda x: not x.use_documents):
+        if invoice.type in ('in_invoice', 'in_refund') and invoice.reference:
+            if self.search([
+                ('type', '=', invoice.type),
+                ('reference', '=', invoice.reference),
+                ('company_id', '=', invoice.company_id.id),
+                ('commercial_partner_id', '=',
+                    invoice.commercial_partner_id.id),
+                   ('id', '!=', invoice.id)]):
+                raise UserError(_(
+                    "Duplicated vendor reference detected. You probably "
+                    "encoded twice the same vendor bill/refund."))
+    return self.write({'state': 'open'})
+
+
+AccountInvoice.invoice_validate = invoice_validate
+
+
 class AccountInvoice(models.Model):
     """
     about name_get and display name:
