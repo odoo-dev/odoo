@@ -27,6 +27,8 @@
         <attribute name="t-if">l.report_invoice_line_tax_ids</attribute>
     </xpath> -->
 
+
+    <!-- por fines de migracion y porque no se usa por el momento se comentan este bloque
     <xpath expr="//span[@t-field='l.price_subtotal']" position="attributes">
         <attribute name="t-field">l.report_price_subtotal</attribute>
     </xpath>
@@ -42,6 +44,7 @@
     <xpath expr="//tr[@t-foreach='o.tax_line_ids']" position="attributes">
         <attribute name="t-foreach">o.report_tax_line_ids</attribute>
     </xpath>
+    FIN DE BLOQUE COMENTADO-->
 </template>
 
 </data>

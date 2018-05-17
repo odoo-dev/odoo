@@ -15,9 +15,13 @@ class AccountChartTemplate(models.Model):
     #     lambda self, *args, **kwargs: self.env[
     #         'res.company']._get_localizations(*args, **kwargs))
 
+    def _get_localizations(self):
+        localizations = self.env['res.company']._fields['localization']._description_selection(self.env)
+        return localizations
+
     localization = fields.Selection(
-        # _get_localizations,
-        ResCompany._localization_selection,
+        _get_localizations,
+        #ResCompany._localization_selection,
         'Localization',
         help='If you set the localization here, then when installing '
         'this chart, this localization will be set on company'

@@ -1,6 +1,6 @@
 {
     "name": "Accounting Documents Management",
-    "version": "9.0.1.9.0",
+    "version": "11.0.1.0.0",
     "author": "Moldeo Interactive,ADHOC SA,Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "category": "Accounting",
@@ -20,6 +20,7 @@
         'view/account_chart_template_view.xml',
         'view/account_payment_view.xml',
         'view/account_payment_receiptbook_view.xml',
+        'view/menuitem.xml',
         'wizards/account_journal_merge_wizard_view.xml',
         'report/invoice_report_view.xml',
         'data/account.document.type.csv',
@@ -33,5 +34,5 @@
     ],
     'images': [
     ],
-    'installable': False,
+    'installable': True,
 }

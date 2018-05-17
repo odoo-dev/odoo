@@ -22,9 +22,6 @@ class ResCompany(models.Model):
     # raise the error that "argentina" was not a valid value for "localization"
     # this way we force all selection values to be loaded first
 
-    _localization_selection = [('generic', 'Generic')]
-
-    localization = fields.Selection(
-        _localization_selection,
+    localization = fields.Selection([('generic', 'Generic')],
         'Localization',
     )

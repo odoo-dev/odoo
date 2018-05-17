@@ -12,13 +12,18 @@ class AccountDocmentType(models.Model):
     #     lambda self, *args, **kwargs: self.env[
     #         'res.company']._get_localizations(*args, **kwargs))
 
+    def _get_localizations(self):
+        localizations = self.env['res.company']._fields['localization']._description_selection(self.env)
+        return localizations
+
     sequence = fields.Integer(
         default=10,
         required=True,
+        help="Used to order records in tree views and relational fields"
     )
     localization = fields.Selection(
-        # _get_localizations,
-        ResCompany._localization_selection,
+        _get_localizations,
+        #ResCompany._localization_selection,
         'Localization',
         help='If you set a localization here then it will be available only '
         'for companies of this localization',
@@ -27,6 +32,7 @@ class AccountDocmentType(models.Model):
         'Name',
         required=True,
     )
+    #Eliminar
     company_id = fields.Many2one(
         'res.company',
         'Company',

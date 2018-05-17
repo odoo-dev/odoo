@@ -4,10 +4,10 @@
 
         <record model="ir.ui.view" id="view_account_config_settings">
             <field name="name">account.documents.config.form.inherit</field>
-            <field name="inherit_id" ref="account.view_account_config_settings"/>
-            <field name="model">account.config.settings</field>
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="model">res.config.settings</field>
             <field name="arch" type="xml">
-                <xpath expr="//group[2]/div/div[2]" position="after">
+                <xpath expr="//div/div/div/div" position="inside">
                     <div name="localization" attrs="{'invisible':[('has_chart_of_accounts','!=',False)]}">
                         <label for="localization"/>
                         <field name="localization" class="oe_inline"/>

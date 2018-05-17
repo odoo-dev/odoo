@@ -125,40 +125,21 @@ class AccountInvoice(models.Model):
         readonly=True,
     )
 
-    @api.multi
-    def onchange(self, values, field_name, field_onchange):
-        """
-        Idea obtenida de aca
-        https://github.com/odoo/odoo/issues/16072#issuecomment-289833419
-        por el cambio que se introdujo en esa mimsa conversación, TODO en v11
-        no haría mas falta, simplemente domain="[('id', 'in', x2m_field)]"
-        Otras posibilidades que probamos pero no resultaron del todo fue:
-        * agregar onchange sobre campos calculados y que devuelvan un dict con
-        domain. El tema es que si se entra a un registro guardado el onchange
-        no se ejecuta
-        * usae el modulo de web_domain_field que esta en un pr a la oca
-        """
-        for field in field_onchange.keys():
-            if field.startswith('available_journal_document_type_ids.'):
-                del field_onchange[field]
-        return super(AccountInvoice, self).onchange(
-            values, field_name, field_onchange)
-
-    @api.multi
-    def _get_tax_amount_by_group(self):
-        """
-        we can not inherit because of function design, we overwrite
-        """
-        self.ensure_one()
-        res = {}
-        currency = self.currency_id or self.company_id.currency_id
-        for line in self.report_tax_line_ids:
-            res.setdefault(line.tax_id.tax_group_id, 0.0)
-            res[line.tax_id.tax_group_id] += line.amount
-        res = sorted(res.items(), key=lambda l: l[0].sequence)
-        res = map(lambda l: (
-            l[0].name, formatLang(self.env, l[1], currency_obj=currency)), res)
-        return res
+#    @api.multi
+#    def _get_tax_amount_by_group(self):
+#        """ Method used by qweb invoice report. We are not using this report
+#        for now.
+#        """
+#        self.ensure_one()
+#        res = {}
+#        currency = self.currency_id or self.company_id.currency_id
+#        for line in self.report_tax_line_ids:
+#            res.setdefault(line.tax_id.tax_group_id, 0.0)
+#            res[line.tax_id.tax_group_id] += line.amount
+#        res = sorted(res.items(), key=lambda l: l[0].sequence)
+#        res = map(lambda l: (
+#            l[0].name, formatLang(self.env, l[1], currency_obj=currency)), res)
+#        return res
 
     @api.depends(
         'amount_untaxed', 'amount_tax', 'tax_line_ids', 'document_type_id')

@@ -82,7 +82,7 @@ class AccountPayment(models.Model):
         string='Next Number',
     )
     display_name = fields.Char(
-        compute='_compute_display_name',
+        compute='_compute_clean_display_name',
         search='_search_display_name',
         string='Document Reference',
     )
@@ -127,26 +127,28 @@ class AccountPayment(models.Model):
                     seq_date = sequence._create_date_range_seq(dt)
                 payment.next_number = seq_date.number_next_actual
 
-    @api.one
+    @api.multi
     @api.depends(
-        # 'move_name',
+        'name',
         'document_number',
-        'document_type_id.doc_code_prefix'
+        'document_type_id.doc_code_prefix',
+        'state'
     )
-    def _compute_display_name(self):
+    def _compute_clean_display_name(self):
         """
         * If document number and document type, we show them
         * Else, we show name
         """
-        if (
-                self.state == 'posted' and self.document_number and
-                self.document_type_id):
-            display_name = ("%s%s" % (
-                self.document_type_id.doc_code_prefix or '',
-                self.document_number))
-        else:
-            display_name = self.name
-        self.display_name = display_name
+        for x in self:
+            if (
+                    x.state == 'posted' and x.document_number and
+                    x.document_type_id):
+                display_name = ("%s%s" % (
+                    x.document_type_id.doc_code_prefix or '',
+                    x.document_number))
+            else:
+                display_name = x.name
+            x.display_name = display_name
 
     # TODO esta constraint si la creamos hay que borrarla en
     # account_payment_group_document

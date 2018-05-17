@@ -15,12 +15,12 @@ class WizardMultiChartsAccounts(models.TransientModel):
 
         # get for detault tax and supplier tax setted for this company
 
-        tax_ids = self.env['ir.values'].get_default(
-            'product.template', 'taxes_id', for_all_users=True,
-            company_id=self.company_id.id, condition=False)
-        supplier_taxes_ids = self.env['ir.values'].get_default(
-            'product.template', 'supplier_taxes_id', for_all_users=True,
-            company_id=self.company_id.id, condition=False)
+        tax_ids = self.env['ir.default'].get(
+            'product.template', 'taxes_id',
+            company_id=self.company_id.id)
+        supplier_taxes_ids = self.env['ir.default'].get(
+            'product.template', 'supplier_taxes_id',
+            company_id=self.company_id.id)
 
         prod_templates = self.env['product.template'].search([])
         if self.sale_tax_id and tax_ids:
@@ -35,7 +35,7 @@ class WizardMultiChartsAccounts(models.TransientModel):
 
 
 class AccountConfigSettings(models.TransientModel):
-    _inherit = 'account.config.settings'
+    _inherit = 'res.config.settings'
 
     sale_use_documents = fields.Boolean(
         'Sale Use Documents'
