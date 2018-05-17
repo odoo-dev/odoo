@@ -16,7 +16,7 @@
         'view/account_invoice_view.xml',
         'view/res_company_view.xml',
         'view/res_partner_view.xml',
-        'view/report_invoice.xml',
+        # 'view/report_invoice.xml',
         'view/account_chart_template_view.xml',
         'view/account_payment_view.xml',
         'view/account_payment_receiptbook_view.xml',
