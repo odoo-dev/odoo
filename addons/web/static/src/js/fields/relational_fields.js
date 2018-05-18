@@ -2304,9 +2304,13 @@ var FieldRadio = FieldSelection.extend({
     },
 });
 
-var FieldRadioBadge = FieldRadio.extend({
-    events: _.extend({}, FieldRadio.prototype.events, {
-        'click span.o_radio_badge': '_onBadgeClicked',
+
+var FieldSelectionBadge = FieldSelection.extend({
+    template: null,
+    tagName: 'span',
+    specialData: "_fetchSpecialMany2ones",
+    events: _.extend({}, AbstractField.prototype.events, {
+        'click span.o_selection_badge': '_onBadgeClicked',
     }),
 
     /**
@@ -2314,23 +2318,30 @@ var FieldRadioBadge = FieldRadio.extend({
      * @override
      */
     _renderEdit: function () {
-        var self = this; 
-        var currentValue;
+        var self = this;
+        this.currentValue = this.value;
+
         if (this.field.type === 'many2one') {
-            currentValue = this.value && this.value.data.id;
-        } else {
-            currentValue = this.value;
+            this.currentValue = this.value && this.value.data.id;
         }
-        this.$el.addClass('o_radio_badge_widget');
+        this.$el.addClass('o_field_selection_badge');
         this.$el.empty();
-        _.each(this.values, function (value, index) {
-            self.$el.append(qweb.render('FieldRadioBadge', {
-                checked: value[0] === currentValue,
-                id: self.unique_id + '_' + value[0],
-                index: index,
-                value: value,
-            }));
-        });
+        this.$el.html(qweb.render('FieldSelectionBadge', {'values': this.values, 'current_value': this.currentValue}));
+    },
+
+
+    /**
+     * @private
+     * @override
+     */
+    _setValues: function () {
+        if (this.field.type === 'selection') {
+            this.values = this.field.selection || [];
+        } else if (this.field.type === 'many2one') {
+            this.values = _.map(this.record.specialData[this.name], function (val) {
+                return [val.id, val.display_name];
+            });
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -2344,13 +2355,16 @@ var FieldRadioBadge = FieldRadio.extend({
     _onBadgeClicked: function (event) {
         var index = $(event.target).data('index');
         var value = this.values[index];
-        if (this.field.type === 'many2one') {
-            this._setValue({id: value[0], display_name: value[1]});
+        if (value[0] != this.currentValue) {
+            if (this.field.type === 'many2one') {
+                this._setValue({id: value[0], display_name: value[1]});
+            } else {
+                this._setValue(value[0]);
+            }
         } else {
-            this._setValue(value[0]);
+            this._setValue('');
         }
-    }
-
+    },
 });
 
 /**
@@ -2513,7 +2527,7 @@ return {
     KanbanFieldMany2ManyTags: KanbanFieldMany2ManyTags,
 
     FieldRadio: FieldRadio,
-    FieldRadioBadge: FieldRadioBadge,
+    FieldSelectionBadge: FieldSelectionBadge,
     FieldSelection: FieldSelection,
     FieldStatus: FieldStatus,
 

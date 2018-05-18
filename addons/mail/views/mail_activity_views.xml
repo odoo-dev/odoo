@@ -93,7 +93,7 @@
                     <group attrs="{'invisible': [('has_recommended_activities','=',False)]}">
                         <div>
                             <strong>Recommended Activities</strong>
-                            <field name="recommended_activity_type_id" widget="radio_badge"
+                            <field name="recommended_activity_type_id" widget="selection_badge"
                                 domain="[('previous_type_ids', '=', previous_activity_type_id)]"
                                 nolabel="1"/>
                         </div>
