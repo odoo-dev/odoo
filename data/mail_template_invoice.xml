@@ -1,66 +1,58 @@
 <?xml version="1.0" ?>
-<odoo>
-    <!-- pisamos la plantilla de odoo agregando display_name en vez de number -->
+<odoo noupdate="1">
+    <!-- pisamos la plantilla de odoo agregando display_name en vez de display_name -->
 
     <!-- Mail template are declared in a NOUPDATE block
          so users can freely customize/delete them -->
-    <data noupdate="1">
-        <!--Email template -->
-        <record id="account.email_template_edi_invoice" model="mail.template">
-            <field name="report_name">Invoice_${(object.display_name or '').replace('/','_')}_${object.state == 'draft' and 'draft' or ''}</field>
-            <field name="body_html"><![CDATA[
-<div style="font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
-    <p>Hello ${object.partner_id.name},</p>
-    <p>A new invoice is available for you: </p>
-    
-    <p style="border-left: 1px solid #8e0000; margin-left: 30px;">
-       &nbsp;&nbsp;<strong>REFERENCES</strong><br />
-       &nbsp;&nbsp;Invoice number: <strong>${object.display_name}</strong><br />
-       &nbsp;&nbsp;Invoice total: <strong>${object.amount_total} ${object.currency_id.name}</strong><br />
-       &nbsp;&nbsp;Invoice date: ${object.date_invoice}<br />
-       % if object.origin:
-       &nbsp;&nbsp;Order reference: ${object.origin}<br />
-       % endif
-       % if object.user_id:
-       &nbsp;&nbsp;Your contact: <a href="mailto:${object.user_id.email or ''}?subject=Invoice%20${object.display_name}">${object.user_id.name}</a>
-       % endif
-    </p>  
-    
-    % if object.paypal_url:
-    <br/>
-    <p>It is also possible to directly pay with Paypal:</p>
-        <a style="margin-left: 120px;" href="${object.paypal_url}">
-            <img class="oe_edi_paypal_button" src="/account/static/src/img/btn_paynowcc_lg.gif"/>
-        </a>
-    % endif
-    
-    <br/>
-    <p>If you have any question, do not hesitate to contact us.</p>
-    <p>Thank you for choosing ${object.company_id.name or 'us'}!</p>
-    <br/>
-    <br/>
-    <div style="width: 375px; margin: 0px; padding: 0px; background-color: #8E0000; border-top-left-radius: 5px 5px; border-top-right-radius: 5px 5px; background-repeat: repeat no-repeat;">
-        <h3 style="margin: 0px; padding: 2px 14px; font-size: 12px; color: #DDD;">
-            <strong style="text-transform:uppercase;">${object.company_id.name}</strong></h3>
-    </div>
-    <div style="width: 347px; margin: 0px; padding: 5px 14px; line-height: 16px; background-color: #F2F2F2;">
-        <span style="color: #222; margin-bottom: 5px; display: block; ">
-            ${object.company_id.partner_id.sudo().with_context(show_address=True, html_format=True).name_get()[0][1] | safe}
-        </span>
-        % if object.company_id.phone:
-            <div style="margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; ">
-                Phone:&nbsp; ${object.company_id.phone}
-            </div>
-        % endif
-        % if object.company_id.website:
-            <div>
-                Web :&nbsp;<a href="${object.company_id.website}">${object.company_id.website}</a>
-            </div>
-        %endif
-        <p></p>
-    </div>
-</div>
-            ]]></field>
+    <!--Email template -->
+    <record id="account.email_template_edi_invoice" model="mail.template">
+        <field name="subject">${object.company_id.name} Invoice (Ref ${object.display_name or 'n/a'})</field>
+        <field name="report_name">Invoice_${(object.display_name or '').replace('/','_')}_${object.state == 'draft' and 'draft' or ''}</field>
+        <field name="body_html" type="html">
+<div>
+<p>Dear ${object.partner_id.name}
+% set access_action = object.with_context(force_website=True).get_access_action()
+% set is_online = access_action and access_action['type'] == 'ir.actions.act_url'
+% set access_url = object.get_mail_url()
+
+% if object.partner_id.parent_id:
+    (<i>${object.partner_id.parent_id.name}</i>)
+% endif
+,</p>
+<p>Here is, in attachment, your 
+% if object.display_name:
+invoice <strong>${object.display_name}</strong>
+% else:
+invoice
+% endif
+% if object.origin:
+(with reference: ${object.origin})
+% endif
+amounting in <strong>${format_amount(object.amount_total, object.currency_id)}</strong>
+from ${object.company_id.name}.
+</p>
+
+% if is_online:
+    <br/><br/>
+    <center>
+      <a href="${access_url}" style="background-color: #1abc9c; padding: 20px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;" class="o_default_snippet_text">View Invoice</a>
+    </center>
+% endif
+    <br/><br/>
+
+% if object.state=='paid':
+    <p>This invoice is already paid.</p>
+% else:
+    <p>Please remit payment at your earliest convenience.</p>
+% endif
+
+<p>Thank you,</p>
+<p style="color:#888888">
+% if object.user_id and object.user_id.signature:
+    ${object.user_id.signature | safe}
+% endif
+</p>
+</div></field>
         </record>
-    </data>
+
 </odoo>

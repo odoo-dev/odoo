@@ -1,5 +1,4 @@
 from odoo import fields, models, api
-from odoo.addons.account_document.models.res_company import ResCompany
 # from odoo.exceptions import UserError
 
 
@@ -8,12 +7,9 @@ class AccountDocmentType(models.Model):
     _description = 'Account Document Type'
     _order = 'sequence, id asc'
 
-    # _get_localizations = (
-    #     lambda self, *args, **kwargs: self.env[
-    #         'res.company']._get_localizations(*args, **kwargs))
-
     def _get_localizations(self):
-        localizations = self.env['res.company']._fields['localization']._description_selection(self.env)
+        localizations = self.env['res.company']._fields[
+            'localization']._description_selection(self.env)
         return localizations
 
     sequence = fields.Integer(
@@ -23,22 +19,15 @@ class AccountDocmentType(models.Model):
     )
     localization = fields.Selection(
         _get_localizations,
-        #ResCompany._localization_selection,
         'Localization',
         help='If you set a localization here then it will be available only '
         'for companies of this localization',
+        index=True,
     )
     name = fields.Char(
         'Name',
         required=True,
-    )
-    #Eliminar
-    company_id = fields.Many2one(
-        'res.company',
-        'Company',
-        required=True,
-        default=lambda self: self.env['res.company']._company_default_get(
-            'account.document.type')
+        index=True,
     )
     doc_code_prefix = fields.Char(
         'Document Code Prefix',
@@ -66,6 +55,7 @@ class AccountDocmentType(models.Model):
         ('in_document', 'In Document'),
     ],
         string='Internal Type',
+        index=True,
         help='On each localization each document type may have a different use'
         # help='It defines some behaviours on different places:\
         # * invoice: used on sale and purchase journals. Auto selected if not\

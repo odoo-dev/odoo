@@ -43,7 +43,7 @@ class AccountInvoiceRefund(models.TransientModel):
     )
     available_journal_document_type_ids = fields.Many2many(
         'account.journal.document.type',
-        compute='get_available_journal_document_types',
+        compute='_compute_available_journal_document_types',
         string='Available Journal Document Types',
     )
 
@@ -68,7 +68,7 @@ class AccountInvoiceRefund(models.TransientModel):
 
     @api.multi
     @api.depends('invoice_id')
-    def get_available_journal_document_types(self):
+    def _compute_available_journal_document_types(self):
         for rec in self:
             invoice = rec.invoice_id
             if not invoice:

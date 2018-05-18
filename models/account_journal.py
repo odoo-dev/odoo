@@ -15,6 +15,8 @@ class AccountJournalDocumentType(models.Model):
         'Document Type',
         required=True,
         ondelete='cascade',
+        auto_join=True,
+        index=True,
     )
     sequence_id = fields.Many2one(
         'ir.sequence',
@@ -27,6 +29,7 @@ class AccountJournalDocumentType(models.Model):
         'Journal',
         required=True,
         ondelete='cascade',
+        auto_join=True,
     )
     journal_type = fields.Selection(
         related='journal_id.type',
@@ -34,6 +37,7 @@ class AccountJournalDocumentType(models.Model):
     )
     sequence = fields.Integer(
         'Sequence',
+        index=True,
     )
     next_number = fields.Integer(
         related='sequence_id.number_next_actual'
@@ -51,9 +55,10 @@ class AccountJournal(models.Model):
         'account.journal.document.type',
         'journal_id',
         'Documents Types',
+        auto_join=True,
     )
     use_documents = fields.Boolean(
-        'Use Documents?'
+        'Use Documents?',
     )
     document_sequence_type = fields.Selection(
         # TODO this field could go in argentina localization
@@ -62,7 +67,7 @@ class AccountJournal(models.Model):
         string='Document Sequence Type',
         default='own_sequence',
         required=False,
-        help="Use own sequence or invoice sequence on Debit and Credit Notes?"
+        help="Use own sequence or invoice sequence on Debit and Credit Notes?",
     )
 
     @api.onchange('company_id', 'type')
@@ -217,6 +222,6 @@ class AccountJournal(models.Model):
                 SET
                     journal_id=%s
                 WHERE journal_id = %s
-                """ % (table, to_journal.id, from_journal.id))
+                """, (table, to_journal.id, from_journal.id))
         if delete_from:
             from_journal.unlink()

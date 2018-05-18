@@ -24,12 +24,14 @@ class AccountMove(models.Model):
         'Document Type',
         copy=False,
         auto_join=True,
-        states={'posted': [('readonly', True)]}
+        states={'posted': [('readonly', True)]},
+        index=True,
     )
     document_number = fields.Char(
         string='Document Number',
         copy=False,
-        states={'posted': [('readonly', True)]}
+        states={'posted': [('readonly', True)]},
+        index=True,
     )
     # this fields exists automatically and was computed by name_get,
     # no we compute with a function so it can be computed by document
@@ -41,6 +43,7 @@ class AccountMove(models.Model):
         # queremos eviatar recargar esta clase por ahora, si activamos
         # desactivar el dpends de prefix
         store=True,
+        index=True,
     )
 
     @api.multi

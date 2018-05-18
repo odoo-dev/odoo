@@ -14,5 +14,5 @@ class ResPartner(models.Model):
         'partner_id', 'document_type_id',
         string='Other Documents',
         help='Set here if this partner can issue other documents further '
-        'than invoices, credit notes and debit notes'
+        'than invoices, credit notes and debit notes',
     )

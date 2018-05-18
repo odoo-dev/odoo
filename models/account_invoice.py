@@ -6,38 +6,9 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 # import odoo.addons.decimal_precision as dp
 # import re
-from odoo.tools.misc import formatLang
+# from odoo.tools.misc import formatLang
 import logging
 _logger = logging.getLogger(__name__)
-
-
-from openerp.addons.account.models.account_invoice import AccountInvoice
-
-
-@api.multi
-def invoice_validate(self):
-    """
-    We make reference only unique if you are not using documents as documents
-    already guarantee to not enode twice same vendor bill.
-    TODO: mejorar esto en v11, ahora es con monkey patch pero en v11 el codigo
-    de odoo es heredable
-    """
-    for invoice in self.filtered(lambda x: not x.use_documents):
-        if invoice.type in ('in_invoice', 'in_refund') and invoice.reference:
-            if self.search([
-                ('type', '=', invoice.type),
-                ('reference', '=', invoice.reference),
-                ('company_id', '=', invoice.company_id.id),
-                ('commercial_partner_id', '=',
-                    invoice.commercial_partner_id.id),
-                   ('id', '!=', invoice.id)]):
-                raise UserError(_(
-                    "Duplicated vendor reference detected. You probably "
-                    "encoded twice the same vendor bill/refund."))
-    return self.write({'state': 'open'})
-
-
-AccountInvoice.invoice_validate = invoice_validate
 
 
 class AccountInvoice(models.Model):
@@ -72,7 +43,7 @@ class AccountInvoice(models.Model):
     )
     available_journal_document_type_ids = fields.Many2many(
         'account.journal.document.type',
-        compute='get_available_journal_document_types',
+        compute='_compute_available_journal_document_types',
         string='Available Journal Document Types',
     )
     journal_document_type_id = fields.Many2one(
@@ -91,6 +62,7 @@ class AccountInvoice(models.Model):
         readonly=True,
         store=True,
         auto_join=True,
+        index=True,
     )
     document_sequence_id = fields.Many2one(
         related='journal_document_type_id.sequence_id',
@@ -102,19 +74,20 @@ class AccountInvoice(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)]},
         track_visibility='onchange',
+        index=True,
     )
     display_name = fields.Char(
-        compute='_get_display_name',
+        compute='_compute_display_name',
         string='Document Reference',
     )
     next_number = fields.Integer(
-        compute='_get_next_number',
+        compute='_compute_next_number',
         string='Next Number',
     )
     use_documents = fields.Boolean(
         related='journal_id.use_documents',
         string='Use Documents?',
-        readonly=True
+        readonly=True,
     )
     localization = fields.Selection(
         related='company_id.localization',
@@ -125,21 +98,21 @@ class AccountInvoice(models.Model):
         readonly=True,
     )
 
-#    @api.multi
-#    def _get_tax_amount_by_group(self):
-#        """ Method used by qweb invoice report. We are not using this report
-#        for now.
-#        """
-#        self.ensure_one()
-#        res = {}
-#        currency = self.currency_id or self.company_id.currency_id
-#        for line in self.report_tax_line_ids:
-#            res.setdefault(line.tax_id.tax_group_id, 0.0)
-#            res[line.tax_id.tax_group_id] += line.amount
-#        res = sorted(res.items(), key=lambda l: l[0].sequence)
-#        res = map(lambda l: (
-#            l[0].name, formatLang(self.env, l[1], currency_obj=currency)), res)
-#        return res
+# @api.multi
+# def _get_tax_amount_by_group(self):
+#     """ Method used by qweb invoice report. We are not using this report
+#     for now.
+#     """
+#     self.ensure_one()
+#     res = {}
+#     currency = self.currency_id or self.company_id.currency_id
+#     for line in self.report_tax_line_ids:
+#         res.setdefault(line.tax_id.tax_group_id, 0.0)
+#         res[line.tax_id.tax_group_id] += line.amount
+#     res = sorted(res.items(), key=lambda l: l[0].sequence)
+#     res = map(lambda l: (
+#         l[0].name, formatLang(self.env, l[1], currency_obj=currency)), res)
+#     return res
 
     @api.depends(
         'amount_untaxed', 'amount_tax', 'tax_line_ids', 'document_type_id')
@@ -169,7 +142,7 @@ class AccountInvoice(models.Model):
         'journal_id.sequence_id.number_next_actual',
         'journal_document_type_id.sequence_id.number_next_actual',
     )
-    def _get_next_number(self):
+    def _compute_next_number(self):
         """
         show next number only for invoices without number and on draft state
         """
@@ -256,7 +229,7 @@ class AccountInvoice(models.Model):
         'document_number',
         'document_type_id.doc_code_prefix'
     )
-    def _get_display_name(self):
+    def _compute_display_name(self):
         """
         If move_name then invoice has been validated, then:
         * If document number and document type, we show them
@@ -342,12 +315,12 @@ class AccountInvoice(models.Model):
                 # also use this for supplier invoices
                 else:
                     document_number = invoice.document_number
-                invoice.move_id.write({
+                invoice.move_id.update({
                     'document_type_id': (
                         journal_document_type.document_type_id.id),
                     'document_number': document_number,
                 })
-            invoice.write(inv_vals)
+            invoice.update(inv_vals)
         return True
 
     @api.multi
@@ -369,7 +342,7 @@ class AccountInvoice(models.Model):
 
     @api.multi
     @api.depends('journal_id', 'partner_id', 'company_id')
-    def get_available_journal_document_types(self):
+    def _compute_available_journal_document_types(self):
         """
         This function should only be inherited if you need to add another
         "depends", for eg, if you need to add a depend on "new_field" you
@@ -512,3 +485,11 @@ class AccountInvoice(models.Model):
         if refund_document_number:
             values['document_number'] = refund_document_number
         return values
+
+    @api.multi
+    def _check_duplicate_supplier_reference(self):
+        """We make reference only unique if you are not using documents.
+        Documents already guarantee to not encode twice same vendor bill.
+        """
+        return super(
+            AccountInvoice, self.filtered(lambda x: not x.use_documents))

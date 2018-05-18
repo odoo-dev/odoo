@@ -5,12 +5,13 @@
 from odoo import models, fields
 
 
-class account_invoice_report(models.Model):
+class AccountInvoiceReport(models.Model):
     _inherit = 'account.invoice.report'
 
     document_type_id = fields.Many2one(
         'account.document.type',
         string='Document Type',
+        index=True,
     )
 
     _depends = {
@@ -19,15 +20,15 @@ class account_invoice_report(models.Model):
 
     def _select(self):
         return super(
-            account_invoice_report, self
+            AccountInvoiceReport, self
         )._select() + ", sub.document_type_id as document_type_id"
 
     def _sub_select(self):
         return super(
-            account_invoice_report, self
+            AccountInvoiceReport, self
         )._sub_select() + ", ai.document_type_id as document_type_id"
 
     def _group_by(self):
         return super(
-            account_invoice_report, self
+            AccountInvoiceReport, self
         )._group_by() + ", ai.document_type_id"

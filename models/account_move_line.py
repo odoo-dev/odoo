@@ -1,9 +1,9 @@
 from odoo import models, api, fields
 # from odoo.exceptions import UserError
 from odoo.osv import expression
-from odoo.addons.account.models.account_move import AccountMoveLine
+from odoo.addons.account.models import account_move
 
-old_method = AccountMoveLine.domain_move_lines_for_reconciliation
+old_method = account_move.AccountMoveLine.domain_move_lines_for_reconciliation
 
 
 class AccountMoveLine(models.Model):
@@ -21,21 +21,10 @@ class AccountMoveLine(models.Model):
         auto_join=True,
         # stored required to group by
         store=True,
+        index=True,
     )
 
-    # fue necesario agregar los dos metodos para no tener error
-    @api.v7
-    def prepare_move_lines_for_reconciliation_widget(
-            self, cr, uid, line_ids, target_currency_id=False, context=None):
-        recs = self.browse(cr, uid, line_ids, context)
-        target_currency = target_currency_id and self.pool.get(
-            'res.currency').browse(
-            cr, uid, target_currency_id, context=context) or False
-        return AccountMoveLine.prepare_move_lines_for_reconciliation_widget(
-            recs, target_currency=target_currency)
-
-    # @api.multi
-    @api.v8
+    @api.multi
     def prepare_move_lines_for_reconciliation_widget(
             self, target_currency=False, target_date=False):
         res = super(

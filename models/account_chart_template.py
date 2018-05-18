@@ -3,7 +3,6 @@
 # directory
 ##############################################################################
 from odoo import models, api, fields, _
-from odoo.addons.account_document.models.res_company import ResCompany
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -11,17 +10,13 @@ _logger = logging.getLogger(__name__)
 class AccountChartTemplate(models.Model):
     _inherit = 'account.chart.template'
 
-    # _get_localizations = (
-    #     lambda self, *args, **kwargs: self.env[
-    #         'res.company']._get_localizations(*args, **kwargs))
-
     def _get_localizations(self):
-        localizations = self.env['res.company']._fields['localization']._description_selection(self.env)
+        localizations = self.env['res.company']._fields[
+            'localization']._description_selection(self.env)
         return localizations
 
     localization = fields.Selection(
         _get_localizations,
-        #ResCompany._localization_selection,
         'Localization',
         help='If you set the localization here, then when installing '
         'this chart, this localization will be set on company'

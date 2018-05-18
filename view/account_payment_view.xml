@@ -1,81 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
 
-        <!-- Tree Recibos (Customer and vendor)-->
-        <record id="view_account_payment_form" model="ir.ui.view">
-            <field name="name">account.payment.inherit.view</field>
-            <field name="model">account.payment</field>
-            <field name="inherit_id" ref="account.view_account_payment_form"/>
-            <field name="arch" type="xml">
-                <form>
-                    <field name="document_sequence_id" invisible="1"/> 
-                    <field name="localization" invisible="1"/>
-                    <field name="company_id" invisible="1"/>
-                </form> 
-                <field name="payment_date" position="before">
+    <!-- Tree Recibos (Customer and vendor)-->
+    <record id="view_account_payment_form" model="ir.ui.view">
+        <field name="name">account.payment.inherit.view</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <form>
+                <field name="document_sequence_id" invisible="1"/>
+                <field name="localization" invisible="1"/>
+                <field name="company_id" invisible="1"/>
+            </form>
+            <field name="payment_date" position="before">
 
-                    <!-- only required on posted state for compatibility if you install this module with payments already created -->
-                    <field name="receiptbook_id" attrs="{'invisible': ['|', ('localization', '=', False), ('payment_type', '=', 'transfer')], 'required':[('payment_type', '!=', 'transfer'), ('localization', '!=', False), ('state', '=', 'draft')]}" domain="[('partner_type', '=', partner_type), ('company_id', '=', company_id)]"/>
-                    <field name="document_number" attrs="{'invisible': ['|', ('payment_type', '=', 'transfer'), '|', ('document_sequence_id', '!=', False), ('localization', '=', False)], 'required': [('payment_type', '!=', 'transfer'), ('document_sequence_id', '=', False), ('localization', '!=', False)]}"/>
-                    <!-- por ahora no agregamos esto, vamos a ver si alguien lo pide -->
-                    <!-- <field name="manual_prefix" attrs="{'invisible':['|',('document_sequence_id', '!=', False), ('state','!=','draft')]}"/> -->
-                    <!-- <field name="manual_sufix" attrs="{'invisible':['|',('document_sequence_id', '!=', False), ('state', '!=', 'draft')], 'required':[('document_sequence_id', '=', False), ('localization', '!=', False)]}"/> -->
-                    <!-- <field name="next_receipt_number" attrs="{'invisible':['|',('receiptbook_sequence_type','!=','automatic'), ('state','!=','draft')]}"/> -->
-                    <!-- we disable for now, probably depreciated, used by sirpeco yet -->
-                    <!-- <field name="force_number" attrs="{'invisible':['|',('receiptbook_sequence_type','!=','automatic'),('state','!=','draft')]}"/> -->
-                </field>
-
-                <!-- similar a en facturas -->
-                <!-- sacamos el attrs para que sea visible siempre -->
-                <div class="oe_title" position="attributes">
-                    <attribute name="attrs"></attribute>
-                </div>
-                <field name="name" position="attributes">
-                    <attribute name="invisible">1</attribute>
-                </field>
-
-                <field name="name" position="before">
-                    <field name="display_name" attrs="{'invisible': [('display_name', '=', False)]}" class="oe_inline"/>
-                    <label string="- Next Number: " attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
-                    <field name="next_number" attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
-                </field>
+                <!-- only required on posted state for compatibility if you install this module with payments already created -->
+                <field name="receiptbook_id" attrs="{'invisible': ['|', ('localization', '=', False), ('payment_type', '=', 'transfer')], 'required':[('payment_type', '!=', 'transfer'), ('localization', '!=', False), ('state', '=', 'draft')]}" domain="[('partner_type', '=', partner_type), ('company_id', '=', company_id)]"/>
+                <field name="document_number" attrs="{'invisible': ['|', ('payment_type', '=', 'transfer'), '|', ('document_sequence_id', '!=', False), ('localization', '=', False)], 'required': [('payment_type', '!=', 'transfer'), ('document_sequence_id', '=', False), ('localization', '!=', False)]}"/>
+                <!-- por ahora no agregamos esto, vamos a ver si alguien lo pide -->
+                <!-- <field name="manual_prefix" attrs="{'invisible':['|',('document_sequence_id', '!=', False), ('state','!=','draft')]}"/> -->
+                <!-- <field name="manual_sufix" attrs="{'invisible':['|',('document_sequence_id', '!=', False), ('state', '!=', 'draft')], 'required':[('document_sequence_id', '=', False), ('localization', '!=', False)]}"/> -->
+                <!-- <field name="next_receipt_number" attrs="{'invisible':['|',('receiptbook_sequence_type','!=','automatic'), ('state','!=','draft')]}"/> -->
+                <!-- we disable for now, probably depreciated, used by sirpeco yet -->
+                <!-- <field name="force_number" attrs="{'invisible':['|',('receiptbook_sequence_type','!=','automatic'),('state','!=','draft')]}"/> -->
             </field>
-        </record>   
 
-        <!-- Search view -->
-        <record id="view_account_payment_search" model="ir.ui.view">
-            <field name="name">account.payment.search</field>
-            <field name="model">account.payment</field>
-            <field name="inherit_id" ref="account.view_account_payment_search"/>
-            <field name="arch" type="xml">
-                <field name="name" position="attributes">
-                    <!-- in this case display_name has the or logic -->
-                    <attribute name="filter_domain">['|', ('display_name','ilike',self), ('communication','ilike',self)]</attribute>
-                </field>
-
-                <field name="company_id">
-                    <field name="receiptbook_id"/>
-                </field>
-
-                <search>
-                    <filter string="Receiptbook" context="{'group_by':'receiptbook_id'}"/>
-                </search>
+            <!-- similar a en facturas -->
+            <!-- sacamos el attrs para que sea visible siempre -->
+            <div class="oe_title" position="attributes">
+                <attribute name="attrs"></attribute>
+            </div>
+            <field name="name" position="attributes">
+                <attribute name="invisible">1</attribute>
             </field>
-        </record>   
-          
-        <record id="view_account_payment_tree" model="ir.ui.view">
-            <field name="name">account.payment.tree</field>
-            <field name="model">account.payment</field>
-            <field name="inherit_id" ref="account.view_account_payment_tree"/>
-            <field name="arch" type="xml">
-                <field name="name" position="after">
-                    <field name="display_name"/>
-                </field>
-                <field name="name" position="attributes">
-                    <attribute name="invisible">1</attribute>
-                </field>
+
+            <field name="name" position="before">
+                <field name="display_name" attrs="{'invisible': [('display_name', '=', False)]}" class="oe_inline"/>
+                <label string="- Next Number: " attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
+                <field name="next_number" attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
             </field>
-        </record>            
-    </data>
+        </field>
+    </record>
+
+    <!-- Search view -->
+    <record id="view_account_payment_search" model="ir.ui.view">
+        <field name="name">account.payment.search</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_search"/>
+        <field name="arch" type="xml">
+            <field name="name" position="attributes">
+                <!-- in this case display_name has the or logic -->
+                <attribute name="filter_domain">['|', ('display_name','ilike',self), ('communication','ilike',self)]</attribute>
+            </field>
+
+            <field name="company_id">
+                <field name="receiptbook_id"/>
+            </field>
+
+            <search>
+                <filter string="Receiptbook" context="{'group_by':'receiptbook_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_account_payment_tree" model="ir.ui.view">
+        <field name="name">account.payment.tree</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="display_name"/>
+            </field>
+            <field name="name" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+        </field>
+    </record>
+
 </odoo>

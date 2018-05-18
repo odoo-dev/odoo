@@ -8,7 +8,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class account_invoice_line(models.Model):
+class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
     report_price_unit = fields.Monetary(

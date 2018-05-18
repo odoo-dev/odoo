@@ -34,7 +34,8 @@ class AccountPayment(models.Model):
         string='Document Number',
         copy=False,
         readonly=True,
-        states={'draft': [('readonly', False)]}
+        states={'draft': [('readonly', False)]},
+        index=True,
     )
     document_sequence_id = fields.Many2one(
         related='receiptbook_id.sequence_id',
@@ -70,6 +71,7 @@ class AccountPayment(models.Model):
         'ReceiptBook',
         readonly=True,
         states={'draft': [('readonly', False)]},
+        auto_join=True,
     )
     document_type_id = fields.Many2one(
         related='receiptbook_id.document_type_id',
@@ -77,7 +79,7 @@ class AccountPayment(models.Model):
     )
     next_number = fields.Integer(
         # related='receiptbook_id.sequence_id.number_next_actual',
-        compute='_get_next_number',
+        compute='_compute_next_number',
         string='Next Number',
     )
     display_name = fields.Char(
@@ -101,7 +103,7 @@ class AccountPayment(models.Model):
         'journal_id.sequence_id.number_next_actual',
         'receiptbook_id.sequence_id.number_next_actual',
     )
-    def _get_next_number(self):
+    def _compute_next_number(self):
         """
         show next number only for payments without number and on draft state
         """

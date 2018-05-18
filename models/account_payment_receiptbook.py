@@ -23,10 +23,12 @@ class AccountPaymentReceiptbook(models.Model):
         'Name',
         size=64,
         required=True,
+        index=True,
     )
     partner_type = fields.Selection(
         [('customer', 'Customer'), ('supplier', 'Vendor')],
         required=True,
+        index=True,
     )
     next_number = fields.Integer(
         related='sequence_id.number_next_actual'
