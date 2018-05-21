@@ -110,7 +110,6 @@ class AccountDocmentType(models.Model):
             'name': '%s - %s' % (journal.name, self.name),
             'padding': 8,
             'prefix': self.code,
-            'company_id': self.company_id.id,
         }
 
     @api.multi
