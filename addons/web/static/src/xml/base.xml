@@ -794,11 +794,9 @@
 </t>
 
 <t t-name="FieldSelectionBadge">
-    <t t-foreach="values" t-as="value">
-        <span t-attf-class="o_selection_badge #{value[0] == current_value ? 'active' : ''}" t-att-data-index="value_index">
-            <t t-esc="value[1]"/>
-        </span>
-    </t>
+    <span t-foreach="values" t-as="value" t-attf-class="o_selection_badge #{value[0] == current_value ? 'active' : ''}" t-att-data-index="value_index">
+        <t t-esc="value[1]"/>
+    </span>
 </t>
 
 <t t-name="FieldMany2One">

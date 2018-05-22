@@ -2307,11 +2307,17 @@ var FieldRadio = FieldSelection.extend({
 
 var FieldSelectionBadge = FieldSelection.extend({
     template: null,
+    className: 'o_field_selection_badge',
     tagName: 'span',
     specialData: "_fetchSpecialMany2ones",
+    supportedFieldTypes: ['selection', 'many2one'],
     events: _.extend({}, AbstractField.prototype.events, {
         'click span.o_selection_badge': '_onBadgeClicked',
     }),
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
 
     /**
      * @private
@@ -2324,17 +2330,19 @@ var FieldSelectionBadge = FieldSelection.extend({
         if (this.field.type === 'many2one') {
             this.currentValue = this.value && this.value.data.id;
         }
-        this.$el.addClass('o_field_selection_badge');
         this.$el.empty();
         this.$el.html(qweb.render('FieldSelectionBadge', {'values': this.values, 'current_value': this.currentValue}));
     },
-
-
     /**
+     * Sets the possible field values. If the field is a many2one, those values
+     * may change during the lifecycle of the widget if the domain change (an
+     * onchange may change the domain).
+     *
      * @private
      * @override
      */
     _setValues: function () {
+        // Note: We can make abstract widget for common code in radio and selection badge
         if (this.field.type === 'selection') {
             this.values = this.field.selection || [];
         } else if (this.field.type === 'many2one') {
@@ -2362,7 +2370,7 @@ var FieldSelectionBadge = FieldSelection.extend({
                 this._setValue(value[0]);
             }
         } else {
-            this._setValue('');
+            this._setValue(false);
         }
     },
 });
