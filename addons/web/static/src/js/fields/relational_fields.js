@@ -2310,7 +2310,6 @@ var FieldSelectionBadge = FieldSelection.extend({
     className: 'o_field_selection_badge',
     tagName: 'span',
     specialData: "_fetchSpecialMany2ones",
-    supportedFieldTypes: ['selection', 'many2one'],
     events: _.extend({}, AbstractField.prototype.events, {
         'click span.o_selection_badge': '_onBadgeClicked',
     }),
