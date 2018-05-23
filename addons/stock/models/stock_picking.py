@@ -930,6 +930,7 @@ class Picking(models.Model):
                 'user_id': responsible.id,
                 'res_id': parent.id,
                 'res_model_id': self.env['ir.model'].search([('model', '=', parent._name)], limit=1).id,
+                'date_deadline': fields.Date.today(),
             })
 
     def _log_less_quantities_than_expected(self, moves):

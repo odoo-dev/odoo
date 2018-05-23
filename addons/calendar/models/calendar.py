@@ -1538,6 +1538,7 @@ class Meeting(models.Model):
                             'res_model_id': res_model_id,
                             'res_id': res_id,
                             'activity_type_id': meeting_activity_type.id,
+                            'date_deadline': fields.Date.today(),
                         }
                         if user_id:
                             activity_vals['user_id'] = user_id

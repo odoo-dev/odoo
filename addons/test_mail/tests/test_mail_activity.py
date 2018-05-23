@@ -4,11 +4,11 @@
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-from odoo import exceptions
+from odoo import exceptions, fields
 from odoo.addons.test_mail.tests.common import BaseFunctionalTest
 from odoo.tools import mute_logger
 
-    
+
 class TestMailActivity(BaseFunctionalTest):
 
     @classmethod
@@ -67,6 +67,7 @@ class TestMailActivity(BaseFunctionalTest):
                     'activity_type_id': self.env.ref('mail.mail_activity_data_email').id,
                     'res_model_id': self.env['ir.model']._get(test_record._name).id,
                     'res_id': test_record.id,
+                    'date_deadline': fields.Date.today(),
                 })
 
     def test_activity_mixin(self):

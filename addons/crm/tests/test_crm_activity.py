@@ -66,6 +66,7 @@ class TestCrmMailActivity(TestCrmCases):
             'note': 'Content of the activity to log',
             'res_id': self.lead.id,
             'res_model_id': self.env.ref('crm.model_crm_lead').id,
+            'date_deadline': fields.Date.today(),
         })
         activity._onchange_activity_type_id()
         self.assertEqual(self.lead.activity_type_id, self.activity1)
@@ -89,6 +90,7 @@ class TestCrmMailActivity(TestCrmCases):
             'summary': 'My Own Summary',
             'res_id': self.lead.id,
             'res_model_id': lead_model_id,
+            'date_deadline': fields.Date.today(),
         })
         activity._onchange_activity_type_id()
 

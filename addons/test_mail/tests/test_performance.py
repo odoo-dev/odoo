@@ -3,6 +3,7 @@
 
 from email.utils import formataddr
 
+from odoo import fields
 from odoo.tests.common import TransactionCase, users, warmup
 from odoo.tools import mute_logger
 
@@ -168,6 +169,7 @@ class TestAdvMailPerformance(TransactionCase):
                 'summary': 'Test Activity',
                 'res_id': record.id,
                 'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
+                'date_deadline': fields.Date.today(),
             })
 
         with self.assertQueryCount(margin=1, admin=37, emp=58):  # test_mail only: 37 - 58

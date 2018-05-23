@@ -130,6 +130,7 @@ class ProcurementRule(models.Model):
                 'user_id': product_id.responsible_id.id,
                 'res_id': product_id.product_tmpl_id.id,
                 'res_model_id': self.env.ref('product.model_product_template').id,
+                'date_deadline': fields.Date.today(),
             })
 
     def _make_po_get_domain(self, values, partner):
