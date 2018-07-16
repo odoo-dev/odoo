@@ -111,6 +111,129 @@ supported.
 
 .. _unittest documentation: https://docs.python.org/2/library/unittest.html
 
+Test selection
+--------------
+
+In Odoo, Python tests can be tagged to facilitate the test selection when
+running tests.
+
+By default, tests that are direct subclasses of odoo.tests.BaseCase, are tagged
+'standard', 'at_install' and also with a special tag that is the technical name
+of the module where the test lies.
+
+Invocation
+^^^^^^^^^^
+
+A command line switch argument exists to select the tests to start. This
+argument is named :option:`--test-tags <odoo-bin --test-tags>` and defaults to
+``+standard``. It means that when Odoo is started with the
+:option:`--test-enable <odoo-bin --test-enable>` switch, all the standard tests
+will be executed even if the tests were not explicitly tagged.
+
+When writing tests, the ``@tagged`` decorator can be used on test classes to
+add or remove tags. All arguments passed to the decorator must be strings. They
+will be tags that mark the test. The ``@tagged`` decorator can only be used on
+classes, not on class methods.
+
+If a tag is prefixed with the minus (``-``) sign, it means that the tag is to
+be removed instead of added.
+
+e.g. if you don't want your test to be executed by default, you have to remove
+the default ``standard`` tag that way:
+
+.. code-block:: python
+
+    from odoo.tests import TransactionCase, tagged
+
+    @tagged('-standard', 'nice')
+    class NiceTest(TransactionCase):
+        ...
+
+The tests defined in the above class will not be executed when using the
+:option:`--test-enable <odoo-bin --test-enable>` switch alone. To be run, the
+test must be selected explicitely:
+
+.. code-block:: console
+
+    $ odoo-bin --test-enable --test-tags nice
+
+With the above command, only the tests tagged ``nice`` are going to be
+executed.  If you want to also execute the standard tests, you have to select
+them like this:
+
+.. code-block:: console
+
+    $ odoo-bin --test-enable --test-tags nice,standard
+
+The config switch parameter also accepts the ``+`` and ``-`` prefixes. The
+``+`` prefix is implied and therefore, totaly optional. The ``-`` (minus)
+prefix is made to deselect tests tagged with the prefixed tags.
+
+For example, if we have a bunch of tests tagged as ``slow``, we can select the
+standard tests and disable the ``slow`` tests with this command:
+
+.. code-block:: console
+
+    $ odoo-bin --test-enable --test-tags 'standard,-slow'
+
+When you write a test that does not inherit from the Odoo BaseCase class, this
+test will not have the default tags, you have to add them explicitely to have
+the test included in the default test suite like this:
+
+.. code-block:: python
+
+    import unittest
+    from odoo.tests import tagged
+
+    @tagged('standard', 'at_install')
+    class SmallTest(unittest.TestCase):
+        ...
+
+Special tags
+^^^^^^^^^^^^
+
+- ``standard``: All Odoo tests that inherit from BaseCase are implicitely
+  tagged standard. Also, the config switch :option:`--test-tags <odoo-bin
+  --test-tags>` defaults to ``standard``. That means that an untagged test will
+  be executed by default when tests are enabled.
+- ``at_install``: Means that the test will be executed right after the module
+  installation and before other modules are installed. This is a default
+  implicit tag.
+- ``post_install``: Means that the test will be executed after all the modules
+  are installed. This is what you want for HttpCase tests most of the time.
+- ``module_name``: All Odoo tests that inherit from BaseCase are implicitely
+  marked with the technical name of the module as a tag. It means that you can
+  easily include or exclude the module tests with a simple tag.
+
+Examples
+^^^^^^^^
+
+.. important::
+
+    Tests will be executed only in the installed or updated modules.  So
+    modules have to be selected with the :option:`-u <odoo-bin -u>` or
+    :option:`-i <odoo-bin -i>` switches.  For simplicity, those switches are
+    not specified in the examples below.
+
+Run only the tests from the sale module:
+
+.. code-block:: console
+
+    $ odoo-bin --test-enable --test-tags sale
+
+Run the tests from the sale module but not the ones tagged as slow:
+
+.. code-block:: console
+
+    $ odoo-bin --test-enable --test-tags 'sale,-slow'
+
+Run only the tests from stock or tagged as slow (note that the ``-standard`` is not mandatory):
+
+.. code-block:: console
+
+    $ odoo-bin --test-enable --test-tags '-standard, slow, stock'
+
+
 Testing JS code
 ===============
 
