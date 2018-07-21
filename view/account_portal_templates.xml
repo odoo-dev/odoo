@@ -1,0 +1,10 @@
+<odoo>
+    <template id="invoices" inherit_id="account.portal_my_invoices" name="Invoices and Payments">
+        <xpath expr="//a" position="attributes">
+        <attribute name="t-att-title">invoice.display_name</attribute>
+        </xpath>
+        <xpath expr="//t[@t-esc='invoice.number']" position="attributes">
+        <attribute name="t-esc">invoice.display_name</attribute>
+        </xpath>
+    </template>
+</odoo>
