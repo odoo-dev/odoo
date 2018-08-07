@@ -40,12 +40,11 @@ class AccountMoveLine(models.Model):
         return res
 
     @api.model
-    def domain_move_lines_for_reconciliation(self, excluded_ids=None,
-                                             str=False):
+    def domain_move_lines_for_reconciliation(self, str):
         """ Add move display name in search of move lines"""
         _super = super(AccountMoveLine, self)
         _get_domain = _super.domain_move_lines_for_reconciliation
-        domain = _get_domain(excluded_ids=excluded_ids, str=str)
+        domain = _get_domain(str)
         if not str and str != '/':
             return domain
         domain_trans_ref = [('move_id.display_name', 'ilike', str)]
