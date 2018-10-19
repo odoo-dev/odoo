@@ -493,3 +493,35 @@ class AccountInvoice(models.Model):
         """
         return super(
             AccountInvoice, self.filtered(lambda x: not x.use_documents))
+
+    @api.multi
+    @api.constrains('document_number', 'partner_id', 'company_id')
+    def _check_document_number_unique(self):
+        """ We dont implement this on _check_duplicate_supplier_reference
+        because we want to check it on data entry and also because we validate
+        customer invoices (not only supplier ones)
+        """
+        for rec in self.filtered(
+                lambda x: x.use_documents and x.document_number):
+            domain = [
+                ('type', '=', rec.type),
+                ('document_number', '=', rec.document_number),
+                ('document_type_id', '=', rec.document_type_id.id),
+                ('company_id', '=', rec.company_id.id),
+                ('id', '!=', rec.id)
+            ]
+            msg = (
+                'Error en factura con id %s: El numero de comprobante (%s)'
+                ' debe ser unico por tipo de documento')
+            if rec.type in ['out_invoice', 'out_refund']:
+                # si es factura de cliente entonces tiene que ser numero
+                # unico por compania y tipo de documento
+                rec.search(domain)
+            else:
+                # si es factura de proveedor debe ser unica por proveedor
+                domain += [
+                    ('partner_id.commercial_partner_id', '=',
+                        rec.commercial_partner_id.id)]
+                msg += ' y proveedor'
+            if rec.search(domain):
+                raise UserError(msg % (rec.id, rec.document_number))
