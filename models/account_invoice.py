@@ -315,12 +315,12 @@ class AccountInvoice(models.Model):
                 # also use this for supplier invoices
                 else:
                     document_number = invoice.document_number
-                invoice.move_id.update({
+                invoice.move_id.write({
                     'document_type_id': (
                         journal_document_type.document_type_id.id),
                     'document_number': document_number,
                 })
-            invoice.update(inv_vals)
+            invoice.write(inv_vals)
         return True
 
     @api.multi
