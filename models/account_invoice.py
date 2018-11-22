@@ -397,6 +397,15 @@ class AccountInvoice(models.Model):
         this invoice
         * 'journal_document_type': suggested document type on this invoice
         """
+        # if journal dont use documents return empty recordsets just in case
+        # there are journal_document_type_ids related to the journal
+        if not journal.use_documents:
+            return {
+                'available_journal_document_types':
+                    self.env['account.journal.document.type'],
+                'journal_document_type':
+                    self.env['account.journal.document.type'],
+            }
         # As default we return every journal document type, and if one exists
         # then we return the first one as suggested
         journal_document_types = journal.journal_document_type_ids
