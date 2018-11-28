@@ -225,3 +225,12 @@ class AccountJournal(models.Model):
                 """, (table, to_journal.id, from_journal.id))
         if delete_from:
             from_journal.unlink()
+
+    @api.constrains('use_documents')
+    def check_use_document(self):
+        for rec in self:
+            if rec.env['account.invoice'].search(
+                    [('journal_id', '=', rec.id)]):
+                raise ValidationError(_(
+                    'You can not modify the field "Use Documents?"'
+                    ' if invoices already exist in the journal!'))
