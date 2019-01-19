@@ -3,15 +3,15 @@
 # * account_document
 # 
 # Translators:
-# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2018
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-27 23:55+0000\n"
+"POT-Creation-Date: 2019-01-17 15:55+0000\n"
 "PO-Revision-Date: 2018-05-17 18:22+0000\n"
-"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2018\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2019\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -56,7 +56,7 @@ msgstr "Talonario de Pago"
 #. module: account_document
 #: model:ir.ui.view,arch_db:account_document.view_res_partner_form
 msgid "Accounting Documents"
-msgstr ""
+msgstr "Documentos Contables"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_active
@@ -130,7 +130,7 @@ msgstr "Creado el"
 #. module: account_document
 #: model:ir.model,name:account_document.model_account_invoice_refund
 msgid "Credit Note"
-msgstr ""
+msgstr "Nota de Crédito"
 
 #. module: account_document
 #: selection:account.document.type,internal_type:0
@@ -477,7 +477,7 @@ msgstr "Secuencia propia"
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_partner_type
 msgid "Partner Type"
-msgstr ""
+msgstr "Tipo de Empresa"
 
 #. module: account_document
 #: model:ir.model,name:account_document.model_account_payment
@@ -561,6 +561,9 @@ msgid ""
 "Select 'Cash' or 'Bank' for journals that are used in customer or vendor payments.\n"
 "Select 'General' for miscellaneous operations journals."
 msgstr ""
+"Seleccione 'Ventas' para diarios de facturas de cliente.\n"
+"Seleccione 'Compras' para diarios de facturas de proveedor.\n"
+"Seleccione 'Caja' o 'Banco' para diarios que se usan para pagos de clientes y proveedores. Seleccione 'General' para diarios que contienen operaciones varias."
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_document_type_sequence
@@ -607,7 +610,7 @@ msgstr "Impuesto"
 #. module: account_document
 #: model:ir.ui.menu,name:account_document.menu_tax_entities_config
 msgid "Tax Entities"
-msgstr ""
+msgstr "Entidades Tributarias"
 
 #. module: account_document
 #: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_invoice_line_tax_ids
@@ -701,6 +704,7 @@ msgstr ""
 #: model:ir.model.fields,help:account_document.field_account_document_type_sequence
 msgid "Used to order records in tree views and relational fields"
 msgstr ""
+"Se utiliza para ordenar registros en vistas lista y campos relacionales"
 
 #. module: account_document
 #: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_sequence
@@ -728,6 +732,16 @@ msgstr "Factura de Proveedor"
 #, python-format
 msgid "Vendor Refund"
 msgstr "Reembolso a proveedor"
+
+#. module: account_document
+#: code:addons/account_document/models/account_journal.py:234
+#, python-format
+msgid ""
+"You can not modify the field \"Use Documents?\" if invoices already exist in"
+" the journal!"
+msgstr ""
+"No puede modificar el campo \"Usar documentos?\" si ya existen facturas en "
+"este diario!"
 
 #. module: account_document
 #: code:addons/account_document/models/account_invoice.py:476
