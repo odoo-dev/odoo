@@ -10,6 +10,7 @@ var utils = require('web.utils');
 
 var _t = core._t;
 var qweb = core.qweb;
+var qwebOwl = core.qwebOwl;
 
 // To do: refactor session. Session accomplishes several concerns (rpc,
 // configuration, currencies (wtf?), user permissions...). They should be
@@ -237,7 +238,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             var route  = '/web/webclient/qweb/' + (cacheId ? cacheId : Date.now()) + '?mods=' + mods;
             return $.get(route).then(function (doc) {
                 if (!doc) { return; }
-                qweb.add_template(doc);
+                self._addQWebTemplates(doc);
             });
         });
         return lock;
@@ -359,6 +360,15 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         utils.set_cookie('cids', hash.cids || String(main_company_id));
         $.bbq.pushState({'cids': hash.cids}, 0);
         location.reload();
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    _addQWebTemplates: function (doc) {
+        qweb.add_template(doc);
+        qwebOwl.addTemplates(doc);
     },
 
     //--------------------------------------------------------------------------

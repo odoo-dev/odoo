@@ -1,0 +1,38 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_Chatter_topbar {
+    display: flex;
+    border-bottom: $nav-tabs-border-width solid transparent;
+}
+
+.o_Chatter_topbarButton {
+    @extend .text-nowrap;
+    margin-bottom: -$nav-tabs-border-width;
+    padding: $grid-gutter-width*0.25 - $nav-tabs-border-width $grid-gutter-width*0.5 $grid-gutter-width*0.25;
+    border-radius: $border-radius-sm $border-radius-sm 0 0;
+}
+
+.o_Chatter_topbarRightArea {
+    display: flex;
+    margin-left: auto;
+    justify-content: flex-end;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_Chatter {
+    // TODO: remove, just to have a distinction between the chatters
+    border: 1px solid red;
+    margin-bottom: 10px !important;
+}
+
+.o_Chatter_topbarButton.o-active {
+    color: $o-brand-odoo;
+    background-color: theme-color('light');
+    border: $nav-tabs-border-width solid gray('300');
+    border-bottom-color: transparent;
+}
