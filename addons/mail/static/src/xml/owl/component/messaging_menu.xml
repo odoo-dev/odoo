@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <li
+        class="o_MessagingMenu"
+        owl="1"
+        t-att-class="{
+            show: props.isOpen,
+        }"
+        t-att-data-id="id"
+        t-name="mail.component.MessagingMenu">
+        <a
+            aria-expanded="false"
+            class="
+                o_MessagingMenu_toggler
+                o-no-caret"
+            data-toggle="dropdown"
+            data-display="static"
+            href="#"
+            role="button"
+            title="Conversations"
+            t-att-class="{
+                show: props.isOpen,
+            }"
+            t-if="!props.isMobile or
+                !props.activeMobileThread"
+            t-on-click.stop="_onClickToggler">
+            <i
+                aria-label="Messages"
+                class="
+                    fa
+                    fa-comments-o
+                    o_MessagingMenu_icon"
+                role="img"/>
+            <span
+                class="
+                    badge
+                    badge-pill
+                    o_MessagingMenu_counter"
+                t-if="props.counter > 0">
+                <t t-esc="props.counter"/>
+            </span>
+        </a>
+        <div
+            class="
+                dropdown-menu
+                dropdown-menu-right
+                o_MessagingMenu_dropdownMenu"
+            role="menu"
+            t-att-class="{
+                'o-mobile': props.isMobile,
+            }"
+            t-if="props.isOpen and
+                (
+                    !props.isMobile or
+                    !props.activeMobileThread
+                )">
+            <div
+                class="o_MessagingMenu_dropdownMenuHeader"
+                t-att-class="{
+                    'o-mobile': props.isMobile,
+                }">
+                <button
+                    class="
+                        btn
+                        btn-link
+                        o_MessagingMenu_tabButton
+                        o-desktop"
+                    role="tab"
+                    type="button"
+                    t-as="tabId"
+                    t-att-data-tab-id="tabId"
+                    t-att-class="{
+                        'o-active': props.activeTabId === tabId,
+                    }"
+                    t-foreach="['all', 'chat', 'channel']"
+                    t-if="!props.isMobile"
+                    t-key="tabId"
+                    t-on-click.stop="_onClickDesktopTabButton">
+                    <t t-if="tabId === 'all'">All</t>
+                    <t t-elif="tabId === 'chat'">Chat</t>
+                    <t t-elif="tabId === 'channel'">Channels</t>
+                </button>
+                <t
+                    t-call="mail.component.MessagingMenu.NewMessageButton"
+                    t-if="props.isMobile"/>
+                <div class="o-autogrow"/>
+                <t
+                    t-call="mail.component.MessagingMenu.NewMessageButton"
+                    t-if="!props.isMobile"/>
+                <AutocompleteInput
+                    class="o_MessagingMenu_mobileNewMessageInput"
+                    customClass="id + '_mobileNewMessageInputAutocomplete'"
+                    isFocusOnMount="true"
+                    placeholder="mobileNewMessageInputPlaceholder"
+                    select="_onMobileNewMessageInputSelect"
+                    source="_onMobileNewMessageInputSource"
+                    t-if="props.isMobile and
+                        props.isMobileNewMessageToggled"
+                    t-on-o-hide.stop="_onHideMobileNewMessage"/>
+            </div>
+            <ThreadPreviewList
+                class="o_MessagingMenu_threadPreviewList"
+                t-att-class="{
+                    'o_MessagingMenu_threadPreviewList-mobile': props.isMobile,
+                }"
+                filter="props.activeTabId"
+                t-on-o-select-thread.stop="_onSelectThread"
+                t-ref="threadPreviewList"/>
+            <MobileNavbar
+                activeTabId="props.activeTabId"
+                class="o_MessagingMenu_mobileNavbar"
+                tabs="tabs"
+                t-if="props.isMobile"
+                t-on-o-select-mobile-messaging-navbar-tab.stop="_onSelectMobileNavbarTab"/>
+        </div>
+    </li>
+
+    <button
+        class="
+            btn
+            o_MessagingMenu_newMessageButton"
+        owl="1"
+        type="button"
+        t-att-class="{
+            'btn-link': !props.isMobile,
+            'btn-secondary': props.isMobile,
+            'o-mobile': props.isMobile,
+        }"
+        t-if="props.isMobile or !props.isDiscussOpen"
+        t-name="mail.component.MessagingMenu.NewMessageButton"
+        t-on-click.stop="_onClickNewMessage">
+        New message
+    </button>
+
+</templates>

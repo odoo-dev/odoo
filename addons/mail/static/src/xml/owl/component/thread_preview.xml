@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!--
+        The preview template is used by the discuss in mobile, and by the systray
+        menu in order to show preview of threads.
+    -->
+    <div
+        class="o_ThreadPreview"
+        owl="1"
+        t-att-class="{
+            'o-unread': props.thread.message_unread_counter > 0,
+        }"
+        t-att-data-thread-local-id="props.threadLocalId"
+        t-name="mail.component.ThreadPreview"
+        t-on-click="_onClick">
+        <div class="o_ThreadPreview_sidebar">
+            <div
+                class="
+                    o_ThreadPreview_imageContainer
+                    o_ThreadPreview_sidebarItem">
+                <img
+                    alt=""
+                    class="
+                        o_ThreadPreview_image
+                        rounded-circle"
+                    t-att-src="image"/>
+                <div
+                    class="o_ThreadPreview_partnerImStatusIconContainer">
+                    <PartnerImStatusIcon
+                        class="o_ThreadPreview_partnerImStatusIcon"
+                        partnerLocalId="props.threadDirectPartner.localId"
+                        t-att-class="{
+                            'o_ThreadPreview_partnerImStatusIcon-mobile': props.isMobile,
+                        }"
+                        t-if="props.threadDirectPartner and
+                            props.threadDirectPartner.im_status"/>
+                </div>
+            </div>
+        </div>
+        <div class="o_ThreadPreview_content">
+            <div
+                class="o_ThreadPreview_header">
+                <span
+                    class="o_ThreadPreview_name"
+                    t-att-class="{
+                        'o-mobile': props.isMobile,
+                    }">
+                    <t t-esc="props.threadName"/>
+                </span>
+                <span
+                    class="o_ThreadPreview_counter"
+                    t-if="props.thread.message_unread_counter > 0">
+                    (<t t-esc="props.thread.message_unread_counter"/>)
+                </span>
+                <span
+                    class="o-autogrow"/>
+                <span
+                    class="o_ThreadPreview_date"
+                    t-if="props.lastMessage">
+                    <t t-esc="props.lastMessage.dateMoment.fromNow()"/>
+                </span>
+            </div>
+            <div
+                class="o_ThreadPreview_core">
+                <span
+                    class="
+                        o_ThreadPreview_coreItem
+                        o_ThreadPreview_inlineText">
+                    <t t-if="props.lastMessageAuthor">
+                        <t t-if="isMyselfLastMessageAuthor">
+                            <i
+                                class="
+                                    fa
+                                    fa-mail-reply
+                                    o_ThreadPreview_inlineTextPrefix"/>You:
+                        </t>
+                        <t t-else="">
+                            <t t-esc="props.lastMessageAuthor.display_name"/>:
+                        </t>
+                    </t>
+                    <t t-raw="inlineLastMessageBody"/>
+                </span>
+                <span
+                    class="o-autogrow"/>
+                <span
+                    class="
+                        fa
+                        fa-check
+                        o_ThreadPreview_coreItem
+                        o_ThreadPreview_markAsRead"
+                    title="Mark as Read"
+                    t-if="props.thread.message_unread_counter > 0"
+                    t-on-click.stop="_onClickMarkAsRead"/>
+            </div>
+        </div>
+    </div>
+
+</templates>

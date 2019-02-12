@@ -1,0 +1,36 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+ .o_ThreadPreviewList {
+    display: flex;
+    flex-flow: column;
+    overflow: auto;
+
+    &.o-empty {
+        justify-content: center;
+    }
+}
+
+.o_ThreadPreviewList_noConversation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+}
+
+.o_ThreadPreviewList_preview {
+    padding: 3px;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_ThreadPreviewList_preview {
+    border-bottom: 1px solid gray('400');
+
+    &.o-targeted {
+        background-color: lighten(gray('200'), 2%);
+    }
+}

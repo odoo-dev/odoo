@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_ChatWindowManager"
+        owl="1"
+        t-name="mail.component.ChatWindowManager">
+        <!-- Note: DOM elements are ordered from left to right -->
+        <HiddenMenu
+            chatWindowLocalIds="props.computed.hidden.chatWindowLocalIds"
+            class="o_ChatWindowManager_hiddenMenu"
+            direction="direction"
+            offset="props.computed.hidden.offset"
+            t-if="props.computed.hidden.isVisible"
+            t-on-o-close-chat-window.stop="_onCloseChatWindow"
+            t-on-o-select-chat-window.stop="_onSelectChatWindow"/>
+        <t
+            t-set="visibleAmount"
+            t-value="props.computed.visible.length"/>
+        <t
+            t-as="data"
+            t-foreach="orderedVisible">
+            <ChatWindow
+                chatWindowLocalId="data.chatWindowLocalId"
+                dockDirection="direction"
+                dockOffset="data.offset"
+                hasCloseAsBackButton="props.isMobile"
+                hasShiftLeft="!props.isMobile and
+                    data_index !== 0"
+                hasShiftRight="!props.isMobile and
+                    chatWindowShiftRight(data_index)"
+                isDocked="true"
+                isExpandable="!props.isMobile and
+                    data.chatWindowLocalId !== 'new_message'"
+                t-key="data.chatWindowLocalId"
+                t-on-o-close.stop="_onCloseChatWindow"
+                t-on-o-focus-next-chat-window="_onFocusNextChatWindow"
+                t-on-o-select-thread.stop="_onSelectThreadChatWindow"
+                t-on-o-shift-left.stop="_onShiftLeftChatWindow"
+                t-on-o-shift-right.stop="_onShiftRightChatWindow"
+                t-on-o-redirect="_onRedirect"
+                t-ref="{{ data.chatWindowLocalId }}"/>
+        </t>
+    </div>
+
+</templates>

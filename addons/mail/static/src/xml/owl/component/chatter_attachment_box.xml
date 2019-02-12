@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- AKU TODO: remove old classnames (old style dependencies) -->
+    <div
+        class="
+            o_mail_chatter_attachments
+            o_ChatterAttachmentBox"
+        owl="1"
+        t-name="mail.component.AttachmentBox">
+        <div class="o_chatter_attachment">
+            <div class="o_border_dashed">
+                <span class="o_attach_title">Attachments</span>
+            </div>
+            <AttachmentList
+                areAttachmentsDownloadable="true"
+                areAttachmentsEditable="true"
+                attachmentLocalIds="props.imageAttachmentLocalIds"
+                attachmentsImageSizeForBasicLayout="'medium'"
+                attachmentsLayout="'card'"
+                class="
+                    o_attachments_previews
+                    o_ChatterAttachmentBox_imageAttachmentList"
+                t-if="props.imageAttachmentLocalIds.length > 0"/>
+            <AttachmentList
+                areAttachmentsDownloadable="true"
+                areattachmentsEditable="true"
+                attachmentLocalIds="props.nonImageAttachmentLocalIds"
+                attachmentsImageSizeForBasicLayout="'medium'"
+                attachmentsLayout="'card'"
+                class="
+                    o_attachments_list
+                    o_ChatterAttachmentBox_nonImageAttachmentList"
+                t-if="props.nonImageAttachmentLocalIds.length > 0"/>
+            <div>
+                <input
+                    class="
+                        d-none
+                        o_ChatterAttachmentBox_fileInput"
+                    multiple="true"
+                    type="file"
+                    t-on-change="_onChangeAttachment"
+                    t-ref="fileInput"/>
+                <center>
+                    <span
+                        class="
+                            btn
+                            btn-link
+                            o_ChatterAttachmentBox_uploadButton"
+                        t-on-click="_onClickAddAttachment">
+                        <span
+                            class="
+                                fa
+                                fa-plus-square"/> Add Attachments
+                    </span>
+                </center>
+            </div>
+        </div>
+    </div>
+
+</templates>

@@ -1,0 +1,27 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_PartnerImStatusIcon {
+    display: flex;
+    flex-flow: column;
+    overflow: auto;
+
+    > i {
+        font-size: 1em;
+        position: relative;
+    }
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+
+.o_PartnerImStatusIcon_away {
+    color: theme-color('warning');
+}
+
+.o_PartnerImStatusIcon_online {
+    color: $o-enterprise-primary-color;
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+   <div
+      class="o_DialogManager"
+      owl="1"
+      t-name="mail.component.DialogManager">
+      <Dialog
+         class="o_DialogManager_dialog"
+         Component="dialog.Component"
+         id="dialog.id"
+         info="dialog.info"
+         t-as="dialog"
+         t-foreach="props.dialogs"
+         t-key="dialog.id"
+         t-on-o-close.stop="_onCloseDialog"/>
+   </div>
+
+</templates>

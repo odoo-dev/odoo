@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <span
+        class="o_PartnerImStatusIcon"
+        owl="1"
+        t-att-data-partner-local-id="props.partner.localId"
+        t-name="mail.component.PartnerImStatusIcon">
+        <i
+            aria-label="User is online"
+            class="
+                fa
+                fa-circle
+                o_PartnerImStatusIcon_icon
+                o_PartnerImStatusIcon_online"
+            role="img"
+            title="Online"
+            t-if="props.partner.im_status === 'online'"/>
+        <i
+            aria-label="User is idle"
+            class="
+                fa
+                fa-circle
+                o_PartnerImStatusIcon_away
+                o_PartnerImStatusIcon_icon"
+            role="img"
+            title="Idle"
+            t-if="props.partner.im_status === 'away'"/>
+        <i
+            aria-label="User is offline"
+            class="
+                fa
+                fa-circle-o
+                o_PartnerImStatusIcon_icon
+                o_PartnerImStatusIcon_offline"
+            role="img"
+            title="Offline"
+            t-if="props.partner.im_status === 'offline'"/>
+    </span>
+
+</templates>
