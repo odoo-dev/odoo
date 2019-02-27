@@ -33,10 +33,11 @@ class AccountMoveLine(models.Model):
             target_currency=target_currency, target_date=target_date)
         for rec in res:
             line = self.browse(rec['id'])
+            display_name = line.move_id.display_name or ''
             rec['name'] = (
-                line.name != '/' and
-                line.move_id.display_name + ': ' + line.name or
-                line.move_id.display_name)
+                line.name and line.name != '/' and
+                display_name + ': ' + line.name or
+                display_name)
         return res
 
     @api.model
