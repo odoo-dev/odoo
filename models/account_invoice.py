@@ -213,15 +213,13 @@ class AccountInvoice(models.Model):
         y como con la funcion anterior solo se almacenan solo si se crea desde
         interfaz, hacemos este hack de constraint para computarlos si no estan
         computados"""
-        for rec in self:
-            if (
-                    not rec.journal_document_type_id and
-                    rec.available_journal_document_type_ids
-            ):
-                rec.journal_document_type_id = (
-                    rec._get_available_journal_document_types(
-                        rec.journal_id, rec.type, rec.partner_id
-                    ).get('journal_document_type'))
+        for rec in self.filtered(
+                lambda x: not x.journal_document_type_id and
+                x.available_journal_document_type_ids):
+            rec.journal_document_type_id = (
+                rec._get_available_journal_document_types(
+                    rec.journal_id, rec.type, rec.partner_id
+                ).get('journal_document_type'))
 
     @api.multi
     @api.depends(
@@ -430,18 +428,14 @@ class AccountInvoice(models.Model):
     @api.constrains('document_type_id', 'document_number')
     @api.onchange('document_type_id', 'document_number')
     def validate_document_number(self):
-        for rec in self:
-            # if we have a sequence, number is set by sequence and we dont
-            # check this
-            if rec.document_sequence_id:
-                continue
-            document_type = rec.document_type_id
-
-            if rec.document_type_id:
-                res = document_type.validate_document_number(
-                    rec.document_number)
-                if res and res != rec.document_number:
-                    rec.document_number = res
+        # if we have a sequence, number is set by sequence and we dont
+        # check this
+        for rec in self.filtered(
+                lambda x: not x.document_sequence_id and x.document_type_id):
+            res = rec.document_type_id.validate_document_number(
+                rec.document_number)
+            if res and res != rec.document_number:
+                rec.document_number = res
 
     @api.multi
     @api.constrains('journal_document_type_id', 'journal_id')
