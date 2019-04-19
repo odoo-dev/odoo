@@ -6,9 +6,13 @@
     'author': 'ADHOC SA,Odoo Community Association (OCA)',
     'license': 'AGPL-3',
     'summary': '',
-    'depends': [
-        'base',
-    ],
+    'description': """
+Base Module for Argentinian Localization
+========================================
+
+* Configure data for used currencies. Principal one ARS and conventions for the most used secondary currencies USD and EUR.
+    """,
+    'depends': ['base'],
     'data': [
         'data/res_currency_data.xml',
     ],
