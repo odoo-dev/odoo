@@ -11,10 +11,14 @@ Base Module for Argentinian Localization
 ========================================
 
 * Configure data for used currencies. Principal one ARS and conventions for the most used secondary currencies USD and EUR.
+* Adds Argentinian Banks data enable by BCRA (Central Bank of Argentina)
+* Add new field named CBU to bank model.
     """,
     'depends': ['base'],
     'data': [
         'data/res_currency_data.xml',
+        'data/res_bank_data.xml',
+        'views/res_partner_bank_views.xml',
     ],
     'demo': [
     ],
