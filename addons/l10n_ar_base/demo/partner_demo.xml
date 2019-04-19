@@ -18,14 +18,14 @@
         <field name="website">http://www.adhoc.com.ar</field>
         <field name='main_id_category_id' ref="dt_CUIT"/>
         <field name='main_id_number'>30714295698</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/adhoc_logo.png"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/adhoc_logo.png"/>
     </record>
 
     <record id="res_partner_adhoc_jjs" model="res.partner">
         <field name="name">Juan José Scarafía</field>
         <field name="type">contact</field>
         <field name="parent_id" ref="res_partner_adhoc"/>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/adhoc_jjs.jpeg"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/adhoc_jjs.jpeg"/>
     </record>
 
     <!-- Gritti Agrimensura -->
@@ -45,7 +45,7 @@
         <field name="website">http://www.grittiagrimensura.com</field>
         <field name='main_id_category_id' ref="dt_CUIT"/>
         <field name='main_id_number'>27320732811</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/gritti_logo.png"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/gritti_logo.png"/>
     </record>
 
     <!-- Consejo Municipal Rosario -->
@@ -63,7 +63,7 @@
         <field name="website">http://www.concejorosario.gov.ar/</field>
         <field name='main_id_category_id' ref="dt_CUIT"/>
         <field name='main_id_number'>30684679372</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/cmr_logo.jpg"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/cmr_logo.jpg"/>
     </record>
 
     <!-- Odoo -->
@@ -80,7 +80,7 @@
         <field name="website">https://www.odoo.com/</field>
         <field name='main_id_category_id' ref="dt_CIe"/>
         <field name='main_id_number'>111222333444</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/odoo_logo.jpg"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/odoo_logo.jpg"/>
     </record>
 
     <!-- Telecom -->
@@ -92,7 +92,7 @@
         <field name='main_id_category_id' ref="dt_CUIT"/>
         <field name='main_id_number'>30639453738</field>
         <!-- TODO agregar -->
-        <!-- <field name="image" type="base64" file="l10n_ar_partner/demo/odoo_logo.jpg"/> -->
+        <!-- <field name="image" type="base64" file="l10n_ar_base/demo/odoo_logo.jpg"/> -->
     </record>
 
     <!-- Odoo -->
@@ -109,7 +109,7 @@
         <field name="website">http://www.expresso.com/</field>
         <field name='main_id_category_id' ref="dt_CIe"/>
         <field name='main_id_number'>2222333344445555</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/expresso_logo.png"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/expresso_logo.png"/>
     </record>
 
     <!-- Paseo del Fuego -->
@@ -126,7 +126,7 @@
         <field name="website">http://www.cerrocastor.com/</field>
         <field name='main_id_category_id' ref="dt_CUIT"/>
         <field name='main_id_number'>27333333339</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/cerrocastor_logo.png"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/cerrocastor_logo.png"/>
     </record>
 
 <!-- Default Partners -->

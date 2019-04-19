@@ -1,5 +1,6 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from odoo.tools.safe_eval import safe_eval
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -69,6 +70,9 @@ class ResPartner(models.Model):
         'main_id_category_id',
     )
     def _compute_cuit(self):
+        """
+        #. Agregamos a partner el campo calculado "cuit" que devuelve un cuit o nada si no existe y además un método que puede ser llamado con .cuit_required() que devuelve el cuit o un error si no se encuentra ninguno.
+        """
         for rec in self:
             # el cuit solo lo devolvemos si es el doc principal
             # para que no sea engañoso si no tienen activado multiples doc
@@ -135,6 +139,8 @@ class ResPartner(models.Model):
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
         """
+        * Hacemos que los id categories puedan buscar por codigo y por nombre
+
         we search by id, if we found we return this results, else we do
         default search
         """
