@@ -7,11 +7,12 @@ from odoo.exceptions import ValidationError
 
 
 class ResPartnerBank(models.Model):
+
     _inherit = 'res.partner.bank'
 
     l10n_ar_cbu = fields.Char(
         'CBU',
-        help=u"Código Bancario Único Argentino"
+        help="Argentine Banking Unique Code",
     )
 
     @api.multi
@@ -20,7 +21,7 @@ class ResPartnerBank(models.Model):
         for rec in self:
             if rec.l10n_ar_cbu and not rec.is_valid_cbu():
                 raise ValidationError(
-                    _('El CBU "%s" no es válido') % rec.l10n_ar_cbu)
+                    _('The CBU "%s" is not valid') % rec.l10n_ar_cbu)
 
     @api.multi
     def is_valid_cbu(self):
