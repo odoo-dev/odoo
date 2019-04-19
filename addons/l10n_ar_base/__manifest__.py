@@ -11,7 +11,6 @@
     ],
     'data': [
         'data/res_currency_data.xml',
-        'data/res_company_data.xml',
     ],
     'demo': [
     ],
