@@ -1,17 +1,14 @@
 {
-    'name': 'Argentinian Localization',
+    'name': 'Argentinian Localization Base',
     'version': '11.0.1.0.0',
-    'category': 'Localization/Argentina',
+    'category': 'Localization',
     'sequence': 14,
     'author': 'ADHOC SA,Odoo Community Association (OCA)',
-    'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
     'summary': '',
     'depends': [
-        'base'
+        'base',
     ],
-    'external_dependencies': {
-    },
     'data': [
         'data/res_currency_data.xml',
         'data/res_company_data.xml',
