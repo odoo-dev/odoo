@@ -3,7 +3,7 @@
 # directory
 ##############################################################################
 from odoo import fields, models, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
 
 
 class ResPartnerBank(models.Model):
@@ -19,7 +19,8 @@ class ResPartnerBank(models.Model):
     def check_cbu(self):
         for rec in self:
             if rec.l10n_ar_cbu and not rec.is_valid_cbu():
-                raise UserError(_('El CBU "%s" no es válido') % rec.l10n_ar_cbu)
+                raise ValidationError(
+                    _('El CBU "%s" no es válido') % rec.l10n_ar_cbu)
 
     @api.multi
     def is_valid_cbu(self):
