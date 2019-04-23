@@ -11,8 +11,8 @@ class ResPartner(models.Model):
     l10n_ar_cuit = fields.Char(
         compute='_compute_l10n_ar_cuit',
     )
-    formated_cuit = fields.Char(
-        compute='_compute_formated_cuit',
+    l10n_ar_formated_cuit = fields.Char(
+        compute='_compute_l10n_ar_formated_cuit',
     )
     # no podemos hacerlo asi porque cuando se pide desde algun lugar
     # quiere computar para todos los partners y da error para los que no
@@ -46,15 +46,13 @@ class ResPartner(models.Model):
                 self.id, self.name))
         return self.l10n_ar_cuit
 
-    @api.depends(
-        'l10n_ar_cuit',
-    )
-    def _compute_formated_cuit(self):
+    @api.depends('l10n_ar_cuit')
+    def _compute_l10n_ar_formated_cuit(self):
         for rec in self:
             if not rec.l10n_ar_cuit:
                 continue
             cuit = rec.l10n_ar_cuit
-            rec.formated_cuit = "{0}-{1}-{2}".format(
+            rec.l10n_ar_formated_cuit = "{0}-{1}-{2}".format(
                 cuit[0:2], cuit[2:10], cuit[10:])
 
     @api.depends('l10n_ar_id_number', 'l10n_ar_id_category_id')
