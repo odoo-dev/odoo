@@ -42,6 +42,7 @@ Base Module for Argentinian Localization
         'views/portal_templates.xml',
         'security/security.xml',
 
+        'security/ir.model.access.csv',
     ],
     'demo': [
         'demo/partner_demo.xml',
