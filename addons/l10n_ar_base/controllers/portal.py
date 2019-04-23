@@ -12,7 +12,7 @@ _logger = logging.getLogger(__name__)
 class L10nArCustomerPortal(CustomerPortal):
 
     OPTIONAL_BILLING_FIELDS = CustomerPortal.OPTIONAL_BILLING_FIELDS + [
-        "commercial_partner_id", "main_id_category_id", "main_id_number",
+        "commercial_partner_id", "main_id_category_id", "l10n_ar_id_number",
         "afip_responsability_type_id",
     ]
 
@@ -23,13 +23,13 @@ class L10nArCustomerPortal(CustomerPortal):
         error, error_message = super(
             L10nArCustomerPortal, self).details_form_validate(data)
 
-        main_id_number = data.get('main_id_number', False)
+        l10n_ar_id_number = data.get('l10n_ar_id_number', False)
         main_id_category_id = data.get('main_id_category_id', False)
-        if main_id_category_id and not main_id_number:
-            error['main_id_number'] = 'error'
+        if main_id_category_id and not l10n_ar_id_number:
+            error['l10n_ar_id_number'] = 'error'
             error_message.append(_(
                 'Please add the document number.'))
-        if main_id_number and not main_id_category_id:
+        if l10n_ar_id_number and not main_id_category_id:
             error['main_id_category_id'] = 'error'
             error_message.append(_(
                 'Please add the type of document.'))
@@ -46,7 +46,7 @@ class L10nArCustomerPortal(CustomerPortal):
             error, _error_message = self.details_form_validate(post)
             if not error:
                 post.pop('commercial_partner_id', False)
-                post.pop('main_id_number', False)
+                post.pop('l10n_ar_id_number', False)
                 post.pop('main_id_category_id', False)
                 post.pop('afip_responsability_type_id', False)
 

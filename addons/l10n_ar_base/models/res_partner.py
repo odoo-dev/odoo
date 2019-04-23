@@ -8,8 +8,8 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    # TODO see if we want to make vat computed from main_id_number
-    # for compatibiltiy with other modules. We try to make vat "main_id_number"
+    # TODO see if we want to make vat computed from l10n_ar_id_number
+    # for compatibiltiy with other modules. We try to make vat "l10n_ar_id_number"
     # but we raise some issues
     # vat = fields.Char(
     # )
@@ -29,9 +29,9 @@ class ResPartner(models.Model):
     # cuit_required = fields.Char(
     #     compute='_compute_cuit_required',
     # )
-    main_id_number = fields.Char(
-        compute='_compute_main_id_number',
-        inverse='_inverse_main_id_number',
+    l10n_ar_id_number = fields.Char(
+        compute='_compute_l10n_ar_id_number',
+        inverse='_inverse_l10n_ar_id_number',
         store=True,
         string='Main Identification Number',
     )
@@ -66,7 +66,7 @@ class ResPartner(models.Model):
     @api.depends(
         'id_numbers.category_id.afip_code',
         'id_numbers.name',
-        'main_id_number',
+        'l10n_ar_id_number',
         'main_id_category_id',
     )
     def _compute_cuit(self):
@@ -94,7 +94,7 @@ class ResPartner(models.Model):
             # agregamos esto para el caso donde el registro todavia no se creo
             # queremos el cuit para que aparezca el boton de refrescar de afip
             if not cuit:
-                rec.cuit = rec.main_id_number
+                rec.cuit = rec.l10n_ar_id_number
             else:
                 rec.cuit = cuit.name
 
@@ -104,21 +104,45 @@ class ResPartner(models.Model):
         'id_numbers.category_id',
         'id_numbers.name',
     )
-    def _compute_main_id_number(self):
+    def _compute_l10n_ar_id_number(self):
         for partner in self:
             id_numbers = partner.id_numbers.filtered(
                 lambda x: x.category_id == partner.main_id_category_id)
             if id_numbers:
-                partner.main_id_number = id_numbers[0].name
+                partner.l10n_ar_id_number = id_numbers[0].name
+
+    # TODO this method need to be adapted in order to work with the new field.
+    @api.constrains('name', 'category_id')
+    def check(self):
+        if not safe_eval(self.env['ir.config_parameter'].sudo().get_param(
+                "l10n_ar_partner.unique_id_numbers", 'False')):
+            return True
+        for rec in self:
+            # we allow same number in related partners
+            related_partners = rec.partner_id.search([
+                '|', ('id', 'parent_of', rec.partner_id.id),
+                ('id', 'child_of', rec.partner_id.id)])
+            same_id_numbers = rec.search([
+                ('name', '=', rec.name),
+                ('category_id', '=', rec.category_id.id),
+                # por ahora no queremos la condicion de igual cia
+                # ('company_id', '=', rec.company_id.id),
+                ('partner_id', 'not in', related_partners.ids),
+                # ('id', '!=', rec.id),
+            ]) - rec
+            if same_id_numbers:
+                raise ValidationError(_(
+                    'Id Number must be unique per id category!\nSame number '
+                    'is only allowed for partner with parent/child relation'))
 
     @api.multi
-    def _inverse_main_id_number(self):
+    def _inverse_l10n_ar_id_number(self):
         to_unlink = self.env['res.partner.id_number']
         # we use sudo because user may have CRUD rights on partner
         # but no to partner id model because partner id module
         # only adds CRUD to "Manage contacts" group
         for partner in self:
-            name = partner.main_id_number
+            name = partner.l10n_ar_id_number
             category_id = partner.main_id_category_id
             if category_id:
                 partner_id_numbers = partner.id_numbers.filtered(
@@ -181,23 +205,23 @@ class ResPartner(models.Model):
         """
         error = dict()
         error_message = []
-        main_id_number = data.get('main_id_number', False)
+        l10n_ar_id_number = data.get('l10n_ar_id_number', False)
         main_id_category_id = data.get('main_id_category_id', False)
         afip_responsability_type_id = data.get('afip_responsability_type_id',
                                                False)
 
-        if main_id_number and main_id_category_id:
+        if l10n_ar_id_number and main_id_category_id:
             commercial_partner = self.env['res.partner'].sudo().browse(
                 int(data.get('commercial_partner_id', False)))
             try:
                 values = {
-                    'main_id_number': main_id_number,
+                    'l10n_ar_id_number': l10n_ar_id_number,
                     'main_id_category_id': int(main_id_category_id),
                     'afip_responsability_type_id':
                         int(afip_responsability_type_id)
                         if afip_responsability_type_id else False,
                 }
-                commercial_fields = ['main_id_number', 'main_id_category_id',
+                commercial_fields = ['l10n_ar_id_number', 'main_id_category_id',
                                      'afip_responsability_type_id']
                 values = commercial_partner.remove_readonly_required_fields(
                     commercial_fields, values)
@@ -205,7 +229,7 @@ class ResPartner(models.Model):
                     commercial_partner.write(values)
             except Exception as exception_error:
                 _logger.error(exception_error)
-                error['main_id_number'] = 'error'
+                error['l10n_ar_id_number'] = 'error'
                 error['main_id_category_id'] = 'error'
                 error_message.append(_(exception_error))
         return error, error_message

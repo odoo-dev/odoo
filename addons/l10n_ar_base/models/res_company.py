@@ -2,13 +2,14 @@ from odoo import models, fields, api
 
 
 class ResCompany(models.Model):
+
     _inherit = 'res.company'
 
     main_id_category_id = fields.Many2one(
         related='partner_id.main_id_category_id',
     )
-    main_id_number = fields.Char(
-        related='partner_id.main_id_number',
+    l10n_ar_id_number = fields.Char(
+        related='partner_id.l10n_ar_id_number',
     )
     cuit = fields.Char(
         related='partner_id.cuit'
@@ -25,9 +26,9 @@ class ResCompany(models.Model):
         """
         company = super(ResCompany, self).create(vals)
         company.change_main_id_category()
-        main_id_number = vals.get('main_id_number')
-        if main_id_number:
-            company.partner_id.main_id_number = main_id_number
+        l10n_ar_id_number = vals.get('l10n_ar_id_number')
+        if l10n_ar_id_number:
+            company.partner_id.l10n_ar_id_number = l10n_ar_id_number
         return company
 
     @api.onchange('main_id_category_id')
@@ -35,4 +36,4 @@ class ResCompany(models.Model):
         # we force change on partner to get updated number
         if self.partner_id:
             self.partner_id.main_id_category_id = self.main_id_category_id
-            self.main_id_number = self.partner_id.main_id_number
+            self.l10n_ar_id_number = self.partner_id.l10n_ar_id_number
