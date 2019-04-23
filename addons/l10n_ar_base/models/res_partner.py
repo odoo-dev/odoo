@@ -21,10 +21,10 @@ class ResPartner(models.Model):
     #     compute='_compute_cuit_required',
     # )
     l10n_ar_id_number = fields.Char(
-        string='Main Identification Number',
+        string='Identification Number',
     )
     l10n_ar_id_category_id = fields.Many2one(
-        string="Main Identification Category",
+        string="Identification Category",
         comodel_name='res_partner_id_category',
         index=True,
         auto_join=True,
