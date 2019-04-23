@@ -24,6 +24,7 @@ Base Module for Argentinian Localization
         # and also beacuse it is essential for argentinian use
         # for the sales config
         'base_setup',
+        'contacts',
     ],
     'data': [
         'data/res_currency_data.xml',
