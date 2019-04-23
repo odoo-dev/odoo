@@ -20,9 +20,7 @@ Base Module for Argentinian Localization
     """,
     'depends': [
         'base',
-
         'portal',
-        'partner_identification',
         # this is for demo data, for fiscal position data on account
         # and also beacuse it is essential for argentinian use
         # for the sales config
