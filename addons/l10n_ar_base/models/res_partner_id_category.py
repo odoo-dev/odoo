@@ -5,7 +5,8 @@ from odoo.osv import expression
 
 class ResPartnerIdCategory(models.Model):
 
-    _name = "res.partner.id_category"
+    _name = "res_partner_id_category"
+    _description = "Identification Category"
     _rec_name = "code"
     _order = "sequence"
 

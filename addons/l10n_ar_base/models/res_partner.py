@@ -37,7 +37,7 @@ class ResPartner(models.Model):
     )
     main_id_category_id = fields.Many2one(
         string="Main Identification Category",
-        comodel_name='res.partner.id_category',
+        comodel_name='res_partner_id_category',
         index=True,
         auto_join=True,
     )

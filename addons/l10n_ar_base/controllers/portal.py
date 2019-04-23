@@ -53,7 +53,7 @@ class L10nArCustomerPortal(CustomerPortal):
         response = super(L10nArCustomerPortal, self).account(
             redirect=redirect, **post)
         document_categories = request.env[
-            'res.partner.id_category'].sudo().search([])
+            'res_partner_id_category'].sudo().search([])
         afip_responsabilities = request.env[
             'afip.responsability.type'].sudo().search([])
         uid = request.session.uid
