@@ -29,6 +29,14 @@ class ResPartner(models.Model):
         index=True,
         auto_join=True,
     )
+    cuit_fisica = fields.Char(
+        'CUIT persona fisica',
+        size=11,
+    )
+    cuit_juridica = fields.Char(
+        'CUIT persona juridica',
+        size=11,
+    )
 
     @api.multi
     def cuit_required(self):
