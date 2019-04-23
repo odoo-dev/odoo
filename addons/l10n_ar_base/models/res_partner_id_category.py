@@ -40,17 +40,17 @@ class ResPartnerIdCategory(models.Model):
                  "# You can use the following variables :\n"
                  "#  - self: browse_record of the current ID Category "
                  "browse_record\n"
-                 "#  - id_number: browse_record of ID number to validate")
+                 "#  - l10n_ar_id_number: l10n_ar_number")
 
     @api.multi
-    def _validation_eval_context(self, id_number):
+    def _validation_eval_context(self, l10n_ar_id_number):
         self.ensure_one()
         return {'self': self,
-                'id_number': id_number,
+                'l10n_ar_id_number': l10n_ar_id_number,
                 }
 
     @api.multi
-    def validate_id_number(self, id_number):
+    def validate_id_number(self, l10n_ar_id_number):
         """Validate the given ID number
         The method raises an openerp.exceptions.ValidationError if the eval of
         python validation code fails
@@ -58,7 +58,7 @@ class ResPartnerIdCategory(models.Model):
         self.ensure_one()
         if self.env.context.get('id_no_validate'):
             return
-        eval_context = self._validation_eval_context(id_number)
+        eval_context = self._validation_eval_context(l10n_ar_id_number)
         try:
             safe_eval(self.validation_code,
                       eval_context,
@@ -71,7 +71,7 @@ class ResPartnerIdCategory(models.Model):
         if eval_context.get('failed', False):
             raise ValidationError(
                 _("%s is not a valid %s identifier") % (
-                    id_number.name, self.name))
+                    l10n_ar_id_number.name, self.name))
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):

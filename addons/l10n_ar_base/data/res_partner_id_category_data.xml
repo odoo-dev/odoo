@@ -151,7 +151,7 @@
         <field name='sequence'>1</field>
         <field name="validation_code">
 def check_vat_ar(vat):
-    vat = id_number.name
+    vat = l10n_ar_id_number
     cstr = str(vat)
     salt = str(5432765432)
     n = 0
@@ -175,7 +175,7 @@ def check_vat_ar(vat):
         return True
     else:
         return False
-failed = not check_vat_ar(id_number.name)
+failed = not check_vat_ar(l10n_ar_id_number)
         </field>
     </record>
     <record model='res_partner_id_category' id='dt_CUIL'>
@@ -185,7 +185,7 @@ failed = not check_vat_ar(id_number.name)
         <field name='sequence'>4</field>
         <field name="validation_code">
 def check_vat_ar(vat):
-    vat = id_number.name
+    vat = l10n_ar_id_number
     cstr = str(vat)
     salt = str(5432765432)
     n = 0
@@ -209,7 +209,7 @@ def check_vat_ar(vat):
         return True
     else:
         return False
-failed = not check_vat_ar(id_number.name)
+failed = not check_vat_ar(l10n_ar_id_number)
         </field>
     </record>
     <record model='res_partner_id_category' id='dt_CDI'>

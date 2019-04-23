@@ -21,9 +21,6 @@ class ResPartner(models.Model):
     #     compute='_compute_cuit_required',
     # )
     l10n_ar_id_number = fields.Char(
-        compute='_compute_l10n_ar_id_number',
-        inverse='_inverse_l10n_ar_id_number',
-        store=True,
         string='Main Identification Number',
     )
     l10n_ar_id_category_id = fields.Many2one(
@@ -55,8 +52,6 @@ class ResPartner(models.Model):
 
     @api.multi
     @api.depends(
-        'id_numbers.category_id.afip_code',
-        'id_numbers.name',
         'l10n_ar_id_number',
         'l10n_ar_id_category_id',
     )
@@ -78,46 +73,25 @@ class ResPartner(models.Model):
                     else:
                         rec.cuit = country.cuit_fisica
                 continue
-            cuit = rec.id_numbers.search([
-                ('partner_id', '=', rec.id),
-                ('category_id.afip_code', '=', 80),
-            ], limit=1)
             # agregamos esto para el caso donde el registro todavia no se creo
             # queremos el cuit para que aparezca el boton de refrescar de afip
-            if not cuit:
+            if rec.l10n_ar_id_category_id.afip_code == 80:
                 rec.cuit = rec.l10n_ar_id_number
-            else:
-                rec.cuit = cuit.name
+                rec.vat = rec.l10n_ar_id_number
 
-    @api.multi
-    @api.depends(
-        'l10n_ar_id_category_id',
-        'id_numbers.category_id',
-        'id_numbers.name',
-    )
-    def _compute_l10n_ar_id_number(self):
-        for partner in self:
-            id_numbers = partner.id_numbers.filtered(
-                lambda x: x.category_id == partner.l10n_ar_id_category_id)
-            if id_numbers:
-                partner.l10n_ar_id_number = id_numbers[0].name
-
-    # TODO this method need to be adapted in order to work with the new field.
-    @api.constrains('name', 'category_id')
-    def check(self):
+    @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
+    def check_id_number_unique(self):
         if not safe_eval(self.env['ir.config_parameter'].sudo().get_param(
                 "l10n_ar_partner.unique_id_numbers", 'False')):
             return True
         for rec in self:
             # we allow same number in related partners
-            related_partners = rec.partner_id.search([
-                '|', ('id', 'parent_of', rec.partner_id.id),
-                ('id', 'child_of', rec.partner_id.id)])
+            related_partners = rec.search([
+                '|', ('id', 'parent_of', rec.id),
+                ('id', 'child_of', rec.id)])
             same_id_numbers = rec.search([
-                ('name', '=', rec.name),
-                ('category_id', '=', rec.category_id.id),
-                # por ahora no queremos la condicion de igual cia
-                # ('company_id', '=', rec.company_id.id),
+                ('l10n_ar_id_number', '=', rec.l10n_ar_id_number),
+                ('category_id', '=', rec.l10n_ar_id_category_id.id),
                 ('partner_id', 'not in', related_partners.ids),
                 # ('id', '!=', rec.id),
             ]) - rec
@@ -126,38 +100,9 @@ class ResPartner(models.Model):
                     'Id Number must be unique per id category!\nSame number '
                     'is only allowed for partner with parent/child relation'))
 
-    @api.multi
-    def _inverse_l10n_ar_id_number(self):
-        to_unlink = self.env['res.partner.id_number']
-        # we use sudo because user may have CRUD rights on partner
-        # but no to partner id model because partner id module
-        # only adds CRUD to "Manage contacts" group
-        for partner in self:
-            name = partner.l10n_ar_id_number
-            category_id = partner.l10n_ar_id_category_id
-            if category_id:
-                partner_id_numbers = partner.id_numbers.filtered(
-                    lambda d: d.category_id == category_id).sudo()
-                if partner_id_numbers and name:
-                    partner_id_numbers[0].name = name
-                elif partner_id_numbers and not name:
-                    to_unlink |= partner_id_numbers[0]
-                # we only create new record if name has a value
-                elif name:
-                    partner_id_numbers.create({
-                        'partner_id': partner.id,
-                        'category_id': category_id.id,
-                        'name': name
-                    })
-        to_unlink.unlink()
-
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
-        """
-        * Hacemos que los id categories puedan buscar por codigo y por nombre
-
-        we search by id, if we found we return this results, else we do
-        default search
+        """ We first search by l10n_ar_id_number field
         """
         if not args:
             args = []
@@ -165,7 +110,7 @@ class ResPartner(models.Model):
         # no contiene algo del nombre
         if name and operator in ('ilike', 'like', '=', '=like', '=ilike'):
             recs = self.search(
-                [('id_numbers.name', operator, name)] + args, limit=limit)
+                [('l10n_ar_id_number', operator, name)] + args, limit=limit)
             if recs:
                 return recs.name_get()
         return super(ResPartner, self).name_search(
