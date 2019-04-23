@@ -5,8 +5,8 @@ class ResCompany(models.Model):
 
     _inherit = 'res.company'
 
-    main_id_category_id = fields.Many2one(
-        related='partner_id.main_id_category_id',
+    l10n_ar_id_category_id = fields.Many2one(
+        related='partner_id.l10n_ar_id_category_id',
     )
     l10n_ar_id_number = fields.Char(
         related='partner_id.l10n_ar_id_number',
@@ -31,9 +31,9 @@ class ResCompany(models.Model):
             company.partner_id.l10n_ar_id_number = l10n_ar_id_number
         return company
 
-    @api.onchange('main_id_category_id')
+    @api.onchange('l10n_ar_id_category_id')
     def change_main_id_category(self):
         # we force change on partner to get updated number
         if self.partner_id:
-            self.partner_id.main_id_category_id = self.main_id_category_id
+            self.partner_id.l10n_ar_id_category_id = self.l10n_ar_id_category_id
             self.l10n_ar_id_number = self.partner_id.l10n_ar_id_number

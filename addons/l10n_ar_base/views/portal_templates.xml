@@ -12,19 +12,19 @@
         </div>
         <div class="clearfix"/>
         <!-- agregamos document type -->
-        <div t-attf-class="form-group #{error.get('main_id_category_id') and 'has-error' or ''} col-lg-3">
-            <label class="control-label" for="main_id_category_id">Tipo de Documento</label>
+        <div t-attf-class="form-group #{error.get('l10n_ar_id_category_id') and 'has-error' or ''} col-lg-3">
+            <label class="control-label" for="l10n_ar_id_category_id">Tipo de Documento</label>
             <input name="commercial_partner_id" class="form-control" t-att-value="partner.commercial_partner_id.id" type='hidden'/>
-            <t t-set="document_type" t-value="partner.commercial_partner_id.main_id_category_id"/>
+            <t t-set="document_type" t-value="partner.commercial_partner_id.l10n_ar_id_category_id"/>
             <t t-if="document_type">
                 <p class="form-control" t-esc="document_type.code" readonly="1" title="Changing your document type is not allowed. Please contact us directly for this operation."/>
-                <input name="main_id_category_id" class="form-control" t-att-value="document_type.id" type='hidden'/>
+                <input name="l10n_ar_id_category_id" class="form-control" t-att-value="document_type.id" type='hidden'/>
             </t>
             <t t-else="">
-                <select name="main_id_category_id" class="form-control">
+                <select name="l10n_ar_id_category_id" class="form-control">
                     <option value="">Tipo de Documento...</option>
                     <t t-foreach="document_categories or []" t-as="document_category">
-                        <option t-att-value="document_category.id" t-att-selected="str(document_category.id) == main_id_category_id">
+                        <option t-att-value="document_category.id" t-att-selected="str(document_category.id) == l10n_ar_id_category_id">
                             <t t-esc="document_category.code"/>
                         </option>
                     </t>

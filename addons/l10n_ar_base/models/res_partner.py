@@ -8,15 +8,6 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    # TODO see if we want to make vat computed from l10n_ar_id_number
-    # for compatibiltiy with other modules. We try to make vat "l10n_ar_id_number"
-    # but we raise some issues
-    # vat = fields.Char(
-    # )
-    # TODO podriamos agregar tambien que el cuit se guarde en el vat con lo de
-    # AR... si es necesario y entonces llamamos a vat en vez de cuit
-    # field used only some argentinian methods that requires a CUIT and not
-    # any other
     cuit = fields.Char(
         compute='_compute_cuit',
     )
@@ -35,7 +26,7 @@ class ResPartner(models.Model):
         store=True,
         string='Main Identification Number',
     )
-    main_id_category_id = fields.Many2one(
+    l10n_ar_id_category_id = fields.Many2one(
         string="Main Identification Category",
         comodel_name='res_partner_id_category',
         index=True,
@@ -67,7 +58,7 @@ class ResPartner(models.Model):
         'id_numbers.category_id.afip_code',
         'id_numbers.name',
         'l10n_ar_id_number',
-        'main_id_category_id',
+        'l10n_ar_id_category_id',
     )
     def _compute_cuit(self):
         """
@@ -79,7 +70,7 @@ class ResPartner(models.Model):
             # y esta seleccionado otro que no es cuit
             # igualmente, si es un partner del extranjero intentamos devolver
             # cuit fisica o juridica del pais
-            if rec.main_id_category_id.afip_code != 80:
+            if rec.l10n_ar_id_category_id.afip_code != 80:
                 country = rec.country_id
                 if country and country.code != 'AR':
                     if rec.is_company:
@@ -100,14 +91,14 @@ class ResPartner(models.Model):
 
     @api.multi
     @api.depends(
-        'main_id_category_id',
+        'l10n_ar_id_category_id',
         'id_numbers.category_id',
         'id_numbers.name',
     )
     def _compute_l10n_ar_id_number(self):
         for partner in self:
             id_numbers = partner.id_numbers.filtered(
-                lambda x: x.category_id == partner.main_id_category_id)
+                lambda x: x.category_id == partner.l10n_ar_id_category_id)
             if id_numbers:
                 partner.l10n_ar_id_number = id_numbers[0].name
 
@@ -143,7 +134,7 @@ class ResPartner(models.Model):
         # only adds CRUD to "Manage contacts" group
         for partner in self:
             name = partner.l10n_ar_id_number
-            category_id = partner.main_id_category_id
+            category_id = partner.l10n_ar_id_category_id
             if category_id:
                 partner_id_numbers = partner.id_numbers.filtered(
                     lambda d: d.category_id == category_id).sudo()
@@ -206,22 +197,22 @@ class ResPartner(models.Model):
         error = dict()
         error_message = []
         l10n_ar_id_number = data.get('l10n_ar_id_number', False)
-        main_id_category_id = data.get('main_id_category_id', False)
+        l10n_ar_id_category_id = data.get('l10n_ar_id_category_id', False)
         afip_responsability_type_id = data.get('afip_responsability_type_id',
                                                False)
 
-        if l10n_ar_id_number and main_id_category_id:
+        if l10n_ar_id_number and l10n_ar_id_category_id:
             commercial_partner = self.env['res.partner'].sudo().browse(
                 int(data.get('commercial_partner_id', False)))
             try:
                 values = {
                     'l10n_ar_id_number': l10n_ar_id_number,
-                    'main_id_category_id': int(main_id_category_id),
+                    'l10n_ar_id_category_id': int(l10n_ar_id_category_id),
                     'afip_responsability_type_id':
                         int(afip_responsability_type_id)
                         if afip_responsability_type_id else False,
                 }
-                commercial_fields = ['l10n_ar_id_number', 'main_id_category_id',
+                commercial_fields = ['l10n_ar_id_number', 'l10n_ar_id_category_id',
                                      'afip_responsability_type_id']
                 values = commercial_partner.remove_readonly_required_fields(
                     commercial_fields, values)
@@ -230,7 +221,7 @@ class ResPartner(models.Model):
             except Exception as exception_error:
                 _logger.error(exception_error)
                 error['l10n_ar_id_number'] = 'error'
-                error['main_id_category_id'] = 'error'
+                error['l10n_ar_id_category_id'] = 'error'
                 error_message.append(_(exception_error))
         return error, error_message
 
