@@ -41,10 +41,6 @@
                 </div>
             </field>
 
-          <page name="id_numbers" position="attributes">
-                <attribute name="groups">l10n_ar_partner.group_multiple_id_numbers</attribute>
-          </page>
-
         </field>
     </record>
 </odoo>
