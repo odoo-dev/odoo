@@ -11,8 +11,8 @@ class ResCompany(models.Model):
     l10n_ar_id_number = fields.Char(
         related='partner_id.l10n_ar_id_number',
     )
-    cuit = fields.Char(
-        related='partner_id.cuit'
+    l10n_ar_cuit = fields.Char(
+        related='partner_id.l10n_ar_cuit'
     )
 
     @api.multi

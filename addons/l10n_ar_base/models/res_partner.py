@@ -8,8 +8,8 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    cuit = fields.Char(
-        compute='_compute_cuit',
+    l10n_ar_cuit = fields.Char(
+        compute='_compute_l10n_ar_cuit',
     )
     formated_cuit = fields.Char(
         compute='_compute_formated_cuit',
@@ -33,31 +33,28 @@ class ResPartner(models.Model):
     @api.multi
     def cuit_required(self):
         self.ensure_one()
-        if not self.cuit:
+        if not self.l10n_ar_cuit:
             raise UserError(_('No CUIT configured for partner [%i] %s') % (
                 self.id, self.name))
-        return self.cuit
+        return self.l10n_ar_cuit
 
-    @api.multi
     @api.depends(
-        'cuit',
+        'l10n_ar_cuit',
     )
     def _compute_formated_cuit(self):
         for rec in self:
-            if not rec.cuit:
+            if not rec.l10n_ar_cuit:
                 continue
-            cuit = rec.cuit
+            cuit = rec.l10n_ar_cuit
             rec.formated_cuit = "{0}-{1}-{2}".format(
                 cuit[0:2], cuit[2:10], cuit[10:])
 
-    @api.multi
-    @api.depends(
-        'l10n_ar_id_number',
-        'l10n_ar_id_category_id',
-    )
-    def _compute_cuit(self):
-        """
-        #. Agregamos a partner el campo calculado "cuit" que devuelve un cuit o nada si no existe y además un método que puede ser llamado con .cuit_required() que devuelve el cuit o un error si no se encuentra ninguno.
+    @api.depends('l10n_ar_id_number', 'l10n_ar_id_category_id')
+    def _compute_l10n_ar_cuit(self):
+        """ Agregamos a partner el campo calculado "l10n_ar_cuit" que devuelve
+        un cuit o nada si no existe y además un método que puede ser llamado
+        con .cuit_required() que devuelve el cuit o un error si no se encuentra
+        ninguno.
         """
         for rec in self:
             # el cuit solo lo devolvemos si es el doc principal
@@ -69,14 +66,14 @@ class ResPartner(models.Model):
                 country = rec.country_id
                 if country and country.code != 'AR':
                     if rec.is_company:
-                        rec.cuit = country.cuit_juridica
+                        rec.l10n_ar_cuit = country.cuit_juridica
                     else:
-                        rec.cuit = country.cuit_fisica
+                        rec.l10n_ar_cuit = country.cuit_fisica
                 continue
             # agregamos esto para el caso donde el registro todavia no se creo
             # queremos el cuit para que aparezca el boton de refrescar de afip
             if rec.l10n_ar_id_category_id.afip_code == 80:
-                rec.cuit = rec.l10n_ar_id_number
+                rec.l10n_ar_cuit = rec.l10n_ar_id_number
                 rec.vat = rec.l10n_ar_id_number
 
     @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')

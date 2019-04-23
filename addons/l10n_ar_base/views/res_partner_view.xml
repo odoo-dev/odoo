@@ -7,7 +7,7 @@
         <field name="model">res.partner</field>
         <field type="xml" name="arch">
             <form>
-                <field name="cuit" invisible="1"/>
+                <field name="l10n_ar_cuit" invisible="1"/>
             </form>
             <field name="vat" position="attributes">
                 <attribute name="readonly">1</attribute>
