@@ -29,11 +29,11 @@ class ResPartner(models.Model):
         index=True,
         auto_join=True,
     )
-    cuit_fisica = fields.Char(
+    l10n_ar_cuit_fisica = fields.Char(
         'CUIT persona fisica',
         size=11,
     )
-    cuit_juridica = fields.Char(
+    l10n_ar_cuit_juridica = fields.Char(
         'CUIT persona juridica',
         size=11,
     )
@@ -74,9 +74,9 @@ class ResPartner(models.Model):
                 country = rec.country_id
                 if country and country.code != 'AR':
                     if rec.is_company:
-                        rec.l10n_ar_cuit = country.cuit_juridica
+                        rec.l10n_ar_cuit = country.l10n_ar_cuit_juridica
                     else:
-                        rec.l10n_ar_cuit = country.cuit_fisica
+                        rec.l10n_ar_cuit = country.l10n_ar_cuit_fisica
                 continue
             # agregamos esto para el caso donde el registro todavia no se creo
             # queremos el cuit para que aparezca el boton de refrescar de afip
