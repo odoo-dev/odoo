@@ -13,7 +13,7 @@ class ResCountry(models.Model):
         'CUIT persona juridica',
         size=11,
     )
-    cuit_otro = fields.Char(
+    l10n_ar_cuit_otro = fields.Char(
         'CUIT otro',
         size=11,
     )
