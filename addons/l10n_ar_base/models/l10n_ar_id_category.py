@@ -1,6 +1,7 @@
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError, UserError
 from odoo.osv import expression
+from odoo.tools.safe_eval import safe_eval
 
 
 class ResPartnerIdCategory(models.Model):
@@ -49,10 +50,12 @@ class ResPartnerIdCategory(models.Model):
                 'l10n_ar_id_number': l10n_ar_id_number,
                 }
 
+    # TODO nadie lo llama
+    # solo en oca-partner-contact/partner_identification/models/res_partner_id_number.py
     @api.multi
     def validate_id_number(self, l10n_ar_id_number):
         """Validate the given ID number
-        The method raises an openerp.exceptions.ValidationError if the eval of
+        The method raises an odoo.exceptions.ValidationError if the eval of
         python validation code fails
         """
         self.ensure_one()
@@ -71,7 +74,7 @@ class ResPartnerIdCategory(models.Model):
         if eval_context.get('failed', False):
             raise ValidationError(
                 _("%s is not a valid %s identifier") % (
-                    l10n_ar_id_number.name, self.name))
+                    self.name, l10n_ar_id_number))
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
