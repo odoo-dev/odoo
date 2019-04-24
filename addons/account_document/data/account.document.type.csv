@@ -1,0 +1,7 @@
+id,code,name,report_name,internal_type,doc_code_prefix,localization,taxes_included
+dc_inv,,INVOICE,INVOICE,invoice,IN ,generic,True
+dc_cn,,CREDIT NOTE,CREDIT NOTE,credit_note,CN ,generic,True
+dc_dn,,DEBIT NOTE,DEBIT NOTE,debit_note,DB ,generic,True
+dc_inv_disc,,INVOICE (Tax Disc.),INVOICE,,IN ,generic,False
+dc_cn_disc,,CREDIT NOTE (Tax Disc.),CREDIT NOTE,,CN ,generic,False
+dc_dn_disc,,DEBIT NOTE (Tax Disc.),DEBIT NOTE,,DB ,generic,False

@@ -1,0 +1,776 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * account_document
+# 
+# Translators:
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2019
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 11.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-03-19 15:08+0000\n"
+"PO-Revision-Date: 2018-05-17 18:22+0000\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2019\n"
+"Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: account_document
+#: code:addons/account_document/models/account_chart_template.py:73
+#, python-format
+msgid "%s Customer Receipts"
+msgstr "%s Recibos de Cliente"
+
+#. module: account_document
+#: code:addons/account_document/models/account_chart_template.py:74
+#, python-format
+msgid "%s Supplier Payments"
+msgstr "%s Pagos de Proveedor"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_account_payment_form
+#: model:ir.ui.view,arch_db:account_document.view_invoice_form
+#: model:ir.ui.view,arch_db:account_document.view_supplier_invoice_form
+msgid "- Next Number:"
+msgstr "Proximo numero:"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_document_type
+msgid "Account Document Type"
+msgstr "Tipo de Documento Contable"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_move
+msgid "Account Entry"
+msgstr "Asiento contable"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_payment_receiptbook
+msgid "Account payment Receiptbook"
+msgstr "Talonario de Pago"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_res_partner_form
+msgid "Accounting Documents"
+msgstr "Documentos Contables"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_active
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_active
+msgid "Active"
+msgstr "Activo"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_price_subtotal
+msgid "Amount"
+msgstr "Importe"
+
+#. module: account_document
+#: selection:account.payment.receiptbook,sequence_type:0
+#: code:addons/account_document/models/account_chart_template.py:77
+#, python-format
+msgid "Automatic"
+msgstr "Automático"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_available_journal_document_type_ids
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_available_journal_document_type_ids
+msgid "Available Journal Document Types"
+msgstr "Tipos de Documentos Disponibles"
+
+#. module: account_document
+#: code:addons/account_document/models/account_journal.py:156
+#, python-format
+msgid "Can not merge from a journal that has cash/bank statements"
+msgstr "No puede fusionar desde un diario que tenga registros de caja/banco"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_code
+msgid "Code"
+msgstr "Código"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_document_type_code
+msgid "Code used by differents localizations"
+msgstr "Código utilizado por diferentes localizaciones"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_res_partner
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_create_uid
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_create_uid
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_create_date
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_create_date
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_invoice_refund
+msgid "Credit Note"
+msgstr "Nota de Crédito"
+
+#. module: account_document
+#: selection:account.document.type,internal_type:0
+msgid "Credit Notes"
+msgstr "Notas de Crédito"
+
+#. module: account_document
+#: selection:account.payment.receiptbook,partner_type:0
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: account_document
+#: selection:account.document.type,internal_type:0
+msgid "Customer Voucer"
+msgstr "Comprobante de Cliente"
+
+#. module: account_document
+#: selection:account.document.type,internal_type:0
+msgid "Debit Notes"
+msgstr "Notas de Débito"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_display_name
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_display_name
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_display_name
+msgid "Display Name"
+msgstr "Nombre a Mostrar"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_doc_code_prefix
+msgid "Document Code Prefix"
+msgstr "Prefijo del Código de Impuesto"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_document_number
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_document_number
+#: model:ir.model.fields,field_description:account_document.field_account_move_document_number
+#: model:ir.model.fields,field_description:account_document.field_account_payment_document_number
+msgid "Document Number"
+msgstr "Número de documento"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_sequence_type
+msgid "Document Sequence Type"
+msgstr "Tipo de Secuencia del documento"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_journal_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_journal_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_report_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_move_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_move_line_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_payment_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_document_type_id
+#: model:ir.ui.view,arch_db:account_document.view_account_invoice_filter
+#: model:ir.ui.view,arch_db:account_document.view_account_invoice_report_search_inherit
+#: model:ir.ui.view,arch_db:account_document.view_account_move_filter
+#: model:ir.ui.view,arch_db:account_document.view_account_move_line_filter
+#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
+#: model:ir.ui.view,arch_db:account_document.view_document_type_form
+#: model:ir.ui.view,arch_db:account_document.view_document_type_tree
+msgid "Document Type"
+msgstr "Tipo de Documento"
+
+#. module: account_document
+#: model:ir.actions.act_window,name:account_document.action_document_type
+#: model:ir.ui.menu,name:account_document.menu_document_type
+msgid "Document Types"
+msgstr "Tipos de Documentos"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_form
+msgid "Documents"
+msgstr "Documentos"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_journal_journal_document_type_ids
+msgid "Documents Types"
+msgstr "Tipos de Documentos"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_document_type_taxes_included
+msgid ""
+"Documents of this type will include taxes on reports. This behaviour could "
+"be overwritten by localizations!"
+msgstr ""
+"Los documentos de este tipo incluirán impuestos sobre los informes. ¡Este "
+"comportamiento podría ser sobrescrito por localizaciones!"
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:446
+#, python-format
+msgid ""
+"El Tipo de Documento elegido \"%s\" no pertenece al diario \"%s\". Por favor"
+" pruebe elegir otro tipo de documento.Puede refrezcar los tipos de "
+"documentos disponibles cambiando el diario o el partner."
+msgstr ""
+"El Tipo de Documento elegido \"%s\" no pertenece al diario \"%s\". Por favor"
+" pruebe elegir otro tipo de documento.Puede refrezcar los tipos de "
+"documentos disponibles cambiando el diario o el partner."
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_document_sequence_id
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_document_sequence_id
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_sequence_id
+#: model:ir.model.fields,field_description:account_document.field_account_payment_document_sequence_id
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_sequence_id
+msgid "Entry Sequence"
+msgstr "Secuencia de Asiento"
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:304
+#, python-format
+msgid ""
+"Error!. Please define sequence on the journal related documents to this "
+"invoice or set the document number."
+msgstr ""
+"Error!. Por favor defina una secuencia en el documento del diario "
+"relacionado a esta factura o establezca un número de documento."
+
+#. module: account_document
+#: code:addons/account_document/models/account_payment.py:190
+#, python-format
+msgid ""
+"Error!. Please define sequence on the receiptbook related documents to this "
+"payment or set the document number."
+msgstr ""
+"Error!. Por favor defina una secuencia en el talonario relacionado a este "
+"pago o establezca un número de documento."
+
+#. module: account_document
+#: selection:res.company,localization:0
+msgid "Generic"
+msgstr "Genérico"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
+msgid "Group By..."
+msgstr "Agrupar por..."
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_id
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_id
+msgid "ID"
+msgstr "ID"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_document_type_localization
+msgid ""
+"If you set a localization here then it will be available only for companies "
+"of this localization"
+msgstr ""
+"Si establece una localización aquí luego estará disponible solo para las "
+"compañías de esta localización"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_chart_template_localization
+msgid ""
+"If you set the localization here, then when installing this chart, this "
+"localization will be set on company"
+msgstr ""
+"Si establece una localización aquí, luego cuando instalemos el plan, esta "
+"localización se establecerá en la compañía."
+
+#. module: account_document
+#: selection:account.document.type,internal_type:0
+msgid "In Document"
+msgstr "Documento Entrante"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_internal_type
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_document_type_internal_type
+#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
+msgid "Internal Type"
+msgstr "Tipo interno"
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:178
+#: model:ir.model,name:account_document.model_account_invoice
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_invoice_id_3944
+#, python-format
+msgid "Invoice"
+msgstr "Factura"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_invoice_line
+msgid "Invoice Line"
+msgstr "Líneas de factura"
+
+#. module: account_document
+#: selection:account.document.type,internal_type:0
+msgid "Invoices"
+msgstr "Facturas"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_invoice_report
+msgid "Invoices Statistics"
+msgstr "Estadísticas de facturas"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_journal
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_journal_id
+msgid "Journal"
+msgstr "Diario"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_journal_document_type
+msgid "Journal Document Types Mapping"
+msgstr "Mapeo de Tipos de Documentos del Diario"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_journal_document_type_form
+#: model:ir.ui.view,arch_db:account_document.view_journal_document_type_tree
+msgid "Journal Documents Types"
+msgstr "Tipos de documentos de diarios"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_move_line
+msgid "Journal Item"
+msgstr "Elementos del diario"
+
+#. module: account_document
+#: code:addons/account_document/models/account_journal.py:164
+#, python-format
+msgid "Journals Must be of the same company"
+msgstr "Los diarios deben ser de la misma compañía"
+
+#. module: account_document
+#: code:addons/account_document/models/account_journal.py:160
+#, python-format
+msgid "Journals Must be of the same type"
+msgstr "Los diarios deben ser del mismo tipo"
+
+#. module: account_document
+#: code:addons/account_document/models/account_journal.py:168
+#, python-format
+msgid "Journals can not be the same"
+msgstr "Los diarios no pueden ser el mismo"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type___last_update
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type___last_update
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook___last_update
+msgid "Last Modified on"
+msgstr "Última Modificación en"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_write_uid
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_write_uid
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_write_date
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_write_date
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_chart_template_localization
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_localization
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_localization
+#: model:ir.model.fields,field_description:account_document.field_account_journal_localization
+#: model:ir.model.fields,field_description:account_document.field_account_payment_localization
+#: model:ir.model.fields,field_description:account_document.field_res_company_localization
+#: model:ir.model.fields,field_description:account_document.field_res_config_settings_localization
+#: model:ir.ui.view,arch_db:account_document.view_document_type_filter
+msgid "Localization"
+msgstr "Localización"
+
+#. module: account_document
+#: selection:account.payment.receiptbook,sequence_type:0
+#: code:addons/account_document/models/account_chart_template.py:78
+#, python-format
+msgid "Manual"
+msgstr "Manual"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_name
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_report_name
+msgid "Name on Reports"
+msgstr "Nombre en los Reportes"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_document_type_report_name
+msgid "Name that will be printed in reports, for example \"CREDIT NOTE\""
+msgstr "Nombre que será impreso en los reportes, por ejemplo \"NOTA DE CRÉDITO\""
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_price_net
+msgid "Net Amount"
+msgstr "Importe Neto"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_next_number
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_next_number
+#: model:ir.model.fields,field_description:account_document.field_account_payment_next_number
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_next_number
+msgid "Next Number"
+msgstr "Próximo número"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_journal_document_type_next_number
+#: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_next_number
+msgid ""
+"Next number that will be used. This number can be incremented frequently so "
+"the displayed value might already be obsolete"
+msgstr ""
+"Próximo número que será utilizado. Este número puede ser incrementado "
+"frecuentemente por lo que que el valor mostrado capaz que ya esté obsoleto."
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_padding
+msgid "Number Padding"
+msgstr "Relleno del Número"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_document_type_internal_type
+#: model:ir.model.fields,help:account_document.field_account_invoice_document_type_internal_type
+msgid "On each localization each document type may have a different use"
+msgstr "En cada localización cada tipo de documento tendría un uso diferente."
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_res_partner_other_document_type_ids
+#: model:ir.model.fields,field_description:account_document.field_res_users_other_document_type_ids
+msgid "Other Documents"
+msgstr "Otros documentos"
+
+#. module: account_document
+#: selection:account.journal,document_sequence_type:0
+msgid "Own Sequence"
+msgstr "Secuencia propia"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_partner_type
+msgid "Partner Type"
+msgstr "Tipo de Empresa"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_payment
+msgid "Payments"
+msgstr "Pagos"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_prefix
+msgid "Prefix"
+msgstr "Prefijo"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_document_type_doc_code_prefix
+msgid ""
+"Prefix for Documents Codes on Invoices and Account Moves. For eg. 'FA ' will"
+" build 'FA 0001-0000001' Document Number"
+msgstr ""
+"Prefijo para Códigos de Docuemntos en Facturas y Asientos Contables. Por ej."
+" 'FA ' va a mostrar el número de documento 'FA 0001-0000001' "
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_res_config_settings_purchase_use_documents
+msgid "Purchase Use Documents"
+msgstr "Las compras usan documentos"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_form
+#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_search
+#: model:ir.ui.view,arch_db:account_document.view_receipt_receiptbook_tree
+msgid "Receipt Books"
+msgstr "Libros de recibo"
+
+#. module: account_document
+#: selection:account.document.type,internal_type:0
+msgid "Receipt Invoice"
+msgstr "Factura Recibo"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_id_3941
+msgid "ReceiptBook"
+msgstr "Talonario de recibo"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_account_payment_search
+msgid "Receiptbook"
+msgstr "Libro de Recibo"
+
+#. module: account_document
+#: model:ir.actions.act_window,name:account_document.action_receiptbook_form
+#: model:ir.ui.menu,name:account_document.menu_receiptbook_form
+msgid "Receiptbooks"
+msgstr "Talonarios de recibos"
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:180
+#, python-format
+msgid "Refund"
+msgstr "Reembolso"
+
+#. module: account_document
+#: code:addons/account_document/wizards/account_invoice_refund.py:18
+#, python-format
+msgid "Refund wizard must be call only from one invoice"
+msgstr "El asistencia de Reembolso solo puede ser utilizado desde una factura"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_res_config_settings_sale_use_documents
+msgid "Sale Use Documents"
+msgstr "La venta usa documentos"
+
+#. module: account_document
+#: selection:account.journal,document_sequence_type:0
+msgid "Same Invoice Sequence"
+msgstr "Misma secuencia de factura"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_journal_document_type_journal_type
+msgid ""
+"Select 'Sale' for customer invoices journals.\n"
+"Select 'Purchase' for vendor bills journals.\n"
+"Select 'Cash' or 'Bank' for journals that are used in customer or vendor payments.\n"
+"Select 'General' for miscellaneous operations journals."
+msgstr ""
+"Seleccione 'Ventas' para diarios de facturas de cliente.\n"
+"Seleccione 'Compras' para diarios de facturas de proveedor.\n"
+"Seleccione 'Caja' o 'Banco' para diarios que se usan para pagos de clientes y proveedores. Seleccione 'General' para diarios que contienen operaciones varias."
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_sequence
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_sequence
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_payment_receiptbook_sequence_type
+msgid "Sequence Type"
+msgstr "Tipo de secuencia"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_res_partner_other_document_type_ids
+#: model:ir.model.fields,help:account_document.field_res_users_other_document_type_ids
+msgid ""
+"Set here if this partner can issue other documents further than invoices, "
+"credit notes and debit notes"
+msgstr ""
+"Establezca aquí si este partner puede emitir otros documentos distintos de "
+"facturas, notas de crédito y notas de débito."
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:259
+#, python-format
+msgid ""
+"Some invoices have a journal that require a document but not document type has been selected.\n"
+"Invoices ids: %s"
+msgstr ""
+"Algunas facturas tienen un diario que requiere un documento pero no se ha seleccionado un tipo de documento.\n"
+"Ids de Facturas: %s"
+
+#. module: account_document
+#: selection:account.document.type,internal_type:0
+msgid "Supplier Invoice"
+msgstr "Factura de Proveedor"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_report_amount_tax
+msgid "Tax"
+msgstr "Impuesto"
+
+#. module: account_document
+#: model:ir.ui.menu,name:account_document.menu_tax_entities_config
+msgid "Tax Entities"
+msgstr "Entidades Tributarias"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_invoice_line_tax_ids
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_report_tax_line_ids
+msgid "Taxes"
+msgstr "Impuestos"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_taxes_included
+msgid "Taxes Included?"
+msgstr "¿Impuestos incluídos?"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_account_chart_template
+msgid "Templates for Account Chart"
+msgstr "Plantillas para el Plan de Cuentas"
+
+#. module: account_document
+#: code:addons/account_document/models/account_payment.py:220
+#, python-format
+msgid "The company of the receiptbook and of the payment must be the same!"
+msgstr "La compañía del talonario y el del pago deben ser la misma!"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_invoice_document_sequence_id
+#: model:ir.model.fields,help:account_document.field_account_invoice_refund_document_sequence_id
+#: model:ir.model.fields,help:account_document.field_account_journal_document_type_sequence_id
+msgid ""
+"This field contains the information related to the numbering of the "
+"documents entries of this document type."
+msgstr ""
+"Este campo contiene información relacionada a la numeración de los registros"
+" de este tipo de documento."
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_payment_document_sequence_id
+#: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_sequence_id
+msgid ""
+"This field contains the information related to the numbering of the receipt "
+"entries of this receiptbook."
+msgstr ""
+"Este campo contiene información relacionada a la numeración de los registros"
+" de este talonario de recibo."
+
+#. module: account_document
+#: selection:account.document.type,internal_type:0
+msgid "Ticket"
+msgstr "Ticket"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_journal_document_type_journal_type
+msgid "Type"
+msgstr "Tipo"
+
+#. module: account_document
+#: code:addons/account_document/models/account_journal.py:110
+#, python-format
+msgid "Type %s not implemented yet"
+msgstr "El tipo %s todavía no está implementado"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_line_report_price_unit
+msgid "Unit Price"
+msgstr "Precio unitario"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_report_amount_untaxed
+msgid "Untaxed Amount"
+msgstr "Importe sin impuesto"
+
+#. module: account_document
+#: model:ir.ui.view,arch_db:account_document.view_account_journal_form
+msgid "Update Documents"
+msgstr "Actualizar documentos"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_refund_use_documents
+#: model:ir.model.fields,field_description:account_document.field_account_invoice_use_documents
+#: model:ir.model.fields,field_description:account_document.field_account_journal_use_documents
+msgid "Use Documents?"
+msgstr "¿Usa documentos?"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_journal_document_sequence_type
+msgid "Use own sequence or invoice sequence on Debit and Credit Notes?"
+msgstr ""
+"¿Usa secuencia propia o la secuencia de las facturas en las Notas de Crédito"
+" y Débito?"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_document_type_sequence
+msgid "Used to order records in tree views and relational fields"
+msgstr ""
+"Se utiliza para ordenar registros en vistas lista y campos relacionales"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_sequence
+msgid "Used to order the receiptbooks"
+msgstr "Utilizado para ordenar los talonarios de recibo"
+
+#. module: account_document
+#: model:ir.model.fields,field_description:account_document.field_account_document_type_validator_id
+msgid "Validator"
+msgstr "Validador"
+
+#. module: account_document
+#: selection:account.payment.receiptbook,partner_type:0
+msgid "Vendor"
+msgstr "Proveedor"
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:179
+#, python-format
+msgid "Vendor Bill"
+msgstr "Factura de Proveedor"
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:181
+#, python-format
+msgid "Vendor Refund"
+msgstr "Reembolso a proveedor"
+
+#. module: account_document
+#: code:addons/account_document/models/account_journal.py:234
+#, python-format
+msgid ""
+"You can not modify the field \"Use Documents?\" if invoices already exist in"
+" the journal!"
+msgstr ""
+"No puede modificar el campo \"Usar documentos?\" si ya existen facturas en "
+"este diario!"
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:470
+#, python-format
+msgid "You can not use a %s document type with a invoice"
+msgstr "No puede utilizar un tipo de documento %s con una factura"
+
+#. module: account_document
+#: code:addons/account_document/models/account_invoice.py:465
+#, python-format
+msgid "You can not use a %s document type with a refund invoice"
+msgstr ""
+"No puede utilizar un tipo de documento %s con una factura rectificativa"
+
+#. module: account_document
+#: model:ir.model.fields,help:account_document.field_account_payment_receiptbook_padding
+msgid ""
+"automatically adds some '0' on the left of the 'Number' to get the required "
+"padding size."
+msgstr ""
+"automáticamente agrega algunos '0' a la izquierda del 'Numero' para obtener "
+"el relleno requerido."
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_res_config_settings
+msgid "res.config.settings"
+msgstr "res.config.settings"
+
+#. module: account_document
+#: model:ir.model,name:account_document.model_wizard_multi_charts_accounts
+msgid "wizard.multi.charts.accounts"
+msgstr "wizard.multi.charts.accounts"
