@@ -3,7 +3,7 @@
     'version': '11.0.1.0.0',
     'category': 'Localization',
     'sequence': 14,
-    'author': 'ADHOC SA,Odoo Community Association (OCA)',
+    'author': 'ADHOC SA',
     'license': 'AGPL-3',
     'summary': '',
     'description': """
