@@ -72,7 +72,7 @@ class ResPartner(models.Model):
             # queremos el cuit para que aparezca el boton de refrescar de afip
             if rec.l10n_ar_id_category_id.afip_code == 80:
                 rec.l10n_ar_cuit = rec.l10n_ar_id_number
-                rec.vat = rec.l10n_ar_id_number
+                rec.vat = 'AR' + rec.l10n_ar_id_number
 
     @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
     def check_id_number_unique(self):
