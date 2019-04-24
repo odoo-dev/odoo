@@ -20,10 +20,6 @@ Base Module for Argentinian Localization
     """,
     'depends': [
         'base',
-        # this is for demo data, for fiscal position data on account
-        # and also beacuse it is essential for argentinian use
-        # for the sales config
-        'base_setup',
         'contacts',
     ],
     'data': [
@@ -37,6 +33,7 @@ Base Module for Argentinian Localization
         'views/res_company_view.xml',
         'views/l10n_ar_id_category_view.xml',
         'views/res_country_view.xml',
+        'wizards/res_config_settings_views.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [

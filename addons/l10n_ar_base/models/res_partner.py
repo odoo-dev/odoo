@@ -78,7 +78,7 @@ class ResPartner(models.Model):
     @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
     def check_id_number_unique(self):
         if not safe_eval(self.env['ir.config_parameter'].sudo().get_param(
-                "l10n_ar_partner.unique_id_numbers", 'False')):
+                "l10n_ar_base.unique_id_numbers", 'False')):
             return True
         for rec in self:
             # we allow same number in related partners
@@ -87,14 +87,16 @@ class ResPartner(models.Model):
                 ('id', 'child_of', rec.id)])
             same_id_numbers = rec.search([
                 ('l10n_ar_id_number', '=', rec.l10n_ar_id_number),
-                ('category_id', '=', rec.l10n_ar_id_category_id.id),
-                ('partner_id', 'not in', related_partners.ids),
-                # ('id', '!=', rec.id),
-            ]) - rec
+                ('l10n_ar_id_category_id', '=', rec.l10n_ar_id_category_id.id),
+                ('id', 'not in', related_partners.ids),
+            ])
             if same_id_numbers:
                 raise ValidationError(_(
-                    'Id Number must be unique per id category!\nSame number '
-                    'is only allowed for partner with parent/child relation'))
+                    'Identification number must be unique per Identification'
+                    ' category!\nSame number is only allowed for partners with'
+                    ' parent/child relation\n\n Already using this'
+                    ' number: ') + ', '.join(same_id_numbers.mapped('name'))
+                )
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
