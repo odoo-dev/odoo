@@ -64,6 +64,15 @@ class ResPartner(models.Model):
             # queremos el cuit para que aparezca el boton de refrescar de afip
             if rec.l10n_ar_id_category_id.afip_code == 80:
                 rec.l10n_ar_cuit = rec.l10n_ar_id_number
+
+    @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
+    def check_vat(self):
+        """ Update the the vat field using the information we have from
+        l10n_ar_id_number and l10n_ar_id_category_id fields
+        """
+        for rec in self:
+            if rec.l10n_ar_id_number and rec.l10n_ar_id_category_id and \
+               rec.l10n_ar_id_category_id.afip_code == 80:
                 rec.vat = 'AR' + rec.l10n_ar_id_number
 
     @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
