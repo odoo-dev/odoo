@@ -31,10 +31,12 @@ Base Module for Argentinian Localization
         'data/res_bank_data.xml',
         'data/l10n_ar_id_category_data.xml',
         'data/res_partner_title_data.xml',
+        'data/res_country_data.xml',
         'views/res_partner_bank_views.xml',
         'views/res_partner_view.xml',
         'views/res_company_view.xml',
         'views/l10n_ar_id_category_view.xml',
+        'views/res_country_view.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [
