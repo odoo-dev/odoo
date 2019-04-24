@@ -87,5 +87,5 @@ class ResPartnerIdCategory(models.Model):
                 ('name', operator, name)]
             if operator in expression.NEGATIVE_TERM_OPERATORS:
                 domain = ['&', '!'] + domain[1:]
-        accounts = self.search(domain + args, limit=limit)
-        return accounts.name_get()
+        recs = self.search(domain + args, limit=limit)
+        return recs.name_get()
