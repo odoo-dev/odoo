@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_res_partner_form" model="ir.ui.view">
+        <field name="name">res.partner.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form"/>
+        <field name="arch" type="xml">
+            <!-- add other documents -->
+            <xpath expr="//page[@name='accounting']/group" position="inside">
+                <group string="Accounting Documents" name="accounting_documents">
+                    <!-- we use _tags widget because of a bug with m2m default widget that don't allow to add records if user don't have access rights to create on destiny model. It is also much cleaner -->
+                    <field name="other_document_type_ids" widget="many2many_tags"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

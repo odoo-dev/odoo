@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_document_type_all,account.document.type.all,model_account_document_type,,1,0,0,0
+access_account_journal_document_type_adviser,account.journal.document.type.adviser,model_account_journal_document_type,account.group_account_manager,1,1,1,1
+access_account_journal_document_type_all,account.journal.document.type.all,model_account_journal_document_type,,1,0,0,0
+account_payment_receiptbook_user,account_payment_receiptbook_user,model_account_payment_receiptbook,account.group_account_invoice,1,0,0,0
+account_payment_receiptbook_manager,account_payment_receiptbook_manager,model_account_payment_receiptbook,account.group_account_manager,1,1,1,1
+account_payment_receiptbook_global,account_payment_receiptbook_global,model_account_payment_receiptbook,,1,0,0,0
