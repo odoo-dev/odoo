@@ -3,29 +3,31 @@
 # directory
 ##############################################################################
 from odoo import fields, models, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
 
 
 class ResPartnerBank(models.Model):
+
     _inherit = 'res.partner.bank'
 
-    cbu = fields.Char(
+    l10n_ar_cbu = fields.Char(
         'CBU',
-        help=u"Código Bancario Único Argentino"
+        help="Argentine Banking Unique Code",
     )
 
     @api.multi
-    @api.constrains('cbu')
+    @api.constrains('l10n_ar_cbu')
     def check_cbu(self):
         for rec in self:
-            if rec.cbu and not rec.is_valid_cbu():
-                raise UserError(_('El CBU "%s" no es válido') % rec.cbu)
+            if rec.l10n_ar_cbu and not rec.is_valid_cbu():
+                raise ValidationError(
+                    _('The CBU "%s" is not valid') % rec.l10n_ar_cbu)
 
     @api.multi
     def is_valid_cbu(self):
         self.ensure_one()
 
-        cbu = self.cbu
+        cbu = self.l10n_ar_cbu
 
         if type(cbu) == int:
             cbu = "%022d" % cbu

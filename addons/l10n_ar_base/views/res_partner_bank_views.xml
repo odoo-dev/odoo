@@ -18,7 +18,7 @@
         <field name="inherit_id" ref="base.view_partner_bank_form" />
         <field name="arch" type="xml">
             <field name="acc_number" position="after">
-               <field name='cbu'/>
+               <field name='l10n_ar_cbu'/>
             </field>
         </field>
     </record>

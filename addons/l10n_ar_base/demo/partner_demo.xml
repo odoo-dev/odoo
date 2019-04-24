@@ -16,16 +16,16 @@
         <field name="email">info@adhoc.com.ar</field>
         <field name="phone">(+54) (341) 208 0203</field>
         <field name="website">http://www.adhoc.com.ar</field>
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>30714295698</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/adhoc_logo.png"/>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>30714295698</field>
+        <field name="image" type="base64" file="l10n_ar_base/demo/adhoc_logo.png"/>
     </record>
 
     <record id="res_partner_adhoc_jjs" model="res.partner">
         <field name="name">Juan José Scarafía</field>
         <field name="type">contact</field>
         <field name="parent_id" ref="res_partner_adhoc"/>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/adhoc_jjs.jpeg"/>
+        <field name="image" type="base64" file="l10n_ar_base/demo/adhoc_jjs.jpeg"/>
     </record>
 
     <!-- Gritti Agrimensura -->
@@ -43,9 +43,9 @@
         <field name="email">info@example.com.ar</field>
         <field name="phone">(+54) (341) 111 2222</field>
         <field name="website">http://www.grittiagrimensura.com</field>
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>27320732811</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/gritti_logo.png"/>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>27320732811</field>
+        <field name="image" type="base64" file="l10n_ar_base/demo/gritti_logo.png"/>
     </record>
 
     <!-- Consejo Municipal Rosario -->
@@ -61,9 +61,9 @@
         <field name="email">info@example.com.ar</field>
         <field name="phone">(+54) (341) 222 3333</field>
         <field name="website">http://www.concejorosario.gov.ar/</field>
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>30684679372</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/cmr_logo.jpg"/>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>30684679372</field>
+        <field name="image" type="base64" file="l10n_ar_base/demo/cmr_logo.jpg"/>
     </record>
 
     <!-- Odoo -->
@@ -78,9 +78,9 @@
         <field name="email">info@odoo.com</field>
         <field name="phone">(+00) (11) 222 3333</field>
         <field name="website">https://www.odoo.com/</field>
-        <field name='main_id_category_id' ref="dt_CIe"/>
-        <field name='main_id_number'>111222333444</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/odoo_logo.jpg"/>
+        <field name='l10n_ar_id_category_id' ref="dt_CIe"/>
+        <field name='l10n_ar_id_number'>111222333444</field>
+        <field name="image" type="base64" file="l10n_ar_base/demo/odoo_logo.jpg"/>
     </record>
 
     <!-- Telecom -->
@@ -89,10 +89,10 @@
         <field eval="1" name="supplier"/>
         <field name="is_company">1</field>
         <!-- la idea es sincronizarlo con afip padron -->
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>30639453738</field>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>30639453738</field>
         <!-- TODO agregar -->
-        <!-- <field name="image" type="base64" file="l10n_ar_partner/demo/odoo_logo.jpg"/> -->
+        <!-- <field name="image" type="base64" file="l10n_ar_base/demo/odoo_logo.jpg"/> -->
     </record>
 
     <!-- Odoo -->
@@ -107,9 +107,9 @@
         <field name="email">info@expresso.com</field>
         <field name="phone">(+00) (11) 222 3333</field>
         <field name="website">http://www.expresso.com/</field>
-        <field name='main_id_category_id' ref="dt_CIe"/>
-        <field name='main_id_number'>2222333344445555</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/expresso_logo.png"/>
+        <field name='l10n_ar_id_category_id' ref="dt_CIe"/>
+        <field name='l10n_ar_id_number'>2222333344445555</field>
+        <field name="image" type="base64" file="l10n_ar_base/demo/expresso_logo.png"/>
     </record>
 
     <!-- Paseo del Fuego -->
@@ -124,47 +124,47 @@
         <field name="email">info@cerrocastor.com</field>
         <field name="phone">(+00) (11) 4444 5556</field>
         <field name="website">http://www.cerrocastor.com/</field>
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>27333333339</field>
-        <field name="image" type="base64" file="l10n_ar_partner/demo/cerrocastor_logo.png"/>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>27333333339</field>
+        <field name="image" type="base64" file="l10n_ar_base/demo/cerrocastor_logo.png"/>
     </record>
 
 <!-- Default Partners -->
 
         <!-- Main Partner -->
     <record id="base.main_partner" model="res.partner">
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>30111111118</field>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>30111111118</field>
     </record>
 
         <!-- ASUSTeK - Supplier -->
     <record id="base.res_partner_1" model="res.partner">
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>30222222229</field>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>30222222229</field>
     </record>
 
         <!-- Agrolait - Customer -->
     <record id="base.res_partner_2" model="res.partner">
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>30111111126</field>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>30111111126</field>
     </record>
 
         <!-- Camptocamp - Supplier/Customer -->
     <record id="base.res_partner_12" model="res.partner">
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>30888888884</field>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>30888888884</field>
     </record>
 
         <!-- Global Solutions  - cliente exterior -->
     <record id="base.res_partner_4" model="res.partner">
-        <field name='main_id_category_id' ref="dt_CIe"/>
-        <field name='main_id_number'>12345678</field>
+        <field name='l10n_ar_id_category_id' ref="dt_CIe"/>
+        <field name='l10n_ar_id_number'>12345678</field>
     </record>
 
         <!--   - cliente exterior -->
 <!--     <record id="base.res_partner_3" model="res.partner">
-        <field name='main_id_category_id' ref="dt_CUIT"/>
-        <field name='main_id_number'>27333333339</field>
+        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
+        <field name='l10n_ar_id_number'>27333333339</field>
     </record> -->
 
 </odoo>
