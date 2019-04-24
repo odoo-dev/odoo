@@ -111,11 +111,3 @@ class ResPartner(models.Model):
                 return recs.name_get()
         return super(ResPartner, self).name_search(
             name, args=args, operator=operator, limit=limit)
-
-    @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
-    @api.onchange('l10n_ar_id_number', 'l10n_ar_id_category_id')
-    def validate_id_number(self):
-        for rec in self.filtered(
-                lambda x: x.l10n_ar_id_number and x.l10n_ar_id_category_id):
-            rec.l10n_ar_id_category_id.validate_id_number(
-                rec.l10n_ar_id_number)
