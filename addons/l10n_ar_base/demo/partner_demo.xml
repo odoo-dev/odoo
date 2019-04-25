@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<!-- New Partners -->
+
+    <!-- New Partners -->
+
     <!-- ADHOC -->
     <record id="res_partner_adhoc" model="res.partner">
         <field name="name">ADHOC SA</field>
@@ -83,19 +85,14 @@
         <field name="image" type="base64" file="l10n_ar_base/demo/odoo_logo.jpg"/>
     </record>
 
-    <!-- Telecom -->
     <record id="res_partner_telecom" model="res.partner">
         <field name="name">TELECOm</field>
         <field eval="1" name="supplier"/>
         <field name="is_company">1</field>
-        <!-- la idea es sincronizarlo con afip padron -->
         <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
         <field name='l10n_ar_id_number'>30639453738</field>
-        <!-- TODO agregar -->
-        <!-- <field name="image" type="base64" file="l10n_ar_base/demo/odoo_logo.jpg"/> -->
     </record>
 
-    <!-- Odoo -->
     <record id="res_partner_expresso" model="res.partner">
         <field name="name">Expresso</field>
         <field eval="1" name="customer"/>
@@ -112,7 +109,6 @@
         <field name="image" type="base64" file="l10n_ar_base/demo/expresso_logo.png"/>
     </record>
 
-    <!-- Paseo del Fuego -->
     <record id="res_partner_cerrocastor" model="res.partner">
         <field name="name">Cerro Castor</field>
         <field eval="1" name="customer"/>
@@ -129,42 +125,34 @@
         <field name="image" type="base64" file="l10n_ar_base/demo/cerrocastor_logo.png"/>
     </record>
 
-<!-- Default Partners -->
-
-        <!-- Main Partner -->
+    <!-- Main Partner -->
     <record id="base.main_partner" model="res.partner">
         <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
         <field name='l10n_ar_id_number'>30111111118</field>
     </record>
 
-        <!-- ASUSTeK - Supplier -->
+    <!-- ASUSTeK - Supplier -->
     <record id="base.res_partner_1" model="res.partner">
         <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
         <field name='l10n_ar_id_number'>30222222229</field>
     </record>
 
-        <!-- Agrolait - Customer -->
+    <!-- Agrolait - Customer -->
     <record id="base.res_partner_2" model="res.partner">
         <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
         <field name='l10n_ar_id_number'>30111111126</field>
     </record>
 
-        <!-- Camptocamp - Supplier/Customer -->
+    <!-- Camptocamp - Supplier/Customer -->
     <record id="base.res_partner_12" model="res.partner">
         <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
         <field name='l10n_ar_id_number'>30888888884</field>
     </record>
 
-        <!-- Global Solutions  - cliente exterior -->
+    <!-- Global Solutions - Cliente exterior -->
     <record id="base.res_partner_4" model="res.partner">
         <field name='l10n_ar_id_category_id' ref="dt_CIe"/>
         <field name='l10n_ar_id_number'>12345678</field>
     </record>
-
-        <!--   - cliente exterior -->
-<!--     <record id="base.res_partner_3" model="res.partner">
-        <field name='l10n_ar_id_category_id' ref="dt_CUIT"/>
-        <field name='l10n_ar_id_number'>27333333339</field>
-    </record> -->
 
 </odoo>

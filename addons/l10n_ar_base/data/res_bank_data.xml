@@ -673,19 +673,6 @@
         <field name="phone">011-4346-4000</field>
         <field name="email">mensajes@bancofrances.com.ar</field>
     </record>
-    <record model="res.bank" id="00266">
-        <field name="name">Bnp Paribas</field>
-        <field name="bic">BNPPARIBAS</field>
-        <field name="active">1</field>
-        <field name="street">Bouchard 547</field>
-        <field name="street2">piso 26</field>
-        <field name="zip">C1106ABG</field>
-        <field name="city">Buenos Aires</field>
-        <field name="state" ref="base.state_ar_c"/>
-        <field name="country" ref="base.ar"/>
-        <field name="phone">011-4318-0318</field>
-        <field name="email">info@bnpparibas.com.ar</field>
-    </record>
     <record model="res.bank" id="65203">
         <field name="name">Caja De Credito "Cuenca" Cooperativa Lim</field>
         <field name="bic">CCCUENCA</field>

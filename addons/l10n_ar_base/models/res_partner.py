@@ -1,5 +1,9 @@
+##############################################################################
+# For copyright and license notices, see __manifest__.py file in module root
+# directory
+##############################################################################
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools.safe_eval import safe_eval
 
 
@@ -24,14 +28,21 @@ class ResPartner(models.Model):
 
     @api.multi
     def cuit_required(self):
+        """ Return the cuit number is this one is defined if not raise an
+        UserError
+        """
         self.ensure_one()
         if not self.l10n_ar_cuit:
-            raise UserError(_('No CUIT configured for partner [%i] %s') % (
-                self.id, self.name))
+            raise UserError(_(
+                'No CUIT configured for partner [%i] %s') % (
+                    self.id, self.name))
         return self.l10n_ar_cuit
 
     @api.depends('l10n_ar_cuit')
     def _compute_l10n_ar_formated_cuit(self):
+        """ This will add some dash to the CUIT number in order to show in his
+        natural format: {person_category}-{number}-{validation_number}
+        """
         for rec in self:
             if not rec.l10n_ar_cuit:
                 continue
@@ -41,17 +52,14 @@ class ResPartner(models.Model):
 
     @api.depends('l10n_ar_id_number', 'l10n_ar_id_category_id')
     def _compute_l10n_ar_cuit(self):
-        """ Agregamos a partner el campo calculado "l10n_ar_cuit" que devuelve
-        un cuit o nada si no existe y además un método que puede ser llamado
-        con .cuit_required() que devuelve el cuit o un error si no se encuentra
-        ninguno.
+        """ We add this computed field that returns cuit or nothing ig this one
+        is not set for the partner. This validation can be also dony by calling
+        cuit_required() method that returns the cuit nombre of error if this
+        one is not found.
         """
         for rec in self:
-            # el cuit solo lo devolvemos si es el doc principal
-            # para que no sea engañoso si no tienen activado multiples doc
-            # y esta seleccionado otro que no es cuit
-            # igualmente, si es un partner del extranjero intentamos devolver
-            # cuit fisica o juridica del pais
+            # If the partner is outside Argentina then we return the defined
+            # country cuit defined by AFIP for that specific partner
             if rec.l10n_ar_id_category_id.afip_code != 80:
                 country = rec.country_id
                 if country and country.code != 'AR':
@@ -60,45 +68,59 @@ class ResPartner(models.Model):
                     else:
                         rec.l10n_ar_cuit = country.l10n_ar_cuit_fisica
                 continue
-            # agregamos esto para el caso donde el registro todavia no se creo
-            # queremos el cuit para que aparezca el boton de refrescar de afip
             if rec.l10n_ar_id_category_id.afip_code == 80:
                 rec.l10n_ar_cuit = rec.l10n_ar_id_number
+
+    @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
+    def check_vat(self):
+        """ Update the the vat field using the information we have from
+        l10n_ar_id_number and l10n_ar_id_category_id fields
+        """
+        for rec in self:
+            if rec.l10n_ar_id_number and rec.l10n_ar_id_category_id and \
+               rec.l10n_ar_id_category_id.afip_code == 80:
                 rec.vat = 'AR' + rec.l10n_ar_id_number
 
     @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
     def check_id_number_unique(self):
+        """ Taking into account the company's general settings it will check
+        that if the identification number we are trying to use is already set
+        in another partner.
+        """
         if not safe_eval(self.env['ir.config_parameter'].sudo().get_param(
-                "l10n_ar_partner.unique_id_numbers", 'False')):
+                "l10n_ar_base.unique_id_numbers", 'False')):
             return True
         for rec in self:
-            # we allow same number in related partners
+            # We allow same number in related partners
             related_partners = rec.search([
                 '|', ('id', 'parent_of', rec.id),
                 ('id', 'child_of', rec.id)])
             same_id_numbers = rec.search([
                 ('l10n_ar_id_number', '=', rec.l10n_ar_id_number),
-                ('category_id', '=', rec.l10n_ar_id_category_id.id),
-                ('partner_id', 'not in', related_partners.ids),
-                # ('id', '!=', rec.id),
-            ]) - rec
+                ('l10n_ar_id_category_id', '=', rec.l10n_ar_id_category_id.id),
+                ('id', 'not in', related_partners.ids),
+            ])
             if same_id_numbers:
                 raise ValidationError(_(
-                    'Id Number must be unique per id category!\nSame number '
-                    'is only allowed for partner with parent/child relation'))
+                    'Identification number must be unique per Identification'
+                    ' category!\nSame number is only allowed for partners with'
+                    ' parent/child relation\n\n Already using this'
+                    ' number: ') + ', '.join(same_id_numbers.mapped('name'))
+                )
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
-        """ We first search by l10n_ar_id_number field
+    def _name_search(self, name, args=None, operator='ilike', limit=100,
+                     name_get_uid=None):
+        """ We add the functionality to found partner by identification number
         """
         if not args:
             args = []
-        # solo para estos operadores para no romper cuando se usa, por ej,
-        # no contiene algo del nombre
+        # We used only this operarators in order to do not break the search.
+        # For example: when searching like "Does not containt" in name field
         if name and operator in ('ilike', 'like', '=', '=like', '=ilike'):
             recs = self.search(
                 [('l10n_ar_id_number', operator, name)] + args, limit=limit)
             if recs:
                 return recs.name_get()
-        return super(ResPartner, self).name_search(
+        return super(ResPartner, self)._name_search(
             name, args=args, operator=operator, limit=limit)
