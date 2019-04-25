@@ -1,3 +1,7 @@
+##############################################################################
+# For copyright and license notices, see __manifest__.py file in module root
+# directory
+##############################################################################
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError, UserError
 from odoo.osv import expression
@@ -12,26 +16,31 @@ class ResPartnerIdCategory(models.Model):
     _order = "sequence"
 
     code = fields.Char(
-        string="Code", size=16, required=True,
-        help="Abbreviation or acronym of this ID type. For example, "
-             "'driver_license'")
+        size=16,
+        required=True,
+        help="Abbreviation or acronym of this ID type. For example: 'PASS'",
+    )
     name = fields.Char(
-        string="ID name", required=True, translate=True,
-        help="Name of this ID type. For example, 'Driver License'")
+        string="ID name",
+        required=True,
+        translate=True,
+        help="Name of this ID type. For example: 'Passport'",
+    )
     active = fields.Boolean(
-        string="Active", default=True,
+        default=True,
     )
     sequence = fields.Integer(
         default=10,
         required=True,
     )
     afip_code = fields.Integer(
-        'AFIP Code',
-        required=True
+        required=True,
     )
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
+        """ Identification category can be searched by code or name
+        """
         args = args or []
         domain = []
         if name:

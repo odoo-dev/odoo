@@ -1,3 +1,7 @@
+##############################################################################
+# For copyright and license notices, see __manifest__.py file in module root
+# directory
+##############################################################################
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.safe_eval import safe_eval
@@ -24,14 +28,21 @@ class ResPartner(models.Model):
 
     @api.multi
     def cuit_required(self):
+        """ Return the cuit number is this one is defined if not raise an
+        UserError
+        """
         self.ensure_one()
         if not self.l10n_ar_cuit:
-            raise UserError(_('No CUIT configured for partner [%i] %s') % (
-                self.id, self.name))
+            raise UserError(_(
+                'No CUIT configured for partner [%i] %s') % (
+                    self.id, self.name))
         return self.l10n_ar_cuit
 
     @api.depends('l10n_ar_cuit')
     def _compute_l10n_ar_formated_cuit(self):
+        """ This will add some dash to the CUIT number in order to show in his
+        natural format: {person_category}-{number}-{validation_number}
+        """
         for rec in self:
             if not rec.l10n_ar_cuit:
                 continue
@@ -41,17 +52,14 @@ class ResPartner(models.Model):
 
     @api.depends('l10n_ar_id_number', 'l10n_ar_id_category_id')
     def _compute_l10n_ar_cuit(self):
-        """ Agregamos a partner el campo calculado "l10n_ar_cuit" que devuelve
-        un cuit o nada si no existe y además un método que puede ser llamado
-        con .cuit_required() que devuelve el cuit o un error si no se encuentra
-        ninguno.
+        """ We add this computed field that returns cuit or nothing ig this one
+        is not set for the partner. This validation can be also dony by calling
+        cuit_required() method that returns the cuit nombre of error if this
+        one is not found.
         """
         for rec in self:
-            # el cuit solo lo devolvemos si es el doc principal
-            # para que no sea engañoso si no tienen activado multiples doc
-            # y esta seleccionado otro que no es cuit
-            # igualmente, si es un partner del extranjero intentamos devolver
-            # cuit fisica o juridica del pais
+            # If the partner is outside Argentina then we return the defined
+            # country cuit defined by AFIP for that specific partner
             if rec.l10n_ar_id_category_id.afip_code != 80:
                 country = rec.country_id
                 if country and country.code != 'AR':
@@ -60,8 +68,6 @@ class ResPartner(models.Model):
                     else:
                         rec.l10n_ar_cuit = country.l10n_ar_cuit_fisica
                 continue
-            # agregamos esto para el caso donde el registro todavia no se creo
-            # queremos el cuit para que aparezca el boton de refrescar de afip
             if rec.l10n_ar_id_category_id.afip_code == 80:
                 rec.l10n_ar_cuit = rec.l10n_ar_id_number
 
@@ -77,11 +83,15 @@ class ResPartner(models.Model):
 
     @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
     def check_id_number_unique(self):
+        """ Taking into account the company's general settings it will check
+        that if the identification number we are trying to use is already set
+        in another partner.
+        """
         if not safe_eval(self.env['ir.config_parameter'].sudo().get_param(
                 "l10n_ar_base.unique_id_numbers", 'False')):
             return True
         for rec in self:
-            # we allow same number in related partners
+            # We allow same number in related partners
             related_partners = rec.search([
                 '|', ('id', 'parent_of', rec.id),
                 ('id', 'child_of', rec.id)])

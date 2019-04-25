@@ -15,7 +15,6 @@ class ResPartnerBank(models.Model):
         help="Argentine Banking Unique Code",
     )
 
-    @api.multi
     @api.constrains('l10n_ar_cbu')
     def check_cbu(self):
         for rec in self:
@@ -25,10 +24,10 @@ class ResPartnerBank(models.Model):
 
     @api.multi
     def is_valid_cbu(self):
+        """ Ensure that the given CBU number is a valid number
+        """
         self.ensure_one()
-
         cbu = self.l10n_ar_cbu
-
         if type(cbu) == int:
             cbu = "%022d" % cbu
         cbu = cbu.strip()
@@ -44,5 +43,4 @@ class ResPartnerBank(models.Model):
         d2 = (10 - s2) % 10
         if d2 != int(cbu[-1]):
             return False
-
         return True
