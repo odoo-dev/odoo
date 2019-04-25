@@ -965,9 +965,9 @@ class Environment(Mapping):
                 # only add records if not already in the recordset, much much
                 # cheaper in case recs is big and records is a singleton
                 # already present
+                result -= recs_list[i]
                 try:
                     if not records <= recs:
-                        result -= recs_list[i]
                         recs_list[i] |= result
                     break
                 except TypeError:

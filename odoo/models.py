@@ -5241,7 +5241,7 @@ Fields:
                 else:
                     for record in records:
                         records.env.cache.remove(record, field)
-                    newtodo = records
+                    newtodo = None
 
                 if newtodo:
                     newtodo.modified([field.name])

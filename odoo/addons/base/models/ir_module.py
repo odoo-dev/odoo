@@ -932,8 +932,8 @@ class ModuleExclusion(models.Model):
     # the module that excludes it
     module_id = fields.Many2one('ir.module.module', 'Module', ondelete='cascade')
 
-    # the module corresponding to the exclusion, and its status
-    exclusion_id = fields.Many2one('ir.module.module', 'Exclusion Module', compute='_compute_exclusion')
+    # the module corresponding to the exclusion, and its status, must be stored as it's used in a @depends
+    exclusion_id = fields.Many2one('ir.module.module', 'Exclusion Module', compute='_compute_exclusion', store=True)
     state = fields.Selection(DEP_STATES, string='Status', compute='_compute_state')
 
     @api.multi

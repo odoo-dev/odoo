@@ -2107,9 +2107,7 @@ class Many2one(_Relational):
         # use registry to avoid creating a recordset for the model
         prefetch = record.env.cache.get_all_values(record, self)
         # FP NOTE: would be good to avoid these 3 lines
-        a = set()
-        for p in prefetch:
-            if p: a.add(p[0])
+        a = map(lambda y: y[0], filter(lambda x: isinstance(x, tuple) and x, prefetch))
         return record.env.registry[self.comodel_name]._browse(value, record.env, a)
 
     def convert_to_read(self, value, record, use_name_get=True):
@@ -2239,9 +2237,7 @@ class _RelationalMulti(_Relational):
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
         prefetch = record.env.cache.get_all_values(record, self)
-        a = set()
-        for p in prefetch:
-            if p: a |= set(p)
+        a = itertools.chain(filter(lambda x: isinstance(x, tuple), prefetch))
         return record.env.registry[self.comodel_name]._browse(value, record.env, a)
         # return record.env.registry[self.comodel_name]._browse(value, record.env, record._prefetch)
 
