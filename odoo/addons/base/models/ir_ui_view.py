@@ -238,7 +238,7 @@ actual arch.
 * if False, the view currently does not extend its parent but can be enabled
          """)
 
-    @api.depends('arch_db', 'arch_fs')
+    @api.depends('arch_db', 'arch_fs', 'xml_id', 'key')
     def _compute_arch(self):
         def resolve_external_ids(arch_fs, view_xml_id):
             def replacer(m):

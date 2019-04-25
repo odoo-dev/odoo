@@ -1110,6 +1110,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 except ValidationError as e:
                     raise
                 except Exception as e:
+                    check(self)
                     raise ValidationError("%s\n\n%s" % (_("Error while validating constraint"), tools.ustr(e)))
 
     @api.model
@@ -3510,7 +3511,6 @@ Fields:
         for vals in vals_list:
             # add missing defaults
             vals = self._add_missing_default_values(vals)
-            print('vals', vals)
 
             # distribute fields into sets for various purposes
             data = {}
@@ -3654,7 +3654,8 @@ Fields:
         records = self.browse(ids)
         for data, record in zip(data_list, records):
             data['record'] = record
-            for fname,value in itertools.chain(data['stored'].items(), data['inherited'].items()):
+            # FP TODO: what about data['inherited'] here?
+            for fname,value in data['stored'].items():
                 field = self._fields[fname]
                 if field.type in ('one2many', 'many2many'):
                     self.env.cache.set(record, field, ())
@@ -5234,7 +5235,14 @@ Fields:
             # final node of path, result should be marked as todo, then recursive modified
             if pathlen==0:
                 if field.name in overwrite: continue
-                newtodo = records.env.add_todo(field, records)
+                # mark as to recompute if it's a stored field; if not a stored field, removing the cache is enough
+                if field.store:
+                    newtodo = records.env.add_todo(field, records)
+                else:
+                    for record in records:
+                        records.env.cache.remove(record, field)
+                    newtodo = records
+
                 if newtodo:
                     newtodo.modified([field.name])
                 continue

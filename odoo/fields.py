@@ -984,10 +984,6 @@ class Field(MetaField('DummyField', (object,), {})):
             record.ensure_one()
             if env.check_todo(self, record):
                 recs = env.field_todo(self)
-                # if self.name=='partner_id':
-                #     import pudb
-                #     pudb.set_trace()
-
                 self.compute_value(recs)
 
             if not env.cache.contains(record, self):

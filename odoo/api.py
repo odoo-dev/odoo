@@ -1066,8 +1066,6 @@ class Cache(object):
 
     def set(self, record, field, value):
         """ Set the value of ``field`` for ``record``. """
-        if field.name in ('company_id','journal_id'):
-            print('    set', field.name, record, value)
         key = record.env.cache_key(field)
         self._data[key][field][record._ids[0]] = value
 
@@ -1079,7 +1077,10 @@ class Cache(object):
     def remove(self, record, field):
         """ Remove the value of ``field`` for ``record``. """
         key = record.env.cache_key(field)
-        del self._data[key][field][record.id]
+        try:
+            del self._data[key][field][record.id]
+        except KeyError:
+            pass
 
     def contains_value(self, record, field):
         """ Return whether ``record`` has a regular value for ``field``. """
