@@ -109,17 +109,18 @@ class ResPartner(models.Model):
                 )
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
-        """ We first search by l10n_ar_id_number field
+    def _name_search(self, name, args=None, operator='ilike', limit=100,
+                     name_get_uid=None):
+        """ We add the functionality to found partner by identification number
         """
         if not args:
             args = []
-        # solo para estos operadores para no romper cuando se usa, por ej,
-        # no contiene algo del nombre
+        # We used only this operarators in order to do not break the search.
+        # For example: when searching like "Does not containt" in name field
         if name and operator in ('ilike', 'like', '=', '=like', '=ilike'):
             recs = self.search(
                 [('l10n_ar_id_number', operator, name)] + args, limit=limit)
             if recs:
                 return recs.name_get()
-        return super(ResPartner, self).name_search(
+        return super(ResPartner, self)._name_search(
             name, args=args, operator=operator, limit=limit)
