@@ -10,12 +10,14 @@
 Base Module for Argentinian Localization
 ========================================
 
-* Configure data for used currencies. Principal one ARS and conventions for the most used secondary currencies USD and EUR.
-* Adds Argentinian Banks data enable by BCRA (Central Bank of Argentina)
+* Configure data for used currencies.
+   * Principal one os ARS.
+   * Conventions for the most used secondary currencies USD and EUR.
+* Add Argentinian Banks data enable by BCRA (Central Bank of Argentina) to operate in the country.
 * Add new field named CBU to bank model.
-* Add type of identifications in Argentina defined by AFIP
-* Agregado de Títulos de personería comunmente utilizados en argentina (SA, SRL, Doctor, etc)
-
+* Add Identification Category model to represent AFIP valid identifications types.
+* Add Res Partner titles used in Argentina to identify the types of legal entities (SA, SRL, etc).
+* Add Countries code defined by AFIP to identify legal entities and natural persons of foreign countries.
 
     """,
     'depends': [
