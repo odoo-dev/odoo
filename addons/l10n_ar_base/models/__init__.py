@@ -1,7 +1,5 @@
-##############################################################################
-# For copyright and license notices, see __manifest__.py file in module root
-# directory
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from . import res_partner_bank
 from . import l10n_ar_id_category
 from . import res_country
