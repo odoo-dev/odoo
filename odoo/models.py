@@ -5238,7 +5238,7 @@ Fields:
             if pathlen==0:
                 if field.name in overwrite: continue
                 # mark as to recompute if it's a stored field; if not a stored field, removing the cache is enough
-                if field.store:
+                if field.store and (field.type not in ('one2many', )):
                     newtodo = records.env.add_todo(field, records)
                 else:
                     for record in records:

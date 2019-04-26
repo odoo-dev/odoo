@@ -265,7 +265,6 @@ class Partner(models.Model):
     @api.depends('vat')
     def _compute_same_vat_partner(self):
         for partner in self:
-            print('VAT', partner)
             partner_id = partner.id
             if isinstance(partner_id, models.NewId):
                 # deal with onchange(), which is always called on a single record
@@ -574,6 +573,7 @@ class Partner(models.Model):
             # no padding on the big image, because it's used as website logo
             tools.image_resize_images(vals, return_big=False)
             tools.image_resize_images(vals, return_medium=False, return_small=False, preserve_aspect_ratio=True)
+
         partners = super(Partner, self).create(vals_list)
         for partner, vals in zip(partners, vals_list):
             partner._fields_sync(vals)
