@@ -76,15 +76,39 @@ class ResPartner(models.Model):
             if rec.l10n_ar_identification_type_id.afip_code == 80:
                 rec.l10n_ar_cuit = rec.l10n_ar_id_number
 
-    @api.constrains('l10n_ar_id_number', 'l10n_ar_identification_type_id')
-    def check_vat(self):
-        """ Update the the vat field using the information we have from
+    @api.model
+    def create(self, values):
+        """ Generate the vat field value with the information in
+        the l10n_ar_id_number and l10n_ar_identification_type_id fields
+        """
+        self.update_vat(values)
+        return super(ResPartner, self).create(values)
+
+    @api.multi
+    def write(self, values):
+        """ Generate the vat field value with the information in
+        the l10n_ar_id_number and l10n_ar_identification_type_id fields
+        """
+        self.update_vat(values)
+        return super(ResPartner, self).write(values)
+
+    @api.multi
+    def update_vat(self, values):
+        """ get the vat field value using the information we have in
         l10n_ar_id_number and l10n_ar_identification_type_id fields
         """
-        for rec in self:
-            if rec.l10n_ar_id_number and rec.l10n_ar_identification_type_id and \
-               rec.l10n_ar_identification_type_id.afip_code == 80:
-                rec.vat = 'AR' + rec.l10n_ar_id_number
+        id_number = values.get(
+            'l10n_ar_id_number', self.l10n_ar_id_number or False)
+        id_type = values.get(
+            'l10n_ar_identification_type_id',
+            self.l10n_ar_identification_type_id.id or False)
+
+        if id_type:
+            id_type = self.env['l10n_ar.identification.type'].browse(id_type)
+
+        if id_number and id_type and id_type.afip_code == 80:
+            values.update({'vat': 'AR' + id_number})
+        return values
 
     @api.constrains('l10n_ar_id_number', 'l10n_ar_identification_type_id')
     def check_id_number_unique(self):
