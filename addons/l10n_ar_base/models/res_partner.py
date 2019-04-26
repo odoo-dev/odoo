@@ -17,9 +17,9 @@ class ResPartner(models.Model):
     l10n_ar_id_number = fields.Char(
         string='Identification Number',
     )
-    l10n_ar_id_category_id = fields.Many2one(
-        string="Identification Category",
-        comodel_name='l10n_ar_id_category',
+    l10n_ar_identification_type_id = fields.Many2one(
+        string="Identification Type",
+        comodel_name='l10n_ar.identification.type',
         index=True,
         auto_join=True,
     )
@@ -48,7 +48,7 @@ class ResPartner(models.Model):
             rec.l10n_ar_formated_cuit = "{0}-{1}-{2}".format(
                 cuit[0:2], cuit[2:10], cuit[10:])
 
-    @api.depends('l10n_ar_id_number', 'l10n_ar_id_category_id')
+    @api.depends('l10n_ar_id_number', 'l10n_ar_identification_type_id')
     def _compute_l10n_ar_cuit(self):
         """ We add this computed field that returns cuit or nothing ig this one
         is not set for the partner. This validation can be also dony by calling
@@ -58,7 +58,7 @@ class ResPartner(models.Model):
         for rec in self:
             # If the partner is outside Argentina then we return the defined
             # country cuit defined by AFIP for that specific partner
-            if rec.l10n_ar_id_category_id.afip_code != 80:
+            if rec.l10n_ar_identification_type_id.afip_code != 80:
                 country = rec.country_id
                 if country and country.code != 'AR':
                     if rec.is_company:
@@ -66,20 +66,20 @@ class ResPartner(models.Model):
                     else:
                         rec.l10n_ar_cuit = country.l10n_ar_cuit_fisica
                 continue
-            if rec.l10n_ar_id_category_id.afip_code == 80:
+            if rec.l10n_ar_identification_type_id.afip_code == 80:
                 rec.l10n_ar_cuit = rec.l10n_ar_id_number
 
-    @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
+    @api.constrains('l10n_ar_id_number', 'l10n_ar_identification_type_id')
     def check_vat(self):
         """ Update the the vat field using the information we have from
-        l10n_ar_id_number and l10n_ar_id_category_id fields
+        l10n_ar_id_number and l10n_ar_identification_type_id fields
         """
         for rec in self:
-            if rec.l10n_ar_id_number and rec.l10n_ar_id_category_id and \
-               rec.l10n_ar_id_category_id.afip_code == 80:
+            if rec.l10n_ar_id_number and rec.l10n_ar_identification_type_id and \
+               rec.l10n_ar_identification_type_id.afip_code == 80:
                 rec.vat = 'AR' + rec.l10n_ar_id_number
 
-    @api.constrains('l10n_ar_id_number', 'l10n_ar_id_category_id')
+    @api.constrains('l10n_ar_id_number', 'l10n_ar_identification_type_id')
     def check_id_number_unique(self):
         """ Taking into account the company's general settings it will check
         that if the identification number we are trying to use is already set
@@ -95,13 +95,13 @@ class ResPartner(models.Model):
                 ('id', 'child_of', rec.id)])
             same_id_numbers = rec.search([
                 ('l10n_ar_id_number', '=', rec.l10n_ar_id_number),
-                ('l10n_ar_id_category_id', '=', rec.l10n_ar_id_category_id.id),
+                ('l10n_ar_identification_type_id', '=', rec.l10n_ar_identification_type_id.id),
                 ('id', 'not in', related_partners.ids),
             ])
             if same_id_numbers:
                 raise ValidationError(_(
                     'Identification number must be unique per Identification'
-                    ' category!\nSame number is only allowed for partners with'
+                    ' type!\nSame number is only allowed for partners with'
                     ' parent/child relation\n\n Already using this'
                     ' number: ') + ', '.join(same_id_numbers.mapped('name'))
                 )

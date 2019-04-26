@@ -7,8 +7,8 @@ class ResCompany(models.Model):
 
     _inherit = 'res.company'
 
-    l10n_ar_id_category_id = fields.Many2one(
-        related='partner_id.l10n_ar_id_category_id',
+    l10n_ar_identification_type_id = fields.Many2one(
+        related='partner_id.l10n_ar_identification_type_id',
     )
     l10n_ar_id_number = fields.Char(
         related='partner_id.l10n_ar_id_number',

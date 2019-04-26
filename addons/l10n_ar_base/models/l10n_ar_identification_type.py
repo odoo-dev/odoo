@@ -6,10 +6,10 @@ from odoo.osv import expression
 from odoo.tools.safe_eval import safe_eval
 
 
-class ResPartnerIdCategory(models.Model):
+class L10nArIdentificationType(models.Model):
 
-    _name = "l10n_ar_id_category"
-    _description = "Identification Category"
+    _name = "l10n_ar.identification.type"
+    _description = "Identification Type"
     _rec_name = "code"
     _order = "sequence"
 
@@ -37,7 +37,7 @@ class ResPartnerIdCategory(models.Model):
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
-        """ Identification category can be searched by code or name
+        """ Identification type can be searched by code or name
         """
         args = args or []
         domain = []
