@@ -21,7 +21,6 @@ class L10nArIdentificationType(models.Model):
     name = fields.Char(
         string="ID name",
         required=True,
-        translate=True,
         help="Name of this ID type. For example: 'Passport'",
     )
     active = fields.Boolean(
