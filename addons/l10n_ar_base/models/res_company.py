@@ -18,5 +18,5 @@ class ResCompany(models.Model):
     )
 
     @api.multi
-    def cuit_required(self):
-        return self.partner_id.cuit_required()
+    def ensure_cuit(self):
+        return self.partner_id.ensure_cuit()

@@ -25,9 +25,16 @@ class ResPartner(models.Model):
     )
 
     @api.multi
-    def cuit_required(self):
-        """ Return the cuit number is this one is defined if not raise an
-        UserError
+    def ensure_cuit(self):
+        """ This method is a helper that returns the cuit number is this one is
+        defined if not raise an UserError.
+
+        CUIT is not mandatory field but for some Argentinian operations the
+        cuit is required, for eg  validate an electronic invoice, build a
+        report, etc.
+
+        This method can be used to validate is the cuit is proper defined in
+        the partner
         """
         self.ensure_one()
         if not self.l10n_ar_cuit:
@@ -51,9 +58,9 @@ class ResPartner(models.Model):
     @api.depends('l10n_ar_id_number', 'l10n_ar_identification_type_id')
     def _compute_l10n_ar_cuit(self):
         """ We add this computed field that returns cuit or nothing ig this one
-        is not set for the partner. This validation can be also dony by calling
-        cuit_required() method that returns the cuit nombre of error if this
-        one is not found.
+        is not set for the partner. This validation can be also done by calling
+        ensure_cuit() method that returns the cuit or error if this one is not
+        found.
         """
         for rec in self:
             # If the partner is outside Argentina then we return the defined
