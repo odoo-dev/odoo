@@ -995,14 +995,13 @@ class Field(MetaField('DummyField', (object,), {})):
                         record._fetch_field(self)
 
                 elif self.compute:
-                    # FP CEHCK: to check; not sure we need the _in_cache_Without; if it's not store, there is no reason to batch
                     recs = record._in_cache_without(self)
-
                     self.compute_value(recs)
 
                 else:
                     env.cache.set(record, self, self.convert_to_cache(False, record, validate=False))
 
+            # raise access rights here instead of in the end of read()
             value = env.cache.get(record, self)
         else:
             # null record -> return the null value for this field
@@ -1028,14 +1027,18 @@ class Field(MetaField('DummyField', (object,), {})):
         env.cache.set(record, self, value)
         env.remove_todo(self, record)
 
+        toflush = False
         for invf in record._field_inverses[self]:
-            invf._update(record[self.name], record)
+            toflush = toflush or not invf._update(record[self.name], record)
 
         record.modified([self.name])
 
         if record.id and self.store:
             write_value = self.convert_to_write(self.convert_to_record(value, record), record)
             env.all.towrite[self][write_value].add(record.id)
+            if toflush:
+                record.towrite_flush([self])
+
 
 
     ############################################################################
@@ -2141,27 +2144,6 @@ class Many2one(_Relational):
         return super(Many2one, self).convert_to_onchange(value, record, names)
 
 
-class _RelationalMultiUpdate(object):
-    """ A getter to update the value of an x2many field, without reading its
-        value until necessary.
-    """
-    __slots__ = ['record', 'field', 'value']
-
-    def __init__(self, record, field, value):
-        self.record = record
-        self.field = field
-        self.value = value
-
-    def __call__(self):
-        # determine the current field's value, and update it in cache only
-        record, field, value = self.record, self.field, self.value
-        cache = record.env.cache
-        cache.remove(record, field)
-        val = field.convert_to_cache(record[field.name] | value, record, validate=False)
-        cache.set(record, field, val)
-        return val
-
-
 class _RelationalMulti(_Relational):
     """ Abstract class for relational fields *2many. """
     _slots = {
@@ -2169,20 +2151,16 @@ class _RelationalMulti(_Relational):
     }
 
     def _update(self, records, value):
-        """ Update the cached value of ``self`` for ``records`` with ``value``. """
+        """ Update the cached value of ``self`` for ``records`` with ``value``, return True if everything is in cache. """
         if not isinstance(records, BaseModel):
             # the inverse of self is a non-relational field; do not update in
             # this case, as we do not know whether the records are the ones that
             # value makes reference to (via a res_model/res_id pair)
             return
         cache = records.env.cache
+        result = True
         for record in records:
-            special = cache.get_special(record, self)
-            if isinstance(special, _RelationalMultiUpdate):
-                # include 'value' in the existing _RelationalMultiUpdate; this
-                # avoids reading the field's value (which may be large)
-                special.value |= value
-            elif cache.contains(record, self):
+            if cache.contains(record, self):
                 try:
                     val = self.convert_to_cache(record[self.name] | value, record, validate=False)
                     cache.set(record, self, val)
@@ -2190,7 +2168,8 @@ class _RelationalMulti(_Relational):
                     # delay the failure until the field is necessary
                     cache.set_failed(record, [self], exc)
             else:
-                cache.set_special(record, self, _RelationalMultiUpdate(record, self, value))
+                result = False
+        return result
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: tuple(ids)
@@ -2260,7 +2239,10 @@ class _RelationalMulti(_Relational):
                 result.append((1, record.id, values))
             else:
                 result[0][2].append(record.id)
-        return result
+
+        # result must be hashable, to group by writes by values
+        result[0] = (6, 0, tuple(result[0][2]))
+        return tuple(result)
 
     def convert_to_onchange(self, value, record, names):
         # return the recordset value as a list of commands; the commands may

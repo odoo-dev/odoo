@@ -4931,11 +4931,12 @@ Fields:
 
 
     @api.model
-    def towrite_flush(self):
+    def towrite_flush(self, fields=None):
         # write in chunks of similar ids / values; could be optimized (e.g. multi-column write?)
         todo = {}
         while self.env.all.towrite:
             field, values = self.env.all.towrite.popitem()
+            if fields and (field not in fields): continue
             for value, ids in values.items():
                 sids = tuple(sorted(ids))
                 todo.setdefault((field.model_name, sids), {})

@@ -170,15 +170,16 @@ class Groups(models.Model):
         return super(Groups, self).copy(default)
 
     @api.multi
-    def write(self, vals):
+    def _write(self, vals):
         if 'name' in vals:
             if vals['name'].startswith('-'):
                 raise UserError(_('The name of the group can not start with "-"'))
         # invalidate caches before updating groups, since the recomputation of
         # field 'share' depends on method has_group()
+        result = super(Groups, self)._write(vals)
         self.env['ir.model.access'].call_cache_clearing_methods()
         self.env['res.users'].has_group.clear_cache(self.env['res.users'])
-        return super(Groups, self).write(vals)
+        return result
 
 
 class ResUsersLog(models.Model):
