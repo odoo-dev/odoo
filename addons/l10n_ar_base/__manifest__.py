@@ -4,7 +4,6 @@
     'category': 'Localization',
     'sequence': 14,
     'author': 'ADHOC SA',
-    'license': 'AGPL-3',
     'summary': '',
     'description': """
 Base Module for Argentinian Localization
