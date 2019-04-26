@@ -193,19 +193,12 @@ class IrRule(models.Model):
 
         model = records._name
         description = self.env['ir.model']._get(model).name or model
-        if not self.env.user.has_group('base.group_no_one'):
-            return AccessError(_('The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n\n(Document type: "%(document_kind)s" (%(document_model)s), Operation: %(operation)s)') % {
-                'document_kind': description,
-                'document_model': model,
-                'operation': operation,
-             })
 
-        # debug mode, provide more info
         rules = self._get_failing(records, mode=operation).sudo()
-        return AccessError(_("""The requested operation ("%(operation)s" on "%(document_kind)s" (%(document_model)s)) was rejected because of the following rules:
+        return AccessError(_("""The "%(operation)s" on "%(document_kind)s" (%(document_model)s) was rejected because of the following rules:
 %(rules_list)s
-%(multi_company_warning)s
-(records: %(example_records)s, uid: %(user_id)d)""") % {
+(records: %(example_records)s, uid: %(user_id)d)
+%(multi_company_warning)s""") % {
             'operation': operation,
             'document_kind': description,
             'document_model': model,

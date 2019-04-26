@@ -2739,8 +2739,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 description = self.env['ir.model']._get(self._name).name
                 if not self.env.user.has_group('base.group_no_one'):
                     raise AccessError(
-                        _('The requested operation cannot be completed due to security restrictions. '
-                          'Please contact your system administrator.\n\n(Document type: %(document_kind)s (%(document_model)s), Operation: %(operation)s)') % {
+                        _('You do not have the right the fields "%(fields)s" on %(document_kind)s (%(document_model)s). '\
+                          'Please contact your system administrator.\n\n(Operation: %(operation)s)') % {
+                        'fields': ','.join(list(invalid_fields)),
                         'document_kind': description,
                         'document_model': self._name,
                         'operation': operation,
@@ -2798,9 +2799,10 @@ Fields:
                 records
         """
         # check access rights
-        # FP Note: should we move that to _read
+        # FP TODO: we should move that to _read as it's called by __get__, but check if not slower first
         self.check_access_rights('read')
         fields = self.check_field_access_rights('read', fields)
+
         self.recompute_fields(fields)
 
         # fetch stored fields from the database to the cache; this should feed
@@ -2826,7 +2828,6 @@ Fields:
                 except MissingError:
                     vals.clear()
         result = [vals for record, vals in data if vals]
-
         return result
 
     @api.multi
@@ -2957,6 +2958,7 @@ Fields:
             if field.deprecated:
                 _logger.warning('Field %s is deprecated: %s', field, field.deprecated)
 
+        # FP NOTE: move this to fields.py__get__, no need to slow down _read; also easier to debug when exceptions are triggered when they happen
         # store failed values in cache for the records that could not be read
         missing = self - fetched
         if missing:
