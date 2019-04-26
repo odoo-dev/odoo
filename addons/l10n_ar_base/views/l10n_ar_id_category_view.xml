@@ -6,7 +6,7 @@
         <field name="model">l10n_ar_id_category</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <form string="Partner Identification Categories">
+            <form string="Partner Identification Categories" create="0" edit="0">
                 <group>
                     <field name="sequence"/>
                     <field name="afip_code"/>
@@ -22,12 +22,28 @@
         <field name="model">l10n_ar_id_category</field>
         <field name="type">tree</field>
         <field name="arch" type="xml">
-            <tree string="Partner Identification Categories">
-                <field name="sequence" widget="handle"/>
+            <tree string="Partner Identification Categories" decoration-muted="(not active)" create="0" edit="0">
                 <field name="afip_code"/>
                 <field name="name"/>
                 <field name="code"/>
+                <field name="active" widget="boolean_toggle"/>
             </tree>
+        </field>
+    </record>
+
+    <record id="view_l10n_ar_id_category_search" model="ir.ui.view">
+        <field name="name">l10n_ar_id_category.search</field>
+        <field name="model">l10n_ar_id_category</field>
+        <field name="type">search</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Name"/>
+                <field name="code" string="Short Name"/>
+                <field name="afip_code" string="AFIP Code"/>
+                <field name="active"/>
+                <filter name="active" string="Active" domain="[('active','=',True)]" help="Show active identification categories"/>
+                <filter name="inactive" string="Inactive" domain="[('active','=',False)]" help="Show inactive identification categories"/>
+            </search>
         </field>
     </record>
 
