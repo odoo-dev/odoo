@@ -110,33 +110,6 @@ class ResPartner(models.Model):
             values.update({'vat': 'AR' + id_number})
         return values
 
-    @api.constrains('l10n_ar_id_number', 'l10n_ar_identification_type_id')
-    def check_id_number_unique(self):
-        """ Taking into account the company's general settings it will check
-        that if the identification number we are trying to use is already set
-        in another partner.
-        """
-        if not safe_eval(self.env['ir.config_parameter'].sudo().get_param(
-                "l10n_ar_base.unique_id_numbers", 'False')):
-            return True
-        for rec in self:
-            # We allow same number in related partners
-            related_partners = rec.search([
-                '|', ('id', 'parent_of', rec.id),
-                ('id', 'child_of', rec.id)])
-            same_id_numbers = rec.search([
-                ('l10n_ar_id_number', '=', rec.l10n_ar_id_number),
-                ('l10n_ar_identification_type_id', '=', rec.l10n_ar_identification_type_id.id),
-                ('id', 'not in', related_partners.ids),
-            ])
-            if same_id_numbers:
-                raise ValidationError(_(
-                    'Identification number must be unique per Identification'
-                    ' type!\nSame number is only allowed for partners with'
-                    ' parent/child relation\n\n Already using this'
-                    ' number: ') + ', '.join(same_id_numbers.mapped('name'))
-                )
-
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100,
                      name_get_uid=None):

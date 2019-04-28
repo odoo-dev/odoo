@@ -33,7 +33,6 @@ Base Module for Argentinian Localization
         'views/res_company_view.xml',
         'views/l10n_ar_identification_type_view.xml',
         'views/res_country_view.xml',
-        'wizards/res_config_settings_views.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [
