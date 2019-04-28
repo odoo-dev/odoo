@@ -23,6 +23,38 @@ class ResPartner(models.Model):
         index=True,
         auto_join=True,
     )
+    same_id_number_partner = fields.Html(
+        string='Partner with same Identification Number',
+        compute='_compute_same_same_id_number_partner',
+        store=False,
+    )
+
+    @api.depends('l10n_ar_id_number', 'l10n_ar_identification_type_id')
+    def _compute_same_same_id_number_partner(self):
+        for partner in self:
+            partner_id = partner.id
+            partner_id_number = partner.l10n_ar_id_number
+            partner_id_type = partner.l10n_ar_identification_type_id
+            if isinstance(partner_id, models.NewId):
+                # deal with onchange(), which is always called on a single
+                # record
+                partner_id = self._origin.id
+            domain = [
+                ('l10n_ar_id_number', '=', partner_id_number),
+                ('l10n_ar_identification_type_id', '=', partner_id_type.id)]
+            if partner_id:
+                related_partners = partner.search([
+                    '|', ('id', 'parent_of', partner_id),
+                    ('id', 'child_of', partner_id)])
+                domain += [('id', 'not in', related_partners.ids)]
+            same_number_partner = self.env['res.partner'].search(
+                domain, limit=1)
+            partner.same_id_number_partner = \
+                "<a href='/web#id={}&model=res.partner' target='_blank'>{}"\
+                "</a>".format(
+                    same_number_partner.id, same_number_partner.name) \
+                        if partner_id_number and partner_id_type and \
+                            same_number_partner else False
 
     @api.multi
     def ensure_cuit(self):
