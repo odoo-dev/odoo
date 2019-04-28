@@ -126,15 +126,19 @@ class ResPartner(models.Model):
 
     @api.multi
     def update_vat(self, values):
-        """ get the vat field value using the information we have in
+        """ Update the vat field value using the information we have in
         l10n_ar_id_number and l10n_ar_identification_type_id fields
+
+        When the vat has been set using _commercial_sync_to_children we do not
+        update it
         """
+        if 'vat' in values or 'commercial_partner_id' in values:
+            return values
         id_number = values.get(
             'l10n_ar_id_number', self.l10n_ar_id_number or False)
         id_type = values.get(
             'l10n_ar_identification_type_id',
             self.l10n_ar_identification_type_id.id or False)
-
         if id_type:
             id_type = self.env['l10n_ar.identification.type'].browse(id_type)
 
