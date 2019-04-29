@@ -1,9 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, fields, _
-from odoo.exceptions import ValidationError, UserError
+from odoo import api, models, fields
 from odoo.osv import expression
-from odoo.tools.safe_eval import safe_eval
 
 
 class L10nArIdentificationType(models.Model):

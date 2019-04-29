@@ -16,7 +16,7 @@ class ResCompany(models.Model):
         readonly=False,
     )
     l10n_ar_cuit = fields.Char(
-        related='partner_id.l10n_ar_cuit'
+        related='partner_id.l10n_ar_cuit',
     )
     l10n_ar_country_code = fields.Char(
         related="country_id.code",
