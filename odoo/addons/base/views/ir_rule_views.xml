@@ -26,7 +26,6 @@
                     <separator string="Rule Definition (Domain Filter)"/>
                     <field name="domain_force" colspan="2" nolabel="1"/>
                     <group string="Groups (no group = global)">
-                        <field name="global"/>
                         <field name="groups" nolabel="1" colspan="4"/>
                     </group>
                     <i class="fa fa-info fa-3x text-info float-left" role="img" aria-label="Info" title="Info"/>
@@ -71,7 +70,6 @@
             <field name="arch" type="xml">
                 <search string="Record Rules">
                     <field name="name" string="Record Rule"/>
-                    <filter string="Global" name="global" domain="[('global','=',True)]"/>
                     <separator/>
                     <filter string="Full Access Right" name="full_access_right" domain="[('perm_read','=',True),('perm_write','=',True),('perm_create','=',True),('perm_unlink','=',True)]"/>
                     <filter string="Read Access Right" name="read_access_right" domain="[('perm_read','=',True)]"/>
@@ -97,7 +95,6 @@
         <record id="property_rule" model="ir.rule">
             <field name="name">Property multi-company</field>
             <field name="model_id" ref="model_ir_property"/>
-            <field eval="True" name="global"/>
             <field name="domain_force">['|',('company_id','child_of',[user.company_id.id]),('company_id','=',False)]</field>
         </record>
 

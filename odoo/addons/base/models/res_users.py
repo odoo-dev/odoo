@@ -94,7 +94,7 @@ class Groups(models.Model):
     users = fields.Many2many('res.users', 'res_groups_users_rel', 'gid', 'uid')
     model_access = fields.One2many('ir.model.access', 'group_id', string='Access Controls', copy=True)
     rule_groups = fields.Many2many('ir.rule', 'rule_group_rel',
-        'group_id', 'rule_group_id', string='Rules', domain=[('global', '=', False)])
+        'group_id', 'rule_group_id', string='Rules')
     menu_access = fields.Many2many('ir.ui.menu', 'ir_ui_menu_group_rel', 'gid', 'menu_id', string='Access Menu')
     view_access = fields.Many2many('ir.ui.view', 'ir_ui_view_group_rel', 'group_id', 'view_id', string='Views')
     comment = fields.Text(translate=True)
@@ -941,8 +941,8 @@ class GroupsImplied(models.Model):
         return groups
 
     @api.multi
-    def write(self, values):
-        res = super(GroupsImplied, self).write(values)
+    def _write(self, values):
+        res = super(GroupsImplied, self)._write(values)
         if values.get('users') or values.get('implied_ids'):
             # add all implied groups (to all users of each group)
             for group in self:
@@ -989,17 +989,17 @@ class UsersImplied(models.Model):
         return super(UsersImplied, self).create(vals_list)
 
     @api.multi
-    def write(self, values):
-        res = super(UsersImplied, self).write(values)
+    def _write(self, values):
+        res = super(UsersImplied, self)._write(values)
         if values.get('groups_id'):
             # add implied groups for all users
             for user in self.with_context({}):
                 if not user.has_group('base.group_user'):
                     vals = {'groups_id': [(5, 0, 0)] + values['groups_id']}
-                    super(UsersImplied, user).write(vals)
+                    super(UsersImplied, user)._write(vals)
                 gs = set(concat(g.trans_implied_ids for g in user.groups_id))
                 vals = {'groups_id': [(4, g.id) for g in gs]}
-                super(UsersImplied, user).write(vals)
+                super(UsersImplied, user)._write(vals)
         return res
 
 #

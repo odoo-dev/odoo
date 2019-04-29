@@ -140,6 +140,9 @@ class TestAPI(common.TransactionCase):
         self.assertTrue(partners)
 
         # call method write on partners itself, and check its effect
+        import pudb
+        pudb.set_trace()
+
         partners.write({'active': False})
         for p in partners:
             self.assertFalse(p.active)

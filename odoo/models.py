@@ -3310,13 +3310,20 @@ Fields:
                 # empty
                 self._write(store_vals)
 
+            # update cache
+            for fname, value in store_vals.items():
+                field = self._fields[fname]
+                for record in self:
+                    val = field.convert_to_cache(value, record)
+                    self.env.cache.set(record, field, val)
+                    self.env.remove_todo(field, record)
+
             # mark fields to recompute; do this before setting other fields, because
             # the latter can require the value of computed fields, e.g., a one2many
             # checking constraints on records
             self.modified(vals, vals)
             if self._log_access:
                 self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
-
 
 
             # update parent records (after possibly updating parent fields)
@@ -3653,6 +3660,8 @@ Fields:
             ids.append(cr.fetchone()[0])
 
         # put the new records in cache, and update inverse fields, for many2one
+        # cachetoclear is an optimization to avoid modified()'s cost until other_fields are processed
+        cachetoclear = []
         records = self.browse(ids)
         for data, record in zip(data_list, records):
             data['record'] = record
@@ -3661,6 +3670,7 @@ Fields:
                 field = self._fields[fname]
                 if field.type in ('one2many', 'many2many'):
                     self.env.cache.set(record, field, ())
+                    cachetoclear.append((record, field))
                 else:
                     value = field.convert_to_cache(value, record)
                     self.env.cache.set(record, field, value)
@@ -3687,6 +3697,11 @@ Fields:
 
             for d in data_list:
                 d['record'].modified([x.name for x in other_fields], setfields)
+
+        # if value in cache has not been updated by other_fields, remove it
+        for record, field in cachetoclear:
+            if not self.env.cache.get(record, field):
+                self.env.cache.remove(record, field)
 
         # check Python constraints for stored fields
         records._validate_fields(name for data in data_list for name in data['stored'])

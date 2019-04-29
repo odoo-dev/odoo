@@ -46,11 +46,6 @@ class IrRule(models.Model):
            ir.rule domains."""
         return {'user': self.env.user, 'time': time}
 
-    @api.depends('groups')
-    def _compute_global(self):
-        for rule in self:
-            rule['global'] = not rule.groups
-
     @api.constrains('model_id')
     def _check_model_transience(self):
         if any(self.env[rule.model_id.model].is_transient() for rule in self):
@@ -112,13 +107,9 @@ class IrRule(models.Model):
 
         query = """ SELECT r.id FROM ir_rule r JOIN ir_model m ON (r.model_id=m.id)
                     WHERE m.model=%s AND r.active AND r.perm_{mode}
-                    AND (r.id IN (SELECT rule_group_id FROM rule_group_rel rg
-                                  JOIN res_groups_users_rel gu ON (rg.group_id=gu.gid)
-                                  WHERE gu.uid=%s)
-                         OR r.global)
                     ORDER BY r.id
                 """.format(mode=mode)
-        self._cr.execute(query, (model_name, self._uid))
+        self._cr.execute(query, (model_name, ))
         return self.browse(row[0] for row in self._cr.fetchall())
 
     @api.model
@@ -177,14 +168,12 @@ class IrRule(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         res = super(IrRule, self).create(vals_list)
-        self.recompute_fields(['global'])
         self.clear_caches()
         return res
 
     @api.multi
-    def write(self, vals):
-        res = super(IrRule, self).write(vals)
-        self.recompute_fields(['global'])
+    def _write(self, vals):
+        res = super(IrRule, self)._write(vals)
         self.clear_caches()
         return res
 
@@ -209,11 +198,3 @@ class IrRule(models.Model):
             'user_id': self.env.user.id,
         })
 
-#
-# Hack for field 'global': this field cannot be defined like others, because
-# 'global' is a Python keyword. Therefore, we add it to the class by assignment.
-# Note that the attribute '_module' is normally added by the class' metaclass.
-#
-setattr(IrRule, 'global',
-        fields.Boolean(compute='_compute_global', store=True, _module=IrRule._module,
-                       help="If no group is specified the rule is global and applied to everyone"))
