@@ -4,6 +4,9 @@ from odoo import models, fields, api
 import time
 
 class test(models.Model):
+    """
+        test object
+    """
     _name = 'test'
     _log_access = False
 
@@ -77,40 +80,39 @@ class test(models.Model):
         return time.time()-t
 
     def test(self):
-        model_res_partner = self.env.ref('base.model_res_partner')
-        group_user = self.env.ref('base.group_user')
-        user_demo = self.env.ref('base.user_demo')
+        def log(record):
+            print(record.name, record.id, ':', record.line_sum)
+            for line in record.line_ids:
+                print('    ', line.name, line.id, line.intx2, line.test_id)
 
-        # create an ir_rule for the Employee group with an blank domain
+        main = self.create({
+            'name': 'main',
+            'line_ids': [
+                (0,0, {'name': 'abc'}),
+                (0,0, {'name': 'def'}),
+                (0,0, {'name': 'ghi'}),
+            ]
+        })
+        second = self.create({ 'name': 'second' })
+        line  = main.line_ids[1]
 
-        data = {
-            'name': 'test_rule2',
-            'model_id': model_res_partner.id,
-            'domain_force': "[('id','=',False),('name','=',False)]",
-            'groups': [(6, 0, group_user.ids)],
-        }
-        import pudb
-        pudb.set_trace()
+        # line.test_id = second.id
+        print('aaa')
+        line.unlink()
+        print('bbb')
 
-        rule2 = self.env['ir.rule'].create(data)
-        print(rule2.groups)
-        # r = self.env['ir.rule']._compute_domain("res.partner", "read")
-        # print('* domain after 1: ', r)
-        # rule1 = self.env['ir.rule'].create({
-        #     'name': 'test_rule1',
-        #     'model_id': model_res_partner.id,
-        #     'domain_force': "[('id','>',1)]",
-        #     'groups': [(6, 0, group_user.ids)],
-        # })
+        # line.write({'test_id': second.id})
 
-
-        # r = self.env['ir.rule']._compute_domain("res.partner", "read")
-        # print('* domain', r)
+        log(main)
+        log(second)
 
         crash_here_to_rollback
 
 
 class test_line(models.Model):
+    """
+        test line
+    """
     _name = 'test.line'
 
     name = fields.Char()

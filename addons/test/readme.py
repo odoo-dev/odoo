@@ -252,3 +252,53 @@ def __get__()
     3/ readonly=False, depends=['partner_id'], related="partner_id.fp_id"
 
 
+# -------------------------------- WRITE -------------------------------------
+
+Master
+    def write():
+        inverse_fields.clear_cache()
+        self.cache_set()
+        self._write()
+        inverse_fields.update()
+        self.modified(vals)
+        inherits.write(...)                          # not in __set__ -> via inverse fields
+        inverse_fields.inverse()                     # not in __set__
+
+    def _write():
+        self.check_access_rights()
+        cr.execute(...)
+        translation_update
+        self.validate()
+        self.parent_store()
+
+    def __set__():
+        if old_value == new_value: continue
+        inverse_fields.clear_cache()
+        self.cache_set()
+        inverse_fields.update()
+        self.modified(vals)
+
+# Goal: replace self.write() by:
+
+def write(self, values):
+    for key, val in values:
+        self[key] = val
+
+
+-> perform inverse in __set__
+-> inherits through inverse methods
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

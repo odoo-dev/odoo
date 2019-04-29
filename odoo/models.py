@@ -3302,6 +3302,16 @@ Fields:
             _logger.warning("%s.write() with unknown fields: %s",
                             self._name, ', '.join(sorted(unknown_names)))
 
+        # clear cache of inverse fields
+        for fname, value in store_vals.items():
+            field = self._fields[fname]
+            if field.relational:
+                for invf in self._field_inverses[field]:
+                    for rec in self.mapped(fname):
+                        if rec:
+                            self.env.cache.remove(rec, invf)
+
+
         with self.env.protecting(protected_fields, self):
             # write stored fields with (low-level) method _write
             if store_vals or inverse_vals or inherited_vals:
@@ -3317,6 +3327,14 @@ Fields:
                     val = field.convert_to_cache(value, record)
                     self.env.cache.set(record, field, val)
                     self.env.remove_todo(field, record)
+
+                # remove inverse fields from cache
+                if field.relational:
+                    for invf in self._field_inverses[field]:
+                        for rec in self.mapped(fname):
+                            if rec:
+                                self.env.cache.remove(rec, invf)
+
 
             # mark fields to recompute; do this before setting other fields, because
             # the latter can require the value of computed fields, e.g., a one2many
@@ -3683,7 +3701,7 @@ Fields:
         # mark computed fields as todo
         modfields = [fname for (fname, field) in self._fields.items() if field.type not in ('one2many', 'many2many')]
         setfields = data_list[0]
-        records.modified(modfields, setfields)
+        records.modified(modfields, setfields['stored'])
 
         if other_fields:
             # discard default values from context for other fields
@@ -3700,7 +3718,7 @@ Fields:
 
         # if value in cache has not been updated by other_fields, remove it
         for record, field in cachetoclear:
-            if not self.env.cache.get(record, field):
+            if self.env.cache.contains(record, field) and not self.env.cache.get(record, field):
                 self.env.cache.remove(record, field)
 
         # check Python constraints for stored fields
@@ -5374,7 +5392,11 @@ Fields:
             field = self.env.get_todo()
             recs = self.env.field_todo(field)
 
-            field.compute_value(recs)
+            try:
+                field.compute_value(recs)
+            except MissingError:
+                field.compute_value(recs.exists())
+
             self.env.remove_todo(field, recs)
 
             # Useful for debug purpose of recursion loops

@@ -1023,6 +1023,9 @@ class Field(MetaField('DummyField', (object,), {})):
         # for chane of relational fields, you have to check dependencies before and after the change
         if self.relational:
             record.modified([self.name])
+            for invf in record._field_inverses[self]:
+                for rec in record[self.name]:
+                    env.cache.remove(rec, invf)
 
         env.cache.set(record, self, value)
         env.remove_todo(self, record)

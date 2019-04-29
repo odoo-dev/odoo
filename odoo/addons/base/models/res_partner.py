@@ -519,7 +519,7 @@ class Partner(models.Model):
         return website
 
     @api.multi
-    def write(self, vals):
+    def _write(self, vals):
         if vals.get('active') is False:
             for partner in self:
                 if partner.active and partner.user_ids:
@@ -548,9 +548,9 @@ class Partner(models.Model):
         result = True
         # To write in SUPERUSER on field is_company and avoid access rights problems.
         if 'is_company' in vals and self.user_has_groups('base.group_partner_manager') and not self.env.uid == SUPERUSER_ID:
-            result = super(Partner, self.sudo()).write({'is_company': vals.get('is_company')})
+            result = super(Partner, self.sudo())._write({'is_company': vals.get('is_company')})
             del vals['is_company']
-        result = result and super(Partner, self).write(vals)
+        result = result and super(Partner, self)._write(vals)
         for partner in self:
             if any(u.has_group('base.group_user') for u in partner.user_ids if u != self.env.user):
                 self.env['res.users'].check_access_rights('write')
@@ -698,6 +698,8 @@ class Partner(models.Model):
 
         # as the implementation is in SQL, we force the recompute of fields if necessary
         self.recompute_fields(['display_name'])
+        self.towrite_flush()
+
         if args is None:
             args = []
         if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):

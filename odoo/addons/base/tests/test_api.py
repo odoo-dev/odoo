@@ -140,9 +140,6 @@ class TestAPI(common.TransactionCase):
         self.assertTrue(partners)
 
         # call method write on partners itself, and check its effect
-        import pudb
-        pudb.set_trace()
-
         partners.write({'active': False})
         for p in partners:
             self.assertFalse(p.active)
@@ -281,7 +278,7 @@ class TestAPI(common.TransactionCase):
         partner.country_id, partner.child_ids
         data = partner._convert_to_write(partner._cache)
         self.assertEqual(data['country_id'], partner.country_id.id)
-        self.assertEqual(data['child_ids'], [(6, 0, partner.child_ids.ids)])
+        self.assertEqual(data['child_ids'], ((6, 0, tuple(partner.child_ids.ids)),))
 
     @mute_logger('odoo.models')
     def test_60_prefetch(self):
