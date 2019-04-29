@@ -23,7 +23,7 @@
                 <label for="l10n_ar_id_number" string="Identification" attrs="{'invisible': [('l10n_ar_country_code', '!=', 'AR')]}"/>
                 <div class="o_address_format" attrs="{'invisible': [('l10n_ar_country_code', '!=', 'AR')]}">
                     <field class="o_address_state" name="l10n_ar_identification_type_id" options="{'no_open': True, 'no_create': True}" placeholder="Type"/>
-                    <label string="-" class="oe_read_only"/>
+                    <span class="oe_read_only">-</span>
                     <field name="l10n_ar_id_number" placeholder="Number" class="oe_inline"/>
                 </div>
             </field>
