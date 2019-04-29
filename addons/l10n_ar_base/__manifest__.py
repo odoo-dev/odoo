@@ -20,7 +20,6 @@ Base Module for Argentinian Localization
     ],
     'data': [
         'data/res_currency_data.xml',
-        'data/res_bank_data.xml',
         'data/l10n_ar_identification_type_data.xml',
         'data/res_country_data.xml',
         'views/res_partner_bank_views.xml',
