@@ -1016,7 +1016,7 @@ class Environment(Mapping):
         """ Return the key to store the value of ``field`` in cache, the full
             cache key being ``(key, field, record.id)``.
         """
-        return self if field.context_dependent else self._cache_key
+        return self if field.context_dependent else 1
 
 
 class Environments(object):

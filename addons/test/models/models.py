@@ -14,7 +14,7 @@ class test(models.Model):
     line_ids = fields.One2many('test.line', 'test_id')
 
     int1 = fields.Integer('User', default=lambda x: 1)
-    intx2 = fields.Integer('User', compute="_get_intx2", store=True)
+    intx2 = fields.Integer('User', compute="_get_intx2", inverse='_set_intx2', store=True)
 
     line_sum = fields.Integer('Sum Currency', compute='_line_sum', store=True)
 
@@ -44,6 +44,10 @@ class test(models.Model):
         for record in self:
             record.intx2 = record.int1 * 2
 
+    def _set_intx2(self):
+        for record in self:
+            record.int1 = record.intx2 // 2
+
     def testme(self):
         t = time.time()
         for partner in self.env['res.partner'].search([]):
@@ -71,7 +75,7 @@ class test(models.Model):
                 (0,0, {'name': 'def'}),
             ]
         })
-        main_id.int1 = 5
+        main.intx2 = 4
         self.env['test.line'].create(
             {'name': 'ghi', 'test_id': main_id.id}
         )
@@ -81,30 +85,26 @@ class test(models.Model):
 
     def test(self):
         def log(record):
-            print(record.name, record.id, ':', record.line_sum)
+            print(record.name, record.id, ':', record.int1, record.line_sum)
             for line in record.line_ids:
-                print('    ', line.name, line.id, line.intx2, line.test_id)
+                print('    ', line.name, line.id, ':', line.name2, line.intx2, line.test_id)
 
         main = self.create({
             'name': 'main',
             'line_ids': [
-                (0,0, {'name': 'abc'}),
                 (0,0, {'name': 'def'}),
                 (0,0, {'name': 'ghi'}),
             ]
         })
-        second = self.create({ 'name': 'second' })
-        line  = main.line_ids[1]
 
-        # line.test_id = second.id
-        print('aaa')
-        line.unlink()
-        print('bbb')
-
-        # line.write({'test_id': second.id})
 
         log(main)
-        log(second)
+        line  = main.line_ids[1]
+
+        line.name2 = 'new line name'
+        log(main)
+        main.name='aaa'
+        log(main)
 
         crash_here_to_rollback
 
@@ -116,6 +116,8 @@ class test_line(models.Model):
     _name = 'test.line'
 
     name = fields.Char()
+    name2 = fields.Char('Related Name', related='test_id.name', store=True)
+
     test_id = fields.Many2one('test')
     intx2   = fields.Integer(compute='_get_intx2', store=True)
 
