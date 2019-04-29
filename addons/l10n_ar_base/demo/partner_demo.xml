@@ -30,34 +30,4 @@
         <field name="image" type="base64" file="l10n_ar_base/demo/adhoc_jjs.jpeg"/>
     </record>
 
-    <!-- Main Partner -->
-    <record id="base.main_partner" model="res.partner">
-        <field name='l10n_ar_identification_type_id' ref="dt_CUIT"/>
-        <field name='l10n_ar_id_number'>30111111118</field>
-    </record>
-
-    <!-- ASUSTeK - Supplier -->
-    <record id="base.res_partner_1" model="res.partner">
-        <field name='l10n_ar_identification_type_id' ref="dt_CUIT"/>
-        <field name='l10n_ar_id_number'>30222222229</field>
-    </record>
-
-    <!-- Agrolait - Customer -->
-    <record id="base.res_partner_2" model="res.partner">
-        <field name='l10n_ar_identification_type_id' ref="dt_CUIT"/>
-        <field name='l10n_ar_id_number'>30111111126</field>
-    </record>
-
-    <!-- Camptocamp - Supplier/Customer -->
-    <record id="base.res_partner_12" model="res.partner">
-        <field name='l10n_ar_identification_type_id' ref="dt_CUIT"/>
-        <field name='l10n_ar_id_number'>30888888884</field>
-    </record>
-
-    <!-- Global Solutions - Cliente exterior -->
-    <record id="base.res_partner_4" model="res.partner">
-        <field name='l10n_ar_identification_type_id' ref="dt_CIe"/>
-        <field name='l10n_ar_id_number'>12345678</field>
-    </record>
-
 </odoo>
