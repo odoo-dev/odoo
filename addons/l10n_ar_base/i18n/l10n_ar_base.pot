@@ -6,14 +6,24 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-28 13:52+0000\n"
-"PO-Revision-Date: 2019-04-28 13:52+0000\n"
+"POT-Creation-Date: 2019-04-29 01:29+0000\n"
+"PO-Revision-Date: 2019-04-29 01:29+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: l10n_ar_base
+#: model_terms:ir.ui.view,arch_db:l10n_ar_base.view_partner_form
+msgid "), are you sure to create a new one?"
+msgstr ""
+
+#. module: l10n_ar_base
+#: model_terms:ir.ui.view,arch_db:l10n_ar_base.view_partner_form
+msgid "A partner with the same Identification Number already exists ("
+msgstr ""
 
 #. module: l10n_ar_base
 #: model_terms:ir.ui.view,arch_db:l10n_ar_base.view_l10n_ar_identification_type_search
@@ -39,11 +49,6 @@ msgstr ""
 #. module: l10n_ar_base
 #: model:ir.model.fields,help:l10n_ar_base.field_res_partner_bank__l10n_ar_cbu
 msgid "Argentine Banking Unique Code"
-msgstr ""
-
-#. module: l10n_ar_base
-#: model_terms:ir.ui.view,arch_db:l10n_ar_base.res_config_settings_view_form
-msgid "Argentinian Localization"
 msgstr ""
 
 #. module: l10n_ar_base
@@ -97,28 +102,20 @@ msgid "Companies"
 msgstr ""
 
 #. module: l10n_ar_base
-#: model:ir.model,name:l10n_ar_base.model_res_config_settings
-msgid "Config Settings"
-msgstr ""
-
-#. module: l10n_ar_base
 #: model:ir.model,name:l10n_ar_base.model_res_partner
 msgid "Contact"
 msgstr ""
 
 #. module: l10n_ar_base
-#: model:res.partner.title,shortcut:l10n_ar_base.coop
-msgid "Coop."
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:res.partner.title,name:l10n_ar_base.coop
-msgid "Cooperativa"
-msgstr ""
-
-#. module: l10n_ar_base
 #: model:ir.model,name:l10n_ar_base.model_res_country
 msgid "Country"
+msgstr ""
+
+#. module: l10n_ar_base
+#: model:ir.model.fields,field_description:l10n_ar_base.field_res_company__l10n_ar_country_code
+#: model:ir.model.fields,field_description:l10n_ar_base.field_res_partner__l10n_ar_country_code
+#: model:ir.model.fields,field_description:l10n_ar_base.field_res_users__l10n_ar_country_code
+msgid "Country code"
 msgstr ""
 
 #. module: l10n_ar_base
@@ -153,11 +150,6 @@ msgid "Identification"
 msgstr ""
 
 #. module: l10n_ar_base
-#: model:ir.model,name:l10n_ar_base.model_l10n_ar_id_category
-msgid "Identification Category"
-msgstr ""
-
-#. module: l10n_ar_base
 #: model:ir.model.fields,field_description:l10n_ar_base.field_res_company__l10n_ar_id_number
 #: model:ir.model.fields,field_description:l10n_ar_base.field_res_partner__l10n_ar_id_number
 #: model:ir.model.fields,field_description:l10n_ar_base.field_res_users__l10n_ar_id_number
@@ -178,20 +170,6 @@ msgstr ""
 #. module: l10n_ar_base
 #: model_terms:ir.ui.view,arch_db:l10n_ar_base.view_l10n_ar_identification_type_tree
 msgid "Identification Types"
-msgstr ""
-
-#. module: l10n_ar_base
-#: code:addons/l10n_ar_base/models/res_partner.py:133
-#, python-format
-msgid "Identification number must be unique per Identification type!\n"
-"Same number is only allowed for partners with parent/child relation\n"
-"\n"
-" Already using this number: "
-msgstr ""
-
-#. module: l10n_ar_base
-#: model_terms:ir.ui.view,arch_db:l10n_ar_base.res_config_settings_view_form
-msgid "Identification number will be unique per partner. Same number is only allowed for partners with parent/child relation"
 msgstr ""
 
 #. module: l10n_ar_base
@@ -238,7 +216,7 @@ msgid "Name of this ID type. For example: 'Passport'"
 msgstr ""
 
 #. module: l10n_ar_base
-#: code:addons/l10n_ar_base/models/res_partner.py:41
+#: code:addons/l10n_ar_base/models/res_partner.py:75
 #, python-format
 msgid "No CUIT configured for partner [%i] %s"
 msgstr ""
@@ -250,23 +228,9 @@ msgid "Number"
 msgstr ""
 
 #. module: l10n_ar_base
-#: model:res.partner.title,shortcut:l10n_ar_base.sa
-msgid "S.A."
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:res.partner.title,shortcut:l10n_ar_base.sdh
-msgid "S.D.H."
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:res.partner.title,shortcut:l10n_ar_base.srl
-msgid "S.R.L."
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:res.partner.title,shortcut:l10n_ar_base.sas
-msgid "SAS"
+#: model:ir.model.fields,field_description:l10n_ar_base.field_res_partner__same_id_number_partner
+#: model:ir.model.fields,field_description:l10n_ar_base.field_res_users__same_id_number_partner
+msgid "Partner with same Identification Number"
 msgstr ""
 
 #. module: l10n_ar_base
@@ -290,23 +254,10 @@ msgid "Show inactive identification types"
 msgstr ""
 
 #. module: l10n_ar_base
-#: model:res.partner.title,name:l10n_ar_base.sa
-msgid "Sociedad Anónima"
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:res.partner.title,name:l10n_ar_base.srl
-msgid "Sociedad Limitada"
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:res.partner.title,name:l10n_ar_base.sdh
-msgid "Sociedad de Hecho"
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:res.partner.title,name:l10n_ar_base.sas
-msgid "Sociedad por Acciones Simplificada"
+#: model:ir.model.fields,help:l10n_ar_base.field_res_company__l10n_ar_country_code
+#: model:ir.model.fields,help:l10n_ar_base.field_res_partner__l10n_ar_country_code
+#: model:ir.model.fields,help:l10n_ar_base.field_res_users__l10n_ar_country_code
+msgid "Technical field use it in view attrs to show or not localization fields"
 msgstr ""
 
 #. module: l10n_ar_base
@@ -319,10 +270,5 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_ar_base.view_company_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar_base.view_partner_form
 msgid "Type"
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:ir.model.fields,field_description:l10n_ar_base.field_res_config_settings__l10n_ar_unique_id_numbers
-msgid "Use unique Identification Numbers"
 msgstr ""
 
