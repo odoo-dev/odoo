@@ -24,12 +24,12 @@ class ResPartner(models.Model):
     )
     same_id_number_partner = fields.Html(
         string='Partner with same Identification Number',
-        compute='_compute_same_same_id_number_partner',
+        compute='_compute_same_id_number_partner',
         store=False,
     )
 
     @api.depends('l10n_ar_id_number', 'l10n_ar_identification_type_id')
-    def _compute_same_same_id_number_partner(self):
+    def _compute_same_id_number_partner(self):
         for partner in self:
             partner_id = partner.id
             partner_id_number = partner.l10n_ar_id_number
