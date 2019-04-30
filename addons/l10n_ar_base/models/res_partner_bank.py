@@ -9,17 +9,12 @@ class ResPartnerBank(models.Model):
 
     _inherit = 'res.partner.bank'
 
-    l10n_ar_cbu = fields.Char(
-        'CBU',
-        help="Argentine Banking Unique Code",
-    )
-
-    @api.constrains('l10n_ar_cbu')
+    @api.constrains('acc_number')
     def check_cbu(self):
         for rec in self:
-            if rec.l10n_ar_cbu and not rec.is_valid_cbu():
+            if rec.acc_number and not rec.is_valid_cbu():
                 raise ValidationError(
-                    _('The CBU "%s" is not valid') % rec.l10n_ar_cbu)
+                    _('The CBU "%s" is not valid') % rec.acc_number)
 
     @api.multi
     def is_valid_cbu(self):
@@ -29,7 +24,7 @@ class ResPartnerBank(models.Model):
         # taking into account what was commented here
         # https://github.com/odoo/odoo/pull/16811
         self.ensure_one()
-        cbu = self.l10n_ar_cbu
+        cbu = self.acc_number
         if type(cbu) == int:
             cbu = "%022d" % cbu
         cbu = cbu.strip()

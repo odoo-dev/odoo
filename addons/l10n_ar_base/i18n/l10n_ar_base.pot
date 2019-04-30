@@ -47,18 +47,8 @@ msgid "Afip Code"
 msgstr ""
 
 #. module: l10n_ar_base
-#: model:ir.model.fields,help:l10n_ar_base.field_res_partner_bank__l10n_ar_cbu
-msgid "Argentine Banking Unique Code"
-msgstr ""
-
-#. module: l10n_ar_base
 #: model:ir.model,name:l10n_ar_base.model_res_partner_bank
 msgid "Bank Accounts"
-msgstr ""
-
-#. module: l10n_ar_base
-#: model:ir.model.fields,field_description:l10n_ar_base.field_res_partner_bank__l10n_ar_cbu
-msgid "CBU"
 msgstr ""
 
 #. module: l10n_ar_base
