@@ -30,10 +30,13 @@ class ResPartner(models.Model):
 
     @api.depends('l10n_ar_id_number', 'l10n_ar_identification_type_id')
     def _compute_same_id_number_partner(self):
+        cuit_id_type = self.env.ref('l10n_ar_base.dt_CUIT')
         for partner in self:
             partner_id = partner.id
             partner_id_number = partner.l10n_ar_id_number
             partner_id_type = partner.l10n_ar_identification_type_id
+            if partner_id_type != cuit_id_type:
+                continue
             if isinstance(partner_id, models.NewId):
                 # deal with onchange(), which is always called on a single
                 # record
