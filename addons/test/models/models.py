@@ -64,23 +64,28 @@ class test(models.Model):
             ]
         })
         self.recompute()
+        if hasattr(self, 'towrite_flush'):
+            self.towrite_flush()
         return time.time()-t
 
     def testme3(self):
         t = time.time()
-        main_id = self.create({
+        main = self.create({
             'name': 'bla',
             'line_ids': [
                 (0,0, {'name': 'abc'}),
                 (0,0, {'name': 'def'}),
             ]
         })
-        main.intx2 = 4
+        main.int1 = 5
+        main.intx2 = 8
         self.env['test.line'].create(
-            {'name': 'ghi', 'test_id': main_id.id}
+            {'name': 'ghi', 'test_id': main.id}
         )
         self.env['test.line'].search([('intx2', '=', 3)])
         self.recompute()
+        if hasattr(self, 'towrite_flush'):
+            self.towrite_flush()
         return time.time()-t
 
     def test(self):
@@ -92,19 +97,21 @@ class test(models.Model):
         main = self.create({
             'name': 'main',
             'line_ids': [
+                (0,0, {'name': 'abc'}),
                 (0,0, {'name': 'def'}),
                 (0,0, {'name': 'ghi'}),
             ]
         })
+        second = self.create({
+            'name': 'second'
+        })
+        main.int1 = 10
 
-
-        log(main)
         line  = main.line_ids[1]
+        line.test_id = second
 
-        line.name2 = 'new line name'
         log(main)
-        main.name='aaa'
-        log(main)
+        log(second)
 
         crash_here_to_rollback
 

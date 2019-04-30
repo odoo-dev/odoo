@@ -1009,43 +1009,9 @@ class Field(MetaField('DummyField', (object,), {})):
 
         return self.convert_to_record(value, record)
 
-    def __set__(self, record, value):
-        """ set the value of field ``self`` on ``record`` """
-        record.ensure_one()
-        env = record.env
-
-
-        # if value did not change; do nothing
-        value = self.convert_to_cache(value, record)
-        if env.cache.contains(record, self) and (env.cache.get(record, self) == value):
-            return
-
-        # for chane of relational fields, you have to check dependencies before and after the change
-        if self.relational:
-            # remove from old
-            record.modified([self.name])
-            for invf in record._field_inverses[self]:
-                for rec in record[self.name]:
-                    env.cache.remove(rec, invf)
-
-        env.cache.set(record, self, value)
-        env.remove_todo(self, record)
-        if self.inverse:
-            self.determine_inverse(record)
-            env.remove_todo(self, record)
-
-        toflush = False
-        for invf in record._field_inverses[self]:
-            toflush = toflush or not invf._update(record[self.name], record)
-
-        record.modified([self.name])
-
-        if record.id and self.store:
-            write_value = self.convert_to_write(self.convert_to_record(value, record), record)
-            env.all.towrite[self][write_value].add(record.id)
-            if toflush:
-                record.towrite_flush([self])
-
+    def __set__(self, records, value):
+        """ set the value of field ``self`` on ``records`` """
+        records.write({self.name: value})
 
 
     ############################################################################
@@ -1069,6 +1035,9 @@ class Field(MetaField('DummyField', (object,), {})):
         # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
             records.env.remove_todo(field, records)
+
+    def _remove(self, records, value):
+        pass
 
 
     def determine_inverse(self, records):
@@ -2156,7 +2125,6 @@ class _RelationalMulti(_Relational):
     _slots = {
         'context_dependent': True,      # depends on context (active_test)
     }
-
     def _update(self, records, value):
         """ Update the cached value of ``self`` for ``records`` with ``value``, return True if everything is in cache. """
         if not isinstance(records, BaseModel):

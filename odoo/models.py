@@ -3266,137 +3266,165 @@ Fields:
         if not self:
             return True
 
-        self._check_concurrency()
         self.check_access_rights('write')
+        self.check_field_access_rights('write', vals.keys())
+        env = self.env
 
-        bad_names = {'id', 'parent_path'}
-        if self._log_access:
-            # the superuser can set log_access fields while loading registry
-            if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
-                bad_names.update(LOG_ACCESS_COLUMNS)
+        for fname, value in vals.items():
+            field = self._fields.get(fname)
+            for record in self:
+                value = field.convert_to_cache(value, record)
+
+                # nothing to do, the record already has the newest value
+                if env.cache.contains(record, field) and (env.cache.get(record, field) == value):
+                    continue
+
+                # when updating a relational field, updates it's inverse fields, as well as those reelying on it's old value
+                if field.relational:
+                    record.modified([field.name])
+                    for invf in record._field_inverses[field]:
+                        for rec in record[field.name]:
+                            env.cache.remove(rec, invf)
+
+                env.cache.set(record, field, value)
+                record.modified([fname])
+                env.remove_todo(field, record)
+
+                if field.inverse:
+                    field.determine_inverse(record)
+                    env.remove_todo(field, record)
+
+                toflush = False
+                for invf in record._field_inverses[field]:
+                    toflush = toflush or not invf._update(record[field.name], record)
+
+                if record.id and field.store:
+                    write_value = field.convert_to_write(field.convert_to_record(value, record), record)
+
+                    # FP NOTE: we could simplify and keep the one in cache instead
+                    env.all.towrite[field][record.id] = write_value
+                    if toflush:
+                        record.towrite_flush([field])
+
+        self._validate_fields(vals.keys())
+
+
+
+
 
         # distribute fields into sets for various purposes
-        store_vals = {}
-        inverse_vals = {}
-        inherited_vals = defaultdict(dict)      # {modelname: {fieldname: value}}
-        unknown_names = []
-        inverse_fields = []
-        protected_fields = []
-        for key, val in vals.items():
-            if key in bad_names:
-                continue
-            field = self._fields.get(key)
-            if not field:
-                unknown_names.append(key)
-                continue
-            if field.store:
-                store_vals[key] = val
-            if field.inherited:
-                inherited_vals[field.related_field.model_name][key] = val
-            elif field.inverse:
-                inverse_vals[key] = val
-                inverse_fields.append(field)
-                protected_fields.extend(self._field_computed.get(field, [field]))
+        # store_vals = {}
+        # inverse_vals = {}
+        # inherited_vals = defaultdict(dict)      # {modelname: {fieldname: value}}
+        # inverse_fields = []
+        # protected_fields = []
+        # for key, val in vals.items():
+        #     field = self._fields.get(key)
+        #     if field.store:
+        #         store_vals[key] = val
+        #     if field.inherited:
+        #         inherited_vals[field.related_field.model_name][key] = val
+        #     elif field.inverse:
+        #         inverse_vals[key] = val
+        #         inverse_fields.append(field)
+        #         protected_fields.extend(self._field_computed.get(field, [field]))
 
-        if unknown_names:
-            _logger.warning("%s.write() with unknown fields: %s",
-                            self._name, ', '.join(sorted(unknown_names)))
-
-        # clear cache of inverse fields
-        for fname, value in store_vals.items():
-            field = self._fields[fname]
-            if field.relational:
-                for invf in self._field_inverses[field]:
-                    for rec in self.mapped(fname):
-                        if rec:
-                            self.env.cache.remove(rec, invf)
+        # # clear cache of inverse fields
+        # for fname, value in store_vals.items():
+        #     field = self._fields[fname]
+        #     if field.relational:
+        #         for invf in self._field_inverses[field]:
+        #             for rec in self.mapped(fname):
+        #                 if rec:
+        #                     self.env.cache.remove(rec, invf)
 
 
-        with self.env.protecting(protected_fields, self):
-            # write stored fields with (low-level) method _write
-            if store_vals or inverse_vals or inherited_vals:
-                # if log_access is enabled, this updates 'write_date' and
-                # 'write_uid' and check access rules, even when old_vals is
-                # empty
-                self._write(store_vals)
+        # with self.env.protecting(protected_fields, self):
+        #     # write stored fields with (low-level) method _write
+        #     if store_vals or inverse_vals or inherited_vals:
+        #         # if log_access is enabled, this updates 'write_date' and
+        #         # 'write_uid' and check access rules, even when old_vals is
+        #         # empty
+        #         self._write(store_vals)
 
-            # update cache
-            for fname, value in store_vals.items():
-                field = self._fields[fname]
-                for record in self:
-                    val = field.convert_to_cache(value, record)
-                    self.env.cache.set(record, field, val)
-                    self.env.remove_todo(field, record)
+        #     # update cache
+        #     for fname, value in store_vals.items():
+        #         field = self._fields[fname]
+        #         for record in self:
+        #             val = field.convert_to_cache(value, record)
+        #             self.env.cache.set(record, field, val)
+        #             self.env.remove_todo(field, record)
 
-                # remove inverse fields from cache
-                if field.relational:
-                    for invf in self._field_inverses[field]:
-                        for rec in self.mapped(fname):
-                            if rec:
-                                self.env.cache.remove(rec, invf)
-
-
-            # mark fields to recompute; do this before setting other fields, because
-            # the latter can require the value of computed fields, e.g., a one2many
-            # checking constraints on records
-            self.modified(vals, vals)
-            if self._log_access:
-                self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
+        #         # remove inverse fields from cache
+        #         if field.relational:
+        #             for invf in self._field_inverses[field]:
+        #                 for rec in self.mapped(fname):
+        #                     if rec:
+        #                         self.env.cache.remove(rec, invf)
 
 
-            # update parent records (after possibly updating parent fields)
-            cr = self.env.cr
-            for model_name, parent_vals in inherited_vals.items():
-                parent_name = self._inherits[model_name]
-                # optimization of self.mapped(parent_name)
-                parent_ids = set()
-                query = "SELECT %s FROM %s WHERE id IN %%s" % (parent_name, self._table)
-                for sub_ids in cr.split_for_in_conditions(self.ids):
-                    cr.execute(query, [sub_ids])
-                    parent_ids.update(row[0] for row in cr.fetchall())
+        #     # mark fields to recompute; do this before setting other fields, because
+        #     # the latter can require the value of computed fields, e.g., a one2many
+        #     # checking constraints on records
+        #     self.modified(vals, vals)
+        #     if self._log_access:
+        #         self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
 
-                try:
-                    self.env[model_name].browse(parent_ids).write(parent_vals)
-                except AccessError as e:
-                    description = self.env['ir.model']._get(self._name).name
-                    raise AccessError(
-                        _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
-                            'previous_message': e.args[0],
-                            'document_kind': description,
-                            'document_model': self._name,
-                        }
-                    )
 
-            if inverse_vals:
-                self.check_field_access_rights('write', list(inverse_vals))
+        #     # FP Note: can we remove that and let related inverse fields do the job?
+        #     # update parent records (after possibly updating parent fields)
+        #     cr = self.env.cr
+        #     for model_name, parent_vals in inherited_vals.items():
+        #         parent_name = self._inherits[model_name]
+        #         # optimization of self.mapped(parent_name)
+        #         parent_ids = set()
+        #         query = "SELECT %s FROM %s WHERE id IN %%s" % (parent_name, self._table)
+        #         for sub_ids in cr.split_for_in_conditions(self.ids):
+        #             cr.execute(query, [sub_ids])
+        #             parent_ids.update(row[0] for row in cr.fetchall())
 
-                self.modified(set(inverse_vals) - set(store_vals))
+        #         try:
+        #             self.env[model_name].browse(parent_ids).write(parent_vals)
+        #         except AccessError as e:
+        #             description = self.env['ir.model']._get(self._name).name
+        #             raise AccessError(
+        #                 _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
+        #                     'previous_message': e.args[0],
+        #                     'document_kind': description,
+        #                     'document_model': self._name,
+        #                 }
+        #             )
 
-                # group fields by inverse method (to call it once), and order
-                # groups by dependence (in case they depend on each other)
-                field_groups = sorted(
-                    (fields for _inv, fields in groupby(inverse_fields, attrgetter('inverse'))),
-                    key=lambda fields: min(map(self.pool.field_sequence, fields)),
-                )
-                for fields in field_groups:
-                    # If a field is not stored, its inverse method will probably
-                    # write on its dependencies, which will invalidate the field
-                    # on all records. We therefore inverse the field one record
-                    # at a time.
-                    batches = [self] if all(f.store for f in fields) else list(self)
-                    # put the values of fields in cache, and inverse them
-                    inv_vals = {f.name: inverse_vals[f.name] for f in fields}
-                    for records in batches:
-                        for record in records:
-                            record._cache.update(
-                                record._convert_to_cache(inv_vals, update=True)
-                            )
-                        fields[0].determine_inverse(records)
+        #     if inverse_vals:
+        #         self.check_field_access_rights('write', list(inverse_vals))
 
-                self.modified(set(inverse_vals) - set(store_vals))
+        #         self.modified(set(inverse_vals) - set(store_vals))
 
-                # check Python constraints for inversed fields
-                self._validate_fields(set(inverse_vals) - set(store_vals))
+        #         # group fields by inverse method (to call it once), and order
+        #         # groups by dependence (in case they depend on each other)
+        #         field_groups = sorted(
+        #             (fields for _inv, fields in groupby(inverse_fields, attrgetter('inverse'))),
+        #             key=lambda fields: min(map(self.pool.field_sequence, fields)),
+        #         )
+        #         for fields in field_groups:
+        #             # If a field is not stored, its inverse method will probably
+        #             # write on its dependencies, which will invalidate the field
+        #             # on all records. We therefore inverse the field one record
+        #             # at a time.
+        #             batches = [self] if all(f.store for f in fields) else list(self)
+        #             # put the values of fields in cache, and inverse them
+        #             inv_vals = {f.name: inverse_vals[f.name] for f in fields}
+        #             for records in batches:
+        #                 for record in records:
+        #                     record._cache.update(
+        #                         record._convert_to_cache(inv_vals, update=True)
+        #                     )
+        #                 fields[0].determine_inverse(records)
+
+        #         self.modified(set(inverse_vals) - set(store_vals))
+
+        #         # check Python constraints for inversed fields
+        #         self._validate_fields(set(inverse_vals) - set(store_vals))
 
         return True
 
@@ -3405,7 +3433,9 @@ Fields:
         # low-level implementation of write()
         if not self:
             return True
-        self.check_field_access_rights('write', list(vals))
+
+        self._check_concurrency()
+        # self.check_field_access_rights('write', list(vals))
 
         cr = self._cr
 
@@ -3419,7 +3449,13 @@ Fields:
         single_lang = len(self.env['res.lang'].get_installed()) <= 1
         has_translation = self.env.lang and self.env.lang != 'en_US'
 
+        bad_names = {'id', 'parent_path'}
+        if self._log_access:
+            if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
+                bad_names.update(LOG_ACCESS_COLUMNS)
+
         for name, val in vals.items():
+            if name in bad_names: continue
             field = self._fields[name]
             assert field.store
 
@@ -4966,21 +5002,33 @@ Fields:
     @api.model
     def towrite_flush(self, fields=None):
         # write in chunks of similar ids / values; could be optimized (e.g. multi-column write?)
-        todo = {}
-        while self.env.all.towrite:
-            field, values = self.env.all.towrite.popitem()
-            if fields and (field not in fields): continue
-            for value, ids in values.items():
-                sids = tuple(sorted(ids))
-                todo.setdefault((field.model_name, sids), {})
-                todo[(field.model_name, sids)][field.name] = value
 
-        for (model, ids), data in todo.items():
+        # invert {id: val} into {val: ids}, to group similar records to write together
+        todo = {}
+        for field, idvals in self.env.all.towrite.items():
+            if fields and (field not in fields): continue
+            todo[field] = defaultdict(set)
+            {todo[field][v].add(k) for k, v in idvals.items()}
+
+        # group values having the same ids to write them together
+        todo2 = {}
+        while todo:
+            field, values = todo.popitem()
+            for value, ids in values.items():
+                # convert to a sorted tuple to be hashable
+                ids = tuple(ids)
+                todo2.setdefault((field.model_name, ids), {})
+                todo2[(field.model_name, ids)][field.name] = value
+
+        self.env.all.towrite.clear()
+
+        for (model, ids), data in todo2.items():
             recs = self.env[model].browse(ids)
             try:
                 recs._write(data)
             except MissingError:
                 recs.exists()._write(data)
+
 
 
 

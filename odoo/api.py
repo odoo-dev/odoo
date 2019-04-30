@@ -1027,7 +1027,7 @@ class Environments(object):
         self.todo = {}                  # recomputations {field: [records]}  FP NOTE: should be renamed to "tocompute"
         self.mode = False               # flag for draft/onchange
         self.recompute = True
-        self.towrite = defaultdict(lambda : defaultdict(set))
+        self.towrite = defaultdict(dict)  # {field: {id: value}}
 
     def add(self, env):
         """ Add the environment ``env``. """
