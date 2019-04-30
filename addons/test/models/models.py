@@ -18,19 +18,6 @@ class test(models.Model):
 
     line_sum = fields.Integer('Sum Currency', compute='_line_sum', store=True)
 
-    def pcache(self):
-        print('------ Cache ----')
-        for dd in self.env.cache._data.values():
-            for field, ids in dd.items():
-                for rid, value in ids.items():
-                    print(field.model_name, rid,':', field.name,'=', value)
-        print('')
-        print('----- Todo -----')
-        for field in self.env.all.todo:
-            print(field, self.env.all.todo[field])
-        print('')
-
-
     @api.depends('line_ids.intx2')
     def _line_sum(self):
         for record in self:
@@ -70,6 +57,7 @@ class test(models.Model):
 
     def testme3(self):
         t = time.time()
+        print('* Create with two lines')
         main = self.create({
             'name': 'bla',
             'line_ids': [
@@ -77,15 +65,20 @@ class test(models.Model):
                 (0,0, {'name': 'def'}),
             ]
         })
+        print('* main.int1 = 5')
         main.int1 = 5
+        print('* main.intx2 = 8')
         main.intx2 = 8
+        print('* create_line')
         self.env['test.line'].create(
             {'name': 'ghi', 'test_id': main.id}
         )
-        self.env['test.line'].search([('intx2', '=', 3)])
+        print('* search intx2 line')
+        print('* end')
         self.recompute()
         if hasattr(self, 'towrite_flush'):
             self.towrite_flush()
+        self.env['test.line'].search([('intx2', '=', 3)])
         return time.time()-t
 
     def test(self):
