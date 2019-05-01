@@ -12,6 +12,7 @@ class test(models.Model):
 
     name = fields.Char()
     line_ids = fields.One2many('test.line', 'test_id')
+    booltest = fields.Boolean('Is False')    # test that postgresql values for boolean is False
 
     int1 = fields.Integer('User', default=lambda x: 1)
     intx2 = fields.Integer('User', compute="_get_intx2", inverse='_set_intx2', store=True)

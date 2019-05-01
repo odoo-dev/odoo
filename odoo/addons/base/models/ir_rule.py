@@ -172,8 +172,8 @@ class IrRule(models.Model):
         return res
 
     @api.multi
-    def _write(self, vals):
-        res = super(IrRule, self)._write(vals)
+    def write(self, vals):
+        res = super(IrRule, self).write(vals)
         self.clear_caches()
         return res
 

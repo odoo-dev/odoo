@@ -80,7 +80,6 @@ class TestACL(TransactionCase):
 
         # Add the restricted group, and check that it works again
         self.erp_system_group.users += self.demo_user
-
         has_group_system = self.demo_user.has_group(GROUP_SYSTEM)
         self.assertTrue(has_group_system, "`demo` user should now belong to the restricted group")
         self.assert_(partner.read(['bank_ids']))

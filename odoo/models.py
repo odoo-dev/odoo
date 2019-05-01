@@ -2798,9 +2798,6 @@ Fields:
         :raise AccessError: if user has no read rights on some of the given
                 records
         """
-        # check access rights
-        # FP TODO: we should move that to _read as it's called by __get__, but check if not slower first
-        self.check_access_rights('read')
         fields = self.check_field_access_rights('read', fields)
 
         self.recompute_fields(fields)
@@ -2848,7 +2845,6 @@ Fields:
                 # discard fields that must be recomputed
                 if not (f.compute and self.env.field_todo(f))
             )
-        self.check_access_rights('read')
         fields = self.check_field_access_rights('read', [f.name for f in fs])
         self._read(fields)
 
@@ -2865,6 +2861,7 @@ Fields:
         """
         if not self:
             return
+        self.check_access_rights('read')
 
         field_names = []
         inherited_field_names = []
@@ -3176,9 +3173,6 @@ Fields:
             # changes made in the database, like cascading delete!
             self.invalidate_cache()
 
-        # recompute new-style fields
-        self.recompute()
-
         # auditing: deletions are infrequent and leave no trace in the database
         _unlink.info('User #%s deleted %s records with IDs: %r', self._uid, self._name, self.ids)
 
@@ -3309,125 +3303,6 @@ Fields:
         self._validate_fields(vals.keys())
 
 
-
-
-
-        # distribute fields into sets for various purposes
-        # store_vals = {}
-        # inverse_vals = {}
-        # inherited_vals = defaultdict(dict)      # {modelname: {fieldname: value}}
-        # inverse_fields = []
-        # protected_fields = []
-        # for key, val in vals.items():
-        #     field = self._fields.get(key)
-        #     if field.store:
-        #         store_vals[key] = val
-        #     if field.inherited:
-        #         inherited_vals[field.related_field.model_name][key] = val
-        #     elif field.inverse:
-        #         inverse_vals[key] = val
-        #         inverse_fields.append(field)
-        #         protected_fields.extend(self._field_computed.get(field, [field]))
-
-        # # clear cache of inverse fields
-        # for fname, value in store_vals.items():
-        #     field = self._fields[fname]
-        #     if field.relational:
-        #         for invf in self._field_inverses[field]:
-        #             for rec in self.mapped(fname):
-        #                 if rec:
-        #                     self.env.cache.remove(rec, invf)
-
-
-        # with self.env.protecting(protected_fields, self):
-        #     # write stored fields with (low-level) method _write
-        #     if store_vals or inverse_vals or inherited_vals:
-        #         # if log_access is enabled, this updates 'write_date' and
-        #         # 'write_uid' and check access rules, even when old_vals is
-        #         # empty
-        #         self._write(store_vals)
-
-        #     # update cache
-        #     for fname, value in store_vals.items():
-        #         field = self._fields[fname]
-        #         for record in self:
-        #             val = field.convert_to_cache(value, record)
-        #             self.env.cache.set(record, field, val)
-        #             self.env.remove_todo(field, record)
-
-        #         # remove inverse fields from cache
-        #         if field.relational:
-        #             for invf in self._field_inverses[field]:
-        #                 for rec in self.mapped(fname):
-        #                     if rec:
-        #                         self.env.cache.remove(rec, invf)
-
-
-        #     # mark fields to recompute; do this before setting other fields, because
-        #     # the latter can require the value of computed fields, e.g., a one2many
-        #     # checking constraints on records
-        #     self.modified(vals, vals)
-        #     if self._log_access:
-        #         self.modified(['write_uid', 'write_date'],['write_uid', 'write_date'])
-
-
-        #     # FP Note: can we remove that and let related inverse fields do the job?
-        #     # update parent records (after possibly updating parent fields)
-        #     cr = self.env.cr
-        #     for model_name, parent_vals in inherited_vals.items():
-        #         parent_name = self._inherits[model_name]
-        #         # optimization of self.mapped(parent_name)
-        #         parent_ids = set()
-        #         query = "SELECT %s FROM %s WHERE id IN %%s" % (parent_name, self._table)
-        #         for sub_ids in cr.split_for_in_conditions(self.ids):
-        #             cr.execute(query, [sub_ids])
-        #             parent_ids.update(row[0] for row in cr.fetchall())
-
-        #         try:
-        #             self.env[model_name].browse(parent_ids).write(parent_vals)
-        #         except AccessError as e:
-        #             description = self.env['ir.model']._get(self._name).name
-        #             raise AccessError(
-        #                 _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
-        #                     'previous_message': e.args[0],
-        #                     'document_kind': description,
-        #                     'document_model': self._name,
-        #                 }
-        #             )
-
-        #     if inverse_vals:
-        #         self.check_field_access_rights('write', list(inverse_vals))
-
-        #         self.modified(set(inverse_vals) - set(store_vals))
-
-        #         # group fields by inverse method (to call it once), and order
-        #         # groups by dependence (in case they depend on each other)
-        #         field_groups = sorted(
-        #             (fields for _inv, fields in groupby(inverse_fields, attrgetter('inverse'))),
-        #             key=lambda fields: min(map(self.pool.field_sequence, fields)),
-        #         )
-        #         for fields in field_groups:
-        #             # If a field is not stored, its inverse method will probably
-        #             # write on its dependencies, which will invalidate the field
-        #             # on all records. We therefore inverse the field one record
-        #             # at a time.
-        #             batches = [self] if all(f.store for f in fields) else list(self)
-        #             # put the values of fields in cache, and inverse them
-        #             inv_vals = {f.name: inverse_vals[f.name] for f in fields}
-        #             for records in batches:
-        #                 for record in records:
-        #                     record._cache.update(
-        #                         record._convert_to_cache(inv_vals, update=True)
-        #                     )
-        #                 fields[0].determine_inverse(records)
-
-        #         self.modified(set(inverse_vals) - set(store_vals))
-
-        #         # check Python constraints for inversed fields
-        #         self._validate_fields(set(inverse_vals) - set(store_vals))
-
-        return True
-
     @api.multi
     def _write(self, vals):
         # low-level implementation of write()
@@ -3435,7 +3310,6 @@ Fields:
             return True
 
         self._check_concurrency()
-        # self.check_field_access_rights('write', list(vals))
 
         cr = self._cr
 
@@ -3525,7 +3399,6 @@ Fields:
         if parent_records:
             parent_records._parent_store_update()
 
-        # self.recompute()
         return True
 
     @api.model_create_multi
@@ -3666,13 +3539,6 @@ Fields:
         assert data_list
         cr = self.env.cr
         quote = '"{}"'.format
-
-        # set boolean fields to False by default (avoid NULL in database)
-        # FP Note: what about removing this code and delegating that to postgresql, default value for booleans
-        for name, field in self._fields.items():
-            if field.type == 'boolean' and field.store:
-                for data in data_list:
-                    data['stored'].setdefault(name, False)
 
         # insert rows
         ids = []                        # ids of created records
@@ -4172,15 +4038,10 @@ Fields:
             if not isinstance(dom_part[0], str): continue
             obj = self
             for fname in dom_part[0].split('.'):
-                obj.recompute_fields([fname])
                 field = obj._fields[fname]
+                self.towrite_flush([field])
                 if field.comodel_name:
                     obj = self.env[field.comodel_name]
-
-        # flush values to write to better read them
-        # FP NOTE: we should flush by fields, that will improve a lot the performance
-        self.towrite_flush()
-
 
         if expression.is_false(self, args):
             # optimization: no need to query, as no record satisfies the domain
@@ -5001,7 +4862,11 @@ Fields:
 
     @api.model
     def towrite_flush(self, fields=None):
-        # write in chunks of similar ids / values; could be optimized (e.g. multi-column write?)
+        if fields is None:
+            self.recompute()
+        else:
+            for field in fields:
+                self.env[field.model_name].recompute_fields([field.name])
 
         # invert {id: val} into {val: ids}, to group similar records to write together
         todo = {}
@@ -5028,9 +4893,6 @@ Fields:
                 recs._write(data)
             except MissingError:
                 recs.exists()._write(data)
-
-
-
 
     #
     # New records - represent records that do not exist in the database yet;
@@ -5417,7 +5279,7 @@ Fields:
         """
         return self.env.check_todo(field, self)
 
-    # FP TODO: merge this method, with recompute bellow
+    # FP TODO: merge this method, with recompute bellow, with field as an optional parameter
     @api.model
     def recompute_fields(self, fields):
         for fname in fields:
@@ -5434,7 +5296,6 @@ Fields:
         """ Recompute stored function fields. The fields and records to
             recompute have been determined by method :meth:`modified`.
         """
-        count = 0
         done = {}
         while self.env.has_todo():
             field = self.env.get_todo()
@@ -5444,54 +5305,7 @@ Fields:
                 field.compute_value(recs)
             except MissingError:
                 field.compute_value(recs.exists())
-
             self.env.remove_todo(field, recs)
-
-            # Useful for debug purpose of recursion loops
-            count+= 1
-            if count > 100:
-                print('Cycling computed fields', recs, field)
-        self.towrite_flush()
-
-    # @api.multi
-    # def _recompute(self, field):
-    #     # determine the fields to recompute
-    #     fs = self.env[field.model_name]._field_computed[field]
-    #     ns = [(f.name, f) for f in fs if f.store]
-
-    #     # evaluate fields, and group record ids by update
-    #     updates = defaultdict(set)
-    #     cache = self.env.cache
-    #     for rec in self:
-    #         # do not write if the value does not change
-    #         vals = {}
-    #         for n,f in ns:
-    #             if cache.contains(rec, f):
-    #                 old = cache.get(rec, f)
-    #                 rec[n]
-    #                 new = cache.get(rec, f)
-    #                 if new!=old:
-    #                     vals[n] = new
-    #             else:
-    #                 vals[n] = rec[n]
-
-    #     # FP TODO: reintroduce the write multi, but avoid making it uphere
-    #     #     vals = rec._convert_to_write(vals)
-    #     #     updates[frozendict(vals)].add(rec.id)
-    #     # # update records in batch when possible
-
-    #     # with self.env.norecompute():
-    #     #     for vals, ids in updates.items():
-    #     #         target = self.browse([x for x in ids if x])
-    #     #         try:
-    #     #             target._write(dict(vals))
-    #     #         except MissingError:
-    #     #             # retry without missing records
-    #     #             target.exists()._write(dict(vals))
-
-    #     # mark computed fields as done
-    #     for f in fs:
-    #         self.env.remove_todo(f, self)
 
     #
     # Generic onchange method
@@ -5688,7 +5502,6 @@ Fields:
                 if field.type == 'many2one' and field.delegate and not value:
                     # do not nullify all fields of parent record for new records
                     continue
-
                 record[name] = value
 
         result = {'warnings': OrderedSet()}
@@ -5715,7 +5528,7 @@ Fields:
 
         # determine values that have changed by comparing snapshots
 
-        # FP TODO, do we need this?
+        # FP TO CHECK, do we need this?
         # self.invalidate_cache()
         result['value'] = snapshot1.diff(snapshot0)
 

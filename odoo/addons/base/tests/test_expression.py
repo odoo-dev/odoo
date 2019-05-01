@@ -719,7 +719,6 @@ class TestAutoJoin(TransactionCase):
         b_aa = bank_obj.create({'acc_number': '123', 'acc_type': 'bank', 'partner_id': p_aa.id})
         b_ab = bank_obj.create({'acc_number': '456', 'acc_type': 'bank', 'partner_id': p_ab.id})
         b_ba = bank_obj.create({'acc_number': '789', 'acc_type': 'bank', 'partner_id': p_ba.id})
-        partner_obj.recompute()
 
         # --------------------------------------------------
         # Test1: basics about the attribute

@@ -278,7 +278,7 @@ class TestAPI(common.TransactionCase):
         partner.country_id, partner.child_ids
         data = partner._convert_to_write(partner._cache)
         self.assertEqual(data['country_id'], partner.country_id.id)
-        self.assertEqual(data['child_ids'], ((6, 0, tuple(partner.child_ids.ids)),))
+        self.assertEqual(data['child_ids'], [(6, 0, partner.child_ids.ids)])
 
     @mute_logger('odoo.models')
     def test_60_prefetch(self):
@@ -287,7 +287,7 @@ class TestAPI(common.TransactionCase):
         self.assertTrue(len(partners) > 1)
 
         # all the records in partners are ready for prefetching
-        self.assertItemsEqual(partners.ids, partners._prefetch)
+        self.assertItemsEqual(partners.ids, partners._prefetch['res.partner'])
 
         # reading ONE partner should fetch them ALL
         for partner in partners:
@@ -303,7 +303,7 @@ class TestAPI(common.TransactionCase):
                        for partner in partners
                        for sid in partner._cache['state_id']}
         self.assertTrue(len(state_ids) > 1)
-        self.assertItemsEqual(state_ids, partners[0].state_id._prefetch)
+        self.assertItemsEqual(state_ids, partners._prefetch['res.country.state'])
 
         # reading ONE partner country should fetch ALL partners' countries
         for partner in partners:
@@ -329,8 +329,8 @@ class TestAPI(common.TransactionCase):
         # the recordset operations below should create new prefetch objects
         diff_prefetch(partners, partners.browse())
         diff_prefetch(partners, partners.browse(partners.ids))
-        same_prefetch(partners, partners[0])
-        same_prefetch(partners, partners[:10])
+        diff_prefetch(partners, partners[0])
+        diff_prefetch(partners, partners[:10])
 
         # the recordset operations below should pass the prefetch object
         same_prefetch(partners, partners.sudo(self.env.ref('base.user_demo')))

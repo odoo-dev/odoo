@@ -168,7 +168,6 @@ class Partner(models.Model):
         partners = self.search([('membership_state', 'in', ['invoiced', 'paid'])])
         # mark the field to be recomputed, and recompute it
         partners._recompute_todo(self._fields['membership_state'])
-        self.recompute()
 
     @api.multi
     def create_membership_invoice(self, product_id=None, datas=None):

@@ -94,7 +94,6 @@ class TestBase(TransactionCase):
         for name, active in DATA:
             partner_id, dummy = res_partner.with_context(default_active=active).name_create(name)
         partners = res_partner.name_search('Raoul')
-
         self.assertEqual(len(partners), 2, 'Incorrect search number result for name_search')
         partners = res_partner.name_search('Raoul', limit=1)
         self.assertEqual(len(partners), 1, 'Incorrect search number result for name_search with a limit')

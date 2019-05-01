@@ -431,7 +431,6 @@ class AccountMove(models.Model):
                     'amount_currency': -acm_line.amount_currency
                 })
             self.reverse_entry_id = reversed_move
-        self.recompute()
         return reversed_move
 
     @api.multi
@@ -580,9 +579,7 @@ class AccountMoveLine(models.Model):
                     reconciled = True
             line.reconciled = reconciled
 
-
-            cur = line.company_id.currency_id
-            line.amount_residual = cur.round(amount * sign)
+            line.amount_residual = line.company_id.currency_id.round(amount * sign)
             line.amount_residual_currency = line.currency_id and line.currency_id.round(amount_residual_currency * sign) or 0.0
 
     @api.depends('debit', 'credit')
@@ -938,8 +935,6 @@ class AccountMoveLine(models.Model):
                 new_rec = part_rec.create(after_rec_dict)
                 if cash_basis:
                     new_rec.create_tax_cash_basis_entry(cash_basis_percentage_before_rec)
-        self.recompute()
-
         return debit_moves+credit_moves
 
 
@@ -1689,7 +1684,6 @@ class AccountPartialReconcile(models.Model):
                                     'amount_currency': self.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
                                     'partner_id': line.partner_id.id,
                                 })
-        self.recompute()
         if newly_created_move:
             if move_date > (self.company_id.period_lock_date or date.min) and newly_created_move.date != move_date:
                 # The move date should be the maximum date between payment and invoice (in case

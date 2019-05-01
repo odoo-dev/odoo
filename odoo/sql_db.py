@@ -210,7 +210,6 @@ class Cursor(object):
 
     @check
     def execute(self, query, params=None, log_exceptions=None):
-        global sql_counter
         if params and not isinstance(params, (tuple, list, dict)):
             # psycopg2's TypeError is not clear if you mess up the params
             raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
@@ -218,11 +217,6 @@ class Cursor(object):
         if self.sql_log:
             encoding = psycopg2.extensions.encodings[self.connection.encoding]
             _logger.debug("query: %s", self._obj.mogrify(query, params).decode(encoding, 'replace'))
-
-            # if _logger.isEnabledFor(logging.DEBUG) and sql_counter>64:
-            #     import ipdb
-            #     ipdb.set_trace()
-
         now = time.time()
         try:
             params = params or None
@@ -253,7 +247,6 @@ class Cursor(object):
                 self.sql_into_log.setdefault(res_into.group(1), [0, 0])
                 self.sql_into_log[res_into.group(1)][0] += 1
                 self.sql_into_log[res_into.group(1)][1] += delay
-
         return res
 
     def split_for_in_conditions(self, ids, size=None):

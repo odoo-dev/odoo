@@ -59,7 +59,6 @@ class TestORM(TransactionCase):
 
         # search as unprivileged user
         partners = self.env['res.partner'].sudo(user).search([])
-
         self.assertNotIn(p1, partners, "W should not be visible...")
         self.assertIn(p2, partners, "... but Y should be visible")
 

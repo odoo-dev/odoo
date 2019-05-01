@@ -170,16 +170,15 @@ class Groups(models.Model):
         return super(Groups, self).copy(default)
 
     @api.multi
-    def _write(self, vals):
+    def write(self, vals):
         if 'name' in vals:
             if vals['name'].startswith('-'):
                 raise UserError(_('The name of the group can not start with "-"'))
         # invalidate caches before updating groups, since the recomputation of
         # field 'share' depends on method has_group()
-        result = super(Groups, self)._write(vals)
         self.env['ir.model.access'].call_cache_clearing_methods()
         self.env['res.users'].has_group.clear_cache(self.env['res.users'])
-        return result
+        return super(Groups, self).write(vals)
 
 
 class ResUsersLog(models.Model):
@@ -989,17 +988,17 @@ class UsersImplied(models.Model):
         return super(UsersImplied, self).create(vals_list)
 
     @api.multi
-    def _write(self, values):
-        res = super(UsersImplied, self)._write(values)
+    def write(self, values):
+        res = super(UsersImplied, self).write(values)
         if values.get('groups_id'):
             # add implied groups for all users
             for user in self.with_context({}):
                 if not user.has_group('base.group_user'):
                     vals = {'groups_id': [(5, 0, 0)] + values['groups_id']}
-                    super(UsersImplied, user)._write(vals)
+                    super(UsersImplied, user).write(vals)
                 gs = set(concat(g.trans_implied_ids for g in user.groups_id))
                 vals = {'groups_id': [(4, g.id) for g in gs]}
-                super(UsersImplied, user)._write(vals)
+                super(UsersImplied, user).write(vals)
         return res
 
 #

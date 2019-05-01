@@ -1036,8 +1036,6 @@ class Field(MetaField('DummyField', (object,), {})):
         for field in fields:
             records.env.remove_todo(field, records)
 
-    def _remove(self, records, value):
-        pass
 
 
     def determine_inverse(self, records):
@@ -1058,37 +1056,6 @@ class Field(MetaField('DummyField', (object,), {})):
     #
     # Notification when fields are modified
     #
-
-    # def modified_draft(self, records):
-    #     """ Same as :meth:`modified`, but in draft mode. """
-    #     env = records.env
-
-    #     # invalidate the fields on the records in cache that depend on
-    #     # ``records``, except fields currently being computed
-    #     spec = []
-    #     for field, path in records._field_triggers[self]:
-    #         if not field.compute:
-    #             # Note: do not invalidate non-computed fields. Such fields may
-    #             # require invalidation in general (like *2many fields with
-    #             # domains) but should not be invalidated in this case, because
-    #             # we would simply lose their values during an onchange!
-    #             continue
-
-    #         target = env[field.model_name]
-    #         protected = env.protected(field)
-    #         if path == 'id' and field.model_name == records._name:
-    #             target = records - protected
-    #         elif path and env.in_onchange:
-    #             target = (env.cache.get_records(target, field) - protected).filtered(
-    #                 lambda rec: rec if path == 'id' else rec._mapped_cache(path) & records
-    #             )
-    #         else:
-    #             # FP TODO: remove protected
-    #             target = env.cache.get_records(target, field) - protected
-
-    #         if target:
-    #             spec.append((field, target))
-    #     return spec
 
 
 class Boolean(Field):
@@ -2087,7 +2054,6 @@ class Many2one(_Relational):
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
         prefetch = record.env.cache.get_all_values(record, self)
-        # FP NOTE: would be good to avoid these 3 lines
         prefetch = itertools.chain.from_iterable(filter(lambda x: isinstance(x, tuple) and x, prefetch))
         return record.env.registry[self.comodel_name]._browse(value, record.env, prefetch)
 

@@ -917,6 +917,7 @@ class ModuleDependency(models.Model):
             dep.depend_id = name_mod.get(dep.name)
 
     @api.one
+    @api.depends('depend_id.state')
     def _compute_state(self):
         for module in self:
             module.state = module.depend_id.state or 'unknown'
