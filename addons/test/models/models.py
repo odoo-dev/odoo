@@ -11,6 +11,8 @@ class test(models.Model):
     _log_access = False
 
     name = fields.Char()
+    parent_id = fields.Many2one('test')
+    dname = fields.Char(compute="_get_dname", store=True)
     line_ids = fields.One2many('test.line', 'test_id')
     booltest = fields.Boolean('Is False')    # test that postgresql values for boolean is False
 
@@ -18,6 +20,14 @@ class test(models.Model):
     intx2 = fields.Integer('User', compute="_get_intx2", inverse='_set_intx2', store=True)
 
     line_sum = fields.Integer('Sum Currency', compute='_line_sum', store=True)
+
+    @api.depends('name', 'parent_id.dname')
+    def _get_dname(self):
+        for record in self:
+            if record.parent_id:
+                record.dname = record.name + ' / ' +record.parent_id.dname
+            else:
+                record.dname = record.name
 
     @api.depends('line_ids.intx2')
     def _line_sum(self):
@@ -75,37 +85,35 @@ class test(models.Model):
             {'name': 'ghi', 'test_id': main.id}
         )
         print('* search intx2 line')
+        self.env['test.line'].search([('intx2', '=', 3)])
         print('* end')
         self.recompute()
         if hasattr(self, 'towrite_flush'):
             self.towrite_flush()
-        self.env['test.line'].search([('intx2', '=', 3)])
         return time.time()-t
 
     def test(self):
-        def log(record):
-            print(record.name, record.id, ':', record.int1, record.line_sum)
-            for line in record.line_ids:
-                print('    ', line.name, line.id, ':', line.name2, line.intx2, line.test_id)
-
         main = self.create({
             'name': 'main',
-            'line_ids': [
-                (0,0, {'name': 'abc'}),
-                (0,0, {'name': 'def'}),
-                (0,0, {'name': 'ghi'}),
-            ]
         })
         second = self.create({
-            'name': 'second'
+            'name': 'second',
+            'parent_id': main.id,
         })
-        main.int1 = 10
+        third = self.create({
+            'name': 'third',
+            'parent_id': second.id,
+        })
+        second.parent_id = False
+        main.parent_id = third.id
 
-        line  = main.line_ids[1]
-        line.test_id = second
+        import pudb
+        pudb.set_trace()
 
-        log(main)
-        log(second)
+        self.recompute()
+
+        for x in (main, second, third):
+            print(x.name, ':', x.dname)
 
         crash_here_to_rollback
 

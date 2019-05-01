@@ -434,12 +434,6 @@ actual arch.
         if ('arch' in vals or 'arch_base' in vals) and 'install_filename' not in self._context:
             vals['arch_fs'] = False
 
-        # drop the corresponding view customizations (used for dashboards for example), otherwise
-        # not all users would see the updated views
-        custom_view = self.env['ir.ui.view.custom'].search([('ref_id', 'in', self.ids)])
-        if custom_view:
-            custom_view.unlink()
-
         self.clear_caches()
         return super(View, self).write(self._compute_defaults(vals))
 

@@ -740,6 +740,8 @@ class Field(MetaField('DummyField', (object,), {})):
             if self.store and not field.store:
                 _logger.info("Field %s depends on non-stored field %s", self, field)
             model._field_triggers.add(field, (self, path))
+            if (field is self) and path:
+                self.recursive = True
 
     ############################################################################
     #
@@ -983,7 +985,7 @@ class Field(MetaField('DummyField', (object,), {})):
             # only a single record may be accessed
             record.ensure_one()
             if env.check_todo(self, record):
-                recs = env.field_todo(self)
+                recs = self.recursive and record or env.field_todo(self)
                 self.compute_value(recs)
 
             if not env.cache.contains(record, self):
@@ -995,7 +997,7 @@ class Field(MetaField('DummyField', (object,), {})):
                         record._fetch_field(self)
 
                 elif self.compute:
-                    recs = record._in_cache_without(self)
+                    recs = self.recursive and record or record._in_cache_without(self)
                     self.compute_value(recs)
 
                 else:
@@ -1027,10 +1029,11 @@ class Field(MetaField('DummyField', (object,), {})):
         # for field in fields:
         #     records.env.remove_todo(field, records)
 
-        if isinstance(self.compute, str):
-            getattr(records, self.compute)()
-        else:
-            self.compute(records)
+        with records.env.protecting(fields, records):
+            if isinstance(self.compute, str):
+                getattr(records, self.compute)()
+            else:
+                self.compute(records)
 
         # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
@@ -1040,6 +1043,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """
+        records = records - records.env.protected(self)
         if isinstance(self.inverse, str):
             getattr(records, self.inverse)()
         else:

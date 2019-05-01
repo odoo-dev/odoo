@@ -30,6 +30,7 @@ WARNING_HELP = _('Selecting the "Warning" option will notify user with the messa
 
 
 ADDRESS_FIELDS = ('street', 'street2', 'zip', 'city', 'state_id', 'country_id')
+
 @api.model
 def _lang_get(self):
     return self.env['res.lang'].get_installed()
@@ -521,9 +522,8 @@ class Partner(models.Model):
     @api.multi
     def write(self, vals):
         if vals.get('active') is False:
-            for partner in self:
-                if partner.active and partner.user_ids:
-                    raise ValidationError(_('You cannot archive a contact linked to an internal user.'))
+            if any(self.mapped('user_ids.active')):
+                raise ValidationError(_('You cannot archive a contact linked to an internal user.'))
         # res.partner must only allow to set the company_id of a partner if it
         # is the same as the company of all users that inherit from this partner
         # (this is to allow the code from res_users to write to the partner!) or

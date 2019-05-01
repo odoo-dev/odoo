@@ -3260,8 +3260,6 @@ Fields:
         if not self:
             return True
 
-        self.check_access_rights('write')
-        self.check_field_access_rights('write', vals.keys())
         env = self.env
 
         for fname, value in vals.items():
@@ -3296,8 +3294,8 @@ Fields:
                     write_value = field.convert_to_write(field.convert_to_record(value, record), record)
 
                     # FP NOTE: we could simplify and keep the one in cache instead
-                    # FP TO CHECK: for one2many / many2many, we might concatenate the values instead of overwrite. (imagine 2 write of [(0,0,{})] (or flush before)
-                    env.all.towrite[field][record.id] = write_value
+                    # FP TO CHECK: for one2many / many2many, we might concatenate the values instead of overwrite. (imagine 2 write of [(0,0,{})]
+                    env.all.towrite[record._name][record.id][field.name] = write_value
                     if toflush:
                         record.towrite_flush([field])
 
@@ -3310,6 +3308,8 @@ Fields:
         if not self:
             return True
 
+        self.check_access_rights('write')
+        self.check_field_access_rights('write', vals.keys())
         self._check_concurrency()
 
         cr = self._cr
@@ -4869,31 +4869,27 @@ Fields:
             for field in fields:
                 self.env[field.model_name].recompute_fields([field.name])
 
-        # invert {id: val} into {val: ids}, to group similar records to write together
-        todo = {}
-        for field, idvals in self.env.all.towrite.items():
-            if fields and (field not in fields): continue
-            todo[field] = defaultdict(set)
-            {todo[field][v].add(k) for k, v in idvals.items()}
+        # FP: possible optimization to flush only records having one of 'fields', to test is worth it
+        while self.env.all.towrite:
+            model, idsval = self.env.all.towrite.popitem()
+            while idsval:
+                rid, vals = idsval.popitem()
+                ids = [rid]
+                todel = []
+                for otherid, othervals in idsval.items():
+                    if othervals == vals:
+                        ids.append(otherid)
+                        todel.append(otherid)
+                for otherid in todel:
+                    del idsval[otherid]
 
-        # group values having the same ids to write them together
-        todo2 = {}
-        while todo:
-            field, values = todo.popitem()
-            for value, ids in values.items():
-                # convert to a sorted tuple to be hashable
-                ids = tuple(ids)
-                todo2.setdefault((field.model_name, ids), {})
-                todo2[(field.model_name, ids)][field.name] = value
+                recs = self.env[model].browse(ids)
+                try:
+                    recs._write(vals)
+                except MissingError:
+                    recs.exists()._write(vals)
 
         self.env.all.towrite.clear()
-
-        for (model, ids), data in todo2.items():
-            recs = self.env[model].browse(ids)
-            try:
-                recs._write(data)
-            except MissingError:
-                recs.exists()._write(data)
 
     #
     # New records - represent records that do not exist in the database yet;
