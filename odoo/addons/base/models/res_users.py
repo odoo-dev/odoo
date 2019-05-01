@@ -911,23 +911,13 @@ class GroupsImplied(models.Model):
     trans_implied_ids = fields.Many2many('res.groups', string='Transitively inherits',
         compute='_compute_trans_implied')
 
-    @api.depends('implied_ids')
+    @api.depends('implied_ids.trans_implied_ids')
     def _compute_trans_implied(self):
         # Compute the transitive closure recursively. Note that the performance
         # is good, because the record cache behaves as a memo (the field is
         # never computed twice on a given group.)
         for g in self:
-            a = g
-            result = self.browse()
-            while a:
-                result += a
-                a = a.mapped('implied_ids')
-            g.trans_implied_ids = result
-
-            # if g.implied_ids:
-            #     g.trans_implied_ids = g.implied_ids | g.mapped('implied_ids.trans_implied_ids')
-            # else:
-            #     g.trans_implied_ids = g.implied_ids
+            g.trans_implied_ids = g.implied_ids | g.mapped('implied_ids.trans_implied_ids')
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1151,6 +1141,10 @@ class GroupsView(models.Model):
             # 'User Type' is an exception
             if app.xml_id == 'base.module_category_user_type':
                 return (app, 'selection', gs.sorted('id'), category_name)
+
+            import pudb
+            pudb.set_trace()
+
             # determine sequence order: a group appears after its implied groups
             order = {g: len(g.trans_implied_ids & gs) for g in gs}
             # check whether order is total, i.e., sequence orders are distinct
