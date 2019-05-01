@@ -1025,8 +1025,8 @@ class GroupsView(models.Model):
         return user
 
     @api.multi
-    def write(self, values):
-        res = super(GroupsView, self).write(values)
+    def _write(self, values):
+        res = super(GroupsView, self)._write(values)
         self._update_user_groups_view()
         # actions.get_bindings() depends on action records
         self.env['ir.actions.actions'].clear_caches()
@@ -1141,10 +1141,6 @@ class GroupsView(models.Model):
             # 'User Type' is an exception
             if app.xml_id == 'base.module_category_user_type':
                 return (app, 'selection', gs.sorted('id'), category_name)
-
-            import pudb
-            pudb.set_trace()
-
             # determine sequence order: a group appears after its implied groups
             order = {g: len(g.trans_implied_ids & gs) for g in gs}
             # check whether order is total, i.e., sequence orders are distinct

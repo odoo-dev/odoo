@@ -1025,11 +1025,6 @@ class Field(MetaField('DummyField', (object,), {})):
     def compute_value(self, records):
         """ Invoke the compute method on ``records``; the results are in cache. """
         fields = records._field_computed[self]
-
-        # FP NOTE: we should remove this to support reccursive fields (within records, some depends on others)
-        # for field in fields:
-        #     records.env.remove_todo(field, records)
-
         with records.env.protecting(fields, records):
             if isinstance(self.compute, str):
                 getattr(records, self.compute)()
@@ -1044,6 +1039,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """
+        # if we are in a compute of a specific field, don't call it's inverse
         records = records - records.env.protected(self)
         if isinstance(self.inverse, str):
             getattr(records, self.inverse)()
