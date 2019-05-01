@@ -3296,6 +3296,7 @@ Fields:
                     write_value = field.convert_to_write(field.convert_to_record(value, record), record)
 
                     # FP NOTE: we could simplify and keep the one in cache instead
+                    # FP TO CHECK: for one2many / many2many, we might concatenate the values instead of overwrite. (imagine 2 write of [(0,0,{})] (or flush before)
                     env.all.towrite[field][record.id] = write_value
                     if toflush:
                         record.towrite_flush([field])

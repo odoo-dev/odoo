@@ -2182,8 +2182,8 @@ class _RelationalMulti(_Relational):
                 result[0][2].append(record.id)
 
         # result must be hashable, to group by writes by values
-        result[0] = (6, 0, tuple(result[0][2]))
-        return tuple(result)
+        result[0] = (6, 0, result[0][2])
+        return result
 
     def convert_to_onchange(self, value, record, names):
         # return the recordset value as a list of commands; the commands may
