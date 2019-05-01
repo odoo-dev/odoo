@@ -293,6 +293,7 @@ class Field(MetaField('DummyField', (object,), {})):
         'index': False,                 # whether the field is indexed in database
         'manual': False,                # whether the field is a custom field
         'copy': True,                   # whether the field is copied over by BaseModel.copy()
+        'recursive': False,             # whether self depends on itself
         'depends': None,                # collection of field dependencies
         'compute': None,                # compute(recs) computes field on recs
         'compute_sudo': False,          # whether field should be recomputed as admin
