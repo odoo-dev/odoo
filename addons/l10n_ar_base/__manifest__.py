@@ -32,6 +32,6 @@ Base Module for Argentinian Localization
         'demo/partner_demo.xml',
     ],
     'installable': True,
-    'auto_install': True,
-    'application': True,
+    'auto_install': False,
+    'application': False,
 }
