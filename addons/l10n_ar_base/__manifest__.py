@@ -12,7 +12,6 @@ Base Module for Argentinian Localization
 * Activate ARS currency.
 * Add Identification Type model to represent AFIP valid identifications types.
 * Add Countries code defined by AFIP to identify legal entities and natural persons of foreign countries.
-* Add new field named CBU to bank model.
     """,
     'depends': [
         'contacts',
