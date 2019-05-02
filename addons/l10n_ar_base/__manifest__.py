@@ -15,7 +15,6 @@ Base Module for Argentinian Localization
 * Add new field named CBU to bank model.
     """,
     'depends': [
-        'base',
         'contacts',
     ],
     'data': [
