@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 import re
 
 
@@ -110,6 +110,24 @@ class ResPartner(models.Model):
                 continue
             if rec.l10n_ar_identification_type_id.afip_code == 80:
                 rec.l10n_ar_cuit = rec.l10n_ar_id_number
+
+    @api.constrains('parent_id', 'commercial_partner_id',
+                    'l10n_ar_identification_type_id', 'l10n_ar_id_number')
+    def check_cuit_commercial_partner(self):
+        """ Can not set CUIT for non commercial partners
+        """
+        cuit_id_type = self.env.ref('l10n_ar_base.dt_CUIT')
+        contacts_with_cuit = self.filtered(
+            lambda x: x.l10n_ar_id_number and
+            x.l10n_ar_identification_type_id == cuit_id_type and
+            x.id != x.commercial_partner_id.id
+        )
+        if contacts_with_cuit:
+            raise ValidationError(_(
+                'Can not define CUIT for contacts, you can set cuit'
+                ' to Commercial Entity. Check contacts: %s') % ', '.join(
+                    contacts_with_cuit.mapped('name'))
+            )
 
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100,
