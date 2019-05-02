@@ -112,62 +112,6 @@ class ResPartner(models.Model):
                 rec.l10n_ar_cuit = rec.l10n_ar_id_number
 
     @api.model
-    def create(self, values):
-        """ Generate the vat field value with the information in
-        the l10n_ar_id_number and l10n_ar_identification_type_id fields
-        """
-        self._update_vat(values)
-        return super(ResPartner, self).create(values)
-
-    @api.multi
-    def write(self, values):
-        """ Generate the vat field value with the information in
-        the l10n_ar_id_number and l10n_ar_identification_type_id fields
-        """
-        self._update_vat(values)
-        return super(ResPartner, self).write(values)
-
-    @api.multi
-    def _update_vat(self, values):
-        """ Update the vat field value using the information we have in
-        l10n_ar_id_number and l10n_ar_identification_type_id fields
-
-        When the vat has been set using _commercial_sync_to_children we do not
-        update it
-        """
-        if 'commercial_partner_id' in values:
-          return values
-
-        cuit_id_type = self.env.ref('l10n_ar_base.dt_CUIT')
-
-        parent = values.get('parent_id', self.parent_id.id)
-        id_number = values.get('l10n_ar_id_number', self.l10n_ar_id_number)
-        id_type = values.get('l10n_ar_identification_type_id',
-            self.l10n_ar_identification_type_id.id)
-        if id_type:
-            id_type = self.env['l10n_ar.identification.type'].browse(id_type)
-
-        if 'vat' in values:
-            vat = values.get('vat', '') or ''
-            if not id_type or id_type == cuit_id_type:
-                id_number = ''.join(re.findall(r'\d+', vat))
-                id_type = cuit_id_type
-                values.update({
-                    'l10n_ar_id_number': id_number,
-                    'l10n_ar_identification_type_id': id_type.id,
-                })
-            return values
-
-        if id_number and id_type and id_type == cuit_id_type:
-            if parent:
-                raise UserError (_(
-                    'Can not define CUIT for this partner because is related'
-                    ' to a parent partner'
-                ))
-            values.update({'vat': 'AR' + id_number})
-        return values
-
-    @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100,
                      name_get_uid=None):
         """ We add the functionality to found partner by identification number
