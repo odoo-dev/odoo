@@ -23,14 +23,14 @@ class ResPartner(models.Model):
         index=True,
         auto_join=True,
     )
-    same_id_number_partner = fields.Html(
+    l10n_ar_same_id_number_partner = fields.Html(
         string='Partner with same Identification Number',
-        compute='_compute_same_id_number_partner',
+        compute='_compute_l10n_ar_same_id_number_partner',
         store=False,
     )
 
     @api.depends('l10n_ar_id_number', 'l10n_ar_identification_type_id')
-    def _compute_same_id_number_partner(self):
+    def _compute_l10n_ar_same_id_number_partner(self):
         cuit_id_type = self.env.ref('l10n_ar_base.dt_CUIT')
         for partner in self:
             partner_id = partner.id
@@ -52,7 +52,7 @@ class ResPartner(models.Model):
                 domain += [('id', 'not in', related_partners.ids)]
             same_number_partner = self.env['res.partner'].search(
                 domain, limit=1)
-            partner.same_id_number_partner = \
+            partner.l10n_ar_same_id_number_partner = \
                 "<a href='/web#id={}&model=res.partner' target='_blank'>{}"\
                 "</a>".format(
                     same_number_partner.id, same_number_partner.name) \
