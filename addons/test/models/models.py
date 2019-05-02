@@ -9,6 +9,7 @@ class test(models.Model):
     """
     _name = 'test'
     _log_access = False
+    _description = "Test"
 
     name = fields.Char()
     parent_id = fields.Many2one('test')
@@ -16,8 +17,8 @@ class test(models.Model):
     line_ids = fields.One2many('test.line', 'test_id')
     booltest = fields.Boolean('Is False')    # test that postgresql values for boolean is False
 
-    int1 = fields.Integer('User', default=lambda x: 1)
-    intx2 = fields.Integer('User', compute="_get_intx2", inverse='_set_intx2', store=True)
+    int1 = fields.Integer('Int Def 1', default=lambda x: 1)
+    intx2 = fields.Integer('Int x2', compute="_get_intx2", inverse='_set_intx2', store=True)
 
     line_sum = fields.Integer('Sum Currency', compute='_line_sum', store=True)
 
@@ -123,6 +124,7 @@ class test_line(models.Model):
         test line
     """
     _name = 'test.line'
+    _description = "Test Line"
 
     name = fields.Char()
     name2 = fields.Char('Related Name', related='test_id.name', store=True)
