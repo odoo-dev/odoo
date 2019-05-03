@@ -5178,6 +5178,8 @@ Fields:
             # final node of path, result should be marked as todo, then recursive modified
             if pathlen==0:
                 if field.name in overwrite: continue
+                records = records - records.env.protected(self)
+                if not records: continue
                 # mark as to recompute if it's a stored field; if not a stored field, removing the cache is enough
                 if field.store and (field.type not in ('one2many', )):
                     newtodo = records.env.add_todo(field, records)

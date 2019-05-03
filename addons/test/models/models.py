@@ -3,6 +3,20 @@
 from odoo import models, fields, api
 import time
 
+class test_mix(models.Model):
+    """
+        test object
+    """
+    _name = 'test.main'
+    _log_access = False
+    _description = "Test"
+
+    name = fields.Char()
+    booltest = fields.Boolean('Is False')
+    int1 = fields.Integer('Int Def 1', default=lambda x: 1)
+    child_ids = fields.One2many('test', 'test_main_id')
+
+
 class test(models.Model):
     """
         test object
@@ -11,24 +25,12 @@ class test(models.Model):
     _log_access = False
     _description = "Test"
 
-    name = fields.Char()
-    parent_id = fields.Many2one('test')
-    dname = fields.Char(compute="_get_dname", store=True)
+    _inherits = {'test.main': 'test_main_id'}
+
+    test_main_id = fields.Many2one('test.main')
     line_ids = fields.One2many('test.line', 'test_id')
-    booltest = fields.Boolean('Is False')    # test that postgresql values for boolean is False
-
-    int1 = fields.Integer('Int Def 1', default=lambda x: 1)
     intx2 = fields.Integer('Int x2', compute="_get_intx2", inverse='_set_intx2', store=True)
-
     line_sum = fields.Integer('Sum Currency', compute='_line_sum', store=True)
-
-    @api.depends('name', 'parent_id.dname')
-    def _get_dname(self):
-        for record in self:
-            if record.parent_id:
-                record.dname = record.name + ' / ' +record.parent_id.dname
-            else:
-                record.dname = record.name
 
     @api.depends('line_ids.intx2')
     def _line_sum(self):
@@ -99,23 +101,12 @@ class test(models.Model):
         })
         second = self.create({
             'name': 'second',
-            'parent_id': main.id,
         })
-        third = self.create({
-            'name': 'third',
-            'parent_id': second.id,
-        })
-        second.parent_id = False
-        main.parent_id = third.id
 
         import pudb
         pudb.set_trace()
 
         self.recompute()
-
-        for x in (main, second, third):
-            print(x.name, ':', x.dname)
-
         crash_here_to_rollback
 
 
