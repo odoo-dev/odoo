@@ -11,10 +11,18 @@ class ResPartnerBank(models.Model):
 
     @api.constrains('acc_number')
     def check_cbu(self):
-        for rec in self:
+        for rec in self.filtered(lambda x: x.acc_type == 'cbu'):
             if rec.acc_number and not rec.is_valid_cbu():
                 raise ValidationError(
                     _('The CBU "%s" is not valid') % rec.acc_number)
+
+    @api.model
+    def _get_supported_account_types(self):
+        """ Add new account type named cbu used in Argentina
+        """
+        res = super(ResPartnerBank, self)._get_supported_account_types()
+        res.append(('cbu', _('CBU')))
+        return res
 
     @api.multi
     def is_valid_cbu(self):
