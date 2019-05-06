@@ -10,23 +10,37 @@ class ResPartner(models.Model):
 
     l10n_ar_cuit = fields.Char(
         compute='_compute_l10n_ar_cuit',
+        string="CUIT",
+        help='Computed field that returns cuit or nothing if this one is not'
+        ' set for the partner',
     )
     l10n_ar_formated_cuit = fields.Char(
         compute='_compute_l10n_ar_formated_cuit',
+        string="Formated CUIT",
+        help='Computed field that will convert the given cuit number to the'
+        ' format {person_category:2}-{number:10}-{validation_number:1}',
     )
     l10n_ar_id_number = fields.Char(
         string='Identification Number',
+        help='Number that appears in the person/legal entity identification'
+        ' document. Number should be expressed completely in integers',
     )
     l10n_ar_identification_type_id = fields.Many2one(
         string="Identification Type",
         comodel_name='l10n_ar.identification.type',
         index=True,
         auto_join=True,
+        help='The type od identifications defined by AFIP that could identify'
+        ' a person or a legal entity when trying to made operations',
     )
     l10n_ar_same_id_number_partner = fields.Html(
         string='Partner with same Identification Number',
         compute='_compute_l10n_ar_same_id_number_partner',
         store=False,
+        help='Technical field used to show a warning when trying to create a '
+        ' a partner with a identification number already used by another'
+        ' partner. Parent/child partners could share identification number'
+        ' so for this cases not warning will appears',
     )
 
     @api.depends('l10n_ar_id_number', 'l10n_ar_identification_type_id')
