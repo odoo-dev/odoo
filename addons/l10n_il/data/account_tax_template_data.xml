@@ -50,7 +50,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_vat_pa')])]"/>
-        <field name="tax_group_id" ref="tax_group_vat_inputs"/>
+        <field name="tax_group_id" ref="tax_group_vat_16"/>
     </record>
     <record id="il_vat_sales_17" model="account.tax.template">
         <field name="sequence">1</field>
@@ -63,7 +63,7 @@
         <field name="type_tax_use">sale</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_vat_sales')])]"/>
-        <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="tax_group_id" ref="tax_group_vat_17"/>
     </record>
     <record id="il_vat_inputs_2_3_17" model="account.tax.template">
         <field name="sequence">4</field>
@@ -77,7 +77,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_vat_inp_2_3')])]"/>
-        <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="tax_group_id" ref="tax_group_vat_17"/>
     </record>
     <record id="il_vat_inputs_1_4_17" model="account.tax.template">
         <field name="sequence">5</field>
@@ -91,7 +91,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_vat_inp_1_4')])]"/>
-        <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="tax_group_id" ref="tax_group_vat_17"/>
     </record>
     <record id="il_vat_inputs_17" model="account.tax.template">
         <field name="sequence">2</field>
@@ -104,7 +104,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_vat_inp')])]"/>
-        <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="tax_group_id" ref="tax_group_vat_17"/>
     </record>
     <record id="il_vat_inputs_fa_17" model="account.tax.template">
         <field name="sequence">6</field>
@@ -117,7 +117,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_fixed_assets')])]"/>
-        <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="tax_group_id" ref="tax_group_vat_17"/>
     </record>
     <record id="il_vat_purchase_exempt" model="account.tax.template">
         <field name="sequence">7</field>
@@ -128,7 +128,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_exempt_inp')])]"/>
-        <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="tax_group_id" ref="tax_group_vat_exempt"/>
     </record>
     <record id="il_vat_pa_sales_17" model="account.tax.template">
         <field name="sequence">8</field>
@@ -140,19 +140,20 @@
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
         <field name="chart_template_id" ref="il_chart_template"/>
-        <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="tax_group_id" ref="tax_group_vat_17"/>
     </record>
     <record id="il_vat_sales_exempt" model="account.tax.template">
         <field name="sequence">9</field>
-        <field name="name">VAT sales exempt</field>
-        <field name="refund_account_id" ref="il_account_111110"/>
+        <field name="description">0%</field>
+        <field name="name">VAT exempt</field>
         <field name="account_id" ref="il_account_111110"/>
         <field name="price_include" eval="1"/>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
         <field name="chart_template_id" ref="il_chart_template"/>
-        <field name="tax_group_id" ref="account.tax_group_taxes"/>
+        <field name="tax_group_id" ref="tax_group_vat_exempt"/>
         <field name="include_base_amount">1</field>
     </record>
+
 </odoo>
