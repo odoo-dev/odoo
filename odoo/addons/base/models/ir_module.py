@@ -901,7 +901,7 @@ class ModuleDependency(models.Model):
     module_id = fields.Many2one('ir.module.module', 'Module', ondelete='cascade')
 
     # the module corresponding to the dependency, and its status
-    depend_id = fields.Many2one('ir.module.module', 'Dependency', compute='_compute_depend')
+    depend_id = fields.Many2one('ir.module.module', 'Dependency', compute='_compute_depend', store=True)
     state = fields.Selection(DEP_STATES, string='Status', compute='_compute_state')
 
     @api.multi
