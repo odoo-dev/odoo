@@ -30,7 +30,6 @@ WARNING_HELP = _('Selecting the "Warning" option will notify user with the messa
 
 
 ADDRESS_FIELDS = ('street', 'street2', 'zip', 'city', 'state_id', 'country_id')
-
 @api.model
 def _lang_get(self):
     return self.env['res.lang'].get_installed()
@@ -285,13 +284,13 @@ class Partner(models.Model):
     def _compute_get_ids(self):
         self.self = self.id
 
-    @api.depends('is_company', 'parent_id')
+    @api.depends('is_company', 'parent_id.commercial_partner_id')
     def _compute_commercial_partner(self):
         for partner in self:
-            p = partner
-            while not (p.is_company or not p.parent_id):
-                p = p.parent_id
-            partner.commercial_partner_id = p
+            if partner.is_company or not partner.parent_id:
+                partner.commercial_partner_id = partner
+            else:
+                partner.commercial_partner_id = partner.parent_id.commercial_partner_id
 
     @api.depends('company_name', 'parent_id.is_company', 'commercial_partner_id.name')
     def _compute_commercial_company_name(self):

@@ -45,15 +45,10 @@ class IrUiMenu(models.Model):
 
     web_icon_data = fields.Binary(string='Web Icon Image', attachment=True)
 
-    @api.depends('name', 'parent_id')
+    @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
         for menu in self:
-            current = menu
-            result = []
-            while current:
-                result.append(current.name)
-                current = current.parent_id
-            menu.complete_name = '/'.join(result)
+            menu.complete_name = menu._get_full_name()
 
     def _get_full_name(self, level=6):
         """ Return the full name of ``self`` (up to a certain level). """
