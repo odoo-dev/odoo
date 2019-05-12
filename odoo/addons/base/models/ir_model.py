@@ -279,8 +279,8 @@ class IrModel(models.Model):
             cr.execute("SELECT * FROM ir_model_data WHERE name=%s AND module=%s",
                        (xmlid, self._context['module']))
             if not cr.rowcount:
-                cr.execute(""" INSERT INTO ir_model_data (module, name, model, res_id, date_init, date_update)
-                               VALUES (%s, %s, %s, %s, (now() at time zone 'UTC'), (now() at time zone 'UTC')) """,
+                cr.execute(""" INSERT INTO ir_model_data (module, name, model, res_id, noupdate, date_init, date_update)
+                               VALUES (%s, %s, %s, %s, true, (now() at time zone 'UTC'), (now() at time zone 'UTC')) """,
                            (self._context['module'], xmlid, record._name, record.id))
 
         return record
