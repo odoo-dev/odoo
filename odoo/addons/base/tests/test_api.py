@@ -287,7 +287,7 @@ class TestAPI(common.TransactionCase):
         self.assertTrue(len(partners) > 1)
 
         # all the records in partners are ready for prefetching
-        self.assertItemsEqual(partners.ids, partners._prefetch['res.partner'])
+        self.assertItemsEqual(partners.ids, partners._prefetch)
 
         # reading ONE partner should fetch them ALL
         for partner in partners:
