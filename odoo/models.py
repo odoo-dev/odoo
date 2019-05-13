@@ -3300,7 +3300,7 @@ Fields:
                         record.towrite_flush([field])
 
         self._validate_fields(vals.keys())
-
+        return True
 
     @api.multi
     def _write(self, vals):
