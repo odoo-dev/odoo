@@ -3260,6 +3260,8 @@ Fields:
         if not self:
             return True
 
+        self.check_access_rights('write')
+        self.check_field_access_rights('write', vals.keys())
         env = self.env
 
         for fname, value in vals.items():
@@ -3308,10 +3310,7 @@ Fields:
         if not self:
             return True
 
-        self.check_access_rights('write')
-        self.check_field_access_rights('write', vals.keys())
         self._check_concurrency()
-
         cr = self._cr
 
         # determine records that require updating parent_path
