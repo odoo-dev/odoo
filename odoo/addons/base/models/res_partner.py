@@ -521,8 +521,13 @@ class Partner(models.Model):
     @api.multi
     def write(self, vals):
         if vals.get('active') is False:
-            if any(self.mapped('user_ids.active')):
-                raise ValidationError(_('You cannot archive a contact linked to an internal user.'))
+            # DLE: It should not be necessary to modify this to make work the ORM. The problem was just the recompute
+            # of partner.user_ids when you create a new user for this partner, see test test_70_archive_internal_partners
+            # You modified it in a previous commit, see original commit of this:
+            # https://github.com/odoo/odoo/commit/9d7226371730e73c296bcc68eb1f856f82b0b4ed
+            for partner in self:
+                if partner.active and partner.user_ids:
+                    raise ValidationError(_('You cannot archive a contact linked to an internal user.'))
         # res.partner must only allow to set the company_id of a partner if it
         # is the same as the company of all users that inherit from this partner
         # (this is to allow the code from res_users to write to the partner!) or

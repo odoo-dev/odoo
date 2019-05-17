@@ -1052,7 +1052,8 @@ class Cache(object):
     def get_all_values(self, record, field):
         """ Return the value of ``field`` for ``record``. """
         key = record.env.cache_key(field)
-        return self._data[key].get(field, {}).values()
+        # DLE P7: Dictionary changed of size during iteration
+        return list(self._data[key].get(field, {}).values())
 
     def get(self, record, field):
         """ Return the value of ``field`` for ``record``. """

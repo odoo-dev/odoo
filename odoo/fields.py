@@ -987,7 +987,8 @@ class Field(MetaField('DummyField', (object,), {})):
             record.ensure_one()
             if env.check_todo(self, record):
                 recs = self.recursive and record or env.field_todo(self)
-                self.compute_value(recs)
+                # DLE P8: can be a one2many, for which compute_value does not exist, its only for compute field.
+                recs._fetch_field(self)
 
             if not env.cache.contains(record, self):
                 if self.store and record.id:
@@ -1014,7 +1015,14 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def __set__(self, records, value):
         """ set the value of field ``self`` on ``records`` """
-        records.write({self.name: value})
+        if self.store:
+            records.write({self.name: value})
+        else:
+            # DLE, P1: Using high level write is a good idea to me, as partner.name = 'Agrolait' should indeed use a high level method,
+            # That said using it for compute fields will trigger extra-behaviors that we dont want when we just store the result of a compute field
+            # e.g. `ir.ui.view` write methods, which writes `arch_fs` to False as a we set the value of the compute field 'arch'
+            for record in records:
+                records.env.cache.set(record, self, self.convert_to_cache(value, record))
 
 
     ############################################################################
@@ -2091,7 +2099,9 @@ class Many2one(_Relational):
 class _RelationalMulti(_Relational):
     """ Abstract class for relational fields *2many. """
     _slots = {
-        'context_dependent': True,      # depends on context (active_test)
+        # DLE P9: If there is a change in the context, the one2many fields cache values of the initial context is not recomputed
+        # See test test_70_archive_internal_partners
+        'context_dependent': False,      # depends on context (active_test)
     }
     def _update(self, records, value):
         """ Update the cached value of ``self`` for ``records`` with ``value``, return True if everything is in cache. """

@@ -303,7 +303,8 @@ class TestAPI(common.TransactionCase):
                        for partner in partners
                        for sid in partner._cache['state_id']}
         self.assertTrue(len(state_ids) > 1)
-        self.assertItemsEqual(state_ids, partners._prefetch['res.country.state'])
+        # DLE P6: _prefetch is no longer what it used to be.
+        self.assertItemsEqual(partners.ids, partners._prefetch)
 
         # reading ONE partner country should fetch ALL partners' countries
         for partner in partners:

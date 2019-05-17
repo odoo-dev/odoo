@@ -2939,7 +2939,9 @@ Fields:
                 # This does not harm in practice, as it is only used in Monetary
                 # fields for rounding the value. As the value comes straight
                 # from the database, it is expected to be rounded already.
-                values = [convert(value, target, validate=False) for value in values]
+                # DLE, P2: if we read values for field we haven't written yet, ignore the read
+                towrite = self.env.all.towrite[fetched._name] if fetched._name in self.env.all.towrite else {}
+                values = [convert(towrite[record_id][field.name] if record_id in towrite and field.name in towrite[record_id] else value, target, validate=False) for record_id, value in zip(ids, values)]
                 self.env.cache.update(fetched, field, values)
 
             # determine the fields that must be processed now;
@@ -3281,6 +3283,17 @@ Fields:
                             env.cache.remove(rec, invf)
 
                 env.cache.set(record, field, value)
+
+                # DLE, P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
+                # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
+                # allows the possibility to not prefetch or ignore the reads of values to write
+                if record.id and field.store:
+                    write_value = field.convert_to_write(field.convert_to_record(value, record), record)
+
+                    # FP NOTE: we could simplify and keep the one in cache instead
+                    # FP TO CHECK: for one2many / many2many, we might concatenate the values instead of overwrite. (imagine 2 write of [(0,0,{})]
+                    env.all.towrite[record._name][record.id][field.name] = write_value
+
                 record.modified([fname])
                 env.remove_todo(field, record)
 
@@ -4314,6 +4327,9 @@ Fields:
 
         succs = defaultdict(set)        # transitive closure of successors
         preds = defaultdict(set)        # transitive closure of predecessors
+        # DLE P4: Need to flush for because this method does a kind of search query manually trough
+        # a cr.execute, for which we need the data in database (see test `test_res_group_recursion`)
+        self.towrite_flush()
         todo, done = set(self.ids), set()
         while todo:
             # retrieve the respective successors of the nodes in 'todo'
@@ -5089,9 +5105,11 @@ Fields:
             # important: one must call the field's getter
             return self._fields[key].__get__(self, type(self))
         elif isinstance(key, slice):
-            return self._browse(self._ids[key], self.env, self._prefetch)
+            # DLE P3: iter should conserve the ids to prefetch, but not records[0]
+            # See test `test_60_prefetch_object`
+            return self._browse(self._ids[key], self.env)
         else:
-            return self._browse((self._ids[key],), self.env, self._prefetch)
+            return self._browse((self._ids[key],), self.env)
 
     def __setitem__(self, key, value):
         """ Assign the field ``key`` to ``value`` in record ``self``. """
