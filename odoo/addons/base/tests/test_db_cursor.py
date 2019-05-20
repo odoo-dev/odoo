@@ -53,6 +53,9 @@ class TestTestCursor(common.TransactionCase):
     def write(self, record, value):
             record.ref = value
 
+    def towrite_flush(self, record):
+            record.towrite_flush([record._fields['ref']])
+
     def check(self, record, value):
             self.assertEqual(record.read(['ref'])[0]['ref'], value)
 
@@ -60,13 +63,18 @@ class TestTestCursor(common.TransactionCase):
         """ Check the behavior of a single test cursor. """
         self.assertIsInstance(self.cr, TestCursor)
         self.write(self.record, 'A')
+        # DLE P13: Writes are not directly applied in db unless towrite_flush is called, and if we want the update
+        # to be commited, we need to call towrite_flush before the cr.commit()
+        self.towrite_flush(self.record)
         self.cr.commit()
 
         self.write(self.record, 'B')
+        self.towrite_flush(self.record)
         self.cr.rollback()
         self.check(self.record, 'A')
 
         self.write(self.record, 'C')
+        self.towrite_flush(self.record)
         self.cr.rollback()
         self.check(self.record, 'A')
 
@@ -74,9 +82,11 @@ class TestTestCursor(common.TransactionCase):
         """ Check the behavior of a subcursor that commits. """
         self.assertIsInstance(self.cr, TestCursor)
         self.write(self.record, 'A')
+        self.towrite_flush(self.record)
         self.cr.commit()
 
         self.write(self.record, 'B')
+        self.towrite_flush(self.record)
 
         # check behavior of a "sub-cursor" that commits
         with self.registry.cursor() as cr:
@@ -84,6 +94,7 @@ class TestTestCursor(common.TransactionCase):
             record = self.record.with_env(self.env(cr=cr))
             self.check(record, 'B')
             self.write(record, 'C')
+            self.towrite_flush(self.record)
 
         self.check(self.record, 'C')
 
@@ -94,9 +105,11 @@ class TestTestCursor(common.TransactionCase):
         """ Check the behavior of a subcursor that rollbacks. """
         self.assertIsInstance(self.cr, TestCursor)
         self.write(self.record, 'A')
+        self.towrite_flush(self.record)
         self.cr.commit()
 
         self.write(self.record, 'B')
+        self.towrite_flush(self.record)
 
         # check behavior of a "sub-cursor" that rollbacks
         with self.assertRaises(ValueError):
@@ -105,6 +118,7 @@ class TestTestCursor(common.TransactionCase):
                 record = self.record.with_env(self.env(cr=cr))
                 self.check(record, 'B')
                 self.write(record, 'C')
+                self.towrite_flush(self.record)
                 raise ValueError(42)
 
         self.check(self.record, 'B')

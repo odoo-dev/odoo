@@ -3293,6 +3293,14 @@ Fields:
                     # FP NOTE: we could simplify and keep the one in cache instead
                     # FP TO CHECK: for one2many / many2many, we might concatenate the values instead of overwrite. (imagine 2 write of [(0,0,{})]
                     env.all.towrite[record._name][record.id][field.name] = write_value
+                    # DLE P11: When writing on `child_ids`, must write on `parent_id` of the one2many related records,
+                    # Otherwise, as we set in the case the correct value for the inverse field values thanks to the above `if field.relational`,
+                    # the above `if env.cache.contains(record, field) and (env.cache.get(record, field) == value):` matches
+                    # and we therefore actually never write the `parent_id` values in database.
+                    # See test test_duplicate_children_03
+                    if field.type.endswith('one2many'):
+                        for rec in record[field.name]:
+                            env.all.towrite[rec._name][rec.id][field.inverse_name] = rec._fields[field.inverse_name].convert_to_write(record, rec)
 
                 record.modified([fname])
                 env.remove_todo(field, record)
@@ -3305,14 +3313,8 @@ Fields:
                 for invf in record._field_inverses[field]:
                     toflush = toflush or not invf._update(record[field.name], record)
 
-                if record.id and field.store:
-                    write_value = field.convert_to_write(field.convert_to_record(value, record), record)
-
-                    # FP NOTE: we could simplify and keep the one in cache instead
-                    # FP TO CHECK: for one2many / many2many, we might concatenate the values instead of overwrite. (imagine 2 write of [(0,0,{})]
-                    env.all.towrite[record._name][record.id][field.name] = write_value
-                    if toflush:
-                        record.towrite_flush([field])
+                if toflush:
+                    record.towrite_flush([field])
 
         self._validate_fields(vals.keys())
         return True
@@ -3544,6 +3546,13 @@ Fields:
         for data in data_list:
             data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
 
+        # DLE P14: needs to call recompute after having computed the modifieds, otherwise
+        # computed field are never computed.
+        # See test `test_auto_join`: A `res.partner.bank` is created, with an `acc_number`, but its computed field
+        # sanitized_acc_number is not computed, therefore the search below `partner_obj.search([('bank_ids.sanitized_acc_number', 'like', name_test)])`
+        # doesn't work.
+        if self.env.recompute and self._context.get('recompute', True):
+            self.recompute()
         return records
 
     @api.model
@@ -4045,17 +4054,6 @@ Fields:
         """
         self.sudo(access_rights_uid or self._uid).check_access_rights('read')
 
-        # recompute fields that are used in the domain
-        for dom_part in args:
-            if isinstance(dom_part, str): continue
-            if not isinstance(dom_part[0], str): continue
-            obj = self
-            for fname in dom_part[0].split('.'):
-                field = obj._fields[fname]
-                self.towrite_flush([field])
-                if field.comodel_name:
-                    obj = self.env[field.comodel_name]
-
         if expression.is_false(self, args):
             # optimization: no need to query, as no record satisfies the domain
             return 0 if count else []
@@ -4066,6 +4064,22 @@ Fields:
         from_clause, where_clause, where_clause_params = query.get_sql()
 
         where_str = where_clause and (" WHERE %s" % where_clause) or ''
+
+        # DLE P13: This is just for test `test_invalid`, which expects a ValueError (raise by _where_calc) rather than
+        # a keyerror (raise by obj._fields[fname])
+        # Now if we decide a KeyError should be raise in this case instead of ValueError, the test needs to be changed.
+        # It would make sense to raise a KeyError for a field which is not in the registry, but I don't know if
+        # it worths the API change.
+        # recompute fields that are used in the domain
+        for dom_part in args:
+            if isinstance(dom_part, str): continue
+            if not isinstance(dom_part[0], str): continue
+            obj = self
+            for fname in dom_part[0].split('.'):
+                field = obj._fields[fname]
+                self.towrite_flush([field])
+                if field.comodel_name:
+                    obj = self.env[field.comodel_name]
 
         if count:
             # Ignore order, limit and offset when just counting, they don't make sense and could
@@ -5201,8 +5215,18 @@ Fields:
                 if field.store and (field.type not in ('one2many', )):
                     newtodo = records.env.add_todo(field, records)
                 else:
-                    for record in records:
-                        records.env.cache.remove(record, field)
+                    while field:
+                        for record in records:
+                            records.env.cache.remove(record, field)
+                        # DLE P10: when res.users.user_ids is must be recomputed, res.partner.user_ids must be as well.
+                        # This solves the fact base can't be installed with https://github.com/odoo-dev/odoo/commit/0470d556315d428bab483b61c98ee0463b3993fe#r33581720
+                        # Basically, when we set `active=False` on a user, this should trigger the recompute of its related partner user_ids
+                        if field.related:
+                            records = records.mapped(field.related[0])
+                            field = records._fields[field.related[1]]
+                        else:
+                            field = None
+
                     newtodo = None
 
                 if newtodo:
