@@ -45,6 +45,7 @@ __all__ = [
     'call_kw',
 ]
 
+import copy
 import logging
 from collections import defaultdict, Mapping
 from contextlib import contextmanager
@@ -901,16 +902,32 @@ class Environment(Mapping):
         """
         self.cache.invalidate()
         self.all.todo.clear()
+        # DLE P17: needs to empty towrite on exception/rollback,
+        # otherwise there are pending write transaction which make no sense after the rollback/exception occured.
+        self.all.towrite.clear()
 
     @contextmanager
     def clear_upon_failure(self):
         """ Context manager that clears the environments (caches and fields to
             recompute) upon exception.
         """
+        # DLE P14: Not really sure about this one.
+        # Basically it's for the self.assertRaises of tests,
+        # which can happen in the middle of a test, and it should not rollback the transaction.
+        # Before it was enough to empty the todo and invalidate the cache, but now
+        # that the computation is done when necessary, the todo list and to write list must be preserved.
+        # The only way I see to do that is to copy the cache, todo and towrite somehow, and to apply it back after the "With"
+        # test `test_auto_join`
+        # with self.assertRaises(NotImplementedError):
+        #     partner_obj.search([('category_id.name', '=', 'foo')])
+        todo = dict(self.all.todo)
+        towrite = copy.deepcopy(self.all.towrite)
         try:
             yield
         except Exception:
             self.clear()
+            self.all.todo = todo
+            self.all.towrite = towrite
             raise
 
     def protected(self, field):

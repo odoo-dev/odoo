@@ -2410,7 +2410,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             def recompute(field):
                 _logger.info("Storing computed values of %s", field)
                 recs = self.with_context(active_test=False).search([])
-                recs.env.add_todo(field, recs)
+                # DLE P15: we are in the database init, (convert models to database table/columns)
+                # at the end end of the initialization, stored computed fields must be computed right away.
+                # add_todo is nice to add the fields to recompute, but in this case it was never called after the database init,
+                # and the computed stored field todo were lost.
+                # test `test_amount_to_text_10`
+                field.compute_value(recs)
 
             for field in self._fields.values():
                 if not field.store:
@@ -3546,13 +3551,6 @@ Fields:
         for data in data_list:
             data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
 
-        # DLE P14: needs to call recompute after having computed the modifieds, otherwise
-        # computed field are never computed.
-        # See test `test_auto_join`: A `res.partner.bank` is created, with an `acc_number`, but its computed field
-        # sanitized_acc_number is not computed, therefore the search below `partner_obj.search([('bank_ids.sanitized_acc_number', 'like', name_test)])`
-        # doesn't work.
-        if self.env.recompute and self._context.get('recompute', True):
-            self.recompute()
         return records
 
     @api.model

@@ -102,6 +102,9 @@ class IrActions(models.Model):
                     actions, where the latter is given by calling the method
                     ``read`` on the action record.
         """
+        # DLE P19: Need to flush before doing the SELECT, which act as a search.
+        # Test `test_bindings`
+        self.towrite_flush([self.env['ir.actions.act_window']._fields['binding_model_id']])
         cr = self.env.cr
         query = """ SELECT a.id, a.type, a.binding_type
                     FROM ir_actions a, ir_model m

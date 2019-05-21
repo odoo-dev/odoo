@@ -1016,6 +1016,12 @@ class Field(MetaField('DummyField', (object,), {})):
     def __set__(self, records, value):
         """ set the value of field ``self`` on ``records`` """
         if self.store:
+            # DLE P18: need to convert to write the value, at least for *2many
+            # Some write overwrites expects the *2many values to be tuple commands and not browse record
+            # See https://github.com/odoo/odoo/blob/659ff0da13951d0b940c24a070a4a7e51b0897bb/odoo/addons/base/models/res_users.py#L934
+            # test `test_bindings`, `action2.groups_id += group`
+            if isinstance(value, BaseModel):
+                value = self.convert_to_write(value, records)
             records.write({self.name: value})
         else:
             # DLE, P1: Using high level write is a good idea to me, as partner.name = 'Agrolait' should indeed use a high level method,
