@@ -1703,6 +1703,15 @@ class Binary(Field):
     def convert_to_cache(self, value, record, validate=True):
         if isinstance(value, _BINARY):
             return bytes(value)
+        # DLE P25: test `TestFileSeparator`
+        # When assigning a binary field value in a create/write,
+        # it is supposed to be bytes, but in some case it is not, it's strings.
+        # Before, they we put in cache as bytes despite the fact we set them using string because they were read from
+        # database, and there they were converted to bytes
+        # Here, as we store directly in cache on create without reading from the database, we need to encode the strings
+        # to bytes when needed.
+        if isinstance(value, str):
+            return value.encode()
         if isinstance(value, int) and \
                 (record._context.get('bin_size') or
                  record._context.get('bin_size_' + self.name)):

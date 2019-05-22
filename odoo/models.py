@@ -4091,6 +4091,13 @@ Fields:
                 self.towrite_flush([field])
                 if field.comodel_name:
                     obj = self.env[field.comodel_name]
+        # DLE P26: test `test_applied_state_toggle`
+        # In case we set active/disable a record, a search on this model must trigger the write_flush of the active fields,
+        # as more or less records can be returned according to the `active` flag.
+        # In the above test case, this is even trickier has it uses an empty domain `[]`,
+        # and therefore we never go inside the above loop `for dom_part in args:`
+        if any('active' in values for values in self.env.all.towrite[self._name].values()):
+            self.towrite_flush([self._fields['active']])
 
         if count:
             # Ignore order, limit and offset when just counting, they don't make sense and could
