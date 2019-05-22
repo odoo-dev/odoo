@@ -60,38 +60,38 @@ class TestRecordCache(TransactionCase):
         cache.set(bar1, ref, 'BAR1_REF')
         # DLE P12: Now, only context_dependent fields does not share the same cache.
         check(foo1, 'FOO1_NAME', 'FOO1_REF')
-        check(foo2, 'FOO1_NAME', 'FOO1_REF')
+        check(foo2, None, None)
         check(bar1, 'BAR1_NAME', 'BAR1_REF')
-        check(bar2, 'BAR1_NAME', 'BAR1_REF')
+        check(bar2, None, None)
         self.assertCountEqual(cache.get_missing_ids(foo1 + bar1, name, (foo1+bar1)._ids), [])
-        self.assertCountEqual(cache.get_missing_ids(foo2 + bar2, name, (foo2+bar2)._ids), [])
+        self.assertCountEqual(cache.get_missing_ids(foo2 + bar2, name, (foo2+bar2)._ids), [1, 2])
 
         # set values in both environments
         cache.set(foo2, name, 'FOO2_NAME')
         cache.set(foo2, ref, 'FOO2_REF')
         cache.set(bar2, name, 'BAR2_NAME')
         cache.set(bar2, ref, 'BAR2_REF')
-        check(foo1, 'FOO2_NAME', 'FOO2_REF')
+        check(foo1, 'FOO1_NAME', 'FOO1_REF')
         check(foo2, 'FOO2_NAME', 'FOO2_REF')
-        check(bar1, 'BAR2_NAME', 'BAR2_REF')
+        check(bar1, 'BAR1_NAME', 'BAR1_REF')
         check(bar2, 'BAR2_NAME', 'BAR2_REF')
         self.assertCountEqual(cache.get_missing_ids(foo1 + bar1, name, (foo1+bar1)._ids), [])
         self.assertCountEqual(cache.get_missing_ids(foo2 + bar2, name, (foo2+bar2)._ids), [])
 
         # remove value in one environment
         cache.remove(foo1, name)
-        check(foo1, None, 'FOO2_REF')
-        check(foo2, None, 'FOO2_REF')
-        check(bar1, 'BAR2_NAME', 'BAR2_REF')
+        check(foo1, None, 'FOO1_REF')
+        check(foo2, 'FOO2_NAME', 'FOO2_REF')
+        check(bar1, 'BAR1_NAME', 'BAR1_REF')
         check(bar2, 'BAR2_NAME', 'BAR2_REF')
         self.assertCountEqual(cache.get_missing_ids(foo1 + bar1, name, (foo1+bar1)._ids), [1])
-        self.assertCountEqual(cache.get_missing_ids(foo2 + bar2, name, (foo2+bar2)._ids), [1])
+        self.assertCountEqual(cache.get_missing_ids(foo2 + bar2, name, (foo2+bar2)._ids), [])
 
         # partial invalidation
         cache.invalidate([(name, None), (ref, foo1.ids)])
         check(foo1, None, None)
         check(foo2, None, None)
-        check(bar1, None, 'BAR2_REF')
+        check(bar1, None, 'BAR1_REF')
         check(bar2, None, 'BAR2_REF')
 
         # total invalidation
@@ -115,16 +115,16 @@ class TestRecordCache(TransactionCase):
         cache.set(bar1, name, 'BAR1_NAME')
         cache.set(bar1, ref, 'BAR1_REF')
         cache.set(foo2, name, 'FOO2_NAME')
-        check(foo1, 'FOO2_NAME', 'FOO1_REF')
-        check(foo2, 'FOO2_NAME', 'FOO1_REF')
+        check(foo1, 'FOO1_NAME', 'FOO1_REF')
+        check(foo2, 'FOO2_NAME', None)
         check(bar1, 'BAR1_NAME', 'BAR1_REF')
-        check(bar2, 'BAR1_NAME', 'BAR1_REF')
+        check(bar2, None, None)
 
         cache.copy(foo1 + bar1, foo2.env)
-        check(foo1, 'FOO2_NAME', 'FOO1_REF')
-        check(foo2, 'FOO2_NAME', 'FOO1_REF')
+        check(foo1, 'FOO1_NAME', 'FOO1_REF')
+        check(foo2, 'FOO2_NAME', None)
         check(bar1, 'BAR1_NAME', 'BAR1_REF')
-        check(bar2, 'BAR1_NAME', 'BAR1_REF')
+        check(bar2, None, None)
 
     @unittest.skipIf(
         not(platform.system() == 'Linux' and platform.machine() == 'x86_64'),

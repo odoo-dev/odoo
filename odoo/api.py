@@ -1033,7 +1033,11 @@ class Environment(Mapping):
         """ Return the key to store the value of ``field`` in cache, the full
             cache key being ``(key, field, record.id)``.
         """
-        return self if field.context_dependent else 1
+        # DLE P21: If a value is set in cache by sudo, and then the regular user (e.g. public) tries to access
+        # the field value, no security check were done. Test `test_ir_http_attachment_access`
+        # Either, we separate the cache by user, either we need to check model and field read access at each __getitem__
+        # Not sure what is the most performant.
+        return self if field.context_dependent else self.uid
 
 
 class Environments(object):

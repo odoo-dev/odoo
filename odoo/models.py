@@ -1110,7 +1110,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 except ValidationError as e:
                     raise
                 except Exception as e:
-                    check(self)
+                    # DLE P24: Why recall check after catching an exception coming from it?
+                    # test `test_views.py`
                     raise ValidationError("%s\n\n%s" % (_("Error while validating constraint"), tools.ustr(e)))
 
     @api.model
@@ -2851,6 +2852,13 @@ Fields:
                 if not (f.compute and self.env.field_todo(f))
             )
         fields = self.check_field_access_rights('read', [f.name for f in fs])
+        # DLE, P2: if we prefetch values for field we haven't written yet,
+        # we must write the changes before reading them from the database, to prevent to overwrite the values we have to
+        # write during the prefetch
+        # Test `test_102_duplicate_record`
+        modfields = set(self._fields[field] for field in fields for record_id in self.ids if field in self.env.all.towrite[self._name][record_id])
+        if modfields:
+            self.towrite_flush(list(modfields))
         self._read(fields)
 
     @api.multi
@@ -2944,9 +2952,7 @@ Fields:
                 # This does not harm in practice, as it is only used in Monetary
                 # fields for rounding the value. As the value comes straight
                 # from the database, it is expected to be rounded already.
-                # DLE, P2: if we read values for field we haven't written yet, ignore the read
-                towrite = self.env.all.towrite[fetched._name] if fetched._name in self.env.all.towrite else {}
-                values = [convert(towrite[record_id][field.name] if record_id in towrite and field.name in towrite[record_id] else value, target, validate=False) for record_id, value in zip(ids, values)]
+                values = [convert(value, target, validate=False) for record_id, value in zip(ids, values)]
                 self.env.cache.update(fetched, field, values)
 
             # determine the fields that must be processed now;
@@ -3271,13 +3277,22 @@ Fields:
         self.check_field_access_rights('write', vals.keys())
         env = self.env
 
+        # DLE P23: test `test_write_date`
+        # We should set the write_date as soon as we write on it, not when we push the write to the server
+        if self._log_access:
+            if 'write_uid' not in vals:
+                vals['write_uid'] = self._uid
+            if 'write_date' not in vals:
+                vals['write_date'] = odoo.fields.Datetime.now()
+
         for fname, value in vals.items():
             field = self._fields.get(fname)
             for record in self:
-                value = field.convert_to_cache(value, record)
+                cache_value = field.convert_to_cache(value, record)
 
                 # nothing to do, the record already has the newest value
-                if env.cache.contains(record, field) and (env.cache.get(record, field) == value):
+                # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
+                if env.cache.contains(record, field) and (env.cache.get(record, field) == cache_value):
                     continue
 
                 # when updating a relational field, updates it's inverse fields, as well as those reelying on it's old value
@@ -3287,17 +3302,26 @@ Fields:
                         for rec in record[field.name]:
                             env.cache.remove(rec, invf)
 
-                env.cache.set(record, field, value)
+                # DLE P21: invalidate the field value for other caches if the field is context dependent.
+                # test `TestXMLID`.`test_create`, `self.assertEqual(category.name, 'Bar')`
+                # `category.name` is context dependent (translatable), category context is `{}`
+                # but when calling `load_records`, `install_mode` is added in the context thanks to
+                # self.with_context(install_mode=True)
+                if field.context_dependent:
+                    env.cache.invalidate([(field, record.ids)])
+                # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
+                env.cache.set(record, field, cache_value)
 
                 # DLE, P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
                 # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
                 # allows the possibility to not prefetch or ignore the reads of values to write
                 if record.id and field.store:
-                    write_value = field.convert_to_write(field.convert_to_record(value, record), record)
-
                     # FP NOTE: we could simplify and keep the one in cache instead
                     # FP TO CHECK: for one2many / many2many, we might concatenate the values instead of overwrite. (imagine 2 write of [(0,0,{})]
-                    env.all.towrite[record._name][record.id][field.name] = write_value
+                    # DLE P20: By writring field.convert_to_write(field.convert_to_record(field.convert_to_cache(value, record), record), record)
+                    # You missed the 2many commands such as [(4, 1), (4, 2)] which were converted to (1, 2), therefore completely replacing
+                    # the existing 2many value instead of just adding new ids to it.
+                    env.all.towrite[record._name][record.id][field.name] = value
                     # DLE P11: When writing on `child_ids`, must write on `parent_id` of the one2many related records,
                     # Otherwise, as we set in the case the correct value for the inverse field values thanks to the above `if field.relational`,
                     # the above `if env.cache.contains(record, field) and (env.cache.get(record, field) == value):` matches
@@ -3344,9 +3368,6 @@ Fields:
         has_translation = self.env.lang and self.env.lang != 'en_US'
 
         bad_names = {'id', 'parent_path'}
-        if self._log_access:
-            if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
-                bad_names.update(LOG_ACCESS_COLUMNS)
 
         for name, val in vals.items():
             if name in bad_names: continue
@@ -3364,14 +3385,6 @@ Fields:
                 updated.append(name)
             else:
                 other_fields.append(field)
-
-        if self._log_access:
-            if 'write_uid' not in vals:
-                columns.append(('write_uid', '%s', self._uid))
-                updated.append('write_uid')
-            if 'write_date' not in vals:
-                columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
-                updated.append('write_date')
 
         # update columns
         if columns:
@@ -5203,7 +5216,9 @@ Fields:
         result = []
         while tocheck:
             (pathlen, field, path), records = tocheck.popitem()
-
+            # DLE P22: test `test_access_deleted_records`,
+            # Deleting an already deleted record should be simply ignored
+            records = records.exists()
             # final node of path, result should be marked as todo, then recursive modified
             if pathlen==0:
                 if field.name in overwrite: continue

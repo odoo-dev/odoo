@@ -1671,6 +1671,7 @@ class ViewModeField(ViewCase):
         })
         with self.assertRaises(IntegrityError):
             view_pure_primary.write({'mode': 'extension'})
+            view_pure_primary.towrite_flush()
 
     def testInheritPrimaryToExtension(self):
         """

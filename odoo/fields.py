@@ -987,8 +987,7 @@ class Field(MetaField('DummyField', (object,), {})):
             record.ensure_one()
             if env.check_todo(self, record):
                 recs = self.recursive and record or env.field_todo(self)
-                # DLE P8: can be a one2many, for which compute_value does not exist, its only for compute field.
-                recs._fetch_field(self)
+                self.compute_value(recs)
 
             if not env.cache.contains(record, self):
                 if self.store and record.id:
