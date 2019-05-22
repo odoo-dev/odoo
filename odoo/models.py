@@ -2876,6 +2876,12 @@ Fields:
             return
         self.check_access_rights('read')
 
+        # DLE P27: `test` test_update_with_id:
+        # On the same model, if a read follows a write, we must flush the towrite as `read` fetch from database and overwrites the cache
+        towrite_fields = [self._fields[field] for values in self.env.all.towrite[self._name].values() for field in fields if field in values]
+        if towrite_fields:
+            self.towrite_flush(towrite_fields)
+
         field_names = []
         inherited_field_names = []
         for name in fields:
