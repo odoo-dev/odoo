@@ -46,6 +46,11 @@ class IrRule(models.Model):
            ir.rule domains."""
         return {'user': self.env.user, 'time': time}
 
+    @api.depends('groups')
+    def _compute_global(self):
+        for rule in self:
+            rule['global'] = not rule.groups
+
     @api.constrains('model_id')
     def _check_model_transience(self):
         if any(self.env[rule.model_id.model].is_transient() for rule in self):
@@ -107,9 +112,13 @@ class IrRule(models.Model):
 
         query = """ SELECT r.id FROM ir_rule r JOIN ir_model m ON (r.model_id=m.id)
                     WHERE m.model=%s AND r.active AND r.perm_{mode}
+                    AND (r.id IN (SELECT rule_group_id FROM rule_group_rel rg
+                                  JOIN res_groups_users_rel gu ON (rg.group_id=gu.gid)
+                                  WHERE gu.uid=%s)
+                         OR r.global)
                     ORDER BY r.id
                 """.format(mode=mode)
-        self._cr.execute(query, (model_name, ))
+        self._cr.execute(query, (model_name, self._uid))
         return self.browse(row[0] for row in self._cr.fetchall())
 
     @api.model
@@ -182,12 +191,19 @@ class IrRule(models.Model):
 
         model = records._name
         description = self.env['ir.model']._get(model).name or model
+        if not self.env.user.has_group('base.group_no_one'):
+            return AccessError(_('The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n\n(Document type: "%(document_kind)s" (%(document_model)s), Operation: %(operation)s)') % {
+                'document_kind': description,
+                'document_model': model,
+                'operation': operation,
+             })
 
+        # debug mode, provide more info
         rules = self._get_failing(records, mode=operation).sudo()
-        return AccessError(_("""The "%(operation)s" on "%(document_kind)s" (%(document_model)s) was rejected because of the following rules:
+        return AccessError(_("""The requested operation ("%(operation)s" on "%(document_kind)s" (%(document_model)s)) was rejected because of the following rules:
 %(rules_list)s
-(records: %(example_records)s, uid: %(user_id)d)
-%(multi_company_warning)s""") % {
+%(multi_company_warning)s
+(records: %(example_records)s, uid: %(user_id)d)""") % {
             'operation': operation,
             'document_kind': description,
             'document_model': model,
@@ -198,3 +214,11 @@ class IrRule(models.Model):
             'user_id': self.env.user.id,
         })
 
+#
+# Hack for field 'global': this field cannot be defined like others, because
+# 'global' is a Python keyword. Therefore, we add it to the class by assignment.
+# Note that the attribute '_module' is normally added by the class' metaclass.
+#
+setattr(IrRule, 'global',
+        fields.Boolean(compute='_compute_global', store=True, _module=IrRule._module,
+                       help="If no group is specified the rule is global and applied to everyone"))
