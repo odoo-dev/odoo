@@ -1014,6 +1014,8 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def __set__(self, records, value):
         """ set the value of field ``self`` on ``records`` """
+        protecteds = records.env.protected(self)
+        not_protected = records - protecteds
         if self.store:
             # DLE P18: need to convert to write the value, at least for *2many
             # Some write overwrites expects the *2many values to be tuple commands and not browse record
@@ -1021,7 +1023,14 @@ class Field(MetaField('DummyField', (object,), {})):
             # test `test_bindings`, `action2.groups_id += group`
             if isinstance(value, BaseModel):
                 value = self.convert_to_write(value, records)
-            records.write({self.name: value})
+            fields = records._field_computed.get(self, [])
+            # DLE P29: issue with `write` overwrite of `/mail/models/mail_thread.py`
+            # Before calling super, it tried to get the value of computed field, which therefore recalled "write"
+            # therefore recalling the write overwrite of `mail`, therefore creating an infinite loop.
+            with records.env.protecting(fields, not_protected):
+                not_protected.write({self.name: value})
+            for record in protecteds:
+                records.env.cache.set(record, self, self.convert_to_cache(value, record))
         else:
             # DLE, P1: Using high level write is a good idea to me, as partner.name = 'Agrolait' should indeed use a high level method,
             # That said using it for compute fields will trigger extra-behaviors that we dont want when we just store the result of a compute field
@@ -1038,11 +1047,11 @@ class Field(MetaField('DummyField', (object,), {})):
     def compute_value(self, records):
         """ Invoke the compute method on ``records``; the results are in cache. """
         fields = records._field_computed[self]
-        with records.env.protecting(fields, records):
-            if isinstance(self.compute, str):
-                getattr(records, self.compute)()
-            else:
-                self.compute(records)
+        # DLE P29: This is part of P29. See other comment.
+        if isinstance(self.compute, str):
+            getattr(records, self.compute)()
+        else:
+            self.compute(records)
 
         # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
@@ -1534,7 +1543,8 @@ class Date(Field):
         if not value:
             return False
         if isinstance(value, datetime):
-            raise TypeError("%s (field %s) must be string or date, not datetime." % (value, self))
+            # DLE P28: crm demo data pass datetimes to date fields.
+            value = value.date()
         return self.from_string(value)
 
     def convert_to_export(self, value, record):
@@ -1645,6 +1655,13 @@ class Datetime(Field):
             return False
         if isinstance(value, date) and not isinstance(value, datetime):
             raise TypeError("%s (field %s) must be string or datetime, not date." % (value, self))
+        if isinstance(value, str):
+            # DLE P27:
+            # Missing seconds
+            # See `mail_demo.xml`
+            # `<field name="date" eval="(DateTime.today() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M')"/>`
+            if len(value) == 16:
+                value += ':00'
         return self.from_string(value)
 
     def convert_to_export(self, value, record):

@@ -5247,7 +5247,7 @@ Fields:
                         # DLE P10: when res.users.user_ids is must be recomputed, res.partner.user_ids must be as well.
                         # This solves the fact base can't be installed with https://github.com/odoo-dev/odoo/commit/0470d556315d428bab483b61c98ee0463b3993fe#r33581720
                         # Basically, when we set `active=False` on a user, this should trigger the recompute of its related partner user_ids
-                        if field.related:
+                        if field.inherited and field.related:
                             records = records.mapped(field.related[0])
                             field = records._fields[field.related[1]]
                         else:

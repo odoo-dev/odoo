@@ -273,8 +273,12 @@ class Lead(models.Model):
 
     @api.depends('state_id')
     def _get_country_id(self):
-        if self.state_id:
-            self.country_id = self.state_id.country_id.id
+        # DLE P30: _on_change methods might have been coded to handle only one record (`api.ensure_one`),
+        # because practicaly it was always the case. Nevertheless, when converting them to compute fields,
+        # you must handle the possibility of `api.multi`.
+        for record in self:
+            if record.state_id:
+                record.country_id = record.state_id.country_id.id
 
     @api.onchange('country_id')
     def _onchange_country_id(self):
