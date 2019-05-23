@@ -5231,7 +5231,7 @@ Fields:
                 records = records - records.env.protected(field)
                 if not records: continue
                 # mark as to recompute if it's a stored field; if not a stored field, removing the cache is enough
-                if field.store and (field.type not in ('one2many', )):
+                if field.store and (field.type not in ('one2many', 'many2many')):
                     newtodo = records.env.add_todo(field, records)
                 else:
                     while field:
