@@ -2852,13 +2852,6 @@ Fields:
                 if not (f.compute and self.env.field_todo(f))
             )
         fields = self.check_field_access_rights('read', [f.name for f in fs])
-        # DLE, P2: if we prefetch values for field we haven't written yet,
-        # we must write the changes before reading them from the database, to prevent to overwrite the values we have to
-        # write during the prefetch
-        # Test `test_102_duplicate_record`
-        modfields = set(self._fields[field] for field in fields for record_id in self.ids if field in self.env.all.towrite[self._name][record_id])
-        if modfields:
-            self.towrite_flush(list(modfields))
         self._read(fields)
 
     @api.multi
@@ -3432,7 +3425,7 @@ Fields:
                 field.write(other, vals[field.name])
 
         # check Python constraints
-        self._validate_fields(vals)
+        # self._validate_fields(vals)
 
         # update parent_path
         if parent_records:

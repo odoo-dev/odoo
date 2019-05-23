@@ -1195,7 +1195,7 @@ class IrModelAccess(models.Model):
                                 JOIN ir_model m ON (a.model_id=m.id)
                                 JOIN res_groups g ON (a.group_id=g.id)
                                 LEFT JOIN ir_module_category c ON (c.id=g.category_id)
-                            WHERE m.model=%s AND a.active IS TRUE AND a.perm_""" + access_mode,
+                            WHERE m.model=%s AND a.active IS TRUE AND a.perm_""" + access_mode + " ORDER BY g.id",
                          (model_name,))
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
 

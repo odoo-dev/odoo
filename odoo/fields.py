@@ -1014,8 +1014,6 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def __set__(self, records, value):
         """ set the value of field ``self`` on ``records`` """
-        protecteds = records.env.protected(self)
-        not_protected = records - protecteds
         if self.store:
             # DLE P18: need to convert to write the value, at least for *2many
             # Some write overwrites expects the *2many values to be tuple commands and not browse record
@@ -1023,14 +1021,20 @@ class Field(MetaField('DummyField', (object,), {})):
             # test `test_bindings`, `action2.groups_id += group`
             if isinstance(value, BaseModel):
                 value = self.convert_to_write(value, records)
-            fields = records._field_computed.get(self, [])
             # DLE P29: issue with `write` overwrite of `/mail/models/mail_thread.py`
             # Before calling super, it tried to get the value of computed field, which therefore recalled "write"
             # therefore recalling the write overwrite of `mail`, therefore creating an infinite loop.
-            with records.env.protecting(fields, not_protected):
-                not_protected.write({self.name: value})
-            for record in protecteds:
-                records.env.cache.set(record, self, self.convert_to_cache(value, record))
+            if self.compute:
+                not_protected = (records - records.env.protected(self))
+                if not_protected:
+                    not_protected.write({self.name: value})
+                protecteds = (records & records.env.protected(self))
+                if protecteds:
+                    for record in protecteds:
+                        record.env.cache.set(record, self, self.convert_to_cache(value, record))
+                        record.env.all.towrite[record._name][record.id][self.name] = value
+            else:
+                records.write({self.name: value})
         else:
             # DLE, P1: Using high level write is a good idea to me, as partner.name = 'Agrolait' should indeed use a high level method,
             # That said using it for compute fields will trigger extra-behaviors that we dont want when we just store the result of a compute field
@@ -1048,10 +1052,11 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Invoke the compute method on ``records``; the results are in cache. """
         fields = records._field_computed[self]
         # DLE P29: This is part of P29. See other comment.
-        if isinstance(self.compute, str):
-            getattr(records, self.compute)()
-        else:
-            self.compute(records)
+        with records.env.protecting(fields, records):
+            if isinstance(self.compute, str):
+                getattr(records, self.compute)()
+            else:
+                self.compute(records)
 
         # even if __set__ already removed the todo, compute method might not set a value
         for field in fields:
