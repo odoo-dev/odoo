@@ -56,6 +56,7 @@ class TestORM(TransactionCase):
             'domain_force': [('id', '!=', p1.id)],
             'model_id': partner_model.id,
         })
+        user.towrite_flush()
 
         # search as unprivileged user
         partners = self.env['res.partner'].sudo(user).search([])

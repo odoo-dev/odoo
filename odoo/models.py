@@ -3633,7 +3633,9 @@ Fields:
         records._parent_store_create()
 
         # mark computed fields as todo
-        modfields = [fname for (fname, field) in self._fields.items() if field.type not in ('one2many', 'many2many')]
+        # DLE P31: modification of a *2many field can trigger a compute field
+        # e.g. ir.rule.global depends on `ir.rule.groups`
+        modfields = [fname for (fname, field) in self._fields.items()]
         setfields = data_list[0]
         records.modified(modfields, setfields['stored'])
 
