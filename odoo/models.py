@@ -3311,7 +3311,7 @@ Fields:
                 # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
                 env.cache.set(record, field, cache_value)
 
-                # DLE, P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
+                # DLE P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
                 # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
                 # allows the possibility to not prefetch or ignore the reads of values to write
                 if record.id and field.store:
