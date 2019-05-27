@@ -1550,12 +1550,12 @@ class Date(Field):
         if isinstance(value, datetime):
             # DLE P28: crm demo data pass datetimes to date fields.
             value = value.date()
-        return self.from_string(value)
+        return self.to_date(value)
 
     def convert_to_export(self, value, record):
         if not value:
             return ''
-        return self.from_string(value) if record._context.get('export_raw_data') else ustr(value)
+        return self.to_date(value) if record._context.get('export_raw_data') else ustr(value)
 
 
 class Datetime(Field):
@@ -1634,10 +1634,8 @@ class Datetime(Field):
                     raise ValueError("Datetime field expects a naive datetime: %s" % value)
                 return value
             return datetime.combine(value, time.min)
-        try:
-            return datetime.strptime(value[:DATETIME_LENGTH], DATETIME_FORMAT)
-        except ValueError:
-            return datetime.strptime(value, DATE_FORMAT)
+
+        return datetime.strptime(value, DATETIME_FORMAT[:len(value)-2])
 
     # kept for backwards compatibility, but consider `from_string` as deprecated, will probably
     # be removed after V12
@@ -1660,20 +1658,13 @@ class Datetime(Field):
             return False
         if isinstance(value, date) and not isinstance(value, datetime):
             raise TypeError("%s (field %s) must be string or datetime, not date." % (value, self))
-        if isinstance(value, str):
-            # DLE P27:
-            # Missing seconds
-            # See `mail_demo.xml`
-            # `<field name="date" eval="(DateTime.today() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M')"/>`
-            if len(value) == 16:
-                value += ':00'
-        return self.from_string(value)
+        return self.to_datetime(value)
 
     def convert_to_export(self, value, record):
         if not value:
             return ''
         value = self.convert_to_display_name(value, record)
-        return self.from_string(value) if record._context.get('export_raw_data') else ustr(value)
+        return self.to_datetime(value) if record._context.get('export_raw_data') else ustr(value)
 
     def convert_to_display_name(self, value, record):
         assert record, 'Record expected'
