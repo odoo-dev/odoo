@@ -999,7 +999,12 @@ class Field(MetaField('DummyField', (object,), {})):
 
                 elif self.compute:
                     recs = self.recursive and record or record._in_cache_without(self)
-                    self.compute_value(recs)
+                    try:
+                        # DLE P35: `test_11_computed_access`
+                        # Prefetch compute fields for which we don't have the access. Same case than just above here
+                        self.compute_value(recs)
+                    except AccessError:
+                        self.compute_value(record)
 
                 else:
                     env.cache.set(record, self, self.convert_to_cache(False, record, validate=False))
@@ -1014,6 +1019,10 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def __set__(self, records, value):
         """ set the value of field ``self`` on ``records`` """
+        # DLE P34: `test_01_basic_set_assertion
+        # You should not be able to assign on a single record. Or if you believe we should from now on, then the test must be changed.
+        # only a single record may be updated
+        records.ensure_one()
         if self.store:
             # DLE P18: need to convert to write the value, at least for *2many
             # Some write overwrites expects the *2many values to be tuple commands and not browse record
@@ -1656,8 +1665,9 @@ class Datetime(Field):
     def convert_to_cache(self, value, record, validate=True):
         if not value:
             return False
-        if isinstance(value, date) and not isinstance(value, datetime):
-            raise TypeError("%s (field %s) must be string or datetime, not date." % (value, self))
+        # DLE P36:
+        # `test_27_company_dependent`
+        # Do not force to pass datetime, accept date as well.
         return self.to_datetime(value)
 
     def convert_to_export(self, value, record):
@@ -2711,6 +2721,11 @@ class Many2many(_RelationalMulti):
                 self.relation, self.column1, self.column2, ", ".join(["%s"] * len(pairs)),
             )
             cr.execute(query, pairs)
+            # DLE P35: Update the many2many field cache with the new added values
+            # `odoo/addons/test_new_api/tests/test_new_fields.py`
+            # `test_11_stored`
+            for record_id, co_record_ids in new_relation.items():
+                self._update(model.browse(record_id), comodel.browse(co_record_ids))
 
         # process pairs to remove
         pairs = [(x, y) for x, ys in old_relation.items() for y in ys - new_relation[x]]

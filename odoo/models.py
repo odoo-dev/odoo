@@ -3310,8 +3310,18 @@ Fields:
                 # self.with_context(install_mode=True)
                 if field.context_dependent:
                     env.cache.invalidate([(field, record.ids)])
-                # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
-                env.cache.set(record, field, cache_value)
+                if field.type == 'many2many':
+                    # DLE P33: `odoo/addons/test_access_rights/tests/test_ir_rules.py`
+                    # test `test_many2many`
+                    # Apparently you can write on many2many values you can't read,
+                    # (You can read A but you can't read B. You should be able to add A & B on a many2many field but not
+                    # but when reading the many2many field, you should see only A, and not B)
+                    # so you should not cache the write value of your many2many, to force to refetch it and re-apply the record rules
+                    # or filter the values by which you can read, and cache only those, I am not sure what the most efficient
+                    env.cache.invalidate([(field, record.ids)])
+                else:
+                    # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
+                    env.cache.set(record, field, cache_value)
 
                 # DLE P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
                 # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
@@ -3331,12 +3341,26 @@ Fields:
                     if field.type.endswith('one2many'):
                         for rec in record[field.name]:
                             env.all.towrite[rec._name][rec.id][field.inverse_name] = rec._fields[field.inverse_name].convert_to_write(record, rec)
-
                 record.modified([fname])
+
                 env.remove_todo(field, record)
 
                 if field.inverse:
-                    field.determine_inverse(record)
+                    try:
+                        field.determine_inverse(record)
+                    except AccessError as e:
+                        # DLE P32: test `test_feedback.py`, `test_local`: When attempting to write on an inherited field,
+                        # the exception raised must be the one below, for a clearer explanation for the user.
+                        if field.inherited:
+                            description = self.env['ir.model']._get(self._name).name
+                            raise AccessError(
+                                _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
+                                    'previous_message': e.args[0],
+                                    'document_kind': description,
+                                    'document_model': self._name,
+                                }
+                            )
+                        raise
                     env.remove_todo(field, record)
 
                 toflush = False
@@ -3346,7 +3370,8 @@ Fields:
                 if toflush:
                     record.towrite_flush([field])
 
-        self._validate_fields(vals.keys())
+        # DLE P36: `test_40_new`, ask RCO if there is not a better way to filter out new records.
+        self.filtered(lambda r: not isinstance(r.id, NewId))._validate_fields(vals.keys())
         return True
 
     @api.multi

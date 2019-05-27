@@ -96,7 +96,6 @@ class TestIRRuleFeedback(Feedback):
             'perm_unlink': False,
             'perm_' + attr: True,
         })
-        res.towrite_flush()
         return res
 
     def test_local(self):
