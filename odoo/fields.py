@@ -1023,6 +1023,7 @@ class Field(MetaField('DummyField', (object,), {})):
         # You should not be able to assign on a single record. Or if you believe we should from now on, then the test must be changed.
         # only a single record may be updated
         records.ensure_one()
+        # FP NOTE: I would remove this "if self.store" there is no reason that non stored fields "=" should behave differently than write(...)
         if self.store:
             # DLE P18: need to convert to write the value, at least for *2many
             # Some write overwrites expects the *2many values to be tuple commands and not browse record
