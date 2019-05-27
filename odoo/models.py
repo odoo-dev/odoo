@@ -1111,7 +1111,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     raise
                 except Exception as e:
                     # DLE P24: Why recall check after catching an exception coming from it?
-                    # test `test_views.py`
+                    # FP NOTE: this makes it difficult to debug bugs in constraints, I would remove the try: and the 2 except
+                    #          if it's not a ValidationError, it's a bug and exception should propagate
                     raise ValidationError("%s\n\n%s" % (_("Error while validating constraint"), tools.ustr(e)))
 
     @api.model
@@ -3277,6 +3278,7 @@ Fields:
         env = self.env
 
         # DLE P23: test `test_write_date`
+        # FP NOTE: this seems wrong: we should use PostgreSQL date and say that the write date is the actual write on the server, I would revert that
         # We should set the write_date as soon as we write on it, not when we push the write to the server
         if self._log_access:
             if 'write_uid' not in vals:
@@ -4092,7 +4094,9 @@ Fields:
                 self.towrite_flush([field])
                 if field.comodel_name:
                     obj = self.env[field.comodel_name]
+
         # DLE P26: test `test_applied_state_toggle`
+        # FP NOTE: instead we should get the domain including ir.rule & active from query (e.g. args = query.get_args()) and let the above code do it's job
         # In case we set active/disable a record, a search on this model must trigger the write_flush of the active fields,
         # as more or less records can be returned according to the `active` flag.
         # In the above test case, this is even trickier has it uses an empty domain `[]`,
@@ -4362,7 +4366,7 @@ Fields:
         preds = defaultdict(set)        # transitive closure of predecessors
         # DLE P4: Need to flush for because this method does a kind of search query manually trough
         # a cr.execute, for which we need the data in database (see test `test_res_group_recursion`)
-        self.towrite_flush()
+        self.towrite_flush([field])
         todo, done = set(self.ids), set()
         while todo:
             # retrieve the respective successors of the nodes in 'todo'
@@ -4911,13 +4915,14 @@ Fields:
 
     @api.model
     def towrite_flush(self, fields=None):
+        # FP NOTE: rename towrite_flush() by flush() everywhere
         if fields is None:
             self.recompute()
         else:
             for field in fields:
                 self.env[field.model_name].recompute_fields([field.name])
 
-        # FP: possible optimization to flush only records having one of 'fields', to test is worth it
+        # FP NOTE: optimization to do: if fields is set, flush only self._name and only if 'fields' in vals
         while self.env.all.towrite:
             model, idsval = self.env.all.towrite.popitem()
             while idsval:
@@ -5226,6 +5231,7 @@ Fields:
             (pathlen, field, path), records = tocheck.popitem()
             # DLE P22: test `test_access_deleted_records`,
             # Deleting an already deleted record should be simply ignored
+            # FP NOTE: we can not do an exists here, that's not efficient; need a better implementation
             records = records.exists()
             # final node of path, result should be marked as todo, then recursive modified
             if pathlen==0:
