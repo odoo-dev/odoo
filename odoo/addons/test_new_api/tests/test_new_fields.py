@@ -1051,7 +1051,12 @@ class TestFields(common.TransactionCase):
         email = self.env.ref('test_new_api.emailmessage_0_0')
         self.assertEqual(email.message, message)
 
-        french = self.env['res.lang']._lang_get('fr_FR')
+        # DLE P40: Well,this one is a bug in the test in standard.
+        # _lang_get leads to a search on res.lang, without active_test=False
+        # and as french is not active, it returns the fallback instead, en_US.
+        # so this test which was attempting to test the translated value was stored on the translation rather than on the source
+        # was actually testing just the opposite.
+        french = self.env['res.lang'].with_context(active_test=False)._lang_get('fr_FR')
         french.active = True
 
         def count(msg):

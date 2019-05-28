@@ -3108,6 +3108,17 @@ Fields:
             valid_ids.extend(row[0] for row in self._cr.fetchall())
         return self.browse(valid_ids)
 
+    @api.model
+    def _sort_values(self, vals):
+        # DLE P39
+        fields = [self._fields[f] for f in vals.keys() if f in self._fields]
+        depend_fields = set()
+        for field in fields:
+            if field.type == 'monetary' and field.currency_field in vals:
+                depend_fields.add(field.currency_field)
+        res = sorted(vals.items(), key=lambda kv: 0 if kv[0] in depend_fields else 1)
+        return res
+
     @api.multi
     def unlink(self):
         """ unlink()
@@ -3286,8 +3297,15 @@ Fields:
             if 'write_date' not in vals:
                 vals['write_date'] = odoo.fields.Datetime.now()
 
-        for fname, value in vals.items():
+        # DLE P34
+        determine_inverses = {}
+        # DLE P39: for monetary field, their related currency field must be cached before the amount so it can be rounded correctly
+        # test `test_20_monetary`
+        for fname, value in self._sort_values(vals):
             field = self._fields.get(fname)
+            # DLE P34
+            if field.inverse:
+                determine_inverses.setdefault(field.inverse, []).append(field)
             for record in self:
                 cache_value = field.convert_to_cache(value, record)
 
@@ -3345,24 +3363,6 @@ Fields:
 
                 env.remove_todo(field, record)
 
-                if field.inverse:
-                    try:
-                        field.determine_inverse(record)
-                    except AccessError as e:
-                        # DLE P32: test `test_feedback.py`, `test_local`: When attempting to write on an inherited field,
-                        # the exception raised must be the one below, for a clearer explanation for the user.
-                        if field.inherited:
-                            description = self.env['ir.model']._get(self._name).name
-                            raise AccessError(
-                                _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
-                                    'previous_message': e.args[0],
-                                    'document_kind': description,
-                                    'document_model': self._name,
-                                }
-                            )
-                        raise
-                    env.remove_todo(field, record)
-
                 toflush = False
                 for invf in record._field_inverses[field]:
                     toflush = toflush or not invf._update(record[field.name], record)
@@ -3370,8 +3370,39 @@ Fields:
                 if toflush:
                     record.towrite_flush([field])
 
+        # DLE P34
+        determine_inverses = sorted(map(list, determine_inverses.values()), key=lambda fields: max(map(self.pool.field_sequence, fields)))
+        inverse_fields = [f.name for g in determine_inverses for f in g]
+
         # DLE P36: `test_40_new`, ask RCO if there is not a better way to filter out new records.
-        self.filtered(lambda r: not isinstance(r.id, NewId))._validate_fields(vals.keys())
+        to_validate = self.filtered(lambda r: not isinstance(r.id, NewId))
+        # DLE P35: Validate first regular fields, then inverse fields
+        # Because inverse field might be wrong because the regular fields are not valid,
+        # and this can cause infinite recursion or longer processing.
+        # This was the case before: regular fields validation were done in `_write`, which was called before the validation of the inverse fields in `write`
+        # test `test_no_recursion`
+        to_validate._validate_fields(set(vals) - set(inverse_fields))
+
+        # DLE P34: Batch process inverse fields
+        # test `test_13_inverse`
+        for fields in determine_inverses:
+            try:
+                for record in self:
+                    fields[0].determine_inverse(self)
+            except AccessError as e:
+                # DLE P32: test `test_feedback.py`, `test_local`: When attempting to write on an inherited field,
+                # the exception raised must be the one below, for a clearer explanation for the user.
+                if field.inherited:
+                    description = self.env['ir.model']._get(self._name).name
+                    raise AccessError(
+                        _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
+                            'previous_message': e.args[0],
+                            'document_kind': description,
+                            'document_model': self._name,
+                        }
+                    )
+                raise
+        to_validate._validate_fields(inverse_fields)
         return True
 
     @api.multi
