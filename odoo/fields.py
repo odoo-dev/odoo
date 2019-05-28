@@ -1023,35 +1023,26 @@ class Field(MetaField('DummyField', (object,), {})):
         # You should not be able to assign on a single record. Or if you believe we should from now on, then the test must be changed.
         # only a single record may be updated
         records.ensure_one()
-        # FP NOTE: I would remove this "if self.store" there is no reason that non stored fields "=" should behave differently than write(...)
-        # DLE NOTE: I would not, first because this makes fail the tests. Seconds because naturally you wouldn't call "write" for a non-stored field.
-        if self.store:
-            # DLE P18: need to convert to write the value, at least for *2many
-            # Some write overwrites expects the *2many values to be tuple commands and not browse record
-            # See https://github.com/odoo/odoo/blob/659ff0da13951d0b940c24a070a4a7e51b0897bb/odoo/addons/base/models/res_users.py#L934
-            # test `test_bindings`, `action2.groups_id += group`
-            if isinstance(value, BaseModel):
-                value = self.convert_to_write(value, records)
-            # DLE P29: issue with `write` overwrite of `/mail/models/mail_thread.py`
-            # Before calling super, it tried to get the value of computed field, which therefore recalled "write"
-            # therefore recalling the write overwrite of `mail`, therefore creating an infinite loop.
-            if self.compute:
-                not_protected = (records - records.env.protected(self))
-                if not_protected:
-                    not_protected.write({self.name: value})
-                protecteds = (records & records.env.protected(self))
-                if protecteds:
-                    for record in protecteds:
-                        record.env.cache.set(record, self, self.convert_to_cache(value, record))
-                        record.env.all.towrite[record._name][record.id][self.name] = value
-            else:
-                records.write({self.name: value})
+        # DLE P18: need to convert to write the value, at least for *2many
+        # Some write overwrites expects the *2many values to be tuple commands and not browse record
+        # See https://github.com/odoo/odoo/blob/659ff0da13951d0b940c24a070a4a7e51b0897bb/odoo/addons/base/models/res_users.py#L934
+        # test `test_bindings`, `action2.groups_id += group`
+        write_value = self.convert_to_write(value, records) if isinstance(value, BaseModel) else value
+        # DLE P29: issue with `write` overwrite of `/mail/models/mail_thread.py`
+        # Before calling super, it tried to get the value of computed field, which therefore recalled "write"
+        # therefore recalling the write overwrite of `mail`, therefore creating an infinite loop.
+        if self.compute:
+            not_protected = (records - records.env.protected(self))
+            if not_protected:
+                not_protected.write({self.name: write_value})
+            protecteds = (records & records.env.protected(self))
+            if protecteds:
+                for record in protecteds:
+                    record.env.cache.set(record, self, self.convert_to_cache(value, record))
+                    if self.store:
+                        record.env.all.towrite[record._name][record.id][self.name] = write_value
         else:
-            # DLE P1: Using high level write is a good idea to me, as partner.name = 'Agrolait' should indeed use a high level method,
-            # That said using it for compute fields will trigger extra-behaviors that we dont want when we just store the result of a compute field
-            # e.g. `ir.ui.view` write methods, which writes `arch_fs` to False as a we set the value of the compute field 'arch'
-            for record in records:
-                records.env.cache.set(record, self, self.convert_to_cache(value, record))
+            records.write({self.name: write_value})
 
 
     ############################################################################

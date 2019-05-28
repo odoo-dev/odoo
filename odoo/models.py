@@ -5246,6 +5246,7 @@ Fields:
         # sort according to path length, to share partial path's evaluation
         # order_id.partner_id.name and order_id.name will share the "order_id" evaluation
         tocheck = OrderedDict()
+        seen = set()
         for fname in fnames:
             mfield = self._fields[fname]
             for field, path in self._field_triggers[mfield]:
@@ -5254,6 +5255,10 @@ Fields:
         result = []
         while tocheck:
             (pathlen, field, path), records = tocheck.popitem()
+            # DLE P37
+            if (pathlen, field, path, records) in seen:
+                continue
+            seen.add((pathlen, field, path, records))
             # DLE P22: test `test_access_deleted_records`,
             # Deleting an already deleted record should be simply ignored
             # FP NOTE: we can not do an exists here, that's not efficient; need a better implementation
@@ -5270,6 +5275,10 @@ Fields:
                     while field:
                         for record in records:
                             records.env.cache.remove(record, field)
+                        # DLE P37: recursive depends, parent record 'display_name' depends on current record 'display_name'
+                        # test `test_12_recursive`
+                        for tfield, path in self._field_triggers[field]:
+                            tocheck[(len(path), tfield, tuple(path))] = records
                         # DLE P10: when res.users.user_ids is must be recomputed, res.partner.user_ids must be as well.
                         # This solves the fact base can't be installed with https://github.com/odoo-dev/odoo/commit/0470d556315d428bab483b61c98ee0463b3993fe#r33581720
                         # Basically, when we set `active=False` on a user, this should trigger the recompute of its related partner user_ids
