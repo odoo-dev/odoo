@@ -1024,6 +1024,7 @@ class Field(MetaField('DummyField', (object,), {})):
         # only a single record may be updated
         records.ensure_one()
         # FP NOTE: I would remove this "if self.store" there is no reason that non stored fields "=" should behave differently than write(...)
+        # DLE NOTE: I would not, first because this makes fail the tests. Seconds because naturally you wouldn't call "write" for a non-stored field.
         if self.store:
             # DLE P18: need to convert to write the value, at least for *2many
             # Some write overwrites expects the *2many values to be tuple commands and not browse record
