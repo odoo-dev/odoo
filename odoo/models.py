@@ -3135,6 +3135,9 @@ Fields:
 
         # for recomputing fields
         self.check_access_rights('unlink')
+        # DLE P22: test `test_access_deleted_records`,
+        # Deleting an already deleted record should be simply ignored
+        self = self.exists()
         self.modified(self._fields)
         self._check_concurrency()
         self.towrite_flush()
@@ -3465,24 +3468,26 @@ Fields:
                 if cr.rowcount != len(sub_ids):
                     raise MissingError(_('One of the records you are trying to modify has already been deleted (Document type: %s).') % self._description)
 
-            for name in updated:
-                field = self._fields[name]
-                if callable(field.translate):
-                    # The source value of a field has been modified,
-                    # synchronize translated terms when possible.
-                    self.env['ir.translation']._sync_terms_translations(field, self)
+        # DLE P47: case wher you only change a translation, and no other columns
+        # `test_80_copy` `email.with_context(lang='fr_FR').label = "bonjour"`
+        for name in updated:
+            field = self._fields[name]
+            if callable(field.translate):
+                # The source value of a field has been modified,
+                # synchronize translated terms when possible.
+                self.env['ir.translation']._sync_terms_translations(field, self)
 
-                elif has_translation and field.translate:
-                    # The translated value of a field has been modified.
-                    src_trans = self.read([name])[0][name]
-                    if not src_trans:
-                        # Insert value to DB
-                        src_trans = vals[name]
-                        self.with_context(lang=None).write({name: src_trans})
-                    tname = "%s,%s" % (self._name, name)
-                    val = field.convert_to_column(vals[name], self, vals)
-                    self.env['ir.translation']._set_ids(
-                        tname, 'model', self.env.lang, self.ids, val, src_trans)
+            elif has_translation and field.translate:
+                # The translated value of a field has been modified.
+                src_trans = self.read([name])[0][name]
+                if not src_trans:
+                    # Insert value to DB
+                    src_trans = vals[name]
+                    self.with_context(lang=None).write({name: src_trans})
+                tname = "%s,%s" % (self._name, name)
+                val = field.convert_to_column(vals[name], self, vals)
+                self.env['ir.translation']._set_ids(
+                    tname, 'model', self.env.lang, self.ids, val, src_trans)
 
         # set the value of non-column fields
         if other_fields:
@@ -5300,10 +5305,6 @@ Fields:
             if (pathlen, field, path, records) in seen:
                 continue
             seen.add((pathlen, field, path, records))
-            # DLE P22: test `test_access_deleted_records`,
-            # Deleting an already deleted record should be simply ignored
-            # FP NOTE: we can not do an exists here, that's not efficient; need a better implementation
-            records = records.exists()
             # final node of path, result should be marked as todo, then recursive modified
             if pathlen==0:
                 if field.name in overwrite: continue

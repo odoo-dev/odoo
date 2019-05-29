@@ -122,9 +122,9 @@ class TestRecordCache(TransactionCase):
 
         cache.copy(foo1 + bar1, foo2.env)
         check(foo1, 'FOO1_NAME', 'FOO1_REF')
-        check(foo2, 'FOO2_NAME', None)
+        check(foo2, 'FOO1_NAME', 'FOO1_REF')
         check(bar1, 'BAR1_NAME', 'BAR1_REF')
-        check(bar2, None, None)
+        check(bar2, 'BAR1_NAME', 'BAR1_REF')
 
     @unittest.skipIf(
         not(platform.system() == 'Linux' and platform.machine() == 'x86_64'),

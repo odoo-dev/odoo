@@ -2401,6 +2401,9 @@ class One2many(_RelationalMulti):
             if to_create:
                 comodel.create(to_create)
                 to_create.clear()
+                # DLE P46: need to remove the new records from the one2many field cache as they have been created now.
+                # test `test_70_x2many_write`, discussion.very_important_messages |= Message.new({..})
+                records.env.cache.remove(records, self)
             if to_relink:
                 comodel_sudo = comodel.sudo().with_context(prefetch_fields=False)
                 # group lines by record, and relink them in batch
