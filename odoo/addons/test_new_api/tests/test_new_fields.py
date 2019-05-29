@@ -453,6 +453,7 @@ class TestFields(common.TransactionCase):
         self.assertIn(record.amount, [ramount, samount], msg)
 
         # check the value in the database
+        record.towrite_flush([record.env['test_new_api.mixed']._fields['amount']])
         self.cr.execute('SELECT amount FROM test_new_api_mixed WHERE id=%s', [record.id])
         value = self.cr.fetchone()[0]
         self.assertEqual(value, samount, msg)
@@ -510,8 +511,9 @@ class TestFields(common.TransactionCase):
         record.date = date(2012, 5, 1)
         self.assertEqual(record.date, date(2012, 5, 1))
 
-        with self.assertRaises(TypeError):
-            record.date = datetime(2012, 5, 1, 10, 45, 0)
+        # DLE P41: We now support to assign datetime to date. Not sure this is the good practice though.
+        # with self.assertRaises(TypeError):
+        #     record.date = datetime(2012, 5, 1, 10, 45, 0)
 
         # one may assign dates and datetime in the default format, and it must be checked
         record.date = '2012-05-01'
@@ -802,7 +804,6 @@ class TestFields(common.TransactionCase):
             'moment': '1932-11-09 00:00:00',
             'tag_id': tag1.id,
         })
-        record.invalidate_cache()
         self.assertEqual(record.sudo(user0).foo, 'main')
         self.assertEqual(record.sudo(user1).foo, 'default')
         self.assertEqual(record.sudo(user2).foo, 'default')
@@ -822,7 +823,6 @@ class TestFields(common.TransactionCase):
             'moment': '1932-12-10 23:59:59',
             'tag_id': tag2.id,
         })
-        record.invalidate_cache()
         self.assertEqual(record.sudo(user0).foo, 'main')
         self.assertEqual(record.sudo(user1).foo, 'alpha')
         self.assertEqual(record.sudo(user2).foo, 'default')
@@ -843,14 +843,12 @@ class TestFields(common.TransactionCase):
         self.assertEqual(record.sudo(user2).tag_id, tag0)
 
         record.sudo(user1).foo = False
-        record.invalidate_cache()
         self.assertEqual(record.sudo(user0).foo, 'main')
         self.assertEqual(record.sudo(user1).foo, False)
         self.assertEqual(record.sudo(user2).foo, 'default')
 
         # set field with 'force_company' in context
         record.sudo(user0).with_context(force_company=company1.id).foo = 'beta'
-        record.invalidate_cache()
         self.assertEqual(record.sudo(user0).foo, 'main')
         self.assertEqual(record.sudo(user1).foo, 'beta')
         self.assertEqual(record.sudo(user2).foo, 'default')

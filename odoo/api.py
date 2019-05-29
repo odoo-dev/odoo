@@ -1163,7 +1163,7 @@ class Cache(object):
     def copy(self, records, env):
         """ Copy the cache of ``records`` to ``env``. """
         src, dst = records.env, env
-        for src_key, dst_key in [(src, dst), (src._cache_key, dst._cache_key)]:
+        for src_key, dst_key in [(src, dst), (src.uid, dst.uid)]:
             if src_key == dst_key:
                 break
             src_cache = self._data[src_key]

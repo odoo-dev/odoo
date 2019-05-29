@@ -3286,6 +3286,16 @@ Fields:
 
         self.check_access_rights('write')
         self.check_field_access_rights('write', vals.keys())
+        # DLE P44: test `test_27_company_dependent`,
+        # with self.assertRaises(AccessError):
+        #     record.sudo(user0).foo = 'forbidden'
+        # I am not sure what's the best approach here
+        # The issue occurs when you write on fields which do not `_write` on the current model but only on other models
+        # to which you have the access or as sudo. e.g. property fields
+        # Neverhtleess, because of the below, we check twice the write access to the current module for most common cases.
+        # An alternative would be to do it only when there are no `field.store`, but basically it choosing between two `if`
+        # (if only stored fields) or (if write access)
+        self.check_access_rule('write')
         env = self.env
 
         # DLE P23: test `test_write_date`
@@ -5278,8 +5288,8 @@ Fields:
         # order_id.partner_id.name and order_id.name will share the "order_id" evaluation
         tocheck = OrderedDict()
         seen = set()
-        for fname in fnames:
-            mfield = self._fields[fname]
+        mfields = [self._fields[fname] for fname in fnames]
+        for mfield in mfields:
             for field, path in self._field_triggers[mfield]:
                 tocheck[(len(path), field, tuple(path))] = self
 
@@ -5313,9 +5323,11 @@ Fields:
                         # DLE P10: when res.users.user_ids is must be recomputed, res.partner.user_ids must be as well.
                         # This solves the fact base can't be installed with https://github.com/odoo-dev/odoo/commit/0470d556315d428bab483b61c98ee0463b3993fe#r33581720
                         # Basically, when we set `active=False` on a user, this should trigger the recompute of its related partner user_ids
-                        if field.inherited and field.related:
+                        # DLE P43: avoid to recheck the related field if this is the one we just modified
+                        # `test_25_related`
+                        if field.inherited and field.related and field.related_field not in mfields:
                             records = records.mapped(field.related[0])
-                            field = records._fields[field.related[1]]
+                            field = field.related_field
                         else:
                             field = None
 

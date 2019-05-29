@@ -57,10 +57,13 @@ class Category(models.Model):
         self.name = names[-1].strip()
 
     @api.multi
-    def read(self, fields=None, load='_classic_read'):
+    def _read(self, fields):
+        # DLE P45: `test_31_prefetch`,
+        # with self.assertRaises(AccessError):
+        #     cat1.name
         if self.search_count([('id', 'in', self._ids), ('name', '=', 'NOACCESS')]):
             raise AccessError('Sorry')
-        return super(Category, self).read(fields=fields, load=load)
+        return super(Category, self)._read(fields)
 
 
 class Discussion(models.Model):

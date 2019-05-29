@@ -1923,8 +1923,11 @@ class Reference(Selection):
                 return (value._name, value.id) if value else False
         elif isinstance(value, str):
             res_model, res_id = value.split(',')
-            if record.env[res_model].browse(int(res_id)).exists():
-                return (res_model, int(res_id))
+            # DLE P42: `test_24_reference`
+            co_record = record.env[res_model].browse(int(res_id))
+            if co_record.exists():
+                if not validate or (res_model in self.get_values(record.env) and len(co_record) <= 1):
+                    return (res_model, int(res_id))
             else:
                 return False
         elif not value:
