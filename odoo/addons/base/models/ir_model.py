@@ -601,9 +601,16 @@ class IrModelFields(models.Model):
                 else:
                     # field hasn't been loaded (yet?)
                     continue
-                for dependant, path in model._field_triggers.get(field, ()):
-                    if dependant.manual:
-                        failed_dependencies.append((field, dependant))
+
+                def tree_parse(node):
+                    for key, val in node.items():
+                        if key is None:
+                            for f in val:
+                                if f.manual: failed_dependencies.append((field, f))
+                        else:
+                            tree_parse(val)
+                tree_parse(model._field_triggers.get(field, {}))
+
                 for inverse in model._field_inverses.get(field, ()):
                     if inverse.manual and inverse.type == 'one2many':
                         failed_dependencies.append((field, inverse))

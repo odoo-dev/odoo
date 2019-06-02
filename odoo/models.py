@@ -2607,7 +2607,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # 4. initialize more field metadata
         cls._field_computed = {}            # fields computed with the same method
         cls._field_inverses = Collector()   # inverse fields for related fields
-        cls._field_triggers = Collector()   # list of (field, path) to invalidate
+        cls._field_triggers = {}            # {depfield: {depfield: {...}, None: [compute_fields]}}
 
         cls._setup_done = True
 
@@ -5314,7 +5314,6 @@ Fields:
                [(invf, None) for f in fields for invf in self._field_inverses[f]]
         self.env.cache.invalidate(spec)
 
-    @api.multi
     def modified(self, fnames, overwrite=[]):
         """ Notify that fields have been modified on ``self``. This invalidates
             the cache, and prepares the recomputation of stored function fields
@@ -5326,141 +5325,38 @@ Fields:
                 for all
             :param followlink: set as False if you expect no record to link to this one (when create)
         """
+        # FP TODO: evaluate performance impact of fusioning dependency trees, instead of for each fields
+        # FP TODO2: remove overwrite argument, and use protected instead
+        if not len(self): return
+        for fname in fnames:
+            field = self._fields[fname]
+            node = self._field_triggers.get(field, None)
+            if node is not None:
+                self._modified_rec(node, field, overwrite)
 
-        # sort according to path length, to share partial path's evaluation
-        # order_id.partner_id.name and order_id.name will share the "order_id" evaluation
-        tocheck = OrderedDict()
-        seen = set()
-        mfields = [self._fields[fname] for fname in fnames]
-        for mfield in mfields:
-            for field, path in self._field_triggers[mfield]:
-                tocheck[(len(path), field, tuple(path))] = self
-
-        # FP TODO: this implementation is not efficient; improve grouping to share common path od dependencies
-        # self._field_triggers should be a tree structure, with None as leaves
-        #       {depfield: {depfield: {...}, None: [modfield]}}
-        result = []
-        while tocheck:
-            (pathlen, field, path), records = tocheck.popitem()
-            # DLE P37
-            if (pathlen, field, path, records) in seen:
-                continue
-            seen.add((pathlen, field, path, records))
-            # final node of path, result should be marked as todo, then recursive modified
-            if pathlen==0:
-                if field.name in overwrite: continue
-                records = records - records.env.protected(field)
-                if not records: continue
-                # mark as to recompute if it's a stored field; if not a stored field, removing the cache is enough
-                if field.store and (field.type not in ('one2many', 'many2many')):
-                    newtodo = records.env.add_todo(field, records)
-                else:
-                    while field:
+    def _modified_rec(self, node, field, overwrite=[]):
+        for key, val in node.items():
+            records = self - self.env.protected(field)
+            if not records: continue
+            # if key is None: val is a list of fields to mark as todo
+            # else: val is another dict structure of dependencies
+            if key is None:
+                for field in val:
+                    if field.name in overwrite: continue
+                    if field.store and (field.type not in ('one2many', 'many2many')):
+                        newtodo = records.env.add_todo(field, records)
+                        newtodo.modified([field.name])
+                    else:
                         for record in records:
                             records.env.cache.remove(record, field)
-                        # DLE P37: recursive depends, parent record 'display_name' depends on current record 'display_name'
-                        # test `test_12_recursive`
-                        for tfield, path in self._field_triggers[field]:
-                            tocheck[(len(path), tfield, tuple(path))] = records
-                        # DLE P10: when res.users.user_ids is must be recomputed, res.partner.user_ids must be as well.
-                        # This solves the fact base can't be installed with https://github.com/odoo-dev/odoo/commit/0470d556315d428bab483b61c98ee0463b3993fe#r33581720
-                        # Basically, when we set `active=False` on a user, this should trigger the recompute of its related partner user_ids
-                        if field.inherited and field.type in ('one2many') and field.related:
-                            records = records.mapped(field.related[0])
-                            field = field.related_field
-                        else:
-                            field = None
-
-                    newtodo = None
-
-                if newtodo:
-                    newtodo.modified([field.name])
-                continue
-
-
-            lastfield = path[-1]
-            model = self.env[lastfield.model_name]
-
-            # FP TO CHECK are o2m with domains considered inverse?
-            try:
-                if model._field_inverses.get(lastfield, False):
-                    new_records = records.mapped(model._field_inverses[lastfield][0].name)
-                else:
-                    new_records = model.search([(lastfield.name, 'in', records.ids)])
-            except MissingError:
-                # DLE P22: test `test_access_deleted_records`,
-                # Deleting an already deleted record should be simply ignored
-                continue
-
-            # Group part of path together
-            key = (pathlen-1, field, path[:-1])
-            if key in tocheck:
-                tocheck[key] |= new_records
             else:
-                tocheck[key] = new_records
-
-
-
-
-
-
-        # group triggers by (model, path) to minimize the calls to search()
-        # triggers = defaultdict(set)
-        # for fname in fnames:
-        #     mfield = self._fields[fname]
-        #     for field, path in self._field_triggers[mfield]:
-        #         triggers[(field.model_name, path)].add(field)
-
-        # # process triggers, mark fields to be invalidated/recomputed
-        # for model_path, fields in triggers.items():
-        #     model_name, path = model_path
-        #     stored = {field for field in fields if field.compute and field.store}
-        #     # process stored fields
-        #     if path and stored:
-        #         # Optimization: do not search for one2many/many2many when creating a record
-        #         if not followlink:
-        #             obj = self.env[model_name]
-        #             f = None
-        #             for p in path:
-        #                 if p=='id': continue
-        #                 f = obj._fields[p]
-        #                 obj = self.env[f.comodel_name]
-        #             if f and (f.type=='many2one'):
-        #                 continue
-
-        #         # determine records of model_name linked by path to self
-        #         if path == 'id':
-        #             target = self
-        #         else:
-        #             Model = self.env[model_name]
-        #             f = Model._fields.get(path)
-        #             if f and f.store and f.type not in ('one2many', 'many2many'):
-        #                 # path is direct (not dotted), stored, and inline -> optimise to raw sql
-        #                 self.env.cr.execute('SELECT id FROM "%s" WHERE "%s" in %%s' % (Model._table, path), [tuple(self.ids)])
-        #                 target = Model.browse(i for [i] in self.env.cr.fetchall())
-        #             else:
-        #                 env = self.env(user=SUPERUSER_ID, context={'active_test': False})
-        #                 target = env[model_name].search([(path, 'in', self.ids)])
-        #                 target = target.with_env(self.env)
-
-        #         # prepare recomputation for each field on linked records
-        #         for field in stored:
-        #             if not target:
-        #                 continue
-        #             # do not recompute if a value is provided (on_change and default optimization)
-        #             if (target==self) and ((overwrite is None) or (field.name in overwrite)):
-        #                 continue
-
-        #             # mark field to be recomputed on target
-        #             if field.compute_sudo:
-        #                 target = target.sudo()
-
-        #             # recursive call
-        #             todo = target.env.check_todo(field, record)
-        #             if todo:
-        #                 target.env.add_todo(field, todo)
-        #                 todo.modified(field)
-
+                model = self.env[key.model_name]
+                if model._field_inverses.get(key, False):
+                    # FP TO CHECK: are o2m with domains considered inverse?
+                    records = records.mapped(model._field_inverses[key][0].name)
+                else:
+                    records = model.search([(key.name, 'in', records.ids)])
+                records._modified_rec(val, key)
 
     def _recompute_check(self, field):
         """ If ``field`` must be recomputed on some record in ``self``, return the
@@ -5504,10 +5400,13 @@ Fields:
         """ Return whether ``field`` should trigger an onchange event in the
             presence of ``other_fields``.
         """
-        # test whether self has an onchange method for field, or field is a
-        # dependency of any field in other_fields
-        return field.name in self._onchange_methods or \
-            any(dep in other_fields for dep, _ in self._field_triggers[field])
+        def tree_traverse(node):
+            for key, val in node.items():
+                if key is None: continue
+                if key in other_fields: return True
+                if tree_traverse(val): return True
+            return False
+        return (field.name in self._onchange_methods) or tree_traverse(self._field_triggers.get(field, {}))
 
     @api.model
     def _onchange_spec(self, view_info=None):

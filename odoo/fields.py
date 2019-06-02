@@ -686,67 +686,51 @@ class Field(MetaField('DummyField', (object,), {})):
     #
     # Setup of field triggers
     #
-    # The triggers of ``self`` are a collection of pairs ``(field, path)`` of
-    # fields that depend on ``self``. When ``self`` is modified, it invalidates
-    # the cache of each ``field``, and determines the records to recompute based
-    # on ``path``. See method ``modified`` below for details.
+    # The triggers of a field F is a tree that contains the fields that depend
+    # on F, together with the fields to inverse to find out which records to
+    # recompute.
     #
-
-    # FP TODO: reimplement this method and setup_triggers to use a tree structure with None being the leaves
-    #     self_field_triggers should be {depfield: {depfield: {...}, None: []}}
-    def resolve_deps(self, model, path0=[], seen=frozenset()):
-        """ Return the dependencies of ``self`` as tuples ``(model, field, path)``,
-            where ``path`` is an optional list of field names.
-        """
-        model0 = model
-        result = []
-
-        # add self's own dependencies
-        for dotnames in self.depends:
-            if dotnames == self.name:
-                _logger.warning("Field %s depends on itself; please fix its decorator @api.depends().", self)
-            model, path = model0, path0
-            for fname in dotnames.split('.'):
-                field = model._fields[fname]
-                result.append((model, field, path))
-                model = model0.env.get(field.comodel_name)
-                path = None if path is None else path + [field]
-
-        # add self's model dependencies
-        for mname, fnames in model0._depends.items():
-            model = model0.env[mname]
-            for fname in fnames:
-                field = model._fields[fname]
-                result.append((model, field, None))
-
-        # FP NOTE: this seems unefficient to have a dependency = many2one.one2many, what about letting modified handle the oné2many, many2many?
-
-        # add indirect dependencies from the dependencies found above
-        seen = seen.union([self])
-        for model, field, path in list(result):
-            # Fields that depend on the inverse of a one2many do not explicitly
-            # depend on the one2many. This avoids useless recomputations when
-            # writing on the one2many without actually modifying it. Actual
-            # modifications do write on the inverse, and therefore trigger the
-            # expected recomputations.
-            if field.type in ('one2many', 'many2many'):
-                for inv_field in model._field_inverses[field]:
-                    inv_model = model0.env[inv_field.model_name]
-                    inv_path = None if path is None else path + [field]
-                    result.append((inv_model, inv_field, inv_path))
-            if not field.store and field not in seen:
-                result += field.resolve_deps(model, path, seen)
-
-        return result
+    # For instance, assume that G depends on F, H depends on X.F, I depends on
+    # W.X.F, and J depends on Y.F. The triggers of F will be the tree:
+    #
+    #                                   [G]
+    #                                 X/   \Y
+    #                               [H]     [J]
+    #                             W/
+    #                           [I]
+    #
+    # This tree provides perfect support for the trigger mechanism:
+    # when F is # modified on records,
+    #  - mark G to recompute on records,
+    #  - mark H to recompute on inverse(X, records),
+    #  - mark I to recompute on inverse(W, inverse(X, records)),
+    #  - mark J to recompute on inverse(Y, records).
 
     def setup_triggers(self, model):
-        """ Add the necessary triggers to invalidate/recompute ``self``. """
-        for model, field, path in self.resolve_deps(model):
-            if self.store and not field.store:
-                _logger.info("Field %s depends on non-stored field %s", self, field)
-            model._field_triggers.add(field, (self, path))
-            if (field is self) and path:
-                self.recursive = True
+        def add_trigger(field, path):
+            """ add a trigger on field to recompute self """
+            field_model = model.env[field.model_name]
+            node = field_model._field_triggers.setdefault(field, {})
+            for f in reversed(path):
+                node = node.setdefault(f, {})
+            node.setdefault(None, []).append(self)
+
+        for dotnames in self.depends:
+            field_model = model
+            path = []                   # fields from model to field_model
+            for fname in dotnames.split('.'):
+                field = field_model._fields[fname]
+                add_trigger(field, path)
+
+                if (field is self) and path:
+                    self.recursive = True
+
+                path.append(field)
+                if field.type in ('one2many', 'many2many'):
+                    for inv_field in field_model._field_inverses[field]:
+                        add_trigger(inv_field, path)
+
+                field_model = model.env.get(field.comodel_name)
 
     ############################################################################
     #
