@@ -692,6 +692,8 @@ class Field(MetaField('DummyField', (object,), {})):
     # on ``path``. See method ``modified`` below for details.
     #
 
+    # FP TODO: reimplement this method and setup_triggers to use a tree structure with None being the leaves
+    #     self_field_triggers should be {depfield: {depfield: {...}, None: []}}
     def resolve_deps(self, model, path0=[], seen=frozenset()):
         """ Return the dependencies of ``self`` as tuples ``(model, field, path)``,
             where ``path`` is an optional list of field names.
@@ -716,6 +718,8 @@ class Field(MetaField('DummyField', (object,), {})):
             for fname in fnames:
                 field = model._fields[fname]
                 result.append((model, field, None))
+
+        # FP NOTE: this seems unefficient to have a dependency = many2one.one2many, what about letting modified handle the oné2many, many2many?
 
         # add indirect dependencies from the dependencies found above
         seen = seen.union([self])

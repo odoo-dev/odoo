@@ -3372,6 +3372,8 @@ Fields:
                     if field.type.endswith('one2many'):
                         for rec in record[field.name]:
                             env.all.towrite[rec._name][rec.id][field.inverse_name] = rec._fields[field.inverse_name].convert_to_write(record, rec)
+
+                # FP NOTE: possible huge optimization here: if field was already in todo, don't recall modified
                 record.modified([fname])
 
                 env.remove_todo(field, record)
@@ -5298,6 +5300,9 @@ Fields:
             for field, path in self._field_triggers[mfield]:
                 tocheck[(len(path), field, tuple(path))] = self
 
+        # FP TODO: this implementation is not efficient; improve grouping to share common path od dependencies
+        # self._field_triggers should be a tree structure, with None as leaves
+        #       {depfield: {depfield: {...}, None: [modfield]}}
         result = []
         while tocheck:
             (pathlen, field, path), records = tocheck.popitem()
