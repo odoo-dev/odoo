@@ -332,7 +332,7 @@ class Bar(models.Model):
     _description = 'Test New API Bar'
 
     name = fields.Char()
-    foo = fields.Many2one('test_new_api.foo', compute='_compute_foo')
+    foo = fields.Many2one('test_new_api.foo', compute='_compute_foo', search='_search_foo')
     value1 = fields.Integer(related='foo.value1', readonly=False)
     value2 = fields.Integer(related='foo.value2', readonly=False)
 
@@ -340,6 +340,11 @@ class Bar(models.Model):
     def _compute_foo(self):
         for bar in self:
             bar.foo = self.env['test_new_api.foo'].search([('name', '=', bar.name)], limit=1)
+
+    def _search_foo(self, operator, value):
+        assert operator == 'in'
+        records = self.env['test_new_api.foo'].browse(value)
+        return [('name', 'in', records.mapped('name'))]
 
 
 class Related(models.Model):
@@ -545,6 +550,15 @@ class Attachment(models.Model):
     def _compute_name(self):
         for rec in self:
             rec.name = self.env[rec.res_model].browse(rec.res_id).display_name
+
+    # DLE P55: `test_cache_invalidation`
+    def modified(self, fnames, overwrite=[]):
+        comodel = self.env[self.res_model]
+        if 'res_id' in fnames and 'attachment_ids' in comodel:
+            records = comodel.browse(self.res_id)
+            self.env.cache.invalidate([(comodel._fields['attachment_ids'], [self.res_id])])
+            records.modified(['attachment_ids'])
+        return super(Attachment, self).modified(fnames, overwrite=overwrite)
 
 
 class AttachmentHost(models.Model):

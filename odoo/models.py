@@ -3298,7 +3298,8 @@ Fields:
         # Neverhtleess, because of the below, we check twice the write access to the current module for most common cases.
         # An alternative would be to do it only when there are no `field.store`, but basically it choosing between two `if`
         # (if only stored fields) or (if write access)
-        self.check_access_rule('write')
+        if self.ids:
+            self.check_access_rule('write')
         env = self.env
 
         # DLE P23: test `test_write_date`
@@ -3324,7 +3325,15 @@ Fields:
 
                 # nothing to do, the record already has the newest value
                 # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
-                if env.cache.contains(record, field) and (env.cache.get(record, field) == cache_value):
+                # DLE P49: in an onchange, the record to which we applied a change already has its cache correctly set,
+                # as we create the `new` record with already the onchanges values
+                # `record = self.new(values)`
+                # We nevertheless needs to trigger the write to trigger the modified to get the values that gets modified
+                # because of this write.
+                # Alternatively, in the `onchange` method, the new record must be created from the origin record values,
+                # and then we assign the new values through __set__
+                # `test_onchange_one2many_with_domain_on_related_field`
+                if not env.in_onchange and env.cache.contains(record, field) and (env.cache.get(record, field) == cache_value):
                     continue
 
                 # when updating a relational field, updates it's inverse fields, as well as those reelying on it's old value
@@ -3349,10 +3358,12 @@ Fields:
                     # but when reading the many2many field, you should see only A, and not B)
                     # so you should not cache the write value of your many2many, to force to refetch it and re-apply the record rules
                     # or filter the values by which you can read, and cache only those, I am not sure what the most efficient
+                    # DLE P52: needs to filter out after all, because of onchanges, in the below test
+                    # test `test_onchange_specific`
                     env.cache.invalidate([(field, record.ids)])
-                else:
-                    # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
-                    env.cache.set(record, field, cache_value)
+                    cache_value = field.convert_to_cache(field.convert_to_record(cache_value, record)._filter_access_rules('read'), record)
+                # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
+                env.cache.set(record, field, cache_value)
 
                 # DLE P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
                 # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
@@ -3396,7 +3407,10 @@ Fields:
         # and this can cause infinite recursion or longer processing.
         # This was the case before: regular fields validation were done in `_write`, which was called before the validation of the inverse fields in `write`
         # test `test_no_recursion`
-        to_validate._validate_fields(set(vals) - set(inverse_fields))
+        # DLE P48: do not validate fields in onchange
+        # `test_onchange_related`
+        if not env.in_onchange:
+            to_validate._validate_fields(set(vals) - set(inverse_fields))
 
         # DLE P34: Batch process inverse fields
         # test `test_13_inverse`
@@ -5603,7 +5617,12 @@ Fields:
                             else:
                                 # existing line: check diff from database
                                 # (requires a clean record cache!)
-                                line_diff = line_snapshot.diff(Snapshot(line, subnames))
+                                # DLE P50: compare the 2many line from the `other` snapshot (which is snapshot0, the snapshot before the onchange happened)
+                                # instead of taking it from the database, as we might already have written the new value in database if `towrite_flush` has been
+                                # called for any reason. Besides it's better to do less query to the database if we already have the information we need.
+                                # `test_onchange_one2many`
+                                other_snapshot = next((line for line in other[name] if line['<record>'] == line_snapshot['<record>']), None)
+                                line_diff = line_snapshot.diff(other_snapshot or Snapshot(line, subnames))
                                 if line_diff:
                                     # send all fields because the web client
                                     # might need them to evaluate modifiers
@@ -5668,13 +5687,13 @@ Fields:
                 if field_onchange.get(name):
                     record._onchange_eval(name, field_onchange[name], result)
 
-        # make a snapshot (this forces evaluation of computed fields)
-        snapshot1 = Snapshot(record, nametree)
+                # make a snapshot (this forces evaluation of computed fields)
+                snapshot1 = Snapshot(record, nametree)
 
-        # determine which fields have been modified
-        for name in nametree:
-            if snapshot1[name] != snapshot0[name]:
-                todo.append(name)
+                # determine which fields have been modified
+                for name in nametree:
+                    if snapshot1[name] != snapshot0[name]:
+                        todo.append(name)
 
         # determine values that have changed by comparing snapshots
 

@@ -2643,7 +2643,17 @@ class Many2many(_RelationalMulti):
         # determine old relation {x: ys}
         old_relation = defaultdict(set)
         if not create:
-            clauses, params, tables = comodel.env['ir.rule'].domain_get(comodel._name)
+            # DLE P53: it was possible to add links to many2many fields while you had not the right to access the comodel records,
+            # but then it wasn't possible to remove this link using [(5,)], as it only removed the links of the records to which you had the read access right
+            # e.g. you have the access to self.id1, but not to self.id2
+            # the below added to the current records links to self.id1 & self.id2
+            # `container_user.write({'some_ids': [(6, 0, [self.id1, self.id2])]})`
+            # then, the below only removed self.id1, as you had no the access to self.id2
+            # `container_user.write({'some_ids': [(5,)]})`
+            # It should behave as many2one field: You can write in many2one field a record to which you don't have the access,
+            # as well as emptying the many2one field from this record to which you do not had the access.
+            # test `test_many2many`
+            tables = ['"%s"' % model.env[comodel._name]._table]
             if '"%s"' % self.relation not in tables:
                 tables.append('"%s"' % self.relation)
             query = """
@@ -2652,10 +2662,10 @@ class Many2many(_RelationalMulti):
             """.format(
                 rel=self.relation, id1=self.column1, id2=self.column2,
                 table=comodel._table, tables=",".join(tables),
-                cond=" AND ".join(clauses) if clauses else "1=1",
+                cond="1=1",
             )
             ids = {rid for recs, cs in records_commands_list for rid in recs.ids}
-            cr.execute(query, [tuple(ids)] + params)
+            cr.execute(query, [tuple(ids)])
             for x, y in cr.fetchall():
                 old_relation[x].add(y)
 
