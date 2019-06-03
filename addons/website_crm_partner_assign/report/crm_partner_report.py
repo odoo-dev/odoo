@@ -23,13 +23,6 @@ class CrmPartnerReportAssign(models.Model):
     turnover = fields.Float('Turnover', readonly=True)
     date = fields.Date('Invoice Account Date', readonly=True)
 
-    _depends = {
-        'account.invoice.report': ['date', 'partner_id', 'price_total', 'state', 'type'],
-        'crm.lead': ['partner_assigned_id'],
-        'res.partner': ['activation', 'country_id', 'date_partnership', 'date_review',
-                        'grade_id', 'parent_id', 'team_id', 'user_id'],
-    }
-
     @api.model_cr
     def init(self):
         """
