@@ -890,6 +890,7 @@ class TestFields(common.TransactionCase):
         })
         with self.assertRaises(AccessError):
             record.sudo(user0).foo = 'forbidden'
+            record.sudo(user0).towrite_flush()
 
     def test_30_read(self):
         """ test computed fields as returned by read(). """

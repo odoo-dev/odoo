@@ -3289,27 +3289,7 @@ Fields:
 
         self.check_access_rights('write')
         self.check_field_access_rights('write', vals.keys())
-        # DLE P44: test `test_27_company_dependent`,
-        # with self.assertRaises(AccessError):
-        #     record.sudo(user0).foo = 'forbidden'
-        # I am not sure what's the best approach here
-        # The issue occurs when you write on fields which do not `_write` on the current model but only on other models
-        # to which you have the access or as sudo. e.g. property fields
-        # Neverhtleess, because of the below, we check twice the write access to the current module for most common cases.
-        # An alternative would be to do it only when there are no `field.store`, but basically it choosing between two `if`
-        # (if only stored fields) or (if write access)
-        if self.ids:
-            self.check_access_rule('write')
         env = self.env
-
-        # DLE P23: test `test_write_date`
-        # FP NOTE: this seems wrong: we should use PostgreSQL date and say that the write date is the actual write on the server, I would revert that
-        # We should set the write_date as soon as we write on it, not when we push the write to the server
-        if self._log_access:
-            if 'write_uid' not in vals:
-                vals['write_uid'] = self._uid
-            if 'write_date' not in vals:
-                vals['write_date'] = odoo.fields.Datetime.now()
 
         # DLE P34
         determine_inverses = {}
@@ -3415,22 +3395,25 @@ Fields:
         # DLE P34: Batch process inverse fields
         # test `test_13_inverse`
         for fields in determine_inverses:
-            try:
-                for record in self:
+            for record in self:
+                try:
                     fields[0].determine_inverse(self)
-            except AccessError as e:
-                # DLE P32: test `test_feedback.py`, `test_local`: When attempting to write on an inherited field,
-                # the exception raised must be the one below, for a clearer explanation for the user.
-                if field.inherited:
-                    description = self.env['ir.model']._get(self._name).name
-                    raise AccessError(
-                        _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
-                            'previous_message': e.args[0],
-                            'document_kind': description,
-                            'document_model': self._name,
-                        }
-                    )
-                raise
+                except AccessError as e:
+                    # DLE P32: test `test_feedback.py`, `test_local`: When attempting to write on an inherited field,
+                    # the exception raised must be the one below, for a clearer explanation for the user.
+                    if fields[0].inherited:
+                        description = self.env['ir.model']._get(self._name).name
+                        raise AccessError(
+                            _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
+                                'previous_message': e.args[0],
+                                'document_kind': description,
+                                'document_model': self._name,
+                            }
+                        )
+                    raise
+        for record in self:
+            env.all.towrite[record._name][record.id]['write_date'] = True
+        self.env.cache.invalidate([(self._fields['write_date'], self.ids)])
         to_validate._validate_fields(inverse_fields)
         return True
 
@@ -3454,9 +3437,12 @@ Fields:
         has_translation = self.env.lang and self.env.lang != 'en_US'
 
         bad_names = {'id', 'parent_path'}
+        if self._log_access:
+            bad_names.update(LOG_ACCESS_COLUMNS)
 
         for name, val in vals.items():
-            if name in bad_names: continue
+            if name in bad_names:
+                continue
             field = self._fields[name]
             assert field.store
 
@@ -3471,6 +3457,12 @@ Fields:
                 updated.append(name)
             else:
                 other_fields.append(field)
+
+        if self._log_access:
+            columns.append(('write_uid', '%s', self._uid))
+            updated.append('write_uid')
+            columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
+            updated.append('write_date')
 
         # update columns
         if columns:

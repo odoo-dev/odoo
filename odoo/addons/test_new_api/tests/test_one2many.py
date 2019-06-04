@@ -161,6 +161,7 @@ class One2manyCase(TransactionCase):
             'res_model': record._name,
             'res_id': record.id,
         })
+        attachment.towrite_flush()
         with self.assertQueryCount(1):
             self.assertEqual(attachment.name, record.display_name,
                              "field should be computed")
