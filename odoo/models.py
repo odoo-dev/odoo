@@ -3411,9 +3411,10 @@ Fields:
                             }
                         )
                     raise
-        for record in self:
-            env.all.towrite[record._name][record.id]['write_date'] = True
-        self.env.cache.invalidate([(self._fields['write_date'], self.ids)])
+        if self._log_access:
+            for record in self:
+                env.all.towrite[record._name][record.id]['write_date'] = True
+            self.env.cache.invalidate([(self._fields['write_date'], self.ids)])
         to_validate._validate_fields(inverse_fields)
         return True
 
@@ -4164,15 +4165,28 @@ Fields:
         # It would make sense to raise a KeyError for a field which is not in the registry, but I don't know if
         # it worths the API change.
         # recompute fields that are used in the domain
+        fields_to_flush = set()
         for dom_part in args:
             if isinstance(dom_part, str): continue
             if not isinstance(dom_part[0], str): continue
             obj = self
             for fname in dom_part[0].split('.'):
                 field = obj._fields[fname]
-                self.towrite_flush([field])
+                fields_to_flush.add(field)
                 if field.comodel_name:
                     obj = self.env[field.comodel_name]
+
+        # DLE P56: needs to flush write the order fields
+        # test_15_equivalent_one2many_1
+        # `self.assertEqual([p1,p2], Partner.search([('user_ids', 'in', [u1a,u2])]).ids, "o2m IN matches any on the right side")`
+        # it's sorted by display_name, which needed to be recomputed and stored.
+        order_spec = order or self._order
+        for order_part in order_spec.split(','):
+            order_split = order_part.strip().split(' ')
+            order_field = order_split[0].strip()
+            fields_to_flush.add(self._fields[order_field])
+
+        self.towrite_flush(fields_to_flush)
 
         # DLE P26: test `test_applied_state_toggle`
         # FP NOTE: instead we should get the domain including ir.rule & active from query (e.g. args = query.get_args()) and let the above code do it's job
