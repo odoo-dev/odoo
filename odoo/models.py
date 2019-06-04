@@ -3341,9 +3341,11 @@ Fields:
                     # DLE P52: needs to filter out after all, because of onchanges, in the below test
                     # test `test_onchange_specific`
                     env.cache.invalidate([(field, record.ids)])
-                    cache_value = field.convert_to_cache(field.convert_to_record(cache_value, record)._filter_access_rules('read'), record)
                 # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
-                env.cache.set(record, field, cache_value)
+                # DLE P46: need to remove the new records from the one2many field cache as they have been created now.
+                # test `test_70_x2many_write`, discussion.very_important_messages |= Message.new({..})
+                if field.type not in ('one2many', 'many2many'):
+                    env.cache.set(record, field, cache_value)
 
                 # DLE P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
                 # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
@@ -5349,9 +5351,7 @@ Fields:
                         # DLE P10: when res.users.user_ids is must be recomputed, res.partner.user_ids must be as well.
                         # This solves the fact base can't be installed with https://github.com/odoo-dev/odoo/commit/0470d556315d428bab483b61c98ee0463b3993fe#r33581720
                         # Basically, when we set `active=False` on a user, this should trigger the recompute of its related partner user_ids
-                        # DLE P43: avoid to recheck the related field if this is the one we just modified
-                        # `test_25_related`
-                        if field.inherited and field.related and field.related_field not in mfields:
+                        if field.inherited and field.type in ('one2many') and field.related:
                             records = records.mapped(field.related[0])
                             field = field.related_field
                         else:
