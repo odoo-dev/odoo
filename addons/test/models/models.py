@@ -103,9 +103,6 @@ class test(models.Model):
             'name': 'second',
         })
 
-        import pudb
-        pudb.set_trace()
-
         self.recompute()
         crash_here_to_rollback
 
@@ -117,11 +114,16 @@ class test_line(models.Model):
     _name = 'test.line'
     _description = "Test Line"
 
-    name = fields.Char()
+    name = fields.Char(compute='_get_name', store=True)
     name2 = fields.Char('Related Name', related='test_id.name', store=True)
 
     test_id = fields.Many2one('test')
     intx2   = fields.Integer(compute='_get_intx2', store=True)
+
+    @api.depends('test_id.test_main_id.name')
+    def _get_name(self):
+        for record in self:
+            record.name = record.test_id.test_main_id.name
 
     @api.depends('test_id.intx2')
     def _get_intx2(self):
