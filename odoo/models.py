@@ -5317,35 +5317,42 @@ Fields:
         """
         # FP TODO: evaluate performance impact of fusioning dependency trees, instead of for each fields
         # FP TODO2: remove overwrite argument, and use protected instead
-        if not len(self): return
+        if not self:
+            return
         for fname in fnames:
             field = self._fields[fname]
-            node = self._field_triggers.get(field, None)
+            node = self._field_triggers.get(field)
             if node is not None:
                 self._modified_rec(node, field, overwrite)
 
     def _modified_rec(self, node, field, overwrite=[]):
+        if not self:
+            return
         for key, val in node.items():
-            records = self - self.env.protected(field)
-            if not records: continue
-            # if key is None: val is a list of fields to mark as todo
-            # else: val is another dict structure of dependencies
             if key is None:
+                # val is a list of fields to mark as todo
                 for field in val:
-                    if field.name in overwrite: continue
-                    if field.store and (field.type not in ('one2many', 'many2many')):
+                    records = self - self.env.protected(field)
+                    if not records:
+                        continue
+                    if field.name in overwrite:
+                        continue
+                    if field.compute and field.store:
                         newtodo = records.env.add_todo(field, records)
+                        # recursively trigger recomputation of field's dependents
                         newtodo.modified([field.name])
                     else:
                         for record in records:
+                            # RCO: does not impact caches of other envs
                             records.env.cache.remove(record, field)
             else:
+                # val is another dict structure of dependencies
                 model = self.env[key.model_name]
                 if model._field_inverses.get(key, False):
                     # FP TO CHECK: are o2m with domains considered inverse?
-                    records = records.mapped(model._field_inverses[key][0].name)
+                    records = self.mapped(model._field_inverses[key][0].name)
                 else:
-                    records = model.search([(key.name, 'in', records.ids)])
+                    records = model.search([(key.name, 'in', self.ids)])
                 records._modified_rec(val, key)
 
     def _recompute_check(self, field):
