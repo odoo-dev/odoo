@@ -5393,18 +5393,23 @@ Fields:
     # Generic onchange method
     #
 
+    def _dependent_fields(self, field):
+        """ Return an iterator on the fields that depend on ``field``. """
+        def traverse(node):
+            for key, val in node.items():
+                if key is None:
+                    yield from val
+                else:
+                    yield from traverse(val)
+        return traverse(self._field_triggers.get(field, {}))
+
     def _has_onchange(self, field, other_fields):
         """ Return whether ``field`` should trigger an onchange event in the
             presence of ``other_fields``.
         """
-        def has_other_fields(node):
-            return any(
-                field in other_fields for field in node.get(None, ())
-            ) or any(
-                has_other_fields(child) for field, child in node.items() if field
-            )
-        return (field.name in self._onchange_methods) or \
-            has_other_fields(self._field_triggers.get(field, {}))
+        return (field.name in self._onchange_methods) or any(
+            dep in other_fields for dep in self._dependent_fields(field)
+        )
 
     @api.model
     def _onchange_spec(self, view_info=None):

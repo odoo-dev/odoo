@@ -601,15 +601,9 @@ class IrModelFields(models.Model):
                 else:
                     # field hasn't been loaded (yet?)
                     continue
-
-                def check_failed(node):
-                    for key, val in node.items():
-                        if key is None:
-                            failed_dependencies.extend((field, f) for f in val if f.manual)
-                        else:
-                            check_failed(val)
-                check_failed(model._field_triggers.get(field, {}))
-
+                for dep in model._dependent_fields(field):
+                    if dep.manual:
+                        failed_dependencies.append((field, dep))
                 for inverse in model._field_inverses.get(field, ()):
                     if inverse.manual and inverse.type == 'one2many':
                         failed_dependencies.append((field, inverse))
