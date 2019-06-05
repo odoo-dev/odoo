@@ -5390,13 +5390,14 @@ Fields:
         """ Return whether ``field`` should trigger an onchange event in the
             presence of ``other_fields``.
         """
-        def tree_traverse(node):
-            for key, val in node.items():
-                if key is None: continue
-                if key in other_fields: return True
-                if tree_traverse(val): return True
-            return False
-        return (field.name in self._onchange_methods) or tree_traverse(self._field_triggers.get(field, {}))
+        def has_other_fields(node):
+            return any(
+                field in other_fields for field in node.get(None, ())
+            ) or any(
+                has_other_fields(child) for field, child in node.items() if field
+            )
+        return (field.name in self._onchange_methods) or \
+            has_other_fields(self._field_triggers.get(field, {}))
 
     @api.model
     def _onchange_spec(self, view_info=None):
