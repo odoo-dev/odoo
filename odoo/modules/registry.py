@@ -183,25 +183,6 @@ class Registry(Mapping):
         """ Add or replace a model in the registry."""
         self.models[model_name] = model
 
-    @lazy_property
-    def field_sequence(self):
-        """ Return a function mapping a field to an integer. The value of a
-            field is guaranteed to be strictly greater than the value of the
-            field's dependencies.
-        """
-        # map fields on their dependents
-        dependents = {
-            field: set(dep for dep, _ in model._field_triggers[field] if dep != field)
-            for model in self.values()
-            for field in model._fields.values()
-        }
-        # sort them topologically, and associate a sequence number to each field
-        mapping = {
-            field: num
-            for num, field in enumerate(reversed(topological_sort(dependents)))
-        }
-        return mapping.get
-
     def descendants(self, model_names, *kinds):
         """ Return the models corresponding to ``model_names`` and all those
         that inherit/inherits from them.

@@ -3389,7 +3389,7 @@ Fields:
                 self.towrite_flush([field])
 
         # DLE P34
-        determine_inverses = sorted(map(list, determine_inverses.values()), key=lambda fields: max(map(self.pool.field_sequence, fields)))
+        determine_inverses = determine_inverses.values()
         inverse_fields = [f.name for g in determine_inverses for f in g]
 
         # DLE P36: `test_40_new`, ask RCO if there is not a better way to filter out new records.
@@ -3626,10 +3626,7 @@ Fields:
 
         # group fields by inverse method (to call it once), and order groups
         # by dependence (in case they depend on each other)
-        field_groups = sorted(
-            (fields for _inv, fields in groupby(inversed_fields, attrgetter('inverse'))),
-            key=lambda fields: min(map(self.pool.field_sequence, fields)),
-        )
+        field_groups = (fields for _inv, fields in groupby(inversed_fields, attrgetter('inverse')))
         for fields in field_groups:
             # determine which records to inverse for those fields
             inv_names = {field.name for field in fields}
