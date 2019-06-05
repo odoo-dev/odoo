@@ -602,14 +602,13 @@ class IrModelFields(models.Model):
                     # field hasn't been loaded (yet?)
                     continue
 
-                def tree_parse(node):
+                def check_failed(node):
                     for key, val in node.items():
                         if key is None:
-                            for f in val:
-                                if f.manual: failed_dependencies.append((field, f))
+                            failed_dependencies.extend((field, f) for f in val if f.manual)
                         else:
-                            tree_parse(val)
-                tree_parse(model._field_triggers.get(field, {}))
+                            check_failed(val)
+                check_failed(model._field_triggers.get(field, {}))
 
                 for inverse in model._field_inverses.get(field, ()):
                     if inverse.manual and inverse.type == 'one2many':
