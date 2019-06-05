@@ -3135,9 +3135,6 @@ Fields:
 
         # for recomputing fields
         self.check_access_rights('unlink')
-        # DLE P22: test `test_access_deleted_records`,
-        # Deleting an already deleted record should be simply ignored
-        self = self.exists()
         self.modified(self._fields)
         self._check_concurrency()
         self.towrite_flush()
@@ -3301,20 +3298,23 @@ Fields:
             if field.inverse:
                 determine_inverses.setdefault(field.inverse, []).append(field)
             for record in self:
-                cache_value = field.convert_to_cache(value, record)
+                # DLE P46: need to remove the new records from the one2many field cache as they have been created now.
+                # test `test_70_x2many_write`, discussion.very_important_messages |= Message.new({..})
+                if field.type not in ('one2many', 'many2many'):
+                    cache_value = field.convert_to_cache(value, record)
 
-                # nothing to do, the record already has the newest value
-                # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
-                # DLE P49: in an onchange, the record to which we applied a change already has its cache correctly set,
-                # as we create the `new` record with already the onchanges values
-                # `record = self.new(values)`
-                # We nevertheless needs to trigger the write to trigger the modified to get the values that gets modified
-                # because of this write.
-                # Alternatively, in the `onchange` method, the new record must be created from the origin record values,
-                # and then we assign the new values through __set__
-                # `test_onchange_one2many_with_domain_on_related_field`
-                if not env.in_onchange and env.cache.contains(record, field) and (env.cache.get(record, field) == cache_value):
-                    continue
+                    # nothing to do, the record already has the newest value
+                    # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
+                    # DLE P49: in an onchange, the record to which we applied a change already has its cache correctly set,
+                    # as we create the `new` record with already the onchanges values
+                    # `record = self.new(values)`
+                    # We nevertheless needs to trigger the write to trigger the modified to get the values that gets modified
+                    # because of this write.
+                    # Alternatively, in the `onchange` method, the new record must be created from the origin record values,
+                    # and then we assign the new values through __set__
+                    # `test_onchange_one2many_with_domain_on_related_field`
+                    if not env.in_onchange and env.cache.contains(record, field) and (env.cache.get(record, field) == cache_value):
+                        continue
 
                 # when updating a relational field, updates it's inverse fields, as well as those reelying on it's old value
                 if field.relational:
@@ -3342,11 +3342,8 @@ Fields:
                     # test `test_onchange_specific`
                     env.cache.invalidate([(field, record.ids)])
                 # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
-                # DLE P46: need to remove the new records from the one2many field cache as they have been created now.
-                # test `test_70_x2many_write`, discussion.very_important_messages |= Message.new({..})
                 if field.type not in ('one2many', 'many2many'):
                     env.cache.set(record, field, cache_value)
-
                 # DLE P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
                 # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
                 # allows the possibility to not prefetch or ignore the reads of values to write
@@ -5368,10 +5365,15 @@ Fields:
             model = self.env[lastfield.model_name]
 
             # FP TO CHECK are o2m with domains considered inverse?
-            if model._field_inverses.get(lastfield, False):
-                new_records = records.mapped(model._field_inverses[lastfield][0].name)
-            else:
-                new_records = model.search([(lastfield.name, 'in', records.ids)])
+            try:
+                if model._field_inverses.get(lastfield, False):
+                    new_records = records.mapped(model._field_inverses[lastfield][0].name)
+                else:
+                    new_records = model.search([(lastfield.name, 'in', records.ids)])
+            except MissingError:
+                # DLE P22: test `test_access_deleted_records`,
+                # Deleting an already deleted record should be simply ignored
+                continue
 
             # Group part of path together
             key = (pathlen-1, field, path[:-1])

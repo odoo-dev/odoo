@@ -2794,4 +2794,4 @@ class Id(Field):
 # imported here to avoid dependency cycle issues
 from odoo import SUPERUSER_ID
 from .exceptions import AccessError, MissingError, UserError
-from .models import check_pg_name, BaseModel, IdType
+from .models import check_pg_name, BaseModel, IdType, NewId

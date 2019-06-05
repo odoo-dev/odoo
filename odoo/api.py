@@ -1154,7 +1154,11 @@ class Cache(object):
         field_cache = self._data[key][field]
         result = []
         for record_id in ids:
-            if record_id and (record_id not in field_cache):
+            # DLE P57: avoid to return the same id multiple times
+            # This prevented to load `stock/data/stock_demo.xml` because in `_compute_company_dependent`
+            # `Property.get_multi(self.name, self.model_name, records.ids)` is not coded to support multiple times the same id passed in the browse record,
+            # and the values ended to something like `stock.location(stock.location(stock.location(stock.location(14,),),),),`
+            if record_id and record_id not in result and (record_id not in field_cache):
                 result.append(record_id)
                 limit = limit-1
                 if limit<1: break
