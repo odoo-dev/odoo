@@ -525,6 +525,11 @@ class Partner(models.Model):
             # of partner.user_ids when you create a new user for this partner, see test test_70_archive_internal_partners
             # You modified it in a previous commit, see original commit of this:
             # https://github.com/odoo/odoo/commit/9d7226371730e73c296bcc68eb1f856f82b0b4ed
+            #
+            # RCO: when creating a user for partner, the user is automatically added in partner.user_ids.
+            # This is wrong if the user is not active, as partner.user_ids only returns active users.
+            # Hence this temporary hack until the ORM updates inverse fields correctly.
+            self.invalidate_cache(['user_ids'], self._ids)
             for partner in self:
                 if partner.active and partner.user_ids:
                     raise ValidationError(_('You cannot archive a contact linked to an internal user.'))
