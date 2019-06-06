@@ -255,7 +255,7 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
             return self._assertRaises(exception)
 
     @contextmanager
-    def assertQueryCount(self, default=0, **counters):
+    def assertQueryCount(self, default=0, flush=True, **counters):
         """ Context manager that counts queries. It may be invoked either with
             one value, or with a set of named arguments like ``login=value``::
 
@@ -272,8 +272,12 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
             with self.subTest(), patch('random.random', lambda: 1):
                 login = self.env.user.login
                 expected = counters.get(login, default)
+                if flush:
+                    self.env.user.towrite_flush()
                 count0 = self.cr.sql_log_count
                 yield
+                if flush:
+                    self.env.user.towrite_flush()
                 count = self.cr.sql_log_count - count0
                 if count != expected:
                     # add some info on caller to allow semi-automatic update of query count
@@ -289,6 +293,8 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
                         logger.info(msg, login, count, expected, funcname, filename, linenum)
         else:
             yield
+            if flush:
+                self.env.user.towrite_flush()
 
     def assertRecordValues(self, records, expected_values):
         ''' Compare a recordset with a list of dictionaries representing the expected results.

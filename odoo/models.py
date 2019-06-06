@@ -3297,6 +3297,9 @@ Fields:
             # DLE P34
             if field.inverse:
                 determine_inverses.setdefault(field.inverse, []).append(field)
+            # DLE P59: `test_write_base_one2many` `test_performance.py`
+            # Write x2many inverses at the same time
+            toflush = False
             for record in self:
                 # DLE P46: need to remove the new records from the one2many field cache as they have been created now.
                 # test `test_70_x2many_write`, discussion.very_important_messages |= Message.new({..})
@@ -3320,7 +3323,11 @@ Fields:
                 if field.relational:
                     record.modified([field.name])
                     for invf in record._field_inverses[field]:
-                        for rec in record[field.name]:
+                        # DLE P60: `test_performance.py` `test_write_base_one2many`
+                        # record[field.name] is not in cache, and it will therefore fetch the one2many ids while it doesn't really need them,
+                        # e.g. for [(0, 0, {..})] which only add lines, you do not need to fetch the previous line nor invalidate their inverse.
+                        # You only need to invalidate the one you have in cache, not the other ones.
+                        for rec in self.env[field.comodel_name].browse(env.cache.get_value(record, field, [])):
                             env.cache.remove(rec, invf)
 
                 # DLE P21: invalidate the field value for other caches if the field is context dependent.
@@ -3360,7 +3367,8 @@ Fields:
                     # and we therefore actually never write the `parent_id` values in database.
                     # See test test_duplicate_children_03
                     if field.type.endswith('one2many'):
-                        for rec in record[field.name]:
+                        # DLE P60
+                        for rec in self.env[field.comodel_name].browse(env.cache.get_value(record, field, [])):
                             env.all.towrite[rec._name][rec.id][field.inverse_name] = rec._fields[field.inverse_name].convert_to_write(record, rec)
 
                 # FP NOTE: possible huge optimization here: if field was already in todo, don't recall modified
@@ -3368,12 +3376,17 @@ Fields:
 
                 env.remove_todo(field, record)
 
-                toflush = False
                 for invf in record._field_inverses[field]:
-                    toflush = toflush or not invf._update(record[field.name], record)
+                    if field.relational:
+                        # DLE P60
+                        records = self.env[field.comodel_name].browse(env.cache.get_value(record, field, []))
+                    else:
+                        records = record[field.name]
+                    toflush = toflush or not invf._update(records, record)
 
-                if toflush:
-                    record.towrite_flush([field])
+            # DLE P59
+            if toflush:
+                self.towrite_flush([field])
 
         # DLE P34
         determine_inverses = sorted(map(list, determine_inverses.values()), key=lambda fields: max(map(self.pool.field_sequence, fields)))
@@ -3410,10 +3423,14 @@ Fields:
                             }
                         )
                     raise
+        # DLE P58: `test_orm.py``test_write_date`
+        # If there are only fields that do not trigger _write (e.g. only determine inverse),
+        # the below will ensure `_write ` will be called, even with empty vals, to ensure `write_date` and `write_uid` is updated
         if self._log_access:
-            for record in self:
-                env.all.towrite[record._name][record.id]['write_date'] = True
-            self.env.cache.invalidate([(self._fields['write_date'], self.ids)])
+            if not any(self._fields[fname].store for fname in vals.keys() if fname in self._fields):
+                for record in self:
+                    env.all.towrite[record._name][record.id]
+            self.env.cache.invalidate([(self._fields['write_date'], self.ids), (self._fields['write_uid'], self.ids)])
         to_validate._validate_fields(inverse_fields)
         return True
 
