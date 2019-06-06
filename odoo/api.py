@@ -1148,6 +1148,12 @@ class Cache(object):
         ids = list(self._data[key][field])
         return model.browse(ids)
 
+    def get_present_records(self, records, field):
+        """ Return the subset of ``records`` that have a value for ``field``. """
+        key = records.env.cache_key(field)
+        ids = self._data[key][field]
+        return records.browse([it for it in records._ids if it in ids])
+
     def get_missing_ids(self, records, field, ids, limit=1000):
         """ Return the ids of ``records`` that have no value for ``field``. """
         key = records.env.cache_key(field)

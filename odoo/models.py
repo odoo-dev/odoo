@@ -5338,11 +5338,12 @@ Fields:
                     if field.name in overwrite:
                         continue
                     if field.compute and field.store:
-                        newtodo = records.env.add_todo(field, records)
-                        # recursively trigger recomputation of field's dependents
-                        newtodo.modified([field.name])
+                        records = self.env.add_todo(field, records)
                     else:
-                        records.env.cache.invalidate([(field, records._ids)])
+                        records = self.env.cache.get_present_records(records, field)
+                        self.env.cache.invalidate([(field, records._ids)])
+                    # recursively trigger recomputation of field's dependents
+                    records.modified([field.name])
             else:
                 # val is another dict structure of dependencies
                 model = self.env[key.model_name]
