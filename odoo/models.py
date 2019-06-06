@@ -5346,9 +5346,11 @@ Fields:
             else:
                 # val is another dict structure of dependencies
                 model = self.env[key.model_name]
-                if model._field_inverses.get(key, False):
-                    # FP TO CHECK: are o2m with domains considered inverse?
-                    records = self.mapped(model._field_inverses[key][0].name)
+                for invf in model._field_inverses[key]:
+                    # use an inverse of field without domain
+                    if not (invf.type in ('one2many', 'many2many') and invf.domain):
+                        records = self.mapped(invf.name)
+                        break
                 else:
                     records = model.search([(key.name, 'in', self.ids)])
                 records._modified_rec(val, key)
