@@ -3300,7 +3300,7 @@ Fields:
             for record in self:
                 # DLE P46: need to remove the new records from the one2many field cache as they have been created now.
                 # test `test_70_x2many_write`, discussion.very_important_messages |= Message.new({..})
-                if field.type not in ('one2many', 'many2many'):
+                if field.type not in ('one2many', 'many2many') or not record.id:
                     cache_value = field.convert_to_cache(value, record)
 
                     # nothing to do, the record already has the newest value
@@ -3342,7 +3342,7 @@ Fields:
                     # test `test_onchange_specific`
                     env.cache.invalidate([(field, record.ids)])
                 # DLE: What about one2many, many2many commands that are just adding ids to the existing values?
-                if field.type not in ('one2many', 'many2many'):
+                if field.type not in ('one2many', 'many2many') or not record.id:
                     env.cache.set(record, field, cache_value)
                 # DLE P2: We set the value to write in the cache, but then it can be overwritten by a prefetch when
                 # reading another field of the same model. Writing the towrite sooner, before the computation of modified,
