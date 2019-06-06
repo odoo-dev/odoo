@@ -3377,6 +3377,10 @@ Fields:
                         records = record[field.name]
                     toflush = toflush or not invf._update(records, record)
 
+            # flush if parent field
+            if self._parent_store and fname == self._parent_name:
+                toflush = True
+
             # DLE P59
             if toflush:
                 self.towrite_flush([field])
