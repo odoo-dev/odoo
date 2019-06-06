@@ -5342,9 +5342,7 @@ Fields:
                         # recursively trigger recomputation of field's dependents
                         newtodo.modified([field.name])
                     else:
-                        for record in records:
-                            # RCO: does not impact caches of other envs
-                            records.env.cache.remove(record, field)
+                        records.env.cache.invalidate([(field, records._ids)])
             else:
                 # val is another dict structure of dependencies
                 model = self.env[key.model_name]
