@@ -553,6 +553,8 @@ class Attachment(models.Model):
 
     # DLE P55: `test_cache_invalidation`
     def modified(self, fnames, overwrite=[]):
+        if not self:
+            return
         comodel = self.env[self.res_model]
         if 'res_id' in fnames and 'attachment_ids' in comodel:
             records = comodel.browse(self.res_id)
