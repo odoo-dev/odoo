@@ -1041,6 +1041,26 @@ class TestFields(common.TransactionCase):
         self.assertEqual(len(discussion.important_messages), 2)
         self.assertEqual(len(discussion.very_important_messages), 2)
 
+    def test_70_relational_inverse(self):
+        """ Check the consistency of relational fields with inverse(s). """
+        discussion = self.env.ref('test_new_api.discussion_0')
+        demo_discussion = discussion.sudo(self.env.ref('base.user_demo'))
+
+        # check that the demo user sees the same messages
+        self.assertEqual(demo_discussion.messages, discussion.messages)
+
+        # add a message as user demo
+        messages = demo_discussion.messages
+        message = messages.create({'discussion': discussion.id})
+        self.assertEqual(demo_discussion.messages, messages + message)
+        self.assertEqual(demo_discussion.messages, discussion.messages)
+
+        # add a message as superuser
+        messages = discussion.messages
+        message = messages.create({'discussion': discussion.id})
+        self.assertEqual(discussion.messages, messages + message)
+        self.assertEqual(demo_discussion.messages, discussion.messages)
+
     def test_80_copy(self):
         Translations = self.env['ir.translation']
         discussion = self.env.ref('test_new_api.discussion_0')
