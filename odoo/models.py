@@ -3375,6 +3375,7 @@ Fields:
                         records = self.env[field.comodel_name].browse(env.cache.get_value(record, field, []))
                     else:
                         records = record[field.name]
+                    # RCO: wait a second, if 'toflush' is true, you don't evaluate the call to _update(). WTF?
                     toflush = toflush or not invf._update(records, record)
 
             # flush if parent field
