@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="False">
+        <record model='l10n_cl.identification.type' id='dt_RUT'>
+            <field name='code'>RUT</field>
+            <field name='name'>RUT</field>
+            <field name='sequence'>1</field>
+            <!--field name='active' eval="True"/-->
+        </record>
+        <record model='l10n_cl.identification.type' id='dt_RUN'>
+            <field name='code'>RUN</field>
+            <field name='name'>Cédula</field>
+            <field name='sequence'>2</field>
+            <!--field name='active' eval="True"/-->
+        </record>
+        <record model='l10n_cl.identification.type' id='dt_CIe'>
+            <field name='code'>CIe</field>
+            <field name='name'>CI extranjera</field>
+            <field name='sequence'>3</field>
+            <!--field name='default_doc_num'>55.555.555-5</field>
+            <field name='active' eval="True"/-->
+        </record>
+        <record model='l10n_cl.identification.type' id='dt_XVAT'>
+            <field name='code'>VAT</field>
+            <field name='name'>Vat Extranjero</field>
+            <field name='sequence'>4</field>
+            <!--field name='default_doc_num'>55.555.555-5</field>
+            <field name='active' eval="True"/-->
+        </record>
+        <record model='l10n_cl.identification.type' id='dt_PAS'>
+            <field name='code'>PAS</field>
+            <field name='name'>Pasaporte</field>
+            <field name='sequence'>4</field>
+            <!--field name='default_doc_num'>55.555.555-5</field>
+            <field name='active' eval="True"/-->
+        </record>
+        <record model='l10n_cl.identification.type' id='dt_DNI'>
+            <field name='code'>DNI</field>
+            <field name='name'>DNI Extranjero</field>
+            <field name='sequence'>5</field>
+            <!--field name='default_doc_num'>55.555.555-5</field>
+            <field name='active' eval="True"/-->
+        </record>
+    </data>
+</odoo>

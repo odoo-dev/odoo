@@ -1,0 +1,804 @@
+<?xml version="1.0"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="base.ad" model="res.country">
+            <field name="l10n_cl_customs_name">ANDORRA</field>
+            <field name="l10n_cl_customs_code" eval="525"/>
+        </record>
+
+        <record id="base.af" model="res.country">
+            <field name="l10n_cl_customs_name">AFGHANISTAN</field>
+            <field name="l10n_cl_customs_code" eval="308"/>
+        </record>
+
+        <record id="base.ag" model="res.country">
+            <field name="l10n_cl_customs_name">ANTIGUA Y BARBUDA</field>
+            <field name="l10n_cl_customs_code" eval="240"/>
+            <field name="l10n_cl_customs_abbreviation">ANTIGUA Y BBUDA</field>
+        </record>
+
+        <record id="base.al" model="res.country">
+            <field name="l10n_cl_customs_name">ALBANIA</field>
+            <field name="l10n_cl_customs_code" eval="518"/>
+        </record>
+
+        <record id="base.am" model="res.country">
+            <field name="l10n_cl_customs_name">ARMENIA</field>
+            <field name="l10n_cl_customs_code" eval="540"/>
+        </record>
+
+        <record id="base.ao" model="res.country">
+            <field name="l10n_cl_customs_name">ANGOLA</field>
+            <field name="l10n_cl_customs_code" eval="140"/>
+        </record>
+
+        <record id="base.ar" model="res.country">
+            <field name="l10n_cl_customs_name">ARGENTINA</field>
+            <field name="l10n_cl_customs_code" eval="224"/>
+        </record>
+
+        <record id="base.at" model="res.country">
+            <field name="l10n_cl_customs_name">AUSTRIA</field>
+            <field name="l10n_cl_customs_code" eval="509"/>
+        </record>
+
+        <record id="base.au" model="res.country">
+            <field name="l10n_cl_customs_name">AUSTRALIA</field>
+            <field name="l10n_cl_customs_code" eval="406"/>
+        </record>
+
+        <record id="base.aw" model="res.country">
+            <field name="l10n_cl_customs_name">ARUBA</field>
+            <field name="l10n_cl_customs_code" eval="243"/>
+        </record>
+
+        <record id="base.az" model="res.country">
+            <field name="l10n_cl_customs_name">AZERBAIJAN</field>
+            <field name="l10n_cl_customs_code" eval="541"/>
+        </record>
+
+        <record id="base.bb" model="res.country">
+            <field name="l10n_cl_customs_name">BARBADOS</field>
+            <field name="l10n_cl_customs_code" eval="204"/>
+        </record>
+
+        <record id="base.bd" model="res.country">
+            <field name="l10n_cl_customs_name">BANGLADESH</field>
+            <field name="l10n_cl_customs_code" eval="321"/>
+        </record>
+
+        <record id="base.bf" model="res.country">
+            <field name="l10n_cl_customs_name">BURKINA FASO</field>
+            <field name="l10n_cl_customs_code" eval="161"/>
+        </record>
+
+        <record id="base.bg" model="res.country">
+            <field name="l10n_cl_customs_name">BULGARIA</field>
+            <field name="l10n_cl_customs_code" eval="527"/>
+        </record>
+
+        <record id="base.bi" model="res.country">
+            <field name="l10n_cl_customs_name">BURUNDI</field>
+            <field name="l10n_cl_customs_code" eval="141"/>
+        </record>
+
+        <record id="base.bj" model="res.country">
+            <field name="l10n_cl_customs_name">BENIN</field>
+            <field name="l10n_cl_customs_code" eval="150"/>
+        </record>
+
+        <record id="base.bm" model="res.country">
+            <field name="l10n_cl_customs_name">BERMUDAS</field>
+            <field name="l10n_cl_customs_code" eval="244"/>
+        </record>
+
+        <record id="base.bo" model="res.country">
+            <field name="l10n_cl_customs_name">BOLIVIA</field>
+            <field name="l10n_cl_customs_code" eval="221"/>
+        </record>
+
+        <record id="base.br" model="res.country">
+            <field name="l10n_cl_customs_name">BRASIL</field>
+            <field name="l10n_cl_customs_code" eval="220"/>
+        </record>
+
+        <record id="base.bs" model="res.country">
+            <field name="l10n_cl_customs_name">BAHAMAS</field>
+            <field name="l10n_cl_customs_code" eval="207"/>
+        </record>
+
+        <record id="base.bw" model="res.country">
+            <field name="l10n_cl_customs_name">BOTSWANA</field>
+            <field name="l10n_cl_customs_code" eval="113"/>
+        </record>
+
+        <record id="base.by" model="res.country">
+            <field name="l10n_cl_customs_name">BELARUS</field>
+            <field name="l10n_cl_customs_code" eval="542"/>
+        </record>
+
+        <record id="base.ca" model="res.country">
+            <field name="l10n_cl_customs_name">CANADA</field>
+            <field name="l10n_cl_customs_code" eval="226"/>
+        </record>
+
+        <record id="base.cg" model="res.country">
+            <field name="l10n_cl_customs_name">CONGO</field>
+            <field name="l10n_cl_customs_code" eval="144"/>
+        </record>
+
+        <record id="base.ch" model="res.country">
+            <field name="l10n_cl_customs_name">SUIZA</field>
+            <field name="l10n_cl_customs_code" eval="508"/>
+        </record>
+
+        <record id="base.ci" model="res.country">
+            <field name="l10n_cl_customs_name">COSTA DE MARFIL</field>
+            <field name="l10n_cl_customs_code" eval="107"/>
+        </record>
+
+        <record id="base.ck" model="res.country">
+            <field name="l10n_cl_customs_name">ISLAS COOK</field>
+            <field name="l10n_cl_customs_code" eval="427"/>
+        </record>
+
+        <record id="base.cl" model="res.country">
+            <field name="l10n_cl_customs_name">CHILE</field>
+            <field name="l10n_cl_customs_code" eval="997"/>
+        </record>
+
+        <record id="base.cn" model="res.country">
+            <field name="l10n_cl_customs_name">CHINA</field>
+            <field name="l10n_cl_customs_code" eval="336"/>
+        </record>
+
+        <record id="base.co" model="res.country">
+            <field name="l10n_cl_customs_name">COLOMBIA</field>
+            <field name="l10n_cl_customs_code" eval="202"/>
+        </record>
+
+        <record id="base.cr" model="res.country">
+            <field name="l10n_cl_customs_name">COSTA RICA</field>
+            <field name="l10n_cl_customs_code" eval="211"/>
+        </record>
+
+        <record id="base.cu" model="res.country">
+            <field name="l10n_cl_customs_name">CUBA</field>
+            <field name="l10n_cl_customs_code" eval="209"/>
+        </record>
+
+        <record id="base.cv" model="res.country">
+            <field name="l10n_cl_customs_name">CABO VERDE</field>
+            <field name="l10n_cl_customs_code" eval="129"/>
+        </record>
+
+        <record id="base.cy" model="res.country">
+            <field name="l10n_cl_customs_name">CHIPRE</field>
+            <field name="l10n_cl_customs_code" eval="305"/>
+        </record>
+
+        <record id="base.de" model="res.country">
+            <field name="l10n_cl_customs_name">ALEMANIA</field>
+            <field name="l10n_cl_customs_code" eval="563"/>
+        </record>
+
+        <record id="base.dj" model="res.country">
+            <field name="l10n_cl_customs_name">DJIBOUTI</field>
+            <field name="l10n_cl_customs_code" eval="155"/>
+        </record>
+
+        <record id="base.dk" model="res.country">
+            <field name="l10n_cl_customs_name">DINAMARCA</field>
+            <field name="l10n_cl_customs_code" eval="507"/>
+        </record>
+
+        <record id="base.dm" model="res.country">
+            <field name="l10n_cl_customs_name">DOMINICA</field>
+            <field name="l10n_cl_customs_code" eval="231"/>
+        </record>
+
+        <record id="base.dz" model="res.country">
+            <field name="l10n_cl_customs_name">ARGELIA</field>
+            <field name="l10n_cl_customs_code" eval="127"/>
+        </record>
+
+        <record id="base.ec" model="res.country">
+            <field name="l10n_cl_customs_name">ECUADOR</field>
+            <field name="l10n_cl_customs_code" eval="218"/>
+        </record>
+
+        <record id="base.ee" model="res.country">
+            <field name="l10n_cl_customs_name">ESTONIA</field>
+            <field name="l10n_cl_customs_code" eval="549"/>
+        </record>
+
+        <record id="base.eg" model="res.country">
+            <field name="l10n_cl_customs_name">EGIPTO</field>
+            <field name="l10n_cl_customs_code" eval="124"/>
+        </record>
+
+        <record id="base.er" model="res.country">
+            <field name="l10n_cl_customs_name">ERITREA</field>
+            <field name="l10n_cl_customs_code" eval="163"/>
+        </record>
+
+        <record id="base.es" model="res.country">
+            <field name="l10n_cl_customs_name">ESPAÑA</field>
+            <field name="l10n_cl_customs_code" eval="517"/>
+        </record>
+
+        <record id="base.fi" model="res.country">
+            <field name="l10n_cl_customs_name">FINLANDIA</field>
+            <field name="l10n_cl_customs_code" eval="512"/>
+        </record>
+
+        <record id="base.fj" model="res.country">
+            <field name="l10n_cl_customs_name">FIJI</field>
+            <field name="l10n_cl_customs_code" eval="401"/>
+        </record>
+
+        <record id="base.fm" model="res.country">
+            <field name="l10n_cl_customs_name">MICRONESIA</field>
+            <field name="l10n_cl_customs_code" eval="417"/>
+        </record>
+
+        <record id="base.fr" model="res.country">
+            <field name="l10n_cl_customs_name">FRANCIA</field>
+            <field name="l10n_cl_customs_code" eval="505"/>
+        </record>
+
+        <record id="base.ga" model="res.country">
+            <field name="l10n_cl_customs_name">GABON</field>
+            <field name="l10n_cl_customs_code" eval="145"/>
+        </record>
+
+        <record id="base.gd" model="res.country">
+            <field name="l10n_cl_customs_name">GRANADA</field>
+            <field name="l10n_cl_customs_code" eval="232"/>
+        </record>
+
+        <record id="base.ge" model="res.country">
+            <field name="l10n_cl_customs_name">GEORGIA</field>
+            <field name="l10n_cl_customs_code" eval="550"/>
+        </record>
+
+        <record id="base.gg" model="res.country">
+            <field name="l10n_cl_customs_name">GUERNSEY</field>
+            <field name="l10n_cl_customs_code" eval="566"/>
+        </record>
+
+        <record id="base.gh" model="res.country">
+            <field name="l10n_cl_customs_name">GHANA</field>
+            <field name="l10n_cl_customs_code" eval="108"/>
+        </record>
+
+        <record id="base.gi" model="res.country">
+            <field name="l10n_cl_customs_name">GIBRALTAR</field>
+            <field name="l10n_cl_customs_code" eval="565"/>
+        </record>
+
+        <record id="base.gl" model="res.country">
+            <field name="l10n_cl_customs_name">GROENLANDIA</field>
+            <field name="l10n_cl_customs_code" eval="253"/>
+        </record>
+
+        <record id="base.gm" model="res.country">
+            <field name="l10n_cl_customs_name">GAMBIA</field>
+            <field name="l10n_cl_customs_code" eval="102"/>
+        </record>
+
+        <record id="base.gn" model="res.country">
+            <field name="l10n_cl_customs_name">GUINEA</field>
+            <field name="l10n_cl_customs_code" eval="104"/>
+        </record>
+
+        <record id="base.gq" model="res.country">
+            <field name="l10n_cl_customs_name">GUINEA ECUATORIAL</field>
+            <field name="l10n_cl_customs_code" eval="147"/>
+            <field name="l10n_cl_customs_abbreviation">GUINEA ECUATRL</field>
+        </record>
+
+        <record id="base.gr" model="res.country">
+            <field name="l10n_cl_customs_name">GRECIA</field>
+            <field name="l10n_cl_customs_code" eval="520"/>
+        </record>
+
+        <record id="base.gt" model="res.country">
+            <field name="l10n_cl_customs_name">GUATEMALA</field>
+            <field name="l10n_cl_customs_code" eval="215"/>
+        </record>
+
+        <record id="base.gu" model="res.country">
+            <field name="l10n_cl_customs_name">GUAM</field>
+            <field name="l10n_cl_customs_code" eval="425"/>
+        </record>
+
+        <record id="base.gy" model="res.country">
+            <field name="l10n_cl_customs_name">GUYANA</field>
+            <field name="l10n_cl_customs_code" eval="217"/>
+        </record>
+
+        <record id="base.hn" model="res.country">
+            <field name="l10n_cl_customs_name">HONDURAS</field>
+            <field name="l10n_cl_customs_code" eval="214"/>
+        </record>
+
+        <record id="base.hr" model="res.country">
+            <field name="l10n_cl_customs_name">CROACIA</field>
+            <field name="l10n_cl_customs_code" eval="547"/>
+        </record>
+
+        <record id="base.ht" model="res.country">
+            <field name="l10n_cl_customs_name">HAITI</field>
+            <field name="l10n_cl_customs_code" eval="208"/>
+        </record>
+
+        <record id="base.id" model="res.country">
+            <field name="l10n_cl_customs_name">INDONESIA</field>
+            <field name="l10n_cl_customs_code" eval="328"/>
+        </record>
+
+        <record id="base.ie" model="res.country">
+            <field name="l10n_cl_customs_name">IRLANDA</field>
+            <field name="l10n_cl_customs_code" eval="506"/>
+        </record>
+
+        <record id="base.il" model="res.country">
+            <field name="l10n_cl_customs_name">ISRAEL</field>
+            <field name="l10n_cl_customs_code" eval="306"/>
+        </record>
+
+        <record id="base.in" model="res.country">
+            <field name="l10n_cl_customs_name">INDIA</field>
+            <field name="l10n_cl_customs_code" eval="317"/>
+        </record>
+
+        <record id="base.iq" model="res.country">
+            <field name="l10n_cl_customs_name">IRAK</field>
+            <field name="l10n_cl_customs_code" eval="307"/>
+        </record>
+
+        <record id="base.ir" model="res.country">
+            <field name="l10n_cl_customs_name">IRAN</field>
+            <field name="l10n_cl_customs_code" eval="309"/>
+        </record>
+
+        <record id="base.is" model="res.country">
+            <field name="l10n_cl_customs_name">ISLANDIA</field>
+            <field name="l10n_cl_customs_code" eval="516"/>
+        </record>
+
+        <record id="base.it" model="res.country">
+            <field name="l10n_cl_customs_name">ITALIA</field>
+            <field name="l10n_cl_customs_code" eval="504"/>
+        </record>
+
+        <record id="base.je" model="res.country">
+            <field name="l10n_cl_customs_name">JERSEY</field>
+            <field name="l10n_cl_customs_code" eval="568"/>
+        </record>
+
+        <record id="base.jm" model="res.country">
+            <field name="l10n_cl_customs_name">JAMAICA</field>
+            <field name="l10n_cl_customs_code" eval="205"/>
+        </record>
+
+        <record id="base.jo" model="res.country">
+            <field name="l10n_cl_customs_name">JORDANIA</field>
+            <field name="l10n_cl_customs_code" eval="301"/>
+        </record>
+
+        <record id="base.ke" model="res.country">
+            <field name="l10n_cl_customs_name">KENIA</field>
+            <field name="l10n_cl_customs_code" eval="137"/>
+        </record>
+
+        <record id="base.kh" model="res.country">
+            <field name="l10n_cl_customs_name">CAMBODIA</field>
+            <field name="l10n_cl_customs_code" eval="315"/>
+        </record>
+
+        <record id="base.ki" model="res.country">
+            <field name="l10n_cl_customs_name">KIRIBATI</field>
+            <field name="l10n_cl_customs_code" eval="416"/>
+        </record>
+
+        <record id="base.kp" model="res.country">
+            <field name="l10n_cl_customs_name">COREA DEL NORTE</field>
+            <field name="l10n_cl_customs_code" eval="334"/>
+        </record>
+
+        <record id="base.kr" model="res.country">
+            <field name="l10n_cl_customs_name">COREA DEL SUR</field>
+            <field name="l10n_cl_customs_code" eval="333"/>
+        </record>
+
+        <record id="base.kw" model="res.country">
+            <field name="l10n_cl_customs_name">KUWAIT</field>
+            <field name="l10n_cl_customs_code" eval="303"/>
+        </record>
+
+        <record id="base.la" model="res.country">
+            <field name="l10n_cl_customs_name">LAOS</field>
+            <field name="l10n_cl_customs_code" eval="316"/>
+        </record>
+
+        <record id="base.li" model="res.country">
+            <field name="l10n_cl_customs_name">LIECHTENSTEIN</field>
+            <field name="l10n_cl_customs_code" eval="534"/>
+        </record>
+
+        <record id="base.lk" model="res.country">
+            <field name="l10n_cl_customs_name">SRI LANKA</field>
+            <field name="l10n_cl_customs_code" eval="314"/>
+        </record>
+
+        <record id="base.lr" model="res.country">
+            <field name="l10n_cl_customs_name">LIBERIA</field>
+            <field name="l10n_cl_customs_code" eval="106"/>
+        </record>
+
+        <record id="base.ls" model="res.country">
+            <field name="l10n_cl_customs_name">LESOTHO</field>
+            <field name="l10n_cl_customs_code" eval="114"/>
+        </record>
+
+        <record id="base.lt" model="res.country">
+            <field name="l10n_cl_customs_name">LITUANIA</field>
+            <field name="l10n_cl_customs_code" eval="554"/>
+        </record>
+
+        <record id="base.lv" model="res.country">
+            <field name="l10n_cl_customs_name">LETONIA</field>
+            <field name="l10n_cl_customs_code" eval="553"/>
+        </record>
+
+        <record id="base.ly" model="res.country">
+            <field name="l10n_cl_customs_name">LIBIA</field>
+            <field name="l10n_cl_customs_code" eval="125"/>
+        </record>
+
+        <record id="base.ma" model="res.country">
+            <field name="l10n_cl_customs_name">MARRUECOS</field>
+            <field name="l10n_cl_customs_code" eval="128"/>
+        </record>
+
+        <record id="base.mc" model="res.country">
+            <field name="l10n_cl_customs_name">MONACO</field>
+            <field name="l10n_cl_customs_code" eval="535"/>
+        </record>
+
+        <record id="base.md" model="res.country">
+            <field name="l10n_cl_customs_name">MOLDOVA</field>
+            <field name="l10n_cl_customs_code" eval="556"/>
+        </record>
+
+        <record id="base.mg" model="res.country">
+            <field name="l10n_cl_customs_name">MADAGASCAR</field>
+            <field name="l10n_cl_customs_code" eval="120"/>
+        </record>
+
+        <record id="base.mh" model="res.country">
+            <field name="l10n_cl_customs_name">ISLAS MARSHALL</field>
+            <field name="l10n_cl_customs_code" eval="164"/>
+        </record>
+
+        <record id="base.ml" model="res.country">
+            <field name="l10n_cl_customs_name">MALI</field>
+            <field name="l10n_cl_customs_code" eval="133"/>
+        </record>
+
+        <record id="base.mn" model="res.country">
+            <field name="l10n_cl_customs_name">MONGOLIA</field>
+            <field name="l10n_cl_customs_code" eval="337"/>
+        </record>
+
+        <record id="base.mo" model="res.country">
+            <field name="l10n_cl_customs_name">MACAO</field>
+            <field name="l10n_cl_customs_code" eval="345"/>
+        </record>
+
+        <record id="base.mp" model="res.country">
+            <field name="l10n_cl_customs_name">ISLAS MARIANAS DEL NORTE</field>
+            <field name="l10n_cl_customs_code" eval="424"/>
+        </record>
+
+        <record id="base.mq" model="res.country">
+            <field name="l10n_cl_customs_name">MARTINICA</field>
+            <field name="l10n_cl_customs_code" eval="250"/>
+        </record>
+
+        <record id="base.mr" model="res.country">
+            <field name="l10n_cl_customs_name">MAURITANIA</field>
+            <field name="l10n_cl_customs_code" eval="134"/>
+        </record>
+
+        <record id="base.mt" model="res.country">
+            <field name="l10n_cl_customs_name">MALTA</field>
+            <field name="l10n_cl_customs_code" eval="523"/>
+        </record>
+
+        <record id="base.mu" model="res.country">
+            <field name="l10n_cl_customs_name">MAURICIO</field>
+            <field name="l10n_cl_customs_code" eval="119"/>
+        </record>
+
+        <record id="base.mw" model="res.country">
+            <field name="l10n_cl_customs_name">MALAWI</field>
+            <field name="l10n_cl_customs_code" eval="115"/>
+        </record>
+
+        <record id="base.mx" model="res.country">
+            <field name="l10n_cl_customs_name">MEXICO</field>
+            <field name="l10n_cl_customs_code" eval="216"/>
+        </record>
+
+        <record id="base.my" model="res.country">
+            <field name="l10n_cl_customs_name">MALASIA</field>
+            <field name="l10n_cl_customs_code" eval="329"/>
+        </record>
+
+        <record id="base.mz" model="res.country">
+            <field name="l10n_cl_customs_name">MOZAMBIQUE</field>
+            <field name="l10n_cl_customs_code" eval="121"/>
+        </record>
+
+        <record id="base.na" model="res.country">
+            <field name="l10n_cl_customs_name">NAMIBIA</field>
+            <field name="l10n_cl_customs_code" eval="159"/>
+        </record>
+
+        <record id="base.nc" model="res.country">
+            <field name="l10n_cl_customs_name">NUEVA CALEDONIA</field>
+            <field name="l10n_cl_customs_code" eval="423"/>
+        </record>
+
+        <record id="base.ne" model="res.country">
+            <field name="l10n_cl_customs_name">NIGER</field>
+            <field name="l10n_cl_customs_code" eval="131"/>
+        </record>
+
+        <record id="base.ng" model="res.country">
+            <field name="l10n_cl_customs_name">NIGERIA</field>
+            <field name="l10n_cl_customs_code" eval="111"/>
+        </record>
+
+        <record id="base.ni" model="res.country">
+            <field name="l10n_cl_customs_name">NICARAGUA</field>
+            <field name="l10n_cl_customs_code" eval="212"/>
+        </record>
+
+        <record id="base.nl" model="res.country">
+            <field name="l10n_cl_customs_name">HOLANDA</field>
+            <field name="l10n_cl_customs_code" eval="515"/>
+        </record>
+
+        <record id="base.no" model="res.country">
+            <field name="l10n_cl_customs_name">NORUEGA</field>
+            <field name="l10n_cl_customs_code" eval="513"/>
+        </record>
+
+        <record id="base.np" model="res.country">
+            <field name="l10n_cl_customs_name">NEPAL</field>
+            <field name="l10n_cl_customs_code" eval="320"/>
+        </record>
+
+        <record id="base.nr" model="res.country">
+            <field name="l10n_cl_customs_name">NAURU</field>
+            <field name="l10n_cl_customs_code" eval="402"/>
+        </record>
+
+        <record id="base.nu" model="res.country">
+            <field name="l10n_cl_customs_name">NIUE</field>
+            <field name="l10n_cl_customs_code" eval="421"/>
+        </record>
+
+        <record id="base.om" model="res.country">
+            <field name="l10n_cl_customs_name">OMAN</field>
+            <field name="l10n_cl_customs_code" eval="304"/>
+        </record>
+
+        <record id="base.pa" model="res.country">
+            <field name="l10n_cl_customs_name">PANAMA</field>
+            <field name="l10n_cl_customs_code" eval="210"/>
+        </record>
+
+        <record id="base.pe" model="res.country">
+            <field name="l10n_cl_customs_name">PERU</field>
+            <field name="l10n_cl_customs_code" eval="219"/>
+        </record>
+
+        <record id="base.pf" model="res.country">
+            <field name="l10n_cl_customs_name">POLINESIA FRANCESA</field>
+            <field name="l10n_cl_customs_code" eval="422"/>
+        </record>
+
+        <record id="base.ph" model="res.country">
+            <field name="l10n_cl_customs_name">FILIPINAS</field>
+            <field name="l10n_cl_customs_code" eval="335"/>
+        </record>
+
+        <record id="base.pk" model="res.country">
+            <field name="l10n_cl_customs_name">PAKISTAN</field>
+            <field name="l10n_cl_customs_code" eval="324"/>
+        </record>
+
+        <record id="base.pl" model="res.country">
+            <field name="l10n_cl_customs_name">POLONIA</field>
+            <field name="l10n_cl_customs_code" eval="528"/>
+        </record>
+
+        <record id="base.pr" model="res.country">
+            <field name="l10n_cl_customs_name">PUERTO RICO</field>
+            <field name="l10n_cl_customs_code" eval="251"/>
+        </record>
+
+        <record id="base.pt" model="res.country">
+            <field name="l10n_cl_customs_name">PORTUGAL</field>
+            <field name="l10n_cl_customs_code" eval="501"/>
+        </record>
+
+        <record id="base.py" model="res.country">
+            <field name="l10n_cl_customs_name">PARAGUAY</field>
+            <field name="l10n_cl_customs_code" eval="222"/>
+        </record>
+
+        <record id="base.qa" model="res.country">
+            <field name="l10n_cl_customs_name">QATAR</field>
+            <field name="l10n_cl_customs_code" eval="312"/>
+        </record>
+
+        <record id="base.rw" model="res.country">
+            <field name="l10n_cl_customs_name">RWANDA</field>
+            <field name="l10n_cl_customs_code" eval="142"/>
+        </record>
+
+        <record id="base.sc" model="res.country">
+            <field name="l10n_cl_customs_name">SEYCHELLES</field>
+            <field name="l10n_cl_customs_code" eval="156"/>
+        </record>
+
+        <record id="base.sd" model="res.country">
+            <field name="l10n_cl_customs_name">SUDAN</field>
+            <field name="l10n_cl_customs_code" eval="123"/>
+        </record>
+
+        <record id="base.se" model="res.country">
+            <field name="l10n_cl_customs_name">SUECIA</field>
+            <field name="l10n_cl_customs_code" eval="511"/>
+        </record>
+
+        <record id="base.sg" model="res.country">
+            <field name="l10n_cl_customs_name">SINGAPUR</field>
+            <field name="l10n_cl_customs_code" eval="332"/>
+        </record>
+
+        <record id="base.si" model="res.country">
+            <field name="l10n_cl_customs_name">ESLOVENIA</field>
+            <field name="l10n_cl_customs_code" eval="548"/>
+        </record>
+
+        <record id="base.sl" model="res.country">
+            <field name="l10n_cl_customs_name">SIERRA LEONA</field>
+            <field name="l10n_cl_customs_code" eval="105"/>
+        </record>
+
+        <record id="base.sm" model="res.country">
+            <field name="l10n_cl_customs_name">SAN MARINO</field>
+            <field name="l10n_cl_customs_code" eval="536"/>
+        </record>
+
+        <record id="base.sn" model="res.country">
+            <field name="l10n_cl_customs_name">SENEGAL</field>
+            <field name="l10n_cl_customs_code" eval="101"/>
+        </record>
+
+        <record id="base.so" model="res.country">
+            <field name="l10n_cl_customs_name">SOMALIA</field>
+            <field name="l10n_cl_customs_code" eval="138"/>
+        </record>
+
+        <record id="base.sr" model="res.country">
+            <field name="l10n_cl_customs_name">SURINAM</field>
+            <field name="l10n_cl_customs_code" eval="235"/>
+        </record>
+
+        <record id="base.sv" model="res.country">
+            <field name="l10n_cl_customs_name">EL SALVADOR</field>
+            <field name="l10n_cl_customs_code" eval="213"/>
+        </record>
+
+        <record id="base.sy" model="res.country">
+            <field name="l10n_cl_customs_name">SIRIA</field>
+            <field name="l10n_cl_customs_code" eval="310"/>
+        </record>
+
+        <record id="base.td" model="res.country">
+            <field name="l10n_cl_customs_name">CHAD</field>
+            <field name="l10n_cl_customs_code" eval="130"/>
+        </record>
+
+        <record id="base.tg" model="res.country">
+            <field name="l10n_cl_customs_name">TOGO</field>
+            <field name="l10n_cl_customs_code" eval="109"/>
+        </record>
+
+        <record id="base.tm" model="res.country">
+            <field name="l10n_cl_customs_name">TURKMENISTAN</field>
+            <field name="l10n_cl_customs_code" eval="558"/>
+        </record>
+
+        <record id="base.tt" model="res.country">
+            <field name="l10n_cl_customs_name">TRINIDAD Y TOBAGO</field>
+            <field name="l10n_cl_customs_code" eval="203"/>
+            <field name="l10n_cl_customs_abbreviation">TRINID. Y TOBAGO</field>
+        </record>
+
+        <record id="base.tv" model="res.country">
+            <field name="l10n_cl_customs_name">TUVALU</field>
+            <field name="l10n_cl_customs_code" eval="419"/>
+        </record>
+
+        <record id="base.tz" model="res.country">
+            <field name="l10n_cl_customs_name">TANZANIA</field>
+            <field name="l10n_cl_customs_code" eval="135"/>
+        </record>
+
+        <record id="base.ua" model="res.country">
+            <field name="l10n_cl_customs_name">UCRANIA</field>
+            <field name="l10n_cl_customs_code" eval="559"/>
+        </record>
+
+        <record id="base.ug" model="res.country">
+            <field name="l10n_cl_customs_name">UGANDA</field>
+            <field name="l10n_cl_customs_code" eval="136"/>
+        </record>
+
+        <record id="base.uk" model="res.country">
+            <field name="l10n_cl_customs_name">REINO UNIDO</field>
+            <field name="l10n_cl_customs_code" eval="510"/>
+        </record>
+
+        <record id="base.uy" model="res.country">
+            <field name="l10n_cl_customs_name">URUGUAY</field>
+            <field name="l10n_cl_customs_code" eval="223"/>
+        </record>
+
+        <record id="base.uz" model="res.country">
+            <field name="l10n_cl_customs_name">UZBEKISTAN</field>
+            <field name="l10n_cl_customs_code" eval="560"/>
+        </record>
+
+        <record id="base.vc" model="res.country">
+            <field name="l10n_cl_customs_name">SAN VICENTE Y LAS GRANADINAS</field>
+            <field name="l10n_cl_customs_code" eval="234"/>
+            <field name="l10n_cl_customs_abbreviation">S. VTE. Y GRANAD.</field>
+        </record>
+
+        <record id="base.ve" model="res.country">
+            <field name="l10n_cl_customs_name">VENEZUELA</field>
+            <field name="l10n_cl_customs_code" eval="201"/>
+        </record>
+
+        <record id="base.vn" model="res.country">
+            <field name="l10n_cl_customs_name">VIETNAM</field>
+            <field name="l10n_cl_customs_code" eval="325"/>
+        </record>
+
+        <record id="base.vu" model="res.country">
+            <field name="l10n_cl_customs_name">VANUATU</field>
+            <field name="l10n_cl_customs_code" eval="415"/>
+        </record>
+
+        <record id="base.zm" model="res.country">
+            <field name="l10n_cl_customs_name">ZAMBIA</field>
+            <field name="l10n_cl_customs_code" eval="117"/>
+        </record>
+
+        <record id="base.zw" model="res.country">
+            <field name="l10n_cl_customs_name">ZIMBABWE</field>
+            <field name="l10n_cl_customs_code" eval="116"/>
+        </record>
+    </data>
+</odoo>
