@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
+<!-- o va aca o va en l10n_cl (me gusta mas que vaya en l10n_cl_base) -->
     <data noupdate="1">
 
         <record id="base.ad" model="res.country">
