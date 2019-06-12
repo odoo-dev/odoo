@@ -11,6 +11,10 @@ class ResCompany(models.Model):
         related='partner_id.l10n_ar_identification_type_id',
         readonly=False,
     )
+    l10n_ar_id_number = fields.Char(
+        related='partner_id.l10n_ar_id_number',
+        readonly=False,
+    )
     l10n_ar_cuit = fields.Char(
         related='partner_id.l10n_ar_cuit',
     )
