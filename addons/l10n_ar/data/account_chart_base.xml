@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="0">
 
+    <menuitem id="account_reports_ar_statements_menu" name="Argentina Statements" parent="account.menu_finance_reports" sequence="3" groups="account.group_account_user"/>
+
     <record id="l10nar_base_chart_template" model="account.chart.template">
         <field name="name">Plan Contable Genérico Argentina Monotributista / Base</field>
         <field name="currency_id" ref="base.ARS"/>
@@ -152,7 +154,7 @@
         <field name="chart_template_id" ref="l10nar_base_chart_template"/>
         <field name="code">1.1.04.03.030</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-        <field name="name">Saldo a favor IIBB p. CABA</field>
+        <field name="name">Saldo a favor IIBB CABA</field>
     </record>
 
     <!-- 1.1.04.04 (ibbb Buenos Aires) -->

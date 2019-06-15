@@ -9,32 +9,7 @@
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
         <field name="tax_group_id" ref="tax_group_iva_19"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_base_imponible_ventas_grav')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('231'),
-                'plus_report_line_ids': [ref('tax_report_impuesto_general_cobrado_iva')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_base_imponible_ventas_grav')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('231'),
-                'minus_report_line_ids': [ref('tax_report_impuesto_general_cobrado_iva')],
-            }),
-        ]"/>
+
     </record>
 
     <record id="OTAX_19" model="account.tax.template">
@@ -45,32 +20,7 @@
       <field name="amount_type">percent</field>
       <field name="type_tax_use">purchase</field>
       <field name="tax_group_id" ref="tax_group_iva_19"/>
-      <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_base_imponible_compras_grav')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('110710'),
-                'plus_report_line_ids': [ref('tax_report_impuesto_general_pag_iva')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_base_imponible_compras_grav')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('110710'),
-                'minus_report_line_ids': [ref('tax_report_impuesto_general_pag_iva')],
-            }),
-        ]"/>
+
     </record>
 
     <record id="I_IU2C" model="account.tax.template">
@@ -85,35 +35,10 @@
         <field name="account_id" ref="244"/>
         <field name="tag_ids" eval="[(6,0,[ref('tag_cl_22'), ref('tag_cl_21')])]"/>
         <field name="tax_group_id" ref="tax_group_2da_categ"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_fees_affected_to_withholding')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('244'),
-                'plus_report_line_ids': [ref('tax_report_withholding_2')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_fees_affected_to_withholding')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('244'),
-                'minus_report_line_ids': [ref('tax_report_withholding_2')],
-            }),
-        ]"/>
+
     </record>
 
-    <!--    <record id="especifico_compra" model="account.tax.template">
+    <record id="especifico_compra" model="account.tax.template">
         <field name="chart_template_id" ref="cl_chart_template"/>
         <field name="name">Específico Compra</field>
         <field name="description">Especifico</field>
@@ -240,5 +165,5 @@
         <field name="sequence">15</field>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="tax_group_ila"/>
-    </record>-->
+    </record>
 </odoo>

@@ -20,17 +20,16 @@ class ResCompany(models.Model):
         string='Gross Income',
         readonly=False,
     )
-    l10n_ar_start_date = fields.Date(
-        related='partner_id.l10n_ar_start_date',
-        readonly=False,
-    )
     l10n_ar_afip_responsability_type = fields.Selection(
         related='partner_id.l10n_ar_afip_responsability_type',
         readonly=False,
     )
     l10n_ar_company_requires_vat = fields.Boolean(
         compute='_compute_l10n_ar_company_requires_vat',
-        string="Company Requires Vat?",
+        string='Company Requires Vat?',
+    )
+    l10n_ar_afip_start_date = fields.Date(
+        'Activities start',
     )
 
     @api.onchange('country_id')
@@ -38,18 +37,19 @@ class ResCompany(models.Model):
         """ Argentinian companies use round_globally as
         tax_calculation_rounding_method
         """
-        for rec in self.filtered(lambda x: x.country_id.code == 'AR'):
+        for rec in self.filtered(
+                lambda x: x.country_id == self.env.ref('base.ar')):
             rec.tax_calculation_rounding_method = 'round_globally'
 
     @api.depends('l10n_ar_afip_responsability_type')
     def _compute_l10n_ar_company_requires_vat(self):
         for rec in self.filtered(
-                lambda x: x.l10n_ar_afip_responsability_type in ['1', '1FM']):
+                lambda x: x.l10n_ar_afip_responsability_type == '1'):
             rec.l10n_ar_company_requires_vat = True
 
     def _localization_use_documents(self):
         """ Argentinian localization use documents
         """
         self.ensure_one()
-        return True if self.country_id.code == 'AR' \
+        return True if self.country_id == self.env.ref('base.ar') \
                 else super()._localization_use_documents()

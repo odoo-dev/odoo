@@ -4,32 +4,15 @@ from odoo import models, api, fields
 
 
 class AccountChartTemplate(models.Model):
+
     _inherit = 'account.chart.template'
 
-    # MOVER A LOGICA DE def _get_fp_vals(self, company, position):
     @api.multi
-    def generate_fiscal_position(
-            self, tax_template_ref, acc_template_ref, company):
-        """
-        if chart is argentina localization, then we add l10n_ar_afip_code to
-        fiscal positions.
-        We also add other data to add fiscal positions automatically
-        """
-        res = super(AccountChartTemplate, self).generate_fiscal_position(
-            tax_template_ref, acc_template_ref, company)
-        if company.country_id.code != 'AR':
-            return res
-        positions = self.env['account.fiscal.position.template'].search(
-            [('chart_template_id', '=', self.id)])
-        for position in positions:
-            created_position = self.env['account.fiscal.position'].search([
-                ('company_id', '=', company.id),
-                ('name', '=', position.name),
-                ('note', '=', position.note)], limit=1)
-            if created_position:
-                created_position.update({
-                    'l10n_ar_afip_code': position.l10n_ar_afip_code,
-                })
+    def _get_fp_vals(self, company, position):
+        res = super()._get_fp_vals(company, position)
+        if company.country_id == self.env.ref('base.ar'):
+            res['l10n_ar_afip_responsability_type_codes'] = \
+                position.l10n_ar_afip_responsability_type_codes
         return res
 
     @api.multi
@@ -42,6 +25,13 @@ class AccountChartTemplate(models.Model):
             AccountChartTemplate, self)._prepare_all_journals(
             acc_template_ref, company, journals_dict=journals_dict)
 
-        if company.country_id.code == 'AR':
-            res = [item for item in res if item.get('type') == 'sale']
+        if company.country_id == self.env.ref('base.ar'):
+            for vals in res:
+                if vals['type'] == 'sale':
+                    vals.update({
+                        'l10n_ar_afip_pos_number': 1,
+                        'l10n_ar_afip_pos_partner_id': company.partner_id.id,
+                        'l10n_ar_afip_pos_system': 'II_IM',
+                        'l10n_ar_share_sequences': True,
+                    })
         return res

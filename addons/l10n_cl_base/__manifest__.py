@@ -16,7 +16,6 @@ Base Module for Chilean Localization
     'data': [
         'data/l10n_cl_identification_type_data.xml',
         'data/res.bank.csv',
-        'data/res_country_data.xml',
         'data/res.currency.csv',
         'views/l10n_cl_identification_type_view.xml',
         'views/res_bank_view.xml',
@@ -29,6 +28,6 @@ Base Module for Chilean Localization
     'auto_install': False,
     'application': False,
     'demo': [
-        # 'demo/partner_demo.xml',
+        'demo/partner_demo.xml',
     ],
 }

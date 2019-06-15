@@ -6,8 +6,6 @@ class AccountFiscalPositionTemplate(models.Model):
 
     _inherit = 'account.fiscal.position.template'
 
-    l10n_ar_afip_code = fields.Char(
-        'AFIP Code',
-        help='This code will be used on electronic invoice and citi '
-        'reports',
+    l10n_ar_afip_responsability_type_codes = fields.Char(
+        'AFIP Responsability Type Codes',
     )

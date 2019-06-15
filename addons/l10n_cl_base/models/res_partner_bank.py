@@ -6,7 +6,7 @@
 from odoo import fields, models
 
 
-class BankSbif(models.Model):
+class ResBank(models.Model):
     _name = 'res.bank'
     _inherit = 'res.bank'
 

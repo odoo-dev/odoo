@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="res_partner_bmya" model="res.partner">
-        <field name="name">Blanco Martin & Asociados EIRL</field>
+        <field name="name">Blanco Martin &amp; Asociados EIRL</field>
         <field eval="1" name="supplier"/>
         <field eval="1" name="customer"/>
         <field name="email">info@bmya.cl</field>
@@ -21,6 +21,7 @@
     <record id="res_partner_bmya_dab" model="res.partner">
         <field name="name">Daniel Blanco</field>
         <field name="type">contact</field>
+        <field name='l10n_cl_identification_type_id' ref="dt_RUT"/>
         <field name="parent_id" ref="res_partner_bmya"/>
         <field name="image" type="base64" file="l10n_cl_base/demo/foto_dab.png"/>
     </record>

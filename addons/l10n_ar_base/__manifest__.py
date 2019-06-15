@@ -14,6 +14,7 @@ Base Module for Argentinian Localization
 * Add Countries code defined by AFIP to identify legal entities and natural persons of foreign countries.
     """,
     'depends': [
+        'base_vat',
         'contacts',
     ],
     'data': [
@@ -21,9 +22,9 @@ Base Module for Argentinian Localization
         'data/l10n_ar_identification_type_data.xml',
         'data/res_country_data.xml',
         'views/res_partner_view.xml',
-        'views/res_company_view.xml',
         'views/l10n_ar_identification_type_view.xml',
         'views/res_country_view.xml',
+        'views/res_company_view.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [
