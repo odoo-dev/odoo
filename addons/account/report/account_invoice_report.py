@@ -20,7 +20,7 @@ class AccountInvoiceReport(models.Model):
     partner_id = fields.Many2one('res.partner', string='Partner', readonly=True)
     commercial_partner_id = fields.Many2one('res.partner', string='Partner Company', help="Commercial Entity")
     country_id = fields.Many2one('res.country', string="Partner Company's Country")
-    user_id = fields.Many2one('res.users', string='Salesperson', readonly=True)
+    invoice_user_id = fields.Many2one('res.users', string='Salesperson', readonly=True)
     type = fields.Selection([
         ('out_invoice', 'Customer Invoice'),
         ('in_invoice', 'Vendor Bill'),
@@ -58,7 +58,7 @@ class AccountInvoiceReport(models.Model):
 
     _depends = {
         'account.move': [
-            'name', 'state', 'type', 'partner_id', 'user_id', 'fiscal_position_id',
+            'name', 'state', 'type', 'partner_id', 'invoice_user_id', 'fiscal_position_id',
             'invoice_date', 'invoice_date_due', 'invoice_payment_term_id', 'invoice_partner_bank_id',
         ],
         'account.move.line': [
@@ -90,7 +90,7 @@ class AccountInvoiceReport(models.Model):
                 move.state,
                 move.type,
                 move.partner_id,
-                move.user_id,
+                move.invoice_user_id,
                 move.fiscal_position_id,
                 move.invoice_payment_state,
                 move.invoice_date,
@@ -152,7 +152,7 @@ class AccountInvoiceReport(models.Model):
                 move.amount_residual_signed,
                 move.amount_total_signed,
                 move.partner_id,
-                move.user_id,
+                move.invoice_user_id,
                 move.fiscal_position_id,
                 move.invoice_payment_state,
                 move.invoice_date,
@@ -169,7 +169,7 @@ class AccountInvoiceReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute('''
             CREATE OR REPLACE VIEW %s AS (
-                %s %s %s %s                
+                %s %s %s %s
             )
         ''' % (
             self._table, self._select(), self._from(), self._where(), self._group_by()

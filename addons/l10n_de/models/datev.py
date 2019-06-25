@@ -24,7 +24,7 @@ class AccountMove(models.Model):
     @api.multi
     def post(self):
         # OVERRIDE to check the invoice lines taxes.
-        for invoice in self.filtered(lambda move: move.type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')):
+        for invoice in self.filtered(lambda move: move.is_invoice()):
             for line in invoice.invoice_line_ids:
                 account_tax = line.account_id.tax_ids.ids
                 if account_tax and invoice.company_id.country_id.code == 'DE':

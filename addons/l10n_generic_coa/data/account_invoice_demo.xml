@@ -5,7 +5,7 @@
         <record id="demo_invoice_1" model="account.move">
             <field name="type">out_invoice</field>
             <field name="partner_id" ref="base.res_partner_12"/>
-            <field name="user_id" ref="base.user_demo"/>
+            <field name="invoice_user_id" ref="base.user_demo"/>
             <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
             <field name="invoice_date" eval="time.strftime('%Y-%m')+'-01'"/>
             <field name="invoice_line_ids" eval="[
@@ -40,7 +40,7 @@
         <record id="demo_invoice_followup" model="account.move">
             <field name="type">out_invoice</field>
             <field name="partner_id" ref="base.res_partner_2"/>
-            <field name="user_id" ref="base.user_demo"/>
+            <field name="invoice_user_id" ref="base.user_demo"/>
             <field name="invoice_payment_term_id" ref="account.account_payment_term_immediate"/>
             <field name="invoice_date" eval="(datetime.today() + timedelta(days=-15)).strftime('%Y-%m-%d')"/>
             <field name="invoice_line_ids" eval="[
@@ -53,7 +53,7 @@
         <record id="demo_invoice_0" model="account.move">
             <field name="type">in_invoice</field>
             <field name="partner_id" ref="base.res_partner_12"/>
-            <field name="user_id" ref="base.user_demo"/>
+            <field name="invoice_user_id" ref="base.user_demo"/>
             <field name="invoice_payment_term_id" ref="account.account_payment_term"/>
             <field name="invoice_date" eval="time.strftime('%Y-%m')+'-01'"/>
             <field name="invoice_line_ids" eval="[
@@ -64,7 +64,7 @@
 
         <!-- ==== Invoice Demo 6 - Draft Vendor Bill for OCR ==== -->
         <record id="demo_invoice_extract" model="account.move" context="{'type': 'in_invoice'}">
-            <field name="user_id" ref="base.user_demo"/>
+            <field name="invoice_user_id" ref="base.user_demo"/>
         </record>
 
         <record id="ir_attachment_in_invoice_draft" model="ir.attachment">

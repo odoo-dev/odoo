@@ -30,7 +30,7 @@
         <field name="model_id">account.invoice.report</field>
         <field name="domain">[]</field>
         <field name="user_id" eval="False"/>
-        <field name="context">{'group_by': ['invoice_date:month', 'user_id']}</field>
+        <field name="context">{'group_by': ['invoice_date:month', 'invoice_user_id']}</field>
     </record>
     <record id="filter_invoice_product" model="ir.filters">
         <field name="name">By Product</field>
@@ -51,7 +51,7 @@
         <field name="model_id">account.invoice.report</field>
         <field name="domain">[('type', '=', 'out_refund')]</field>
         <field name="user_id" eval="False"/>
-        <field name="context">{'group_by': ['invoice_date:month', 'user_id']}</field>
+        <field name="context">{'group_by': ['invoice_date:month', 'invoice_user_id']}</field>
     </record>
     <record id="filter_invoice_country" model="ir.filters">
         <field name="name">By Country</field>
@@ -66,7 +66,7 @@
         <field name="model">account.invoice.report</field>
         <field name="arch" type="xml">
             <search string="Invoices Analysis">
-                <filter string="My Invoices" name="my_invoice" domain="[('user_id', '=', uid)]"/>
+                <filter string="My Invoices" name="my_invoice" domain="[('invoice_user_id', '=', uid)]"/>
                 <separator/>
                 <field name="invoice_date"/>
                 <separator/>
@@ -79,11 +79,11 @@
                 <filter string="Invoices" name="invoice" domain="['|', ('type','=','out_invoice'),('type','=','in_invoice')]"/>
                 <filter string="Credit Notes" name="creditnote" domain="['|', ('type','=','out_refund'),('type','=','in_refund')]"/>
                 <field name="partner_id" operator="child_of"/>
-                <field name="user_id" />
+                <field name="invoice_user_id" />
                 <field name="product_id" />
                 <field name="product_categ_id" filter_domain="[('product_categ_id', 'child_of', self)]"/>
                 <group expand="1" string="Group By">
-                    <filter string="Salesperson" name='user' context="{'group_by':'user_id'}"/>
+                    <filter string="Salesperson" name='user' context="{'group_by':'invoice_user_id'}"/>
                     <filter string="Partner" name="partner_id" context="{'group_by':'partner_id','residual_visible':True}"/>
                     <filter string="Product Category" name="category_product" context="{'group_by':'product_categ_id','residual_invisible':True}"/>
                     <filter string="Status" name="status" context="{'group_by':'state'}"/>

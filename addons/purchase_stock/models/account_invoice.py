@@ -135,8 +135,7 @@ class AccountMove(models.Model):
                             'exclude_from_invoice_tab': True,
                             'is_anglo_saxon_line': True,
                         }
-                        vals.update(line._get_computed_accounting_vals(
-                            vals['price_subtotal'], move.type, line.currency_id, line.company_id, line.date))
+                        vals.update(line._get_fields_onchange_subtotal(price_subtotal=vals['price_subtotal']))
                         lines_vals_list.append(vals)
 
                         # Correct the amount of the current line.
@@ -155,8 +154,7 @@ class AccountMove(models.Model):
                             'exclude_from_invoice_tab': True,
                             'is_anglo_saxon_line': True,
                         }
-                        vals.update(line._get_computed_accounting_vals(
-                            vals['price_subtotal'], move.type, line.currency_id, line.company_id, line.date))
+                        vals.update(line._get_fields_onchange_subtotal(price_subtotal=vals['price_subtotal']))
                         lines_vals_list.append(vals)
         return lines_vals_list
 

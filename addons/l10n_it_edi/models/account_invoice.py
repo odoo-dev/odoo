@@ -53,7 +53,7 @@ class AccountMove(models.Model):
         super(AccountMove, self).post()
 
         # Retrieve invoices to generate the xml.
-        invoices_to_export = self.filtered(lambda move: move.company_id.country_id == self.env.ref('base.it') and move.type in ('out_invoice', 'out_refund'))
+        invoices_to_export = self.filtered(lambda move: move.company_id.country_id == self.env.ref('base.it') and move.is_sale_document())
 
         invoices_to_export.write({'l10n_it_send_state': 'other'})
         invoices_to_send = self.env['account.move']

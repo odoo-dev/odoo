@@ -54,7 +54,7 @@ class AccountMoveReversal(models.TransientModel):
                 'ref': _('Reversal of: %s') % move.name,
                 'invoice_payment_ref': self.reason,
                 'date': self.date or move.date,
-                'invoice_date': move._is_invoice() and (self.date or move.date) or False,
+                'invoice_date': move.is_invoice(include_receipts=True) and (self.date or move.date) or False,
                 'journal_id': self.journal_id and self.journal_id.id or move.journal_id.id,
             })
 

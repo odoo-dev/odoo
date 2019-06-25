@@ -769,7 +769,7 @@
                                            name="sale_info_group"
                                            attrs="{'invisible': [('type', 'not in', ('out_invoice', 'out_refund'))]}">
                                         <field name="company_id" groups="base.group_multi_company"/>
-                                        <field name="user_id"/>
+                                        <field name="invoice_user_id"/>
                                     </group>
                                     <group string="Accounting Information"
                                            name="accounting_info_group"
@@ -854,7 +854,7 @@
                 <search string="Search Invoice">
                     <field name="name" string="Invoice"
                            filter_domain="['|','|','|', '|', ('name','ilike',self), ('invoice_origin','ilike',self), ('ref', 'ilike', self), ('invoice_payment_ref', 'ilike', self), ('partner_id', 'child_of', self)]"/>
-                    <filter domain="[('user_id','=',uid)]" name="myinvoices" help="My Invoices"/>
+                    <filter domain="[('invoice_user_id','=',uid)]" name="myinvoices" help="My Invoices"/>
                     <field name="journal_id"/>
                     <separator/>
                     <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
@@ -864,7 +864,7 @@
                     <filter name="late" string="Overdue" domain="['&amp;', ('invoice_date_due', '&lt;', time.strftime('%%Y-%%m-%%d')), ('state', '=', 'posted'), ('invoice_payment_state', '=', 'not_paid')]" help="Overdue invoices, maturity date passed"/>
                     <separator/>
                     <field name="partner_id" operator="child_of"/>
-                    <field name="user_id" string="Salesperson" domain="[('share','=', False)]"/>
+                    <field name="invoice_user_id" string="Salesperson" domain="[('share','=', False)]"/>
                     <field name="date" string="Period"/>
                     <separator/>
                     <filter string="My Activities" name="activities_my"
@@ -880,7 +880,7 @@
                         ]"/>
                     <group expand="0" string="Group By">
                         <filter name="group_by_partner_id" string="Partner" context="{'group_by':'commercial_partner_id'}"/>
-                        <filter string="Salesperson" name="salesperson" context="{'group_by':'user_id'}"/>
+                        <filter string="Salesperson" name="salesperson" context="{'group_by':'invoice_user_id'}"/>
                         <filter name="status" string="Status" context="{'group_by':'state'}"/>
                         <separator/>
                         <filter string="Invoice Date" name="invoicedate" context="{'group_by':'invoice_date'}"/>

@@ -240,7 +240,7 @@ class FetchmailServer(models.Model):
             )
             activity_vals = {
                 'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
-                'user_id': related_invoice.user_id.id if related_invoice.user_id else self.env.user.id
+                'invoice_user_id': related_invoice.invoice_user_id.id if related_invoice.invoice_user_id else self.env.user.id
             }
             related_invoice.activity_schedule(summary='Rejection notice', **activity_vals)
 
@@ -300,7 +300,7 @@ class FetchmailServer(models.Model):
             if related_invoice.l10n_it_send_state == 'delivered_refused':
                 activity_vals = {
                     'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
-                    'user_id': related_invoice.user_id.id if related_invoice.user_id else self.env.user.id
+                    'invoice_user_id': related_invoice.invoice_user_id.id if related_invoice.invoice_user_id else self.env.user.id
                 }
                 related_invoice.activity_schedule(summary='Outcome notice: Refused', **activity_vals)
 

@@ -62,7 +62,7 @@ class AccountMove(models.Model):
         # It's useful when you have a "paid" sale order (using a payment transaction) and you invoice it later.
         res = super(AccountMove, self).post()
 
-        for invoice in self.filtered(lambda move: move.type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')):
+        for invoice in self.filtered(lambda move: move.is_invoice()):
             payments = invoice.mapped('transaction_ids.payment_id')
             move_lines = payments.mapped('move_line_ids').filtered(lambda line: not line.reconciled and line.credit > 0.0)
             for line in move_lines:
@@ -74,7 +74,7 @@ class AccountMove(models.Model):
         # OVERRIDE
         res = super(AccountMove, self).action_invoice_paid()
         todo = set()
-        for invoice in self.filtered(lambda move: move.type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')):
+        for invoice in self.filtered(lambda move: move.is_invoice()):
             for line in invoice.invoice_line_ids:
                 for sale_line in line.sale_line_ids:
                     todo.add((sale_line.order_id, invoice.name))
@@ -92,7 +92,7 @@ class AccountMove(models.Model):
     def _get_invoice_intrastat_country_id(self):
         # OVERRIDE
         self.ensure_one()
-        if self.type in ('out_invoice', 'out_refund'):
+        if self.is_sale_document():
             intrastat_country_id = self.partner_shipping_id.country_id.id
         else:
             intrastat_country_id = super(AccountMove, self)._get_invoice_intrastat_country_id()

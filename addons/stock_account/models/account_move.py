@@ -84,7 +84,7 @@ class AccountMove(models.Model):
         '''
         lines_vals_list = []
         for move in self:
-            if move.type not in ('out_invoice', 'out_refund', 'out_receipt') or not move.company_id.anglo_saxon_accounting:
+            if not move.is_sale_document(include_receipts=True) or not move.company_id.anglo_saxon_accounting:
                 continue
 
             for line in move.invoice_line_ids:
@@ -165,7 +165,7 @@ class AccountMove(models.Model):
         reconciling stock valuation move lines with the invoice's.
         """
         for move in self:
-            if not move.type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+            if not move.is_invoice():
                 continue
             if not move.company_id.anglo_saxon_accounting:
                 continue
@@ -182,7 +182,7 @@ class AccountMove(models.Model):
 
                 # We first get the invoices move lines (taking the invoice and the previous ones into account)...
                 product_accounts = product.product_tmpl_id._get_product_accounts()
-                if move.type in ('out_invoice', 'out_refund'):
+                if move.is_sale_document():
                     product_interim_account = product_accounts['stock_output']
                 else:
                     product_interim_account = product_accounts['stock_input']
@@ -212,7 +212,7 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         if self.product_id.type == 'product' \
             and self.move_id.company_id.anglo_saxon_accounting \
-            and self.move_id.type in ('in_invoice', 'in_refund'):
+            and self.move_id.is_purchase_document():
             fiscal_position = self.move_id.fiscal_position_id
             accounts = self.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=fiscal_position)
             if accounts['stock_input']:

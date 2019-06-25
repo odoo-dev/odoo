@@ -95,7 +95,7 @@ class account_payment(models.Model):
         if not active_ids or active_model != 'account.move':
             return rec
 
-        invoices = self.env['account.move'].browse(active_ids).filtered(lambda move: move._is_invoice())
+        invoices = self.env['account.move'].browse(active_ids).filtered(lambda move: move.is_invoice(include_receipts=True))
 
         # Check all invoices are open
         if not invoices or any(invoice.state != 'posted' for invoice in invoices):
@@ -388,8 +388,7 @@ class account_payment(models.Model):
         for record in self:
             reconciled_moves = record.move_line_ids.mapped('matched_debit_ids.debit_move_id.move_id')\
                                + record.move_line_ids.mapped('matched_credit_ids.credit_move_id.move_id')
-            record.reconciled_invoice_ids = reconciled_moves.filtered(
-                lambda move: move.type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))
+            record.reconciled_invoice_ids = reconciled_moves.filtered(lambda move: move.is_invoice())
             record.has_invoices = bool(record.reconciled_invoice_ids)
 
     @api.multi
@@ -740,11 +739,11 @@ class payment_register(models.TransientModel):
         invoices = self.env['account.move'].browse(active_ids)
 
         # Check all invoices are open
-        if any(invoice.state != 'posted' or invoice.invoice_payment_state != 'not_paid' for invoice in invoices):
+        if any(invoice.state != 'posted' or invoice.invoice_payment_state != 'not_paid' or not invoice.is_invoice() for invoice in invoices):
             raise UserError(_("You can only register payments for open invoices"))
         # Check all invoices are inbound or all invoices are outbound
-        outbound_list = [invoice.type in ('in_invoice', 'out_refund') for invoice in invoices]
-        first_outbound = invoices[0].type in ('in_invoice', 'out_refund')
+        outbound_list = [invoice.is_outbound() for invoice in invoices]
+        first_outbound = invoices[0].is_outbound()
         if any(x != first_outbound for x in outbound_list):
             raise UserError(_("You can only register at the same time for payment that are all inbound or all outbound"))
         if 'invoice_ids' not in rec:
@@ -752,7 +751,7 @@ class payment_register(models.TransientModel):
         if 'journal_id' not in rec:
             rec['journal_id'] = self.env['account.journal'].search([('company_id', '=', self.env.company.id), ('type', 'in', ('bank', 'cash'))], limit=1).id
         if 'payment_method_id' not in rec:
-            if invoices[0].type in ('out_invoice', 'in_refund'):
+            if invoices[0].is_inbound():
                 domain = [('payment_type', '=', 'inbound')]
             else:
                 domain = [('payment_type', '=', 'outbound')]
@@ -764,7 +763,7 @@ class payment_register(models.TransientModel):
         active_ids = self._context.get('active_ids')
         invoices = self.env['account.move'].browse(active_ids)
         if self.journal_id and invoices:
-            if invoices[0].type in ('out_invoice', 'in_refund'):
+            if invoices[0].is_inbound():
                 domain = [('payment_type', '=', 'inbound'), ('id', 'in', self.journal_id.inbound_payment_method_ids.ids)]
             else:
                 domain = [('payment_type', '=', 'outbound'), ('id', 'in', self.journal_id.outbound_payment_method_ids.ids)]

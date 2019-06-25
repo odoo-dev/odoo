@@ -43,7 +43,7 @@ class CrmLead(models.Model):
         }
         account_invoice_domain = [
             ('state', '=', 'posted'),
-            ('user_id', '=', self.env.uid),
+            ('invoice_user_id', '=', self.env.uid),
             ('invoice_date', '>=', date_today.replace(day=1) - relativedelta(months=+1)),
             ('type', 'in', ['out_invoice', 'out_refund'])
         ]
