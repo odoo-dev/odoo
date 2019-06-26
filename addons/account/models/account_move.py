@@ -110,9 +110,6 @@ class AccountMove(models.Model):
         states={'draft': [('readonly', False)]},
         string='Currency',
         default=_get_default_currency)
-    foreign_currency_id = fields.Many2one('res.currency', string='Foreign Currency',
-        compute='_compute_foreign_currency_id',
-        help="Technical field used to set the default currency on journal items as their must have a currency_id set only when dealing with foreign currencies.")
     line_ids = fields.One2many('account.move.line', 'move_id', string='Journal Items', copy=True, readonly=True,
         states={'draft': [('readonly', False)]})
     partner_id = fields.Many2one('res.partner', readonly=True, tracking=True,
@@ -238,7 +235,7 @@ class AccountMove(models.Model):
     invoice_filter_type_domain = fields.Char(compute='_compute_invoice_filter_type_domain',
         help="Technical field used to have a dynamic domain on journal / taxes in the form view.")
     company_partner_id = fields.Many2one(string='Company Partner', readonly=True, related='company_id.partner_id',
-        help="""The partner representing the current company owning this invoice. This technical field is used 
+        help="""The partner representing the current company owning this invoice. This technical field is used
         to make a domain on res.partner.bank in case of customer invoices""")
     invoice_has_matching_supsense_amount = fields.Boolean(compute='_compute_has_matching_suspense_amount',
         groups='account.group_account_invoice',
@@ -889,11 +886,6 @@ class AccountMove(models.Model):
             else:
                 move.invoice_filter_type_domain = False
 
-    @api.depends('currency_id')
-    def _compute_foreign_currency_id(self):
-        for move in self:
-            move.foreign_currency_id = move.currency_id != move.company_id.currency_id and move.currency_id
-
     @api.depends('partner_id')
     def _compute_commercial_partner_id(self):
         for move in self:
@@ -908,8 +900,8 @@ class AccountMove(models.Model):
         'line_ids.amount_residual_currency',
         'line_ids.payment_id.state')
     def _compute_amount(self):
-        invoice_ids = [move.id for move in self if move.id
-                       and move.type in ('out_invoice', 'out_refund', 'out_receipt', 'in_invoice', 'in_refund', 'in_receipt')]
+        invoice_ids = [move.id for move in self if move.id and
+                       move.type in ('out_invoice', 'out_refund', 'out_receipt', 'in_invoice', 'in_refund', 'in_receipt')]
         if invoice_ids:
             self._cr.execute(
                 '''
