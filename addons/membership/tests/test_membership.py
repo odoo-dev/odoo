@@ -29,7 +29,7 @@ class TestMembership(TestMembershipCommon):
             'membership: default membership status of partners should be None')
 
         # subscribes to a membership
-        invoice = self.partner_1.create_membership_invoice(self.membership_1.id, 75.0)
+        invoice = self.partner_1.create_membership_invoice(self.membership_1, 75.0)
 
         self.assertEqual(
             invoice.state, 'draft',
@@ -81,7 +81,7 @@ class TestMembership(TestMembershipCommon):
             'membership: default membership status of partners should be None')
 
         # subscribes to a membership
-        invoice = self.partner_1.create_membership_invoice(self.membership_1.id, 75.0)
+        invoice = self.partner_1.create_membership_invoice(self.membership_1, 75.0)
 
         # the invoice is canceled -> membership state of the customer goes to canceled
         invoice.journal_id.update_posted = True
