@@ -477,7 +477,7 @@
                     </div>
                     <!-- Invoice suspense accounts -->
                     <div groups="account.group_account_invoice" class="alert alert-info" role="alert" style="margin-bottom:0px;"
-                         attrs="{'invisible': ['|', ('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')), ('invoice_edition_mode_available','=',False)]}">
+                         attrs="{'invisible': ['|', ('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')), ('invoice_has_matching_supsense_amount','=',False)]}">
                         You have suspense account moves that match this invoice. <bold><button class="alert-link" type="object" name="action_invoice_reconcile_to_check" role="button" string="Check them" style="padding: 0;vertical-align: baseline;"/></bold> to mark this invoice as paid.
                     </div>
                     <sheet>
@@ -513,7 +513,7 @@
                         <field name="invoice_sent" invisible="1"/>
                         <field name="invoice_sequence_number_next_prefix" invisible="1"/>
                         <field name="invoice_sequence_number_next" invisible="1"/>
-                        <field name="invoice_edition_mode_available" invisible="1"/>
+                        <field name="invoice_has_matching_supsense_amount" invisible="1"/>
 
                         <div>
                             <!-- Invoice draft header -->

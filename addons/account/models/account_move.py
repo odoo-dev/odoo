@@ -205,8 +205,6 @@ class AccountMove(models.Model):
     invoice_incoterm_id = fields.Many2one('account.incoterms', string='Incoterm',
         default=_get_default_invoice_incoterm,
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
-    invoice_edition_mode_available = fields.Boolean(compute='_get_edition_mode_available',
-        groups='account.group_account_invoice')
 
     # ==== Payment widget fields ====
     invoice_outstanding_credits_debits_widget = fields.Text(groups="account.group_account_invoice",
@@ -242,6 +240,9 @@ class AccountMove(models.Model):
     company_partner_id = fields.Many2one(string='Company Partner', readonly=True, related='company_id.partner_id',
         help="""The partner representing the current company owning this invoice. This technical field is used 
         to make a domain on res.partner.bank in case of customer invoices""")
+    invoice_has_matching_supsense_amount = fields.Boolean(compute='_compute_has_matching_suspense_amount',
+        groups='account.group_account_invoice',
+        help="Technical field used to display an alert on invoices if there is at least a matching amount in any supsense account.")
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -1028,7 +1029,7 @@ class AccountMove(models.Model):
             domain.append(('balance', '=', self.amount_residual))
         return domain
 
-    def _get_edition_mode_available(self):
+    def _compute_has_matching_suspense_amount(self):
         for r in self:
             domain = r._get_domain_edition_mode_available()
             domain2 = [('state', '=', 'open'), ('amount_residual', '=', r.amount_residual), ('type', '=', r.type)]
