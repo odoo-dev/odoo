@@ -266,7 +266,7 @@ class AccountMove(models.Model):
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
         for line in self.line_ids:
-            line.partner_id = self.commercial_partner_id
+            line.partner_id = self.partner_id.commercial_partner_id
 
         if self.type in ('out_invoice', 'out_refund', 'out_receipt'):
             self.invoice_payment_term_id = self.partner_id.property_payment_term_id
