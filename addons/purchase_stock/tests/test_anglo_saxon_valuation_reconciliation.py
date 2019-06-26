@@ -19,7 +19,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
         self.price_dif_account = self.env['account.account'].create({
             'name': 'Test price dif',
             'code': 'purchase_account_TEST_42',
-            'user_type_id': self.env['account.account.type'].search([],limit=1).id,
+            'user_type_id': self.env.ref('account.data_account_type_current_assets').id,
             'reconcile': True,
             'company_id': self.company.id,
         })

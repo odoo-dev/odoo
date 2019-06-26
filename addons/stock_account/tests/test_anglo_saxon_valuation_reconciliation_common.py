@@ -71,7 +71,7 @@ class ValuationReconciliationTestCase(AccountingTestCase):
         self.input_account = self.env['account.account'].create({
             'name': 'Test stock in',
             'code': 'stock_account_TEST_42',
-            'user_type_id': self.env['account.account.type'].search([],limit=1).id,
+            'user_type_id': self.env.ref('account.data_account_type_current_assets').id,
             'reconcile': True,
             'company_id': self.company.id,
         })
@@ -79,7 +79,7 @@ class ValuationReconciliationTestCase(AccountingTestCase):
         self.output_account = self.env['account.account'].create({
             'name': 'Test stock out',
             'code': 'stock_account_TEST_43',
-            'user_type_id': self.env['account.account.type'].search([],limit=1).id,
+            'user_type_id': self.env.ref('account.data_account_type_current_assets').id,
             'reconcile': True,
             'company_id': self.company.id,
         })
@@ -87,7 +87,7 @@ class ValuationReconciliationTestCase(AccountingTestCase):
         self.valuation_account = self.env['account.account'].create({
             'name': 'Test stock valuation',
             'code': 'stock_account_TEST_44',
-            'user_type_id': self.env['account.account.type'].search([],limit=1).id,
+            'user_type_id': self.env.ref('account.data_account_type_current_assets').id,
             'reconcile': True,
             'company_id': self.company.id,
         })
