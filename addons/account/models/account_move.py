@@ -1944,6 +1944,7 @@ class AccountMove(models.Model):
             self._cr.execute('UPDATE account_move SET state=%s WHERE id IN %s', ('cancel', tuple(self.ids)))
             self.invalidate_cache()
         self._check_fiscalyear_lock_date()
+        self.mapped('line_ids').remove_move_reconcile()
         return True
 
     @api.multi
