@@ -430,7 +430,7 @@ class account_journal(models.Model):
         self.ensure_one()
         ids = self.to_check_ids().ids
         action_context = {'show_mode_selector': False, 'company_ids': self.mapped('company_id').ids}
-        action_context.update({'edition_mode': True})
+        action_context.update({'suspense_moves_mode': True})
         action_context.update({'statement_line_ids': ids})
         return {
             'type': 'ir.actions.client',
@@ -440,7 +440,7 @@ class account_journal(models.Model):
 
     def to_check_ids(self):
         self.ensure_one()
-        domain = self.env['account.move.line']._get_domain_for_edition_mode()
+        domain = self.env['account.move.line']._get_suspense_moves_domain()
         domain.append(('journal_id', '=', self.id))
         statement_line_ids = self.env['account.move.line'].search(domain).mapped('statement_line_id')
         return statement_line_ids

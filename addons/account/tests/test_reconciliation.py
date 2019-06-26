@@ -1445,7 +1445,7 @@ class TestReconciliationExec(TestReconciliation):
         previous_name = st_line.move_name
 
         with self.assertRaises(UserError): #you need edition mode to be able to change it
-            st_line.with_context(edition_mode=False).process_reconciliation(
+            st_line.with_context(suspense_moves_mode=False).process_reconciliation(
                 counterpart_aml_dicts=[],
                 new_aml_dicts=[{
                   'debit': 0,
@@ -1455,7 +1455,7 @@ class TestReconciliationExec(TestReconciliation):
                 }],
             )
 
-        st_line.with_context(edition_mode=True).process_reconciliation(
+        st_line.with_context(suspense_moves_mode=True).process_reconciliation(
             counterpart_aml_dicts=[],
             new_aml_dicts=[{
               'debit': 0,

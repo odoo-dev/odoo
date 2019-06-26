@@ -443,7 +443,7 @@
                                 attrs="{'invisible':['|', '|', '|', ('state', '!=', 'posted'), ('invoice_sent', '=', False), ('invoice_payment_state', '!=', 'not_paid'), ('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))]}"
                                 groups="base.group_user"/>
                         <!-- Register Payment (only invoices / receipts) -->
-                        <button name="action_account_invoice_payment" id="account_invoice_payment_btn"
+                        <button name="action_invoice_register_payment" id="account_invoice_payment_btn"
                                 type="object" class="oe_highlight"
                                 attrs="{'invisible': ['|', '|', ('state', '!=', 'posted'), ('invoice_payment_state', '!=', 'not_paid'), ('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"
                                 string="Register Payment"
@@ -478,7 +478,7 @@
                     <!-- Invoice suspense accounts -->
                     <div groups="account.group_account_invoice" class="alert alert-info" role="alert" style="margin-bottom:0px;"
                          attrs="{'invisible': ['|', ('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')), ('invoice_has_matching_supsense_amount','=',False)]}">
-                        You have suspense account moves that match this invoice. <bold><button class="alert-link" type="object" name="action_invoice_reconcile_to_check" role="button" string="Check them" style="padding: 0;vertical-align: baseline;"/></bold> to mark this invoice as paid.
+                        You have suspense account moves that match this invoice. <bold><button class="alert-link" type="object" name="action_open_matching_suspense_moves" role="button" string="Check them" style="padding: 0;vertical-align: baseline;"/></bold> to mark this invoice as paid.
                     </div>
                     <sheet>
                         <div name="button_box" class="oe_button_box">

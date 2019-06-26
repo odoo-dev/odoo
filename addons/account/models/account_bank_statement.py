@@ -627,7 +627,7 @@ class AccountBankStatementLine(models.Model):
         """
         payable_account_type = self.env.ref('account.data_account_type_payable')
         receivable_account_type = self.env.ref('account.data_account_type_receivable')
-        edition_mode = self._context.get('edition_mode')
+        suspense_moves_mode = self._context.get('suspense_moves_mode')
         counterpart_aml_dicts = counterpart_aml_dicts or []
         payment_aml_rec = payment_aml_rec or self.env['account.move.line']
         new_aml_dicts = new_aml_dicts or []
@@ -644,7 +644,7 @@ class AccountBankStatementLine(models.Model):
         if any(rec.statement_id for rec in payment_aml_rec):
             raise UserError(_('A selected move line was already reconciled.'))
         for aml_dict in counterpart_aml_dicts:
-            if aml_dict['move_line'].reconciled and not edition_mode:
+            if aml_dict['move_line'].reconciled and not suspense_moves_mode:
                 raise UserError(_('A selected move line was already reconciled.'))
             if isinstance(aml_dict['move_line'], int):
                 aml_dict['move_line'] = aml_obj.browse(aml_dict['move_line'])
@@ -658,7 +658,7 @@ class AccountBankStatementLine(models.Model):
             user_type_id = self.env['account.account'].browse(aml_dict.get('account_id')).user_type_id
             if user_type_id in [payable_account_type, receivable_account_type] and user_type_id not in account_types:
                 account_types |= user_type_id
-        if edition_mode:
+        if suspense_moves_mode:
             if any(not line.journal_entry_ids for line in self):
                 raise UserError(_('Some selected statement line were not already reconciled with an account move.'))
         else:
@@ -691,7 +691,7 @@ class AccountBankStatementLine(models.Model):
             # Create the move
             self.sequence = self.statement_id.line_ids.ids.index(self.id) + 1
             move_vals = self._prepare_reconciliation_move(self.statement_id.name)
-            if edition_mode:
+            if suspense_moves_mode:
                 self.button_cancel_reconciliation()
             move = self.env['account.move'].with_context(default_journal_id=move_vals['journal_id']).create(move_vals)
             counterpart_moves = (counterpart_moves | move)

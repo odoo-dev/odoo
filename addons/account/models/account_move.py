@@ -546,7 +546,7 @@ class AccountMove(models.Model):
                 diff_balance = self.currency_id._convert(diff_amount_currency, self.company_id.currency_id, self.company_id, self.date)
             return diff_balance, diff_amount_currency
 
-        def _compute_diff_cash_rounding_lines(self, diff_balance, diff_amount_currency, cash_rounding_line):
+        def _apply_cash_rounding(self, diff_balance, diff_amount_currency, cash_rounding_line):
             ''' Apply the cash rounding.
             :param self:                    The current account.move record.
             :param diff_balance:            The computed balance to set on the new rounding line.
@@ -633,7 +633,7 @@ class AccountMove(models.Model):
             self.line_ids -= existing_cash_rounding_line
             return
 
-        _compute_diff_cash_rounding_lines(self, diff_balance, diff_amount_currency, existing_cash_rounding_line)
+        _apply_cash_rounding(self, diff_balance, diff_amount_currency, existing_cash_rounding_line)
 
     @api.multi
     def _recompute_payment_terms_lines(self):
@@ -959,9 +959,9 @@ class AccountMove(models.Model):
             move.write({'line_ids': to_write})
 
     @api.multi
-    def _get_domain_edition_mode_available(self):
+    def _get_domain_matching_supsense_moves(self):
         self.ensure_one()
-        domain = self.env['account.move.line']._get_domain_for_edition_mode()
+        domain = self.env['account.move.line']._get_suspense_moves_domain()
         domain += ['|', ('partner_id', '=?', self.partner_id.id), ('partner_id', '=', False)]
         if self.type in ('out_invoice', 'in_refund'):
             domain.append(('balance', '=', -self.amount_residual))
@@ -971,10 +971,20 @@ class AccountMove(models.Model):
 
     def _compute_has_matching_suspense_amount(self):
         for r in self:
-            domain = r._get_domain_edition_mode_available()
-            domain2 = [('state', '=', 'open'), ('amount_residual', '=', r.amount_residual), ('type', '=', r.type)]
-            r.edition_mode_available = r.state == 'open' and (0 < self.env['account.move.line'].search_count(domain) < 5) and self.env[
-                'account.move'].search_count(domain2) < 5
+            res = False
+            if r.state == 'open' and r._is_invoice() and r.invoice_payment_state == 'not_paid':
+                domain = r._get_domain_matching_supsense_moves()
+                #there are more than one but less than 5 suspense moves matching the residual amount
+                if (0 < self.env['account.move.line'].search_count(domain) < 5):
+                    domain2 = [
+                        ('invoice_payment_state', '=', 'not_paid'),
+                        ('state', '=', 'open'),
+                        ('amount_residual', '=', r.amount_residual),
+                        ('type', '=', r.type)]
+                    #there are less than 5 other open invoices of the same type with the same residual
+                    if self.env['account.move'].search_count(domain2) < 5:
+                        res = True
+            r.invoice_has_matching_supsense_amount = res
 
     @api.depends('partner_id', 'invoice_source_email')
     def _compute_invoice_vendor_display_info(self):
@@ -1231,7 +1241,6 @@ class AccountMove(models.Model):
 
         # /!\ As this method is called in create / write, we can't make the assumption the computed stored fields
         # are already done. Then, this query MUST NOT depend of computed stored fields (e.g. balance).
-        # It happens as the ORM makes the create with the 'no_recompute' statement.
         # It happens as the ORM makes the create with the 'no_recompute' statement.
         self._cr.execute('''
             SELECT line.move_id
@@ -1870,8 +1879,8 @@ class AccountMove(models.Model):
         AccountMoveLine = self.env['account.move.line']
         excluded_move_ids = []
 
-        if self._context.get('edition_mode'):
-            excluded_move_ids = AccountMoveLine.search(AccountMoveLine._get_domain_for_edition_mode() + [('move_id', 'in', self.ids)]).mapped('move_id').ids
+        if self._context.get('suspense_moves_mode'):
+            excluded_move_ids = AccountMoveLine.search(AccountMoveLine._get_suspense_moves_domain() + [('move_id', 'in', self.ids)]).mapped('move_id').ids
 
         for move in self:
             if not move.journal_id.update_posted and move.id not in excluded_move_ids:
@@ -1938,12 +1947,12 @@ class AccountMove(models.Model):
         pass
 
     @api.multi
-    def action_invoice_reconcile_to_check(self):
+    def action_open_matching_suspense_moves(self):
         self.ensure_one()
-        domain = self._get_domain_edition_mode_available()
+        domain = self._get_domain_matching_supsense_moves()
         ids = self.env['account.move.line'].search(domain).mapped('statement_line_id').ids
         action_context = {'show_mode_selector': False, 'company_ids': self.mapped('company_id').ids}
-        action_context.update({'edition_mode': True})
+        action_context.update({'suspense_moves_mode': True})
         action_context.update({'statement_line_ids': ids})
         action_context.update({'partner_id': self.partner_id.id})
         action_context.update({'partner_name': self.partner_id.name})
@@ -1954,7 +1963,7 @@ class AccountMove(models.Model):
         }
 
     @api.multi
-    def action_account_invoice_payment(self):
+    def action_invoice_register_payment(self):
         return self.env['account.payment']\
             .with_context(active_ids=self.ids, active_model='account.move', active_id=self.id)\
             .action_register_payment()
@@ -2004,7 +2013,7 @@ class AccountMove(models.Model):
         return action
 
     @api.model
-    def _run_post_draft_to_post(self):
+    def _autopost_draft_entries(self):
         ''' This method is called from a cron job.
         It is used to post entries such as those created by the module
         account_asset.
@@ -2089,11 +2098,11 @@ class AccountMoveLine(models.Model):
         help="Technical field used to mark a tax line as exigible in the vat report or not (only exigible journal items"
              " are displayed). By default all new journal items are directly exigible, but with the feature cash_basis"
              " on taxes, some will become exigible only when the payment is recorded.")
-    tag_ids = fields.Many2many(string="Tags", comodel_name='account.account.tag', ondelete='restrict',
-        help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.")
     tax_repartition_line_id = fields.Many2one(comodel_name='account.tax.repartition.line',
         string="Originator Tax Repartition Line", ondelete='restrict',
         help="Tax repartition line that caused the creation of this move line, if any")
+    tag_ids = fields.Many2many(string="Tags", comodel_name='account.account.tag', ondelete='restrict',
+        help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.")
     tax_audit = fields.Char(string="Tax Audit String", compute="_compute_tax_audit", store=True,
         help="Computed field, listing the tax grids impacted by this line, and the amount it applies to each of them.")
 
@@ -2284,8 +2293,7 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         if self.product_id:
             return self.product_id.uom_id
-        else:
-            return False
+        return False
 
     @api.model
     def _get_computed_business_vals(self, price_unit, quantity, discount, currency, product, partner, taxes, move_type):
@@ -2694,6 +2702,21 @@ class AccountMoveLine(models.Model):
                       "Please change the journal entry date or the tax lock date set in the settings ({}) to proceed").format(
                         line.company_id.tax_lock_date or date.min))
 
+    @api.multi
+    def _update_check(self):
+        """ Raise Warning to cause rollback if the move is posted, some entries are reconciled or the move is older than the lock date"""
+        move_ids = set()
+        for line in self:
+            err_msg = _('Move name (id): %s (%s)') % (line.move_id.name, str(line.move_id.id))
+            if line.move_id.state != 'draft':
+                raise UserError(_('You cannot do this modification on a posted journal entry, you can just change some non legal fields. You must revert the journal entry to cancel it.\n%s.') % err_msg)
+            if line.reconciled and not (line.debit == 0 and line.credit == 0):
+                raise UserError(_('You cannot do this modification on a reconciled entry. You can just change some non legal fields or you must unreconcile first.\n%s.') % err_msg)
+            if line.move_id.id not in move_ids:
+                move_ids.add(line.move_id.id)
+        self.env['account.move'].browse(list(move_ids))._check_fiscalyear_lock_date()
+        return True
+
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
@@ -2924,21 +2947,6 @@ class AccountMoveLine(models.Model):
                 if len(accounts) == 1:
                     values['account_id'] = accounts.id
         return values
-
-    @api.multi
-    def _update_check(self):
-        """ Raise Warning to cause rollback if the move is posted, some entries are reconciled or the move is older than the lock date"""
-        move_ids = set()
-        for line in self:
-            err_msg = _('Move name (id): %s (%s)') % (line.move_id.name, str(line.move_id.id))
-            if line.move_id.state != 'draft':
-                raise UserError(_('You cannot do this modification on a posted journal entry, you can just change some non legal fields. You must revert the journal entry to cancel it.\n%s.') % err_msg)
-            if line.reconciled and not (line.debit == 0 and line.credit == 0):
-                raise UserError(_('You cannot do this modification on a reconciled entry. You can just change some non legal fields or you must unreconcile first.\n%s.') % err_msg)
-            if line.move_id.id not in move_ids:
-                move_ids.add(line.move_id.id)
-        self.env['account.move'].browse(list(move_ids))._check_fiscalyear_lock_date()
-        return True
 
     @api.multi
     @api.depends('ref', 'move_id')
@@ -3276,11 +3284,12 @@ class AccountMoveLine(models.Model):
                 'line_ids': [(0, 0, line) for line in writeoff_lines],
             })
             writeoff_moves += writeoff_move
-            # writeoff_move.post()
-
             line_to_reconcile += writeoff_move.line_ids.filtered(lambda r: r.account_id == self[0].account_id).sorted(key='id')[-1:]
+
+        #post all the writeoff moves at once
         if writeoff_moves:
             writeoff_moves.post()
+
         # Return the writeoff move.line which is to be reconciled
         return line_to_reconcile
 
@@ -3517,7 +3526,7 @@ class AccountMoveLine(models.Model):
         return action
 
     @api.model
-    def _get_domain_for_edition_mode(self):
+    def _get_suspense_moves_domain(self):
         return [
             ('move_id.to_check', '=', True),
             ('full_reconcile_id', '=', False),
