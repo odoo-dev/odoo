@@ -257,8 +257,8 @@ class AccountMove(models.Model):
 
     @api.onchange('journal_id')
     def _onchange_journal(self):
-        if self.journal_id:
-            new_currency = self.journal_id.currency_id or self.journal_id.company_id.currency_id
+        if self.journal_id and self.journal_id.currency_id:
+            new_currency = self.journal_id.currency_id
             if new_currency != self.currency_id:
                 self.currency_id = new_currency
                 self._onchange_currency()
