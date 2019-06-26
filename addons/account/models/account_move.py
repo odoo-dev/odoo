@@ -79,7 +79,7 @@ class AccountMove(models.Model):
     state = fields.Selection(selection=[
             ('draft', 'Unposted'),
             ('posted', 'Posted'),
-            ('cancel', 'cancelled')
+            ('cancel', 'Cancelled')
         ], string='Status', required=True, readonly=True, copy=False, tracking=True,
         default='draft')
     type = fields.Selection(selection=[
