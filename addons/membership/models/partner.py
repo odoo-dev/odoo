@@ -115,13 +115,9 @@ class Partner(models.Model):
         self.recompute()
 
     @api.multi
-    def create_membership_invoice(self, product_id=None, datas=None):
+    def create_membership_invoice(self, product, amount):
         """ Create Customer Invoice of Membership for partners.
-        @param datas: datas has dictionary value which consist Id of Membership product and Cost Amount of Membership.
-                      datas = {'membership_product_id': None, 'amount': None}
         """
-        product_id = product_id or datas.get('membership_product_id')
-        amount = datas.get('amount', 0.0)
         invoice_vals_list = []
         for partner in self:
             addr = partner.address_get(['invoice'])
@@ -134,7 +130,7 @@ class Partner(models.Model):
                 'type': 'out_invoice',
                 'partner_id': partner.id,
                 'invoice_line_ids': [
-                    (0, None, {'product_id': product_id, 'quantity': 1, 'price_unit': amount})
+                    (0, None, {'product_id': product.id, 'quantity': 1, 'price_unit': amount, 'tax_ids': [(6, 0, product.taxes_id.ids)]})
                 ]
             })
 

@@ -18,7 +18,7 @@ class TestMembership(TestMembershipCommon):
             'membership_date_to': datetime.date.today() + relativedelta(years=-1),
         })
 
-        self.partner_1.create_membership_invoice(product_id=self.membership_1.id, datas={'amount': 75.0})
+        self.partner_1.create_membership_invoice(self.membership_1, 75.0)
         self.assertEqual(
             self.partner_1.membership_state, 'old',
             'membership: outdated subscription should put member in old state')
@@ -29,7 +29,7 @@ class TestMembership(TestMembershipCommon):
             'membership: default membership status of partners should be None')
 
         # subscribes to a membership
-        invoice = self.partner_1.create_membership_invoice(product_id=self.membership_1.id, datas={'amount': 75.0})
+        invoice = self.partner_1.create_membership_invoice(self.membership_1.id, 75.0)
 
         self.assertEqual(
             invoice.state, 'draft',
@@ -81,7 +81,7 @@ class TestMembership(TestMembershipCommon):
             'membership: default membership status of partners should be None')
 
         # subscribes to a membership
-        invoice = self.partner_1.create_membership_invoice(product_id=self.membership_1.id, datas={'amount': 75.0})
+        invoice = self.partner_1.create_membership_invoice(self.membership_1.id, 75.0)
 
         # the invoice is canceled -> membership state of the customer goes to canceled
         invoice.journal_id.update_posted = True
