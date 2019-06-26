@@ -92,6 +92,8 @@ class AccountMove(models.Model):
             ('in_receipt', 'Purchase Receipt'),
         ], String='Type', required=True, store=True, index=True, readonly=True, tracking=True,
         default="entry")
+    to_check = fields.Boolean(string='To Check', default=False,
+        help='If this checkbox is ticked, it means that the user was not sure of all the related informations at the time of the creation of the move and that the move needs to be checked again.')
     user_id = fields.Many2one('res.users', readonly=True, copy=False, tracking=True,
         states={'draft': [('readonly', False)]},
         string='Salesperson',
@@ -118,10 +120,8 @@ class AccountMove(models.Model):
         string='Customer/Vendor')
     commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity', store=True, readonly=True,
         compute='_compute_commercial_partner_id')
-    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True,
-        states={'draft': [('readonly', False)]},
-        help = "Fiscal positions are used to adapt taxes and accounts for particular customers or sales orders/invoices. "
-               "The default value comes from the customer.")
+
+    # === Amount fields ===
     amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, tracking=True,
         compute='_compute_amount')
     amount_tax = fields.Monetary(string='Tax', store=True, readonly=True,
@@ -141,9 +141,7 @@ class AccountMove(models.Model):
         compute='_compute_amount')
     amount_by_group = fields.Binary(string="Tax amount by group",
         compute='_compute_invoice_taxes_by_group',
-        help="type: [(name, amount, base, formated amount, formated base)]")
-    to_check = fields.Boolean(string='To Check', default=False,
-        help='If this checkbox is ticked, it means that the user was not sure of all the related informations at the time of the creation of the move and that the move needs to be checked again.')
+        help="Technical field used by web_studio to allow an easy edition of the invoice report by drag/drop of the field. Return type: [(name, amount, base, formated amount, formated base)]")
 
     # ==== Cash basis feature fields ====
     tax_cash_basis_rec_id = fields.Many2one(
@@ -164,6 +162,10 @@ class AccountMove(models.Model):
     # =========================================================
 
     # ==== Business fields ====
+    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True,
+        states={'draft': [('readonly', False)]},
+        help="Fiscal positions are used to adapt taxes and accounts for particular customers or sales orders/invoices. "
+             "The default value comes from the customer.")
     invoice_payment_state = fields.Selection(selection=[
             ('not_paid', 'Not Paid'),
             ('in_payment', 'In Payment'),
@@ -238,7 +240,8 @@ class AccountMove(models.Model):
     invoice_filter_type_domain = fields.Char(compute='_compute_invoice_filter_type_domain',
         help="Technical field used to have a dynamic domain on journal / taxes in the form view.")
     company_partner_id = fields.Many2one(string='Company Partner', readonly=True, related='company_id.partner_id',
-        help="The partner representing the current company owning this invoice.")
+        help="""The partner representing the current company owning this invoice. This technical field is used 
+        to make a domain on res.partner.bank in case of customer invoices""")
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -364,17 +367,14 @@ class AccountMove(models.Model):
         ]
 
     @api.model
-    def _get_tax_line_values_from_base_lines(self, tax, base_lines):
+    def _get_extra_tax_values_from_base_lines(self, tax, base_lines):
         ''' Hook used to set custom values at the creation of a tax line computed based on base lines.
-        /!\ The result must be consistent with the grouping key (see '_build_tax_line_groupby_key').
 
         :param tax:         An account.tax record for which the line is created.
         :param base_lines:  A recorset of account.move.line representing the lines on which this tax is computed.
         :return:            A dictionary of additional values computed from base lines to create a new tax line.
         '''
         return {
-            'analytic_account_id': tax.analytic and base_lines[0].analytic_account_id.id or False,
-            'analytic_tag_ids': [(6, 0, tax.analytic and base_lines[0].analytic_tag_ids.ids or [])],
         }
 
     @api.multi
@@ -530,7 +530,7 @@ class AccountMove(models.Model):
                     'tax_repartition_line_id': tax_repartition_line.id,
                     'tax_ids': values['tax_ids'],
                     'tag_ids': [(6, 0, values['tag_ids'])],
-                    **self._get_tax_line_values_from_base_lines(tax, values['base_lines']),
+                    **self._get_extra_tax_values_from_base_lines(tax, values['base_lines']),
                 })
                 lines_map['tax_lines'] += tax_line
 
