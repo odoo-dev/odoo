@@ -30,17 +30,19 @@ class AccountMove(models.Model):
     l10n_in_partner_vat = fields.Char(related="partner_id.vat", readonly=True)
 
     @api.model
-    def _build_tax_line_groupby_key(self, line, tax):
+    def _get_tax_grouping_key_from_tax_line(self, tax_line):
         # OVERRIDE to group taxes also by product.
-        res = super(AccountMove, self)._build_tax_line_groupby_key(line, tax)
-        res.append(line.product_id.id)
+        res = super()._get_tax_grouping_key_from_tax_line(tax_line)
+        res['product_id'] = tax_line.product_id.id
         return res
 
     @api.model
-    def _get_tax_line_values_from_base_lines(self, tax, base_lines):
-        # OVERRIDE to copy the product from the base line to the tax line.
-        res = super(AccountMove, self)._get_tax_line_values_from_base_lines(tax, base_lines)
-        res['product_id'] = base_lines[0].product_id.id
-        res['product_uom_id'] = base_lines[0].product_id.id
-        res['quantity'] = base_lines[0].product_id.id
+    def _get_tax_grouping_key_from_base_line(self, base_line, tax_vals):
+        # OVERRIDE to group taxes also by product.
+        res = super()._get_tax_grouping_key_from_base_line(base_line, tax_vals)
+        res.update({
+            'product_id': base_line.product_id.id,
+            'product_uom_id': base_line.product_uom_id.id,
+            'quantity': base_line.quantity,
+        })
         return res
