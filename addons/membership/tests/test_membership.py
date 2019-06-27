@@ -57,7 +57,7 @@ class TestMembership(TestMembershipCommon):
             'payment_method_id': self.env.ref("account.account_payment_method_manual_in").id,
             'payment_type': 'inbound',
             'invoice_ids': [(6, False, invoice.ids)],
-            'amount': 75.0,
+            'amount': 86.25,
             'journal_id': bank_journal.id,
             'partner_type': 'customer',
         }).post()
