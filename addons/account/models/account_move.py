@@ -338,12 +338,12 @@ class AccountMove(models.Model):
     def _onchange_recompute_dynamic_lines(self):
         self._recompute_dynamic_lines()
 
-    # TODO: continue doc plus review _recompute_tax_lines
     @api.model
     def _get_tax_grouping_key_from_tax_line(self, tax_line):
         ''' Create the dictionary based on a tax line that will be used as key to group taxes together.
-        :param tax_line:
-        :return:
+        /!\ Must be consistent with '_get_tax_grouping_key_from_base_line'.
+        :param tax_line:    An account.move.line being a tax line (with 'tax_repartition_line_id' set then).
+        :return:            A dictionary containing all fields on which the tax will be grouped.
         '''
         return {
             'tax_repartition_line_id': tax_line.tax_repartition_line_id.id,
@@ -357,6 +357,12 @@ class AccountMove(models.Model):
 
     @api.model
     def _get_tax_grouping_key_from_base_line(self, base_line, tax_vals):
+        ''' Create the dictionary based on a base line that will be used as key to group taxes together.
+        /!\ Must be consistent with '_get_tax_grouping_key_from_tax_line'.
+        :param base_line:   An account.move.line being a base line (that could contains something in 'tax_ids').
+        :param tax_vals:    An element of compute_all(...)['taxes'].
+        :return:            A dictionary containing all fields on which the tax will be grouped.
+        '''
         tax_repartition_line = self.env['account.tax.repartition.line'].browse(tax_vals['tax_repartition_line_id'])
         account = base_line._get_default_tax_account(tax_repartition_line) or base_line.account_id
         return {
