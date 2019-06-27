@@ -14,7 +14,7 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
 
     @api.multi
-    def _reverse_move_vals(self, default_values, cancel=False):
+    def _reverse_move_vals(self, default_values, cancel=True):
         # OVERRIDE
         # Don't keep anglo-saxon lines if not cancelling an existing invoice.
         move_vals = super(AccountMove, self)._reverse_move_vals(default_values, cancel=cancel)

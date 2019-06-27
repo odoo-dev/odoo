@@ -1634,7 +1634,7 @@ class AccountMove(models.Model):
             return abs(total_reconciled / total_amount)
 
     @api.multi
-    def _reverse_move_vals(self, default_values, cancel=False):
+    def _reverse_move_vals(self, default_values, cancel=True):
         ''' Reverse values passed as parameter being the copied values of the original journal entry.
         For example, debit / credit must be switched. The tax lines must be edited in case of refunds.
 
@@ -1729,6 +1729,9 @@ class AccountMove(models.Model):
     @api.multi
     def _reverse_moves(self, default_values_list=None, cancel=False):
         ''' Reverse a recordset of account.move.
+        If cancel parameter is true, the reconcilable or liquidity lines
+        of each original move will be reconciled with its reverse's.
+
         :param default_values_list: A list of default values to consider per move.
                                     ('type' & 'reversed_entry_id' are computed in the method).
         :return:                    An account.move recordset, reverse of the current self.
