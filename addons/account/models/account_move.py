@@ -806,6 +806,8 @@ class AccountMove(models.Model):
     @api.multi
     def onchange(self, values, field_name, field_onchange):
         # OVERRIDE
+        # As the dynamic lines in this model are quite complex, we need to ensure some computations are done exactly
+        # at the beginning / at the end of the onchange mechanism. So, the onchange recursivity is disabled.
         return super(AccountMove, self.with_context(recursive_onchanges=False)).onchange(values, field_name, field_onchange)
 
     # -------------------------------------------------------------------------
