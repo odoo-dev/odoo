@@ -806,25 +806,7 @@ class AccountMove(models.Model):
     @api.multi
     def onchange(self, values, field_name, field_onchange):
         # OVERRIDE
-        if not isinstance(field_name, list):
-            field_name = [field_name]
-
-        # Ensure the modified one2many is exactly at the end of the values for cache consistency.
-        # This is necessary as the cache must contains values for updated records.
-        if 'line_ids' in field_name:
-            o2m_field = 'line_ids'
-        elif 'invoice_line_ids' in field_name:
-            o2m_field = 'invoice_line_ids'
-        else:
-            o2m_field = None
-        if o2m_field:
-            values = OrderedDict(values)
-            values[o2m_field] = values.pop(o2m_field)
-
-        # As the dynamic lines in this model are quite complex, we need to ensure some computations are done exactly
-        # at the beginning / at the end of the onchange mechanism. So, the onchange recursivity is disabled.
-        self_ctx = self.with_context(recursive_onchanges=False)
-        return super(AccountMove, self_ctx).onchange(values, field_name, field_onchange)
+        return super(AccountMove, self.with_context(recursive_onchanges=False)).onchange(values, field_name, field_onchange)
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
