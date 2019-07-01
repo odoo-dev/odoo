@@ -657,11 +657,20 @@
         <field name="chart_template_id" ref="cl_chart_template"/>
     </record>
 
+
     <record id="212" model="account.account.template">
         <field name="code">210220</field>
         <field name="name">Anticipo de Clientes</field>
         <field ref="account.data_account_type_payable" name="user_type_id"/>
         <field name="reconcile" eval="True"/>
+        <field name="chart_template_id" ref="cl_chart_template"/>
+    </record>
+
+    <record id="211" model="account.account.template">
+        <field name="code">210230</field>
+        <field name="name">Facturas por Recibir</field>
+        <field ref="account.data_account_type_current_liabilities" name="user_type_id"/>
+        <field name="reconcile" eval="False"/>
         <field name="chart_template_id" ref="cl_chart_template"/>
     </record>
 

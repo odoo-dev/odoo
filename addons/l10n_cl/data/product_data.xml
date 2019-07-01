@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo noupdate="1">
+
     <record id="product_product_ad_valorem" model="product.product">
         <field name="name">Ad-Valorem</field>
         <field name="type">service</field>
@@ -9,22 +10,4 @@
         <field name="uom_id" ref="uom.product_uom_unit"/>
     </record>
 
-    <!-- este producto se va -->
-    <!--<record id="product_correct" model="product.product">
-        <field name="name">Corrige Nota de Credito/Debito</field>
-        <field name="type">service</field>
-        <field name="default_code">CORRECC</field>
-        <field name="description">Producto usado para corregir texto en notas de crédito</field>
-        <field name="sale_ok" eval="False" />
-        <field name="uom_id" ref="uom.product_uom_unit"/>
-    </record>-->
-
-    <record id="product_modif" model="product.product">
-        <field name="name">Modifica Nota de Credito/Debito</field>
-        <field name="type">service</field>
-        <field name="default_code">MODIFIC</field>
-        <field name="description">Producto usado para modificar notas de crédito</field>
-        <field name="sale_ok" eval="False" />
-        <field name="uom_id" ref="uom.product_uom_unit"/>
-    </record>
 </odoo>

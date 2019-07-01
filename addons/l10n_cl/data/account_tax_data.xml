@@ -9,7 +9,6 @@
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
         <field name="tax_group_id" ref="tax_group_iva_19"/>
-
     </record>
 
     <record id="OTAX_19" model="account.tax.template">
@@ -20,7 +19,6 @@
       <field name="amount_type">percent</field>
       <field name="type_tax_use">purchase</field>
       <field name="tax_group_id" ref="tax_group_iva_19"/>
-
     </record>
 
     <record id="I_IU2C" model="account.tax.template">
@@ -35,7 +33,6 @@
         <field name="account_id" ref="244"/>
         <field name="tag_ids" eval="[(6,0,[ref('tag_cl_22'), ref('tag_cl_21')])]"/>
         <field name="tax_group_id" ref="tax_group_2da_categ"/>
-
     </record>
 
     <record id="especifico_compra" model="account.tax.template">
@@ -43,7 +40,6 @@
         <field name="name">Específico Compra</field>
         <field name="description">Especifico</field>
         <field name="amount">63</field>
-
         <field name="amount_type">percent</field>
         <field name="type_tax_use">purchase</field>
         <field name="sequence" eval="5"/>
