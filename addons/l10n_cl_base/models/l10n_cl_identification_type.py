@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+# todo: to deprecate
 from odoo import _, api, fields, models
 from odoo.osv import expression
 

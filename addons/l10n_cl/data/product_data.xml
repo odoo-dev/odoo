@@ -9,14 +9,15 @@
         <field name="uom_id" ref="uom.product_uom_unit"/>
     </record>
 
-    <record id="product_correct" model="product.product">
+    <!-- este producto se va -->
+    <!--<record id="product_correct" model="product.product">
         <field name="name">Corrige Nota de Credito/Debito</field>
         <field name="type">service</field>
         <field name="default_code">CORRECC</field>
         <field name="description">Producto usado para corregir texto en notas de crédito</field>
         <field name="sale_ok" eval="False" />
         <field name="uom_id" ref="uom.product_uom_unit"/>
-    </record>
+    </record>-->
 
     <record id="product_modif" model="product.product">
         <field name="name">Modifica Nota de Credito/Debito</field>

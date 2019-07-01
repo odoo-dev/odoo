@@ -30,15 +30,9 @@ class L10nLatamDocumentType(models.Model):
         selection_add=[
             ('invoice', 'Invoices'),
             ('debit_note', 'Debit Notes'),
-            ('stock_picking', 'Stock Picking'),
-            ('invoice_in', 'Incoming Invoice'),
             ('credit_note', 'Credit Notes'),
-            ('ticket', 'Ticket'),
-            ('receipt_invoice', 'Receipt Invoice'),
-            ('customer_payment', 'Customer Voucher'),
-            ('supplier_payment', 'Supplier Invoice'),
-            ('in_document', 'In Document')],
-    )
+            ('receipt_invoice', 'Receipt Invoice')])
+    # take a look if I put here a fiscal position (preferred fiscal position).
 
     @api.multi
     def get_document_sequence_vals(self, journal):

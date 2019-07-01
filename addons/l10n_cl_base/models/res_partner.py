@@ -42,7 +42,7 @@ class ResPartner(models.Model):
                 raise ValidationError(_('Only numbers allowed.'))
             except Exception as error:
                 raise ValidationError(repr(error))
-
+    # TODO: change to a selection l10n_cl_identification_type (punto 2)
     l10n_cl_identification_type_id = fields.Many2one(
         string="Identification Type",
         comodel_name='l10n_cl.identification.type',
