@@ -12,22 +12,22 @@ Base Module for Chilean Localization
     'depends': [
         'contacts',
         'base_vat',
+        'l10n_latam_base'
     ],
     'data': [
-        'data/l10n_cl_identification_type_data.xml',
+        'data/l10n_latam_identification_type_data.xml',
         'data/res.bank.csv',
         'data/res.currency.csv',
-        'views/l10n_cl_identification_type_view.xml',
         'views/res_bank_view.xml',
         'views/res_company_view.xml',
         'views/res_country_view.xml',
-        'views/res_partner_view.xml',
-        'security/ir.model.access.csv',
+        # 'views/res_partner_view.xml',
+        # 'security/ir.model.access.csv',
     ],
     'installable': True,
     'auto_install': False,
     'application': False,
     'demo': [
-        'demo/partner_demo.xml',
+        # 'demo/partner_demo.xml',
     ],
 }

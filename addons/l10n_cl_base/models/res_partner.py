@@ -15,7 +15,7 @@ class ResPartner(models.Model):
         self.ensure_one()
         if not self.country_id:
             return False, False
-        elif self.l10n_cl_identification_type_id.code in ['RUT', 'RUN']:
+        elif self.l10n_latam_identification_type_id.short_name in ['RUT', 'RUN']:
             country_origin = 'cl'
         elif self.country_id.code != 'CL':
             country_origin = self.country_id.code.lower()
@@ -27,7 +27,7 @@ class ResPartner(models.Model):
         else:
             return False, False
 
-    def l10n_cl_identification_validator(self):
+    def l10n_cl_latamfication_validator(self):
         for rec in self.filtered('vat'):
             module = rec._get_validation_module()
             if not module[0]:
@@ -42,10 +42,10 @@ class ResPartner(models.Model):
                 raise ValidationError(_('Only numbers allowed.'))
             except Exception as error:
                 raise ValidationError(repr(error))
-    # TODO: change to a selection l10n_cl_identification_type (punto 2)
-    l10n_cl_identification_type_id = fields.Many2one(
+    # TODO: change to a selection l10n_latam_identification_type (punto 2)
+    l10n_latam_identification_type_id = fields.Many2one(
         string="Identification Type",
-        comodel_name='l10n_cl.identification.type',
+        comodel_name='l10n_latam.identification.type',
         index=True,
         auto_join=True,
         help='The type of identifications used in Chile that could identify'
@@ -64,14 +64,14 @@ class ResPartner(models.Model):
         ' set for the partner',
     )
 
-    @api.constrains('vat', 'l10n_cl_identification_type_id')
+    @api.constrains('vat', 'l10n_latam_identification_type_id')
     def check_vat(self):
-        l10n_cl_partners = self.filtered('l10n_cl_identification_type_id')
-        l10n_cl_partners.l10n_cl_identification_validator()
+        l10n_cl_partners = self.filtered('l10n_latam_identification_type_id')
+        l10n_cl_partners.l10n_cl_latamfication_validator()
         return super(ResPartner, self - l10n_cl_partners).check_vat()
 
-    @api.depends('vat', 'country_id', 'l10n_cl_identification_type_id')
-    @api.onchange('vat', 'country_id', 'l10n_cl_identification_type_id')
+    @api.depends('vat', 'country_id', 'l10n_latam_identification_type_id')
+    @api.onchange('vat', 'country_id', 'l10n_latam_identification_type_id')
     def _compute_l10n_cl_rut(self):
         for rec in self.filtered('vat'):
             module = rec._get_validation_module()
@@ -98,7 +98,7 @@ class ResPartner(models.Model):
     @api.onchange('country_id')
     def _adjust_identification_type(self):
         if self.country_id == self.env.ref('base.cl'):
-            self.l10n_cl_identification_type_id = self.env.ref('l10n_cl_base.dt_RUT')
+            self.l10n_latam_identification_type_id = self.env.ref('l10n_cl_base.it_RUT')
         else:
-            self.l10n_cl_identification_type_id = self.env.ref('l10n_cl_base.dt_XVAT')
+            self.l10n_latam_identification_type_id = self.env.ref('l10n_latam_base.it_vat')
         self.vat = self.l10n_cl_rut = self.l10n_cl_rut_dv = False

@@ -6,15 +6,18 @@ class ResCompany(models.Model):
     _name = 'res.company'
     _inherit = 'res.company'
 
-    l10n_cl_identification_type_id = fields.Many2one(
-        related='partner_id.l10n_cl_identification_type_id',
-        readonly=False,
+    # remove this?
+    l10n_latam_identification_type_id = fields.Many2one(
+        related='partner_id.l10n_latam_identification_type_id',
+        readonly=True,
     )
     l10n_cl_rut = fields.Char(
         related='partner_id.l10n_cl_rut',
+        readonly=True
     )
     l10n_cl_rut_dv = fields.Char(
         related='partner_id.l10n_cl_rut_dv',
+        readonly=True
     )
     
     @api.multi

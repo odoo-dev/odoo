@@ -7,7 +7,7 @@
             <field name="model">res.company</field>
             <field name="arch" type="xml">
                 <field name="vat" position="before">
-                    <field name="l10n_cl_identification_type_id" options="{'no_open': True, 'no_create': True}" />
+                    <field name="l10n_latam_identification_type_id" options="{'no_open': True, 'no_create': True}" />
                 </field>
             </field>
         </record>
