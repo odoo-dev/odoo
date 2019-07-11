@@ -21,7 +21,11 @@ class ResPartner(models.Model):
             country_origin = self.country_id.code.lower()
         else:
             return False, False
-        country_validator = getattr(__import__('stdnum', fromlist=[country_origin]), country_origin)
+        try:
+            country_validator = getattr(__import__('stdnum', fromlist=[country_origin]), country_origin)
+        except AttributeError:
+            # there is no validator for the selected country
+            return False, False
         if 'vat' in dir(country_validator):
             return country_validator.vat, country_origin
         else:
@@ -65,13 +69,16 @@ class ResPartner(models.Model):
     )
     l10n_cl_county_id = fields.Many2one(
         "l10n_cl.county", 'County')
+    country_id = fields.Many2one(
+        'res.country',
+        default=lambda self: self.env.ref('base.cl'))
 
     @api.onchange('l10n_cl_county_id', 'city', 'state_id')
     def _change_city_province(self):
         if self.country_id != self.env.ref('base.cl'):
             return
         if self.l10n_cl_county_id.state_id.parent_id:
-            self.state_id = self.city_id.state_id.parent_id
+            self.state_id = self.l10n_cl_county_id.state_id.parent_id
         if self.state_id == self.env.ref('l10n_cl_base.CL13'):
             self.city = 'Santiago'
         else:
