@@ -11,6 +11,7 @@ Base Module for Chilean Localization
     """,
     'depends': [
         'contacts',
+        'base_address_city',
         'base_vat',
         'l10n_latam_base'
     ],
@@ -21,6 +22,8 @@ Base Module for Chilean Localization
         'views/res_bank_view.xml',
         'views/res_company_view.xml',
         'views/res_country_view.xml',
+        'data/l10n_cl_states_data.xml',
+        'data/l10n_cl_counties_data.xml',
         # 'views/res_partner_view.xml',
         # 'security/ir.model.access.csv',
     ],
