@@ -33,8 +33,6 @@ dc_hes,310,HES,Hoja de Entrada de Servicio (HES),,HES,,HES,base.cl,True
 dc_hem,320,HEM,Hoja de Entrada de Materiales (HEM),,HEM,,HEM,base.cl,True
 dc_migo,330,MIG,Movimiento de Mercancías (MIGO),,MIGO,,MIGO,base.cl,True
 dc_li,340,103,Liquidación,,LIQ,,LIQ,base.cl,True
-dc_gd,350,50,Guía de Despacho,X,GD,stock_picking,GD,base.cl,True
-dc_gd_dte,360,52,Guía de Despacho Electrónica,X,GDE,stock_picking,GDE,base.cl,True
 dc_fe_dte,370,110,Factura de Exportación Electrónica,E,FCXE,invoice,FCXE,base.cl,True
 dc_ndex_dte,380,111,Nota de Débito de Exportación Electrónica,E,NDXE,debit_note,NDXE,base.cl,True
 dc_ncex_dte,390,112,Nota de Crédito de Exportación Electrónica,E,NCXE,credit_note,NCXE,base.cl,True

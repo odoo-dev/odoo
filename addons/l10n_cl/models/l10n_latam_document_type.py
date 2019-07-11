@@ -29,6 +29,7 @@ class L10nLatamDocumentType(models.Model):
     internal_type = fields.Selection(
         selection_add=[
             ('invoice', 'Invoices'),
+            ('invoice_in', 'Purchase Invoices'),
             ('debit_note', 'Debit Notes'),
             ('credit_note', 'Credit Notes'),
             ('receipt_invoice', 'Receipt Invoice')])

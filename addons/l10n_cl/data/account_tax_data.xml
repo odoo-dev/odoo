@@ -9,16 +9,18 @@
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
         <field name="tax_group_id" ref="tax_group_iva_19"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_sale_tot_mnt_iva')])]"/>
     </record>
 
     <record id="OTAX_19" model="account.tax.template">
-      <field name="chart_template_id" ref="cl_chart_template"/>
-      <field name="name">IVA 19% Compra</field>
-      <field name="description">IVA 19% Compra</field>
-      <field name="amount">19</field>
-      <field name="amount_type">percent</field>
-      <field name="type_tax_use">purchase</field>
-      <field name="tax_group_id" ref="tax_group_iva_19"/>
+        <field name="chart_template_id" ref="cl_chart_template"/>
+        <field name="name">IVA 19% Compra</field>
+        <field name="description">IVA 19% Compra</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_iva_19"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_purchase_tot_mnt_iva')])]"/>
     </record>
 
     <record id="I_IU2C" model="account.tax.template">
@@ -31,8 +33,8 @@
         <field name="type_tax_use">purchase</field>
         <field name="refund_account_id" ref="244"/>
         <field name="account_id" ref="244"/>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_22'), ref('tag_cl_21')])]"/>
         <field name="tax_group_id" ref="tax_group_2da_categ"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_fees_amount_widholding')])]"/>
     </record>
 
     <record id="especifico_compra" model="account.tax.template">
@@ -45,8 +47,8 @@
         <field name="sequence" eval="5"/>
         <field name="refund_account_id" ref="110710"/>
         <field name="account_id" ref="110710"/>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_05'), ref('tag_cl_18')])]"/>
         <field name="tax_group_id" ref="tax_group_impuestos_especificos"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_purchase_tot_mnt_otros_imp')])]"/>
     </record>
 
     <record id="iva_activo_fijo" model="account.tax.template">
@@ -59,8 +61,8 @@
         <field name="sequence" eval="6"/>
         <field name="refund_account_id" ref="125"/>
         <field name="account_id" ref="125"/>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_05'), ref('tag_cl_18')])]"/>
         <field name="tax_group_id" ref="tax_group_iva_19"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_purchase_tot_mnt_iva_actf')])]"/>
     </record>
 
     <record id="vat_non_recoverable" model="account.tax.template">
@@ -73,7 +75,7 @@
         <field name="sequence" eval="7"/>
         <field name="refund_account_id" ref="125"/>
         <field name="account_id" ref="125"/>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_05'), ref('tag_cl_18')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_purchase_tot_mnt_iva_no_rec')])]"/>
         <field name="tax_group_id" ref="tax_group_iva_19"/>
     </record>
 
@@ -87,7 +89,7 @@
         <field name="sequence" eval="4"/>
         <field name="refund_account_id" ref="231"/>
         <field name="account_id" ref="231"/>
-        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_05'), ref('tag_cl_18')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_sale_iva_ret_total'), ref('tag_cl_sale_iva_ret_parcial')])]"/>
         <field name="tax_group_id" ref="tax_group_retenciones"/>
     </record>
 
@@ -107,6 +109,7 @@
         <field name="sequence">10</field>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="tax_group_ila"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_sale_tot_otros_imp')])]"/>
     </record>
 
     <record id="ila_a_180" model="account.tax.template">
@@ -125,6 +128,7 @@
         <field name="sequence">12</field>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="tax_group_ila"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_sale_tot_otros_imp')])]"/>
     </record>
 
     <record id="ila_l_315" model="account.tax.template">
@@ -143,6 +147,7 @@
         <field name="sequence">14</field>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="tax_group_ila"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_sale_tot_otros_imp')])]"/>
     </record>
 
     <record id="ila_v_205" model="account.tax.template">
@@ -161,5 +166,6 @@
         <field name="sequence">15</field>
         <field name="type_tax_use">purchase</field>
         <field name="tax_group_id" ref="tax_group_ila"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tag_cl_sale_tot_otros_imp')])]"/>
     </record>
 </odoo>
