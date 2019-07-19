@@ -51,7 +51,7 @@ class Manager(Thread):
             urllib3.disable_warnings()
             http = urllib3.PoolManager(cert_reqs='CERT_NONE')
             try:
-                http.request(
+                resp = http.request(
                     'POST',
                     server + "/iot/setup",
                     body=json.dumps(data).encode('utf8'),
@@ -60,6 +60,16 @@ class Manager(Thread):
                         'Accept': 'text/plain',
                     },
                 )
+                data = json.loads(resp.data.decode())
+
+                for device in [devices for devices in data['result'] if data['result']]:
+                    if data['result'] and data['result'][device]['type'] == 'opcua':
+                        nodes = data['result'][device]['nodes']
+                        subscribe = {
+                            'action': 'create_subscription',
+                            'nodes': nodes,
+                        }
+                        iot_devices[device].action(subscribe)
             except Exception as e:
                 _logger.error('Could not reach configured server')
                 _logger.error('A error encountered : %s ' % e)
@@ -71,7 +81,7 @@ class Manager(Thread):
         Thread that will load interfaces and drivers and contact the odoo server with the updates
         """
 
-        helpers.check_git_branch()
+        #helpers.check_git_branch()
         helpers.check_certificate()
 
         # We first add the IoT Box to the connected DB because IoT handlers cannot be downloaded if

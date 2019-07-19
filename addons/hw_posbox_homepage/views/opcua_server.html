@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% from "loading.html" import loading_block_ui %}
+{% block head %}
+    <script>
+        var _onQueryDone = function () {
+            $('.message-status').html('Updated configuration <br> Refreshing page');
+            setTimeout(function () {
+                location.reload();
+            }, 30000);
+        }
+        $(document).ready(function () {
+            $('#opcua-server-id').submit(function(e){
+                e.preventDefault();
+                $('.loading-block').removeClass('o_hide');
+                $.ajax({
+                    url: '/opcua_server_add',
+                    type: 'post',
+                    data: $('#opcua-server-id').serialize(),
+                }).always(_onQueryDone);
+            });
+            $('#opcua-server-id-clear').submit(function(e){
+                e.preventDefault();
+                $('.loading-block').removeClass('o_hide');
+                $.ajax({
+                    url: '/opcua_server_clear',
+                    type: 'get',
+                }).always(_onQueryDone);
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <h2 class="text-center">OPC-UA Server</h2>
+    <p>
+        Set the OPC-UA Server Endpoint you want to use.
+    </p>
+    <form id="opcua-server-id" action='/opcua_server_add' method='POST'>
+        <table align="center">
+            <tr>
+                <td>OPC-UA Server endpoint</td>
+                <td><input type="text" name="opcua_server_endpoint"></td>
+            </tr>
+            <tr>
+                <td>OPC-UA Server endpoint User</td>
+                <td><input type="text" name="opcua_server_endpoint_user"></td>
+            </tr>
+            <tr>
+                <td>OPC-UA Server endpoint Password</td>
+                <td><input type="text" name="opcua_server_endpoint_pwd"></td>
+            </tr>
+            <tr>
+                <td/>
+                <td><input class="btn" type="submit" value="Connect"/></td>
+            </tr>
+        </table>
+        {{ loading_block_ui(loading_message) }}
+    </form>
+    {% if opcuaServer %}
+        <p class="text-center font-small">
+            Current OPC-UA Server endpoint: <strong>{{ opcuaServer }}</strong>
+        </p>
+        <div class="text-center font-small" style="margin: 10px auto;">
+            You can clear the OPC-UA Server endpoint
+            <form id="opcua-server-id-clear" style="display: inline-block;margin-left: 4px;">
+                <input class="btn btn-sm" type="submit" value="Clear"/>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}

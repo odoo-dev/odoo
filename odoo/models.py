@@ -2102,6 +2102,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # Mixing both formats, e.g. 'MMM YYYY' would yield wrong results,
                 # such as 2006-01-01 being formatted as "January 2005" in some locales.
                 # Cfr: http://babel.pocoo.org/en/latest/dates.html#date-fields
+                'minute': 'mm:00 hh dd MMM',
                 'hour': 'hh:00 dd MMM',
                 'day': 'dd MMM yyyy', # yyyy = normal year
                 'week': "'W'w YYYY",  # w YYYY = ISO week-year
@@ -2110,6 +2111,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 'year': 'yyyy',
             }
             time_intervals = {
+                'minute': dateutil.relativedelta.relativedelta(minutes=1),
                 'hour': dateutil.relativedelta.relativedelta(hours=1),
                 'day': dateutil.relativedelta.relativedelta(days=1),
                 'week': datetime.timedelta(days=7),
