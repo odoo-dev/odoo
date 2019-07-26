@@ -176,7 +176,15 @@ class AccountChartTemplate(models.Model):
             for template in self:
                 template.load_for_current_company(15.0, 15.0)
 
-    def load_for_current_company(self, sale_tax_rate, purchase_tax_rate):
+    def try_loading_for_company(self, company):
+        if not company:
+            self.try_loading_for_current_company()
+        else:
+            if not company.chart_template_id and not self.existing_accounting(company):
+                for template in self:
+                    template.load_for_current_company(15.0, 15.0, company)
+
+    def load_for_current_company(self, sale_tax_rate, purchase_tax_rate, company=False):
         """ Installs this chart of accounts on the current company, replacing
         the existing one if it had already one defined. If some accounting entries
         had already been made, this function fails instead, triggering a UserError.
@@ -185,11 +193,12 @@ class AccountChartTemplate(models.Model):
         rights.
         """
         self.ensure_one()
-        # do not use `request.env` here, it can cause deadlocks
-        if request and hasattr(request, 'allowed_company_ids'):
-            company = self.env['res.company'].browse(request.allowed_company_ids[0])
-        else:
-            company = self.env.company
+        if not company:
+            # do not use `request.env` here, it can cause deadlocks
+            if request and hasattr(request, 'allowed_company_ids'):
+                company = self.env['res.company'].browse(request.allowed_company_ids[0])
+            else:
+                company = self.env.company
         # Ensure everything is translated to the company's language, not the user's one.
         self = self.with_context(lang=company.partner_id.lang)
         if not self.env.is_admin():
