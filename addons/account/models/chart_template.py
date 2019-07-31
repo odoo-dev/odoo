@@ -182,7 +182,7 @@ class AccountChartTemplate(models.Model):
         else:
             if not company.chart_template_id and not self.existing_accounting(company):
                 for template in self:
-                    template.load_for_current_company(15.0, 15.0, company)
+                    template.with_context(default_company_id=company.id).load_for_current_company(15.0, 15.0, company)
 
     def load_for_current_company(self, sale_tax_rate, purchase_tax_rate, company=False):
         """ Installs this chart of accounts on the current company, replacing
