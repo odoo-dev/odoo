@@ -10,6 +10,7 @@ const config = require('web.config');
 function init(alteration) {
     let state = {
         MESSAGE_FETCH_LIMIT: 30,
+        PREVIEW_MSG_MAX_SIZE: 350,
         attachments: {},
         attachmentNextTemporaryId: -1,
         cannedResponses: {},
