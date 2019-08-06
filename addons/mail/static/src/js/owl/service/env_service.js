@@ -36,6 +36,7 @@ const EnvService = AbstractService.extend({
             do_notify: (...args) => this.do_notify(...args),
             do_warn: (...args) => this.do_warn(...args),
             rpc: (...args) => this._rpc(...args),
+            trigger_up: (...args) => this.trigger_up(...args),
         };
     },
 
