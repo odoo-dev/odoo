@@ -1276,7 +1276,12 @@ const mutations = {
         Object.assign(threadCache, changes);
         commit('_computeThreadCache', threadCache);
     },
-    updateOutOfFocusUnreadMessageCounter({state}, {newValue}){
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {integer} newValue
+     */
+    updateOutOfFocusUnreadMessageCounter({state}, newValue){
         state.outOfFocusUnreadMessageCounter = newValue;
     },
     /**
