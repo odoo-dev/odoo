@@ -14,9 +14,7 @@ class AccountTaxTemplate(models.Model):
     _name = 'account.tax.template'
     _inherit = 'account.tax.template'
 
-    l10n_cl_sii_code = fields.Integer(
-        'SII Code'
-    )
+    l10n_cl_sii_code = fields.Integer('SII Code')
 
     def _get_tax_vals(self, company, tax_template_to_tax):
         self.ensure_one()
