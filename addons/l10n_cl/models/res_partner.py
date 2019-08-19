@@ -69,7 +69,7 @@ class ResPartner(models.Model):
         else:
             return False, False
 
-    def l10n_cl_latamfication_validator(self):
+    def _l10n_cl_latamfication_validator(self):
         for rec in self.filtered('vat'):
             module = rec._get_validation_module()
             if not module[0]:
@@ -88,7 +88,7 @@ class ResPartner(models.Model):
     @api.constrains('vat', 'l10n_latam_identification_type_id')
     def check_vat(self):
         l10n_cl_partners = self.filtered('l10n_latam_identification_type_id')
-        l10n_cl_partners.l10n_cl_latamfication_validator()
+        l10n_cl_partners._l10n_cl_latamfication_validator()
         return super(ResPartner, self - l10n_cl_partners).check_vat()
 
     @api.depends('vat', 'country_id', 'l10n_latam_identification_type_id')
