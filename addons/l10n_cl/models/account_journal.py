@@ -19,10 +19,11 @@ class AccountJournal(models.Model):
             sequence = self.env['ir.sequence'].create(document.get_document_sequence_vals(self))
             self.update({'l10n_cl_sequence_ids': [(4, {sequence.id})]})
 
-    def create_document_sequences(self):
+    def l10n_cl_create_document_sequences(self):
         self.ensure_one()
-        if (self.company_id.country_id != self.env.ref('base.cl')) or self.env['ir.sequence'].search(
-                [('l10n_latam_document_type_id', '!=', False)]) or self.type != 'sale' or not self.l10n_latam_use_documents:
+        if (self.company_id.country_id != self.env.ref('base.cl') or self.env['ir.sequence'].search(
+                [('l10n_latam_document_type_id', '!=', False)]) or self.type != 'sale' or not
+                self.l10n_latam_use_documents):
             return
         self.button_create_new_sequences()
 
@@ -30,5 +31,5 @@ class AccountJournal(models.Model):
     def create(self, values):
         """ Create Document sequences after create the journal """
         res = super().create(values)
-        res.create_document_sequences()
+        res.l10n_cl_create_document_sequences()
         return res
