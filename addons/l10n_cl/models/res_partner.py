@@ -8,9 +8,15 @@ class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = 'res.partner'
 
+    def _get_default_country_id(self):
+        allowed_company = self._context.get('allowed_company_ids')
+        if not allowed_company:
+            return False
+        company = self.env['res.company'].browse(allowed_company[0])
+        return company.country_id == self.env.ref('base.cl') and self.env.ref('base.cl')
+
     country_id = fields.Many2one(
-        'res.country',
-        default=lambda self: self.env.ref('base.cl'))
+        'res.country', default=_get_default_country_id)
 
     _sii_taxpayer_types = [
         ('1', _('VAT Affected (1st Category)')),
@@ -104,6 +110,5 @@ class ResPartner(models.Model):
     def validate_rut(self):
         self.ensure_one()
         if not self.l10n_cl_rut:
-            raise UserError(_(
-                'No RUT configured for partner [%i] %s') % (self.id, self.name))
+            raise UserError(_('No RUT configured for partner [%i] %s') % (self.id, self.name))
         return self.l10n_cl_rut
