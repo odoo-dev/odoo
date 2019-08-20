@@ -109,15 +109,17 @@ class ResPartner(models.Model):
             module = rec._l10n_cl_get_validation_module()
             if not module[0]:
                 continue
-            rec.l10n_cl_rut = module[0].format(rec.vat)
             if module[1] == 'cl':
-                rec.l10n_cl_rut = rec.l10n_cl_rut.replace('.', '')
+                rec.l10n_cl_rut = module[0].format(rec.vat).replace('.', '')
                 rec.vat = rec.l10n_cl_rut
+                rec.l10n_cl_rut_dv = rec.l10n_cl_rut[-1:]
             else:
-                rec.vat = module[0].format(rec.vat)
+                try:
+                    rec.vat = module[0].format(rec.vat)
+                except AttributeError:
+                    pass
                 rec.l10n_cl_rut = '55555555-5'
-            rec.l10n_cl_rut_dv = rec.l10n_cl_rut[-1:]
-
+            
     def validate_rut(self):
         self.ensure_one()
         if not self.l10n_cl_rut:
