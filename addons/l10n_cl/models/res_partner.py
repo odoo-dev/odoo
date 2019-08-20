@@ -15,6 +15,13 @@ class ResPartner(models.Model):
         company = self.env['res.company'].browse(allowed_company[0])
         return company.country_id == self.env.ref('base.cl') and self.env.ref('base.cl')
 
+    def _get_default_l10n_cl_sii_taxpayer_type(self):
+        allowed_company = self._context.get('allowed_company_ids')
+        if not allowed_company:
+            return False
+        company = self.env['res.company'].browse(allowed_company[0])
+        return company.country_id == self.env.ref('base.cl') and '1'
+
     country_id = fields.Many2one(
         'res.country', default=_get_default_country_id)
 
@@ -29,7 +36,7 @@ class ResPartner(models.Model):
         _sii_taxpayer_types,
         'Taxpayer Types',
         index=True,
-        default='1',
+        default=_get_default_l10n_cl_sii_taxpayer_type,
         help='1 - VAT Affected (1st Category) (Most of the cases)\n'
         '2 - Fees Receipt Issuer (Applies to suppliers who issue fees receipt)\n'
         '3 - End consumer (only receipts)\n'
