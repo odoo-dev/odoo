@@ -42,6 +42,8 @@ class AccountMove(models.Model):
     def _check_invoice_type_document_type(self):
         super()._check_invoice_type_document_type()
         for rec in self.filtered('l10n_latam_document_type_id'):
+            if rec.company_id.country_id != self.env.ref('base.cl'):
+                continue
             tax_payer_type = rec.partner_id.l10n_cl_sii_taxpayer_type
             latam_document_type_code = rec.l10n_latam_document_type_id.code
             if not tax_payer_type and latam_document_type_code not in {'35', '38', '39', '41'}:
