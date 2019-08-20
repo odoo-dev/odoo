@@ -94,6 +94,8 @@ class ResPartner(models.Model):
 
     @api.constrains('vat', 'l10n_latam_identification_type_id')
     def check_vat(self):
+        if self.company_id.country_id != self.env.ref('base.cl'):
+            return super().check_vat()
         l10n_cl_partners = self.filtered('l10n_latam_identification_type_id')
         l10n_cl_partners._l10n_cl_latamfication_validator()
         return super(ResPartner, self - l10n_cl_partners).check_vat()
@@ -102,6 +104,8 @@ class ResPartner(models.Model):
     @api.onchange('vat', 'country_id', 'l10n_latam_identification_type_id')
     def _compute_l10n_cl_rut(self):
         for rec in self.filtered('vat'):
+            if rec.company_id.country_id != self.env.ref('base.cl'):
+                continue
             module = rec._l10n_cl_get_validation_module()
             if not module[0]:
                 continue
