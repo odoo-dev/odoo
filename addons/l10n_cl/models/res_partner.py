@@ -55,7 +55,7 @@ class ResPartner(models.Model):
         help='Computed field that returns RUT or nothing if this one is not'
              ' set for the partner')
 
-    def _get_validation_module(self):
+    def _l10n_cl_get_validation_module(self):
         self.ensure_one()
         if not self.country_id:
             return False, False
@@ -78,7 +78,7 @@ class ResPartner(models.Model):
 
     def _l10n_cl_latamfication_validator(self):
         for rec in self.filtered('vat'):
-            module = rec._get_validation_module()
+            module = rec._l10n_cl_get_validation_module()
             if not module[0]:
                 continue
             try:
@@ -102,7 +102,7 @@ class ResPartner(models.Model):
     @api.onchange('vat', 'country_id', 'l10n_latam_identification_type_id')
     def _compute_l10n_cl_rut(self):
         for rec in self.filtered('vat'):
-            module = rec._get_validation_module()
+            module = rec._l10n_cl_get_validation_module()
             if not module[0]:
                 continue
             rec.l10n_cl_rut = module[0].format(rec.vat)
