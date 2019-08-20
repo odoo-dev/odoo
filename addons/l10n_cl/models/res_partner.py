@@ -18,7 +18,7 @@ class ResPartner(models.Model):
     def _get_default_l10n_cl_sii_taxpayer_type(self):
         allowed_company = self._context.get('allowed_company_ids')
         if not allowed_company:
-            return False
+            return self._context.get('install_module') == 'l10n_cl' and '1'
         company = self.env['res.company'].browse(allowed_company[0])
         return company.country_id == self.env.ref('base.cl') and '1'
 
