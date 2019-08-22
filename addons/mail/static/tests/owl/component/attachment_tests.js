@@ -22,7 +22,7 @@ QUnit.module('Attachment', {
             await this.attachment.mount(this.widget.$el[0]);
         };
         this.start = async params => {
-            if (this.wiget) {
+            if (this.widget) {
                 this.widget.destroy();
             }
             let { store, widget } = await utilsStart({

@@ -93,7 +93,7 @@
         <t t-if="item.original.im_status">
             <t t-call="mail.component.PartnerImStatusIcon">
                 <t
-                    t-set="props"
+                    t-set="storeProps"
                     t-value="{ partner: item.original }"/>
             </t>
         </t><t t-esc="partnerName"/><t t-if="item.original.email"> <t t-esc="item.original.email"/><span class="o_extra"><t t-esc="'&lt;' + item.original.email + '&gt;'"/></span></t>

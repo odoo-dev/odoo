@@ -99,6 +99,7 @@ function init(alteration) {
          * (key: composerId, value: store data of component)
          */
         composers: {},
+        composerStates: {},
         currentPartnerLocalId: undefined,
         /**
          * State slice related to Dialogs & Dialog Manager

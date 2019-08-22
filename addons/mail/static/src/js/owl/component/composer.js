@@ -42,6 +42,19 @@ class Composer extends owl.store.ConnectedComponent {
             attachmentLocalIds: [],
         });
         document.addEventListener('click', this._globalCaptureClickEventListener, true);
+        const activeThreadId = this.env.store.state.discuss.activeThreadLocalId;
+        const initialState = this.env.store.state.composerStates[activeThreadId] || {};
+        if(!!initialState)
+        {
+            if(!!initialState.text)
+            {
+                this.refs.textInput.setValue(initialState.text);
+            }
+            if (!!initialState.attachmentLocalIds)
+            {
+                this.dispatch('setComposerAttachments', this.props.id, initialState.attachmentLocalIds);
+            }
+        }
     }
 
     /**
@@ -62,6 +75,11 @@ class Composer extends owl.store.ConnectedComponent {
     }
 
     willUnmount() {
+        const thisComposer = this.env.store.state.composers[this.props.id];
+        const threadLocalId = this.props.threadLocalId;
+        const attachmentLocalIds = thisComposer.attachmentLocalIds;
+        const text = this.refs.textInput.getValue();
+        this.dispatch('saveComposerState', threadLocalId, { text, attachmentLocalIds });
         this.dispatch('deleteComposer', this.props.id);
         $(window).off(this.fileuploadId, this._attachmentUploadedEventListener);
         document.removeEventListener('click', this._globalCaptureClickEventListener, true);

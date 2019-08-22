@@ -263,7 +263,7 @@ async function start(params) {
     if (params.debug) {
         window.o_test_store = store;
     }
-    return { store, widget };
+    return { discuss, store, widget };
 }
 
 //------------------------------------------------------------------------------

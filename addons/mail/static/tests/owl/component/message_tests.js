@@ -9,6 +9,8 @@ const {
     start: startUtils,
 } = require('mail.owl.testUtils');
 
+const testUtils = require('web.test_utils');
+
 QUnit.module('mail.owl', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('Message', {
@@ -23,7 +25,7 @@ QUnit.module('Message', {
             await this.message.mount(this.widget.$el[0]);
         };
         this.start = async params => {
-            if (this.wiget) {
+            if (this.widget) {
                 this.widget.destroy();
             }
             let { store, widget } = await startUtils({
@@ -152,6 +154,36 @@ QUnit.test('default', async function (assert) {
         "<p>Test</p>",
         "message should display the correct content");
 });
+
+QUnit.test('deleteAttachment', async function(assert){
+    assert.expect(2);
+
+    await this.start();
+    await testUtils.nextTick();
+    const attachmentLocalId = await this.store.dispatch('createAttachment', {
+        filename: 'BLAH.jpg',
+        isTemporary: true,
+        name: 'BLAH',
+    });
+
+    const messageLocalId = this.store.dispatch('_createMessage', {
+        author_id: [7, "Demo User"],
+        body: "<p>Test</p>",
+        id: 100,
+        attachment_ids: [{id:-1}]
+    });
+    this.store.dispatch('_updateAttachment', attachmentLocalId, {
+        messageLocalIds: [messageLocalId]
+    });
+    await this.createMessage(messageLocalId);
+    await testUtils.nextTick();
+
+    this.store.dispatch('deleteAttachment', attachmentLocalId);
+    await testUtils.nextTick();
+
+    assert.ok(!this.store.state.attachments[attachmentLocalId]);
+    assert.ok(!this.store.state.messages[messageLocalId].attachmentLocalIds[attachmentLocalId]);
+})
 
 });
 });

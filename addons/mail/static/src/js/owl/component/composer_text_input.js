@@ -19,6 +19,7 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
         this.template = 'mail.component.ComposerTextInput';
         this._$textarea = undefined;
         this._editable = undefined;
+        this.lastRange = undefined;
         this._tribute = undefined; // list of tribute mentions (partner, canned responses, etc.)
 
         this._searchChannelMentionSuggestions = _.throttle(
@@ -55,6 +56,7 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
     }
 
     willUnmount() {
+        this._tribute.detach(this._editable);
         this._$textarea.summernote('destroy');
     }
 
@@ -78,10 +80,44 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
     }
 
     /**
+     * @param {string} value
+     */
+    setValue(value){
+        this.focus();
+        if (value.startsWith('<')) {
+            this._$textarea.code(value);
+        }
+        else {
+            this._$textarea.summernote('editor.pasteHTML', value);
+        }
+        this.placeCursorAtEnd();
+    }
+
+    placeCursorAtEnd() {
+        // Places the cursor at the end of a contenteditable container (should also work for textarea / input)
+        if (this.length === 0) {
+            throw new Error("Cannot manipulate an element if there is no element!");
+        }
+        var el = this._editable;
+        var range = document.createRange();
+        var sel = window.getSelection();
+        var childLength = el.childNodes.length;
+        if (childLength > 0) {
+            var lastNode = el.childNodes[childLength - 1];
+            var lastNodeChildren = lastNode.childNodes.length;
+            range.setStart(lastNode, lastNodeChildren);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+        return this;
+    }
+
+    /**
      * @param {string} content
      */
     insert(content) {
-        // if (this._summernoteContext.modules.editor.lastRange.sc.nodeType === 3) {
+        if (this.lastRange && this.lastRange.sc.nodeType === 3) {
             /**
              * Restore range only if it makes sense, i.e. it targets a text node.
              * This is not the case right after mentioning, in which the cursor
@@ -90,8 +126,15 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
              * insert text at the default position, which is the beginning of
              * the editor.
              */
-            this._$textarea.summernote('editor.restoreRange');
-        // }
+            if(this.lastRange.so <= this.lastRange.sc.length)
+            {
+                this._$textarea.summernote('editor.restoreRange');
+            }
+            else
+            {
+                this.placeCursorAtEnd();
+            }
+        }
         this._$textarea.summernote('editor.insertText', content);
     }
 
@@ -148,6 +191,7 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
         editable.addEventListener('click', ev => this._onClickEditable(ev));
         editable.addEventListener('input', ev => this._onInputEditable(ev));
         editable.addEventListener('keydown', ev => this._onKeydownEditable(ev));
+        editable.addEventListener('keyup', ev => this._onKeyupEditable(ev));
         editable.addEventListener('selectionchange', ev => this._onSelectionChangeEditable(ev));
 
         return {
@@ -295,6 +339,7 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
      */
     _saveRange() {
         this._$textarea.summernote('editor.saveRange');
+        this.lastRange = this._$textarea.summernote('editor.createRange');
     }
 
     /**
@@ -421,6 +466,14 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
             default:
                 break;
         }
+    }
+
+    /**
+     * @private
+     * @param {KeyboardEvent} ev
+     */
+    _onKeyupEditable(ev) {
+        this._saveRange();
     }
 
     /**

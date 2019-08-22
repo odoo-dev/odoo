@@ -951,6 +951,15 @@ const actions = {
     },
     /**
      * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} activeThreadId
+     * @param {Object} composerState
+     */
+    saveComposerState({ state }, activeThreadId, composerState){
+        state.composerStates[activeThreadId] = composerState;
+    },
+    /**
+     * @param {Object} param0
      * @param {function} param0.dispatch
      * @param {Object} param0.env
      * @param {Object} param0.state
@@ -995,6 +1004,16 @@ const actions = {
             }
         }
         callback(partners);
+    },
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.state
+     * @param {string} composerLocalId
+     * @param {Array} attachmentLocalIds
+     */
+    setComposerAttachments({ dispatch, state }, composerLocalId, attachmentLocalIds) {
+        state.composers[composerLocalId].attachmentLocalIds = attachmentLocalIds;
     },
     /**
      * @param {Object} param0
@@ -3323,9 +3342,6 @@ const actions = {
      */
     _unlinkAttachmentFromMessage({ state }, messageLocalId, attachmentLocalId) {
         const message = state.messages[messageLocalId];
-        if (message.attachmentLocalIds.includes(attachmentLocalId)) {
-            return;
-        }
         message.attachmentLocalIds = message.attachmentLocalIds.filter(localId =>
             localId !== attachmentLocalId);
     },

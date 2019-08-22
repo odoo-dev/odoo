@@ -32,11 +32,13 @@ QUnit.module('Discuss', {
             if (this.widget) {
                 this.widget.destroy();
             }
-            let { widget } = await utilsStart({
+            let { discuss, store, widget } = await utilsStart({
                 ...params,
                 autoOpenDiscuss: true,
                 data: this.data,
             });
+            this.discuss = discuss;
+            this.store = store;
             this.widget = widget;
         };
     },
@@ -3396,6 +3398,379 @@ QUnit.test('composer text input: basic rendering', async function (assert) {
             .placeholder,
         "Write something...",
         "should have placeholder in note editable of composer text input");
+});
+
+QUnit.test('composer: emoji insertion', async function (assert) {
+    assert.expect(4);
+
+    async function insertEmoji(){
+        let emoji = null;
+        let trials = 0;
+        // Do not why but sometimes it needs 3 trials to open the menu and select an emoji
+        while(!emoji && trials < 10)
+        {
+            // Show emoji menu
+            await testUtils.dom.click(
+                document.querySelector(`
+                    .o_Composer
+                    .o_Composer_buttons
+                    > .o_Composer_toolButtons
+                    > .o_Composer_buttonEmojis`)
+            );
+
+            // Select first emoji
+            await testUtils.nextTick();
+            emoji = document.querySelector('.o_EmojisPopover > .o_EmojisPopover_emoji');
+            trials++;
+        }
+        if(emoji)
+        {
+            await testUtils.dom.click(emoji);
+            return emoji.dataset.unicode;
+        }
+        else {
+            return null;
+        }
+    }
+
+    async function setEditableContent(editable, content){
+        editable.innerHTML = content;
+        const kevt = new window.KeyboardEvent('input');
+        editable.dispatchEvent(kevt);
+        await testUtils.nextTick();
+    }
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 20,
+                name: "General",
+            }],
+        },
+    });
+
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                return [];
+            }
+            return this._super(...arguments);
+        },
+        params: {
+            default_active_id: 'mail.channel_20',
+        },
+    });
+
+    const editable = document.querySelector(`
+        .o_ComposerTextInput
+        > .note-editor
+        > .note-editing-area
+        > .note-editable`);
+
+    // Insert emoji in empty editable
+    let emoji = await insertEmoji();
+    assert.strictEqual(editable.innerHTML, '<p>'+emoji+'<br></p>', 'emoji should be inserted');
+
+    // fill editable with text
+    const content = 'Blabla';
+    await setEditableContent(editable, '');
+    editable.focus();
+    document.execCommand('insertHTML', false, `<p>${content}</p>`);
+
+    // insert emoji at the end of text
+    emoji = await insertEmoji();
+    assert.strictEqual(editable.innerHTML, `<p>${content}${emoji}</p>`, 'emoji should be inserted at end of editable');
+
+    /* TEST SELECTED CONTENT BY KEYBOARD IS REPLACED BY EMOJI */
+
+    // select all the content
+    const range = document.createRange();
+    range.selectNodeContents(editable);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    // emulate the fact that the selection is made by the keyboard
+    editable.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    await testUtils.nextTick();
+
+    // insert emoji to replace selected text
+    emoji = await insertEmoji();
+    assert.strictEqual(editable.innerHTML, `<p>${emoji}<br></p>`, 'emoji should replace selected content (keyboard)');
+
+    /* TEST SELECTED CONTENT BY MOUSE IS REPLACED BY EMOJI */
+
+    // select all the content
+    document.execCommand('insertHTML', false, `<p>${content}</p>`);
+    const range2 = document.createRange();
+    range2.selectNodeContents(editable);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range2);
+    // emulate the fact that the selection is made by the mouse
+    editable.dispatchEvent(new window.MouseEvent('mouseup'));
+    await testUtils.nextTick();
+
+    // insert emoji to replace selected text
+    emoji = await insertEmoji();
+    assert.strictEqual(editable.innerHTML, `<p>${emoji}<br></p>`, 'emoji should replace selected content (mouse)');
+});
+
+QUnit.test('composer: mention insertion', async function (assert) {
+    assert.expect(4);
+
+    async function insertEmoji() {
+        // Show emoji menu
+        await testUtils.dom.click(
+            document.querySelector(`
+                .o_Composer
+                .o_Composer_buttons
+                > .o_Composer_toolButtons
+                > .o_Composer_buttonEmojis`)
+        );
+
+        // Select first emoji
+        await testUtils.nextTick();
+        const emoji = document.querySelector('.o_EmojisPopover > .o_EmojisPopover_emoji');
+        await testUtils.dom.click(emoji);
+        return emoji.dataset.unicode;
+    }
+
+    async function setEditableContent(editable, content) {
+        editable.innerHTML = content;
+        const kevt = new window.KeyboardEvent('input');
+        editable.dispatchEvent(kevt);
+        await testUtils.nextTick();
+    }
+
+    async function insertMention() {
+        tribute.showMenuForCollection(editable, 3); // 3 stands for the 3rd collection which are partner mentions
+        tribute.selectItemAtIndex(0);
+        tribute.hideMenu(0);
+        const kevt = new window.KeyboardEvent('input');
+        editable.dispatchEvent(kevt);
+        await testUtils.nextTick();
+    }
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 20,
+                name: "General",
+            }],
+        },
+    });
+
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                return [];
+            }
+            return this._super(...arguments);
+        },
+        params: {
+            default_active_id: 'mail.channel_20',
+        },
+    });
+
+    const tribute = this.discuss.component.refs.thread.refs.composer.refs.textInput._tribute;
+
+    const editable = document.querySelector(`
+        .o_ComposerTextInput
+        > .note-editor
+        > .note-editing-area
+        > .note-editable`);
+
+    // Insert a mention, the mention should then be in the editable
+    await insertMention();
+    const str_mention = '<a contenteditable="false" data-oe-model="res.partner" href="#" owl="1" data-oe-id="odoobot" class="o_mention">@OdooBot</a>&nbsp;';
+    assert.strictEqual(
+        editable.innerHTML,
+        str_mention,
+        'mention should be inserted in the editable as a contenteditable false');
+
+    // Make sur insertion of the mention is made after the text
+    await setEditableContent(editable, '');
+    const content = 'bluhbluh';
+    document.execCommand('insertHTML', false, `<p>${content}</p>`);
+    await insertMention();
+
+    assert.strictEqual(
+        editable.innerHTML,
+        `<p>${content}${str_mention}</p>`,
+        'mention should be inserted in the editable after the already written text'
+    );
+
+    // Checking emoji insertion is ok after a mention
+    const emoji = await insertEmoji();
+    assert.strictEqual(
+        editable.innerHTML,
+        `<p>${content}${str_mention}${emoji}</p>`,
+        'emoji should be inserted after the mention'
+    );
+
+    // Checking emoji insertion is ok after a mention when there is only a mention
+    await setEditableContent(editable, '');
+    document.execCommand('insertHTML', false, str_mention);
+    const notext_emoji = await insertEmoji();
+
+    assert.strictEqual(
+        editable.innerHTML,
+        `<p>${str_mention}${notext_emoji}</p>`,
+        'emoji should be inserted after the mention'
+    );
+
+    // Executed code includes a setTimeout function to remove the menu from the body
+    // If menu is not removed at the right time, test will fail because of extra element in the body
+    // We need to this manually as in unmount it cannot be awaited
+    await tribute.detach(editable);
+});
+
+QUnit.test('composer state: text save and restore', async function (assert) {
+    assert.expect(2);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 20,
+                name: "General",
+            },
+            {
+                channel_type: "channel",
+                id: 21,
+                name: "Special",
+            }],
+        },
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                return [];
+            }
+            return this._super(...arguments);
+        },
+        params: {
+            default_active_id: 'mail.channel_20',
+        },
+    });
+
+    const channels = document.querySelectorAll(`
+        .o_DiscussSidebar
+        > .o_DiscussSidebar_groupChannel
+        > .o_DiscussSidebar_list
+        > .o_DiscussSidebarItem
+    `);
+
+    const editable_selector = '.o_ComposerTextInput > .note-editor > .note-editing-area > .note-editable';
+    const general_editable = document.querySelector(editable_selector);
+
+    // Write text in composer for #general
+    general_editable.innerHTML = "<p>XDU for the win</p>";
+    const kevt = new window.KeyboardEvent('input');
+    general_editable.dispatchEvent(kevt);
+    await testUtils.nextTick();
+
+    // Switch to #special
+    await testUtils.dom.click(channels[1]);
+
+    // Write text in composer for #special
+    const special_editable = document.querySelector(editable_selector);
+    special_editable.innerHTML = "They see me rollin\'";
+    const kevt2 = new window.KeyboardEvent('input');
+    special_editable.dispatchEvent(kevt2);
+    await testUtils.nextTick();
+
+    // Switch back to #general
+    await testUtils.dom.click(channels[0]);
+    assert.strictEqual(document.querySelector(editable_selector).innerHTML,
+        "<p>XDU for the win</p>",
+        "should restore the input text");
+
+    // Switch back to #special
+    await testUtils.dom.click(channels[1]);
+    assert.strictEqual(document.querySelector(editable_selector).innerHTML,
+        "<p>They see me rollin'<br></p>",
+        "should restore the input text");
+});
+
+QUnit.test('composer state: attachments save and restore', async function (assert) {
+    assert.expect(2);
+    const self = this;
+
+    async function addAttachmentsToActiveComposer(attachments){
+        const composerLocalId = Object.keys(self.store.state.composers)[0];
+        const attachmentLocalIds = [];
+        for(const i in attachments){
+            const attachmentName = attachments[i];
+            const attachmentLocalId = self.store.dispatch('createAttachment', {
+                filename: attachmentName,
+                isTemporary: true,
+                name: attachmentName,
+            });
+            self.store.dispatch('linkAttachmentToComposer', composerLocalId, attachmentLocalId);
+            attachmentLocalIds.push(attachmentLocalId);
+        }
+        return attachmentLocalIds;
+    }
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 20,
+                name: "General",
+            },
+            {
+                channel_type: "channel",
+                id: 21,
+                name: "Special",
+            }],
+        },
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                return [];
+            }
+            return this._super(...arguments);
+        },
+        params: {
+            default_active_id: 'mail.channel_20',
+        },
+    });
+
+    const channels = document.querySelectorAll(`
+        .o_DiscussSidebar
+        > .o_DiscussSidebar_groupChannel
+        > .o_DiscussSidebar_list
+        > .o_DiscussSidebarItem
+    `);
+
+    // Add attachment in a message for #general
+    const generalAttachments = ['BLAH.png'];
+    const generalAttachmentLocalIds = await addAttachmentsToActiveComposer(generalAttachments);
+
+    // Switch to #special
+    await testUtils.dom.click(channels[1]);
+
+    // Add attachments in a message for #special
+    const specialAttachments = ['Peaky.png', 'Blinders.jpg', 'Tommy.pdf'];
+    const specialAttachmentLocalIds = await addAttachmentsToActiveComposer(specialAttachments);
+    // Switch back to #general
+    await testUtils.dom.click(channels[0]);
+
+    // Check attachment is reloaded
+    let composerLocalId = Object.keys(this.store.state.composers)[0];
+    let composer = this.store.state.composers[composerLocalId];
+    assert.deepEqual(composer.attachmentLocalIds, generalAttachmentLocalIds, 'attachment(s) should be reloaded');
+
+    // Switch back to #special
+    await testUtils.dom.click(channels[1]);
+
+    // Check attachments are reloaded
+    composerLocalId = Object.keys(this.store.state.composers)[0];
+    composer = this.store.state.composers[composerLocalId];
+    assert.deepEqual(composer.attachmentLocalIds, specialAttachmentLocalIds, 'attachment(s) should be reloaded');
 });
 
 QUnit.test('post a simple message', async function (assert) {
