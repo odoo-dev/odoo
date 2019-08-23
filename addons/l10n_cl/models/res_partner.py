@@ -8,13 +8,6 @@ class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = 'res.partner'
 
-    def _get_default_country_id(self):
-        allowed_company = self._context.get('allowed_company_ids')
-        if not allowed_company:
-            return False
-        company = self.env['res.company'].browse(allowed_company[0])
-        return company.country_id == self.env.ref('base.cl') and self.env.ref('base.cl')
-
     def _get_default_l10n_cl_sii_taxpayer_type(self):
         allowed_company = self._context.get('allowed_company_ids')
         if not allowed_company:
@@ -22,8 +15,7 @@ class ResPartner(models.Model):
         company = self.env['res.company'].browse(allowed_company[0])
         return company.country_id == self.env.ref('base.cl') and '1'
 
-    country_id = fields.Many2one(
-        'res.country', default=_get_default_country_id)
+    country_id = fields.Many2one('res.country')
 
     _sii_taxpayer_types = [
         ('1', _('VAT Affected (1st Category)')),
