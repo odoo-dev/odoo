@@ -30,6 +30,8 @@ const ChatWindowService =  AbstractService.extend(EnvMixin, {
             core.bus.on('hide_home_menu', this, this._onHideHomeMenu.bind(this));
             core.bus.on('show_home_menu', this, this._onShowHomeMenu.bind(this));
             core.bus.on('web_client_ready', this, this._onWebClientReady.bind(this));
+            core.bus.on('will_hide_home_menu', this, this._onWillHideHomeMenu.bind(this));
+            core.bus.on('will_show_home_menu', this, this._onWillShowHomeMenu.bind(this));
         } else {
             this['test:hide_home_menu'] = this._onHideHomeMenu;
             this['test:show_home_menu'] = this._onShowHomeMenu;
@@ -85,6 +87,9 @@ const ChatWindowService =  AbstractService.extend(EnvMixin, {
         }
         await this._mount();
     },
+    /**
+     * @private
+     */
     async _onShowHomeMenu() {
         if (!this._webClientReady) {
             return;
@@ -100,7 +105,23 @@ const ChatWindowService =  AbstractService.extend(EnvMixin, {
     async _onWebClientReady() {
         await this._mount();
         this._webClientReady = true;
-    }
+    },
+    /**
+     * @private
+     */
+    async _onWillShowHomeMenu() {
+        if(this.component){
+            this.component.saveChatWindowsState();
+        }
+    },
+    /**
+     * @private
+     */
+    async _onWillHideHomeMenu() {
+        if(this.component){
+            this.component.saveChatWindowsState();
+        }
+    },
 });
 
 core.serviceRegistry.add('chat_window', ChatWindowService);

@@ -80,6 +80,15 @@ class ChatWindow extends owl.store.ConnectedComponent {
         return this.state.folded;
     }
 
+    saveState(){
+        const composerState = this.refs.thread.getComposerState();
+        const scrollTop = this.refs.thread.getScrollTop();
+        this.dispatch('saveChatWindowState', this.props.chatWindowLocalId, {
+            composerState,
+            scrollTop
+        });
+    }
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -248,14 +257,18 @@ class ChatWindow extends owl.store.ConnectedComponent {
 }
 
 ChatWindow.defaultProps = {
+    composerInitialAttachmentLocalIds: [],
+    composerInitialTextInputHtmlContent: null,
     dockDirection: 'rtl',
     dockOffset: 0,
     hasCloseAsBackButton: false,
     hasShiftLeft: false,
     hasShiftRight: false,
+    initialState: {},
     isDocked: false,
     isExpandable: false,
     isFullscreen: false,
+    messageListInitialScrollTop: null,
 };
 
 /**
@@ -273,6 +286,15 @@ ChatWindow.mapStoreToProps = function (state, ownProps) {
 
 ChatWindow.props = {
     chatWindowLocalId: String,
+    composerInitialAttachmentLocalIds: {
+        type: Array,
+        element: String,
+        optional: true,
+    },
+    composerInitialTextInputHtmlContent: {
+        type: String,
+        optional: true,
+    },
     dockDirection: String,
     dockOffset: Number,
     hasCloseAsBackButton: Boolean,
@@ -281,6 +303,10 @@ ChatWindow.props = {
     isDocked: Boolean,
     isExpandable: Boolean,
     isFullscreen: Boolean,
+    messageListInitialScrollTop: {
+        type: Number,
+        optional: true,
+    },
 };
 
 return ChatWindow;

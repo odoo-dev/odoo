@@ -172,6 +172,7 @@ Thread.props = {
     haveMessagesAuthorRedirect: Boolean,
     haveMessagesMarkAsReadIcon: Boolean,
     haveMessagesReplyIcon: Boolean,
+    initialScrollTop: Number,
     isMessageListScrollToEndOnMount: {
         type: Boolean,
         optional: true,

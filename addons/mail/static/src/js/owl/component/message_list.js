@@ -46,6 +46,10 @@ class MessageList extends owl.store.ConnectedComponent {
         ) {
             this._scrollToLastMessage();
         }
+        else
+        {
+            this.setScrollTop(this.props.scrollTop);
+        }
         this._checkThreadMarkAsRead();
         this._updateTrackedPatchInfo();
     }

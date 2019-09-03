@@ -92,6 +92,7 @@ function init(alteration) {
              * case it is mounted and the autofocus counter has not changed.
              */
             notifiedAutofocusCounter: 0,
+            storedChatWindowStates: {}
         },
         commands: {},
         /**

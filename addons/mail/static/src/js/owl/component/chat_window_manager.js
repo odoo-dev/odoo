@@ -51,6 +51,14 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
     }
 
     /**
+     * Return initial chat window states
+     * @return {Object}
+     */
+    get initialStates() {
+        return this.env.store.state.chatWindowManager.storedChatWindowStates;
+    }
+
+    /**
      * Return list of chat ids ordered by DOM position,
      * i.e. from left to right with this.TEXT_DIRECTION = 'rtl'.
      *
@@ -70,6 +78,12 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
      */
     chatWindowShiftRight(index) {
         return index < this.storeProps.computed.visible.length - 1;
+    }
+
+    saveChatWindowsState(){
+        for(const chatWindowLocalId in this.refs){
+            this.refs[chatWindowLocalId].saveState();
+        }
     }
 
     //--------------------------------------------------------------------------
