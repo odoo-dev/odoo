@@ -40,14 +40,14 @@ class MessageList extends owl.store.ConnectedComponent {
     }
 
     mounted() {
-        if (
+        if (this.props.initialScrollTop !== undefined) {
+            this.setScrollTop(this.props.initialScrollTop);
+        }
+        else if (
             this.props.isScrollToEndOnMount &&
             this.storeProps.messages.length > 0
         ) {
             this._scrollToLastMessage();
-        }
-        else {
-            this.setScrollTop(this.props.initialScrollTop);
         }
         this._checkThreadMarkAsRead();
         this._updateTrackedPatchInfo();
