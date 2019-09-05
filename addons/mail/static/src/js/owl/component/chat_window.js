@@ -268,11 +268,9 @@ ChatWindow.defaultProps = {
     hasCloseAsBackButton: false,
     hasShiftLeft: false,
     hasShiftRight: false,
-    initialState: {},
     isDocked: false,
     isExpandable: false,
     isFullscreen: false,
-    threadInitialScrollTop: null,
 };
 
 /**
