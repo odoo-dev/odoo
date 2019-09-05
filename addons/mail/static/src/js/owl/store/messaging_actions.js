@@ -39,6 +39,7 @@ const actions = {
     closeChatWindow({ dispatch, state }, chatWindowLocalId) {
         const cwm = state.chatWindowManager;
         cwm.chatWindowLocalIds = cwm.chatWindowLocalIds.filter(id => id !== chatWindowLocalId);
+        delete cwm.storedChatWindowStates[chatWindowLocalId];
         if (chatWindowLocalId !== 'new_message') {
             const thread = state.threads[chatWindowLocalId];
             Object.assign(thread, {
