@@ -585,7 +585,6 @@ QUnit.test('chat window: open / close', async function (assert) {
             return this._super(...arguments);
         },
     });
-    window.openThread = openThread;
     await openThread();
     assert.verifySteps(['rpc:channel_minimize']);
     // Close chat window
@@ -606,19 +605,6 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     assert.expect(20);
 
     // HELPERS SETUP & START
-    async function openThread() {
-        document
-            .querySelector(`.o_MessagingMenu_toggler`)
-            .click()
-        ;
-        await testUtils.nextTick(); // re-render
-        document
-            .querySelector(`
-                .o_MessagingMenu_dropdownMenu
-                .o_ThreadPreviewList_preview`)
-            .click();
-        await testUtils.nextTick(); // re-render
-    }
 
     Object.assign(this.data.initMessaging, {
         channel_slots: {
@@ -650,37 +636,42 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
                     },
                 }];
             } else if (args.method === 'channel_fold') {
-                return [];
-            } else if (args.method === 'message_fetch'){
-                const out = [];
-                for (let i = 0; i < 20; i++) {
-                    out.push({
+                return;
+            } else if (args.method === 'message_fetch') {
+                return [...Array(20).keys()].map(i => {
+                    return {
                         author_id: [11, "Demo"],
                         body: "<p>body</p>",
                         channel_ids: [20],
                         date: "2019-04-20 10:00:00",
-                        id: i+10,
+                        id: i + 10,
                         message_type: 'comment',
                         model: 'mail.channel',
                         record_name: 'General',
-                        res_id: i+1,
-                    });
-                }
-                return out;
+                        res_id: i + 1,
+                    }
+                });
             }
             return this._super(...arguments);
         },
     });
-    window.openThread = openThread;
-    await openThread();
 
-    const scrollTop = 142;
-    const composerHTML = "XDU for the win !";
-    const composerAttachments = ['a.png', 'b.pdf'];
+    // Open thread
+    document
+        .querySelector(`.o_MessagingMenu_toggler`)
+        .click()
+    ;
+    await testUtils.nextTick(); // re-render
+    document
+        .querySelector(`
+            .o_MessagingMenu_dropdownMenu
+            .o_ThreadPreviewList_preview`)
+        .click();
+    await testUtils.nextTick(); // re-render
 
     // SETUP INITIAL STATE
     // - Set a scroll position to chat window
-    document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop = scrollTop;
+    document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop = 142;
 
     // - Set html content of the composer of the chat window
     const composerTextInput = document.querySelector(`
@@ -688,7 +679,7 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
         > .note-editor
         > .note-editing-area
         > .note-editable`);
-    composerTextInput.innerHTML = composerHTML;
+    composerTextInput.innerHTML = "XDU for the win !";
     composerTextInput.dispatchEvent(new window.KeyboardEvent('input'));
 
     // - Set attachments of the composer
@@ -721,17 +712,17 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
     assert.ok(chatWindowStates, "chat window manager should have storedChatWindowState key in store");
     assert.ok(chatWindowStates[localChannelId], "chat window state should be stored");
-    assert.equal(chatWindowStates[localChannelId].scrollTop, scrollTop, "chat window scrollTop value saved in store should be good");
-    assert.equal(chatWindowStates[localChannelId].composerTextInputHtmlContent, composerHTML, "chat window composer text input html saved in store should be good");
+    assert.strictEqual(chatWindowStates[localChannelId].scrollTop, 142, "chat window scrollTop value saved in store should be good");
+    assert.strictEqual(chatWindowStates[localChannelId].composerTextInputHtmlContent, "XDU for the win !", "chat window composer text input html saved in store should be good");
     assert.deepEqual(chatWindowStates[localChannelId].composerAttachmentLocalIds, composerAttachmentLocalIds, "chat window composer attachments saved in store should be good");
 
     // -- Check dom state
-    assert.equal(document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop, scrollTop, "chat window scrollTop should still be the same");
-    assert.equal(composerTextInput.innerHTML, composerHTML, "chat window composer should still have the same html input");
+    assert.strictEqual(document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop, 142, "chat window scrollTop should still be the same");
+    assert.strictEqual(composerTextInput.innerHTML, "XDU for the win !", "chat window composer should still have the same html input");
     domAttachments = document.querySelectorAll(`.o_Composer .o_Attachment`);
-    assert.equal(domAttachments.length, composerAttachments.length, "chat window composer should still have the same amount of attachments");
-    assert.equal(domAttachments[0].dataset.attachmentLocalId, composerAttachmentLocalIds[0], "chat window composer should still have the same first attachment");
-    assert.equal(domAttachments[1].dataset.attachmentLocalId, composerAttachmentLocalIds[1], "chat window composer should still have the same second attachment");
+    assert.strictEqual(domAttachments.length, 2, "chat window composer should still have the same amount of attachments");
+    assert.strictEqual(domAttachments[0].dataset.attachmentLocalId, composerAttachmentLocalIds[0], "chat window composer should still have the same first attachment");
+    assert.strictEqual(domAttachments[1].dataset.attachmentLocalId, composerAttachmentLocalIds[1], "chat window composer should still have the same second attachment");
 
 
     // - phase 2 : on showing menu
@@ -739,40 +730,27 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     await this.widget.call('chat_window', 'test:will_show_home_menu');
     await this.widget.call('chat_window', 'test:show_home_menu');
 
-        // -- Check store state
+    // -- Check store state
     chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
     assert.ok(chatWindowStates, "chat window manager should have storedChatWindowState key in store");
     assert.ok(chatWindowStates[localChannelId], "chat window state should be stored");
-    assert.equal(chatWindowStates[localChannelId].scrollTop, scrollTop, "chat window scrollTop value saved in store should be good");
-    assert.equal(chatWindowStates[localChannelId].composerTextInputHtmlContent, composerHTML, "chat window composer text input html saved in store should be good");
+    assert.strictEqual(chatWindowStates[localChannelId].scrollTop, 142, "chat window scrollTop value saved in store should be good");
+    assert.strictEqual(chatWindowStates[localChannelId].composerTextInputHtmlContent, "XDU for the win !", "chat window composer text input html saved in store should be good");
     assert.deepEqual(chatWindowStates[localChannelId].composerAttachmentLocalIds, composerAttachmentLocalIds, "chat window composer attachments saved in store should be good");
 
     // -- Check dom state
-    assert.equal(document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop, scrollTop, "chat window scrollTop should still be the same");
-    assert.equal(composerTextInput.innerHTML, composerHTML, "chat window composer should still have the same html input");
+    assert.strictEqual(document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop, 142, "chat window scrollTop should still be the same");
+    assert.strictEqual(composerTextInput.innerHTML, "XDU for the win !", "chat window composer should still have the same html input");
     domAttachments = document.querySelectorAll(`.o_Composer .o_Attachment`);
-    assert.equal(domAttachments.length, composerAttachments.length, "chat window composer should still have the same amount of attachments");
-    assert.equal(domAttachments[0].dataset.attachmentLocalId, composerAttachmentLocalIds[0], "chat window composer should still have the same first attachment");
-    assert.equal(domAttachments[1].dataset.attachmentLocalId, composerAttachmentLocalIds[1], "chat window composer should still have the same second attachment");
+    assert.strictEqual(domAttachments.length, 2, "chat window composer should still have the same amount of attachments");
+    assert.strictEqual(domAttachments[0].dataset.attachmentLocalId, composerAttachmentLocalIds[0], "chat window composer should still have the same first attachment");
+    assert.strictEqual(domAttachments[1].dataset.attachmentLocalId, composerAttachmentLocalIds[1], "chat window composer should still have the same second attachment");
 });
 
 QUnit.test('chat window: state destroyed on close', async function (assert) {
     assert.expect(6);
 
     // HELPERS SETUP & START
-    async function openThread() {
-        document
-            .querySelector(`.o_MessagingMenu_toggler`)
-            .click()
-        ;
-        await testUtils.nextTick(); // re-render
-        document
-            .querySelector(`
-                .o_MessagingMenu_dropdownMenu
-                .o_ThreadPreviewList_preview`)
-            .click();
-        await testUtils.nextTick(); // re-render
-    }
 
     Object.assign(this.data.initMessaging, {
         channel_slots: {
@@ -786,8 +764,6 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
             }],
         },
     });
-    const channelId = 20;
-    const localChannelId = `mail.channel_${channelId}`;
     await this.start({
         async mockRPC(route, args) {
             if (args.method === 'channel_fetch_preview') {
@@ -804,37 +780,41 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
                     },
                 }];
             } else if (args.method === 'channel_fold') {
-                return [];
-            } else if (args.method === 'message_fetch'){
-                const out = [];
-                for (let i = 0; i < 20; i++) {
-                    out.push({
+                return;
+            } else if (args.method === 'message_fetch') {
+                return [...Array(20).keys()].map(i => {
+                    return {
                         author_id: [11, "Demo"],
                         body: "<p>body</p>",
                         channel_ids: [20],
                         date: "2019-04-20 10:00:00",
-                        id: i+10,
+                        id: i + 10,
                         message_type: 'comment',
                         model: 'mail.channel',
                         record_name: 'General',
-                        res_id: i+1,
-                    });
-                }
-                return out;
+                        res_id: i + 1,
+                    }
+                });
             }
             return this._super(...arguments);
         },
     });
-    window.openThread = openThread;
-    await openThread();
 
-    const scrollTop = 142;
-    const composerHTML = "XDU for the win !";
-    const composerAttachments = ['a.png', 'b.pdf'];
+    document
+        .querySelector(`.o_MessagingMenu_toggler`)
+        .click()
+    ;
+    await testUtils.nextTick(); // re-render
+    document
+        .querySelector(`
+            .o_MessagingMenu_dropdownMenu
+            .o_ThreadPreviewList_preview`)
+        .click();
+    await testUtils.nextTick(); // re-render
 
     // SETUP INITIAL STATE
     // - Set a scroll position to chat window
-    document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop = scrollTop;
+    document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop = 142;
 
     // - Set html content of the composer of the chat window
     const composerTextInput = document.querySelector(`
@@ -842,7 +822,7 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
         > .note-editor
         > .note-editing-area
         > .note-editable`);
-    composerTextInput.innerHTML = composerHTML;
+    composerTextInput.innerHTML = "XDU for the win !";
     composerTextInput.dispatchEvent(new window.KeyboardEvent('input'));
     await testUtils.nextTick();
 
@@ -857,23 +837,23 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
     // -- Check store state
     chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
     assert.ok(chatWindowStates, "chat window manager should have storedChatWindowState key in store");
-    assert.ok(chatWindowStates[localChannelId], "chat window state should be stored");
-    assert.equal(chatWindowStates[localChannelId].scrollTop, scrollTop, "chat window scrollTop value saved in store should be good");
-    assert.equal(chatWindowStates[localChannelId].composerTextInputHtmlContent, composerHTML, "chat window composer text input html saved in store should be good");
+    assert.ok(chatWindowStates['mail.channel_20'], "chat window state should be stored");
+    assert.strictEqual(chatWindowStates['mail.channel_20'].scrollTop, 142, "chat window scrollTop value saved in store should be good");
+    assert.strictEqual(chatWindowStates['mail.channel_20'].composerTextInputHtmlContent, "XDU for the win !", "chat window composer text input html saved in store should be good");
 
     // -- Close chat window
     document
         .querySelector(`
-                .o_ChatWindow
-                .o_ChatWindowHeader
-                .o_ChatWindowHeader_commandClose`)
+            .o_ChatWindow
+            .o_ChatWindowHeader
+            .o_ChatWindowHeader_commandClose`)
         .click();
     await testUtils.nextTick(); // re-render
 
     // -- Check store state
     chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
     assert.ok(chatWindowStates, "chat window manager should have storedChatWindowState key in store");
-    assert.notOk(chatWindowStates[localChannelId], "chat window state should be removed from store");
+    assert.notOk(chatWindowStates['mail.channel_20'], "chat window state should be removed from store");
 
 });
 
