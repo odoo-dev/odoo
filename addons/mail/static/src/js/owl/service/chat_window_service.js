@@ -36,6 +36,8 @@ const ChatWindowService =  AbstractService.extend(EnvMixin, {
             this['test:hide_home_menu'] = this._onHideHomeMenu;
             this['test:show_home_menu'] = this._onShowHomeMenu;
             this['test:web_client_ready'] = this._onWebClientReady;
+            this['test:will_hide_home_menu'] = this._onWillHideHomeMenu;
+            this['test:will_show_home_menu'] = this._onWillShowHomeMenu;
         }
     },
     /**
