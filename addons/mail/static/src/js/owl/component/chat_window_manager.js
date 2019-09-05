@@ -51,14 +51,6 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
     }
 
     /**
-     * Return initial chat window states
-     * @return {Object}
-     */
-    get initialStates() {
-        return this.env.store.state.chatWindowManager.storedChatWindowStates;
-    }
-
-    /**
      * Return list of chat ids ordered by DOM position,
      * i.e. from left to right with this.TEXT_DIRECTION = 'rtl'.
      *
@@ -80,10 +72,14 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
         return index < this.storeProps.computed.visible.length - 1;
     }
 
-    saveChatWindowsState(){
-        for(const chatWindowLocalId in this.refs){
-            this.refs[chatWindowLocalId].saveState();
+    saveChatWindowsStates() {
+        const states = {};
+        for (const chatWindowLocalId in this.refs) {
+            states[chatWindowLocalId] = this.refs[chatWindowLocalId].getState();
         }
+        this.dispatch('updateChatWindowManager', {
+            storedChatWindowStates: states
+        });
     }
 
     //--------------------------------------------------------------------------
@@ -236,12 +232,14 @@ ChatWindowManager.mapStoreToProps = function (state) {
         autofocusCounter,
         autofocusChatWindowLocalId,
         computed,
+        storedChatWindowStates,
     } = state.chatWindowManager;
     return {
         autofocusCounter,
         autofocusChatWindowLocalId,
         computed,
         isMobile: state.isMobile,
+        storedChatWindowStates,
     };
 };
 

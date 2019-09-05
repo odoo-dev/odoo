@@ -951,16 +951,6 @@ const actions = {
     },
     /**
      * @param {Object} param0
-     * @param {Object} param0.state
-     * @param {String} chatWindowLocalId
-     * @param {Object} chatWindowState
-     */
-    saveChatWindowState({state}, chatWindowLocalId, chatWindowState){
-        const cwm = state.chatWindowManager;
-        cwm.storedChatWindowStates[chatWindowLocalId] = chatWindowState;
-    },
-    /**
-     * @param {Object} param0
      * @param {function} param0.dispatch
      * @param {Object} param0.env
      * @param {Object} param0.state

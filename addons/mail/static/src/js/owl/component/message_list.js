@@ -46,9 +46,8 @@ class MessageList extends owl.store.ConnectedComponent {
         ) {
             this._scrollToLastMessage();
         }
-        else
-        {
-            this.setScrollTop(this.props.scrollTop);
+        else {
+            this.setScrollTop(this.props.initialScrollTop);
         }
         this._checkThreadMarkAsRead();
         this._updateTrackedPatchInfo();
@@ -436,6 +435,10 @@ MessageList.props = {
     haveMessagesAuthorRedirect: Boolean,
     haveMessagesMarkAsReadIcon: Boolean,
     haveMessagesReplyIcon: Boolean,
+    initialScrollTop: {
+        type: Number,
+        optional: true
+    },
     isScrollToEndOnMount: Boolean,
     order: String, // ['asc', 'desc']
     selectedMessageLocalId: {

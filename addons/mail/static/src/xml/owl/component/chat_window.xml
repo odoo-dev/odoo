@@ -39,7 +39,7 @@
             hasSquashCloseMessages="storeProps.thread._model !== 'mail.box'"
             haveComposerAttachmentsLabelForCardLayout="false"
             haveMessagesAuthorRedirect="storeProps.thread.channel_type !== 'chat'"
-            initialScrollTop="props.messageListInitialScrollTop"
+            initialScrollTop="props.threadInitialScrollTop"
             threadLocalId="props.chatWindowLocalId"
             t-if="storeProps.thread"
             t-on-focusin.stop="_onFocusinThread"
