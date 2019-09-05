@@ -92,6 +92,21 @@ function init(alteration) {
              * case it is mounted and the autofocus counter has not changed.
              */
             notifiedAutofocusCounter: 0,
+            /**
+             * Stored chat window states (scroll positions, composer text & composer attachments).
+             * Useful to restore chat window UI state when showing/hiding home menu.
+             * This is necessary because toggling home menu cleans the DOM, so chat windows need
+             * re-mount.
+             *
+             * Format:
+             *    {
+             *       [chatWindowLocalId]: {
+             *           composerAttachmentLocalIds {string[]},
+             *           composerTextInputHtmlContent {string},
+             *           scrollTop {integer},
+             *       },
+             *    }
+             */
             storedChatWindowStates: {}
         },
         commands: {},
