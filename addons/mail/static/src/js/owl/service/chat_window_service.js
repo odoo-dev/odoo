@@ -112,7 +112,7 @@ const ChatWindowService =  AbstractService.extend(EnvMixin, {
      * @private
      */
     async _onWillShowHomeMenu() {
-        if(this.component){
+        if (this.component) {
             this.component.saveChatWindowsStates();
         }
     },
@@ -120,7 +120,7 @@ const ChatWindowService =  AbstractService.extend(EnvMixin, {
      * @private
      */
     async _onWillHideHomeMenu() {
-        if(this.component){
+        if (this.component) {
             this.component.saveChatWindowsStates();
         }
     },
