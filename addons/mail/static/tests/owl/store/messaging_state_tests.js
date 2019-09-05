@@ -107,6 +107,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     visible: [],
                 },
                 notifiedAutofocusCounter: 0,
+                storedChatWindowStates: {}
             },
             commands: {},
             composers: {},
