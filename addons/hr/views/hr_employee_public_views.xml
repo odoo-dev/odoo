@@ -11,6 +11,8 @@
                     <field name="job_title" string="Job Title"/>
                     <field name="department_id" string="Department"/>
                     <field name="company_id" string="Company"/>
+                    <separator/>
+                    <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter name="group_manager" string="Manager" domain="[]" context="{'group_by':'parent_id'}"/>
                         <filter name="group_department" string="Department" domain="[]" context="{'group_by':'department_id'}"/>
@@ -51,6 +53,7 @@
                                     <field name="mobile_phone" widget="phone"/>
                                     <field name="work_phone" widget="phone"/>
                                     <field name="work_email" widget="email"/>
+                                    <field name="work_location"/>
                                 </group>
                                 <group>
                                     <field name="department_id"/>
@@ -66,7 +69,6 @@
                                             <field name="address_id"
                                                 context="{'show_address': 1}"
                                                 options='{"always_reload": True, "highlight_first_line": True}'/>
-                                            <field name="work_location"/>
                                         </group>
                                         <group name="managers" string="Responsibles">
                                             <field name="coach_id"/>

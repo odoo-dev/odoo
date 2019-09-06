@@ -15,7 +15,9 @@ class Website(models.Model):
     _inherit = 'website'
 
     pricelist_id = fields.Many2one('product.pricelist', compute='_compute_pricelist_id', string='Default Pricelist')
-    currency_id = fields.Many2one('res.currency', related='pricelist_id.currency_id', related_sudo=False, string='Default Currency', readonly=False)
+    currency_id = fields.Many2one('res.currency',
+        related='pricelist_id.currency_id', depends=(), related_sudo=False,
+        string='Default Currency', readonly=False)
     salesperson_id = fields.Many2one('res.users', string='Salesperson')
 
     def _get_default_website_team(self):
@@ -30,6 +32,8 @@ class Website(models.Model):
         default=_get_default_website_team)
     pricelist_ids = fields.One2many('product.pricelist', compute="_compute_pricelist_ids",
                                     string='Price list available for this Ecommerce/Website')
+    all_pricelist_ids = fields.One2many('product.pricelist', 'website_id', string='All pricelists',
+                                        help='Technical: Used to recompute pricelist_ids')
 
     def _default_recovery_mail_template(self):
         try:
@@ -43,6 +47,7 @@ class Website(models.Model):
     shop_ppg = fields.Integer(default=20, string="Number of products in the grid on the shop")
     shop_ppr = fields.Integer(default=4, string="Number of grid columns on the shop")
 
+    @api.depends('all_pricelist_ids')
     def _compute_pricelist_ids(self):
         Pricelist = self.env['product.pricelist']
         for website in self:
@@ -50,6 +55,7 @@ class Website(models.Model):
                 Pricelist._get_website_pricelists_domain(website.id)
             )
 
+    @api.depends_context('website_id')
     def _compute_pricelist_id(self):
         for website in self:
             if website._context.get('website_id') != website.id:
@@ -206,7 +212,7 @@ class Website(models.Model):
         salesperson_id = affiliate_id if self.env['res.users'].sudo().browse(affiliate_id).exists() else request.website.salesperson_id.id
         addr = partner.address_get(['delivery'])
         if not request.website.is_public_user():
-            last_sale_order = self.env['sale.order'].search([('partner_id', '=', partner.id)], limit=1, order="date_order desc, id desc")
+            last_sale_order = self.env['sale.order'].sudo().search([('partner_id', '=', partner.id)], limit=1, order="date_order desc, id desc")
             if last_sale_order:  # first = me
                 addr['delivery'] = last_sale_order.partner_shipping_id.id
         default_user_id = partner.parent_id.user_id.id or partner.user_id.id

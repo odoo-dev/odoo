@@ -35,8 +35,8 @@ class ChangeProductionQty(models.TransientModel):
         modification = {}
         for move in production.move_finished_ids.filtered(lambda m: m.state not in ('done', 'cancel')):
             qty = (qty - old_qty) * move.unit_factor
-            modification[move] = (move.product_uom_qty - qty, move.product_uom_qty)
-            move[0].write({'product_uom_qty': move.product_uom_qty - qty})
+            modification[move] = (move.product_uom_qty + qty, move.product_uom_qty)
+            move[0].write({'product_uom_qty': move.product_uom_qty + qty})
         return modification
 
     def change_prod_qty(self):
@@ -60,7 +60,8 @@ class ChangeProductionQty(models.TransientModel):
                     continue
                 move = production.move_raw_ids.filtered(lambda x: x.bom_line_id.id == line.id and x.state not in ('done', 'cancel'))
                 if move:
-                    old_qty = move[0].product_uom_qty
+                    move = move[0]
+                    old_qty = move.product_uom_qty
                 else:
                     old_qty = 0
                 iterate_key = production._get_document_iterate_key(move)

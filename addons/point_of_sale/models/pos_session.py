@@ -37,7 +37,8 @@ class PosSession(models.Model):
         index=True,
         readonly=True,
         states={'opening_control': [('readonly', False)]},
-        default=lambda self: self.env.uid)
+        default=lambda self: self.env.uid,
+        ondelete='restrict')
     currency_id = fields.Many2one('res.currency', related='config_id.currency_id', string="Currency", readonly=False)
     start_at = fields.Datetime(string='Opening Date', readonly=True)
     stop_at = fields.Datetime(string='Closing Date', readonly=True, copy=False)
@@ -151,16 +152,6 @@ class PosSession(models.Model):
                     session.cash_journal_id = statement.journal_id.id
                     session.cash_register_id = statement.id
                     break  # stop iteration after finding the cash journal
-
-    @api.constrains('user_id', 'state')
-    def _check_unicity(self):
-        # open if there is no session in 'opening_control', 'opened', 'closing_control' for one user
-        if self.search_count([
-                ('state', 'not in', ('closed', 'closing_control')),
-                ('user_id', '=', self.user_id.id),
-                ('rescue', '=', False)
-            ]) > 1:
-            raise ValidationError(_("You cannot create two active sessions with the same responsible."))
 
     @api.constrains('config_id')
     def _check_pos_config(self):
@@ -753,15 +744,19 @@ class PosSession(models.Model):
         }
 
     def open_frontend_cb(self):
+        """Open the pos interface with config_id as an extra argument.
+
+        In vanilla PoS each user can only have one active session, therefore it was not needed to pass the config_id
+        on opening a session. It is also possible to login to sessions created by other users.
+
+        :returns: dict
+        """
         if not self.ids:
             return {}
-        for session in self.filtered(lambda s: s.user_id.id != self.env.uid):
-            raise UserError(_("You cannot use the session of another user. This session is owned by %s. "
-                              "Please first close this one to use this point of sale.") % session.user_id.name)
         return {
             'type': 'ir.actions.act_url',
             'target': 'self',
-            'url':   '/pos/web/',
+            'url':   '/pos/web?config_id=%d' % self.config_id.id,
         }
 
     def open_cashbox_pos(self):
@@ -807,7 +802,7 @@ class PosSession(models.Model):
             'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'closing.balance.confirm.wizard',
-            'view_id': self.env.ref('point_of_sale.closing_balance_confirm').id,
+            'views': [(False, 'form')],
             'type': 'ir.actions.act_window',
             'context': context,
             'target': 'new'

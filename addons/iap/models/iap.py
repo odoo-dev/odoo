@@ -7,7 +7,7 @@ import uuid
 import werkzeug.urls
 import requests
 
-from odoo import api, fields, models, exceptions
+from odoo import api, fields, models, exceptions, _
 from odoo.tools import pycompat
 
 _logger = logging.getLogger(__name__)
@@ -46,7 +46,6 @@ def jsonrpc(url, method='call', params=None, timeout=15):
         'id': uuid.uuid4().hex,
     }
 
-
     _logger.info('iap jsonrpc %s', url)
     try:
         req = requests.post(url, json=payload, timeout=timeout)
@@ -68,7 +67,9 @@ def jsonrpc(url, method='call', params=None, timeout=15):
             raise e
         return response.get('result')
     except (ValueError, requests.exceptions.ConnectionError, requests.exceptions.MissingSchema, requests.exceptions.Timeout, requests.exceptions.HTTPError) as e:
-        raise exceptions.AccessError('The url that this service requested returned an error. Please contact the author of the app. The url it tried to contact was ' + url)
+        raise exceptions.AccessError(
+            _('The url that this service requested returned an error. Please contact the author of the app. The url it tried to contact was %s') % url
+        )
 
 #----------------------------------------------------------
 # Helpers for proxy
@@ -165,7 +166,7 @@ class IapAccount(models.Model):
         accounts = self.search([
             ('service_name', '=', service_name), 
             '|',
-                ('company_ids', 'in', self.env.context['allowed_company_ids']),
+                ('company_ids', 'in', self.env.companies.ids),
                 ('company_ids','=',False)],
             order='id desc')
         if not accounts:

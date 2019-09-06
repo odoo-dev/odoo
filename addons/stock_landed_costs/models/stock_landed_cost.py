@@ -68,7 +68,7 @@ class LandedCost(models.Model):
         'account.journal', 'Account Journal',
         required=True, states={'done': [('readonly', True)]}, default=lambda self: self._default_account_journal_id())
     company_id = fields.Many2one('res.company', string="Company",
-        related='account_journal_id.company_id', readonly=False)
+        related='account_journal_id.company_id')
     stock_valuation_layer_ids = fields.One2many('stock.valuation.layer', 'stock_landed_cost_id')
     vendor_bill_id = fields.Many2one(
         'account.move', 'Vendor Bill', copy=False, domain=[('type', '=', 'in_invoice')])
@@ -140,6 +140,7 @@ class LandedCost(models.Model):
                         'company_id': cost.company_id.id,
                     })
                     move_vals['stock_valuation_layer_ids'] = [(6, None, [valuation_layer.id])]
+                    linked_layer.remaining_value += cost_to_add
                 # Update the AVCO
                 product = line.move_id.product_id
                 if product.cost_method == 'average' and not float_is_zero(product.quantity_svl, precision_rounding=product.uom_id.rounding):

@@ -85,6 +85,18 @@ def _message_post_helper(res_model, res_id, message, token='', _hash=False, pid=
 
 class PortalChatter(http.Controller):
 
+    def _portal_post_filter_params(self):
+        return ['token', 'hash', 'pid']
+
+    def _portal_post_check_attachments(self, attachment_ids, attachment_tokens):
+        if len(attachment_tokens) != len(attachment_ids):
+            raise UserError(_("An access token must be provided for each attachment."))
+        for (attachment_id, access_token) in zip(attachment_ids, attachment_tokens):
+            try:
+                CustomerPortal._document_check_access(self, 'ir.attachment', attachment_id, access_token)
+            except (AccessError, MissingError):
+                raise UserError(_("The attachment %s does not exist or you do not have the rights to access it.") % attachment_id)
+
     @http.route(['/mail/chatter_post'], type='http', methods=['POST'], auth='public', website=True)
     def portal_chatter_post(self, res_model, res_id, message, redirect=None, attachment_ids='', attachment_tokens='', **kw):
         """Create a new `mail.message` with the given `message` and/or
@@ -98,30 +110,23 @@ class PortalChatter(http.Controller):
 
         res_id = int(res_id)
 
-        attachment_ids = [int(res_id) for res_id in attachment_ids.split(',')]
-        attachment_tokens = attachment_tokens.split(',')
-        if len(attachment_tokens) != len(attachment_ids):
-            raise UserError(_("An access token must be provided for each attachment."))
-        for (attachment_id, access_token) in zip(attachment_ids, attachment_tokens):
-            try:
-                CustomerPortal._document_check_access(self, 'ir.attachment', attachment_id, access_token)
-            except (AccessError, MissingError):
-                raise UserError(_("The attachment %s does not exist or you do not have the rights to access it.") % attachment_id)
+        attachment_ids = [int(attachment_id) for attachment_id in attachment_ids.split(',') if attachment_id]
+        attachment_tokens = [attachment_token for attachment_token in attachment_tokens.split(',') if attachment_token]
+        self._portal_post_check_attachments(attachment_ids, attachment_tokens)
 
         if message or attachment_ids:
             # message is received in plaintext and saved in html
             if message:
                 message = plaintext2html(message)
-            message = _message_post_helper(
-                res_model=res_model,
-                res_id=res_id,
-                token=kw.get('token'),
-                _hash=kw.get('hash'),
-                pid=kw.get('pid'),
-                message=message,
-                send_after_commit=False,
-                attachment_ids=attachment_ids
-            )
+            post_values = {
+                'res_model': res_model,
+                'res_id': res_id,
+                'message': message,
+                'send_after_commit': False,
+                'attachment_ids': attachment_ids,
+            }
+            post_values.update((fname, kw.get(fname)) for fname in self._portal_post_filter_params())
+            message = _message_post_helper(**post_values)
 
         return request.redirect(url)
 

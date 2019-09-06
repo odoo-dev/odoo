@@ -14,19 +14,14 @@ class PurchaseOrder(models.Model):
 
     @api.model
     def _default_picking_type(self):
-        type_obj = self.env['stock.picking.type']
-        company_id = self.env.context.get('company_id') or self.env.company.id
-        types = type_obj.search([('code', '=', 'incoming'), ('warehouse_id.company_id', '=', company_id)])
-        if not types:
-            types = type_obj.search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
-        return types[:1]
+        return self._get_picking_type(self.env.context.get('company_id') or self.env.company.id)
 
     incoterm_id = fields.Many2one('account.incoterms', 'Incoterm', states={'done': [('readonly', True)]}, help="International Commercial Terms are a series of predefined commercial terms used in international transactions.")
 
     picking_count = fields.Integer(compute='_compute_picking', string='Picking count', default=0, store=True)
     picking_ids = fields.Many2many('stock.picking', compute='_compute_picking', string='Receptions', copy=False, store=True)
 
-    picking_type_id = fields.Many2one('stock.picking.type', 'Deliver To', states=Purchase.READONLY_STATES, required=True, default=_default_picking_type,
+    picking_type_id = fields.Many2one('stock.picking.type', 'Deliver To', states=Purchase.READONLY_STATES, required=True, default=_default_picking_type, domain="['|', ('warehouse_id', '=', False), ('warehouse_id.company_id', '=', company_id)]",
         help="This will determine operation type of incoming shipment")
     default_location_dest_id_usage = fields.Selection(related='picking_type_id.default_location_dest_id.usage', string='Destination Location Type',
         help="Technical field used to display the Drop Ship Address", readonly=True)
@@ -52,11 +47,17 @@ class PurchaseOrder(models.Model):
         for order in self:
             if order.picking_ids and all([x.state in ['done', 'cancel'] for x in order.picking_ids]):
                 order.is_shipped = True
+            else:
+                order.is_shipped = False
 
     @api.onchange('picking_type_id')
     def _onchange_picking_type_id(self):
         if self.picking_type_id.default_location_dest_id.usage != 'customer':
             self.dest_address_id = False
+
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        self.picking_type_id = self._get_picking_type(self.company_id.id)
 
     # --------------------------------------------------
     # CRUD
@@ -172,6 +173,13 @@ class PurchaseOrder(models.Model):
         if self.dest_address_id:
             return self.dest_address_id.property_stock_customer.id
         return self.picking_type_id.default_location_dest_id.id
+
+    @api.model
+    def _get_picking_type(self, company_id):
+        picking_type = self.env['stock.picking.type'].search([('code', '=', 'incoming'), ('warehouse_id.company_id', '=', company_id)])
+        if not picking_type:
+            picking_type = self.env['stock.picking.type'].search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
+        return picking_type[:1]
 
     @api.model
     def _prepare_picking(self):

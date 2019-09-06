@@ -13,14 +13,14 @@ class AccountMove(models.Model):
     l10n_latam_internal_type = fields.Selection(
         related='l10n_latam_document_type_id.internal_type', string='L10n Latam Internal Type')
 
-    def get_document_type_sequence(self):
+    def _get_document_type_sequence(self):
         """ Return the match sequences for the given journal and invoice """
         self.ensure_one()
         if self.journal_id.l10n_latam_use_documents and self.l10n_latam_country_code == 'CL':
             res = self.journal_id.l10n_cl_sequence_ids.filtered(
                 lambda x: x.l10n_latam_document_type_id == self.l10n_latam_document_type_id)
             return res
-        return super().get_document_type_sequence()
+        return super()._get_document_type_sequence()
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
@@ -28,12 +28,12 @@ class AccountMove(models.Model):
         if (self.journal_id.l10n_latam_use_documents and
                 self.journal_id.company_id.country_id == self.env.ref('base.cl')):
             domain += [('active', '=', True)]
-            if self.type in {'in_invoice', 'in_refund'}:
+            if self.type in ['in_invoice', 'in_refund']:
                 if self.partner_id.l10n_cl_sii_taxpayer_type == '2':
                     domain += [('code', '=', '71')]
                 return domain
-            journal_sequence_ids = self.journal_id.l10n_cl_sequence_ids.mapped('l10n_latam_document_type_id').ids
-            domain += [('id', 'in', journal_sequence_ids)]
+            document_type_ids = self.journal_id.l10n_cl_sequence_ids.mapped('l10n_latam_document_type_id').ids
+            domain += [('id', 'in', document_type_ids)]
             if self.partner_id.l10n_cl_sii_taxpayer_type == '3':
                 domain += [('code', 'in', {'35', '38', '39', '41'})]
         return domain

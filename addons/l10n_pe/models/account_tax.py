@@ -50,3 +50,11 @@ class AccountTaxTemplate(models.Model):
         help="Follow the UN/ECE 5305 standard from the United Nations Economic Commission for Europe for more "
              "information  http://www.unece.org/trade/untdid/d08a/tred/tred5305.htm"
     )
+
+    def _get_tax_vals(self, company, tax_template_to_tax):
+        val = super()._get_tax_vals(company, tax_template_to_tax)
+        val.update({
+            'l10n_pe_edi_tax_code': self.l10n_pe_edi_tax_code,
+            'l10n_pe_edi_unece_category': self.l10n_pe_edi_unece_category,
+        })
+        return val

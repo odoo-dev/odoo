@@ -16,8 +16,8 @@ class ProductTemplate(models.Model):
         attribute_lines = self.valid_product_template_attribute_line_ids
 
         Attrib = self.env['product.template.attribute.value']
-        first_line_attributes = attribute_lines[0].product_template_value_ids
-        attribute_ids_by_line = [line.product_template_value_ids.ids for line in attribute_lines]
+        first_line_attributes = attribute_lines[0].product_template_value_ids._only_active()
+        attribute_ids_by_line = [line.product_template_value_ids._only_active().ids for line in attribute_lines]
 
         header = [{"name": self.display_name}] + [
             attr._grid_header_cell(
@@ -75,11 +75,11 @@ class ProductTemplateAttributeValue(models.Model):
         :rtype: dict
         """
         header_cell = {
-            'name': '-'.join([attr.name for attr in self]) if self else " "
+            'name': ' • '.join([attr.name for attr in self]) if self else " "
         }  # The " " is to avoid having 'Not available' if the template has only one attribute line.
         extra_price = sum(self.mapped('price_extra')) if display_extra else 0
         if extra_price:
-            sign = '+ ' if self.price_extra > 0 else '- '
+            sign = '+ ' if extra_price > 0 else '- '
             header_cell.update({
                 "price": sign + self.env['ir.qweb.field.monetary'].value_to_html(
                     extra_price, {

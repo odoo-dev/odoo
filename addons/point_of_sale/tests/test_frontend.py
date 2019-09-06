@@ -37,17 +37,19 @@ class TestUi(odoo.tests.HttpCase):
 
         # test an extra price on an attribute
         pear = env.ref('point_of_sale.whiteboard')
+        attribute = env['product.attribute'].create({
+            'name': 'add 2',
+        })
         attribute_value = env['product.attribute.value'].create({
             'name': 'add 2',
-            'attribute_id': env['product.attribute'].create({
-                'name': 'add 2',
-            }).id,
+            'attribute_id': attribute.id,
         })
-        env['product.template.attribute.value'].create({
+        line = env['product.template.attribute.line'].create({
             'product_tmpl_id': pear.product_tmpl_id.id,
-            'price_extra': 2,
-            'product_attribute_value_id': attribute_value.id,
+            'attribute_id': attribute.id,
+            'value_ids': [(6, 0, attribute_value.ids)]
         })
+        line.product_template_value_ids[0].price_extra = 2
 
         fixed_pricelist = env['product.pricelist'].create({
             'name': 'Fixed',
@@ -323,9 +325,9 @@ class TestUi(odoo.tests.HttpCase):
         # this you end up with js, css but no qweb.
         env['ir.module.module'].search([('name', '=', 'point_of_sale')], limit=1).state = 'installed'
 
-        self.start_tour("/pos/web", 'pos_pricelist', login="admin")
+        self.start_tour("/pos/web?config_id=%d" % main_pos_config.id, 'pos_pricelist', login="admin")
 
-        self.start_tour("/pos/web", 'pos_basic_order', login="admin")
+        self.start_tour("/pos/web?config_id=%d" % main_pos_config.id, 'pos_basic_order', login="admin")
 
         for order in env['pos.order'].search([]):
             self.assertEqual(order.state, 'paid', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))

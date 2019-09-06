@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import fields, models, _
 
 
 class StockWarehouse(models.Model):
@@ -107,9 +107,10 @@ class StockWarehouse(models.Model):
             'subcontracting_type_id': {
                 'name': _('Subcontracting'),
                 'code': 'mrp_operation',
-                'use_create_lots': True,
-                'use_existing_lots': True,
-                'sequence': next_sequence + 2
+                'use_create_components_lots': True,
+                'sequence': next_sequence + 2,
+                'sequence_code': 'SBC',
+                'company_id': self.company_id.id,
             },
         })
         return data, max_sequence + 4
@@ -117,7 +118,7 @@ class StockWarehouse(models.Model):
     def _get_sequence_values(self):
         values = super(StockWarehouse, self)._get_sequence_values()
         values.update({
-            'subcontracting_type_id': {'name': self.name + ' ' + _('Sequence subcontracting'), 'prefix': self.code + '/SBC/', 'padding': 5},
+            'subcontracting_type_id': {'name': self.name + ' ' + _('Sequence subcontracting'), 'prefix': self.code + '/SBC/', 'padding': 5, 'company_id': self.company_id.id},
         })
         return values
 
@@ -136,4 +137,3 @@ class StockWarehouse(models.Model):
 
     def _get_subcontracting_location(self):
         return self.company_id.subcontracting_location_id
-

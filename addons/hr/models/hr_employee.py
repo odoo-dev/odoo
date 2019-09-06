@@ -42,7 +42,8 @@ class HrEmployeePrivate(models.Model):
     # private partner
     address_home_id = fields.Many2one(
         'res.partner', 'Address', help='Enter here the private address of the employee, not the one linked to your company.',
-        groups="hr.group_hr_user", tracking=True)
+        groups="hr.group_hr_user", tracking=True,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     is_address_home_a_company = fields.Boolean(
         'The employee address has a company linked',
         compute='_compute_is_address_home_a_company',
@@ -74,7 +75,7 @@ class HrEmployeePrivate(models.Model):
     passport_id = fields.Char('Passport No', groups="hr.group_hr_user", tracking=True)
     bank_account_id = fields.Many2one(
         'res.partner.bank', 'Bank Account Number',
-        domain="[('partner_id', '=', address_home_id)]",
+        domain="[('partner_id', '=', address_home_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         groups="hr.group_hr_user",
         tracking=True,
         help='Employee bank salary account')
@@ -96,9 +97,9 @@ class HrEmployeePrivate(models.Model):
     image_1920 = fields.Image(default=_default_image)
     phone = fields.Char(related='address_home_id.phone', related_sudo=False, string="Private Phone", groups="hr.group_hr_user")
     # employee in company
-    parent_id = fields.Many2one('hr.employee', 'Manager')
+    parent_id = fields.Many2one('hr.employee', 'Manager', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     child_ids = fields.One2many('hr.employee', 'parent_id', string='Direct subordinates')
-    coach_id = fields.Many2one('hr.employee', 'Coach')
+    coach_id = fields.Many2one('hr.employee', 'Coach', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     category_ids = fields.Many2many(
         'hr.employee.category', 'employee_category_rel',
         'emp_id', 'category_id', groups="hr.group_hr_manager",
@@ -126,6 +127,15 @@ class HrEmployeePrivate(models.Model):
         if self.check_access_rights('read', raise_exception=False):
             return super(HrEmployeePrivate, self).name_get()
         return self.env['hr.employee.public'].browse(self.ids).name_get()
+
+    def _read(self, fields):
+        if self.check_access_rights('read', raise_exception=False):
+            return super(HrEmployeePrivate, self)._read(fields)
+
+        res = self.env['hr.employee.public'].browse(self.ids).read(fields)
+        for r in res:
+            record = self.browse(r['id'])
+            record._update_cache({k:v for k,v in r.items() if k in fields}, validate=False)
 
     def read(self, fields, load='_classic_read'):
         if self.check_access_rights('read', raise_exception=False):
@@ -241,7 +251,7 @@ class HrEmployeePrivate(models.Model):
             vals['name'] = vals.get('name', user.name)
         employee = super(HrEmployeePrivate, self).create(vals)
         url = '/web#%s' % url_encode({'action': 'hr.plan_wizard_action', 'active_id': employee.id, 'active_model': 'hr.employee'})
-        employee._message_log(body=_('<b>Congratulations !</b> May I recommand you to setup an <a href="%s">onboarding plan ?</a>') % (url))
+        employee._message_log(body=_('<b>Congratulations!</b> May I recommend you to setup an <a href="%s">onboarding plan?</a>') % (url))
         if employee.department_id:
             self.env['mail.channel'].sudo().search([
                 ('subscription_department_ids', 'in', employee.department_id.id)

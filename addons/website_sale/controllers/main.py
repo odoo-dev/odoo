@@ -622,7 +622,12 @@ class WebsiteSale(http.Controller):
         return partner_id
 
     def values_preprocess(self, order, mode, values):
-        return values
+        # Convert the values for many2one fields to integer since they are used as IDs
+        partner_fields = request.env['res.partner']._fields
+        return {
+            k: (bool(v) and int(v)) if k in partner_fields and partner_fields[k].type == 'many2one' else v
+            for k, v in values.items()
+        }
 
     def values_postprocess(self, order, mode, values, errors, error_msg):
         new_values = {}
@@ -644,7 +649,7 @@ class WebsiteSale(http.Controller):
         if mode[0] == 'new':
             new_values['company_id'] = request.website.company_id.id
 
-        lang = request.lang if request.lang in request.website.mapped('language_ids.code') else None
+        lang = request.lang.code if request.lang.code in request.website.mapped('language_ids.code') else None
         if lang:
             new_values['lang'] = lang
         if mode == ('edit', 'billing') and order.partner_id.type == 'contact':
@@ -972,7 +977,10 @@ class WebsiteSale(http.Controller):
     @http.route('/shop/payment/get_status/<int:sale_order_id>', type='json', auth="public", website=True)
     def payment_get_status(self, sale_order_id, **post):
         order = request.env['sale.order'].sudo().browse(sale_order_id).exists()
-        assert order.id == request.session.get('sale_last_order_id')
+        if order.id != request.session.get('sale_last_order_id'):
+            # either something went wrong or the session is unbound
+            # prevent recalling every 3rd of a second in the JS widget
+            return {}
 
         return {
             'recall': order.get_portal_last_transaction().state == 'pending',
@@ -1063,7 +1071,7 @@ class WebsiteSale(http.Controller):
     # ------------------------------------------------------
 
     @http.route(['/shop/add_product'], type='json', auth="user", methods=['POST'], website=True)
-    def add_product(self, name=None, category=0, **post):
+    def add_product(self, name=None, category=None, **post):
         product = request.env['product.product'].create({
             'name': name or _("New Product"),
             'public_categ_ids': category,

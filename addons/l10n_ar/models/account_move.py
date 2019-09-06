@@ -30,21 +30,24 @@ class AccountMove(models.Model):
 
     # Mostly used on reports
     l10n_ar_afip_concept = fields.Selection(
-        compute='_compute_l10n_ar_afip_concept', selection='get_afip_invoice_concepts', string="AFIP Concept",
+        compute='_compute_l10n_ar_afip_concept', selection='_get_afip_invoice_concepts', string="AFIP Concept",
         help="A concept is suggested regarding the type of the products on the invoice but it is allowed to force a"
         " different type if required.")
     l10n_ar_afip_service_start = fields.Date(string='AFIP Service Start Date', readonly=True, states={'draft': [('readonly', False)]})
     l10n_ar_afip_service_end = fields.Date(string='AFIP Service End Date', readonly=True, states={'draft': [('readonly', False)]})
 
-    def get_afip_invoice_concepts(self):
+    def _get_afip_invoice_concepts(self):
         """ Return the list of values of the selection field. """
         return [('1', 'Products / Definitive export of goods'), ('2', 'Services'), ('3', 'Products and Services'),
                 ('4', '4-Other (export)')]
 
     @api.depends('invoice_line_ids', 'invoice_line_ids.product_id', 'invoice_line_ids.product_id.type', 'journal_id')
     def _compute_l10n_ar_afip_concept(self):
-        for rec in self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.l10n_latam_use_documents):
+        recs_afip = self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.l10n_latam_use_documents)
+        for rec in recs_afip:
             rec.l10n_ar_afip_concept = rec._get_concept()
+        remaining = self - recs_afip
+        remaining.l10n_ar_afip_concept = ''
 
     def _get_concept(self):
         """ Method to get the concept of the invoice considering the type of the products on the invoice """
@@ -71,14 +74,14 @@ class AccountMove(models.Model):
         self.ensure_one()
         domain = super()._get_l10n_latam_documents_domain()
         if self.journal_id.company_id.country_id == self.env.ref('base.ar'):
-            letters = self.journal_id.get_journal_letter(counterpart_partner=self.partner_id.commercial_partner_id)
+            letters = self.journal_id._get_journal_letter(counterpart_partner=self.partner_id.commercial_partner_id)
             domain += ['|', ('l10n_ar_letter', '=', False), ('l10n_ar_letter', 'in', letters)]
-            codes = self.journal_id.get_journal_codes()
+            codes = self.journal_id._get_journal_codes()
             if codes:
                 domain.append(('code', 'in', codes))
         return domain
 
-    def check_argentinian_invoice_taxes(self):
+    def _check_argentinian_invoice_taxes(self):
         _logger.info('Running checks related to argentinian documents')
 
         # check vat on companies thats has it (Responsable inscripto)
@@ -96,26 +99,28 @@ class AccountMove(models.Model):
                 elif purchase_aliquots == 'not_zero' and vat_taxes.tax_group_id.l10n_ar_vat_afip_code == '0':
                     raise UserError(_('On invoice id "%s" you must use VAT taxes different than VAT Not Applicable.')  % inv.id)
 
-    @api.onchange('invoice_date')
-    def set_afip_date(self):
-        for rec in self.filtered('invoice_date'):
-            invoice_date = fields.Datetime.from_string(rec.invoice_date)
-            vals = {}
+    def _set_afip_service_dates(self):
+        for rec in self.filtered(lambda m: m.invoice_date and m.l10n_ar_afip_concept in ['2', '3', '4']):
             if not rec.l10n_ar_afip_service_start:
-                rec.l10n_ar_afip_service_start = invoice_date + relativedelta(day=1)
+                rec.l10n_ar_afip_service_start = rec.invoice_date + relativedelta(day=1)
             if not rec.l10n_ar_afip_service_end:
-                rec.l10n_ar_afip_service_end = invoice_date + relativedelta(day=1, days=-1, months=+1)
+                rec.l10n_ar_afip_service_end = rec.invoice_date + relativedelta(day=1, days=-1, months=+1)
+
+    @api.onchange('invoice_date')
+    def _onchange_invoice_date(self):
+        super()._onchange_invoice_date()
+        self._set_afip_service_dates()
 
     @api.onchange('partner_id')
-    def check_afip_responsibility(self):
+    def _onchange_afip_responsibility(self):
         if self.company_id.country_id == self.env.ref('base.ar') and self.l10n_latam_use_documents and self.partner_id \
            and not self.partner_id.l10n_ar_afip_responsibility_type_id:
             return {'warning': {
-                'title': 'Missing Partner Configuration',
-                'message': 'Please configure the AFIP Responsibility for "%s" in order to continue' % (
+                'title': _('Missing Partner Configuration'),
+                'message': _('Please configure the AFIP Responsibility for "%s" in order to continue') % (
                     self.partner_id.name)}}
 
-    def get_document_type_sequence(self):
+    def _get_document_type_sequence(self):
         """ Return the match sequences for the given journal and invoice """
         self.ensure_one()
         if self.journal_id.l10n_latam_use_documents and self.l10n_latam_country_code == 'AR':
@@ -125,7 +130,7 @@ class AccountMove(models.Model):
             res = self.journal_id.l10n_ar_sequence_ids.filtered(
                 lambda x: x.l10n_latam_document_type_id == self.l10n_latam_document_type_id)
             return res
-        return super().get_document_type_sequence()
+        return super()._get_document_type_sequence()
 
     @api.onchange('partner_id')
     def _onchange_partner_journal(self):
@@ -158,7 +163,7 @@ class AccountMove(models.Model):
 
         # We make validations here and not with a constraint because we want validaiton before sending electronic
         # data on l10n_ar_edi
-        ar_invoices.check_argentinian_invoice_taxes()
+        ar_invoices._check_argentinian_invoice_taxes()
         return super().post()
 
     def _reverse_moves(self, default_values_list=None, cancel=False):

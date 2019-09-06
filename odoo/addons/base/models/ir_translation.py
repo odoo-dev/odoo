@@ -15,7 +15,6 @@ _logger = logging.getLogger(__name__)
 TRANSLATION_TYPE = [
     ('model', 'Model Field'),
     ('model_terms', 'Structured Model Field'),
-    ('selection', 'Selection'),
     ('code', 'Code'),
 ]
 
@@ -122,16 +121,7 @@ class IrTranslationImport(object):
                             WHERE EXCLUDED.value IS NOT NULL AND EXCLUDED.value != '';
                        """ % (self._model_table, self._table))
             count += cr.rowcount
-            cr.execute(""" INSERT INTO %s(name, lang, res_id, src, type, value, module, state, comments)
-                           SELECT name, lang, res_id, src, type, value, module, state, comments
-                           FROM %s
-                           WHERE type = 'selection'
-                           AND noupdate IS NOT TRUE
-                           ON CONFLICT (type, lang, name, md5(src)) WHERE type = 'selection'
-                            DO UPDATE SET (name, lang, res_id, src, type, value, module, state, comments) = (EXCLUDED.name, EXCLUDED.lang, EXCLUDED.res_id, EXCLUDED.src, EXCLUDED.type, EXCLUDED.value, EXCLUDED.module, EXCLUDED.state, EXCLUDED.comments)
-                            WHERE EXCLUDED.value IS NOT NULL AND EXCLUDED.value != '';
-                       """ % (self._model_table, self._table))
-            count += cr.rowcount
+
             cr.execute(""" INSERT INTO %s(name, lang, res_id, src, type, value, module, state, comments)
                            SELECT name, lang, res_id, src, type, value, module, state, comments
                            FROM %s
@@ -204,8 +194,7 @@ class IrTranslation(models.Model):
             self._cr.execute("CREATE UNIQUE INDEX ir_translation_code_unique ON ir_translation (type, lang, md5(src)) WHERE type = 'code'")
         if not tools.index_exists(self._cr, 'ir_translation_model_unique'):
             self._cr.execute("CREATE UNIQUE INDEX ir_translation_model_unique ON ir_translation (type, lang, name, res_id) WHERE type = 'model'")
-        if not tools.index_exists(self._cr, 'ir_translation_selection_unique'):
-            self._cr.execute("CREATE UNIQUE INDEX ir_translation_selection_unique ON ir_translation (type, lang, name, md5(src)) WHERE type = 'selection'")
+
         return res
 
     @api.model
@@ -237,6 +226,16 @@ class IrTranslation(models.Model):
 
     def _modified(self):
         """ Invalidate the ormcache if necessary, depending on the translations ``self``. """
+        # DLE P63: test_views.py
+        for trans in self:
+            if trans.type == 'model_terms' and trans.res_id:
+                model, field = trans.name.split(',')
+                if model in self.env:
+                    model = self.env[model]
+                    if field in model._fields:
+                        field = model._fields[field]
+                        record = model.browse(trans.res_id)
+                        record.modified([field.name])
         for trans in self:
             if trans.type != 'model' or trans.name.split(',')[0] in self.CACHED_MODELS:
                 self.clear_caches()
@@ -469,6 +468,19 @@ class IrTranslation(models.Model):
         fields = self.env['ir.model.fields'].sudo().search([('model', '=', model_name)])
         return {field.name: field.help for field in fields}
 
+    @api.model
+    @tools.ormcache_context('model_name', 'field_name', keys=('lang',))
+    def get_field_selection(self, model_name, field_name):
+        """ Return the translation of a field's selection in the context's language.
+        Note that the result contains the available translations only.
+
+        :param model_name: the name of the field's model
+        :param field_name: the name of the field
+        :return: the fields' selection as a list
+        """
+        field = self.env['ir.model.fields']._get(model_name, field_name)
+        return [(sel.value, sel.name) for sel in field.selection_ids]
+
     def check(self, mode):
         """ Check access rights of operation ``mode`` on ``self`` for the
         current user. Raise an AccessError in case conditions are not met.
@@ -528,6 +540,8 @@ class IrTranslation(models.Model):
         records = super(IrTranslation, self.sudo()).create(vals_list).with_env(self.env)
         records.check('create')
         records._modified()
+        # DLE P62: `test_translate.py`, `test_sync`
+        self.flush()
         return records
 
     def write(self, vals):
@@ -539,12 +553,28 @@ class IrTranslation(models.Model):
         result = super(IrTranslation, self.sudo()).write(vals)
         self.check('write')
         self._modified()
+        # DLE P62: `test_translate.py`, `test_sync`
+        # when calling `flush` with a field list, if there is no value for one of these fields,
+        # the flush to database is not done.
+        # this causes issues when changing the src/value of a translation, as when we read, we ask the flush,
+        # but its not really the field which is in the towrite values, but its translation
+        self.flush()
         return result
 
     def unlink(self):
         self.check('unlink')
         self._modified()
         return super(IrTranslation, self.sudo()).unlink()
+
+    @api.model
+    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+        # DLE P67, `test_new_fields.py`, `test_80_copy`
+        # When assigning a translation to a field
+        # e.g. email.with_context(lang='fr_FR').label = "bonjour"
+        # and then search on translations for this translation, must flush as the translation has not yet been written in database
+        if any(self.env[model]._fields[field].translate for model, ids in self.env.all.towrite.items() for record_id, fields in ids.items() for field in fields):
+            self.flush()
+        return super(IrTranslation, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
 
     @api.model
     def insert_missing(self, field, records):
@@ -802,6 +832,7 @@ class IrTranslation(models.Model):
         :return: action definition to open the list of available translations
         """
         fields = self.env['ir.model.fields'].search([('model', '=', model_name)])
+        selection_ids = [field.selection_ids.ids for field in fields if field.ttype == 'selection']
         view = self.env.ref("base.view_translation_tree", False) or self.env['ir.ui.view']
         return {
             'name': _("Technical Translations"),
@@ -810,12 +841,13 @@ class IrTranslation(models.Model):
             'res_model': 'ir.translation',
             'type': 'ir.actions.act_window',
             'domain': [
-                '|',
-                    '&', ('type', '=', 'model'),
+                '&',
+                    ('type', '=', 'model'),
+                    '|',
                         '&', ('res_id', 'in', fields.ids),
                              ('name', 'like', 'ir.model.fields,'),
-                    '&', ('type', '=', 'selection'),
-                         ('name', 'like', model_name+','),
+                        '&', ('res_id', 'in', selection_ids),
+                             ('name', 'like', 'ir.model.fields.selection,')
             ],
         }
 

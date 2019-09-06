@@ -17,10 +17,11 @@ var AbstractField = require('web.AbstractField');
 var basicFields = require('web.basic_fields');
 var concurrency = require('web.concurrency');
 var ControlPanelView = require('web.ControlPanelView');
-var dialogs = require('web.view_dialogs');
 var core = require('web.core');
 var data = require('web.data');
 var Dialog = require('web.Dialog');
+var dialogs = require('web.view_dialogs');
+var dom = require('web.dom');
 var KanbanRecord = require('web.KanbanRecord');
 var KanbanRenderer = require('web.KanbanRenderer');
 var ListRenderer = require('web.ListRenderer');
@@ -857,6 +858,8 @@ var FieldX2Many = AbstractField.extend({
         toggle_column_order: '_onToggleColumnOrder',
         activate_next_widget: '_onActiveNextWidget',
         navigation_move: '_onNavigationMove',
+        save_optional_fields: '_onSaveOrLoadOptionalFields',
+        load_optional_fields: '_onSaveOrLoadOptionalFields',
     }),
 
     // We need to trigger the reset on every changes to be aware of the parent changes
@@ -902,6 +905,22 @@ var FieldX2Many = AbstractField.extend({
      */
     start: function () {
         return this._renderControlPanel().then(this._super.bind(this));
+    },
+    /**
+     * For the list renderer to properly work, it must know if it is in the DOM,
+     * and be notified when it is attached to the DOM.
+     */
+    on_attach_callback: function () {
+        this.isInDOM = true;
+        if (this.renderer) {
+            this.renderer.on_attach_callback();
+        }
+    },
+    /**
+     * For the list renderer to properly work, it must know if it is in the DOM.
+     */
+    on_detach_callback: function () {
+        this.isInDOM = false;
     },
 
     //--------------------------------------------------------------------------
@@ -1052,6 +1071,7 @@ var FieldX2Many = AbstractField.extend({
             this.currentColInvisibleFields = this._evalColumnInvisibleFields();
             return this.renderer.updateState(this.value, {
                 columnInvisibleFields: this.currentColInvisibleFields,
+                keepWidths: true,
             }).then(function () {
                 self.pager.updateState({ size: self.value.count });
             });
@@ -1094,7 +1114,16 @@ var FieldX2Many = AbstractField.extend({
         this.renderer = new Renderer(this, this.value, rendererParams);
 
         this.$el.addClass('o_field_x2many o_field_x2many_' + viewType);
-        return this.renderer ? this.renderer.appendTo(this.$el) : this._super();
+        if (this.renderer) {
+            return this.renderer.appendTo(document.createDocumentFragment()).then(function () {
+                dom.append(self.$el, self.renderer.$el, {
+                    in_DOM: self.isInDOM,
+                    callbacks: [{widget: self.renderer}],
+                });
+            });
+        } else {
+            return this._super();
+        }
     },
     /**
      * Instanciates a control panel with the appropriate buttons and a pager.
@@ -1387,6 +1416,18 @@ var FieldX2Many = AbstractField.extend({
                 },
             });
         });
+    },
+    /**
+     * Add necessary key parts for the basic controller to compute the local
+     * storage key. The event will be properly handled by the basic controller.
+     *
+     * @param {OdooEvent} ev
+     * @private
+     */
+    _onSaveOrLoadOptionalFields: function (ev) {
+        ev.data.keyParts.relationalField = this.name;
+        ev.data.keyParts.subViewId = this.view.view_id;
+        ev.data.keyParts.subViewType = this.view.type;
     },
     /**
      * Forces a resequencing of the records.
@@ -2226,7 +2267,7 @@ var FieldMany2ManyTagsAvatar = FieldMany2ManyTags.extend({
     _getRenderTagsContext: function () {
         var result = this._super.apply(this, arguments);
         result.avatarModel = this.nodeOptions.avatarModel || this.field.relation;
-        result.avatarField = this.nodeOptions.avatarField || 'image';
+        result.avatarField = this.nodeOptions.avatarField || 'image_64';
         return result;
     },
 });

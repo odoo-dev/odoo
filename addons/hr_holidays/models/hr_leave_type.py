@@ -61,7 +61,7 @@ class HolidaysType(models.Model):
         compute='_compute_leaves', string='Remaining Time Off',
         help='Maximum Time Off Allowed - Time Off Already Taken')
     virtual_remaining_leaves = fields.Float(
-        compute='_compute_leaves', string='Virtual Remaining Time Off',
+        compute='_compute_leaves', search='_search_virtual_remaining_leaves' ,string='Virtual Remaining Time Off',
         help='Maximum Time Off Allowed - Time Off Already Taken - Time Off Waiting Approval')
     group_days_allocation = fields.Float(
         compute='_compute_group_days_allocation', string='Days Allocated')
@@ -69,6 +69,7 @@ class HolidaysType(models.Model):
         compute='_compute_group_days_leave', string='Group Time Off')
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     responsible_id = fields.Many2one('res.users', 'Responsible',
+        domain=lambda self: [('groups_id', 'in', self.env.ref('hr_holidays.group_hr_holidays_user').id)],
         help="This user will be responsible for approving this type of times off"
         "This is only used when validation is 'hr' or 'both'",)
     validation_type = fields.Selection([
@@ -153,6 +154,30 @@ class HolidaysType(models.Model):
                     valid_leave.append(leave)
 
         return [('id', 'in', valid_leave)]
+
+    def _search_virtual_remaining_leaves(self, operator, value):
+        value = float(value)
+        leave_types = self.env['hr.leave.type'].search([])
+        valid_leave_types = self.env['hr.leave.type']
+
+        for leave_type in leave_types:
+            if leave_type.allocation_type != 'no':
+                if operator == '>' and leave_type.virtual_remaining_leaves > value:
+                    valid_leave_types |= leave_type
+                elif operator == '<' and leave_type.virtual_remaining_leaves < value:
+                    valid_leave_types |= leave_type
+                elif operator == '>=' and leave_type.virtual_remaining_leaves >= value:
+                    valid_leave_types |= leave_type
+                elif operator == '<=' and leave_type.virtual_remaining_leaves <= value:
+                    valid_leave_types |= leave_type
+                elif operator == '=' and leave_type.virtual_remaining_leaves == value:
+                    valid_leave_types |= leave_type
+                elif operator == '!=' and leave_type.virtual_remaining_leaves != value:
+                    valid_leave_types |= leave_type
+            else:
+                valid_leave_types |= leave_type
+
+        return [('id', 'in', valid_leave_types.ids)]
 
     def get_days(self, employee_id):
         # need to use `dict` constructor to create a dict per id

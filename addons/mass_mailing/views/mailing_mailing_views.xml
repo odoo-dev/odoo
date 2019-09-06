@@ -6,21 +6,18 @@
             <field name="model">mailing.mailing</field>
             <field name="arch" type="xml">
                <search string="Mailings">
-                    <field name="name" string="Mailings"/>
-                    <field name="mailing_type" invisible="1"/>
-                    <field name="campaign_id"/>
+                    <field name="name" string="Mailing" filter_domain="['|', ('name', 'ilike', self), ('subject', 'ilike', self)]"/>
+                    <field name="campaign_id" string="Campaign"/>
                     <filter string="My Mailings" name="assigned_to_me"
                             domain="[('user_id', '=', uid)]"
                             help="Mailings that are assigned to me"/>
-                    <filter name="inactive" string="Archived" domain="[('active','=',False)]"/>
+                    <separator/>
+                    <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
                     <group expand="0" string="Group By">
-                        <filter string="Status" name="group_state"
-                            context="{'group_by': 'state'}"/>
-                        <filter string="Sent By" name="sent_by" domain="[]"
-                            context="{'group_by':'email_from'}"/>
+                        <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                        <filter string="Sent By" name="sent_by" domain="[]" context="{'group_by': 'email_from'}"/>
                         <separator/>
-                        <filter string="Sent Period" name="sent_date"
-                            domain="[]" context="{'group_by':'sent_date'}"/>
+                        <filter string="Sent Period" name="sent_date" domain="[]" context="{'group_by': 'sent_date'}"/>
                     </group>
                 </search>
             </field>
@@ -238,7 +235,7 @@
                         <t t-name="kanban-box">
                             <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_kanban_mass_mailing">
                                 <div class="o_dropdown_kanban dropdown" t-if="!selection_mode">
-                                    <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
+                                    <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" data-display="static" aria-label="Dropdown menu" title="Dropdown menu">
                                         <span class="fa fa-ellipsis-v"/>
                                     </a>
                                     <div class="dropdown-menu" role="menu">

@@ -321,6 +321,8 @@ actual arch.
     @api.depends('write_date')
     def _compute_model_data_id(self):
         # get the first ir_model_data record corresponding to self
+        for view in self:
+            view.model_data_id = False
         domain = [('model', '=', 'ir.ui.view'), ('res_id', 'in', self.ids)]
         for data in self.env['ir.model.data'].sudo().search_read(domain, ['res_id'], order='id desc'):
             view = self.browse(data['res_id'])
@@ -374,6 +376,8 @@ actual arch.
         # Any exception raised below will cause a transaction rollback.
         self = self.with_context(check_field_names=True)
         for view in self:
+            if not view.arch:
+                continue
             view_arch = etree.fromstring(view.arch.encode('utf-8'))
             view._valid_inheritance(view_arch)
             view_def = view.read_combined(['arch'])
@@ -610,7 +614,7 @@ actual arch.
         return specs_tree
 
     @api.model
-    def apply_inheritance_specs(self, source, specs_tree, inherit_id):
+    def apply_inheritance_specs(self, source, specs_tree, inherit_id, pre_locate=lambda s: True):
         """ Apply an inheriting view (a descendant of the base view)
 
         Apply to a source architecture all the spec nodes (i.e. nodes
@@ -620,16 +624,19 @@ actual arch.
         :param Element source: a parent architecture to modify
         :param Elepect specs_tree: a modifying architecture in an inheriting view
         :param inherit_id: the database id of specs_arch
+        :param (optional) pre_locate: function that is execute before locating a node.
+                                        This function receives an arch as argument.
         :return: a modified source where the specs are applied
         :rtype: Element
         """
         # Queue of specification nodes (i.e. nodes describing where and
         # changes to apply to some parent architecture).
         try:
-            source = apply_inheritance_specs(source, specs_tree)
+            source = apply_inheritance_specs(source, specs_tree,
+                                             inherit_branding=self._context.get('inherit_branding'),
+                                             pre_locate=pre_locate)
         except ValueError as e:
             self.raise_view_error(str(e), inherit_id)
-
         return source
 
     @api.model
@@ -808,7 +815,7 @@ actual arch.
             field = Model._fields.get(node.get('name'))
             if field:
                 if field.type != 'many2one':
-                    self.raise_view_error(_('groupby can only target many2one (%(field)s') % dict(field=field.name), view_id)
+                    self.raise_view_error(_("'groupby' tags can only target many2one (%(field)s)") % dict(field=field.name), view_id)
                 attrs = fields.setdefault(node.get('name'), {})
                 children = False
                 # move all children nodes into a new node <groupby>
@@ -1096,6 +1103,11 @@ actual arch.
                     if child.get('data-oe-xpath'):
                         # injected by view inheritance, skip otherwise
                         # generated xpath is incorrect
+                        # Also, if a node is known to have been replaced during applying xpath
+                        # increment its index to compute an accurate xpath for susequent nodes
+                        replaced_node_tag = child.attrib.pop('meta-oe-xpath-replacing', None)
+                        if replaced_node_tag:
+                            indexes[replaced_node_tag] += 1
                         self.distribute_branding(child)
                     else:
                         indexes[child.tag] += 1

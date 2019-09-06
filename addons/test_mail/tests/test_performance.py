@@ -341,6 +341,8 @@ class TestHeavyMailPerformance(BaseMailPerformance):
             self.env.ref('mail.mt_comment').id,
             self.env.ref('test_mail.st_mail_test_child_full').id]
         )
+        # `test_complex_mail_mail_send`
+        self.umbrella.flush()
 
     @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     @users('__system__', 'emp')
@@ -459,7 +461,7 @@ class TestHeavyMailPerformance(BaseMailPerformance):
             'user_id': self.env.uid,
         })
         self.assertEqual(rec.message_partner_ids, self.partners | self.env.user.partner_id)
-        with self.assertQueryCount(__system__=51, emp=53):  # com runbot: 51 - 53 // test_mail only: 51 - 53
+        with self.assertQueryCount(__system__=52, emp=53):  # com runbot: 51 - 53 // test_mail only: 51 - 53
             rec.write({'user_id': self.user_portal.id})
         self.assertEqual(rec.message_partner_ids, self.partners | self.env.user.partner_id | self.user_portal.partner_id)
         # write tracking message

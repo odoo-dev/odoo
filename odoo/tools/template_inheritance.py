@@ -74,7 +74,7 @@ def locate_node(arch, spec):
     return None
 
 
-def apply_inheritance_specs(source, specs_tree):
+def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_locate=lambda s: True):
     """ Apply an inheriting view (a descendant of the base view)
 
     Apply to a source architecture all the spec nodes (i.e. nodes
@@ -82,6 +82,9 @@ def apply_inheritance_specs(source, specs_tree):
     architecture) given by an inheriting view.
 
     :param Element source: a parent architecture to modify
+    :param pre_locate: function that is executed before locating a node.
+                        This function receives an arch as argument.
+                        This is required by studio to properly handle group_ids.
     :return: a modified source where the specs are applied
     :rtype: Element
     """
@@ -99,6 +102,7 @@ def apply_inheritance_specs(source, specs_tree):
                 _("Invalid specification for moved nodes: '%s'") %
                 etree.tostring(spec)
             )
+        pre_locate(spec)
         to_extract = locate_node(source, spec)
         if to_extract is not None:
             remove_element(to_extract)
@@ -116,6 +120,7 @@ def apply_inheritance_specs(source, specs_tree):
         if spec.tag == 'data':
             specs += [c for c in spec]
             continue
+        pre_locate(spec)
         node = locate_node(source, spec)
         if node is not None:
             pos = spec.get('position', 'inside')
@@ -126,9 +131,19 @@ def apply_inheritance_specs(source, specs_tree):
                 if node.getparent() is None:
                     source = copy.deepcopy(spec[0])
                 else:
+                    replaced_node_tag = None
                     for child in spec:
                         if child.get('position') == 'move':
                             child = extract(child)
+                        if inherit_branding and not replaced_node_tag and child.tag is not etree.Comment:
+                            # To make a correct branding, we need to
+                            # - know exactly which node has been replaced
+                            # - store it before anything else has altered the Tree
+                            # Do it exactly here :D
+                            child.set('meta-oe-xpath-replacing', node.tag)
+                            # We just store the replaced node tag on the first
+                            # child of the xpath replacing it
+                            replaced_node_tag = node.tag
                         node.addprevious(child)
                     node.getparent().remove(node)
             elif pos == 'attributes':

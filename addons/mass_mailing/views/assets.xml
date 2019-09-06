@@ -24,17 +24,12 @@
     </template>
 
     <template id="assets_mail_themes_edition"> <!-- maybe to remove and convert into a field dumy with attr invisible if the template is not selected -->
-        <t t-call="web._assets_helpers">
-            <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg_variables.scss"/>
-        </t>
+        <t t-call="web._assets_helpers"/>
         <link rel="stylesheet" type="text/scss" href="/mass_mailing/static/src/scss/mass_mailing.ui.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/webclient.scss"/>
     </template>
 
     <template id="iframe_css_assets_edit">
-        <t t-call-assets="web.assets_common" t-js="false"/>
-        <t t-call-assets="web.assets_frontend" t-js="false"/>
-        <t t-call-assets="web_editor.assets_wysiwyg" t-js="false"/>
         <t t-call-assets="mass_mailing.assets_mail_themes" t-js="false"/>
         <t t-call-assets="mass_mailing.assets_mail_themes_edition" t-js="false"/>
     </template>

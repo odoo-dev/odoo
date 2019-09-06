@@ -143,13 +143,13 @@ class SaleOrder(models.Model):
     remaining_validity_days = fields.Integer(compute='_compute_remaining_validity_days', string="Remaining Days Before Expiration")
     create_date = fields.Datetime(string='Creation Date', readonly=True, index=True, help="Date on which sales order is created.")
     user_id = fields.Many2one('res.users', string='Salesperson', index=True, tracking=2, default=lambda self: self.env.user)
-    partner_id = fields.Many2one('res.partner', string='Customer', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, required=True, change_default=True, index=True, tracking=1, help="You can find a customer from their name, email, tax ID or reference.")
-    partner_invoice_id = fields.Many2one('res.partner', string='Invoice Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'sale': [('readonly', False)]}, help="Invoice address for current sales order.")
-    partner_shipping_id = fields.Many2one('res.partner', string='Delivery Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'sale': [('readonly', False)]}, help="Delivery address for current sales order.")
+    partner_id = fields.Many2one('res.partner', string='Customer', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, required=True, change_default=True, index=True, tracking=1, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="You can find a customer from their name, email, tax ID or reference.")
+    partner_invoice_id = fields.Many2one('res.partner', string='Invoice Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'sale': [('readonly', False)]}, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="Invoice address for current sales order.")
+    partner_shipping_id = fields.Many2one('res.partner', string='Delivery Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'sale': [('readonly', False)]}, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="Delivery address for current sales order.")
 
-    pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Pricelist for current order. If you change the pricelist, only new lines will consider this pricelist.")
+    pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="Pricelist for current order. If you change the pricelist, only new lines will consider this pricelist.")
     currency_id = fields.Many2one("res.currency", related='pricelist_id.currency_id', string="Currency", readonly=True, required=True)
-    analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="The analytic account related to a sales order.", copy=False)
+    analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="The analytic account related to a sales order.", copy=False)
 
     order_line = fields.One2many('sale.order.line', 'order_id', string='Order Lines', states={'cancel': [('readonly', True)], 'done': [('readonly', True)]}, copy=True, auto_join=True)
 
@@ -170,22 +170,23 @@ class SaleOrder(models.Model):
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
     currency_rate = fields.Float("Currency Rate", compute='_compute_currency_rate', compute_sudo=True, store=True, digits=(12, 6), readonly=True, help='The rate of the currency to the currency of rate 1 applicable at the date of the order')
 
-    payment_term_id = fields.Many2one('account.payment.term', string='Payment Terms', help="Payment terms applies to all invoices issued from this order.")
-    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', help=" Fiscal positions are used to adapt taxes and accounts for particular customers or sales orders/invoices. The default value comes from the customer.")
+    payment_term_id = fields.Many2one('account.payment.term', string='Payment Terms', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="Payment terms applies to all invoices issued from this order.")
+    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', domain="[('company_id', '=', company_id)]", help=" Fiscal positions are used to adapt taxes and accounts for particular customers or sales orders/invoices. The default value comes from the customer.")
     company_id = fields.Many2one('res.company', 'Company', required=True, default=lambda self: self.env.company)
-    team_id = fields.Many2one('crm.team', 'Sales Team', change_default=True, default=_get_default_team)
+    team_id = fields.Many2one('crm.team', 'Sales Team', change_default=True, default=_get_default_team, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
 
     signature = fields.Binary('Signature', help='Signature received through the portal.', copy=False, attachment=True)
     signed_by = fields.Char('Signed By', help='Name of the person that signed the SO.', copy=False)
     signed_on = fields.Datetime('Signed On', help='Date of the signature.', copy=False)
 
     commitment_date = fields.Datetime('Commitment Date',
-        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
-        copy=False, readonly=True,
-        help="This is the delivery date promised to the customer. If set, the delivery order "
-             "will be scheduled based on this date rather than product lead times.")
+                                      states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+                                      copy=False, readonly=True,
+                                      help="This is the delivery date promised to the customer. "
+                                           "If set, the delivery order will be scheduled based on "
+                                           "this date rather than product lead times.")
     expected_date = fields.Datetime("Expected Date", compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
-        help="Delivery date you can promise to the customer, computed from product lead times and from the shipping policy of the order.")
+        help="Delivery date you can promise to the customer, computed from the minimum lead time of the order lines.")
     amount_undiscounted = fields.Float('Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
 
     type_name = fields.Char('Type Name', compute='_compute_type_name')
@@ -241,6 +242,8 @@ class SaleOrder(models.Model):
                 dates_list.append(dt)
             if dates_list:
                 order.expected_date = fields.Datetime.to_string(min(dates_list))
+            else:
+                order.expected_date = False
 
     def _compute_remaining_validity_days(self):
         for record in self:
@@ -442,7 +445,7 @@ class SaleOrder(models.Model):
                     ['|', ('name', operator, name), ('partner_id.name', operator, name)]
                 ])
                 order_ids = self._search(domain, limit=limit, access_rights_uid=name_get_uid)
-                return self.browse(order_ids).name_get()
+                return models.lazy_name_get(self.browse(order_ids).with_user(name_get_uid))
         return super(SaleOrder, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     def _prepare_invoice(self):
@@ -524,7 +527,7 @@ class SaleOrder(models.Model):
                     continue
                 if line.qty_to_invoice > 0 or (line.qty_to_invoice < 0 and final):
                     if pending_section:
-                        invoice_vals.append((0, 0, pending_section._prepare_invoice_line()))
+                        invoice_vals['invoice_line_ids'].append((0, 0, pending_section._prepare_invoice_line()))
                         pending_section = None
                 invoice_vals['invoice_line_ids'].append((0, 0, line._prepare_invoice_line()))
 
@@ -693,18 +696,28 @@ class SaleOrder(models.Model):
 
     def _get_forbidden_state_confirm(self):
         return {'done', 'cancel'}
+    
+    def _prepare_analytic_account_data(self, prefix=None):
+        """
+        Prepare method for analytic account data
+
+        :param prefix: The prefix of the to-be-created analytic account name
+        :type prefix: string
+        :return: dictionary of value for new analytic account creation
+        """
+        name = self.name
+        if prefix:
+            name = prefix + ": " + self.name
+        return {
+            'name': name,
+            'code': self.client_order_ref,
+            'company_id': self.company_id.id,
+            'partner_id': self.partner_id.id
+        }
 
     def _create_analytic_account(self, prefix=None):
         for order in self:
-            name = order.name
-            if prefix:
-                name = prefix + ": " + order.name
-            analytic = self.env['account.analytic.account'].create({
-                'name': name,
-                'code': order.client_order_ref,
-                'company_id': order.company_id.id,
-                'partner_id': order.partner_id.id
-            })
+            analytic = self.env['account.analytic.account'].create(order._prepare_analytic_account_data(prefix))
             order.analytic_account_id = analytic
 
     def _amount_by_group(self):
@@ -995,7 +1008,8 @@ class SaleOrderLine(models.Model):
         for line in self:
             fpos = line.order_id.fiscal_position_id or line.order_id.partner_id.property_account_position_id
             # If company_id is set, always filter taxes by the company
-            taxes = line.product_id.taxes_id.filtered(lambda r: not line.company_id or r.company_id == line.company_id)
+            line_company_id = line.company_id or line.order_id.company_id
+            taxes = line.product_id.taxes_id.filtered(lambda r: not line_company_id or r.company_id == line_company_id)
             line.tax_id = fpos.map_tax(taxes, line.product_id, line.order_id.partner_shipping_id) if fpos else taxes
 
     @api.model
@@ -1059,7 +1073,7 @@ class SaleOrderLine(models.Model):
 
     def write(self, values):
         if 'display_type' in values and self.filtered(lambda line: line.display_type != values.get('display_type')):
-            raise UserError("You cannot change the type of a sale order line. Instead you should delete the current line and create a new line of the proper type.")
+            raise UserError(_("You cannot change the type of a sale order line. Instead you should delete the current line and create a new line of the proper type."))
 
         if 'product_uom_qty' in values:
             precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
@@ -1111,16 +1125,11 @@ class SaleOrderLine(models.Model):
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
     product_uom = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True)
-    product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'sale_order_line_id', string='User entered custom product attribute values')
+    product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'sale_order_line_id', string="Custom Values")
 
     # M2M holding the values of product.attribute with create_variant field set to 'no_variant'
     # It allows keeping track of the extra_price associated to those attribute values and add them to the SO line description
-    # Note: If the attributes are changed on the template, some or all records
-    # in `product_no_variant_attribute_value_ids` will be removed here, even
-    # from existing or locked sales order lines. Thus this field can only be
-    # relied on initially, but it cannot be used to recompute anything later
-    # because the result might be different then.
-    product_no_variant_attribute_value_ids = fields.Many2many('product.template.attribute.value', string='Product attribute values that do not create variants')
+    product_no_variant_attribute_value_ids = fields.Many2many('product.template.attribute.value', string="Extra Values", ondelete='restrict')
 
     qty_delivered_method = fields.Selection([
         ('manual', 'Manual'),
@@ -1163,7 +1172,7 @@ class SaleOrderLine(models.Model):
     ], related='order_id.state', string='Order Status', readonly=True, copy=False, store=True, default='draft')
 
     customer_lead = fields.Float(
-        'Delivery Lead Time', required=True, default=0.0,
+        'Lead Time', required=True, default=0.0,
         help="Number of days between the order confirmation and the shipping of the products to the customer")
 
     display_type = fields.Selection([
@@ -1346,7 +1355,7 @@ class SaleOrderLine(models.Model):
         ]
         if no_variant_attributes_price_extra:
             product = product.with_context(
-                no_variant_attributes_price_extra=no_variant_attributes_price_extra
+                no_variant_attributes_price_extra=tuple(no_variant_attributes_price_extra)
             )
 
         if self.order_id.pricelist_id.discount_policy == 'with_discount':
@@ -1366,15 +1375,15 @@ class SaleOrderLine(models.Model):
     def product_id_change(self):
         if not self.product_id:
             return
-
+        valid_values = self.product_id.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids
         # remove the is_custom values that don't belong to this template
         for pacv in self.product_custom_attribute_value_ids:
-            if pacv.attribute_value_id not in self.product_id.product_tmpl_id.valid_product_attribute_value_ids:
+            if pacv.custom_product_template_attribute_value_id not in valid_values:
                 self.product_custom_attribute_value_ids -= pacv
 
         # remove the no_variant attributes that don't belong to this template
         for ptav in self.product_no_variant_attribute_value_ids:
-            if ptav.product_attribute_value_id not in self.product_id.product_tmpl_id.valid_product_attribute_value_ids:
+            if ptav._origin not in valid_values:
                 self.product_no_variant_attribute_value_ids -= ptav
 
         vals = {}
@@ -1571,10 +1580,6 @@ class SaleOrderLine(models.Model):
         itself is not sufficient to create the description: we need to add
         information about those special attributes and values.
 
-        See note about `product_no_variant_attribute_value_ids` above the field
-        definition: this method is not reliable to recompute the description at
-        a later time, it should only be used initially.
-
         :return: the description related to special variant attributes/values
         :rtype: string
         """
@@ -1583,19 +1588,15 @@ class SaleOrderLine(models.Model):
 
         name = "\n"
 
-        product_attribute_with_is_custom = self.product_custom_attribute_value_ids.mapped('attribute_value_id.attribute_id')
+        custom_values = self.product_custom_attribute_value_ids.custom_product_template_attribute_value_id
 
         # display the no_variant attributes, except those that are also
         # displayed by a custom (avoid duplicate)
-        for no_variant_attribute_value in self.product_no_variant_attribute_value_ids.filtered(
-            lambda ptav: ptav.attribute_id not in product_attribute_with_is_custom
-        ):
-            name += "\n" + no_variant_attribute_value.attribute_id.name + ': ' + no_variant_attribute_value.name
+        for ptav in (self.product_no_variant_attribute_value_ids - custom_values):
+            name += "\n" + ptav.display_name
 
         # display the is_custom values
         for pacv in self.product_custom_attribute_value_ids:
-            name += "\n" + pacv.attribute_value_id.attribute_id.name + \
-                ': ' + pacv.attribute_value_id.name + \
-                ': ' + (pacv.custom_value or '').strip()
+            name += "\n" + pacv.display_name
 
         return name

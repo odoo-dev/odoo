@@ -173,8 +173,10 @@ class Groups(models.Model):
                 raise UserError(_('The name of the group can not start with "-"'))
         # invalidate caches before updating groups, since the recomputation of
         # field 'share' depends on method has_group()
-        self.env['ir.model.access'].call_cache_clearing_methods()
-        self.env['res.users'].has_group.clear_cache(self.env['res.users'])
+        # DLE P139
+        if self.ids:
+            self.env['ir.model.access'].call_cache_clearing_methods()
+            self.env['res.users'].has_group.clear_cache(self.env['res.users'])
         return super(Groups, self).write(vals)
 
 
@@ -372,10 +374,10 @@ class Users(models.Model):
     def onchange_parent_id(self):
         return self.partner_id.onchange_parent_id()
 
-    def _read_from_database(self, field_names, inherited_field_names=[]):
-        super(Users, self)._read_from_database(field_names, inherited_field_names)
+    def _read(self, fields):
+        super(Users, self)._read(fields)
         canwrite = self.check_access_rights('write', raise_exception=False)
-        if not canwrite and set(USER_PRIVATE_FIELDS).intersection(field_names):
+        if not canwrite and set(USER_PRIVATE_FIELDS).intersection(fields):
             for record in self:
                 for f in USER_PRIVATE_FIELDS:
                     try:
@@ -439,9 +441,7 @@ class Users(models.Model):
     def create(self, vals_list):
         users = super(Users, self).create(vals_list)
         for user in users:
-            user.partner_id.active = user.active
-            if user.partner_id.company_id:
-                user.partner_id.write({'company_id': user.company_id.id})
+            user.partner_id.write({'company_id': user.company_id.id, 'active': user.active})
         return users
 
     def write(self, values):
@@ -475,7 +475,9 @@ class Users(models.Model):
             self.env['ir.default'].clear_caches()
 
         # clear caches linked to the users
-        if 'groups_id' in values:
+        if self.ids and 'groups_id' in values:
+            # DLE P139: Calling invalidate_cache on a new, well you lost everything as you wont be able to take it back from the cache
+            # `test_00_equipment_multicompany_user`
             self.env['ir.model.access'].call_cache_clearing_methods()
             self.env['ir.rule'].clear_caches()
             self.has_group.clear_cache(self)
@@ -861,7 +863,7 @@ class Users(models.Model):
         cfg = self.env['ir.config_parameter'].sudo()
         min_failures = int(cfg.get_param('base.login_cooldown_after', 5))
         if min_failures == 0:
-            return True
+            return False
 
         delay = int(cfg.get_param('base.login_cooldown_duration', 60))
         return failures >= min_failures and (datetime.datetime.now() - previous) < datetime.timedelta(seconds=delay)

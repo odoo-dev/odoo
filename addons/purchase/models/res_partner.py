@@ -18,12 +18,15 @@ class res_partner(models.Model):
             domain=[('partner_id', 'in', all_partners.ids)],
             fields=['partner_id'], groupby=['partner_id']
         )
+        partners = self.browse()
         for group in purchase_order_groups:
             partner = self.browse(group['partner_id'][0])
             while partner:
                 if partner in self:
                     partner.purchase_order_count += group['partner_id_count']
+                    partners |= partner
                 partner = partner.parent_id
+        (self - partners).purchase_order_count = 0
 
     def _compute_supplier_invoice_count(self):
         # retrieve all children partners and prefetch 'parent_id' on them
@@ -35,12 +38,15 @@ class res_partner(models.Model):
                     ('type', 'in', ('in_invoice', 'in_refund'))],
             fields=['partner_id'], groupby=['partner_id']
         )
+        partners = self.browse()
         for group in supplier_invoice_groups:
             partner = self.browse(group['partner_id'][0])
             while partner:
                 if partner in self:
                     partner.supplier_invoice_count += group['partner_id_count']
+                    partners |= partner
                 partner = partner.parent_id
+        (self - partners).supplier_invoice_count = 0
 
     @api.model
     def _commercial_fields(self):
@@ -53,11 +59,3 @@ class res_partner(models.Model):
     supplier_invoice_count = fields.Integer(compute='_compute_supplier_invoice_count', string='# Vendor Bills')
     purchase_warn = fields.Selection(WARNING_MESSAGE, 'Purchase Order', help=WARNING_HELP, default="no-message")
     purchase_warn_msg = fields.Text('Message for Purchase Order')
-
-    def _get_name_search_join_clause(self):
-        res = super()._get_name_search_join_clause()
-        partner_search_mode = self.env.context.get('res_partner_search_mode')
-        if partner_search_mode == 'supplier':
-            join_clause = "LEFT JOIN {table} ON res_partner.id = {table}.partner_id".format(table=self.env['purchase.order']._table)
-            return '%s %s' % (res, join_clause) if res else join_clause
-        return res

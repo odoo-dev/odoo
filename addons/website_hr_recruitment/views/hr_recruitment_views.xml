@@ -5,7 +5,7 @@
         <field name="model">hr.recruitment.source</field>
         <field name="inherit_id" ref="hr_recruitment.hr_recruitment_source_tree"/>
         <field name="arch" type="xml">
-            <xpath expr="//button[@name='create_alias']" position="before">
+            <xpath expr="//field[@name='email']" position="after">
                 <field name="url" widget="url"/>
             </xpath>
         </field>
@@ -28,7 +28,7 @@
         <field name="inherit_id" ref="hr.view_hr_job_form"/>
         <field name="arch" type="xml">
             <field name="company_id" position="after">
-                <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
+                <field name="website_id" options="{'no_create': True}" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]" groups="website.group_multi_website"/>
             </field>
         </field>
     </record>

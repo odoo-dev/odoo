@@ -71,7 +71,8 @@
             <field name="inherit_id" ref="hr.view_employee_filter"/>
             <field name="arch" type="xml">
                 <data>
-                    <xpath expr="." position="inside">
+                    <xpath expr="//filter[@name='message_needaction']" position="after">
+                        <separator/>
                         <filter string="Contract Warning" name="with_contract_warning" domain="[('contract_warning', '=', True)]"/>
                     </xpath>
                 </data>
@@ -94,25 +95,24 @@
             <field name="model">hr.contract</field>
             <field name="arch" type="xml">
                 <search string="Search Contract">
-                    <field name="name" string="Contracts"/>
+                    <field name="name" string="Contract"/>
                     <field name="date_start"/>
                     <field name="date_end"/>
-                    <field name="resource_calendar_id"/>
                     <field name="employee_id"/>
+                    <field name="job_id"/>
                     <field name="department_id" operator="child_of"/>
-                    <field name="state"/>
+                    <field name="resource_calendar_id"/>
                     <filter string="Running" name="running" domain="[('state', '=', 'open')]"/>
-                    <filter string="To Renew / Expires Soon" name="to_renew" domain="['&amp;', ('state', '=', 'open'), ('kanban_state', '=', 'blocked')]"/>
+                    <filter string="Need Action" name="to_renew" domain="['&amp;', ('state', '=', 'open'), ('kanban_state', '=', 'blocked')]"/>
                     <separator />
-                    <filter string="Current Employee" name="current_employee" domain="[('employee_id.active','=',True)]"/>
+                    <filter string="Employed" name="current_employee" domain="[('employee_id.active', '=', True)]"/>
                     <separator/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                     <separator/>
-                    <filter string="Important Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
                     <group expand="0" string="Group By">
-                        <filter string="Employee" name="employee" domain="[]" context="{'group_by':'employee_id'}"/>
-                        <filter string="Job" name="job" domain="[]" context="{'group_by':'job_id'}"/>
-                        <filter string="State" name='group_by_state' domain="[]" context="{'group_by': 'state'}"/>
+                        <filter string="Employee" name="employee" domain="[]" context="{'group_by': 'employee_id'}"/>
+                        <filter string="Job Position" name="job" domain="[]" context="{'group_by': 'job_id'}"/>
+                        <filter string="Status" name='group_by_state' domain="[]" context="{'group_by': 'state'}"/>
                     </group>
                 </search>
             </field>
@@ -151,6 +151,7 @@
                         </group>
                         <group>
                             <field name="job_id"/>
+                            <field name="company_id" invisible="1"/>
                         </group>
                     </group>
                     <notebook>
@@ -242,7 +243,7 @@
                     <t t-name="kanban-box">
                         <div class="oe_kanban_card oe_kanban_global_click">
                             <div class="o_dropdown_kanban dropdown" t-if="!selection_mode" groups="base.group_user">
-                                <a class="dropdown-toggle o-no-caret btn" role="button" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
+                                <a class="dropdown-toggle o-no-caret btn" role="button" data-toggle="dropdown" data-display="static" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                     <span class="fa fa-ellipsis-v"/>
                                 </a>
                                 <div class="dropdown-menu" role="menu">

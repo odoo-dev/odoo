@@ -13,16 +13,18 @@ class StockWarehouse(models.Model):
         help="When products are manufactured, they can be manufactured in this warehouse.")
     manufacture_pull_id = fields.Many2one(
         'stock.rule', 'Manufacture Rule')
+    manufacture_mto_pull_id = fields.Many2one(
+        'stock.rule', 'Manufacture MTO Rule')
     pbm_mto_pull_id = fields.Many2one(
         'stock.rule', 'Picking Before Manufacturing MTO Rule')
     sam_rule_id = fields.Many2one(
         'stock.rule', 'Stock After Manufacturing Rule')
     manu_type_id = fields.Many2one(
         'stock.picking.type', 'Manufacturing Operation Type',
-        domain=[('code', '=', 'mrp_operation')])
+        domain="[('code', '=', 'mrp_operation'), ('company_id', '=', company_id)]", check_company=True)
 
-    pbm_type_id = fields.Many2one('stock.picking.type', 'Picking Before Manufacturing Operation Type')
-    sam_type_id = fields.Many2one('stock.picking.type', 'Stock After Manufacturing Operation Type')
+    pbm_type_id = fields.Many2one('stock.picking.type', 'Picking Before Manufacturing Operation Type', check_company=True)
+    sam_type_id = fields.Many2one('stock.picking.type', 'Stock After Manufacturing Operation Type', check_company=True)
 
     manufacture_steps = fields.Selection([
         ('mrp_one_step', 'Manufacture (1 step)'),
@@ -36,8 +38,8 @@ class StockWarehouse(models.Model):
 
     pbm_route_id = fields.Many2one('stock.location.route', 'Picking Before Manufacturing Route', ondelete='restrict')
 
-    pbm_loc_id = fields.Many2one('stock.location', 'Picking before Manufacturing Location')
-    sam_loc_id = fields.Many2one('stock.location', 'Stock after Manufacturing Location')
+    pbm_loc_id = fields.Many2one('stock.location', 'Picking before Manufacturing Location', check_company=True)
+    sam_loc_id = fields.Many2one('stock.location', 'Stock after Manufacturing Location', check_company=True)
 
     def get_rules_dict(self):
         result = super(StockWarehouse, self).get_rules_dict()
@@ -101,6 +103,8 @@ class StockWarehouse(models.Model):
 
     def _get_global_route_rules_values(self):
         rules = super(StockWarehouse, self)._get_global_route_rules_values()
+        location_src = self.manufacture_steps == 'mrp_one_step' and self.lot_stock_id or self.pbm_loc_id
+        production_location = self._get_production_location()
         location_id = self.manufacture_steps == 'pbm_sam' and self.sam_loc_id or self.lot_stock_id
         rules.update({
             'manufacture_pull_id': {
@@ -117,6 +121,23 @@ class StockWarehouse(models.Model):
                     'name': self._format_rulename(location_id, False, 'Production'),
                     'location_id': location_id.id,
                     'propagate_cancel': self.manufacture_steps == 'pbm_sam'
+                },
+            },
+            'manufacture_mto_pull_id': {
+                'depends': ['manufacture_steps', 'manufacture_to_resupply'],
+                'create_values': {
+                    'procure_method': 'make_to_order',
+                    'company_id': self.company_id.id,
+                    'action': 'pull',
+                    'auto': 'manual',
+                    'route_id': self._find_global_route('stock.route_warehouse0_mto', _('Make To Order')).id,
+                    'location_id': production_location.id,
+                    'location_src_id': location_src.id,
+                    'picking_type_id': self.manu_type_id.id
+                },
+                'update_values': {
+                    'name': self._format_rulename(location_src, production_location, 'MTO'),
+                    'active': self.manufacture_to_resupply,
                 },
             },
             'pbm_mto_pull_id': {
@@ -189,9 +210,9 @@ class StockWarehouse(models.Model):
     def _get_sequence_values(self):
         values = super(StockWarehouse, self)._get_sequence_values()
         values.update({
-            'pbm_type_id': {'name': self.name + ' ' + _('Sequence picking before manufacturing'), 'prefix': self.code + '/PC/', 'padding': 5},
-            'sam_type_id': {'name': self.name + ' ' + _('Sequence stock after manufacturing'), 'prefix': self.code + '/SFP/', 'padding': 5},
-            'manu_type_id': {'name': self.name + ' ' + _('Sequence production'), 'prefix': self.code + '/MO/', 'padding': 5},
+            'pbm_type_id': {'name': self.name + ' ' + _('Sequence picking before manufacturing'), 'prefix': self.code + '/PC/', 'padding': 5, 'company_id': self.company_id.id},
+            'sam_type_id': {'name': self.name + ' ' + _('Sequence stock after manufacturing'), 'prefix': self.code + '/SFP/', 'padding': 5, 'company_id': self.company_id.id},
+            'manu_type_id': {'name': self.name + ' ' + _('Sequence production'), 'prefix': self.code + '/MO/', 'padding': 5, 'company_id': self.company_id.id},
         })
         return values
 
@@ -205,7 +226,9 @@ class StockWarehouse(models.Model):
                 'use_existing_lots': True,
                 'default_location_src_id': self.lot_stock_id.id,
                 'default_location_dest_id': self.pbm_loc_id.id,
-                'sequence': next_sequence + 1
+                'sequence': next_sequence + 1,
+                'sequence_code': 'PC',
+                'company_id': self.company_id.id,
             },
             'sam_type_id': {
                 'name': _('Store Finished Product'),
@@ -214,14 +237,18 @@ class StockWarehouse(models.Model):
                 'use_existing_lots': True,
                 'default_location_src_id': self.sam_loc_id.id,
                 'default_location_dest_id': self.lot_stock_id.id,
-                'sequence': next_sequence + 3
+                'sequence': next_sequence + 3,
+                'sequence_code': 'SFP',
+                'company_id': self.company_id.id,
             },
             'manu_type_id': {
                 'name': _('Manufacturing'),
                 'code': 'mrp_operation',
                 'use_create_lots': True,
                 'use_existing_lots': True,
-                'sequence': next_sequence + 2
+                'sequence': next_sequence + 2,
+                'sequence_code': 'MO',
+                'company_id': self.company_id.id,
             },
         })
         return data, max_sequence + 4

@@ -77,7 +77,7 @@ class StockPicking(models.Model):
 
     carrier_price = fields.Float(string="Shipping Cost")
     delivery_type = fields.Selection(related='carrier_id.delivery_type', readonly=True)
-    carrier_id = fields.Many2one("delivery.carrier", string="Carrier", domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    carrier_id = fields.Many2one("delivery.carrier", string="Carrier", check_company=True)
     volume = fields.Float(copy=False)
     weight = fields.Float(compute='_cal_weight', digits='Stock Weight', store=True, help="Total weight of the products in the picking.")
     carrier_tracking_ref = fields.Char(string='Tracking Reference', copy=False)
@@ -112,13 +112,12 @@ class StockPicking(models.Model):
         for picking in self:
             picking.weight = sum(move.weight for move in picking.move_lines if move.state != 'cancel')
 
-    def action_done(self):
-        res = super(StockPicking, self).action_done()
+    def _send_confirmation_email(self):
         for pick in self:
             if pick.carrier_id:
                 if pick.carrier_id.integration_level == 'rate_and_ship' and pick.picking_type_code != 'incoming':
                     pick.send_to_shipper()
-        return res
+        return super(StockPicking, self)._send_confirmation_email()
 
     def _pre_put_in_pack_hook(self, move_line_ids):
         res = super(StockPicking, self)._pre_put_in_pack_hook(move_line_ids)
@@ -149,27 +148,6 @@ class StockPicking(models.Model):
             ),
         }
 
-    def action_send_confirmation_email(self):
-        self.ensure_one()
-        delivery_template_id = self.env.ref('delivery.mail_template_data_delivery_confirmation').id
-        compose_form_id = self.env.ref('mail.email_compose_message_wizard_form').id
-        ctx = dict(
-            default_composition_mode='comment',
-            default_res_id=self.id,
-            default_model='stock.picking',
-            default_use_template=bool(delivery_template_id),
-            default_template_id=delivery_template_id,
-            custom_layout='mail.mail_notification_light'
-        )
-        return {
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': 'mail.compose.message',
-            'view_id': compose_form_id,
-            'target': 'new',
-            'context': ctx,
-        }
-
     def send_to_shipper(self):
         self.ensure_one()
         res = self.carrier_id.send_shipping(self)[0]
@@ -182,7 +160,6 @@ class StockPicking(models.Model):
         msg = _("Shipment sent to carrier %s for shipping with tracking number %s<br/>Cost: %.2f %s") % (self.carrier_id.name, self.carrier_tracking_ref, self.carrier_price, order_currency.name)
         self.message_post(body=msg)
         self._add_delivery_cost_to_so()
-
 
     def print_return_label(self):
         self.ensure_one()

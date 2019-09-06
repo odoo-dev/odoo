@@ -102,7 +102,12 @@ class WebsiteMultiMixin(models.AbstractModel):
     _name = 'website.multi.mixin'
     _description = 'Multi Website Mixin'
 
-    website_id = fields.Many2one('website', string='Website', help='Restrict publishing to this website.')
+    website_id = fields.Many2one(
+        "website",
+        string="Website",
+        ondelete="restrict",
+        help="Restrict publishing to this website.",
+    )
 
     def can_access_from_current_website(self, website_id=False):
         can_access = True
@@ -187,6 +192,7 @@ class WebsitePublishedMultiMixin(WebsitePublishedMixin):
                                        related=False, readonly=False)
 
     @api.depends('is_published', 'website_id')
+    @api.depends_context('website_id')
     def _compute_website_published(self):
         current_website_id = self._context.get('website_id')
         for record in self:

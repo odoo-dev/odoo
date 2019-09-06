@@ -31,18 +31,22 @@ class SaleOrder(models.Model):
     warehouse_id = fields.Many2one(
         'stock.warehouse', string='Warehouse',
         required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
-        default=_default_warehouse_id)
-    picking_ids = fields.One2many('stock.picking', 'sale_id', string='Pickings')
+        default=_default_warehouse_id, check_company=True)
+    picking_ids = fields.One2many('stock.picking', 'sale_id', string='Transfers')
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
     procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
     effective_date = fields.Date("Effective Date", compute='_compute_effective_date', store=True, help="Completion date of the first delivery order.")
+    expected_date = fields.Datetime( help="Delivery date you can promise to the customer, computed from the minimum lead time of "
+                                          "the order lines in case of Service products. In case of shipping, the shipping policy of "
+                                          "the order will be taken into account to either use the minimum or maximum lead time of "
+                                          "the order lines.")
 
     @api.depends('picking_ids.date_done')
     def _compute_effective_date(self):
         for order in self:
             pickings = order.picking_ids.filtered(lambda x: x.state == 'done' and x.location_dest_id.usage == 'customer')
             dates_list = [date for date in pickings.mapped('date_done') if date]
-            order.effective_date = dates_list and min(dates_list).date()
+            order.effective_date = min(dates_list).date() if dates_list else False
 
     @api.depends('picking_policy')
     def _compute_expected_date(self):
@@ -101,10 +105,10 @@ class SaleOrder(models.Model):
         for order in self:
             order.delivery_count = len(order.picking_ids)
 
-    @api.onchange('warehouse_id')
-    def _onchange_warehouse_id(self):
-        if self.warehouse_id.company_id:
-            self.company_id = self.warehouse_id.company_id.id
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        if self.company_id:
+            self.warehouse_id = self.env['stock.warehouse'].search([('company_id', '=', self.company_id.id)], limit=1)
 
     @api.onchange('partner_shipping_id')
     def _onchange_partner_shipping_id(self):
@@ -190,8 +194,8 @@ class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     qty_delivered_method = fields.Selection(selection_add=[('stock_move', 'Stock Moves')])
-    product_packaging = fields.Many2one('product.packaging', string='Package', default=False)
-    route_id = fields.Many2one('stock.location.route', string='Route', domain=[('sale_selectable', '=', True)], ondelete='restrict')
+    product_packaging = fields.Many2one( 'product.packaging', string='Package', default=False, check_company=True)
+    route_id = fields.Many2one('stock.location.route', string='Route', domain=[('sale_selectable', '=', True)], ondelete='restrict', check_company=True)
     move_ids = fields.One2many('stock.move', 'sale_line_id', string='Stock Moves')
     product_type = fields.Selection(related='product_id.type')
     virtual_available_at_date = fields.Float(compute='_compute_qty_at_date')
@@ -231,10 +235,11 @@ class SaleOrderLine(models.Model):
             if line.order_id.commitment_date:
                 date = line.order_id.commitment_date
             else:
-                confirm_date = line.order_id.confirmation_date if line.order_id.state in ['sale', 'done'] else datetime.now()
+                confirm_date = line.order_id.date_order if line.order_id.state in ['sale', 'done'] else datetime.now()
                 date = confirm_date + timedelta(days=line.customer_lead or 0.0)
             grouped_lines[(warehouse.id, date)] |= line
 
+        treated = self.browse()
         for (warehouse, scheduled_date), lines in grouped_lines.items():
             product_qties = lines.mapped('product_id').with_context(to_date=scheduled_date, warehouse=warehouse).read([
                 'qty_available',
@@ -252,33 +257,39 @@ class SaleOrderLine(models.Model):
                 line.free_qty_today = free_qty_today - qty_processed_per_product[line.product_id.id]
                 line.virtual_available_at_date = virtual_available_at_date - qty_processed_per_product[line.product_id.id]
                 qty_processed_per_product[line.product_id.id] += line.product_uom_qty
+            treated |= lines
+        remaining = (self - treated)
+        remaining.virtual_available_at_date = False
+        remaining.scheduled_date = False
+        remaining.free_qty_today = False
+        remaining.qty_available_today = False
 
-    @api.depends('product_id', 'route_id', 'order_id.warehouse_id')
+    @api.depends('product_id', 'route_id', 'order_id.warehouse_id', 'product_id.route_ids')
     def _compute_is_mto(self):
         """ Verify the route of the product based on the warehouse
             set 'is_available' at True if the product availibility in stock does
             not need to be verified, which is the case in MTO, Cross-Dock or Drop-Shipping
         """
+        self.is_mto = False
         for line in self:
             if not line.display_qty_widget:
                 continue
             product = line.product_id
-            line.is_mto = False
             product_routes = line.route_id or (product.route_ids + product.categ_id.total_route_ids)
 
             # Check MTO
-            wh_mto_route = line.order_id.warehouse_id.mto_pull_id.route_id
-            if wh_mto_route and wh_mto_route.mapped('sequence') <= product_routes.mapped('sequence'):
-                line.is_mto = True
-            else:
-                mto_route = False
+            mto_route = line.order_id.warehouse_id.mto_pull_id.route_id
+            if not mto_route:
                 try:
                     mto_route = self.env['stock.warehouse']._find_global_route('stock.route_warehouse0_mto', _('Make To Order'))
                 except UserError:
                     # if route MTO not found in ir_model_data, we treat the product as in MTS
                     pass
-                if mto_route and mto_route in product_routes:
-                    line.is_mto = True
+
+            if mto_route and mto_route in product_routes:
+                line.is_mto = True
+            else:
+                line.is_mto = False
 
     @api.depends('product_id')
     def _compute_qty_delivered_method(self):
@@ -386,6 +397,7 @@ class SaleOrderLine(models.Model):
             'route_ids': self.route_id,
             'warehouse_id': self.order_id.warehouse_id or False,
             'partner_id': self.order_id.partner_shipping_id.id,
+            'company_id': self.order_id.company_id,
         })
         for line in self.filtered("order_id.commitment_date"):
             date_planned = fields.Datetime.from_string(line.order_id.commitment_date) - timedelta(days=line.order_id.company_id.security_lead)

@@ -8,6 +8,8 @@ from odoo.exceptions import UserError
 from odoo.tools import mute_logger, float_compare
 
 
+# these tests create accounting entries, and therefore need a chart of accounts
+@common.tagged('post_install', '-at_install')
 class TestSaleMrpFlow(common.SavepointCase):
 
     @classmethod
@@ -540,7 +542,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         self.assertEqual(del_qty, 0.0, 'Sale MRP: delivered quantity should be zero after partial delivery of a kit')
         # deliver remaining products, check the so's invoice_status and delivered quantities
         self.assertEqual(len(so.picking_ids), 2, 'Sale MRP: number of pickings should be 2')
-        pick_2 = so.picking_ids[0]
+        pick_2 = so.picking_ids.filtered('backorder_id')
         for move in pick_2.move_lines:
             if move.product_id.id == self.env.ref('mrp.product_product_computer_desk_bolt').id:
                 move.write({'quantity_done': 19})
@@ -572,7 +574,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         self.company.anglo_saxon_accounting = True
         self.partner = self.env.ref('base.res_partner_1')
         self.category = self.env.ref('product.product_category_1').copy({'name': 'Test category','property_valuation': 'real_time', 'property_cost_method': 'fifo'})
-        account_type = self.env['account.account.type'].create({'name': 'RCV type', 'type': 'other'})
+        account_type = self.env['account.account.type'].create({'name': 'RCV type', 'type': 'other', 'internal_group': 'asset'})
         self.account_receiv = self.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00' , 'user_type_id': account_type.id, 'reconcile': True})
         account_expense = self.env['account.account'].create({'name': 'Expense', 'code': 'EXP00' , 'user_type_id': account_type.id, 'reconcile': True})
         account_output = self.env['account.account'].create({'name': 'Output', 'code': 'OUT00' , 'user_type_id': account_type.id, 'reconcile': True})
@@ -729,7 +731,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         self._assert_quantities(move_lines, expected_quantities)
 
         # Process only x1 of the first component then create a backorder for the missing components
-        picking_original.move_lines[0].write({'quantity_done': 1})
+        picking_original.move_lines.sorted()[0].write({'quantity_done': 1})
         backorder_wizard = self.env['stock.backorder.confirmation'].create({'pick_ids': [(4, so.picking_ids[0].id)]})
         backorder_wizard.process()
 

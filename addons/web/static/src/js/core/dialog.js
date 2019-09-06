@@ -60,6 +60,9 @@ var Dialog = Widget.extend({
      *        Whether or not the dialog should be rendered with header
      * @param {boolean} [options.renderFooter=true]
      *        Whether or not the dialog should be rendered with footer
+     * @param {function} [options.onForceClose]
+     *        Callback that triggers when the modal is closed by other means than with the buttons
+     *        e.g. pressing ESC
      */
     init: function (parent, options) {
         var self = this;
@@ -79,6 +82,7 @@ var Dialog = Widget.extend({
             backdrop: 'static',
             renderHeader: true,
             renderFooter: true,
+            onForceClose: false,
         });
 
         this.$content = options.$content;
@@ -93,6 +97,7 @@ var Dialog = Widget.extend({
         this.backdrop = options.backdrop;
         this.renderHeader = options.renderHeader;
         this.renderFooter = options.renderFooter;
+        this.onForceClose = options.onForceClose;
 
         core.bus.on('close_dialogs', this, this.destroy.bind(this));
     },
@@ -152,32 +157,7 @@ var Dialog = Widget.extend({
      * @param {Object[]} buttons - @see init
      */
     set_buttons: function (buttons) {
-        var self = this;
-        this.$footer.empty();
-        _.each(buttons, function (buttonData) {
-            var $button = dom.renderButton({
-                attrs: {
-                    class: buttonData.classes || (buttons.length > 1 ? 'btn-secondary' : 'btn-primary'),
-                    disabled: buttonData.disabled,
-                },
-                icon: buttonData.icon,
-                text: buttonData.text,
-            });
-            $button.on('click', function (e) {
-                var def;
-                if (buttonData.click) {
-                    def = buttonData.click.call(self, e);
-                }
-                if (buttonData.close) {
-                    Promise.resolve(def).then(self.close.bind(self)).guardedCatch(self.close.bind(self));
-                }
-            });
-            if (self.technical) {
-                self.$footer.append($button);
-            } else {
-                self.$footer.prepend($button);
-            }
-        });
+        this._setButtonsTo(this.$footer, buttons);
     },
 
     set_title: function (title, subtitle) {
@@ -254,6 +234,11 @@ var Dialog = Widget.extend({
         if (this.isDestroyed()) {
             return;
         }
+
+        // Triggers the onForceClose event if the callback is defined
+        if (this.onForceClose) {
+            this.onForceClose();
+        }
         var isFocusSet = this._focusOnClose();
 
         this._super();
@@ -291,6 +276,42 @@ var Dialog = Widget.extend({
      */
     _focusOnClose: function() {
         return false;
+    },
+    /**
+     * Render and set the given buttons into a target element
+     *
+     * @private
+     * @param {jQueryElement} $target The destination of the rendered buttons
+     * @param {Array} buttons The array of buttons to render
+     */
+    _setButtonsTo($target, buttons) {
+        var self = this;
+        $target.empty();
+        _.each(buttons, function (buttonData) {
+            var $button = dom.renderButton({
+                attrs: {
+                    class: buttonData.classes || (buttons.length > 1 ? 'btn-secondary' : 'btn-primary'),
+                    disabled: buttonData.disabled,
+                },
+                icon: buttonData.icon,
+                text: buttonData.text,
+            });
+            $button.on('click', function (e) {
+                var def;
+                if (buttonData.click) {
+                    def = buttonData.click.call(self, e);
+                }
+                if (buttonData.close) {
+                    self.onForceClose = false;
+                    Promise.resolve(def).then(self.close.bind(self)).guardedCatch(self.close.bind(self));
+                }
+            });
+            if (self.technical) {
+                $target.append($button);
+            } else {
+                $target.prepend($button);
+            }
+        });
     },
     //--------------------------------------------------------------------------
     // Handlers
@@ -352,6 +373,7 @@ Dialog.alert = function (owner, message, options) {
             text: message,
         }),
         title: _t("Alert"),
+        onForceClose: options && (options.onForceClose || options.confirm_callback),
     }, options)).open({shouldFocusButtons:true});
 };
 
@@ -378,6 +400,7 @@ Dialog.confirm = function (owner, message, options) {
             text: message,
         }),
         title: _t("Confirmation"),
+        onForceClose: options && (options.onForceClose || options.cancel_callback),
     }, options)).open({shouldFocusButtons:true});
 };
 
@@ -428,6 +451,7 @@ Dialog.safeConfirm = function (owner, message, options) {
         buttons: buttons,
         $content: $content,
         title: _t("Confirmation"),
+        onForceClose: options && (options.onForceClose || options.cancel_callback),
     }, options));
     dialog.opened(function () {
         var $button = dialog.$footer.find('.o_safe_confirm_button');

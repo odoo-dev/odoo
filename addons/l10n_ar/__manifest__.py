@@ -38,7 +38,6 @@ Follow the next Settings steps
     'depends': [
         'l10n_latam_invoice_document',
         'l10n_latam_base',
-        'base_vat',
     ],
     'data': [
         'security/ir.model.access.csv',

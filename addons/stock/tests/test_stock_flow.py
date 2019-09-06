@@ -4,6 +4,7 @@ from odoo.addons.stock.tests.common import TestStockCommon
 from odoo.tests import Form
 from odoo.tools import mute_logger, float_round
 from odoo.exceptions import UserError
+from odoo import fields
 
 class TestStockFlow(TestStockCommon):
     def setUp(cls):
@@ -11,6 +12,7 @@ class TestStockFlow(TestStockCommon):
         cls.partner_company2 = cls.env['res.partner'].create({
             'name': 'My Company (Chicago)-demo',
             'email': 'chicago@yourcompany.com',
+            'company_id': False,
             })
         cls.company = cls.env['res.company'].create({
             'currency_id': cls.env.ref('base.USD').id,
@@ -92,7 +94,7 @@ class TestStockFlow(TestStockCommon):
         move_b.move_line_ids.qty_done = 5
         move_c.move_line_ids.qty_done = 5
         move_d.move_line_ids.qty_done = 5
-        lot2_productC = LotObj.create({'name': 'C Lot 2', 'product_id': self.productC.id})
+        lot2_productC = LotObj.create({'name': 'C Lot 2', 'product_id': self.productC.id, 'company_id': self.env.company.id})
         self.StockPackObj.create({
             'product_id': self.productC.id,
             'qty_done': 2,
@@ -310,12 +312,12 @@ class TestStockFlow(TestStockCommon):
         # Back Order of Incoming shipment
         # -----------------------------------------------------------------------
 
-        lot3_productC = LotObj.create({'name': 'Lot 3', 'product_id': self.productC.id})
-        lot4_productC = LotObj.create({'name': 'Lot 4', 'product_id': self.productC.id})
-        lot5_productC = LotObj.create({'name': 'Lot 5', 'product_id': self.productC.id})
-        lot6_productC = LotObj.create({'name': 'Lot 6', 'product_id': self.productC.id})
-        lot1_productD = LotObj.create({'name': 'Lot 1', 'product_id': self.productD.id})
-        LotObj.create({'name': 'Lot 2', 'product_id': self.productD.id})
+        lot3_productC = LotObj.create({'name': 'Lot 3', 'product_id': self.productC.id, 'company_id': self.env.company.id})
+        lot4_productC = LotObj.create({'name': 'Lot 4', 'product_id': self.productC.id, 'company_id': self.env.company.id})
+        lot5_productC = LotObj.create({'name': 'Lot 5', 'product_id': self.productC.id, 'company_id': self.env.company.id})
+        lot6_productC = LotObj.create({'name': 'Lot 6', 'product_id': self.productC.id, 'company_id': self.env.company.id})
+        lot1_productD = LotObj.create({'name': 'Lot 1', 'product_id': self.productD.id, 'company_id': self.env.company.id})
+        LotObj.create({'name': 'Lot 2', 'product_id': self.productD.id, 'company_id': self.env.company.id})
 
         # Confirm back order of incoming shipment.
         back_order_in.action_confirm()
@@ -1060,7 +1062,7 @@ class TestStockFlow(TestStockCommon):
         wizard.process()
         quants = self.StockQuantObj.search([('product_id', '=', productKG.id), ('location_id', '=', self.stock_location)])
         total_qty = [quant.quantity for quant in quants]
-        self.assertEqual(sum(total_qty), 999.9975, 'Expecting 999.9975 kg , got %.4f kg on location stock!' % (sum(total_qty)))
+        self.assertAlmostEqual(sum(total_qty), 999.9975, msg='Expecting 999.9975 kg , got %.4f kg on location stock!' % (sum(total_qty)))
 
     def test_20_create_inventory_with_different_uom(self):
         """Create inventory with different unit of measure."""
@@ -1158,7 +1160,7 @@ class TestStockFlow(TestStockCommon):
         lot_obj = self.env['stock.production.lot']
         pack1 = pack_obj.create({'name': 'PACK00TEST1'})
         pack_obj.create({'name': 'PACK00TEST2'})
-        lot1 = lot_obj.create({'name': 'Lot001', 'product_id': lotproduct.id})
+        lot1 = lot_obj.create({'name': 'Lot001', 'product_id': lotproduct.id, 'company_id': self.env.company.id})
         move = self.MoveObj.search([('product_id', '=', productKG.id), ('inventory_id', '=', inventory.id)], limit=1)
         self.assertEqual(len(move), 0, "Partial filter should not create a lines upon prepare")
 
@@ -1244,9 +1246,9 @@ class TestStockFlow(TestStockCommon):
         picking_out.action_confirm()
         picking_out.action_assign()
         pack_opt = self.StockPackObj.search([('picking_id', '=', picking_out.id)], limit=1)
-        lot1 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT1'})
-        lot2 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT2'})
-        lot3 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT3'})
+        lot1 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT1', 'company_id': self.env.company.id})
+        lot2 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT2', 'company_id': self.env.company.id})
+        lot3 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT3', 'company_id': self.env.company.id})
 
         pack_opt.write({'lot_id': lot1.id, 'qty_done': 1.0})
         self.StockPackObj.create({'product_id': self.productA.id, 'move_id': move_out.id, 'product_uom_id': move_out.product_uom.id, 'lot_id': lot2.id, 'qty_done': 1.0, 'location_id': self.stock_location, 'location_dest_id': self.customer_location})
@@ -1943,3 +1945,33 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(incoming_picking.move_lines.mapped('company_id'), self.env.company)
         self.assertEqual(outgoing_picking.company_id, company_3)
         self.assertEqual(outgoing_picking.move_lines.company_id, company_3)
+
+    def test_picking_scheduled_date_readonlyness(self):
+        """ As it seems we keep breaking this thing over and over this small
+        test ensure the scheduled_date is writable on a picking in state 'draft' or 'confirmed'
+        """
+        partner = self.env['res.partner'].create({'name': 'Hubert Bonisseur de la Bath'})
+        product = self.env['product.product'].create({'name': 'Un petit coup de polish', 'type': 'product'})
+        wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+
+        f = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        f.partner_id = partner
+        f.picking_type_id = wh.out_type_id
+        with f.move_ids_without_package.new() as move:
+            move.product_id = product
+            move.product_uom_qty = 5
+        f.scheduled_date = fields.Datetime.now()
+        picking = f.save()
+
+        f = Form(picking, view='stock.view_picking_form')
+        f.scheduled_date = fields.Datetime.now()
+        picking = f.save()
+
+        self.assertEquals(f.state, 'draft')
+        picking.action_confirm()
+
+        f = Form(picking, view='stock.view_picking_form')
+        f.scheduled_date = fields.Datetime.now()
+        picking = f.save()
+
+        self.assertEquals(f.state, 'confirmed')

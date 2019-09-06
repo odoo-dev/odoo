@@ -5,7 +5,6 @@ from threading import Thread, Event, Lock
 from usb import core
 from gatt import DeviceManager as Gatt_DeviceManager
 import subprocess
-import netifaces
 import json
 from re import sub
 import urllib3
@@ -23,41 +22,10 @@ import ctypes
 
 from odoo import http, _
 from odoo.modules.module import get_resource_path
+from odoo.addons.hw_drivers.tools import helpers
 
 _logger = logging.getLogger(__name__)
 
-
-#----------------------------------------------------------
-# Helper
-#----------------------------------------------------------
-
-def get_mac_address():
-    try:
-        return netifaces.ifaddresses('eth0')[netifaces.AF_LINK][0]['addr']
-    except:
-        return netifaces.ifaddresses('wlan0')[netifaces.AF_LINK][0]['addr']
-
-def get_ip():
-    try:
-        return netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
-    except:
-        return netifaces.ifaddresses('wlan0')[netifaces.AF_INET][0]['addr']
-
-def read_file_first_line(filename):
-    path = Path.home() / filename
-    if path.exists():
-        with path.open('r') as f:
-            return f.readline().strip('\n')
-    return ''
-
-def get_odoo_server_url():
-    return read_file_first_line('odoo-remote-server.conf')
-
-def get_token():
-    return read_file_first_line('token')
-
-def get_version():
-    return '19_07'
 
 #----------------------------------------------------------
 # Controllers
@@ -79,6 +47,14 @@ class StatusController(http.Controller):
             return True
         return False
 
+    @http.route('/hw_drivers/check_certificate', type='http', auth='none', cors='*', csrf=False, save_session=False)
+    def check_certificate(self):
+        """
+        This route is called when we want to check if certificate is up-to-date
+        Used in cron.daily
+        """
+        helpers.check_certificate()
+
     @http.route('/hw_drivers/event', type='json', auth='none', cors='*', csrf=False, save_session=False)
     def event(self, listener):
         """
@@ -98,14 +74,22 @@ class StatusController(http.Controller):
         1 - url of odoo DB
         2 - token. This token will be compared to the token of Odoo. He have 1 hour lifetime
         """
-        server = get_odoo_server_url()
+        server = helpers.get_odoo_server_url()
         image = get_resource_path('hw_drivers', 'static/img', 'False.jpg')
         if server == '':
-            token = b64decode(token).decode('utf-8')
-            url, token = token.split('|')
+            credential = b64decode(token).decode('utf-8').split('|')
+            url = credential[0]
+            token = credential[1]
+            if len(credential) > 2:
+                # IoT Box send token with db_uuid and enterprise_code only since V13
+                db_uuid = credential[2]
+                enterprise_code = credential[3]
+                helpers.add_credential(db_uuid, enterprise_code)
             try:
                 subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
+                helpers.check_certificate()
                 m.send_alldevices()
+                m.load_drivers()
                 image = get_resource_path('hw_drivers', 'static/img', 'True.jpg')
             except subprocess.CalledProcessError as e:
                 _logger.error('A error encountered : %s ' % e.output)
@@ -158,7 +142,7 @@ class Driver(Thread, metaclass=DriverMetaClass):
         """
         On specific driver override this method to give connection type of device
         return string
-        possible value : direct - network - bluetooth - serial
+        possible value : direct - network - bluetooth - serial - hdmi
         """
         return self._device_connection
 
@@ -167,7 +151,7 @@ class Driver(Thread, metaclass=DriverMetaClass):
         """
         On specific driver override this method to give type of device
         return string
-        possible value : printer - camera - keyboard - scanner - device
+        possible value : printer - camera - keyboard - scanner - display - device
         """
         return self._device_type
 
@@ -246,17 +230,15 @@ event_manager = EventManager()
 
 class Manager(Thread):
 
-    def __init__(self):
-        super(Manager, self).__init__()
-        self.load_drivers()
-
     def load_drivers(self):
         """
         This method loads local files: 'odoo/addons/hw_drivers/drivers'
         And execute these python drivers
         """
+        helpers.download_drivers()
         path = get_resource_path('hw_drivers', 'drivers')
         driversList = os.listdir(path)
+        self.devices = {}
         for driver in driversList:
             path_file = os.path.join(path, driver)
             spec = util.spec_from_file_location(driver, path_file)
@@ -268,14 +250,19 @@ class Manager(Thread):
         """
         This method send IoT Box and devices informations to Odoo database
         """
-        server = get_odoo_server_url()
+        server = helpers.get_odoo_server_url()
         if server:
+            subject = helpers.read_file_first_line('odoo-subject.conf')
+            if subject:
+                domain = helpers.get_ip().replace('.', '-') + subject.strip('*')
+            else:
+                domain = helpers.get_ip()
             iot_box = {
                 'name': socket.gethostname(),
-                'identifier': get_mac_address(),
-                'ip': get_ip(),
-                'token': get_token(),
-                'version': get_version()
+                'identifier': helpers.get_mac_address(),
+                'ip': domain,
+                'token': helpers.get_token(),
+                'version': helpers.get_version()
                 }
             devices_list = {}
             for device in iot_devices:
@@ -306,6 +293,26 @@ class Manager(Thread):
                 _logger.error('A error encountered : %s ' % e)
         else:
             _logger.warning('Odoo server not set')
+
+    def get_connected_displays(self):
+        display_devices = {}
+        hdmi = subprocess.check_output(['tvservice', '-n']).decode('utf-8')
+        if hdmi.find('=') != -1:
+            hdmi_serial = sub('[^a-zA-Z0-9 ]+', '', hdmi.split('=')[1]).replace(' ', '_')
+            iot_device = IoTDevice({
+                'identifier': hdmi_serial,
+                'name': hdmi.split('=')[1],
+            }, 'display')
+            display_devices[hdmi_serial] = iot_device
+
+        if not len(display_devices):
+            # No display connected, create "fake" device to be accessed from another computer
+            display_devices['distant_display'] = IoTDevice({
+                'identifier': "distant_display",
+                'name': "Distant Display",
+            }, 'display')
+
+        return display_devices
 
     def serial_loop(self):
         serial_devices = {}
@@ -373,14 +380,18 @@ class Manager(Thread):
         """
         Thread that will check connected/disconnected device, load drivers if needed and contact the odoo server with the updates
         """
-        devices = {}
+        helpers.check_certificate()
         updated_devices = {}
         self.send_alldevices()
+        self.load_drivers()
+        # The list of devices doesn't change after the Raspberry has booted
+        display_devices = self.get_connected_displays()
         cpt = 0
         while 1:
             updated_devices = self.usb_loop()
             updated_devices.update(self.video_loop())
             updated_devices.update(mpdm.devices)
+            updated_devices.update(display_devices)
             updated_devices.update(bt_devices)
             updated_devices.update(socket_devices)
             updated_devices.update(self.serial_loop())
@@ -389,16 +400,16 @@ class Manager(Thread):
                 cpt = 0
             updated_devices.update(printer_devices)
             cpt += 1
-            added = updated_devices.keys() - devices.keys()
-            removed = devices.keys() - updated_devices.keys()
-            devices = updated_devices
+            added = updated_devices.keys() - self.devices.keys()
+            removed = self.devices.keys() - updated_devices.keys()
+            self.devices = updated_devices
             send_devices = False
             for path in [device_rm for device_rm in removed if device_rm in iot_devices]:
                 iot_devices[path].disconnect()
                 _logger.info('Device %s is now disconnected', path)
                 send_devices = True
             for path in [device_add for device_add in added if device_add not in iot_devices]:
-                for driverclass in [d for d in drivers if d.connection_type == devices[path].connection_type]:
+                for driverclass in [d for d in drivers if d.connection_type == self.devices[path].connection_type]:
                     if driverclass.supported(device = updated_devices[path].dev):
                         _logger.info('Device %s is now connected', path)
                         d = driverclass(device = updated_devices[path].dev)
@@ -434,14 +445,17 @@ class SocketManager(Thread):
 
     def run(self):
         while True:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(('', 9000))
-            sock.listen(1)
-            dev, addr = sock.accept()
-            if addr and addr[0] not in socket_devices:
-                iot_device = IoTDevice(type('', (), {'dev': dev}), 'socket')
-                socket_devices[addr[0]] = iot_device
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.bind(('', 9000))
+                sock.listen(1)
+                dev, addr = sock.accept()
+                if addr and addr[0] not in socket_devices:
+                    iot_device = IoTDevice(type('', (), {'dev': dev}), 'socket')
+                    socket_devices[addr[0]] = iot_device
+            except OSError as e:
+                _logger.error(_('Error in SocketManager: %s') % (e.strerror))
 
 class MPDManager(Thread):
     def __init__(self):
@@ -473,7 +487,7 @@ printers = conn.getPrinters()
 cups_lock = Lock()  # We can only make one call to Cups at a time
 
 mpdm = MPDManager()
-terminal_id = read_file_first_line('odoo-six-payment-terminal.conf')
+terminal_id = helpers.read_file_first_line('odoo-six-payment-terminal.conf')
 if terminal_id:
     try:
         subprocess.check_output(["pidof", "eftdvs"])  # Check if MPD server is running
@@ -482,6 +496,11 @@ if terminal_id:
     eftapi = ctypes.CDLL("eftapi.so")  # Library given by Six
     mpdm.daemon = True
     mpdm.start()
+else:
+    try:
+        subprocess.check_call(["pkill", "-9", "eftdvs"])  # Check if MPD server is running
+    except subprocess.CalledProcessError:
+        pass
 
 m = Manager()
 m.daemon = True

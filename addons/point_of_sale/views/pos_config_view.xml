@@ -32,6 +32,7 @@
                     <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                     <field name="active" invisible="1"/>
                     <field name="currency_id" invisible="1"/>
+                    <field name="selectable_categ_ids" invisible="1"/>
                     <field name="is_installed_account_accountant" invisible="1"/>
                     <field name="company_has_template" invisible="1"/>
                     <div class="oe_title" id="title">
@@ -65,7 +66,7 @@
                                 <field name="module_pos_hr"/>
                             </div>
                             <div class="o_setting_right_pane" id="login_with_employees">
-                                <span class="o_form_label">Log in with Employees</span>
+                                <span class="o_form_label">Login with Employees</span>
                                 <div class="text-muted">
                                     Use employee credentials to log in to the PoS session and switch cashier
                                 </div>
@@ -127,7 +128,7 @@
                                     Start selling from a default product category
                                 </div>
                                 <div class="content-group mt16" attrs="{'invisible': [('start_category', '=', False)]}">
-                                    <field name="iface_start_categ_id"/>
+                                    <field name="iface_start_categ_id" domain="[('id','in',selectable_categ_ids)]"/>
                                 </div>
                             </div>
                         </div>
@@ -143,20 +144,20 @@
                             </div>
                         </div>
                     </div>
-                    <h2>IoT Box</h2>
+                    <h2>Connected Devices</h2>
                     <div class="row mt16 o_settings_container" id="posbox_reference">
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
                                 <field name="is_posbox"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="is_posbox" string="IoT Box"/>
+                                <label for="is_posbox" string="IoT Box Devices"/>
                                 <div class="text-muted">
-                                    Connect devices to your PoS (ticket printer, barcode scanner, scale, etc.)
+                                    Connect devices to your PoS through an IoT Box
                                 </div>
                                 <div class="content-group" attrs="{'invisible' : [('is_posbox', '=', False)]}">
                                     <div class="row mt16">
-                                        <label string="IP Address" for="proxy_ip" class="col-lg-3 o_light_label"/>
+                                        <label string="IoT Box IP Address" for="proxy_ip" class="col-lg-3 o_light_label"/>
                                         <field name="proxy_ip"/>
                                     </div>
                                     <div class="row">
@@ -168,18 +169,29 @@
                                         <field name="iface_electronic_scale"/>
                                     </div>
                                     <div class="row">
-                                        <label string="Cashdrawer" for="iface_cashdrawer" class="col-lg-3 o_light_label"/>
-                                        <field name="iface_cashdrawer"/>
-                                    </div>
-                                    <div class="row">
                                         <label string="Receipt Printer" for="iface_print_via_proxy" class="col-lg-3 o_light_label"/>
                                         <field name="iface_print_via_proxy"/>
+                                    </div>
+                                    <div class="row" attrs="{'invisible': [('iface_print_via_proxy', '=', False)]}">
+                                        <label string="Cashdrawer" for="iface_cashdrawer" class="col-lg-3 o_light_label"/>
+                                        <field name="iface_cashdrawer"/>
                                     </div>
                                     <div class="row">
                                         <label string="Customer Display" for="iface_customer_facing_display" class="col-lg-3 o_light_label"/>
                                         <field name="iface_customer_facing_display"/>
                                     </div>
                                     <field name="customer_facing_display_html" invisible="1"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box" id="other_devices">
+                            <div class="o_setting_left_pane">
+                                <field name="other_devices"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="other_devices" string="Other Devices"/>
+                                <div class="text-muted mb16">
+                                    Connect devices to your PoS
                                 </div>
                             </div>
                         </div>
@@ -238,7 +250,7 @@
                     </div>
                     <h2>Pricing</h2>
                     <div class="row mt16 o_settings_container" id="pricing">
-                        <div class="col-12 col-lg-6 o_setting_box" id="default_pricelist_setting" groups="base.group_multi_currency,product.group_sale_pricelist">
+                        <div class="col-12 col-lg-6 o_setting_box" id="default_pricelist_setting" groups="base.group_multi_currency,product.group_product_pricelist">
                             <div class="o_setting_right_pane">
                                 <span class="o_form_label">Default Pricelist</span>
                                 <div class="content-group mt16">
@@ -249,7 +261,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-lg-6 o_setting_box" id="pricelist_setting" groups="product.group_sale_pricelist">
+                        <div class="col-12 col-lg-6 o_setting_box" id="pricelist_setting" groups="product.group_product_pricelist">
                             <div class="o_setting_left_pane">
                                 <field name="use_pricelist"/>
                             </div>
@@ -341,7 +353,7 @@
                                 <div class="content-group mt16" attrs="{'invisible': [('cash_control', '=', False)]}">
                                     <div class="row mt16">
                                         <label string="Default Opening" for="proxy_ip" class="col-lg-3 o_light_label" />
-                                        <field name="default_cashbox_id" domain="[('is_a_template', '=', True)]" context="{'default_is_a_template': True}"/>
+                                        <field name="default_cashbox_id" domain="[('is_a_template', '=', True)]" context="{'default_is_a_template': True, 'current_currency_id': currency_id}"/>
                                     </div>
                                 </div>
                                 <div attrs="{'invisible': [('cash_control', '=', False)]}">
@@ -358,6 +370,27 @@
                                 <label for="iface_precompute_cash"/>
                                 <div class="text-muted">
                                     Prefill amount paid with the exact due amount
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box"
+                             id="iface_tipproduct"
+                             title="This product is used as reference on customer receipts.">
+                            <div class="o_setting_left_pane">
+                                <field name="iface_tipproduct"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="tip_product_id" string="Tips"/>
+                                <div class="text-muted">
+                                    Accept customer tips or convert their change to a tip
+                                </div>
+                                <div class="content-group" attrs="{'invisible': [('iface_tipproduct', '=', False)]}">
+                                    <div class="mt16">
+                                        <label string="Tip Product" for="tip_product_id" class="o_light_label"/>
+                                        <field name="tip_product_id"
+                                               domain="[('available_in_pos', '=', True)]"
+                                               context="{'default_available_in_pos': True}"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -405,7 +438,7 @@
                                 <div class="text-muted">
                                     Print receipts automatically once the payment is registered
                                 </div>
-                                <div class="content-group mt16" attrs="{'invisible' : ['|', ('iface_print_auto', '=', False), ('is_posbox', '=', False)]}">
+                                <div class="content-group mt16" attrs="{'invisible' : ['|', ('iface_print_auto', '=', False), '&amp;', ('is_posbox', '=', False), ('other_devices', '=', False)]}">
                                     <div>
                                         <field name="iface_print_skip_screen" class="oe_inline"/><span class="oe_inline"><b>Skip Preview Screen</b></span>
                                     </div>
@@ -505,8 +538,8 @@
         <field name="arch" type="xml">
             <search string="Point of Sale Config">
                 <field name="name"/>
-                <filter string="Inactive" name="inactive" domain="[('active', '=', False)]" />
                 <field name="picking_type_id" />
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
             </search>
         </field>
     </record>

@@ -123,6 +123,7 @@ pip3 install ${PIP_TO_INSTALL}
 
 # Dowload MPD server and library for Six terminals
 wget 'https://nightly.odoo.com/master/iotbox/eftdvs' -P /usr/local/bin/
+chmod +x /usr/local/bin/eftdvs
 wget 'https://nightly.odoo.com/master/iotbox/eftapi.so' -P /usr/lib/
 
 groupadd usbusers
@@ -182,8 +183,6 @@ echo "disable_overscan=1" >> /boot/config.txt
 setupcon
 
 # exclude /drivers folder from git info to be able to load specific drivers
-mkdir /home/pi/odoo/addons/hw_drivers/drivers/
-chmod 777 /home/pi/odoo/addons/hw_drivers/drivers/
 echo "addons/hw_drivers/drivers/" > /home/pi/odoo/.git/info/exclude
 
 # create dirs for ramdisks

@@ -6,10 +6,22 @@ from odoo import api, fields, models, _
 
 class Company(models.Model):
     _inherit = "res.company"
+    _check_company_auto = True
+
+    def _default_confirmation_mail_template(self):
+        try:
+            return self.env.ref('stock.mail_template_data_delivery_confirmation').id
+        except ValueError:
+            return False
 
     internal_transit_location_id = fields.Many2one(
-        'stock.location', 'Internal Transit Location', ondelete="restrict",
+        'stock.location', 'Internal Transit Location', ondelete="restrict", check_company=True,
         help="Technical field used for resupply routes between warehouses that belong to this company")
+    stock_move_email_validation = fields.Boolean("Email Confirmation picking", default=False)
+    stock_mail_confirmation_template_id = fields.Many2one('mail.template', string="Email Template confirmation picking",
+        domain="[('model', '=', 'stock.picking')]",
+        default=_default_confirmation_mail_template,
+        help="Email sent to the customer once the order is done.")
 
     def _create_transit_location(self):
         '''Create a transit location with company_id being the given company_id. This is needed
@@ -158,10 +170,19 @@ class Company(models.Model):
         self.ensure_one()
         self._create_scrap_sequence()
 
+    def _create_per_company_picking_types(self):
+        self.ensure_one()
+
+    def _create_per_company_rules(self):
+        self.ensure_one()
+
     @api.model
     def create(self, vals):
         company = super(Company, self).create(vals)
         company.sudo()._create_per_company_locations()
         company.sudo()._create_per_company_sequences()
+        company.sudo()._create_per_company_picking_types()
+        company.sudo()._create_per_company_rules()
         self.env['stock.warehouse'].sudo().create({'name': company.name, 'code': company.name[:5], 'company_id': company.id, 'partner_id': company.partner_id.id})
         return company
+

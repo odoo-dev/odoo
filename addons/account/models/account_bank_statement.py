@@ -183,7 +183,7 @@ class AccountBankStatement(models.Model):
     state = fields.Selection([('open', 'New'), ('confirm', 'Validated')], string='Status', required=True, readonly=True, copy=False, default='open')
     currency_id = fields.Many2one('res.currency', compute='_compute_currency', string="Currency")
     journal_id = fields.Many2one('account.journal', string='Journal', required=True, states={'confirm': [('readonly', True)]}, default=_default_journal)
-    journal_type = fields.Selection(related='journal_id.type', help="Technical field used for usability purposes", readonly=False)
+    journal_type = fields.Selection(related='journal_id.type', help="Technical field used for usability purposes")
     company_id = fields.Many2one('res.company', related='journal_id.company_id', string='Company', store=True, readonly=True,
         default=lambda self: self.env.company)
 
@@ -722,7 +722,7 @@ class AccountBankStatementLine(models.Model):
             total -= aml_currency._convert(balance, currency, aml_rec.company_id, aml_rec.date)
             aml_rec.with_context(check_move_validity=False).write({'statement_line_id': self.id})
             counterpart_moves = (counterpart_moves | aml_rec.move_id)
-            if aml_rec.journal_id.post_at_bank_rec and aml_rec.payment_id and aml_rec.move_id.state == 'draft':
+            if aml_rec.journal_id.post_at == 'bank_rec' and aml_rec.payment_id and aml_rec.move_id.state == 'draft':
                 # In case the journal is set to only post payments when performing bank
                 # reconciliation, we modify its date and post it.
                 aml_rec.move_id.date = self.date
@@ -843,3 +843,6 @@ class AccountBankStatementLine(models.Model):
 
     def _check_invoice_state(self, invoice):
         invoice._compute_amount()
+
+    def button_confirm_bank(self):
+        self.statement_id.button_confirm_bank()

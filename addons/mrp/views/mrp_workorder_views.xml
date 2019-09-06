@@ -5,6 +5,7 @@
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <search>
+                <field name="production_id"/>
                 <field name="workcenter_id"/>
                 <filter string="Ready" name="ready" domain="[('state','=','ready')]"/>
                 <filter string="Pending" name="pending" domain="[('state','=','pending')]"/>
@@ -92,6 +93,7 @@
                 <field name="product_uom_id"/>
                 <field name="state"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
+                <field name="company_id" groups="base.group_multi_company"/>
             </tree>
         </field>
     </record>
@@ -149,7 +151,8 @@
                     <group>
                         <group>
                             <field name="qty_producing" string="Quantity in Production" attrs="{'readonly': ['|', ('product_tracking', '=', 'serial'), ('state', 'in', ('done', 'cancel'))]}"/>
-                            <field name="finished_lot_id" context="{'default_product_id': product_id}" domain="[('id', 'in', allowed_lots_domain)]" attrs="{'invisible': [('product_tracking', '=', 'none')]}" groups="stock.group_production_lot"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="finished_lot_id" context="{'default_product_id': product_id, 'default_company_id': company_id}" attrs="{'invisible': [('product_tracking', '=', 'none')]}" groups="stock.group_production_lot"/>
                             <field name="product_tracking" invisible="1"/>
                         </group>
                     </group>
@@ -158,10 +161,11 @@
                         <tree editable="bottom" create="0" delete="0">
                             <field name="product_id"/>
                             <field name="product_tracking" invisible="1"/>
-                            <field name="lot_id" attrs="{'readonly': [('product_tracking', '=', 'none')]}" domain="[('product_id', '=', product_id)]" context="{'default_product_id': product_id, 'active_mo_id': parent.production_id}"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="lot_id" attrs="{'readonly': [('product_tracking', '=', 'none')]}" context="{'default_product_id': product_id, 'active_mo_id': parent.production_id}"/>
                             <field name="qty_to_consume" readonly="1"/>
                             <field name="qty_reserved" readonly="1"/>
-                            <field name="qty_done" string="Done"/>
+                            <field name="qty_done" attrs="{'column_invisible': [('parent.state', 'not in', ('progress', 'done'))]}"/>
                             <field name="product_uom_id" invisible="1"/>
                             <field name="move_id" invisible="1"/>
                         </tree>
@@ -171,9 +175,10 @@
                         <tree editable="bottom" create="0" delete="0">
                             <field name="product_id"/>
                             <field name="product_tracking" invisible="1"/>
-                            <field name="lot_id" attrs="{'readonly': [('product_tracking', '=', 'none')]}" domain="[('product_id', '=', product_id)]" context="{'default_product_id': product_id}"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="lot_id" attrs="{'readonly': [('product_tracking', '=', 'none')]}" context="{'default_product_id': product_id}"/>
                             <field name="qty_to_consume" readonly="1" string="To Produce"/>
-                            <field name="qty_done" string="Done"/>
+                            <field name="qty_done" string="Produced"/>
                             <field name="product_uom_id" invisible="1"/>
                             <field name="move_id" invisible="1"/>
                         </tree>
@@ -215,13 +220,14 @@
                         </group>
                     </group>
                     <group>
-                        <field name="time_ids" nolabel="1" context="{'default_workcenter_id': workcenter_id}">
+                        <field name="time_ids" nolabel="1" context="{'default_workcenter_id': workcenter_id, 'default_workorder_id': id}">
                             <tree>
                                 <field name="date_start"/>
                                 <field name="date_end"/>
                                 <field name="duration" widget="float_time" sum="Total duration"/>
                                 <field name="user_id"/>
                                 <field name="workcenter_id" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
                                 <field name="loss_id" string="Productivity"/>
                             </tree>
                             <form>
@@ -230,10 +236,12 @@
                                         <field name="date_start"/>
                                         <field name="date_end"/>
                                         <field name="duration" widget="float_time"/>
+                                        <field name="company_id" invisible="1"/>
                                     </group>
                                     <group>
                                         <field name="user_id"/>
                                         <field name="workcenter_id"/>
+                                        <field name="company_id" invisible="1"/>
                                         <field name="loss_id"/>
                                     </group>
                                 </group>
@@ -246,6 +254,7 @@
                         <group>
                             <field name="workcenter_id" readonly="1"/>
                             <field name="production_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
                 </page>
@@ -265,16 +274,16 @@
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <search string="Search Work Orders">
-                <field name="name" string="Work Orders"/>
-                <field name="date_planned_start"/>
-                <field name="state"/>
-                <filter string="In Progress" name="progress" domain="[('state','=','progress')]"/>
-                <filter string="Ready" name="ready" domain="[('state','=','ready')]"/>
-                <filter string="Pending" name="pending" domain="[('state','=','pending')]"/>
-                <filter string="Finished" name="finish" domain="[('state','=','done')]"/>
-                <filter string="Available" name="available" domain="[('production_availability','=', 'assigned')]"/>
+                <field name="name" string="Work Order"/>
+                <field name="workcenter_id"/>
+                <field name="production_id"/>
+                <filter string="In Progress" name="progress" domain="[('state', '=', 'progress')]"/>
+                <filter string="Ready" name="ready" domain="[('state', '=', 'ready')]"/>
+                <filter string="Pending" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Finished" name="finish" domain="[('state', '=', 'done')]"/>
+                <filter string="Available" name="available" domain="[('production_availability', '=', 'assigned')]"/>
                 <separator/>
-                <filter string="Late" name="late" domain="['&amp;', ('date_planned_start','&lt;', current_date), ('state', '=', 'ready')]"
+                <filter string="Late" name="late" domain="['&amp;', ('date_planned_start', '&lt;', current_date), ('state', '=', 'ready')]"
                     help="Production started late"/>
                 <filter invisible="1" string="Late Activities" name="activities_overdue"
                     domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
@@ -284,14 +293,12 @@
                 <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
                     domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Exception Activities" name="activities_exception"
-                        domain="[('activity_exception_decoration', '!=', False)]"/>
-                <field name="workcenter_id"/>
-                <field name="production_id"/>
+                    domain="[('activity_exception_decoration', '!=', False)]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Work Center" name="work_center" domain="[]" context="{'group_by':'workcenter_id'}"/>
-                    <filter string="Production" name="production" domain="[]" context="{'group_by':'production_id'}"/>
-                    <filter string="Status" name="status" domain="[]" context="{'group_by':'state'}"/>
-                    <filter string="Scheduled Date" name="scheduled_month" domain="[]" context="{'group_by':'date_planned_start'}"/>
+                    <filter string="Work Center" name="work_center" domain="[]" context="{'group_by': 'workcenter_id'}"/>
+                    <filter string="Manufacturing Order" name="production" domain="[]" context="{'group_by': 'production_id'}"/>
+                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="Scheduled Date" name="scheduled_month" domain="[]" context="{'group_by': 'date_planned_start'}"/>
                 </group>
              </search>
         </field>
@@ -337,7 +344,13 @@
         <field name="name">mrp.production.work.order.gantt.production</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
-            <gantt date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" default_group_by="production_id" create="0">
+            <gantt class="o_mrp_workorder_gantt" date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" default_group_by="production_id" create="0"
+                progress="progress" plan="0"
+                decoration-danger="date_planned_start &lt; current_date and state in ['pending', 'ready']"
+                decoration-success="state == 'done'"
+                decoration-warning="state == 'cancel'">
+                <field name="date_planned_start"/>
+                <field name="state"/>
             </gantt>
         </field>
     </record>
@@ -346,7 +359,13 @@
         <field name="name">mrp.workorder.view.gantt</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
-            <gantt date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" default_group_by="workcenter_id" create="0">
+            <gantt class="o_mrp_workorder_gantt" date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" default_group_by="workcenter_id" create="0"
+                progress="progress" plan="0"
+                decoration-danger="date_planned_start &lt; current_date and state in ['pending', 'ready']"
+                decoration-success="state == 'done'"
+                decoration-warning="state == 'cancel'">
+                <field name="date_planned_start"/>
+                <field name="state"/>
             </gantt>
         </field>
     </record>
@@ -355,7 +374,7 @@
         <field name="name">mrp.production.work.order.kanban</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
-            <kanban class="oe_background_grey o_kanban_dashboard" create="0">
+            <kanban class="oe_background_grey o_kanban_dashboard o_mrp_workorder_kanban" create="0">
                 <field name="name"/>
                 <field name="production_id"/>
                 <field name="state"/>
@@ -369,7 +388,7 @@
                 <field name="product_uom_id"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div style="width: 400px;" class="oe_kanban_global_click">
+                        <div class="oe_kanban_global_click">
                             <div class="o_kanban_card_header o_kanban_record_top">
                                 <div class="o_kanban_record_headings o_kanban_card_header_title">
                                     <strong class="o_primary ml8">
@@ -411,7 +430,7 @@
         <field name="view_mode">gantt,tree,form,calendar,pivot,graph</field>
         <field name="search_view_id" ref="view_mrp_production_workorder_form_view_filter"/>
         <field name="view_id" ref="mrp_workorder_view_gantt"/>
-        <field name="context">{'search_default_work_center': True}</field>
+        <field name="context">{'search_default_work_center': True, 'search_default_ready': True, 'search_default_progress': True, 'search_default_pending': True}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
             Start a new work order
@@ -431,7 +450,7 @@
         <field name="view_mode">gantt,tree,form,calendar,pivot,graph</field>
         <field name="search_view_id" ref="view_mrp_production_workorder_form_view_filter"/>
         <field name="view_id" ref="workcenter_line_gantt_production"/>
-        <field name="context">{'search_default_production': True}</field>
+        <field name="context">{'search_default_production': True, 'search_default_ready': True, 'search_default_progress': True, 'search_default_pending': True}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
             Start a new work order
@@ -449,7 +468,7 @@
         <field name="name">Work Orders</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">mrp.workorder</field>
-        <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+        <field name="view_mode">tree,kanban,form,calendar,pivot,graph,gantt</field>
         <field name="search_view_id" ref="view_mrp_production_workorder_form_view_filter"/>
         <field name="context">{'search_default_ready': True, 'search_default_progress': True, 'search_default_pending': True}</field>
         <field name="help" type="html">

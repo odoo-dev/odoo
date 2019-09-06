@@ -15,7 +15,7 @@ class ResPartner(models.Model):
         compute='_compute_l10n_ar_vat', string="VAT", help='Computed field that returns VAT or nothing if this one'
         ' is not set for the partner')
     l10n_ar_formatted_vat = fields.Char(
-        compute='_compute_l10n_ar_formatted_vat', string="Formated VAT", help='Computed field that will convert the'
+        compute='_compute_l10n_ar_formatted_vat', string="Formatted VAT", help='Computed field that will convert the'
         ' given VAT number to the format {person_category:2}-{number:10}-{validation_number:1}')
 
     l10n_ar_gross_income_number = fields.Char('Gross Income Number')
@@ -35,16 +35,21 @@ class ResPartner(models.Model):
     def _compute_l10n_ar_formatted_vat(self):
         """ This will add some dash to the CUIT number in order to show in his natural format:
         {person_category}-{number}-{validation_number} """
-        for rec in self.filtered('l10n_ar_vat'):
+        recs_ar_vat = self.filtered('l10n_ar_vat')
+        for rec in recs_ar_vat:
             rec.l10n_ar_formatted_vat = stdnum.ar.cuit.format(rec.l10n_ar_vat)
+        remaining = self - recs_ar_vat
+        remaining.l10n_ar_formatted_vat = False
 
     @api.depends('vat', 'l10n_latam_identification_type_id')
     def _compute_l10n_ar_vat(self):
-        """ We add this computed field that returns cuit or nothing ig this one is not set for the partner. This
+        """ We add this computed field that returns cuit or nothing if this one is not set for the partner. This
         Validation can be also done by calling ensure_vat() method that returns the cuit or error if this one is not
         found """
-        for rec in self.filtered(lambda x: x.l10n_latam_identification_type_id.l10n_ar_afip_code == '80'):
-            rec.l10n_ar_vat = rec.vat
+        recs_ar_vat = self.filtered(lambda x: x.l10n_latam_identification_type_id.l10n_ar_afip_code == '80')
+        recs_ar_vat.l10n_ar_vat = True
+        remaining = self - recs_ar_vat
+        remaining.l10n_ar_vat = False
 
     @api.constrains('vat', 'l10n_latam_identification_type_id')
     def check_vat(self):

@@ -45,7 +45,7 @@ class TestDropship(common.TransactionCase):
         self.assertAlmostEqual(po_line.product_qty, 1.00)
 
         # Update qty on SO and check PO
-        so.order_line.product_uom_qty = 2.00
+        so.write({'order_line': [[1, so.order_line.id, {'product_uom_qty': 2.00}]]})
         self.assertAlmostEqual(po_line.product_qty, 2.00)
 
         # Create a new so line
@@ -88,7 +88,7 @@ class TestDropship(common.TransactionCase):
         # Create a sales order with a line of 200 PCE incoming shipment, with route_id drop shipping
         so_form = Form(self.env['sale.order'])
         so_form.partner_id = self.env.ref('base.res_partner_2')
-        so_form.payment_term_id = self.env.ref('account.account_payment_term')
+        so_form.payment_term_id = self.env.ref('account.account_payment_term_end_following_month')
         with mute_logger('odoo.tests.common.onchange'):
             # otherwise complains that there's not enough inventory and
             # apparently that's normal according to @jco and @sle

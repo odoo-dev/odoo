@@ -28,9 +28,7 @@ var SearchBar = Widget.extend({
 
         this.facets = params.facets;
         this.fields = params.fields;
-        this.filters = params.filters;
         this.filterFields = params.filterFields;
-        this.groupBys = params.groupBys;
 
         this.autoCompleteSources = [];
         this.searchFacets = [];
@@ -167,12 +165,6 @@ var SearchBar = Widget.extend({
                 self.autoCompleteSources.push(new (Obj) (self, filter, field, self.context));
             }
         });
-        _.each(this.filters, function (filter) {
-            self.autoCompleteSources.push(new (registry.get('filter'))(self, filter));
-        });
-        _.each(this.groupBys, function (filter) {
-            self.autoCompleteSources.push(new (registry.get('groupby'))(self, filter));
-        });
     },
 
     //--------------------------------------------------------------------------
@@ -220,6 +212,14 @@ var SearchBar = Widget.extend({
             case $.ui.keyCode.RIGHT:
                 this._focusFollowing();
                 e.preventDefault();
+                break;
+            case $.ui.keyCode.DOWN:
+                // if the searchbar dropdown is closed, try to focus the renderer
+                const $dropdown = this.$('.o_searchview_autocomplete:visible');
+                if (!$dropdown.length) {
+                    this.trigger_up('navigation_move', { direction: 'down' });
+                    e.preventDefault();
+                }
                 break;
             case $.ui.keyCode.BACKSPACE:
                 if (this.$input.val() === '') {

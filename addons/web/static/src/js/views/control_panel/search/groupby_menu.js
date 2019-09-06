@@ -31,6 +31,7 @@ var GroupByMenu = DropdownMenu.extend({
      */
     init: function (parent, groupBys, fields, options) {
         var self = this;
+        options = options || {};
         this._super(parent, groupBys);
         this.fields = fields;
         // determines when the 'Add custom groupby' submenu is open
@@ -38,7 +39,7 @@ var GroupByMenu = DropdownMenu.extend({
         // determines list of options used by groupBys of type 'date'
         this.groupableFields = [];
         _.each(fields, function (field, name) {
-            if (field.sortable && _.contains(GROUPABLE_TYPES, field.type)) {
+            if (field.sortable && name !== "id" && _.contains(GROUPABLE_TYPES, field.type)) {
                 self.groupableFields.push(_.extend({}, field, {
                     name: name,
                 }));
@@ -55,9 +56,9 @@ var GroupByMenu = DropdownMenu.extend({
         this.dropdownCategory = 'groupby';
         this.dropdownTitle = _t('Group By');
         this.dropdownIcon = 'fa fa-bars';
-        this.dropdownSymbol = this.isMobile ? 'fa fa-chevron-right float-right mt4' : false;
+        this.dropdownSymbol = this.isMobile && !options.noSymbol ? 'fa fa-chevron-right float-right mt4' : false;
         // the default style of the groupby menu can be changed here using the options key 'headerStyle'
-        if (options && options.headerStyle === 'primary') {
+        if (options.headerStyle === 'primary') {
             this.dropdownStyle = {
                 el: {class: 'btn-group o_group_by_menu o_dropdown', attrs: {'role': 'group'}},
                 mainButton: {class: 'btn btn-primary dropdown-toggle'},

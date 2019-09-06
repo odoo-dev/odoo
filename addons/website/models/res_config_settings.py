@@ -19,15 +19,11 @@ class ResConfigSettings(models.TransientModel):
     website_country_group_ids = fields.Many2many(related='website_id.country_group_ids', readonly=False)
     website_company_id = fields.Many2one(related='website_id.company_id', string='Website Company', readonly=False)
     website_logo = fields.Binary(related='website_id.logo', readonly=False)
-    language_ids = fields.Many2many(related='website_id.language_ids', relation='res.lang',
-        readonly=False)
+    language_ids = fields.Many2many(related='website_id.language_ids', relation='res.lang', readonly=False)
     website_language_count = fields.Integer(string='Number of languages', compute='_compute_website_language_count', readonly=True)
-    website_default_lang_id = fields.Many2one(
-        string='Default language', related='website_id.default_lang_id', readonly=False,
-        relation='res.lang')
-    website_default_lang_code = fields.Char(
-        'Default language code', related='website_id.default_lang_code', readonly=False,
-        )
+    website_default_lang_id = fields.Many2one(string='Default language', related='website_id.default_lang_id',
+                                              readonly=False, relation='res.lang')
+    website_default_lang_code = fields.Char('Default language code', related='website_id.default_lang_id.code', readonly=False)
     specific_user_account = fields.Boolean(related='website_id.specific_user_account', readonly=False,
                                            help='Are newly created user accounts website specific')
 
@@ -40,7 +36,8 @@ class ResConfigSettings(models.TransientModel):
     cdn_filters = fields.Text(related='website_id.cdn_filters', readonly=False)
     module_website_version = fields.Boolean("A/B Testing")
     module_website_links = fields.Boolean("Link Trackers")
-    auth_signup_uninvited = fields.Selection("Customer Account", related='website_id.auth_signup_uninvited', readonly=False)
+    auth_signup_uninvited = fields.Selection(compute="_compute_auth_signup",
+        inverse="_set_auth_signup")
 
     social_twitter = fields.Char(related='website_id.social_twitter', readonly=False)
     social_facebook = fields.Char(related='website_id.social_facebook', readonly=False)
@@ -72,6 +69,15 @@ class ResConfigSettings(models.TransientModel):
 
     google_maps_api_key = fields.Char(related='website_id.google_maps_api_key', readonly=False)
     group_multi_website = fields.Boolean("Multi-website", implied_group="website.group_multi_website")
+
+    @api.depends('website_id.auth_signup_uninvited')
+    def _compute_auth_signup(self):
+        for config in self:
+            config.auth_signup_uninvited = config.website_id.auth_signup_uninvited
+
+    def _set_auth_signup(self):
+        for config in self:
+            config.website_id.auth_signup_uninvited = config.auth_signup_uninvited
 
     @api.depends('website_id')
     def has_google_analytics(self):

@@ -15,15 +15,15 @@ class AccountJournal(models.Model):
         internal_types = ['invoice', 'debit_note', 'credit_note']
         domain = [('country_id.code', '=', 'CL'), ('internal_type', 'in', internal_types), ('active', '=', True)]
         documents = self.env['l10n_latam.document.type'].search(domain)
+        sequences = self.env['ir.sequence']
         for document in documents:
-            sequence = self.env['ir.sequence'].create(document.get_document_sequence_vals(self))
-            self.update({'l10n_cl_sequence_ids': [(4, {sequence.id})]})
+            sequences |= self.env['ir.sequence'].create(document.get_document_sequence_vals(self))
+        self.write({'l10n_cl_sequence_ids': [(4, s.id) for s in sequences]})
 
     def l10n_cl_create_document_sequences(self):
         self.ensure_one()
-        if (self.company_id.country_id != self.env.ref('base.cl') or self.env['ir.sequence'].search(
-                [('l10n_latam_document_type_id', '!=', False)]) or self.type != 'sale' or not
-                self.l10n_latam_use_documents):
+        if (self.company_id.country_id != self.env.ref('base.cl')) or self.env['ir.sequence'].search(
+                [('l10n_latam_document_type_id', '!=', False)]) or self.type != 'sale' or not self.l10n_latam_use_documents:
             return
         self.button_create_new_sequences()
 
@@ -31,5 +31,4 @@ class AccountJournal(models.Model):
     def create(self, values):
         """ Create Document sequences after create the journal """
         res = super().create(values)
-        res.l10n_cl_create_document_sequences()
         return res

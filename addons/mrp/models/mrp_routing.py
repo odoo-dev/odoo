@@ -21,8 +21,7 @@ class MrpRouting(models.Model):
         'mrp.routing.workcenter', 'routing_id', 'Operations',
         copy=True)
     company_id = fields.Many2one(
-        'res.company', 'Company',
-        default=lambda self: self.env.company)
+        'res.company', 'Company', default=lambda self: self.env.company)
 
     @api.model
     def create(self, vals):
@@ -35,9 +34,10 @@ class MrpRoutingWorkcenter(models.Model):
     _name = 'mrp.routing.workcenter'
     _description = 'Work Center Usage'
     _order = 'sequence, id'
+    _check_company_auto = True
 
     name = fields.Char('Operation', required=True)
-    workcenter_id = fields.Many2one('mrp.workcenter', 'Work Center', required=True)
+    workcenter_id = fields.Many2one('mrp.workcenter', 'Work Center', required=True, check_company=True)
     sequence = fields.Integer(
         'Sequence', default=100,
         help="Gives the sequence order when displaying a list of routing Work Centers.")
@@ -69,8 +69,7 @@ class MrpRoutingWorkcenter(models.Model):
     workorder_count = fields.Integer("# Work Orders", compute="_compute_workorder_count")
     batch = fields.Selection([
         ('no',  'Once all products are processed'),
-        ('yes', 'Once a minimum number of products is processed')], string='Next Operation',
-        help="Set 'no' to schedule the next work order after the previous one. Set 'yes' to produce after the quantity set in 'Quantity To Process' has been produced.",
+        ('yes', 'Once some products are processed')], string='Start Next Operation',
         default='no', required=True)
     batch_size = fields.Float('Quantity to Process', default=1.0)
     workorder_ids = fields.One2many('mrp.workorder', 'operation_id', string="Work Orders")
@@ -98,3 +97,4 @@ class MrpRoutingWorkcenter(models.Model):
         count_data = dict((item['operation_id'][0], item['operation_id_count']) for item in data)
         for operation in self:
             operation.workorder_count = count_data.get(operation.id, 0)
+

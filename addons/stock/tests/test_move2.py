@@ -201,8 +201,9 @@ class TestPickShip(TestStockCommon):
         picking_client.move_lines[0].move_line_ids[0].qty_done = 15.0
         picking_client.move_lines._action_done()
         self.assertEqual(len(picking_client.move_lines), 2)
-        self.assertEqual(picking_client.move_lines.mapped('procure_method'), ['make_to_order', 'make_to_stock'])
-        self.assertEqual(picking_client.move_lines.mapped('product_uom_qty'), [10.0, 5.0])
+        move_lines = picking_client.move_lines.sorted()
+        self.assertEqual(move_lines.mapped('procure_method'), ['make_to_order', 'make_to_stock'])
+        self.assertEqual(move_lines.mapped('product_uom_qty'), [10.0, 5.0])
 
     def test_mto_moves_return_extra(self):
         picking_pick, picking_client = self.create_pick_ship()
@@ -336,10 +337,12 @@ class TestPickShip(TestStockCommon):
         lot1 = self.env['stock.production.lot'].create({
             'name': 'lot1',
             'product_id': self.productA.id,
+            'company_id': self.env.company.id,
         })
         lot2 = self.env['stock.production.lot'].create({
             'name': 'lot2',
             'product_id': self.productA.id,
+            'company_id': self.env.company.id,
         })
         picking_pick, picking_client = self.create_pick_ship()
         location = self.env['stock.location'].browse(self.stock_location)
@@ -436,7 +439,8 @@ class TestPickShip(TestStockCommon):
         self.productA.tracking = 'lot'
         lot = self.env['stock.production.lot'].create({
             'product_id': self.productA.id,
-            'name': '123456789'
+            'name': '123456789',
+            'company_id': self.env.company.id,
         })
         self.env['stock.quant']._update_available_quantity(self.productA, stock_location, 10.0, lot_id=lot)
 
@@ -518,7 +522,8 @@ class TestPickShip(TestStockCommon):
         self.productA.tracking = 'serial'
         lot = self.env['stock.production.lot'].create({
             'product_id': self.productA.id,
-            'name': '123456789'
+            'name': '123456789',
+            'company_id': self.env.company.id,
         })
         self.env['stock.quant']._update_available_quantity(self.productA, stock_location, 1.0, lot_id=lot)
 
@@ -1161,6 +1166,7 @@ class TestSinglePicking(TestStockCommon):
         lot1 = self.env['stock.production.lot'].create({
             'name': 'lot1',
             'product_id': self.productA.id,
+            'company_id': self.env.company.id,
         })
         stock_location = self.env['stock.location'].browse(self.stock_location)
         self.env['stock.quant']._update_available_quantity(self.productA, stock_location, 1.0, lot_id=lot1)
@@ -1215,10 +1221,12 @@ class TestSinglePicking(TestStockCommon):
         lot1 = self.env['stock.production.lot'].create({
             'name': 'lot1',
             'product_id': self.productA.id,
+            'company_id': self.env.company.id,
         })
         lot2 = self.env['stock.production.lot'].create({
             'name': 'lot2',
             'product_id': self.productA.id,
+            'company_id': self.env.company.id,
         })
         stock_location = self.env['stock.location'].browse(self.stock_location)
         self.env['stock.quant']._update_available_quantity(self.productA, stock_location, 1.0, lot_id=lot1)
@@ -1268,8 +1276,9 @@ class TestSinglePicking(TestStockCommon):
         # Check reserved quantity
         self.assertEqual(move1.reserved_availability, 2.0)
         self.assertEqual(len(move1.move_line_ids), 2)
-        self.assertEqual(move1.move_line_ids[0].lot_id.id, lot1.id)
-        self.assertEqual(move1.move_line_ids[1].lot_id.id, lot2.id)
+        move_lines = move1.move_line_ids.sorted()
+        self.assertEqual(move_lines[0].lot_id.id, lot1.id)
+        self.assertEqual(move_lines[1].lot_id.id, lot2.id)
 
     def test_recheck_availability_4(self):
         """ Same check than test_recheck_availability_2 but with serial number this time.
@@ -1279,10 +1288,12 @@ class TestSinglePicking(TestStockCommon):
         serial1 = self.env['stock.production.lot'].create({
             'name': 'serial1',
             'product_id': self.productA.id,
+            'company_id': self.env.company.id,
         })
         serial2 = self.env['stock.production.lot'].create({
             'name': 'serial2',
             'product_id': self.productA.id,
+            'company_id': self.env.company.id,
         })
         stock_location = self.env['stock.location'].browse(self.stock_location)
         self.env['stock.quant']._update_available_quantity(self.productA, stock_location, 1.0, lot_id=serial1)
@@ -1332,8 +1343,9 @@ class TestSinglePicking(TestStockCommon):
         # Check reserved quantity
         self.assertEqual(move1.reserved_availability, 2.0)
         self.assertEqual(len(move1.move_line_ids), 2)
-        self.assertEqual(move1.move_line_ids[0].lot_id.id, serial1.id)
-        self.assertEqual(move1.move_line_ids[1].lot_id.id, serial2.id)
+        move_lines = move1.move_line_ids.sorted()
+        self.assertEqual(move_lines[0].lot_id.id, serial1.id)
+        self.assertEqual(move_lines[1].lot_id.id, serial2.id)
 
     def test_add_move_when_picking_is_available_1(self):
         """ Check that any move added in a picking once it's assigned is directly considered as
@@ -1535,12 +1547,14 @@ class TestSinglePicking(TestStockCommon):
                 .create({
                     'name': 'lot1',
                     'product_id': self.productA.id,
+                    'company_id': self.env.company.id,
                 })
 
         # enter an existing lot_id, should work
         lot1 = self.env['stock.production.lot'].create({
             'name': 'lot1',
             'product_id': self.productA.id,
+            'company_id': self.env.company.id,
         })
         move_line.lot_id = lot1
         delivery_order.action_done()
@@ -1931,7 +1945,7 @@ class TestStockUOM(TestStockCommon):
         self.assertEqual(move.product_uom_qty, 60.00, 'Wrong T_GT quantity')
         self.assertEqual(move.product_qty, 134400.00, 'Wrong T_LBS quantity')
 
-        lot = self.env['stock.production.lot'].create({'name': 'Lot TEST', 'product_id': T_TEST.id})
+        lot = self.env['stock.production.lot'].create({'name': 'Lot TEST', 'product_id': T_TEST.id, 'company_id': self.env.company.id, })
         self.env['stock.move.line'].create({
             'move_id': move.id,
             'product_id': T_TEST.id,

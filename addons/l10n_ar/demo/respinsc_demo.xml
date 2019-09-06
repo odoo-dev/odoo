@@ -47,4 +47,15 @@
         <field name='l10n_ar_share_sequences' eval="True"/>
     </record>
 
+   <record id="sale_expo_journal_ri" model="account.journal">
+        <field name='name'>Expo Sales Journal</field>
+        <field name='company_id' ref="l10n_ar.company_ri"/>
+        <field name='type'>sale</field>
+        <field name='code'>S0002</field>
+        <field name='l10n_latam_use_documents' eval="True"/>
+        <field name='l10n_ar_afip_pos_number'>2</field>
+        <field name='l10n_ar_afip_pos_partner_id' ref="l10n_ar.partner_ri"/>
+        <field name='l10n_ar_afip_pos_system'>FEERCEL</field>
+    </record>
+
 </odoo>

@@ -133,7 +133,7 @@ class Applicant(models.Model):
     date_open = fields.Datetime("Assigned", readonly=True, index=True)
     date_last_stage_update = fields.Datetime("Last Stage Update", index=True, default=fields.Datetime.now)
     priority = fields.Selection(AVAILABLE_PRIORITIES, "Appreciation", default='0')
-    job_id = fields.Many2one('hr.job', "Applied Job")
+    job_id = fields.Many2one('hr.job', "Applied Job", domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     salary_proposed_extra = fields.Char("Proposed Salary Extra", help="Salary Proposed by the Organisation, extra advantages")
     salary_expected_extra = fields.Char("Expected Salary Extra", help="Salary Expected by Applicant, extra advantages")
     salary_proposed = fields.Float("Proposed Salary", group_operator="avg", help="Salary Proposed by the Organisation")
@@ -143,7 +143,7 @@ class Applicant(models.Model):
     partner_phone = fields.Char("Phone", size=32)
     partner_mobile = fields.Char("Mobile", size=32)
     type_id = fields.Many2one('hr.recruitment.degree', "Degree")
-    department_id = fields.Many2one('hr.department', "Department")
+    department_id = fields.Many2one('hr.department', "Department", domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     day_open = fields.Float(compute='_compute_day', string="Days to Open")
     day_close = fields.Float(compute='_compute_day', string="Days to Close")
     delay_close = fields.Float(compute="_compute_day", string='Delay to Close', readonly=True, group_operator="avg", help="Number of days to close", store=True)
@@ -171,19 +171,26 @@ class Applicant(models.Model):
                 date_create = applicant.create_date
                 date_open = applicant.date_open
                 applicant.day_open = (date_open - date_create).total_seconds() / (24.0 * 3600)
+            else:
+                applicant.day_open = False
             if applicant.date_closed:
                 date_create = applicant.create_date
                 date_closed = applicant.date_closed
                 applicant.day_close = (date_closed - date_create).total_seconds() / (24.0 * 3600)
                 applicant.delay_close = applicant.day_close - applicant.day_open
+            else:
+                applicant.day_close = False
+                applicant.delay_close = False
 
     @api.depends('email_from')
     def _compute_application_count(self):
         application_data = self.env['hr.applicant'].read_group([
             ('email_from', 'in', list(set(self.mapped('email_from'))))], ['email_from'], ['email_from'])
         application_data_mapped = dict((data['email_from'], data['email_from_count']) for data in application_data)
-        for applicant in self.filtered(lambda applicant: applicant.email_from):
+        applicants = self.filtered(lambda applicant: applicant.email_from)
+        for applicant in applicants:
             applicant.application_count = application_data_mapped.get(applicant.email_from, 1) - 1
+        (self - applicants).application_count = False
 
     def _compute_meeting_count(self):
         for applicant in self:

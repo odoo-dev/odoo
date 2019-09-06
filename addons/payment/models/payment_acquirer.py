@@ -104,7 +104,7 @@ class PaymentAcquirer(models.Model):
     capture_manually = fields.Boolean(string="Capture Amount Manually",
         help="Capture the amount from Odoo, when the delivery is completed.")
     journal_id = fields.Many2one(
-        'account.journal', 'Payment Journal', domain=[('type', 'in', ['bank', 'cash'])],
+        'account.journal', 'Payment Journal', domain="[('type', 'in', ['bank', 'cash']), ('company_id', '=', company_id)]",
         help="""Journal where the successful transactions will be posted""")
     check_validity = fields.Boolean(string="Verify Card Validity",
         help="""Trigger a transaction of 1 currency unit and its refund to check the validity of new credit cards entered in the customer portal.
@@ -154,6 +154,7 @@ class PaymentAcquirer(models.Model):
     # TDE FIXME: remove that brol
     module_id = fields.Many2one('ir.module.module', string='Corresponding Module')
     module_state = fields.Selection(selection=ir_module.STATES, string='Installation State', related='module_id.state', store=True)
+    module_to_buy = fields.Boolean(string='Odoo Enterprise Module', related='module_id.to_buy', readonly=True, store=False)
 
     image_128 = fields.Image("Image", max_width=128, max_height=128)
 
@@ -271,7 +272,7 @@ class PaymentAcquirer(models.Model):
         # If the trigger comes from the chart template wizard, the modules are already installed.
         acquirer_modules = self.env['ir.module.module'].search(
             [('name', 'like', 'payment_%'), ('state', 'in', ('to install', 'installed'))])
-        acquirer_names = [a.name.split('_')[1] for a in acquirer_modules]
+        acquirer_names = [a.name.split('_', 1)[1] for a in acquirer_modules]
 
         # Search for acquirers having no journal
         company = company or self.env.company

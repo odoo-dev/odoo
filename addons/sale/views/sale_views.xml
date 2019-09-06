@@ -22,7 +22,7 @@
 
         <menuitem id="res_partner_menu"
             parent="sale_order_menu"
-            action="base.action_partner_form"
+            action="account.res_partner_action_customer"
             sequence="4" groups="sales_team.group_sale_salesman"/>
 
         <menuitem id="menu_sale_report"
@@ -83,7 +83,7 @@
             </field>
         </record>
 
-        <menuitem id="product_menu_catalog" name="Products" action="product_template_action" parent="sale_menu_root" sequence="4" groups="sales_team.group_sale_salesman"/>
+        <menuitem id="product_menu_catalog" name="Products" parent="sale_menu_root" sequence="4" groups="sales_team.group_sale_salesman"/>
         <menuitem id="menu_product" name="Product Variants" parent="product_menu_catalog" sequence="2" groups="base.group_no_one" active="False"/>
         <menuitem action="product_template_action" id="menu_product_template_action" parent="product_menu_catalog" sequence="1" active="False"/>
         <menuitem id="prod_config_main" name="Products" parent="menu_sale_config" sequence="5"/>
@@ -91,7 +91,7 @@
         <menuitem id="next_id_16" name="Units of Measure" parent="sale.prod_config_main" sequence="6" groups="uom.group_uom" active="False"/>
         <menuitem action="uom.product_uom_form_action" id="menu_product_uom_form_action" parent="sale.prod_config_main" sequence="7" groups="uom.group_uom" active="False"/>
         <menuitem action="uom.product_uom_categ_form_action" id="menu_product_uom_categ_form_action" parent="sale.prod_config_main" sequence="8" groups="uom.group_uom" active="False"/>
-        <menuitem id="menu_product_pricelist_main" name="Pricelists" parent="product_menu_catalog" action="product.product_pricelist_action2" groups="product.group_sale_pricelist" sequence="3" active="False"/>
+        <menuitem id="menu_product_pricelist_main" name="Pricelists" parent="product_menu_catalog" action="product.product_pricelist_action2" groups="product.group_product_pricelist" sequence="3" active="False"/>
 
         <record id="sale_order_view_activity" model="ir.ui.view">
             <field name="name">sale.order.activity</field>
@@ -196,6 +196,8 @@
                     <field name="user_id" optional="show"/>
                     <field name="team_id" optional="hide"/>
                     <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                    <field name="amount_untaxed" sum="Total Tax Excluded" widget="monetary" optional="hide"/>
+                    <field name="amount_tax" sum="Tax Total" widget="monetary" optional="hide"/>
                     <field name="amount_total" sum="Total Tax Included" widget="monetary" optional="show"/>
                     <field name="currency_id" invisible="1"/>
                     <field name="invoice_status" optional="show"/>
@@ -220,6 +222,8 @@
                     <field name="user_id" optional="show"/>
                     <field name="team_id" optional="hide"/>
                     <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                    <field name="amount_untaxed" sum="Total Tax Excluded" widget="monetary" optional="hide"/>
+                    <field name="amount_tax" sum="Tax Total" widget="monetary" optional="hide"/>
                     <field name="amount_total" sum="Total Tax Included" widget="monetary" optional="show"/>
                     <field name="currency_id" invisible="1"/>
                     <field name="state" optional="show"/>
@@ -254,8 +258,16 @@
                             string="Void Transaction"
                             confirm="Are you sure you want to void the authorized transaction? This action can't be undone."
                             attrs="{'invisible': [('authorized_transaction_ids', '=', [])]}"/>
+                    <button name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoice"
+                        type="action" class="btn-primary"
+                        attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
+                    <button name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoice"
+                        type="action" context="{'default_advance_payment_method': 'percentage'}"
+                        attrs="{'invisible': ['|',('invoice_status', '!=', 'no'), ('state', '!=', 'sale')]}"/>
                     <button name="action_quotation_send" string="Send by Email" type="object" states="draft" class="btn-primary"/>
-                    <button name="action_quotation_send" type="object" string="Send PRO-FORMA Invoice" groups="sale.group_proforma_sales" class="btn-primary" attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('invoice_count','&gt;=',1)]}" context="{'proforma': True}"/>
+                    <button name="action_quotation_send" type="object" string="Send PRO-FORMA Invoice"
+                      groups="sale.group_proforma_sales" class="btn-primary"
+                      attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('invoice_count','&gt;=',1)]}" context="{'proforma': True}"/>
                     <button name="action_confirm" id="action_confirm"
                         string="Confirm" class="btn-primary" type="object"
                         attrs="{'invisible': [('state', 'not in', ['sent'])]}"/>
@@ -300,15 +312,15 @@
                         </group>
                         <group>
                             <field name="validity_date" attrs="{'invisible': [('state', 'in', ['sale', 'done'])]}"/>
-                            <div class="o_td_label" groups="base.group_no_one" attrs="{'invisible': [('state', 'in', ['sale', 'done', 'cancel'])]}"> 
-                                <label for="date_order" string="Quotation Date"/> 
+                            <div class="o_td_label" groups="base.group_no_one" attrs="{'invisible': [('state', 'in', ['sale', 'done', 'cancel'])]}">
+                                <label for="date_order" string="Quotation Date"/>
                             </div>
                             <field name="date_order" nolabel="1" groups="base.group_no_one" attrs="{'invisible': [('state', 'in', ['sale', 'done', 'cancel'])]}"/>
-                            <div class="o_td_label" attrs="{'invisible': [('state', 'in', ['draft', 'sent'])]}"> 
-                                <label for="date_order" string="Order Date"/> 
+                            <div class="o_td_label" attrs="{'invisible': [('state', 'in', ['draft', 'sent'])]}">
+                                <label for="date_order" string="Order Date"/>
                             </div>
                             <field name="date_order" attrs="{'required': [('state', 'in', ['sale', 'done'])], 'invisible': [('state', 'in', ['draft', 'sent'])]}" nolabel="1"/>
-                            <field name="pricelist_id" groups="product.group_sale_pricelist"/>
+                            <field name="pricelist_id" groups="product.group_product_pricelist" options="{'no_open':True,'no_create': True}"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="payment_term_id" options="{'no_open':True,'no_create': True}"/>
                         </group>
@@ -393,7 +405,7 @@
                                             <div name="lead">
                                                 <field name="customer_lead" class="oe_inline"/> days
                                             </div>
-                                            <field name="analytic_tag_ids" widget="many2many_tags" groups="analytic.group_analytic_tags" options="{'color_field': 'color'}"/>
+                                            <field name="analytic_tag_ids" widget="many2many_tags" groups="analytic.group_analytic_tags" options="{'color_field': 'color'}" domain="['|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
                                         </group>
                                     </group>
                                     <label for="name" string="Description" attrs="{'invisible': [('display_type', '!=', False)]}"/>
@@ -469,6 +481,7 @@
                                         groups="analytic.group_analytic_tags"
                                         widget="many2many_tags"
                                         options="{'color_field': 'color'}"
+                                        domain="['|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
                                     />
                                     <field
                                         name="product_uom_qty"
@@ -624,7 +637,7 @@
                                 <group name="sale_info" string="Invoicing">
                                     <field name="fiscal_position_id" options="{'no_create': True}"/>
                                     <field name="analytic_account_id" context="{'default_partner_id':partner_invoice_id, 'default_name':name}" attrs="{'readonly': [('invoice_count','!=',0),('state','=','sale')]}" groups="analytic.group_analytic_accounting" force_save="1"/>
-                                    <field name="invoice_status" states="sale,done" invisible="1"/>
+                                    <field name="invoice_status" states="sale,done" groups="base.group_no_one"/>
                                 </group>
                             </group>
                             <group>
@@ -632,7 +645,7 @@
                                     <field name="expected_date"/>
                                     <field name="commitment_date"/>
                                 </group>
-                                <group string="Reporting" groups="base.group_no_one">
+                                <group string="Reporting" name="sale_reporting" groups="base.group_no_one">
                                     <group name="technical" colspan="2" class="mb-0">
                                         <field name="origin"/>
                                     </group>
@@ -676,37 +689,37 @@
                 </xpath>
             </field>
         </record>
+
         <record id="view_sales_order_filter" model="ir.ui.view">
             <field name="name">sale.order.list.select</field>
             <field name="model">sale.order</field>
             <field name="priority" eval="15"/>
             <field name="arch" type="xml">
                 <search string="Search Sales Order">
-                    <field name="name" string="Sales Order" filter_domain="['|','|',('name','ilike',self),('client_order_ref','ilike',self),('partner_id','child_of',self)]"/>
+                    <field name="name" string="Order" filter_domain="['|', '|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self), ('partner_id', 'child_of', self)]"/>
                     <field name="partner_id" operator="child_of"/>
                     <field name="user_id"/>
                     <field name="team_id" string="Sales Team"/>
+                    <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>
                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                     <!-- We only allow to search on the following sale order line fields (product, name) because the other fields, such as price, quantity, ...
                         will not be searched as often, and if they need to be searched it's usually in the context of products
                         and then they can be searched from the page listing the sale order lines related to a product (from the product itself).
                     -->
-                    <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>
-                    <filter string="My Orders" domain="[('user_id','=',uid)]" name="my_sale_orders_filter"/>
+                    <filter string="My Orders" domain="[('user_id', '=', uid)]" name="my_sale_orders_filter"/>
                     <filter invisible="1" string="Late Activities" name="activities_overdue"
                         domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
                         help="Show all records which has next action date is before today"/>
                     <filter invisible="1" string="Today Activities" name="activities_today"
                         domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
                     <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                        domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
-                        ]"/>
+                        domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
                     <filter string="Exception Activities" name="activities_exception"
                         domain="[('activity_exception_decoration', '!=', False)]"/>
                     <group expand="0" string="Group By">
-                        <filter string="Salesperson" name="salesperson" domain="[]" context="{'group_by':'user_id'}"/>
-                        <filter name="customer" string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
-                        <filter string="Order Date" name="order_month" domain="[]" context="{'group_by':'date_order'}"/>
+                        <filter string="Salesperson" name="salesperson" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Order Date" name="order_month" domain="[]" context="{'group_by': 'date_order'}"/>
                     </group>
                </search>
             </field>
@@ -1140,7 +1153,7 @@
                     <xpath expr="//field[@name='invoice_line_ids']//field[@name='discount']" position="attributes">
                         <attribute name="groups">product.group_discount_per_so_line</attribute>
                     </xpath>
-                    <xpath expr="//group[@name='sale_info_group']" position="inside">
+                    <xpath expr="//group[@name='sale_info_group']/field[@name='invoice_user_id']" position="after">
                         <field name="team_id" kanban_view_ref="%(sales_team.crm_team_view_kanban)s"/>
                     </xpath>
                     <xpath expr="//group[@id='other_tab_group']" position="inside">

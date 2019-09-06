@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from ast import literal_eval
-from operator import itemgetter
 import time
+import logging
 
 from odoo import api, fields, models, _
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
@@ -18,7 +18,7 @@ class AccountFiscalPosition(models.Model):
     name = fields.Char(string='Fiscal Position', required=True)
     active = fields.Boolean(default=True,
         help="By unchecking the active field, you may hide a fiscal position without deleting it.")
-    company_id = fields.Many2one('res.company', string='Company')
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True)
     account_ids = fields.One2many('account.fiscal.position.account', 'position_id', string='Account Mapping', copy=True)
     tax_ids = fields.One2many('account.fiscal.position.tax', 'position_id', string='Tax Mapping', copy=True)
     note = fields.Text('Notes', translate=True, help="Legal mentions that have to be printed on the invoices.")
@@ -223,6 +223,7 @@ class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = 'res.partner'
 
+    @api.depends_context('force_company')
     def _credit_debit_get(self):
         tables, where_clause, where_params = self.env['account.move.line'].with_context(company_id=self.env.company.id)._query_get()
         where_params = [tuple(self.ids)] + where_params
@@ -238,12 +239,20 @@ class ResPartner(models.Model):
                       """ + where_clause + """
                       GROUP BY account_move_line.partner_id, act.type
                       """, where_params)
+        treated = self.browse()
         for pid, type, val in self._cr.fetchall():
             partner = self.browse(pid)
             if type == 'receivable':
                 partner.credit = val
+                partner.debit = False
+                treated |= partner
             elif type == 'payable':
                 partner.debit = -val
+                partner.credit = False
+                treated |= partner
+        remaining = (self - treated)
+        remaining.debit = False
+        remaining.credit = False
 
     def _asset_difference_search(self, account_type, operator, operand):
         if operator not in ('<', '=', '>', '>=', '<='):
@@ -337,6 +346,7 @@ class ResPartner(models.Model):
         for partner in self:
             # Avoid useless work if has_unreconciled_entries is not relevant for this partner
             if not partner.active or not partner.is_company and partner.parent_id:
+                partner.has_unreconciled_entries = False
                 continue
             self.env.cr.execute(
                 """ SELECT 1 FROM(
@@ -424,6 +434,24 @@ class ResPartner(models.Model):
     trust = fields.Selection([('good', 'Good Debtor'), ('normal', 'Normal Debtor'), ('bad', 'Bad Debtor')], string='Degree of trust you have in this debtor', default='normal', company_dependent=True)
     invoice_warn = fields.Selection(WARNING_MESSAGE, 'Invoice', help=WARNING_HELP, default="no-message")
     invoice_warn_msg = fields.Text('Message for Invoice')
+    # Computed fields to order the partners as suppliers/customers according to the
+    # amount of their generated incoming/outgoing account moves 
+    supplier_rank = fields.Integer(default=0)
+    customer_rank = fields.Integer(default=0)
+
+    def _get_name_search_order_by_fields(self):
+        res = super()._get_name_search_order_by_fields()
+        partner_search_mode = self.env.context.get('res_partner_search_mode')
+        if not partner_search_mode in ('customer', 'supplier'):
+            return res
+        order_by_field = 'COALESCE(res_partner.%s, 0) DESC,'
+        if partner_search_mode == 'customer':
+            field = 'customer_rank'
+        else:
+            field = 'supplier_rank'
+
+        order_by_field = order_by_field % field
+        return '%s, %s' % (res, order_by_field % field) if res else order_by_field
 
     def _compute_bank_count(self):
         bank_data = self.env['res.partner.bank'].read_group([('partner_id', 'in', self.ids)], ['partner_id'], ['partner_id'])
@@ -471,3 +499,16 @@ class ResPartner(models.Model):
             ('state', '=', 'posted')
         ], limit=1)
         return can_edit_vat and not (bool(has_invoice))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        search_partner_mode = self.env.context.get('res_partner_search_mode')
+        is_customer = search_partner_mode == 'customer'
+        is_supplier = search_partner_mode == 'supplier'
+        if search_partner_mode:
+            for vals in vals_list:
+                if is_customer and 'customer_rank' not in vals:
+                    vals['customer_rank'] = 1
+                elif is_supplier and 'supplier_rank' not in vals:
+                    vals['supplier_rank'] = 1
+        return super().create(vals_list)

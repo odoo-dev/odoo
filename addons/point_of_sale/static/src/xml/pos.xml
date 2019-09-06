@@ -229,7 +229,12 @@
             </div>
             <div class="searchbox">
                 <input placeholder="Search Products" />
-                <span class="search-clear"></span>
+                <span class="search-clear left">
+                    <i class="fa fa-search" />
+                </span>
+                <span class="search-clear right">
+                    <i class="fa fa-remove" />
+                </span>
             </div>
         </header>
         <t t-if="widget.subcategories.length > 0">
@@ -246,8 +251,20 @@
     <t t-name="ProductListWidget">
         <div class='product-list-container'>
             <div class="product-list-scroller touch-scrollable">
-                <div class="product-list">
-                </div>
+                <t t-if="widget.product_list.length != 0">
+                    <div class="product-list">
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="product-list-empty">
+                        <t t-if="widget.product_list.length == 0 &amp;&amp; !!widget.search_word">
+                            <p>No results found for "<b t-esc="widget.search_word"></b>".</p>
+                        </t>
+                        <t t-else="">
+                            <p>There are no products in this category.</p>
+                        </t>
+                    </div>
+                </t>
             </div>
             <span class="placeholder-ScrollbarWidget" />
         </div>
@@ -547,6 +564,82 @@
         </div>
     </t>
 
+    <t t-name="PaymentScreenElectronicPayment">
+        <tr class="send_request paymentline electronic_payment"/>
+        <tr class="paymentline electronic_payment">
+            <t t-if="line.payment_status == 'pending'">
+                <td colspan="3">
+                    Payment request pending
+                </td>
+                <td colspan="2" class='button send_payment_request highlight' title="Send Payment Request" t-att-data-cid='line.cid'>
+                    Send
+                </td>
+            </t>
+            <t t-elif="line.payment_status == 'retry'">
+                <td colspan="3">
+                    Transaction cancelled
+                </td>
+                <td colspan="2" class='button send_payment_request highlight' title="Send Payment Request" t-att-data-cid='line.cid'>
+                    Retry
+                </td>
+            </t>
+            <t t-elif="line.payment_status == 'force_done'">
+                <td colspan="3">
+                    Connection error
+                </td>
+                <td colspan="2" class='button send_force_done' title="Force Done" t-att-data-cid='line.cid'>
+                    Force done
+                </td>
+            </t>
+            <t t-elif="line.payment_status == 'waitingCard'">
+                <td colspan="3">
+                    Waiting for card
+                </td>
+                <td colspan="2" class='button send_payment_cancel' title="Cancel Payment Request" t-att-data-cid='line.cid'>
+                    Cancel
+                </td>
+            </t>
+            <t t-elif="['waiting', 'waitingCancel'].includes(line.payment_status)">
+                <td colspan="3">
+                    Request sent
+                </td>
+                <td colspan="2">
+                    <i class='fa fa-spinner fa-spin' role='img'/>
+                </td>
+            </t>
+            <t t-elif="line.payment_status == 'reversing'">
+                <td colspan="3">
+                    Reversal request sent to terminal
+                </td>
+                <td colspan="2">
+                    <i class='fa fa-spinner fa-spin' role='img'/>
+                </td>
+            </t>
+            <t t-elif="line.payment_status == 'done'">
+                <t t-if="line.can_be_reversed">
+                    <td colspan="3">
+                        Payment Successful
+                    </td>
+                    <td colspan="2" class='button send_payment_reversal' title="Reverse Payment" t-att-data-cid='line.cid'>
+                        Reverse
+                    </td>
+                </t>
+                <t t-else="">
+                    <td colspan="5">
+                        Payment Successful
+                    </td>
+                </t>
+            </t>
+            <t t-elif="line.payment_status == 'reversed'">
+                <tr class="paymentline electronic_payment">
+                    <td colspan="5">
+                        Payment reversed
+                    </td>
+                 </tr>
+             </t>
+        </tr>
+    </t>
+
     <t t-name="PaymentScreen-Paymentlines">
         <t t-if="!paymentlines.length">
             <div class='paymentlines-empty'>
@@ -582,10 +675,16 @@
                         <t t-if='line.selected'>
                             <tr class='paymentline selected'>
                                 <td class='col-due'> <t t-esc='widget.format_currency_no_symbol(order.get_due(line))' /> </td>
-                                <td class='col-tendered edit'>
-                                    <t t-esc='widget.inputbuffer' />
-                                    <!-- <t t-esc='line.get_amount()' /> -->
-                                </td>
+                                <t t-if="line &amp;&amp; line.payment_status &amp;&amp; ['done', 'waitingCard', 'waiting', 'reversing', 'reversed'].includes(line.payment_status)">
+                                    <td class='col-tendered'>
+                                        <t t-esc='widget.format_currency_no_symbol(line.get_amount())' />
+                                    </td>
+                                </t>
+                                <t t-else="">
+                                    <td class='col-tendered edit'>
+                                        <t t-esc='widget.inputbuffer' />
+                                    </td>
+                                </t>
                                 <t t-if='order.get_change(line)'>
                                     <td class='col-change highlight' >
                                         <t t-esc='widget.format_currency_no_symbol(order.get_change(line))' />
@@ -596,7 +695,18 @@
                                 </t>
 
                                 <td class='col-name' > <t t-esc='line.name' /> </td>
-                                <td class='delete-button' t-att-data-cid='line.cid' aria-label="Delete" title="Delete"> <i class='fa fa-times-circle' /> </td>
+                                <t t-if="line &amp;&amp; line.payment_status &amp;&amp; ['done', 'reversed', 'reversing'].includes(line.payment_status)">
+                                    <td/>
+                                </t>
+                                <t t-else=''>
+                                    <td class='delete-button' t-att-data-cid='line.cid' aria-label="Delete" title="Delete">
+                                        <i class='fa fa-times-circle'/>
+                                    </td>
+                                </t>
+
+                                <t t-if="line &amp;&amp; line.payment_status">
+                                    <t t-call="PaymentScreenElectronicPayment"/>
+                                </t>
                             </tr>
                         </t>
                         <t t-if='!line.selected'>
@@ -609,7 +719,14 @@
                                      </t>
                                 </td>
                                 <td class='col-name'> <t t-esc='line.name' /> </td>
-                                <td class='delete-button' t-att-data-cid='line.cid' aria-label="Delete" title="Delete"> <i class='fa fa-times-circle' /> </td>
+                                <t t-if="line &amp;&amp; line.payment_status &amp;&amp; ['done', 'reversed', 'reversing'].includes(line.payment_status)">
+                                    <td/>
+                                </t>
+                                <t t-else=''>
+                                    <td class='delete-button' t-att-data-cid='line.cid' aria-label="Delete" title="Delete">
+                                        <i class='fa fa-times-circle'/>
+                                    </td>
+                                </t>
                             </tr>
                         </t>
                     </t>
@@ -707,6 +824,9 @@
                                 </div>
                             </t>
                         </t>
+                        <div t-attf-class='button js_email #{widget.pos.get_client() ? "" : "oe_hidden"}'>
+                            <i class='fa fa-inbox' /> Email
+                        </div>
                         <t t-if='widget.pos.config.tip_product_id'>
                             <div class='button js_tip'>
                                 <i class='fa fa-heart' /> Tip
@@ -824,7 +944,7 @@
                                     <t t-esc="widget.format_currency_no_symbol(line.price_with_tax_before_discount)"/>
                                 </t>
                                 <t t-else="">
-                                    <t t-esc="widget.format_currency_no_symbol(line.price_lst)"/>
+                                    <t t-esc="widget.format_currency_no_symbol(line.price)"/>
                                 </t>
                             </div>
                         </t>
@@ -921,7 +1041,16 @@
                 <br/>
             </div>
 
-            <div class='after-footer' />
+            <div class='after-footer'>
+                <t t-foreach='paymentlines' t-as='line'>
+                    <t t-if='line.ticket'>
+                        <br />
+                        <div class="pos-payment-terminal-receipt">
+                            <t t-raw='line.ticket'/>
+                        </div>
+                    </t>
+                </t>
+            </div>
 
             <br/>
             <div class="pos-receipt-order-data">
@@ -1031,6 +1160,23 @@
                         Ok
                     </div>
                 </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="SyncErrorPopupWidget">
+        <div role="dialog" class="modal-dialog">
+            <div class="popup popup-error">
+                <header class="title"><t t-esc=" widget.options.title || 'Error' " /></header>
+                <main class="body traceback"><t t-esc=" widget.options.body || '' "/></main>
+                <footer class="footer">
+                    <div class="button cancel">
+                        Ok
+                    </div>
+                    <div class="button stop_showing_sync_errors">
+                        Don't show again
+                    </div>
+                </footer>
             </div>
         </div>
     </t>
@@ -1449,18 +1595,18 @@
             <span class="orders touch-scrollable">
 
                 <t t-foreach="widget.pos.get_order_list()" t-as="order">
-                    <t t-if='order === widget.pos.get_order()'>
+                    <t t-if="order === widget.pos.get_order()">
                         <span class="order-button select-order selected" t-att-data-uid="order.uid">
-                            <span class='order-sequence'>
-                                <t t-esc='order.sequence_number' />
+                            <span class="order-sequence">
+                                <t t-esc="order.sequence_number" />
                             </span>
                             <t t-esc="moment(order.creation_date).format('hh:mm')"/>
                         </span>
                     </t>
-                    <t t-if='order !== widget.pos.get_order()'>
+                    <t t-if="order !== widget.pos.get_order()">
                         <span class="order-button select-order" t-att-data-uid="order.uid">
-                            <span class='order-sequence'>
-                                <t t-esc='order.sequence_number' />
+                            <span class="order-sequence">
+                                <t t-esc="order.sequence_number" />
                             </span>
                         </span>
                     </t>

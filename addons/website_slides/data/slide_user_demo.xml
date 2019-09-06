@@ -80,6 +80,8 @@
         <field name="message_id" ref="website_slides.message_channel_0_demo"/>
     </record>
 
+    <function model="slide.channel" name="message_subscribe"
+            eval="[ref('website_slides.slide_channel_demo_0_gard_0')], [ref('base.partner_admin'), ref('base.partner_demo'), ref('base.partner_demo_portal')]"/>
 
     <!-- CHANNEL 1: Taking care of Trees -->
     <!-- ================================================== -->
@@ -189,7 +191,13 @@
         <field name="rating">6</field>
         <field name="feedback">Interesting. Could be great to include more examples.</field>
         <field name="message_id" ref="website_slides.message_channel_1_portal"/>
+        <field name="publisher_comment">Thanks for the feedback! We just updated first lessons to better include newcomers.</field>
+        <field name="publisher_id" ref="base.partner_admin"/>
+        <field name="publisher_datetime" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d %H:%M')"/>
     </record>
+
+    <function model="slide.channel" name="message_subscribe"
+            eval="[ref('website_slides.slide_channel_demo_1_gard1')], [ref('base.partner_admin'), ref('base.partner_demo'), ref('base.partner_demo_portal')]"/>
 
 
     <!-- CHANNEL 2: Trees, Wood and Garden -->
@@ -220,5 +228,8 @@
         <field name="vote">1</field>
         <field name="quiz_attempts_count">2</field>
     </record>
+
+    <function model="slide.channel" name="message_subscribe"
+            eval="[ref('website_slides.slide_channel_demo_2_gard2')], [ref('base.partner_admin'), ref('base.partner_demo')]"/>
 
 </data></odoo>

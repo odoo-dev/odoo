@@ -6,8 +6,8 @@ from odoo import api, fields, models, tools
 class MaintenanceEquipment(models.Model):
     _inherit = 'maintenance.equipment'
 
-    employee_id = fields.Many2one('hr.employee', string='Assigned to Employee', tracking=True)
-    department_id = fields.Many2one('hr.department', string='Assigned to Department', tracking=True)
+    employee_id = fields.Many2one('hr.employee', string='Assigned Employee', tracking=True)
+    department_id = fields.Many2one('hr.department', string='Assigned Department', tracking=True)
     equipment_assign_to = fields.Selection(
         [('department', 'Department'), ('employee', 'Employee'), ('other', 'Other')],
         string='Used By',
@@ -85,6 +85,8 @@ class MaintenanceRequest(models.Model):
                 r.owner_user_id = r.employee_id.user_id.id
             elif r.equipment_id.equipment_assign_to == 'department':
                 r.owner_user_id = r.department_id.manager_id.user_id.id
+            else:
+                r.owner_user_id = False
 
     @api.onchange('employee_id', 'department_id')
     def onchange_department_or_employee_id(self):

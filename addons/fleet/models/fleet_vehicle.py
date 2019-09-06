@@ -25,7 +25,7 @@ class FleetVehicle(models.Model):
         help='License plate number of the vehicle (i = plate number for a car)')
     vin_sn = fields.Char('Chassis Number', help='Unique number written on the vehicle motor (VIN/SN number)', copy=False)
     driver_id = fields.Many2one('res.partner', 'Driver', tracking=True, help='Driver of the vehicle', copy=False)
-    future_driver_id = fields.Many2one('res.partner', 'Future Driver', tracking=True, help='Next Driver of the vehicle', copy=False)
+    future_driver_id = fields.Many2one('res.partner', 'Future Driver', tracking=True, help='Next Driver of the vehicle', copy=False, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     model_id = fields.Many2one('fleet.vehicle.model', 'Model',
         tracking=True, required=True, help='Model of the vehicle')
     manager_id = fields.Many2one('res.users', related='model_id.manager_id')
@@ -88,7 +88,7 @@ class FleetVehicle(models.Model):
     @api.depends('model_id.brand_id.name', 'model_id.name', 'license_plate')
     def _compute_vehicle_name(self):
         for record in self:
-            record.name = record.model_id.brand_id.name + '/' + record.model_id.name + '/' + (record.license_plate or _('No Plate'))
+            record.name = (record.model_id.brand_id.name or '') + '/' + (record.model_id.name or '') + '/' + (record.license_plate or _('No Plate'))
 
     def _get_odometer(self):
         FleetVehicalOdometer = self.env['fleet.vehicle.odometer']

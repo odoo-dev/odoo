@@ -26,8 +26,10 @@ class ResCompany(models.Model):
 
     @api.depends('l10n_ar_afip_responsibility_type_id')
     def _compute_l10n_ar_company_requires_vat(self):
-        for rec in self.filtered(lambda x: x.l10n_ar_afip_responsibility_type_id.code == '1'):
-            rec.l10n_ar_company_requires_vat = True
+        recs_requires_vat = self.filtered(lambda x: x.l10n_ar_afip_responsibility_type_id.code == '1')
+        recs_requires_vat.l10n_ar_company_requires_vat = True
+        remaining = self - recs_requires_vat
+        remaining.l10n_ar_company_requires_vat = False
 
     def _localization_use_documents(self):
         """ Argentinian localization use documents """

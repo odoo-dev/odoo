@@ -2,10 +2,12 @@ odoo.define('web.field_one_to_many_tests', function (require) {
 "use strict";
 
 var AbstractField = require('web.AbstractField');
+var AbstractStorageService = require('web.AbstractStorageService');
 var FormView = require('web.FormView');
 var KanbanRecord = require('web.KanbanRecord');
 var ListRenderer = require('web.ListRenderer');
 var NotificationService = require('web.NotificationService');
+var RamStorage = require('web.RamStorage');
 var relationalFields = require('web.relational_fields');
 var testUtils = require('web.test_utils');
 var fieldUtils = require('web.field_utils');
@@ -938,7 +940,7 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
                 mockRPC: function (route, args) {
                     if (args.method === 'write') {
-                        assert.deepEqual(args.args[1].turtles, [[4, 2, false], [1, 1, { "turtle_int": 2 }], [1, 3, { "turtle_int": 3 }]],
+                        assert.deepEqual(args.args[1].turtles, [[1, 2, { "turtle_int": 1 }], [1, 1, { "turtle_int": 2 }], [1, 3, { "turtle_int": 3 }]],
                             "should change all lines that have changed (the first one doesn't change because it has the same sequence)");
                     }
                     return this._super.apply(this, arguments);
@@ -2253,7 +2255,7 @@ QUnit.module('fields', {}, function () {
         });
 
         QUnit.test('one2many kanban: edition', async function (assert) {
-            assert.expect(17);
+            assert.expect(23);
 
             this.data.partner.records[0].p = [2];
             var form = await createView({
@@ -2284,6 +2286,22 @@ QUnit.module('fields', {}, function () {
                     '</field>' +
                     '</form>',
                 res_id: 1,
+                mockRPC: function (route, args) {
+                    if (route === '/web/dataset/call_kw/partner/write') {
+                        var commands = args.args[1].p;
+                        assert.strictEqual(commands.length, 2,
+                            'should have generated two commands');
+                        assert.strictEqual(commands[0][0], 0,
+                            'generated command should be ADD WITH VALUES');
+                        assert.strictEqual(commands[0][2].display_name, "new subrecord 3",
+                            'value of newly created subrecord should be "new subrecord 3"');
+                        assert.strictEqual(commands[1][0], 2,
+                            'generated command should be REMOVE AND DELETE');
+                        assert.strictEqual(commands[1][1], 2,
+                            'deleted record id should be 2');
+                    }
+                    return this._super.apply(this, arguments);
+                },
             });
 
             assert.ok(!form.$('.o_kanban_view .delete_icon').length,
@@ -2339,6 +2357,7 @@ QUnit.module('fields', {}, function () {
             assert.strictEqual($('.modal .modal-footer .o_btn_remove').length, 1,
                 'There should be a modal having Remove Button');
             await testUtils.dom.click($('.modal .modal-footer .o_btn_remove'));
+            assert.containsNone($('.o_modal'), "modal should have been closed");
             assert.strictEqual(form.$('.o_kanban_record:not(.o_kanban_ghost)').length, 3,
                 'should contain 3 records');
             await testUtils.dom.click(form.$('.o_kanban_view .delete_icon:first()'));
@@ -2347,6 +2366,9 @@ QUnit.module('fields', {}, function () {
                 'should contain 1 records');
             assert.strictEqual(form.$('.o_kanban_record span:first').text(), 'new subrecord 3',
                 'the remaining subrecord should be "new subrecord 3"');
+
+            // save and check that the correct command has been generated
+            await testUtils.form.clickSave(form);
             form.destroy();
         });
 
@@ -6609,7 +6631,7 @@ QUnit.module('fields', {}, function () {
 
             await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
             prom = testUtils.makeTestPromise();
-            testUtils.fields.editAndTrigger(form.$('.o_field_widget[name=int_field]'), '44',
+            await testUtils.fields.editAndTrigger(form.$('.o_field_widget[name=int_field]'), '44',
                 ['input', { type: 'keydown', which: $.ui.keyCode.TAB }]);
             prom.resolve();
             await testUtils.nextTick();
@@ -8541,6 +8563,148 @@ QUnit.module('fields', {}, function () {
             form.destroy();
         });
 
+        QUnit.test('column widths are kept when adding first record in o2m', async function (assert) {
+            assert.expect(2);
+
+            var form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: '<form>' +
+                            '<field name="p">' +
+                                '<tree editable="top">' +
+                                    '<field name="date"/>' +
+                                    '<field name="foo"/>' +
+                                '</tree>' +
+                            '</field>' +
+                        '</form>',
+            });
+
+            var width = form.$('th[data-name="date"]')[0].offsetWidth;
+
+            await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+
+            assert.containsOnce(form, '.o_data_row');
+            assert.strictEqual(form.$('th[data-name="date"]')[0].offsetWidth, width);
+
+            form.destroy();
+        });
+
+        QUnit.test('column widths are kept when editing a record in o2m', async function (assert) {
+            assert.expect(2);
+
+            this.data.partner.records[0].p = [2];
+
+            var form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: '<form>' +
+                            '<field name="p">' +
+                                '<tree editable="top">' +
+                                    '<field name="date"/>' +
+                                    '<field name="foo"/>' +
+                                '</tree>' +
+                            '</field>' +
+                        '</form>',
+                res_id: 1,
+                viewOptions: {
+                    mode: 'edit',
+                },
+            });
+
+            var width = form.$('th[data-name="date"]')[0].offsetWidth;
+
+            await testUtils.dom.click(form.$('.o_data_row .o_data_cell:first'));
+
+            assert.strictEqual(form.$('th[data-name="date"]')[0].offsetWidth, width);
+
+            var longVal = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed blandit, ' +
+                'justo nec tincidunt feugiat, mi justo suscipit libero, sit amet tempus ipsum ' +
+                'purus bibendum est.';
+            await testUtils.fields.editInput(form.$('.o_field_widget[name=foo]'), longVal);
+
+            assert.strictEqual(form.$('th[data-name="date"]')[0].offsetWidth, width);
+
+            form.destroy();
+        });
+
+        QUnit.test('column widths are kept when remove last record in o2m', async function (assert) {
+            assert.expect(1);
+
+            this.data.partner.records[0].p = [2];
+
+            var form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: '<form>' +
+                            '<field name="p">' +
+                                '<tree editable="top">' +
+                                    '<field name="date"/>' +
+                                    '<field name="foo"/>' +
+                                '</tree>' +
+                            '</field>' +
+                        '</form>',
+                res_id: 1,
+                viewOptions: {
+                    mode: 'edit',
+                },
+            });
+
+            var width = form.$('th[data-name="date"]')[0].offsetWidth;
+
+            await testUtils.dom.click(form.$('.o_data_row .o_list_record_remove'));
+
+            assert.strictEqual(form.$('th[data-name="date"]')[0].offsetWidth, width);
+
+            form.destroy();
+        });
+
+        QUnit.test('column widths are correct after toggling optional fields', async function (assert) {
+            assert.expect(2);
+
+            var RamStorageService = AbstractStorageService.extend({
+                storage: new RamStorage(),
+            });
+
+            this.data.partner.records[0].p = [2];
+
+            var form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: '<form>' +
+                            '<field name="p">' +
+                                '<tree editable="top">' +
+                                    '<field name="date" required="1"/>' + // we want the list to remain empty
+                                    '<field name="foo"/>' +
+                                    '<field name="int_field" optional="1"/>' +
+                                '</tree>' +
+                            '</field>' +
+                        '</form>',
+                services: {
+                    local_storage: RamStorageService,
+                },
+            });
+
+            // date fields have an hardcoded width, which apply when there is no
+            // record, and should be kept afterwards
+            let width = form.$('th[data-name="date"]')[0].offsetWidth;
+
+            // create a record to store the current widths, but discard it directly to keep
+            // the list empty (otherwise, the browser automatically computes the optimal widths)
+            await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+
+            assert.strictEqual(form.$('th[data-name="date"]')[0].offsetWidth, width);
+
+            await testUtils.dom.click(form.$('.o_optional_columns_dropdown_toggle'));
+            await testUtils.dom.click(form.$('div.o_optional_columns div.dropdown-item input'));
+
+            assert.strictEqual(form.$('th[data-name="date"]')[0].offsetWidth, width);
+
+            form.destroy();
+        });
     });
 });
 });

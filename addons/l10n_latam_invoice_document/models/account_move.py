@@ -31,12 +31,15 @@ class AccountMove(models.Model):
 
     @api.depends('name')
     def _compute_l10n_latam_document_number(self):
-        for rec in self.filtered(lambda x: x.name != '/'):
+        recs_with_name = self.filtered(lambda x: x.name != '/')
+        for rec in recs_with_name:
             name = rec.name
             doc_code_prefix = rec.l10n_latam_document_type_id.doc_code_prefix
             if doc_code_prefix and name:
                 name = name.split(" ", 1)[-1]
             rec.l10n_latam_document_number = name
+        remaining = self - recs_with_name
+        remaining.l10n_latam_document_number = False
 
     @api.onchange('l10n_latam_document_type_id', 'l10n_latam_document_number')
     def _inverse_l10n_latam_document_number(self):
@@ -51,11 +54,15 @@ class AccountMove(models.Model):
 
     @api.depends('l10n_latam_document_type_id', 'journal_id')
     def _compute_l10n_latam_sequence(self):
-        for rec in self.filtered('journal_id'):
-            rec.l10n_latam_sequence_id = rec.get_document_type_sequence()
+        recs_with_journal_id = self.filtered('journal_id')
+        for rec in recs_with_journal_id:
+            rec.l10n_latam_sequence_id = rec._get_document_type_sequence()
+        remaining = self - recs_with_journal_id
+        remaining.l10n_latam_sequence_id = False
 
     def _compute_l10n_latam_amount_and_taxes(self):
-        for invoice in self.filtered(lambda x: x.is_invoice(include_receipts=True)):
+        recs_invoice = self.filtered(lambda x: x.is_invoice(include_receipts=True))
+        for invoice in recs_invoice:
             tax_lines = invoice.line_ids.filtered('tax_line_id')
             included_taxes = invoice.l10n_latam_document_type_id and \
                 invoice.l10n_latam_document_type_id._filter_taxes_included(tax_lines.mapped('tax_line_id'))
@@ -75,16 +82,24 @@ class AccountMove(models.Model):
             invoice.l10n_latam_amount_tax = l10n_latam_amount_tax
             invoice.l10n_latam_amount_untaxed = l10n_latam_amount_untaxed
             invoice.l10n_latam_tax_ids = not_included_invoice_taxes
+        remaining = self - recs_invoice
+        remaining.l10n_latam_amount_tax = False
+        remaining.l10n_latam_amount_untaxed = False
+        remaining.l10n_latam_tax_ids = []
 
     def _compute_invoice_sequence_number_next(self):
         """ If journal use documents disable the next number header"""
         with_latam_document_number = self.filtered('l10n_latam_use_documents')
+        with_latam_document_number.invoice_sequence_number_next_prefix = False
+        with_latam_document_number.invoice_sequence_number_next = False
         return super(AccountMove, self - with_latam_document_number)._compute_invoice_sequence_number_next()
 
     def post(self):
-        for rec in self.filtered(lambda x: x.l10n_latam_use_documents and not x.l10n_latam_document_number):
+        for rec in self.filtered(lambda x: x.l10n_latam_use_documents and (not x.name or x.name == '/')):
             if not rec.l10n_latam_sequence_id:
                 raise UserError(_('No sequence or document number linked to invoice id %s') % rec.id)
+            if rec.type in ('in_receipt', 'out_receipt'):
+                raise UserError(_('We do not accept the usage of document types on receipts yet. '))
             rec.l10n_latam_document_number = rec.l10n_latam_sequence_id.next_by_id()
         return super().post()
 
@@ -134,7 +149,8 @@ class AccountMove(models.Model):
     @api.depends('journal_id', 'partner_id', 'company_id')
     def _compute_l10n_latam_documents(self):
         internal_type = self._context.get('internal_type', False)
-        for rec in self.filtered(lambda x: x.journal_id and x.l10n_latam_use_documents and x.partner_id):
+        recs_with_journal_partner = self.filtered(lambda x: x.journal_id and x.l10n_latam_use_documents and x.partner_id)
+        for rec in recs_with_journal_partner:
             document_types = self.env['l10n_latam.document.type'].search(rec._get_l10n_latam_documents_domain())
 
             # If internal_type is in context we try to search for an specific document. for eg used on debit notes
@@ -143,6 +159,9 @@ class AccountMove(models.Model):
 
             rec.l10n_latam_available_document_type_ids = document_types
             rec.l10n_latam_document_type_id = document_type and document_type[0]
+        remaining = self - recs_with_journal_partner
+        remaining.l10n_latam_available_document_type_ids = []
+        remaining.l10n_latam_document_type_id = False
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -170,7 +189,7 @@ class AccountMove(models.Model):
             ) for group, amounts in res]
         super(AccountMove, self - move_with_doc_type)._compute_invoice_taxes_by_group()
 
-    def get_document_type_sequence(self):
+    def _get_document_type_sequence(self):
         """ Method to be inherited by different localizations. """
         self.ensure_one()
         return self.env['ir.sequence']

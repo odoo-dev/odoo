@@ -16,8 +16,11 @@ class MrpProductProduce(models.TransientModel):
     @api.model
     def default_get(self, fields):
         res = super(MrpProductProduce, self).default_get(fields)
-        if self._context and self._context.get('active_id'):
-            production = self.env['mrp.production'].browse(self._context['active_id'])
+        production = self.env['mrp.production']
+        production_id = self.env.context.get('default_production_id') or self.env.context.get('active_id')
+        if production_id:
+            production = self.env['mrp.production'].browse(production_id)
+        if production.exists():
             serial_finished = (production.product_id.tracking == 'serial')
             todo_uom = production.product_uom_id.id
             todo_quantity = self._get_todo(production)
@@ -68,14 +71,15 @@ class MrpProductProduce(models.TransientModel):
         self.ensure_one()
         self._record_production()
         action = self.production_id.open_produce_product()
-        action['context'] = {'active_id': self.production_id.id}
+        action['context'] = {'default_production_id': self.production_id.id}
         return action
 
     def action_generate_serial(self):
         self.ensure_one()
         product_produce_wiz = self.env.ref('mrp.view_mrp_product_produce_wizard', False)
         self.finished_lot_id = self.env['stock.production.lot'].create({
-            'product_id': self.product_id.id
+            'product_id': self.product_id.id,
+            'company_id': self.production_id.company_id.id
         })
         return {
             'name': _('Produce'),
@@ -91,6 +95,7 @@ class MrpProductProduce(models.TransientModel):
         """ Save the current wizard and go back to the MO. """
         self.ensure_one()
         self._record_production()
+        self._check_company()
         return {'type': 'ir.actions.act_window_close'}
 
     def _get_todo(self, production):
@@ -124,12 +129,18 @@ class MrpProductProduce(models.TransientModel):
                             'raw_material_production_id': self.production_id.id,
                             'group_id': self.production_id.procurement_group_id.id,
                             'origin': self.production_id.name,
-                            'state': 'confirmed'
+                            'state': 'confirmed',
+                            'company_id': self.production_id.company_id.id,
                         }
                     else:
                         values = self.production_id._get_finished_move_value(line.product_id.id, 0, line.product_uom_id.id)
                     move_id = self.env['stock.move'].create(values)
                 line.move_id = move_id.id
+
+        # because of an ORM limitation (fields on transient models are not
+        # recomputed by updates in non-transient models), the related fields on
+        # this model are not recomputed by the creations above
+        self.invalidate_cache(['move_raw_ids', 'move_finished_ids'])
 
         # Save product produce lines data into stock moves/move lines
         quantity = self.qty_producing

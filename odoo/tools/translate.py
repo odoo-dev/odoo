@@ -603,7 +603,7 @@ class PoFileReader:
             translation = entry.msgstr
             found_code_occurrence = False
             for occurrence, line_number in entry.occurrences:
-                match = re.match(r'(model|model_terms):([\w.]+),([\w]+):(\w+)\.(\w+)', occurrence)
+                match = re.match(r'(model|model_terms):([\w.]+),([\w]+):(\w+)\.([\w-]+)', occurrence)
                 if match:
                     type, model_name, field_name, module, xmlid = match.groups()
                     yield {
@@ -632,24 +632,14 @@ class PoFileReader:
                         'src': source,
                         'value': translation,
                         'comments': comments,
-                        'res_id': int(line_number),
+                        'res_id': int(line_number or 0),
                         'module': module,
                     }
                     continue
 
                 match = re.match(r'(selection):([\w.]+),([\w]+)', occurrence)
                 if match:
-                    type, model_name, field_name = match.groups()
-                    yield {
-                        'type': type,
-                        'model': model_name,
-                        'name': model_name+','+field_name,
-                        'src': source,
-                        'value': translation,
-                        'comments': comments,
-                        'res_id': int(line_number),
-                        'module': module,
-                    }
+                    _logger.info("Skipped deprecated occurrence %s", occurrence)
                     continue
 
                 match = re.match(r'(sql_constraint|constraint):([\w.]+)', occurrence)
@@ -943,11 +933,6 @@ def trans_generate(lang, modules, cr):
                     field_name not in field_model._fields):
                 continue
             field = field_model._fields[field_name]
-
-            if isinstance(getattr(field, 'selection', None), (list, tuple)):
-                name = "%s,%s" % (record.model, field_name)
-                for dummy, val in field.selection:
-                    push_translation(module, 'selection', name, 0, val)
 
         for field_name, field in record._fields.items():
             if field.translate:

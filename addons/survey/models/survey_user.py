@@ -199,11 +199,15 @@ class SurveyUserInputLine(models.Model):
     _name = 'survey.user_input_line'
     _description = 'Survey User Input Line'
     _rec_name = 'user_input_id'
+    _order = 'question_sequence,id'
 
+    # survey data
     user_input_id = fields.Many2one('survey.user_input', string='User Input', ondelete='cascade', required=True)
-    question_id = fields.Many2one('survey.question', string='Question', ondelete='cascade', required=True)
-    page_id = fields.Many2one(related='question_id.page_id', string="Page", readonly=False)
     survey_id = fields.Many2one(related='user_input_id.survey_id', string='Survey', store=True, readonly=False)
+    question_id = fields.Many2one('survey.question', string='Question', ondelete='cascade', required=True)
+    page_id = fields.Many2one(related='question_id.page_id', string="Section", readonly=False)
+    question_sequence = fields.Integer('Sequence', related='question_id.sequence', store=True)
+    # answer
     skipped = fields.Boolean('Skipped')
     answer_type = fields.Selection([
         ('text', 'Text'),
@@ -219,7 +223,16 @@ class SurveyUserInputLine(models.Model):
     value_free_text = fields.Text('Free Text answer')
     value_suggested = fields.Many2one('survey.label', string="Suggested answer")
     value_suggested_row = fields.Many2one('survey.label', string="Row answer")
-    answer_score = fields.Float('Score given for this choice')
+    answer_score = fields.Float('Score')
+    answer_is_correct = fields.Boolean('Correct', compute='_compute_answer_is_correct')
+
+    @api.depends('value_suggested', 'question_id')
+    def _compute_answer_is_correct(self):
+        for answer in self:
+            if answer.value_suggested and answer.question_id.question_type in ['simple_choice', 'multiple_choice']:
+                answer.answer_is_correct = answer.value_suggested.is_correct
+            else:
+                answer.answer_is_correct = False
 
     @api.constrains('skipped', 'answer_type')
     def _answered_or_skipped(self):
@@ -405,7 +418,7 @@ class SurveyUserInputLine(models.Model):
         old_uil.sudo().unlink()
 
         if answer_tag in post and post[answer_tag].strip():
-            vals.update({'answer_type': 'suggestion', 'value_suggested': post[answer_tag]})
+            vals.update({'answer_type': 'suggestion', 'value_suggested': int(post[answer_tag])})
         else:
             vals.update({'answer_type': None, 'skipped': True})
 
@@ -441,7 +454,8 @@ class SurveyUserInputLine(models.Model):
             for key in ca_dict:
                 # '-1' indicates 'comment count as an answer' so do not need to record it
                 if key != ('%s_%s' % (answer_tag, '-1')):
-                    vals.update({'answer_type': 'suggestion', 'value_suggested': ca_dict[key]})
+                    val = ca_dict[key]
+                    vals.update({'answer_type': 'suggestion', 'value_suggested': bool(val) and int(val)})
                     self.create(vals)
         if comment_answer:
             vals.update({'answer_type': 'text', 'value_text': comment_answer, 'value_suggested': False})

@@ -15,7 +15,7 @@ import odoo
 from odoo import api, models, registry
 from odoo import SUPERUSER_ID
 from odoo.http import request
-from odoo.tools import config
+from odoo.tools import config, ormcache
 from odoo.tools.safe_eval import safe_eval
 from odoo.osv.expression import FALSE_DOMAIN, OR
 
@@ -87,6 +87,20 @@ class Http(models.AbstractModel):
             super(Http, cls)._auth_method_public()
 
     @classmethod
+    def _extract_website_page(cls, response):
+        if getattr(response, 'status_code', 0) != 200:
+            return False
+
+        main_object = getattr(response, 'qcontext', {}).get('main_object')
+        return main_object if getattr(main_object, '_name', False) == 'website.page' else False
+
+    @classmethod
+    def _dispatch(cls):
+        response = super(Http, cls)._dispatch()
+        request.env['website.visitor']._handle_webpage_dispatch(response, cls._extract_website_page(response))
+        return response
+
+    @classmethod
     def _add_dispatch_parameters(cls, func):
 
         # Force website with query string paramater, typically set from website selector in frontend navbar
@@ -117,18 +131,6 @@ class Http(models.AbstractModel):
 
         if request.routing_iteration == 1:
             request.website = request.website.with_context(request.context)
-
-    @classmethod
-    def _get_languages(cls):
-        if getattr(request, 'website', False):
-            return request.website.language_ids
-        return super(Http, cls)._get_languages()
-
-    @classmethod
-    def _get_language_codes(cls):
-        if getattr(request, 'website', False):
-            return request.website._get_languages()
-        return super(Http, cls)._get_language_codes()
 
     @classmethod
     def _get_default_lang(cls):
@@ -191,7 +193,7 @@ class Http(models.AbstractModel):
     @classmethod
     def _handle_exception(cls, exception):
         code = 500  # default code
-        is_website_request = bool(getattr(request, 'is_frontend', False) and getattr(request, 'website', False))
+        is_website_request = bool(getattr(request, 'is_frontend', False) and get_request_website())
         if not is_website_request:
             # Don't touch non website requests exception handling
             return super(Http, cls)._handle_exception(exception)

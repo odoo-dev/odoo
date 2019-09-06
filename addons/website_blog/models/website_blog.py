@@ -5,8 +5,6 @@ from datetime import datetime
 import random
 import json
 
-import itertools
-
 from odoo import api, models, fields, _
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.tools.translate import html_translate
@@ -22,6 +20,10 @@ class Blog(models.Model):
     name = fields.Char('Blog Name', required=True, translate=True)
     subtitle = fields.Char('Blog Subtitle', translate=True)
     active = fields.Boolean('Active', default=True)
+    content = fields.Html('Content', translate=html_translate, sanitize=False)
+    cover_properties = fields.Text(
+        'Cover Properties',
+        default='{"background-image": "none", "background-color": "oe_black", "opacity": "0.2", "resize_class": "cover_mid"}')
 
     def write(self, vals):
         res = super(Blog, self).write(vals)
@@ -48,7 +50,8 @@ class Blog(models.Model):
                 subtype = 'mail.mt_note'
         return super(Blog, self).message_post(parent_id=parent_id, subtype=subtype, **kwargs)
 
-    def all_tags(self, min_limit=1):
+    def all_tags(self, join=False, min_limit=1):
+        BlogTag = self.env['blog.tag']
         req = """
             SELECT
                 p.blog_id, count(*), r.blog_tag_id
@@ -65,13 +68,20 @@ class Blog(models.Model):
         """
         self._cr.execute(req, [tuple(self.ids)])
         tag_by_blog = {i.id: [] for i in self}
+        all_tags = set()
         for blog_id, freq, tag_id in self._cr.fetchall():
             if freq >= min_limit:
-                tag_by_blog[blog_id].append(tag_id)
+                if join:
+                    all_tags.add(tag_id)
+                else:
+                    tag_by_blog[blog_id].append(tag_id)
 
-        BlogTag = self.env['blog.tag']
+        if join:
+            return BlogTag.browse(all_tags)
+
         for blog_id in tag_by_blog:
             tag_by_blog[blog_id] = BlogTag.browse(tag_by_blog[blog_id])
+
         return tag_by_blog
 
 
@@ -115,35 +125,17 @@ class BlogPost(models.Model):
         for blog_post in self:
             blog_post.website_url = "/blog/%s/post/%s" % (slug(blog_post.blog_id), slug(blog_post))
 
-    @api.depends('post_date', 'visits')
-    def _compute_ranking(self):
-        res = {}
-        for blog_post in self:
-            if blog_post.id:  # avoid to rank one post not yet saved and so withtout post_date in case of an onchange.
-                age = datetime.now() - fields.Datetime.from_string(blog_post.post_date)
-                res[blog_post.id] = blog_post.visits * (0.5 + random.random()) / max(3, age.days)
-        return res
-
     def _default_content(self):
         return '''
-            <section class="s_text_block">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-12 mb16 mt16">
-                            <p class="o_default_snippet_text">''' + _("Start writing here...") + '''</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <p class="o_default_snippet_text">''' + _("Start writing here...") + '''</p>
         '''
-
     name = fields.Char('Title', required=True, translate=True, default='')
     subtitle = fields.Char('Sub Title', translate=True)
     author_id = fields.Many2one('res.partner', 'Author', default=lambda self: self.env.user.partner_id)
     active = fields.Boolean('Active', default=True)
     cover_properties = fields.Text(
         'Cover Properties',
-        default='{"background-image": "none", "background-color": "oe_black", "opacity": "0.2", "resize_class": ""}')
+        default='{"background-image": "none", "background-color": "oe_black", "opacity": "0.2", "resize_class": "cover_mid"}')
     blog_id = fields.Many2one('blog.blog', 'Blog', required=True, ondelete='cascade')
     tag_ids = fields.Many2many('blog.tag', string='Tags')
     content = fields.Html('Content', default=_default_content, translate=html_translate, sanitize=False)
@@ -162,8 +154,6 @@ class BlogPost(models.Model):
     write_uid = fields.Many2one('res.users', 'Last Contributor', index=True, readonly=True)
     author_avatar = fields.Binary(related='author_id.image_64', string="Avatar", readonly=False)
     visits = fields.Integer('No of Views', copy=False)
-    ranking = fields.Float(compute='_compute_ranking', string='Ranking')
-
     website_id = fields.Many2one(related='blog_id.website_id', readonly=True)
 
     @api.depends('content', 'teaser_manual')
@@ -173,7 +163,7 @@ class BlogPost(models.Model):
                 blog_post.teaser = blog_post.teaser_manual
             else:
                 content = html2plaintext(blog_post.content).replace('\n', ' ')
-                blog_post.teaser = content[:150] + '...'
+                blog_post.teaser = content[:200] + '...'
 
     def _set_teaser(self):
         for blog_post in self:
@@ -258,8 +248,11 @@ class BlogPost(models.Model):
     def _default_website_meta(self):
         res = super(BlogPost, self)._default_website_meta()
         res['default_opengraph']['og:description'] = res['default_twitter']['twitter:description'] = self.subtitle
-        blog_post_cover_properties = json.loads(self.cover_properties)
-        res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = blog_post_cover_properties.get('background-image', 'none')[4:-1]
+        res['default_opengraph']['og:type'] = 'article'
+        res['default_opengraph']['article:published_time'] = self.post_date
+        res['default_opengraph']['article:modified_time'] = self.write_date
+        res['default_opengraph']['article:tag'] = self.tag_ids.mapped('name')
+        res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = json.loads(self.cover_properties).get('background-image', 'none')[4:-1]
         res['default_opengraph']['og:title'] = res['default_twitter']['twitter:title'] = self.name
         res['default_meta_description'] = self.subtitle
         return res

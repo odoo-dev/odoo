@@ -112,6 +112,16 @@ class TestORM(TransactionCase):
         found = partner.search_read([('name', '=', 'Does not exists')], ['name'])
         self.assertEqual(len(found), 0)
 
+        # search_read with an empty array of fields
+        found = partner.search_read([], [], limit=1)
+        self.assertEqual(len(found), 1)
+        self.assertTrue(field in list(found[0]) for field in ['id', 'name', 'display_name', 'email'])
+
+        # search_read without fields
+        found = partner.search_read([], False, limit=1)
+        self.assertEqual(len(found), 1)
+        self.assertTrue(field in list(found[0]) for field in ['id', 'name', 'display_name', 'email'])
+
     def test_exists(self):
         partner = self.env['res.partner']
 
@@ -319,10 +329,13 @@ class TestInherits(TransactionCase):
         })
         foo_before, = user_foo.read()
         del foo_before['__last_update']
+        del foo_before['create_date']
+        del foo_before['write_date']
         user_bar = user_foo.copy({'login': 'bar'})
         foo_after, = user_foo.read()
         del foo_after['__last_update']
-
+        del foo_after['create_date']
+        del foo_after['write_date']
         self.assertEqual(foo_before, foo_after)
 
         self.assertEqual(user_bar.name, 'Foo (copy)')
@@ -339,11 +352,15 @@ class TestInherits(TransactionCase):
 
         foo_before, = user_foo.read()
         del foo_before['__last_update']
+        del foo_before['create_date']
+        del foo_before['write_date']
         del foo_before['login_date']
         partners_before = self.env['res.partner'].search([])
         user_bar = user_foo.copy({'partner_id': partner_bar.id, 'login': 'bar'})
         foo_after, = user_foo.read()
         del foo_after['__last_update']
+        del foo_after['create_date']
+        del foo_after['write_date']
         del foo_after['login_date']
         partners_after = self.env['res.partner'].search([])
 

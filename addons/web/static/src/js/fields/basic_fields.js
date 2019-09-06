@@ -1380,7 +1380,7 @@ var HandleWidget = AbstractField.extend({
     description: _lt("Handle"),
     noLabel: true,
     className: 'o_row_handle fa fa-arrows ui-sortable-handle',
-    widthFactor: 0,
+    widthInList: '33px',
     tagName: 'span',
     supportedFieldTypes: ['integer'],
 
@@ -1803,8 +1803,8 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
         }
         this.$('> img').remove();
         this.$el.prepend($img);
+
         $img.one('error', function () {
-            self._clearFile();
             $img.attr('src', self.placeholder);
             self.do_warn(_t("Image"), _t("Could not display the selected image."));
         });
@@ -1822,8 +1822,11 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
 
         if(this.nodeOptions.zoom) {
             var unique = this.recordData.__last_update;
-            var url = this._getImageUrl(this.model, this.res_id, 'image', unique);
+            var url = this._getImageUrl(this.model, this.res_id, 'image_1920', unique);
             var $img;
+            var imageField = _.find(Object.keys(this.recordData), function(o) {
+                return o.startsWith('image_');
+            });
 
             if(this.nodeOptions.background)
             {
@@ -1844,7 +1847,7 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
                 $img = this.$('img');
             }
 
-            if(this.recordData.image) {
+            if(this.recordData[imageField]) {
                 $img.attr('data-zoom', 1);
                 $img.attr('data-zoom-image', url);
 
@@ -1865,6 +1868,17 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
             }
         }
     },
+});
+
+var KanbanFieldBinaryImage = FieldBinaryImage.extend({
+    // In kanban views, there is a weird logic to determine whether or not a
+    // click on a card should open the record in a form view.  This logic checks
+    // if the clicked element has click handlers bound on it, and if so, does
+    // not open the record (assuming that the click will be handle by someone
+    // else).  In the case of this widget, there are clicks handler but they
+    // only apply in edit mode, which is never the case in kanban views, so we
+    // simply remove them.
+    events: {},
 });
 
 var FieldBinaryFile = AbstractFieldBinary.extend({
@@ -1941,7 +1955,7 @@ var FieldBinaryFile = AbstractFieldBinary.extend({
                     'download': true,
                     'data': utils.is_bin_size(this.value) ? null : this.value,
                 },
-                error: () => this.call('crash_manager', 'rpc_error', ...arguments),
+                error: (error) => this.call('crash_manager', 'rpc_error', error),
                 url: '/web/content',
             });
             ev.stopPropagation();
@@ -3266,6 +3280,7 @@ return {
     FieldPdfViewer: FieldPdfViewer,
     AbstractFieldBinary: AbstractFieldBinary,
     FieldBinaryImage: FieldBinaryImage,
+    KanbanFieldBinaryImage: KanbanFieldBinaryImage,
     FieldBoolean: FieldBoolean,
     BooleanToggle: BooleanToggle,
     FieldChar: FieldChar,
@@ -3278,7 +3293,7 @@ return {
     FieldFloatTime: FieldFloatTime,
     FieldFloatFactor: FieldFloatFactor,
     FieldFloatToggle: FieldFloatToggle,
-    FieldPercentage : FieldPercentage,
+    FieldPercentage: FieldPercentage,
     FieldInteger: FieldInteger,
     FieldMonetary: FieldMonetary,
     FieldPercentPie: FieldPercentPie,

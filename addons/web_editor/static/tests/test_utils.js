@@ -79,25 +79,24 @@ MockServer.include({
                         'data-drop-in=".note-editable" data-drop-near="p, h1, h2, h3, blockquote, .s_hr"></div>' +
                         '    <div data-js="sizing_y" data-selector=".s_hr, .test_option_all"></div>' +
                         '    <div data-js="colorpicker" data-selector=".test_option_all">' +
-                        '       <div class="dropdown-submenu">' +
-                        '           <a tabindex="-1" href="#" class="dropdown-item"><i class="fa fa-eyedropper"/>Background Color</a>' +
-                        '           <div class="dropdown-menu" role="menu"/>' +
-                        '       </div>' +
+                        '       <we-collapse-area>' +
+                        '           <we-toggler><i class="fa fa-eyedropper"/> Background Color</we-toggler>' +
+                        '           <we-collapse/>' +
+                        '       </we-collapse-area>' +
                         '    </div>' +
                         '    <div data-js="background" data-selector=".test_option_all">' +
-                        '       <a tabindex="-1" href="#" class="dropdown-item" data-choose-image="true" data-no-preview="true"><i class="fa fa-picture-o"/>Background Image</a>' +
+                        '       <we-button data-choose-image="true" data-no-preview="true"><i class="fa fa-picture-o"/> Background Image</we-button>' +
                         '    </div>' +
                         '    <div data-js="option_test" data-selector=".s_hr">' +
-                        '        <div class="dropdown-submenu">' +
-                        '            <a tabindex="-2" href="#" class="dropdown-item"><i class="fa fa-arrows-v"/>Alignment</a>' +
-                        '            <div class="dropdown-menu" role="menu">' +
-                        '                <a href="#" class="dropdown-item" data-select-class="align-items-start">Top</a>' +
-                        '                <a href="#" class="dropdown-item" data-select-class="align-items-center">Middle</a>' +
-                        '                <a href="#" class="dropdown-item" data-select-class="align-items-end">Bottom</a>' +
-                        '                <div class="dropdown-divider"/>' +
-                        '                <a href="#" class="dropdown-item" data-select-class="align-items-stretch">Equal height</a>' +
-                        '            </div>' +
-                        '        </div>' +
+                        '        <we-collapse-area>' +
+                        '            <we-toggler><i class="fa fa-arrows-v"/> Alignment</we-toggler>' +
+                        '            <we-collapse>' +
+                        '                <we-button data-select-class="align-items-start">Top</we-button>' +
+                        '                <we-button data-select-class="align-items-center">Middle</we-button>' +
+                        '                <we-button data-select-class="align-items-end">Bottom</we-button>' +
+                        '                <we-button data-select-class="align-items-stretch">Equal height</we-button>' +
+                        '            </we-collapse>' +
+                        '        </we-collapse-area>' +
                         '    </div>' +
                         '</div>';
                 return Promise.resolve(template);
@@ -151,40 +150,6 @@ var WysiwygTest = Wysiwyg.extend({
         this._super();
         this.$target.remove();
         this._parentToDestroyForTest.destroy();
-    },
-    /**
-     * @override
-     */
-    isUnbreakableNode: function (node) {
-        var Node = (node.tagName ? node : node.parentNode);
-        return (!this.options.useOnlyTestUnbreakable && this._super(node)) ||
-            !this.isEditableNode(node) ||
-            Node.tagName === "UNBREAKABLE" ||
-            (Node.className + '').indexOf('unbreakable') !== -1;
-    },
-    /**
-     * @override
-     */
-    isEditableNode: function (node) {
-        if (!$(node).closest(this.$el).length) {
-            return false;
-        }
-        while (node) {
-            if (node.tagName === "EDITABLE") {
-                return true;
-            }
-            if (node.tagName === "NOTEDITABLE") {
-                return false;
-            }
-            if ((node.className + '').indexOf('editable') !== -1) {
-                return true;
-            }
-            if (this.$el[0] === node) {
-                return true;
-            }
-            node = node.parentNode;
-        }
-        return false;
     },
 });
 
@@ -289,25 +254,24 @@ function wysiwygData(data) {
                         'data-drop-in=".note-editable" data-drop-near="p, h1, h2, h3, blockquote, .s_hr"></div>' +
                         '    <div data-js="sizing_y" data-selector=".s_hr, .test_option_all"></div>' +
                         '    <div data-js="colorpicker" data-selector=".test_option_all">' +
-                        '       <div class="dropdown-submenu">' +
-                        '           <a tabindex="-1" href="#" class="dropdown-item"><i class="fa fa-eyedropper"/>Background Color</a>' +
-                        '           <div class="dropdown-menu" role="menu"/>' +
-                        '       </div>' +
+                        '       <we-collapse-area>' +
+                        '           <we-toggler><i class="fa fa-eyedropper"/>Background Color</we-toggler>' +
+                        '           <we-collapse/>' +
+                        '       </we-collapse-area>' +
                         '    </div>' +
                         '    <div data-js="background" data-selector=".test_option_all">' +
-                        '       <a tabindex="-1" href="#" class="dropdown-item" data-choose-image="true" data-no-preview="true"><i class="fa fa-picture-o"/>Background Image</a>' +
+                        '       <we-button data-choose-image="true" data-no-preview="true"><i class="fa fa-picture-o"/> Background Image</we-button>' +
                         '    </div>' +
                         '    <div data-js="option_test" data-selector=".s_hr">' +
-                        '        <div class="dropdown-submenu">' +
-                        '            <a tabindex="-2" href="#" class="dropdown-item"><i class="fa fa-arrows-v"/>Alignment</a>' +
-                        '            <div class="dropdown-menu" role="menu">' +
-                        '                <a href="#" class="dropdown-item" data-select-class="align-items-start">Top</a>' +
-                        '                <a href="#" class="dropdown-item" data-select-class="align-items-center">Middle</a>' +
-                        '                <a href="#" class="dropdown-item" data-select-class="align-items-end">Bottom</a>' +
-                        '                <div class="dropdown-divider"/>' +
-                        '                <a href="#" class="dropdown-item" data-select-class="align-items-stretch">Equal height</a>' +
-                        '            </div>' +
-                        '        </div>' +
+                        '        <we-collapse-area>' +
+                        '            <we-toggler><i class="fa fa-arrows-v"/> Alignment</we-toggler>' +
+                        '            <we-collapse>' +
+                        '                <we-button data-select-class="align-items-start">Top</we-button>' +
+                        '                <we-button data-select-class="align-items-center">Middle</we-button>' +
+                        '                <we-button data-select-class="align-items-end">Bottom</we-button>' +
+                        '                <we-button data-select-class="align-items-stretch">Equal height</we-button>' +
+                        '            </we-collapse>' +
+                        '        </we-collapse-area>' +
                         '    </div>' +
                         '</div>';
                 }
@@ -508,9 +472,10 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
         keypress.keyCode = keypress.keyCode;
         var event = $.Event("keydown", keypress);
         $target.trigger(event);
+
         if (!event.isDefaultPrevented()) {
             if (keypress.key.length === 1) {
-                document.execCommand("insertText", 0, keypress.key);
+                textInput($target[0], keypress.key);
             } else {
                 console.warn('Native "' + keypress.key + '" is not supported in test');
             }
@@ -773,7 +738,39 @@ var keydown = function (key, $editable, options) {
     var $target = $(target.tagName ? target : target.parentNode);
     var event = $.Event("keydown", keyPress);
     $target.trigger(event);
+
+    if (!event.isDefaultPrevented()) {
+        if (keyPress.key.length === 1) {
+            textInput($target[0], keyPress.key);
+        } else {
+            console.warn('Native "' + keyPress.key + '" is not supported in test');
+        }
+    }
 };
+
+var textInput = function (target, char) {
+    var ev = new CustomEvent('textInput', {
+        bubbles: true,
+        cancelBubble: false,
+        cancelable: true,
+        composed: true,
+        data: char,
+        defaultPrevented: false,
+        detail: 0,
+        eventPhase: 3,
+        isTrusted: true,
+        returnValue: true,
+        sourceCapabilities: null,
+        type: "textInput",
+        which: 0,
+    });
+    ev.data = char;
+    target.dispatchEvent(ev);
+
+    if (!ev.defaultPrevented) {
+        document.execCommand("insertText", 0, ev.data);
+    }
+}
 
 return {
     wysiwygData: wysiwygData,

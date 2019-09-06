@@ -82,8 +82,7 @@ class MailThread(models.AbstractModel):
     message_is_follower = fields.Boolean(
         'Is Follower', compute='_compute_is_follower', search='_search_is_follower')
     message_follower_ids = fields.One2many(
-        'mail.followers', 'res_id', string='Followers',
-        domain=lambda self: [('res_model', '=', self._name)])
+        'mail.followers', 'res_id', string='Followers')
     message_partner_ids = fields.Many2many(
         comodel_name='res.partner', string='Followers (Partners)',
         compute='_get_followers', search='_search_follower_partners')
@@ -92,7 +91,7 @@ class MailThread(models.AbstractModel):
         compute='_get_followers', search='_search_follower_channels')
     message_ids = fields.One2many(
         'mail.message', 'res_id', string='Messages',
-        domain=lambda self: [('model', '=', self._name), ('message_type', '!=', 'user_notification')], auto_join=True)
+        domain=lambda self: [('message_type', '!=', 'user_notification')], auto_join=True)
     message_unread = fields.Boolean(
         'Unread Messages', compute='_get_message_unread',
         help="If checked new messages require your attention.")
@@ -424,7 +423,7 @@ class MailThread(models.AbstractModel):
     # ------------------------------------------------------
 
     def with_lang(self):
-        if 'lang' not in self._context:
+        if not self._context.get("lang"):
             return self.with_context(lang=self.env.user.lang)
         return self
 
@@ -792,7 +791,13 @@ class MailThread(models.AbstractModel):
 
         # Update message author if asked. We do it now because we need it for aliases (contact settings)
         if not author_id:
-            authors = self._mail_find_partner_from_emails([email_from], records=record_set)
+            if record_set:
+                authors = self._mail_find_partner_from_emails([email_from], records=record_set)
+            elif alias and alias.alias_parent_model_id and alias.alias_parent_thread_id:
+                records = self.env[alias.alias_parent_model_id.model].browse(alias.alias_parent_thread_id)
+                authors = self._mail_find_partner_from_emails([email_from], records=records)
+            else:
+                authors = self._mail_find_partner_from_emails([email_from], records=None)
             if authors:
                 message_dict['author_id'] = authors[0].id
 
@@ -879,7 +884,7 @@ class MailThread(models.AbstractModel):
         # compute references to find if message is a reply to an existing thread
         thread_references = message_dict['references'] or message_dict['in_reply_to']
         msg_references = [ref for ref in tools.mail_header_msgid_re.findall(thread_references) if 'reply_to' not in ref]
-        mail_messages = self.env['mail.message'].sudo().search([('message_id', 'in', msg_references)], limit=1)
+        mail_messages = self.env['mail.message'].sudo().search([('message_id', 'in', msg_references)], limit=1, order='id desc, message_id')
         is_a_reply = bool(mail_messages)
         reply_model, reply_thread_id = mail_messages.model, mail_messages.res_id
 
@@ -925,9 +930,10 @@ class MailThread(models.AbstractModel):
         if is_a_reply:
             dest_aliases = self.env['mail.alias'].search([('alias_name', 'in', rcpt_tos_localparts)], limit=1)
 
+            user_id = self._mail_find_user_for_gateway(email_from, alias=dest_aliases).id or self._uid
             route = self._routing_check_route(
                 message, message_dict,
-                (reply_model, reply_thread_id, custom_values, self._uid, dest_aliases),
+                (reply_model, reply_thread_id, custom_values, user_id, dest_aliases),
                 raise_exception=False)
             if route:
                 _logger.info(
@@ -955,15 +961,7 @@ class MailThread(models.AbstractModel):
             if dest_aliases:
                 routes = []
                 for alias in dest_aliases:
-                    user_id = alias.alias_user_id.id
-                    if not user_id:
-                        # TDE note: this could cause crashes, because no clue that the user
-                        # that send the email has the right to create or modify a new document
-                        # Fallback on user_id = uid
-                        # Note: recognized partners will be added as followers anyway
-                        # user_id = self._message_find_user_id(message)
-                        user_id = self._uid
-                        _logger.info('No matching user_id for the alias %s', alias.alias_name)
+                    user_id = self._mail_find_user_for_gateway(email_from, alias=alias).id or self._uid
                     route = (alias.alias_model_id.model, alias.alias_force_thread_id, safe_eval(alias.alias_defaults), user_id, alias)
                     route = self._routing_check_route(message, message_dict, route, raise_exception=True)
                     if route:
@@ -977,14 +975,15 @@ class MailThread(models.AbstractModel):
         if fallback_model:
             # no route found for a matching reference (or reply), so parent is invalid
             message_dict.pop('parent_id', None)
+            user_id = self._mail_find_user_for_gateway(email_from).id or self._uid
             route = self._routing_check_route(
                 message, message_dict,
-                (fallback_model, thread_id, custom_values, self._uid, None),
+                (fallback_model, thread_id, custom_values, user_id, None),
                 raise_exception=True)
             if route:
                 _logger.info(
                     'Routing mail from %s to %s with Message-Id %s: fallback to model:%s, thread_id:%s, custom_values:%s, uid:%s',
-                    email_from, email_to, message_id, fallback_model, thread_id, custom_values, self._uid)
+                    email_from, email_to, message_id, fallback_model, thread_id, custom_values, user_id)
                 return [route]
 
         # ValueError if no routes found and if no bounce occured
@@ -995,14 +994,14 @@ class MailThread(models.AbstractModel):
         )
 
     @api.model
-    def message_route_process(self, message, message_dict, routes):
+    def _message_route_process(self, message, message_dict, routes):
         self = self.with_context(attachments_mime_plainxml=True) # import XML attachments as text
         # postpone setting message_dict.partner_ids after message_post, to avoid double notifications
         original_partner_ids = message_dict.pop('partner_ids', [])
         thread_id = False
         for model, thread_id, custom_values, user_id, alias in routes or ():
             subtype_id = False
-            Model = self.env[model]
+            Model = self.env[model].with_context(mail_create_nosubscribe=True, mail_create_nolog=True)
             if not (thread_id and hasattr(Model, 'message_update') or hasattr(Model, 'message_new')):
                 raise ValueError(
                     "Undeliverable mail with Message-Id %s, model %s does not accept incoming emails" %
@@ -1011,14 +1010,14 @@ class MailThread(models.AbstractModel):
 
             # disabled subscriptions during message_new/update to avoid having the system user running the
             # email gateway become a follower of all inbound messages
-            MessageModel = Model.with_user(user_id).with_context(mail_create_nosubscribe=True, mail_create_nolog=True)
-            if thread_id and hasattr(MessageModel, 'message_update'):
-                thread = MessageModel.browse(thread_id)
+            ModelCtx = Model.with_user(user_id).sudo()
+            if thread_id and hasattr(ModelCtx, 'message_update'):
+                thread = ModelCtx.browse(thread_id)
                 thread.message_update(message_dict)
             else:
                 # if a new thread is created, parent is irrelevant
                 message_dict.pop('parent_id', None)
-                thread = MessageModel.message_new(message_dict, custom_values)
+                thread = ModelCtx.message_new(message_dict, custom_values)
                 thread_id = thread.id
                 subtype = thread._creation_subtype()
                 subtype_id = subtype.id if subtype else False
@@ -1105,7 +1104,7 @@ class MailThread(models.AbstractModel):
 
         # find possible routes for the message
         routes = self.message_route(message, msg_dict, model, thread_id, custom_values)
-        thread_id = self.message_route_process(message, msg_dict, routes)
+        thread_id = self._message_route_process(message, msg_dict, routes)
         return thread_id
 
     @api.model
@@ -1367,7 +1366,7 @@ class MailThread(models.AbstractModel):
             # Very unusual situation, be we should be fault-tolerant here
             message_id = "<%s@localhost>" % time.time()
             _logger.debug('Parsing Message without message-id, generating a random one: %s', message_id)
-        msg_dict['message_id'] = message_id
+        msg_dict['message_id'] = message_id.strip()
 
         if message.get('Subject'):
             msg_dict['subject'] = tools.decode_message_header(message, 'Subject')
@@ -1508,8 +1507,7 @@ class MailThread(models.AbstractModel):
         domain = [('email_normalized', 'in', normalized_emails)]
         if extra_domain:
             domain = expression.AND(domain, extra_domain)
-        Users = self.env['res.users'].sudo()
-        partners = Users.search(domain).mapped('partner_id')
+        partners = self.env['res.users'].sudo().search(domain, order='name ASC').mapped('partner_id')
         # return a search on partner to filter results current user should not see (multi company for example)
         return self.env['res.partner'].search([('id', 'in', partners.ids)])
 
@@ -1518,6 +1516,63 @@ class MailThread(models.AbstractModel):
         if extra_domain:
             domain = expression.AND(domain, extra_domain)
         return self.env['res.partner'].search(domain)
+
+    def _mail_find_user_for_gateway(self, email, alias=None):
+        """ Utility method to find user from email address that can create documents
+        in the target model. Purpose is to link document creation to users whenever
+        possible, for example when creating document through mailgateway.
+
+        Heuristic
+
+          * alias owner record: fetch in its followers for user with matching email;
+          * find any user with matching emails;
+          * try alias owner as fallback;
+
+        Note that standard search order is applied.
+
+        :param str email: will be sanitized and parsed to find email;
+        :param mail.alias alias: optional alias. Used to fetch owner followers
+          or fallback user (alias owner);
+        :param fallback_model: if not alias, related model to check access rights;
+
+        :return res.user user: user matching email or void recordset if none found
+        """
+        # find normalized emails and exclude aliases (to avoid subscribing alias emails to records)
+        normalized_email = tools.email_normalize(email)
+        catchall_domain = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain")
+        if normalized_email and catchall_domain:
+            left_part = normalized_email.split('@')[0] if normalized_email.split('@')[1] == catchall_domain.lower() else False
+            if left_part:
+                if self.env['mail.alias'].sudo().search_count([('alias_name', '=', left_part)]):
+                    return self.env['res.users']
+
+        if alias and alias.alias_parent_model_id and alias.alias_parent_thread_id:
+            followers = self.env['mail.followers'].search([
+                ('res_model', '=', alias.alias_parent_model_id.model),
+                ('res_id', '=', alias.alias_parent_thread_id)]
+            ).mapped('partner_id')
+        else:
+            followers = self.env['res.partner']
+
+        follower_users = self.env['res.users'].search([
+            ('partner_id', 'in', followers.ids), ('email_normalized', '=', normalized_email)
+        ], limit=1) if followers else self.env['res.users']
+        matching_user = follower_users[0] if follower_users else self.env['res.users']
+        if matching_user:
+            return matching_user
+
+        if not matching_user:
+            std_users = self.env['res.users'].sudo().search([('email_normalized', '=', normalized_email)], limit=1, order='name ASC')
+            matching_user = std_users[0] if std_users else self.env['res.users']
+        if matching_user:
+            return matching_user
+
+        if not matching_user and alias and alias.alias_user_id:
+            matching_user = alias and alias.alias_user_id
+        if matching_user:
+            return matching_user
+
+        return matching_user
 
     @api.model
     def _mail_find_partner_from_emails(self, emails, records=None, force_create=False):
@@ -1741,6 +1796,9 @@ class MailThread(models.AbstractModel):
 
         self = self.with_lang() # add lang to context imediatly since it will be usefull in various flows latter.
 
+        # Explicit access rights check, because display_name is computed as sudo.
+        self.check_access_rights('read')
+        self.check_access_rule('read')
         record_name = record_name or self.display_name
 
         partner_ids = set(partner_ids or [])
@@ -1900,7 +1958,7 @@ class MailThread(models.AbstractModel):
 
         if not partner_ids:
             _logger.warning('Message notify called without recipient_ids, skipping')
-            return self.env['mail_message']
+            return self.env['mail.message']
 
         if not (model and res_id):  # both value should be set or none should be set (record)
             model = False

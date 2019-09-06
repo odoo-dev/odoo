@@ -31,7 +31,7 @@
         ]"/>
     </record>
 
-    <!-- Invoice to ADHOC with vat cero and 21 (citi needs to guess operation type) -->
+    <!-- Invoice to ADHOC with vat cero and 21 -->
     <record id="demo_invoice_3" model="account.move">
         <field name="partner_id" ref="l10n_ar.res_partner_adhoc"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
@@ -45,7 +45,7 @@
         ]"/>
     </record>
 
-    <!-- Invoice to ADHOC with vat exempt and 21 (citi needs to guess operation type) -->
+    <!-- Invoice to ADHOC with vat exempt and 21 -->
     <record id="demo_invoice_4" model="account.move">
         <field name="partner_id" ref="l10n_ar.res_partner_adhoc"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
@@ -59,7 +59,7 @@
         ]"/>
     </record>
 
-    <!-- Invoice to ADHOC with all type of taxes (citi needs to guess operation type)  -->
+    <!-- Invoice to ADHOC with all type of taxes -->
     <record id="demo_invoice_5" model="account.move">
         <field name="partner_id" ref="l10n_ar.res_partner_adhoc"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
@@ -77,9 +77,7 @@
         ]"/>
     </record>
 
-    <!-- Invoice to cerro castor, fiscal position changes taxes to exempt
-    La cargamos aparte para poder cambiar el diario cuando la volvamos a cargar
-    con fe -->
+    <!-- Invoice to cerro castor, fiscal position changes taxes to exempt -->
     <record id="demo_invoice_6" model="account.move">
         <field name="partner_id" ref="res_partner_cerrocastor"/>
         <field name="fiscal_position_id" model="account.fiscal.position" eval="obj().search([('company_id', '=', obj().env.ref('l10n_ar.company_ri').id), ('name', '=', 'Operaciones exentas')], limit=1).id"/>
@@ -146,7 +144,7 @@
         <field name="currency_id" ref="base.USD"/>
     </record>
 
-    <!-- Invoice to ADHOC con muchas lineas para probar rounding "ERROR 1" (ver readme), con 4 ya daria error (precision decimal de monedas y producto en 2) -->
+    <!-- Invoice to ADHOC with many lines in order to prove rounding error, with 4 decimals of precision for the currency and 2 decimals for the product the error apperar -->
     <record id="demo_invoice_11" model="account.move">
         <field name="partner_id" ref="l10n_ar.res_partner_adhoc"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
@@ -162,7 +160,7 @@
         ]"/>
     </record>
 
-    <!-- Invoice to ADHOC con muchas lineas para probar rounding "ERROR 2" (ver readme), (se requiere usar precision decimal de precio producto en 4 para que de el error) -->
+    <!-- Invoice to ADHOC with many lines in order to test rounding error, it is required to use a 4 decimal precision in prodct in order to the error occur -->
     <record id="demo_invoice_12" model="account.move">
         <field name="partner_id" ref="l10n_ar.res_partner_adhoc"/>
         <field name="invoice_user_id" ref="base.user_demo"/>
@@ -178,8 +176,7 @@
         ]"/>
     </record>
 
-    <!-- Invoice to ADHOC con muchas lineas para probar factura en cero y rounding "ERROR 3" (ver readme), (se requiere usar precision decimal de precio producto en 4 para que de el error y cambiar el 260.59 por 260.60)
-   # TODO mejorar este caso demo porque con dos decimales queda en negativo (citi needs to guess operation type) -->
+    <!-- Invoice to ADHOC with many lines in order to test zero amount invoices y rounding error. it is required to set the product decimal precision to 4 and change 260.59 for 260.60 in order to reproduce the error -->
     <record id="demo_invoice_13" model="account.move">
         <field name="partner_id" ref="l10n_ar.res_partner_adhoc"/>
         <field name="invoice_user_id" ref="base.user_demo"/>

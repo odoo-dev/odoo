@@ -329,11 +329,13 @@ Possible children elements of the list view are:
         dynamic attributes based on record values. Only effects the current
         field, so e.g. ``invisible`` will hide the field but leave the same
         field of other records visible, it will not hide the column itself
-    ``width_factor`` (for ``editable``)
-        the column relative width (as the layout is fixed)
     ``width`` (for ``editable``)
-        the column width (as the layout is fixed). It is a string describing the
-        width css property, such as '100px'.
+        when there is no data in the list, the width of a column can be forced
+        by setting this attribute. The value can be an absolute width (e.g.
+        '100px'), or a relative weight (e.g. '3', meaning that this column will
+        be 3 times larger than the others). Note that when there are records in
+        the list, we let the browser automatically adapt the column's widths
+        according to their content, and this attribute is thus ignored.
 
     .. note:: if the list view is ``editable``, any field attribute from the
               :ref:`form view <reference/views/form>` is also valid and will
@@ -1074,8 +1076,8 @@ Possible children of the view element are:
     the progressbar
 
   ``colors`` (required)
-    JSON mapping the above field values to either "danger", "warning" or
-    "success" colors
+    JSON mapping the above field values to either "danger", "warning", "success"
+    or "muted" colors
 
   ``sum_field`` (optional)
     the name of the field whose column's records' values will be summed and
@@ -1367,6 +1369,25 @@ take the following attributes:
   view to open when the user create or edit a record. Note that if this attribute
   is not set, the gantt view will fall back to the id of the form view in the
   current action, if any.
+
+``thumbnails``
+  This allows to display a thumbnail next to groups name if the group is a relationnal field.
+  This expects a python dict which keys are the name of the field on the active model.
+  Values are the names of the field holding the thumbnail on the related model.
+
+  Example: tasks have a field user_id that reference res.users. The res.users model has a field image that holds the avatar,
+  then:
+.. code-block:: xml
+
+      <gantt
+        date_start="date_start"
+        date_stop="date_stop"
+        thumbnails="{'user_id': 'image_64'}"
+      >
+      </gantt>
+
+
+will display the users avatars next to their names when grouped by user_id
 
 .. _reference/views/diagram:
 

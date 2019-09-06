@@ -50,9 +50,15 @@ class CrmTeam(models.Model):
         """ % where_clause
         self.env.cr.execute(select_query, where_clause_args)
         quotation_data = self.env.cr.dictfetchall()
+        teams = self.browse()
         for datum in quotation_data:
-            self.browse(datum['team_id']).quotations_amount = datum['amount_total']
-            self.browse(datum['team_id']).quotations_count = datum['count']
+            team = self.browse(datum['team_id'])
+            team.quotations_amount = datum['amount_total']
+            team.quotations_count = datum['count']
+            teams |= team
+        remaining = (self - teams)
+        remaining.quotations_amount = 0
+        remaining.quotations_count = 0
 
     def _compute_sales_to_invoice(self):
         sale_order_data = self.env['sale.order'].read_group([
@@ -98,7 +104,7 @@ class CrmTeam(models.Model):
 
     def _graph_date_column(self):
         if self._context.get('in_sales_app'):
-            return 'date_order'
+            return 'date'
         return super(CrmTeam,self)._graph_date_column()
 
     def _graph_y_query(self):

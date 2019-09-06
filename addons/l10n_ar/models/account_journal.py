@@ -29,7 +29,7 @@ class AccountJournal(models.Model):
             ('CPERCEL', 'Product Coding - Online Vouchers'),
         ]
 
-    def get_journal_letter(self, counterpart_partner=False):
+    def _get_journal_letter(self, counterpart_partner=False):
         """ Regarding the AFIP responsibility of the company and the type of journal (sale/purchase), get the allowed
         letters. Optionally, receive the counterpart partner (customer/supplier) and get the allowed letters to work
         with him. This method is used to populate document types on journals and also to filter document types on
@@ -76,7 +76,7 @@ class AccountJournal(models.Model):
             letters = list(set(letters) & set(counterpart_letters))
         return letters
 
-    def get_journal_codes(self):
+    def _get_journal_codes(self):
         self.ensure_one()
         usual_codes = ['1', '2', '3', '6', '7', '8', '11', '12', '13']
         mipyme_codes = ['201', '202', '203', '206', '207', '208', '211', '212', '213']
@@ -120,7 +120,8 @@ class AccountJournal(models.Model):
 
     @api.constrains('type', 'l10n_ar_afip_pos_system', 'l10n_ar_afip_pos_number', 'l10n_ar_share_sequences',
                     'l10n_latam_use_documents')
-    def check_afip_configurations(self):
+
+    def _check_afip_configurations(self):
         """ Do not let to update journal if already have confirmed invoices """
         self.ensure_one()
         if self.company_id.country_id != self.env.ref('base.ar'):
@@ -146,11 +147,11 @@ class AccountJournal(models.Model):
         sequences.unlink()
 
         # Create Sequences
-        letters = self.get_journal_letter()
+        letters = self._get_journal_letter()
         internal_types = ['invoice', 'debit_note', 'credit_note']
         domain = [('country_id.code', '=', 'AR'), ('internal_type', 'in', internal_types),
                   '|', ('l10n_ar_letter', '=', False), ('l10n_ar_letter', 'in', letters)]
-        codes = self.get_journal_codes()
+        codes = self._get_journal_codes()
         if codes:
             domain.append(('code', 'in', codes))
         documents = self.env['l10n_latam.document.type'].search(domain)
@@ -163,9 +164,10 @@ class AccountJournal(models.Model):
         return sequences
 
     @api.constrains('l10n_ar_afip_pos_number')
-    def check_afip_pos_number(self):
+    def _check_afip_pos_number(self):
         missing_pos_number = self.filtered(
-            lambda x: x.type == 'sale' and x.l10n_latam_use_documents and x.l10n_ar_afip_pos_number == 0)
+            lambda x: x.type == 'sale' and x.l10n_latam_use_documents and x.company_id.country_id == self.env.ref('base.ar')
+                      and x.l10n_ar_afip_pos_number == 0)
         if missing_pos_number:
             raise ValidationError(_('Please define a valid AFIP POS number'))
 

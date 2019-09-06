@@ -115,13 +115,13 @@ class MailActivity(models.Model):
         return res
 
     # owner
-    res_id = fields.Integer('Related Document ID', index=True, required=True)
     res_model_id = fields.Many2one(
         'ir.model', 'Document Model',
         index=True, ondelete='cascade', required=True)
     res_model = fields.Char(
         'Related Document Model',
         index=True, related='res_model_id.model', compute_sudo=True, store=True, readonly=True)
+    res_id = fields.Many2oneReference(string='Related Document ID', index=True, required=True, model_field='res_model')
     res_name = fields.Char(
         'Document Name', compute='_compute_res_name', compute_sudo=True, store=True,
         help="Display name of the related document.", readonly=True)
@@ -173,7 +173,8 @@ class MailActivity(models.Model):
     @api.depends('res_model', 'res_id')
     def _compute_res_name(self):
         for activity in self:
-            activity.res_name = self.env[activity.res_model].browse(activity.res_id).display_name
+            activity.res_name = activity.res_model and \
+                self.env[activity.res_model].browse(activity.res_id).display_name
 
     @api.depends('date_deadline')
     def _compute_state(self):
@@ -224,6 +225,26 @@ class MailActivity(models.Model):
             self.activity_type_id = self.recommended_activity_type_id
 
     def _filter_access_rules(self, operation):
+        # write / unlink: valid for creator / assigned
+        if operation in ('write', 'unlink'):
+            valid = super(MailActivity, self)._filter_access_rules(operation)
+            if valid and valid == self:
+                return self
+        else:
+            valid = self.env[self._name]
+        return self._filter_access_rules_remaining(valid, operation, '_filter_access_rules')
+
+    def _filter_access_rules_python(self, operation):
+        # write / unlink: valid for creator / assigned
+        if operation in ('write', 'unlink'):
+            valid = super(MailActivity, self)._filter_access_rules_python(operation)
+            if valid and valid == self:
+                return self
+        else:
+            valid = self.env[self._name]
+        return self._filter_access_rules_remaining(valid, operation, '_filter_access_rules_python')
+
+    def _filter_access_rules_remaining(self, valid, operation, filter_access_rules_method):
         """ Return the subset of ``self`` for which ``operation`` is allowed.
         A custom implementation is done on activities as this document has some
         access rules and is based on related document for activities that are
@@ -238,19 +259,6 @@ class MailActivity(models.Model):
           * unlink: access rule OR
                     (``mail_post_access`` or write) rights on related documents);
         """
-        if self.env.is_superuser():
-            return self
-        if not self.check_access_rights(operation, raise_exception=False):
-            return self.env[self._name]
-
-        # write / unlink: valid for creator / assigned
-        if operation in ('write', 'unlink'):
-            valid = super(MailActivity, self)._filter_access_rules(operation)
-            if valid and valid == self:
-                return self
-        else:  # create / read: linked to document only, no access rules defined
-            valid = self.env[self._name]
-
         # compute remaining for hand-tailored rules
         remaining = self - valid
         remaining_sudo = remaining.sudo()
@@ -273,7 +281,7 @@ class MailActivity(models.Model):
                 doc_operation = 'write'
             right = self.env[doc_model].check_access_rights(doc_operation, raise_exception=False)
             if right:
-                valid_doc_ids = self.env[doc_model].browse(doc_ids)._filter_access_rules(doc_operation)
+                valid_doc_ids = getattr(self.env[doc_model].browse(doc_ids), filter_access_rules_method)(doc_operation)
                 valid += remaining.filtered(lambda activity: activity.res_model == doc_model and activity.res_id in valid_doc_ids.ids)
 
         return valid
@@ -312,6 +320,12 @@ class MailActivity(models.Model):
     @api.model
     def create(self, values):
         activity = super(MailActivity, self).create(values)
+        need_sudo = False
+        try:  # in multicompany, reading the partner might break
+            partner_id = activity.user_id.partner_id.id
+        except exceptions.AccessError:
+            need_sudo = True
+            partner_id = activity.user_id.sudo().partner_id.id
 
         # send a notification to assigned user; in case of manually done activity also check
         # target has rights on document otherwise we prevent its creation. Automated activities
@@ -320,9 +334,12 @@ class MailActivity(models.Model):
             if not activity.automated:
                 activity._check_access_assignation()
             if not self.env.context.get('mail_activity_quick_update', False):
-                activity.action_notify()
+                if need_sudo:
+                    activity.sudo().action_notify()
+                else:
+                    activity.action_notify()
 
-        self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[activity.user_id.partner_id.id])
+        self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[partner_id])
         if activity.date_deadline <= fields.Date.today():
             self.env['bus.bus'].sendone(
                 (self._cr.dbname, 'res.partner', activity.user_id.partner_id.id),
@@ -560,8 +577,7 @@ class MailActivityMixin(models.AbstractModel):
     activity_ids = fields.One2many(
         'mail.activity', 'res_id', 'Activities',
         auto_join=True,
-        groups="base.group_user",
-        domain=lambda self: [('res_model', '=', self._name)])
+        groups="base.group_user",)
     activity_state = fields.Selection([
         ('overdue', 'Overdue'),
         ('today', 'Today'),
@@ -613,9 +629,8 @@ class MailActivityMixin(models.AbstractModel):
                     break
                 if activity_type_id.decoration_type == 'warning':
                     exception_activity_type_id = activity_type_id
-            if exception_activity_type_id:
-                record.activity_exception_decoration = exception_activity_type_id.decoration_type
-                record.activity_exception_icon = exception_activity_type_id.icon
+            record.activity_exception_decoration = exception_activity_type_id and exception_activity_type_id.decoration_type
+            record.activity_exception_icon = exception_activity_type_id and exception_activity_type_id.icon
 
     def _search_activity_exception_decoration(self, operator, operand):
         return [('activity_ids.activity_type_id.decoration_type', operator, operand)]
@@ -630,6 +645,8 @@ class MailActivityMixin(models.AbstractModel):
                 record.activity_state = 'today'
             elif 'planned' in states:
                 record.activity_state = 'planned'
+            else:
+                record.activity_state = False
 
     @api.depends('activity_ids.date_deadline')
     def _compute_activity_date_deadline(self):

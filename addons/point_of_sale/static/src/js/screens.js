@@ -35,6 +35,7 @@ var rpc = require('web.rpc');
 var utils = require('web.utils');
 var field_utils = require('web.field_utils');
 var BarcodeEvents = require('barcodes.BarcodeEvents').BarcodeEvents;
+var Printer = require('point_of_sale.Printer').Printer;
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -76,7 +77,10 @@ var ScreenWidget = PosBaseWidget.extend({
     barcode_client_action: function(code){
         var partner = this.pos.db.get_partner_by_barcode(code.code);
         if(partner){
-            this.pos.get_order().set_client(partner);
+            if (this.pos.get_order().get_client() !== partner) {
+                this.pos.get_order().set_client(partner);
+                this.pos.get_order().set_pricelist(_.findWhere(this.pos.pricelists, {'id': partner.property_product_pricelist[0]}) || this.pos.default_pricelist);
+            }
             return true;
         }
         this.barcode_error_action(code);
@@ -127,6 +131,10 @@ var ScreenWidget = PosBaseWidget.extend({
     close: function(){
         if(this.pos.barcode_reader){
             this.pos.barcode_reader.reset_action_callbacks();
+        }
+
+        if(this.payment_interface){
+            this.payment_interface.close();
         }
     },
 
@@ -543,6 +551,7 @@ var OrderWidget = PosBaseWidget.extend({
                 selected_orderline.price_manually_set = true;
                 selected_orderline.set_unit_price(val);
             }
+            this.pos.send_current_order_to_customer_facing_display();
     	}
     },
     change_selected_order: function() {
@@ -811,7 +820,7 @@ var ProductCategoriesWidget = PosBaseWidget.extend({
 
         this.el.querySelector('.searchbox input').addEventListener('keydown',this.search_handler);
 
-        this.el.querySelector('.search-clear').addEventListener('click',this.clear_search_handler);
+        this.el.querySelector('.search-clear.right').addEventListener('click',this.clear_search_handler);
 
         if(this.pos.config.iface_vkeyboard && this.chrome.widget.keyboard){
             this.chrome.widget.keyboard.connect($(this.el.querySelector('.searchbox input')));
@@ -840,11 +849,11 @@ var ProductCategoriesWidget = PosBaseWidget.extend({
                     this.pos.get_order().add_product(products[0]);
                     this.clear_search();
             }else{
-                this.product_list_widget.set_product_list(products);
+                this.product_list_widget.set_product_list(products, query);
             }
         }else{
             products = this.pos.db.get_product_by_category(this.category.id);
-            this.product_list_widget.set_product_list(products);
+            this.product_list_widget.set_product_list(products, query);
         }
     },
 
@@ -867,6 +876,7 @@ var ProductListWidget = PosBaseWidget.extend({
         this.weight = options.weight || 0;
         this.show_scale = options.show_scale || false;
         this.next_screen = options.next_screen || false;
+        this.search_word = false;
 
         this.click_product_handler = function(){
             var product = self.pos.db.get_product_by_id(this.dataset.productId);
@@ -894,8 +904,9 @@ var ProductListWidget = PosBaseWidget.extend({
             this.renderElement();
         }, this);
     },
-    set_product_list: function(product_list){
+    set_product_list: function(product_list, search_word){
         this.product_list = product_list;
+        this.search_word = !!search_word ? search_word : false;
         this.renderElement();
     },
     get_product_image_url: function(product){
@@ -1130,6 +1141,7 @@ var ClientListScreenWidget = ScreenWidget.extend({
     init: function(parent, options){
         this._super(parent, options);
         this.partner_cache = new DomCache();
+        this.integer_client_details = ['country_id', 'state_id', 'property_product_pricelist'];
     },
 
     auto_back: true,
@@ -1330,29 +1342,34 @@ var ClientListScreenWidget = ScreenWidget.extend({
     // save was successfull.
     save_client_details: function(partner) {
         var self = this;
-        
+
         var fields = {};
         this.$('.client-details-contents .detail').each(function(idx,el){
-            fields[el.name] = el.value || false;
+            if (self.integer_client_details.includes(el.name)){
+                var parsed_value = parseInt(el.value, 10);
+                if (isNaN(parsed_value)){
+                    fields[el.name] = false;
+                }
+                else{
+                    fields[el.name] = parsed_value
+                }
+            }
+            else{
+                fields[el.name] = el.value || false;
+            }
         });
 
         if (!fields.name) {
             this.gui.show_popup('error',_t('A Customer Name Is Required'));
             return;
         }
-        
+
         if (this.uploaded_picture) {
-            fields.image = this.uploaded_picture;
+            fields.image_1920 = this.uploaded_picture;
         }
 
-        fields.id           = partner.id || false;
-        fields.country_id   = fields.country_id || false;
+        fields.id = partner.id || false;
 
-        if (fields.property_product_pricelist) {
-            fields.property_product_pricelist = parseInt(fields.property_product_pricelist, 10);
-        } else {
-            fields.property_product_pricelist = false;
-        }
         var contents = this.$(".client-details-contents");
         contents.off("click", ".button.save");
 
@@ -1364,11 +1381,11 @@ var ClientListScreenWidget = ScreenWidget.extend({
             })
             .then(function(partner_id){
                 self.saved_client_details(partner_id);
-            },function(err,ev){
-                ev.preventDefault();
+            }).catch(function(error){
+                error.event.preventDefault();
                 var error_body = _t('Your Internet connection is probably down.');
-                if (err.data) {
-                    var except = err.data;
+                if (error.message.data) {
+                    var except = error.message.data;
                     error_body = except.arguments && except.arguments[0] || except.message || error_body;
                 }
                 self.gui.show_popup('error',{
@@ -1614,7 +1631,7 @@ var ReceiptScreenWidget = ScreenWidget.extend({
         this.handle_auto_print();
     },
     handle_auto_print: function() {
-        if (this.should_auto_print()) {
+        if (this.should_auto_print() && !this.pos.get_order().is_to_email()) {
             this.print();
             if (this.should_close_immediately()){
                 this.click_next();
@@ -1629,7 +1646,7 @@ var ReceiptScreenWidget = ScreenWidget.extend({
     should_close_immediately: function() {
         var order = this.pos.get_order();
         var invoiced_finalized = order.is_to_invoice() ? order.finalized : true;
-        return this.pos.config.iface_print_via_proxy && this.pos.config.iface_print_skip_screen && invoiced_finalized;
+        return this.pos.proxy.printer && this.pos.config.iface_print_skip_screen && invoiced_finalized;
     },
     lock_screen: function(locked) {
         this._locked = locked;
@@ -1678,7 +1695,7 @@ var ReceiptScreenWidget = ScreenWidget.extend({
     print: function() {
         var self = this;
 
-        if (!this.pos.config.iface_print_via_proxy) { // browser (html) printing
+        if (!this.pos.proxy.printer) { // browser (html) printing
 
             // The problem is that in chrome the print() is asynchronous and doesn't
             // execute until all rpc are finished. So it conflicts with the rpc used
@@ -1864,6 +1881,13 @@ var PaymentScreenWidget = ScreenWidget.extend({
     // handle both keyboard and numpad input. Accepts
     // a string that represents the key pressed.
     payment_input: function(input) {
+        var paymentline = this.pos.get_order().selected_paymentline;
+
+        // disable changing amount on paymentlines with running or done payments on a payment terminal
+        if (this.payment_interface && !['pending', 'retry'].includes(paymentline.get_payment_status())) {
+            return;
+        }
+
         var newbuf = this.gui.numpad_input(this.inputbuffer, input, {'firstinput': this.firstinput});
 
         this.firstinput = (newbuf.length === 0);
@@ -1876,15 +1900,14 @@ var PaymentScreenWidget = ScreenWidget.extend({
         if (newbuf !== this.inputbuffer) {
             this.inputbuffer = newbuf;
             var order = this.pos.get_order();
-            if (order.selected_paymentline) {
+            if (paymentline) {
                 var amount = this.inputbuffer;
 
                 if (this.inputbuffer !== "-") {
                     amount = field_utils.parse.float(this.inputbuffer);
                 }
 
-                order.selected_paymentline.set_amount(amount);
-                this.order_changes();
+                paymentline.set_amount(amount);
                 this.render_paymentlines();
                 this.$('.paymentline.selected .edit').text(this.format_currency_no_symbol(amount));
             }
@@ -1918,8 +1941,16 @@ var PaymentScreenWidget = ScreenWidget.extend({
     click_delete_paymentline: function(cid){
         var lines = this.pos.get_order().get_paymentlines();
         for ( var i = 0; i < lines.length; i++ ) {
-            if (lines[i].cid === cid) {
-                this.pos.get_order().remove_paymentline(lines[i]);
+            var line = lines[i];
+            if (line.cid === cid) {
+                // If a paymentline with a payment terminal linked to
+                // it is removed, the terminal should get a cancel
+                // request.
+                if (['waiting', 'waitingCard', 'timeout'].includes(lines[i].get_payment_status())) {
+                    line.payment_method.payment_terminal.send_payment_cancel(this.pos.get_order(), cid);
+                }
+
+                this.pos.get_order().remove_paymentline(line);
                 this.reset_input();
                 this.render_paymentlines();
                 return;
@@ -1936,6 +1967,83 @@ var PaymentScreenWidget = ScreenWidget.extend({
                 return;
             }
         }
+    },
+    /**
+     * link the proper functions to buttons for payment terminals
+     * send_payment_request, force_payment_done and cancel_payment.
+     */
+    render_payment_terminal: function() {
+        var self = this;
+        var order = this.pos.get_order();
+        if (!order) {
+            return;
+        }
+
+        this.$el.find('.send_payment_request').click(function () {
+            var cid = $(this).data('cid');
+            // Other payment lines can not be reversed anymore
+            order.get_paymentlines().forEach(function (line) {
+                line.can_be_reversed = false;
+            });
+
+            var line = self.pos.get_order().get_paymentline(cid);
+            var payment_terminal = line.payment_method.payment_terminal;
+            line.set_payment_status('waiting');
+            self.render_paymentlines();
+
+            payment_terminal.send_payment_request(cid).then(function (payment_successful) {
+                if (payment_successful) {
+                    line.set_payment_status('done');
+                    line.can_be_reversed = self.payment_interface.supports_reversals;
+                    self.reset_input(); // in case somebody entered a tip the amount tendered should be updated
+                } else {
+                    line.set_payment_status('retry');
+                }
+            }).finally(function () {
+                self.render_paymentlines();
+            });
+
+            self.render_paymentlines();
+        });
+        this.$el.find('.send_payment_cancel').click(function () {
+            var cid = $(this).data('cid');
+            var line = self.pos.get_order().get_paymentline($(this).data('cid'));
+            var payment_terminal = line.payment_method.payment_terminal;
+            line.set_payment_status('waitingCancel');
+            self.render_paymentlines();
+
+            payment_terminal.send_payment_cancel(self.pos.get_order(), cid).finally(function () {
+                line.set_payment_status('retry');
+                self.render_paymentlines();
+            });
+
+            self.render_paymentlines();
+        });
+        this.$el.find('.send_payment_reversal').click(function () {
+            var cid = $(this).data('cid');
+            var line = self.pos.get_order().get_paymentline($(this).data('cid'));
+            var payment_terminal = line.payment_method.payment_terminal;
+            line.set_payment_status('reversing');
+            self.render_paymentlines();
+
+            payment_terminal.send_payment_reversal(cid).then(function (reversal_successful) {
+                if (reversal_successful) {
+                    line.set_amount(0);
+                    line.set_payment_status('reversed');
+                } else {
+                    line.can_be_reversed = false;
+                    line.set_payment_status('done');
+                }
+                self.render_paymentlines();
+            });
+        });
+
+        this.$el.find('.send_force_done').click(function () {
+            var line = self.pos.get_order().get_paymentline($(this).data('cid'));
+            var payment_terminal = line.payment_method.payment_terminal;
+            line.set_payment_status('done');
+            self.render_paymentlines();
+        });
     },
     render_paymentlines: function() {
         var self  = this;
@@ -1964,20 +2072,37 @@ var PaymentScreenWidget = ScreenWidget.extend({
         });
             
         lines.appendTo(this.$('.paymentlines-container'));
+
+        this.render_payment_terminal();
     },
     compute_extradue: function (order) {
         var lines = order.get_paymentlines();
         var due   = order.get_due();
-        if (due && lines.length  && due !== order.get_due(lines[lines.length-1])) {
+        if (due && lines.length && (due !== order.get_due(lines[lines.length-1]) || lines[lines.length - 1].payment_status === 'reversed')) {
             return due;
         }
         return 0;
     },
     click_paymentmethods: function(id) {
-        var payment_method = this.pos.payment_methods_by_id[id]
-        this.pos.get_order().add_paymentline(payment_method);
-        this.reset_input();
-        this.render_paymentlines();
+        var payment_method = this.pos.payment_methods_by_id[id];
+        var order = this.pos.get_order();
+
+        if (order.electronic_payment_in_progress()) {
+            this.gui.show_popup('error',{
+                'title': _t('Error'),
+                'body':  _t('There is already an electronic payment in progress.'),
+            });
+        } else {
+            order.add_paymentline(payment_method);
+            this.reset_input();
+
+            this.payment_interface = payment_method.payment_terminal;
+            if (this.payment_interface) {
+                order.selected_paymentline.set_payment_status('pending');
+            }
+
+            this.render_paymentlines();
+        }
     },
     render_paymentmethods: function() {
         var self = this;
@@ -1996,6 +2121,11 @@ var PaymentScreenWidget = ScreenWidget.extend({
             this.$('.js_invoice').removeClass('highlight');
         }
     },
+    click_email: function(){
+        var order = this.pos.get_order();
+        order.set_to_email(!order.is_to_email());
+        this.$('.js_email').toggleClass('highlight', order.is_to_email());
+    },
     click_tip: function(){
         var self   = this;
         var order  = this.pos.get_order();
@@ -2012,14 +2142,18 @@ var PaymentScreenWidget = ScreenWidget.extend({
             'value': self.format_currency_no_symbol(value),
             'confirm': function(value) {
                 order.set_tip(field_utils.parse.float(value));
-                self.order_changes();
                 self.render_paymentlines();
             }
         });
     },
+    toggle_email_button: function() {
+        var client = this.pos.get_client();
+        this.$('.js_email').removeClass('oe_hidden', client);
+    },
     customer_changed: function() {
         var client = this.pos.get_client();
-        this.$('.js_customer_name').text( client ? client.name : _t('Customer') ); 
+        this.$('.js_customer_name').text( client ? client.name : _t('Customer') );
+        this.toggle_email_button();
     },
     click_set_customer: function(){
         this.gui.show_screen('clientlist');
@@ -2057,7 +2191,9 @@ var PaymentScreenWidget = ScreenWidget.extend({
         this.$('.js_invoice').click(function(){
             self.click_invoice();
         });
-
+        this.$('.js_email').click(function(){
+            self.click_email();
+        });
         this.$('.js_cashdrawer').click(function(){
             self.pos.proxy.printer.open_cashbox();
         });
@@ -2067,7 +2203,6 @@ var PaymentScreenWidget = ScreenWidget.extend({
         this.pos.get_order().clean_empty_paymentlines();
         this.reset_input();
         this.render_paymentlines();
-        this.order_changes();
         // that one comes from BarcodeEvents
         $('body').keypress(this.keyboard_handler);
         // that one comes from the pos, but we prefer to cover all the basis
@@ -2077,6 +2212,10 @@ var PaymentScreenWidget = ScreenWidget.extend({
     hide: function(){
         $('body').off('keypress', this.keyboard_handler);
         $('body').off('keydown', this.keyboard_keydown_handler);
+        var order = this.pos.get_order();
+        if (order) {
+            order.stop_electronic_payment();
+        }
         this._super();
     },
     // sets up listeners to watch for order changes
@@ -2087,11 +2226,14 @@ var PaymentScreenWidget = ScreenWidget.extend({
             return;
         }
         if(this.old_order){
-            this.old_order.unbind(null,null,this);
+            this.old_order.stop_electronic_payment();
+            this.old_order.unbind(null, null, this);
+            this.old_order.paymentlines.unbind(null, null, this);
         }
         order.bind('all',function(){
             self.order_changes();
         });
+        order.paymentlines.bind('all', self.order_changes.bind(self));
         this.old_order = order;
     },
     // called when the order is changed, used to show if
@@ -2141,6 +2283,17 @@ var PaymentScreenWidget = ScreenWidget.extend({
             }
         }
 
+        if (order.get_client && order.is_to_email() && !order.get_client().email) {
+            this.gui.show_popup('confirm', {
+                'title': _t('Please fill the Customer Email'),
+                'body': _t('This customer does not have an email address, define one or do not send an email'),
+                confirm: function () {
+                    this.gui.show_screen('clientlist');
+                },
+            });
+            return false;
+        }
+
         // if the change is too large, it's probably an input error, make the user confirm.
         if (!force_validation && order.get_total_with_tax() > 0 && (order.get_total_with_tax() * 1000 < order.get_total_paid())) {
             this.gui.show_popup('confirm',{
@@ -2182,13 +2335,32 @@ var PaymentScreenWidget = ScreenWidget.extend({
 
             invoiced.catch(this._handleFailedPushForInvoice.bind(this, order, false));
 
-            invoiced.then(function () {
+            invoiced.then(function (value) {
                 self.invoicing = false;
+                self.send_receipt_to_customer(value || false);
                 self.gui.show_screen('receipt');
             });
         } else {
-            this.pos.push_order(order);
-            this.gui.show_screen('receipt');
+            if (order.is_to_email()){
+                var ordered = this.pos.push_order(order);
+                ordered.then(function() {
+                    self.send_receipt_to_customer(false);
+                    self.gui.show_screen('receipt');
+                });
+                ordered.catch(function(value) {
+                    order.set_to_email(false);
+                    self.gui.show_screen('receipt');
+                    self.gui.show_popup('error',{
+                        'title': "Error: no internet connection",
+                        'body':  "There is no internet connection, impossible to send the email.",
+                    });
+                });
+            }
+            else {
+              this.pos.push_order(order);
+              self.gui.show_screen('receipt');
+            }
+
         }
 
     },
@@ -2198,6 +2370,31 @@ var PaymentScreenWidget = ScreenWidget.extend({
     validate_order: function(force_validation) {
         if (this.order_is_valid(force_validation)) {
             this.finalize_validation();
+        }
+    },
+
+    send_receipt_to_customer: function(invoice_server_id) {
+        var order = this.pos.get_order();
+        if(order.is_to_email()){
+            var data = {
+                widget: this,
+                pos: order.pos,
+                order: order,
+                receipt: order.export_for_printing(),
+                orderlines: order.get_orderlines(),
+                paymentlines: order.get_paymentlines(),
+            }
+
+            var receipt = QWeb.render('OrderReceipt', data);
+            var printer = new Printer();
+
+            printer.htmlToImg(receipt).then(function(ticket) {
+                rpc.query({
+                    model: 'pos.order',
+                    method: 'action_receipt_to_customer',
+                    args: [order.get_name(), order.get_client(), ticket, invoice_server_id],
+                });
+            });
         }
     },
 });

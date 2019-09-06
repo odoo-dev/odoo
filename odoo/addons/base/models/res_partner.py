@@ -137,9 +137,6 @@ class Partner(models.Model):
     def _default_category(self):
         return self.env['res.partner.category'].browse(self._context.get('category_id'))
 
-    def _default_company(self):
-        return self.env.company
-
     def _split_street_with_params(self, street_raw, street_format):
         return {'street': street_raw}
 
@@ -204,7 +201,7 @@ class Partner(models.Model):
     company_type = fields.Selection(string='Company Type',
         selection=[('person', 'Individual'), ('company', 'Company')],
         compute='_compute_company_type', inverse='_write_company_type')
-    company_id = fields.Many2one('res.company', 'Company', index=True, default=_default_company)
+    company_id = fields.Many2one('res.company', 'Company', index=True)
     color = fields.Integer(string='Color Index', default=0)
     user_ids = fields.One2many('res.users', 'partner_id', string='Users', auto_join=True)
     partner_share = fields.Boolean(
@@ -224,7 +221,7 @@ class Partner(models.Model):
     self = fields.Many2one(comodel_name=_name, compute='_compute_get_ids')
 
     _sql_constraints = [
-        ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name.'),
+        ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name'),
     ]
 
     def init(self):
@@ -233,8 +230,9 @@ class Partner(models.Model):
             self._cr.execute("""CREATE INDEX res_partner_vat_index ON res_partner (regexp_replace(upper(vat), '[^A-Z0-9]+', '', 'g'))""")
 
     @api.depends('is_company', 'name', 'parent_id.name', 'type', 'company_name')
+    @api.depends_context('show_address', 'show_address_only', 'show_email', 'html_format', 'show_vat')
     def _compute_display_name(self):
-        diff = dict(show_address=None, show_address_only=None, show_email=None, html_format=None, show_vat=False)
+        diff = dict(show_address=None, show_address_only=None, show_email=None, html_format=None, show_vat=None)
         names = dict(self.with_context(**diff).name_get())
         for partner in self:
             partner.display_name = names.get(partner.id)
@@ -310,35 +308,6 @@ class Partner(models.Model):
         for partner in self:
             p = partner.commercial_partner_id
             partner.commercial_company_name = p.is_company and p.name or partner.company_name
-
-    @api.model
-    def _get_default_image(self, partner_type, is_company, parent_id):
-        if getattr(threading.currentThread(), 'testing', False) or self._context.get('install_mode'):
-            return False
-
-        colorize, img_path, image_base64 = False, False, False
-
-        if partner_type in ['other'] and parent_id:
-            parent_image = self.browse(parent_id).image_1920
-            image_base64 = parent_image or None
-
-        if not image_base64 and partner_type == 'invoice':
-            img_path = get_module_resource('base', 'static/img', 'money.png')
-        elif not image_base64 and partner_type == 'delivery':
-            img_path = get_module_resource('base', 'static/img', 'truck.png')
-        elif not image_base64 and is_company:
-            img_path = get_module_resource('base', 'static/img', 'company_image.png')
-        elif not image_base64:
-            img_path = get_module_resource('base', 'static/img', 'avatar.png')
-            colorize = True
-
-        if img_path:
-            with open(img_path, 'rb') as f:
-                image_base64 = base64.b64encode(f.read())
-        if image_base64 and colorize:
-            image_base64 = tools.image_process(image_base64, colorize=True)
-
-        return image_base64
 
     @api.model
     def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
@@ -538,6 +507,15 @@ class Partner(models.Model):
 
     def write(self, vals):
         if vals.get('active') is False:
+            # DLE: It should not be necessary to modify this to make work the ORM. The problem was just the recompute
+            # of partner.user_ids when you create a new user for this partner, see test test_70_archive_internal_partners
+            # You modified it in a previous commit, see original commit of this:
+            # https://github.com/odoo/odoo/commit/9d7226371730e73c296bcc68eb1f856f82b0b4ed
+            #
+            # RCO: when creating a user for partner, the user is automatically added in partner.user_ids.
+            # This is wrong if the user is not active, as partner.user_ids only returns active users.
+            # Hence this temporary hack until the ORM updates inverse fields correctly.
+            self.invalidate_cache(['user_ids'], self._ids)
             for partner in self:
                 if partner.active and partner.user_ids:
                     raise ValidationError(_('You cannot archive a contact linked to an internal user.'))
@@ -579,10 +557,6 @@ class Partner(models.Model):
                 vals['website'] = self._clean_website(vals['website'])
             if vals.get('parent_id'):
                 vals['company_name'] = False
-            # compute default image in create, because computing gravatar in the onchange
-            # cannot be easily performed if default images are in the way
-            if not vals.get('image_1920'):
-                vals['image_1920'] = self._get_default_image(vals.get('type'), vals.get('is_company'), vals.get('parent_id'))
         partners = super(Partner, self).create(vals_list)
 
         if self.env.context.get('_partners_skip_fields_sync'):
@@ -739,15 +713,19 @@ class Partner(models.Model):
         return super(Partner, self)._search(args, offset=offset, limit=limit, order=order,
                                             count=count, access_rights_uid=access_rights_uid)
 
-    def _get_name_search_join_clause(self):
+    def _get_name_search_order_by_fields(self):
         return ''
 
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         self = self.with_user(name_get_uid or self.env.uid)
+        # as the implementation is in SQL, we force the recompute of fields if necessary
+        self.recompute(['display_name'])
+        self.flush()
         if args is None:
             args = []
-        if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
+        order_by_rank = self.env.context.get('res_partner_search_mode') 
+        if (name or order_by_rank) and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
             self.check_access_rights('read')
             where_query = self._where_calc(args)
             self._apply_ir_rules(where_query, 'read')
@@ -764,21 +742,19 @@ class Partner(models.Model):
 
             unaccent = get_unaccent_wrapper(self.env.cr)
 
-            join_clause = self._get_name_search_join_clause()
+            fields = self._get_name_search_order_by_fields()
 
             query = """SELECT res_partner.id
                          FROM {from_str}
-                         {join}
                       {where} ({email} {operator} {percent}
                            OR {display_name} {operator} {percent}
                            OR {reference} {operator} {percent}
                            OR {vat} {operator} {percent})
                            -- don't panic, trust postgres bitmap
-                     GROUP BY res_partner.id
-                     ORDER BY COUNT(*) DESC, {display_name} {operator} {percent} desc,
+                     ORDER BY {fields} {display_name} {operator} {percent} desc,
                               {display_name}
                     """.format(from_str=from_str,
-                               join=join_clause,
+                               fields=fields,
                                where=where_str,
                                operator=operator,
                                email=unaccent('res_partner.email'),

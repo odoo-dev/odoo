@@ -349,6 +349,35 @@ def topological_sort(elems):
     return result
 
 
+def merge_sequences(*iterables):
+    """ Merge several iterables into a list. The result is the union of the
+        iterables, ordered following the partial order given by the iterables,
+        with a bias towards the end for the last iterable::
+
+            seq = merge_sequences(['A', 'B', 'C'])
+            assert seq == ['A', 'B', 'C']
+
+            seq = merge_sequences(
+                ['A', 'B', 'C'],
+                ['Z'],                  # 'Z' can be anywhere
+                ['Y', 'C'],             # 'Y' must precede 'C';
+                ['A', 'X', 'Y'],        # 'X' must follow 'A' and precede 'Y'
+            )
+            assert seq == ['A', 'B', 'X', 'Y', 'C', 'Z']
+    """
+    # we use an OrderedDict to keep elements in order by default
+    deps = OrderedDict()                # {item: elems_before_item}
+    for iterable in iterables:
+        prev = None
+        for index, item in enumerate(iterable):
+            if not index:
+                deps.setdefault(item, [])
+            else:
+                deps.setdefault(item, []).append(prev)
+            prev = item
+    return topological_sort(deps)
+
+
 try:
     import xlwt
 
@@ -1196,6 +1225,25 @@ def format_date(env, value, lang_code=False, date_format=False):
 
     return babel.dates.format_date(value, format=date_format, locale=locale)
 
+def parse_date(env, value, lang_code=False):
+    '''
+        Parse the date from a given format. If it is not a valid format for the
+        localization, return the original string.
+
+        :param env: an environment.
+        :param string value: the date to parse.
+        :param string lang_code: the lang code, if not specified it is extracted from the
+            environment context.
+        :return: date object from the localized string
+        :rtype: datetime.date
+    '''
+    lang = env['res.lang']._lang_get(lang_code or env.context.get('lang') or 'en_US')
+    locale = babel.Locale.parse(lang.code)
+    try:
+        return babel.dates.parse_date(value, locale=locale)
+    except:
+        return value
+
 
 def format_datetime(env, value, tz=False, dt_format='medium', lang_code=False):
     """ Formats the datetime in a given format.
@@ -1255,6 +1303,14 @@ def format_time(env, value, tz=False, time_format='medium', lang_code=False):
         time_format = posix_to_ldml(lang.time_format, locale=locale)
 
     return babel.dates.format_time(value, format=time_format, locale=locale)
+
+
+def _format_time_ago(env, time_delta, lang_code=False):
+    if not lang_code:
+        langs = [code for code, _ in env['res.lang'].get_installed()]
+        lang_code = env.context['lang'] if env.context.get('lang') in langs else (env.user.company_id.partner_id.lang or langs[0])
+    locale = babel.Locale.parse(lang_code)
+    return babel.dates.format_timedelta(-time_delta, add_direction=True, locale=locale)
 
 
 def format_amount(env, amount, currency, lang_code=False):

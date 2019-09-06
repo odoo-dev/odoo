@@ -64,6 +64,7 @@ QUnit.module('Discuss', {
                         type: 'integer',
                     },
                 },
+                records: [],
             },
             'res.partner': {
                 fields: {
@@ -1118,6 +1119,53 @@ QUnit.test('drag and drop file in composer [REQUIRE NON-INCOGNITO WINDOW]', asyn
     discuss.destroy();
 });
 
+QUnit.test('non-deletable message attachments', async function (assert) {
+    assert.expect(2);
+
+    this.data['mail.message'].records = [{
+        attachment_ids: [{
+            filename: "text.txt",
+            id: 250,
+            mimetype: 'text/plain',
+            name: "text.txt",
+        }, {
+            filename: "image.png",
+            id: 251,
+            mimetype: 'image/png',
+            name: "image.png",
+        }],
+        author_id: [5, "Demo User"],
+        body: "<p>test</p>",
+        id: 1,
+        needaction: true,
+        needaction_partner_ids: [3],
+        model: 'some.document',
+        record_name: "SomeDocument",
+        res_id: 100,
+    }];
+
+    const discuss = await createDiscuss({
+        context: {},
+        data: this.data,
+        params: {},
+        services: this.services,
+        session: {
+            partner_id: 3,
+        },
+    });
+    assert.containsN(
+        discuss,
+        '.o_attachment',
+        2,
+        "should display 2 attachments");
+    assert.containsNone(
+        discuss.$('.o_attachment'),
+        'o_attachment_delete_cross',
+        "attachments should not be deletable");
+
+    discuss.destroy();
+});
+
 QUnit.test('reply to message from inbox', async function (assert) {
     assert.expect(11);
 
@@ -1513,6 +1561,70 @@ QUnit.test('custom-named DM conversation', async function (assert) {
     var $dm = discuss.$('.o_mail_discuss_item[data-thread-id=1]');
     assert.isVisible($dm, "should display DM in the discuss sidebar");
     assert.strictEqual($dm.find('.o_thread_name').text().trim(), "My Buddy");
+
+    discuss.destroy();
+});
+
+QUnit.test('receive channel message notification then delayed needaction notification', async function (assert) {
+    assert.expect(3);
+
+    const message = {
+        author_id: [5, 'Demo User'],
+        body: '<p>test</p>',
+        channel_ids: [1],
+        id: 100,
+        model: 'mail.channel',
+        needaction: true,
+        needaction_partner_ids: [3],
+        res_id: 1,
+    };
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_channel: [{
+                id: 1,
+                channel_type: 'channel',
+                name: "general",
+            }],
+        },
+    };
+
+    const discuss = await createDiscuss({
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+        session: {
+            partner_id: 3
+        },
+    });
+
+    const $inbox = discuss.$('.o_mail_discuss_item[data-thread-id="mailbox_inbox"]');
+    assert.hasClass(
+        $inbox,
+        'o_active',
+        "'Inbox' should be the currently active thread");
+    assert.containsNone(
+        discuss,
+        '.o_thread_message',
+        "inbox should contain no messages initially");
+
+    // simulate new needaction message posted on channnel
+    this.data['mail.message'].records.push(message);
+    // simulate receiving channel notification
+    discuss.call('bus_service', 'trigger', 'notification', [
+        [['myDB', 'mail.channel', 1], message]
+    ]);
+    // short delay after receiving needaction notification
+    await testUtils.nextTick();
+    // simulate receiving needaction message notification after a short delay
+    discuss.call('bus_service', 'trigger', 'notification', [
+        [['myDB', 'ir.needaction', 3], message]
+    ]);
+    await testUtils.nextTick();
+    assert.containsOnce(
+        discuss,
+        '.o_thread_message',
+        "inbox should contain one message");
 
     discuss.destroy();
 });
