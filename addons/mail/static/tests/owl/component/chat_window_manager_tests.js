@@ -618,8 +618,6 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
             }],
         },
     });
-    const channelId = 20;
-    const localChannelId = `mail.channel_${channelId}`;
     await this.start({
         async mockRPC(route, args) {
             if (args.method === 'channel_fetch_preview') {
@@ -659,9 +657,9 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     // Open thread
     document
         .querySelector(`.o_MessagingMenu_toggler`)
-        .click()
-    ;
+        .click();
     await testUtils.nextTick(); // re-render
+
     document
         .querySelector(`
             .o_MessagingMenu_dropdownMenu
@@ -679,8 +677,8 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
         > .note-editor
         > .note-editing-area
         > .note-editable`);
-    composerTextInput.innerHTML = "XDU for the win !";
-    composerTextInput.dispatchEvent(new window.KeyboardEvent('input'));
+    composerTextInput.focus();
+    document.execCommand('insertHTML', false, '<p>XDU for the win !</p>');
 
     // - Set attachments of the composer
     const composerLocalId = Object.keys(self.store.state.composers)[0];
@@ -706,20 +704,41 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     // -- Hide home menu
     await this.widget.call('chat_window', 'test:will_hide_home_menu');
     await this.widget.call('chat_window', 'test:hide_home_menu');
-    let domAttachments;
 
     // -- Check dom state
-    assert.strictEqual(document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop, 142, "chat window scrollTop should still be the same");
+    assert.strictEqual(
+        document
+            .querySelector(`.o_MessageList.o_Thread_messageList`)
+            .scrollTop,
+        142,
+        "chat window scrollTop should still be the same");
     composerTextInput = document.querySelector(`
         .o_ComposerTextInput
         > .note-editor
         > .note-editing-area
         > .note-editable`);
-    assert.strictEqual(composerTextInput.innerHTML, "XDU for the win !", "chat window composer should still have the same html input");
-    domAttachments = document.querySelectorAll(`.o_Composer .o_Attachment`);
-    assert.strictEqual(domAttachments.length, 2, "chat window composer should still have the same amount of attachments");
-    assert.strictEqual(domAttachments[0].dataset.attachmentLocalId, composerAttachmentLocalIds[0], "chat window composer should still have the same first attachment");
-    assert.strictEqual(domAttachments[1].dataset.attachmentLocalId, composerAttachmentLocalIds[1], "chat window composer should still have the same second attachment");
+    assert.strictEqual(composerTextInput.innerHTML, "<p>XDU for the win !</p>", "Chat window composer should still have the same html input");
+    assert.strictEqual(
+        document.querySelectorAll(`
+            .o_Composer
+            .o_Attachment`)
+        .length,
+        2,
+        "Chat window composer should still have the same amount of attachments");
+    assert.strictEqual(
+        document.querySelectorAll(`
+            .o_Composer
+            .o_Attachment[data-attachment-local-id="ir.attachment_1"]`)
+        .length,
+        1,
+        "Chat window composer should still have attachment with ID 1");
+    assert.strictEqual(
+        document.querySelectorAll(`
+            .o_Composer
+            .o_Attachment[data-attachment-local-id="ir.attachment_2"]`)
+        .length,
+        1,
+        "Chat window composer should still have attachment with ID 2");
 
 
     // - phase 2 : on showing menu
@@ -734,11 +753,28 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
         > .note-editor
         > .note-editing-area
         > .note-editable`);
-    assert.strictEqual(composerTextInput.innerHTML, "XDU for the win !", "chat window composer should still have the same html input");
-    domAttachments = document.querySelectorAll(`.o_Composer .o_Attachment`);
-    assert.strictEqual(domAttachments.length, 2, "chat window composer should still have the same amount of attachments");
-    assert.strictEqual(domAttachments[0].dataset.attachmentLocalId, composerAttachmentLocalIds[0], "chat window composer should still have the same first attachment");
-    assert.strictEqual(domAttachments[1].dataset.attachmentLocalId, composerAttachmentLocalIds[1], "chat window composer should still have the same second attachment");
+    assert.strictEqual(composerTextInput.innerHTML, "<p>XDU for the win !</p>", "chat window composer should still have the same html input");
+    assert.strictEqual(
+        document.querySelectorAll(`
+            .o_Composer
+            .o_Attachment`)
+        .length,
+        2,
+        "Chat window composer should still have the same amount of attachments");
+    assert.strictEqual(
+        document.querySelectorAll(`
+            .o_Composer
+            .o_Attachment[data-attachment-local-id="ir.attachment_1"]`)
+        .length,
+        1,
+        "Chat window composer should still have attachment with ID 1");
+    assert.strictEqual(
+        document.querySelectorAll(`
+            .o_Composer
+            .o_Attachment[data-attachment-local-id="ir.attachment_2"]`)
+        .length,
+        1,
+        "Chat window composer should still have attachment with ID 2");
 });
 
 QUnit.test('chat window: stored state behaviour on toggle home menu and close', async function (assert) {
@@ -797,8 +833,7 @@ QUnit.test('chat window: stored state behaviour on toggle home menu and close', 
     // Open thread
     document
         .querySelector(`.o_MessagingMenu_toggler`)
-        .click()
-    ;
+        .click();
     await testUtils.nextTick(); // re-render
     document
         .querySelector(`
@@ -817,8 +852,8 @@ QUnit.test('chat window: stored state behaviour on toggle home menu and close', 
         > .note-editor
         > .note-editing-area
         > .note-editable`);
-    composerTextInput.innerHTML = "XDU for the win !";
-    composerTextInput.dispatchEvent(new window.KeyboardEvent('input'));
+    composerTextInput.focus();
+    document.execCommand('insertHTML', false, '<p>XDU for the win !</p>');
 
     // - Set attachments of the composer
     const composerLocalId = Object.keys(self.store.state.composers)[0];
@@ -850,8 +885,8 @@ QUnit.test('chat window: stored state behaviour on toggle home menu and close', 
     chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
     assert.ok(chatWindowStates, "chat window manager should have storedChatWindowState key in store");
     assert.ok(chatWindowStates['mail.channel_20'], "chat window state should be stored");
-    assert.strictEqual(chatWindowStates['mail.channel_20'].scrollTop, 142, "chat window scrollTop value saved in store should be good");
-    assert.strictEqual(chatWindowStates['mail.channel_20'].composerTextInputHtmlContent, "XDU for the win !", "chat window composer text input html saved in store should be good");
+    assert.strictEqual(chatWindowStates['mail.channel_20'].scrollTop, 142, "Chat window thread scroll positions should be the same as before hiding home menu");
+    assert.strictEqual(chatWindowStates['mail.channel_20'].composerTextInputHtmlContent, "<p>XDU for the win !</p>", "chat window composer text input html saved in store should be good");
     assert.deepEqual(chatWindowStates['mail.channel_20'].composerAttachmentLocalIds, composerAttachmentLocalIds, "chat window composer attachments saved in store should be good");
 
     // - phase 2 : on showing menu
@@ -863,8 +898,8 @@ QUnit.test('chat window: stored state behaviour on toggle home menu and close', 
     chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
     assert.ok(chatWindowStates, "chat window manager should have storedChatWindowState key in store");
     assert.ok(chatWindowStates['mail.channel_20'], "chat window state should be stored");
-    assert.strictEqual(chatWindowStates['mail.channel_20'].scrollTop, 142, "chat window scrollTop value saved in store should be good");
-    assert.strictEqual(chatWindowStates['mail.channel_20'].composerTextInputHtmlContent, "XDU for the win !", "chat window composer text input html saved in store should be good");
+    assert.strictEqual(chatWindowStates['mail.channel_20'].scrollTop, 142, "Chat window thread scroll positions should be the same as before showing home menu");
+    assert.strictEqual(chatWindowStates['mail.channel_20'].composerTextInputHtmlContent, "<p>XDU for the win !</p>", "chat window composer text input html saved in store should be good");
     assert.deepEqual(chatWindowStates['mail.channel_20'].composerAttachmentLocalIds, composerAttachmentLocalIds, "chat window composer attachments saved in store should be good");
 
     // -- Close chat window
@@ -936,8 +971,7 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
     // openThread
     document
         .querySelector(`.o_MessagingMenu_toggler`)
-        .click()
-    ;
+        .click();
     await testUtils.nextTick(); // re-render
     document
         .querySelector(`
@@ -956,8 +990,8 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
         > .note-editor
         > .note-editing-area
         > .note-editable`);
-    composerTextInput.innerHTML = "XDU for the win !";
-    composerTextInput.dispatchEvent(new window.KeyboardEvent('input'));
+    composerTextInput.focus();
+    document.execCommand('insertHTML', false, '<p>XDU for the win !</p>');
 
     // - Set attachments of the composer
     const composerLocalId = Object.keys(self.store.state.composers)[0];
@@ -1012,10 +1046,8 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
         > .note-editor
         > .note-editing-area
         > .note-editable`);
-    assert.strictEqual(composerTextInput.innerHTML, "<p></p>", "chat window composer html input should be empty");
+    assert.strictEqual(composerTextInput.textContent, "", "chat window composer html input should be empty");
     assert.strictEqual(document.querySelectorAll(`.o_Composer .o_Attachment`).length, 0, "chat window composer should have no attachments");
-
-
 });
 
 QUnit.test('open 2 different chat windows: enough screen width', async function (assert) {
