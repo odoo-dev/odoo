@@ -1040,7 +1040,14 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
         .click();
     await testUtils.nextTick(); // re-render
 
-    assert.ok(document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop > 0, "chat window scrollTop should not be the same");
+    const scrollTopBeforeScrollToLastMessage = document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop;
+    // "scroll" to last message
+    document.querySelector(`.o_MessageList .o_Message:last-child`).scrollIntoView();
+
+    assert.strictEqual(
+        document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop,
+        scrollTopBeforeScrollToLastMessage,
+        "chat window should have been scrolled to last message on opening");
     composerTextInput = document.querySelector(`
         .o_ComposerTextInput
         > .note-editor
