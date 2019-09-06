@@ -81,6 +81,9 @@ class ChatWindow extends owl.store.ConnectedComponent {
     }
 
     getState(){
+        if (!this.refs.thread){
+            return;
+        }
         const {
             attachmentLocalIds,
             textInputHtmlContent
@@ -261,8 +264,6 @@ class ChatWindow extends owl.store.ConnectedComponent {
 }
 
 ChatWindow.defaultProps = {
-    composerInitialAttachmentLocalIds: [],
-    composerInitialTextInputHtmlContent: null,
     dockDirection: 'rtl',
     dockOffset: 0,
     hasCloseAsBackButton: false,
