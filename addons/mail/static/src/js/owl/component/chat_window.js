@@ -85,14 +85,13 @@ class ChatWindow extends owl.store.ConnectedComponent {
             return;
         }
         const {
-            attachmentLocalIds,
-            textInputHtmlContent
+            attachmentLocalIds: composerAttachmentLocalIds,
+            textInputHtmlContent: composerTextInputHtmlContent
         } = this.refs.thread.getComposerState();
-        const scrollTop = this.refs.thread.getScrollTop();
         return {
-            composerAttachmentLocalIds: attachmentLocalIds,
-            composerTextInputHtmlContent: textInputHtmlContent,
-            scrollTop
+            composerAttachmentLocalIds,
+            composerTextInputHtmlContent,
+            scrollTop: this.refs.thread.getScrollTop()
         };
     }
 
