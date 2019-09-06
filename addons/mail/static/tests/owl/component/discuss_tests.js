@@ -3644,6 +3644,114 @@ QUnit.test('composer: mention insertion', async function (assert) {
     await tribute.detach(editable);
 });
 
+QUnit.test('composer: add file as attachment', async function (assert) {
+    assert.expect(4);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: 'channel',
+                id: 20,
+                name: "General",
+            }],
+        },
+    });
+    await this.start({
+        debug :true,
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                return [];
+            }
+            return this._super(...arguments);
+        },
+        params: {
+            default_active_id: 'mail.channel_20',
+        },
+    });
+
+    const file = await testUtils.file.createFile({
+        name: 'text.txt',
+        content: 'hello, world',
+        contentType: 'text/plain',
+    });
+    const fakeEvent = {target:{files :[file]}};
+    this.discuss.component.refs.thread.refs.composer._onChangeAttachment(fakeEvent);
+
+    assert.ok(
+        document
+            .querySelector('.o_AttachmentList.o_Composer_attachmentList'),
+        "should have an attachment list");
+    assert.ok(
+        document
+            .querySelector(`
+            .o_AttachmentList.o_Composer_attachmentList
+            .o_Attachment
+            `),
+        "should have an attachment");
+    assert.ok(
+        document
+            .querySelector(`
+            .o_AttachmentList.o_Composer_attachmentList
+            .o_Attachment
+            .o_Attachment_image
+            `),
+        "should have an attachment image");
+    assert.ok(
+        document
+            .querySelector(`
+            .o_AttachmentList.o_Composer_attachmentList
+            .o_Attachment
+            .o_Attachment_main
+            `),
+        "should have an attachment main part");
+    assert.ok(
+        document
+            .querySelector(`
+            .o_AttachmentList.o_Composer_attachmentList
+            .o_Attachment
+            .o_Attachment_main
+            .o_Attachment_filename
+            `),
+        "should have an attachment filename");
+    assert.ok(
+        document
+            .querySelector(`
+            .o_AttachmentList.o_Composer_attachmentList
+            .o_Attachment
+            .o_Attachment_main
+            .o_Attachment_extension
+            `),
+        "should have an attachment extension");
+    assert.ok(
+        document
+            .querySelector(`
+            .o_AttachmentList.o_Composer_attachmentList
+            .o_Attachment
+            .o_Attachment_aside
+            `),
+        "should have an attachment aside");
+    assert.ok(
+        document
+            .querySelector(`
+            .o_AttachmentList.o_Composer_attachmentList
+            .o_Attachment
+            .o_Attachment_aside
+            .o_Attachment_asideItemUploaded
+            `),
+        "should have an attachment uploaded image");
+    assert.ok(
+        document
+            .querySelector(`
+            .o_AttachmentList.o_Composer_attachmentList
+            .o_Attachment
+            .o_Attachment_aside
+            .o_Attachment_asideItemUnlink
+            `),
+        "should have an attachment remove button");
+
+    await pause();
+});
+
 QUnit.test('composer state: text save and restore', async function (assert) {
     assert.expect(2);
 
