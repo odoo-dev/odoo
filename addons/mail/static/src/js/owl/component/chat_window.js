@@ -80,6 +80,10 @@ class ChatWindow extends owl.store.ConnectedComponent {
         return this.state.folded;
     }
 
+    /**
+     * Get the state of the chat window
+     * @returns {{composerAttachmentLocalIds: Array, composerTextInputHtmlContent: String, scrollTop: integer}|undefined}
+     */
     getState(){
         if (!this.refs.thread){
             return;
