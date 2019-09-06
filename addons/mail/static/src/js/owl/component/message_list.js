@@ -42,8 +42,7 @@ class MessageList extends owl.store.ConnectedComponent {
     mounted() {
         if (this.props.initialScrollTop !== undefined) {
             this.setScrollTop(this.props.initialScrollTop);
-        }
-        else if (
+        } else if (
             this.props.isScrollToEndOnMount &&
             this.storeProps.messages.length > 0
         ) {

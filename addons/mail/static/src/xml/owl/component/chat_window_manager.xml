@@ -22,9 +22,11 @@
             t-foreach="orderedVisible">
             <ChatWindow
                 chatWindowLocalId="data.chatWindowLocalId"
-                composerInitialAttachmentLocalIds="storeProps.storedChatWindowStates[data.chatWindowLocalId] and
+                composerInitialAttachmentLocalIds="
+                    storeProps.storedChatWindowStates[data.chatWindowLocalId] and
                     storeProps.storedChatWindowStates[data.chatWindowLocalId].composerAttachmentLocalIds"
-                composerInitialTextInputHtmlContent="storeProps.storedChatWindowStates[data.chatWindowLocalId] and
+                composerInitialTextInputHtmlContent="
+                    storeProps.storedChatWindowStates[data.chatWindowLocalId] and
                     storeProps.storedChatWindowStates[data.chatWindowLocalId].composerTextInputHtmlContent"
                 dockDirection="direction"
                 dockOffset="data.offset"
@@ -37,7 +39,8 @@
                 isDocked="!storeProps.isMobile"
                 isExpandable="!storeProps.isMobile and
                     data.chatWindowLocalId !== 'new_message'"
-                threadInitialScrollTop="storeProps.storedChatWindowStates[data.chatWindowLocalId] and
+                threadInitialScrollTop="
+                    storeProps.storedChatWindowStates[data.chatWindowLocalId] and
                     storeProps.storedChatWindowStates[data.chatWindowLocalId].scrollTop"
                 t-key="data.chatWindowLocalId"
                 t-on-o-focus-next-chat-window="_onFocusNextChatWindow"
