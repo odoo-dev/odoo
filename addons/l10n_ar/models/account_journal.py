@@ -120,7 +120,6 @@ class AccountJournal(models.Model):
 
     @api.constrains('type', 'l10n_ar_afip_pos_system', 'l10n_ar_afip_pos_number', 'l10n_ar_share_sequences',
                     'l10n_latam_use_documents')
-
     def _check_afip_configurations(self):
         """ Do not let to update journal if already have confirmed invoices """
         self.ensure_one()

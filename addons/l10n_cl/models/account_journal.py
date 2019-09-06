@@ -31,4 +31,5 @@ class AccountJournal(models.Model):
     def create(self, values):
         """ Create Document sequences after create the journal """
         res = super().create(values)
+        res.l10n_cl_create_document_sequences()
         return res

@@ -6,9 +6,6 @@ from odoo import models, fields
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-    l10n_cl_rut = fields.Char(related='partner_id.l10n_cl_rut', readonly=True)
-    l10n_cl_rut_dv = fields.Char(related='partner_id.l10n_cl_rut_dv', readonly=True)
-
     def _localization_use_documents(self):
         """ Chilean localization use documents """
         self.ensure_one()

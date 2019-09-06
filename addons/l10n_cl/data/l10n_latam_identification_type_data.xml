@@ -11,19 +11,6 @@
         <record model='l10n_latam.identification.type' id='it_RUN'>
             <field name='name'>RUN</field>
             <field name='description'>Cédula</field>
-<!--            <field name='sequence'>2</field>-->
-<!--            <field name='country_id' ref="base.cl"/>-->
-<!--        </record>-->
-<!--        <record model='l10n_latam.identification.type' id='it_CIe'>-->
-<!--            <field name='name'>CIe</field>-->
-<!--            <field name='description'>CI extranjera</field>-->
-<!--            <field name='sequence'>3</field>-->
-<!--            <field name='country_id' ref="base.cl"/>-->
-<!--        </record>-->
-<!--        <record model='l10n_latam.identification.type' id='it_PAS'>-->
-<!--            <field name='name'>PAS</field>-->
-<!--            <field name='description'>Pasaporte</field>-->
-<!--            <field name='sequence'>4</field>-->
             <field name='sequence'>12</field>
             <field name='country_id' ref="base.cl"/>
         </record>
