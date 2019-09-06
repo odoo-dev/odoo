@@ -73,12 +73,21 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
     }
 
     saveChatWindowsStates() {
-        const states = {};
-        for (const chatWindowLocalId in this.refs) {
-            states[chatWindowLocalId] = this.refs[chatWindowLocalId].getState();
-        }
         this.dispatch('updateChatWindowManager', {
-            storedChatWindowStates: states
+            storedChatWindowStates: Object
+                .entries(this.refs)
+                .reduce((acc, [refId, ref]) => {
+                    if (!refId.startsWith('chatWindow_')) {
+                        return acc;
+                    }
+                    if (ref.props.chatWindowLocalId === 'new_message') {
+                        return acc;
+                    }
+                    return {
+                        ...acc,
+                        [ref.props.chatWindowLocalId]: ref.getState(),
+                    };
+                }, {})
         });
     }
 
@@ -86,6 +95,12 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     */
+    _getChatWindow(chatWindowLocalId){
+        return this.refs[`chatWindow_${chatWindowLocalId}`];
+    }
     /**
      * @private
      */
@@ -113,7 +128,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
             !handled &&
             this._lastAutofocusedChatWindowLocalId === undefined
         ) {
-            this.refs[this.storeProps.autofocusChatWindowLocalId].focus();
+            this._getChatWindow(this.storeProps.autofocusChatWindowLocalId).focus();
             handled = true;
         }
         if (
@@ -121,14 +136,14 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
             this._lastAutofocusedChatWindowLocalId === this.storeProps.autofocusChatWindowLocalId &&
             this._lastAutofocusedCounter !== this.storeProps.autofocusCounter
         ) {
-            this.refs[this.storeProps.autofocusChatWindowLocalId].focus();
+            this._getChatWindow(this.storeProps.autofocusChatWindowLocalId).focus();
             handled = true;
         }
         if (
             !handled &&
             this._lastAutofocusedChatWindowLocalId !== this.storeProps.autofocusChatWindowLocalId
         ) {
-            this.refs[this.storeProps.autofocusChatWindowLocalId].focus();
+            this._getChatWindow(this.storeProps.autofocusChatWindowLocalId).focus();
             handled = true;
         }
         this._lastAutofocusedChatWindowLocalId = this.storeProps.autofocusChatWindowLocalId;
@@ -165,7 +180,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
             let nextIndex = _getNextVisibleChatWindowIndex(currentChatWindowIndex);
             let nextToFocusChatWindowLocalId = orderedVisible[nextIndex].chatWindowLocalId;
 
-            while (this.refs[nextToFocusChatWindowLocalId].isFolded()) {
+            while (this._getChatWindow(nextToFocusChatWindowLocalId).isFolded()) {
                 nextIndex = _getNextVisibleChatWindowIndex(nextIndex);
                 nextToFocusChatWindowLocalId = orderedVisible[nextIndex].chatWindowLocalId;
             }
