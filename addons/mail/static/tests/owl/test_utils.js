@@ -179,7 +179,7 @@ function beforeEach(self) {
             async text() {
                 const ufiles = formData.getAll('ufile');
                 const files = [];
-                for(const i in ufiles){
+                for (const i in ufiles) {
                     const ufile = ufiles[i];
                     files.push(JSON.stringify({
                         'filename': ufile.name,
