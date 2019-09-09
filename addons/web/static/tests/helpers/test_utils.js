@@ -180,6 +180,7 @@ return Promise.all([
             dragoverFile: testUtilsFile.dragoverFile,
             dropFile: testUtilsFile.dropFile,
             dropFiles: testUtilsFile.dropFiles,
+            inputFiles: testUtilsFile.inputFiles
         },
 
         createActionManager: testUtilsCreate.createActionManager,

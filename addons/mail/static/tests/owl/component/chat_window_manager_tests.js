@@ -602,7 +602,7 @@ QUnit.test('chat window: open / close', async function (assert) {
 });
 
 QUnit.test('chat window: state conservation on toggle home menu', async function (assert) {
-    assert.expect(10);
+    assert.expect(6);
 
     // HELPERS SETUP & START
 
@@ -681,21 +681,20 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     document.execCommand('insertHTML', false, '<p>XDU for the win !</p>');
 
     // - Set attachments of the composer
-    const composerLocalId = Object.keys(self.store.state.composers)[0];
-    const composerAttachmentLocalIds = [
-        this.store.dispatch('createAttachment', {
-            filename: 'blah.png',
-            id: 1,
-            name: 'blah',
+    const el = document.querySelector('.o_Composer .o_Composer_fileInput');
+    const files = [
+        await testUtils.file.createFile({
+            name: 'text.txt',
+            content: 'hello, world',
+            contentType: 'text/plain',
         }),
-        this.store.dispatch('createAttachment', {
-            filename: 'blah.pdf',
-            id: 2,
-            name: 'bluh',
-        }),
+        await testUtils.file.createFile({
+            name: 'text2.txt',
+            content: 'hello, xdu is da best man',
+            contentType: 'text/plain',
+        })
     ];
-    this.store.dispatch('linkAttachmentToComposer', composerLocalId, composerAttachmentLocalIds[0]);
-    this.store.dispatch('linkAttachmentToComposer', composerLocalId, composerAttachmentLocalIds[1]);
+    testUtils.file.inputFiles(el, files);
     await testUtils.nextTick();
 
     // TESTS
@@ -721,25 +720,10 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Composer
-            .o_Attachment`)
+            .o_Attachment[data-attachment-local-id*="ir.attachment_"]`)
         .length,
         2,
-        "Chat window composer should still have the same amount of attachments");
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Composer
-            .o_Attachment[data-attachment-local-id="ir.attachment_1"]`)
-        .length,
-        1,
-        "Chat window composer should still have attachment with ID 1");
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Composer
-            .o_Attachment[data-attachment-local-id="ir.attachment_2"]`)
-        .length,
-        1,
-        "Chat window composer should still have attachment with ID 2");
-
+        "Chat window composer should have 2 attachments");
 
     // - phase 2 : on showing menu
     // Show home menu
@@ -757,24 +741,10 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Composer
-            .o_Attachment`)
+            .o_Attachment[data-attachment-local-id*="ir.attachment_"]`)
         .length,
         2,
-        "Chat window composer should still have the same amount of attachments");
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Composer
-            .o_Attachment[data-attachment-local-id="ir.attachment_1"]`)
-        .length,
-        1,
-        "Chat window composer should still have attachment with ID 1");
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Composer
-            .o_Attachment[data-attachment-local-id="ir.attachment_2"]`)
-        .length,
-        1,
-        "Chat window composer should still have attachment with ID 2");
+        "Chat window composer should have 2 attachments");
 });
 
 QUnit.test('chat window: stored state behaviour on toggle home menu and close', async function (assert) {

@@ -115,6 +115,15 @@ function dropFiles($el, files) {
     $el[0].dispatchEvent(ev);
 }
 
+function inputFiles(el, files) {
+    const dT = new DataTransfer();
+    for (const i in files) {
+        dT.items.add(files[i]);
+    }
+    el.files = dT.files;
+    el.dispatchEvent(new Event('change'));
+}
+
 //------------------------------------------------------------------------------
 // Exposed API
 //------------------------------------------------------------------------------
@@ -124,6 +133,7 @@ return {
     dragoverFile: dragoverFile,
     dropFile: dropFile,
     dropFiles,
+    inputFiles
 };
 
 });

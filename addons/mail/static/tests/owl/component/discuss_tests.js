@@ -3645,7 +3645,7 @@ QUnit.test('composer: mention insertion', async function (assert) {
 });
 
 QUnit.test('composer: add file as attachment', async function (assert) {
-    assert.expect(4);
+    assert.expect(9);
 
     Object.assign(this.data.initMessaging, {
         channel_slots: {
@@ -3657,7 +3657,6 @@ QUnit.test('composer: add file as attachment', async function (assert) {
         },
     });
     await this.start({
-        debug :true,
         async mockRPC(route, args) {
             if (args.method === 'message_fetch') {
                 return [];
@@ -3669,13 +3668,14 @@ QUnit.test('composer: add file as attachment', async function (assert) {
         },
     });
 
+    const el = document.querySelector('.o_Composer .o_Composer_fileInput');
     const file = await testUtils.file.createFile({
         name: 'text.txt',
         content: 'hello, world',
         contentType: 'text/plain',
     });
-    const fakeEvent = {target:{files :[file]}};
-    this.discuss.component.refs.thread.refs.composer._onChangeAttachment(fakeEvent);
+    testUtils.file.inputFiles(el, [file]);
+    await testUtils.nextTick();
 
     assert.ok(
         document
@@ -3748,8 +3748,6 @@ QUnit.test('composer: add file as attachment', async function (assert) {
             .o_Attachment_asideItemUnlink
             `),
         "should have an attachment remove button");
-
-    await pause();
 });
 
 QUnit.test('composer state: text save and restore', async function (assert) {

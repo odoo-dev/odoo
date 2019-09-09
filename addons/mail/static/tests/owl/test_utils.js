@@ -69,6 +69,7 @@ function afterEach(self) {
     // unpatch _.debounce and _.throttle
     _.debounce = self.underscoreDebounce;
     _.throttle = self.underscoreThrottle;
+    window.fetch = self._old_window_fetch;
 }
 
 function beforeEach(self) {
@@ -169,6 +170,32 @@ function beforeEach(self) {
                 },
             },
         },
+    };
+    self._old_window_fetch = window.fetch;
+    self.uploadedAttachmentsCount = 1;
+    window.fetch = async function (route, form) {
+        const formData = form.body;
+        return {
+            async text() {
+                const ufiles = formData.getAll('ufile');
+                const files = [];
+                for(const i in ufiles){
+                    const ufile = ufiles[i];
+                    files.push(JSON.stringify({
+                        'filename': ufile.name,
+                        'name': ufile.name,
+                        'mimetype': ufile.type,
+                        'id': self.uploadedAttachmentsCount
+                    }));
+                }
+                const callback = formData.get('callback');
+                self.uploadedAttachmentsCount++;
+                return `<script language="javascript" type="text/javascript">
+                            var win = window.top.window;
+                            win.jQuery(win).trigger('${callback}', ${files.join(', ')});
+                        </script>`;
+            }
+        };
     };
 }
 
