@@ -178,16 +178,12 @@ function beforeEach(self) {
         return {
             async text() {
                 const ufiles = formData.getAll('ufile');
-                const files = [];
-                for (const i in ufiles) {
-                    const ufile = ufiles[i];
-                    files.push(JSON.stringify({
-                        'filename': ufile.name,
-                        'name': ufile.name,
-                        'mimetype': ufile.type,
-                        'id': self.uploadedAttachmentsCount
-                    }));
-                }
+                const files = ufiles.map(ufile => JSON.stringify({
+                    filename: ufile.name,
+                    id: self.uploadedAttachmentsCount,
+                    mimetype: ufile.type,
+                    name: ufile.name,
+                }));
                 const callback = formData.get('callback');
                 self.uploadedAttachmentsCount++;
                 return `<script language="javascript" type="text/javascript">
