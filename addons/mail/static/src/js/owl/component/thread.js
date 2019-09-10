@@ -26,6 +26,11 @@ class Thread extends owl.store.ConnectedComponent {
         ) {
             this._loadThreadCache();
         }
+
+        if(this._messageListJustMounted)
+        {
+            this._handleInitialScroll();
+        }
         this.trigger('o-rendered');
     }
 
@@ -38,6 +43,10 @@ class Thread extends owl.store.ConnectedComponent {
             )
         ) {
             this._loadThreadCache();
+        }
+        if(this._messageListJustMounted)
+        {
+            this._handleInitialScroll();
         }
         this.trigger('o-rendered');
     }
@@ -86,13 +95,33 @@ class Thread extends owl.store.ConnectedComponent {
     /**
      * @param {integer} value
      */
-    setScrollTop(value) {
-        this.refs.messageList.setScrollTop(value);
+    async setScrollTop(value) {
+        await this.refs.messageList.setScrollTop(value);
     }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+
+    /**
+     * Handle initial scroll value for message list subcomponent.
+     * We need to this within thread as the scroll position for message list
+     * can be affected by the composer component.
+     * @private
+     */
+    async _handleInitialScroll(){
+        if (this.refs.messageList) {
+            if (this.props.initialScrollTop !== undefined) {
+                await this.setScrollTop(this.props.initialScrollTop);
+            } else if (
+                this.props.isMessageListScrollToEndOnMount &&
+                this.refs.messageList.messages.length > 0
+            ) {
+                await this._scrollToLastMessage();
+            }
+        }
+        this._messageListJustMounted = false;
+    }
 
     /**
      * @private
@@ -101,6 +130,25 @@ class Thread extends owl.store.ConnectedComponent {
         this.dispatch('loadThreadCache', this.props.threadLocalId, {
             searchDomain: this.props.domain,
         });
+    }
+
+    /**
+     * @private
+     */
+    async _scrollToLastMessage() {
+        await this.refs.messageList.scrollToLastMessage();
+    }
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {CustomEvent} ev
+     */
+    _onMessageListMounted(ev) {
+        this._messageListJustMounted = true;
     }
 }
 
@@ -111,6 +159,7 @@ Thread.defaultProps = {
     haveMessagesMarkAsReadIcon: false,
     haveMessagesReplyIcon: false,
     hasSquashCloseMessages: false,
+    isMessageListScrollToEndOnMount: true,
     order: 'asc',
 };
 

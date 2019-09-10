@@ -40,16 +40,9 @@ class MessageList extends owl.store.ConnectedComponent {
     }
 
     mounted() {
-        if (this.props.initialScrollTop !== undefined) {
-            this.setScrollTop(this.props.initialScrollTop);
-        } else if (
-            this.props.isScrollToEndOnMount &&
-            this.storeProps.messages.length > 0
-        ) {
-            this._scrollToLastMessage();
-        }
         this._checkThreadMarkAsRead();
         this._updateTrackedPatchInfo();
+        this.trigger('o-mounted');
     }
 
     /**
@@ -126,7 +119,7 @@ class MessageList extends owl.store.ConnectedComponent {
                 snapshot.isLastMessageVisible
             )
         ) {
-            this._scrollToLastMessage().then(() => this._onScroll());
+            this.scrollToLastMessage().then(() => this._onScroll());
         } else if (
             snapshot.isPatchedWithNewMessages &&
             this.storeProps.threadCacheCurrentPartnerMessagePostCounter !==
@@ -222,11 +215,23 @@ class MessageList extends owl.store.ConnectedComponent {
         return this.el.scrollTop;
     }
 
+    async scrollToLastMessage() {
+        this._isAutoLoadOnScrollActive = false;
+        await this.lastMessageRef.scrollIntoView();
+        if (!this.el) {
+            return;
+        }
+        this.el.scrollTop += 15;
+        this._isAutoLoadOnScrollActive = true;
+    }
+
     /**
      * @param {integer} value
      */
-    setScrollTop(value) {
-        this.el.scrollTop = value;
+    async setScrollTop(value) {
+        this._isAutoLoadOnScrollActive = false;
+        await setTimeout(() => this.el.scrollTop = value, 0);
+        this._isAutoLoadOnScrollActive = true;
     }
 
     /**
@@ -347,19 +352,6 @@ class MessageList extends owl.store.ConnectedComponent {
     /**
      * @private
      */
-    async _scrollToLastMessage() {
-        this._isAutoLoadOnScrollActive = false;
-        await this.lastMessageRef.scrollIntoView();
-        if (!this.el) {
-            return;
-        }
-        this.el.scrollTop += 15;
-        this._isAutoLoadOnScrollActive = true;
-    }
-
-    /**
-     * @private
-     */
     _updateTrackedPatchInfo() {
         this._renderedThreadCacheLocalId = this.props.threadCacheLocalId;
         this._selectedMessageLocalId = this.props.selectedMessageLocalId;
@@ -405,7 +397,6 @@ MessageList.defaultProps = {
     haveMessagesAuthorRedirect: false,
     haveMessagesMarkAsReadIcon: false,
     haveMessagesReplyIcon: false,
-    isScrollToEndOnMount: true,
     order: 'asc',
 };
 
@@ -434,11 +425,6 @@ MessageList.props = {
     haveMessagesAuthorRedirect: Boolean,
     haveMessagesMarkAsReadIcon: Boolean,
     haveMessagesReplyIcon: Boolean,
-    initialScrollTop: {
-        type: Number,
-        optional: true
-    },
-    isScrollToEndOnMount: Boolean,
     order: String, // ['asc', 'desc']
     selectedMessageLocalId: {
         type: String,

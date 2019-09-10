@@ -35,13 +35,12 @@
             haveMessagesAuthorRedirect="props.haveMessagesAuthorRedirect"
             haveMessagesMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
             haveMessagesReplyIcon="props.haveMessagesReplyIcon"
-            initialScrollTop="props.initialScrollTop"
-            isScrollToEndOnMount="props.isMessageListScrollToEndOnMount"
             order="props.order"
             selectedMessageLocalId="props.selectedMessageLocalId"
             threadCacheLocalId="storeProps.threadCacheLocalId"
             threadLocalId="props.threadLocalId"
             t-else=""
+            t-on-o-mounted.stop="_onMessageListMounted"
             t-ref="messageList"/>
         <Composer
             attachmentsLayout="props.composerAttachmentLayout"
