@@ -92,13 +92,6 @@ class Thread extends owl.store.ConnectedComponent {
         return this.refs.messageList.getScrollTop();
     }
 
-    /**
-     * @param {integer} value
-     */
-    async setScrollTop(value) {
-        await this.refs.messageList.setScrollTop(value);
-    }
-
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -112,11 +105,8 @@ class Thread extends owl.store.ConnectedComponent {
     async _handleInitialScroll(){
         if (this.refs.messageList) {
             if (this.props.initialScrollTop !== undefined) {
-                await this.setScrollTop(this.props.initialScrollTop);
-            } else if (
-                this.props.isMessageListScrollToEndOnMount &&
-                this.refs.messageList.messages.length > 0
-            ) {
+                await this._setScrollTop(this.props.initialScrollTop);
+            } else if (this.refs.messageList.hasMessages() > 0) {
                 await this._scrollToLastMessage();
             }
         }
@@ -139,6 +129,13 @@ class Thread extends owl.store.ConnectedComponent {
         await this.refs.messageList.scrollToLastMessage();
     }
 
+    /**
+     * @param {integer} value
+     */
+    async _setScrollTop(value) {
+        await this.refs.messageList.setScrollTop(value);
+    }
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -159,7 +156,6 @@ Thread.defaultProps = {
     haveMessagesMarkAsReadIcon: false,
     haveMessagesReplyIcon: false,
     hasSquashCloseMessages: false,
-    isMessageListScrollToEndOnMount: true,
     order: 'asc',
 };
 
@@ -224,10 +220,6 @@ Thread.props = {
     initialScrollTop: {
         type: Number,
         optional: true
-    },
-    isMessageListScrollToEndOnMount: {
-        type: Boolean,
-        optional: true,
     },
     order: String, // ['asc', 'desc']
     selectedMessageLocalId: {

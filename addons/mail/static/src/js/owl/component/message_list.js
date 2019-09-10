@@ -215,6 +215,16 @@ class MessageList extends owl.store.ConnectedComponent {
         return this.el.scrollTop;
     }
 
+    /**
+     * @return {boolean}
+     */
+    hasMessages(){
+        return this.messages && this.messages.length > 0;
+    }
+
+    /**
+     * @return {Promise<void>}
+     */
     async scrollToLastMessage() {
         this._isAutoLoadOnScrollActive = false;
         await this.lastMessageRef.scrollIntoView();

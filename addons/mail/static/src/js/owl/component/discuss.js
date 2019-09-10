@@ -148,15 +148,6 @@ class Discuss extends owl.store.ConnectedComponent {
         });
         this._targetThreadCounter = this.storeProps.targetThreadCounter;
         this._targetThreadLocalId = this.storeProps.targetThreadLocalId;
-        // stored scrolltop for new thread cache
-        const threadCacheStoreScrollTop =
-            this.state.threadCachesStoredScrollTop[this.storeProps.activeThreadCacheLocalId];
-        if (
-            this._activeThreadCacheLocalId !== this.storeProps.activeThreadCacheLocalId &&
-            threadCacheStoreScrollTop
-        ) {
-            this.refs.thread.setScrollTop(threadCacheStoreScrollTop.value);
-        }
         if (this._inboxMarkAsReadCounter < this.storeProps.inboxMarkAsReadCounter) {
             this.trigger('o-show-rainbow-man');
         }
