@@ -1,4 +1,4 @@
-odoo.define('web.test_utils_file', function () {
+odoo.define('web.test_utils_file', function (require) {
 "use strict";
 
 /**
@@ -11,6 +11,7 @@ odoo.define('web.test_utils_file', function () {
  * testUtils file.
  */
 
+const concurrency = require('web.concurrency');
 
 //------------------------------------------------------------------------------
 // Private functions
@@ -115,13 +116,14 @@ function dropFiles($el, files) {
     $el[0].dispatchEvent(ev);
 }
 
-function inputFiles(el, files) {
+async function inputFiles(el, files) {
     const dT = new DataTransfer();
     for (const i in files) {
         dT.items.add(files[i]);
     }
     el.files = dT.files;
     el.dispatchEvent(new Event('change'));
+    return concurrency.delay(0);
 }
 
 //------------------------------------------------------------------------------

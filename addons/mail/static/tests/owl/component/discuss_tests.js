@@ -3668,14 +3668,12 @@ QUnit.test('composer: add file as attachment', async function (assert) {
         },
     });
 
-    const el = document.querySelector('.o_Composer .o_Composer_fileInput');
     const file = await testUtils.file.createFile({
         name: 'text.txt',
         content: 'hello, world',
         contentType: 'text/plain',
     });
-    testUtils.file.inputFiles(el, [file]);
-    await testUtils.nextTick();
+    await testUtils.file.inputFiles(document.querySelector('.o_Composer .o_Composer_fileInput'), [file]);
 
     assert.ok(
         document
