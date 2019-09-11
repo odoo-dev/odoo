@@ -250,31 +250,32 @@ QUnit.test('updateChatWindowsStates', async function (assert) {
         "Initial value of storedChatWindowStates is {}");
 
     this.store.dispatch('updateChatWindowsStates', {
-        chat_window_1: {
-            composerAttachmentLocalIds: ['ir.attachment-1', 'ir.attachment-2'],
+        'mail.channel_1': {
+            composerAttachmentLocalIds: ['ir.attachment_1', 'ir.attachment_2'],
             composerTextInputHtmlContent: '<p><strong>XDU</strong></p>',
             scrollTop: 42
         }
     });
 
     assert.ok(
-        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1,
-        "A state has been stored for 'chat_window_1'");
+        this.store.state.chatWindowManager.storedChatWindowStates['mail.channel_1'],
+        "A state has been stored for 'mail.channel_1'");
     assert.strictEqual(
-        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1.composerTextInputHtmlContent,
+        this.store.state.chatWindowManager.storedChatWindowStates['mail.channel_1'].composerTextInputHtmlContent,
         '<p><strong>XDU</strong></p>',
         "Composer input html content should be stored in composerTextInputHtmlContent key");
     assert.strictEqual(
-        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1.scrollTop,
+        this.store.state.chatWindowManager.storedChatWindowStates['mail.channel_1'].scrollTop,
         42,
         "Thread scrollTop value should be stored in scrollTop key");
     assert.ok(
-        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1.composerAttachmentLocalIds
-            .includes('ir.attachment-1'),
-        "Attachment 'ir.attachment-1' is stored in chat window state");assert.ok(
-        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1.composerAttachmentLocalIds
-            .includes('ir.attachment-2'),
-        "Attachment 'ir.attachment-2' is stored in chat window state");
+        this.store.state.chatWindowManager.storedChatWindowStates['mail.channel_1'].composerAttachmentLocalIds
+            .includes('ir.attachment_1'),
+        "Attachment 'ir.attachment_1' is stored in chat window state");
+    assert.ok(
+        this.store.state.chatWindowManager.storedChatWindowStates['mail.channel_1'].composerAttachmentLocalIds
+            .includes('ir.attachment_2'),
+        "Attachment 'ir.attachment_2' is stored in chat window state");
 });
 
 
