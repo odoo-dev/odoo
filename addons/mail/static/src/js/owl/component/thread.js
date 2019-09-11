@@ -14,6 +14,7 @@ class Thread extends owl.store.ConnectedComponent {
         this.components = { Composer, MessageList };
         this.id = _.uniqueId('o_thread_');
         this.template = 'mail.component.Thread';
+        this._isMessageListJustMounted = false;
     }
 
     mounted() {
@@ -27,9 +28,9 @@ class Thread extends owl.store.ConnectedComponent {
             this._loadThreadCache();
         }
 
-        if(this._messageListJustMounted)
-        {
-            this._handleInitialScroll();
+        if (this._isMessageListJustMounted) {
+            this._isMessageListJustMounted = false;
+            this._handleMessageListScrollOnMount();
         }
         this.trigger('o-rendered');
     }
@@ -44,9 +45,10 @@ class Thread extends owl.store.ConnectedComponent {
         ) {
             this._loadThreadCache();
         }
-        if(this._messageListJustMounted)
+        if(this._isMessageListJustMounted)
         {
-            this._handleInitialScroll();
+            this._isMessageListJustMounted = false;
+            this._handleMessageListScrollOnMount();
         }
         this.trigger('o-rendered');
     }
@@ -100,17 +102,15 @@ class Thread extends owl.store.ConnectedComponent {
      * Handle initial scroll value for message list subcomponent.
      * We need to this within thread as the scroll position for message list
      * can be affected by the composer component.
+     *
      * @private
      */
-    async _handleInitialScroll(){
-        if (this.refs.messageList) {
-            if (this.props.initialScrollTop !== undefined) {
-                await this._setScrollTop(this.props.initialScrollTop);
-            } else if (this.refs.messageList.hasMessages() > 0) {
-                await this._scrollToLastMessage();
-            }
+    async _handleMessageListScrollOnMount() {
+        if (this.props.messageListInitialScrollTop !== undefined) {
+            await this.refs.messageList.setScrollTop(this.props.messageListInitialScrollTop);
+        } else if (this.refs.messageList.hasMessages()) {
+            await this.refs.messageList.scrollToLastMessage();
         }
-        this._messageListJustMounted = false;
     }
 
     /**
@@ -122,20 +122,6 @@ class Thread extends owl.store.ConnectedComponent {
         });
     }
 
-    /**
-     * @private
-     */
-    async _scrollToLastMessage() {
-        await this.refs.messageList.scrollToLastMessage();
-    }
-
-    /**
-     * @param {integer} value
-     */
-    async _setScrollTop(value) {
-        await this.refs.messageList.setScrollTop(value);
-    }
-
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -145,7 +131,7 @@ class Thread extends owl.store.ConnectedComponent {
      * @param {CustomEvent} ev
      */
     _onMessageListMounted(ev) {
-        this._messageListJustMounted = true;
+        this._isMessageListJustMounted = true;
     }
 }
 
@@ -217,7 +203,7 @@ Thread.props = {
     haveMessagesAuthorRedirect: Boolean,
     haveMessagesMarkAsReadIcon: Boolean,
     haveMessagesReplyIcon: Boolean,
-    initialScrollTop: {
+    messageListInitialScrollTop: {
         type: Number,
         optional: true
     },

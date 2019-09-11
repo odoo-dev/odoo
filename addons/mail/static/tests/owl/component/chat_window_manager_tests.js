@@ -738,162 +738,6 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
         "Chat window composer should have 2 attachments");
 });
 
-QUnit.test('chat window: stored state behaviour on toggle home menu and close', async function (assert) {
-    assert.expect(14);
-
-    Object.assign(this.data.initMessaging, {
-        channel_slots: {
-            channel_channel: [{
-                channel_type: 'channel',
-                id: 20,
-                is_minimized: false,
-                name: "General",
-                state: 'open',
-                uuid: 'channel-20-uuid',
-            }],
-        },
-    });
-    await this.start({
-        async mockRPC(route, args) {
-            if (args.method === 'channel_fetch_preview') {
-                return [{
-                    id: 20,
-                    last_message: {
-                        author_id: [7, "Demo"],
-                        body: "<p>test</p>",
-                        channel_ids: [20],
-                        id: 100,
-                        message_type: 'comment',
-                        model: 'mail.channel',
-                        res_id: 20,
-                    },
-                }];
-            } else if (args.method === 'channel_fold') {
-                return;
-            } else if (args.method === 'message_fetch') {
-                return [...Array(20).keys()].map(i => {
-                    return {
-                        author_id: [11, "Demo"],
-                        body: "<p>body</p>",
-                        channel_ids: [20],
-                        date: "2019-04-20 10:00:00",
-                        id: i + 10,
-                        message_type: 'comment',
-                        model: 'mail.channel',
-                        record_name: 'General',
-                        res_id: i + 1,
-                    }
-                });
-            }
-            return this._super(...arguments);
-        },
-    });
-
-    document
-        .querySelector(`.o_MessagingMenu_toggler`)
-        .click();
-    await testUtils.nextTick(); // re-render
-    document
-        .querySelector(`
-            .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreviewList_preview`)
-        .click();
-    await testUtils.nextTick(); // re-render
-
-    // SETUP INITIAL STATE
-    // - Set a scroll position to chat window
-    document.querySelector(`.o_MessageList.o_Thread_messageList`).scrollTop = 142;
-
-    // Set html content of the composer of the chat window
-    const composerTextInput = document.querySelector(`
-        .o_ComposerTextInput
-        > .note-editor
-        > .note-editing-area
-        > .note-editable`);
-    composerTextInput.focus();
-    document.execCommand('insertText', false, 'XDU for the win !');
-    // Set attachments of the composer
-    const el = document.querySelector('.o_Composer .o_Composer_fileInput');
-    const files = [
-        await testUtils.file.createFile({
-            name: 'text.txt',
-            content: 'hello, world',
-            contentType: 'text/plain',
-        }),
-        await testUtils.file.createFile({
-            name: 'text2.txt',
-            content: 'hello, xdu is da best man',
-            contentType: 'text/plain',
-        })
-    ];
-    await testUtils.file.inputFiles(el, files);
-    // Hide home menu
-    await this.widget.call('chat_window', 'test:will_hide_home_menu');
-    await this.widget.call('chat_window', 'test:hide_home_menu');
-    let chatWindowStates;
-    chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
-    assert.ok(
-        chatWindowStates,
-        "chat window manager should have storedChatWindowState key in store");
-    assert.ok(
-        chatWindowStates['mail.channel_20'],
-        "chat window state should be stored");
-    assert.strictEqual(
-        chatWindowStates['mail.channel_20'].scrollTop,
-        142, "Chat window thread scroll positions should be the same as before hiding home menu");
-    assert.strictEqual(
-        chatWindowStates['mail.channel_20'].composerTextInputHtmlContent,
-        "<p>XDU for the win !</p>",
-        "chat window composer text input html saved in store should be good");
-    assert.ok(
-        chatWindowStates['mail.channel_20'].composerAttachmentLocalIds.includes('ir.attachment_1'),
-        "chat window composer attachments should contain ir.attachment_1");
-    assert.ok(
-        chatWindowStates['mail.channel_20'].composerAttachmentLocalIds.includes('ir.attachment_2'),
-        "chat window composer attachments should contain ir.attachment_2");
-
-    // Show home menu
-    await this.widget.call('chat_window', 'test:will_show_home_menu');
-    await this.widget.call('chat_window', 'test:show_home_menu');
-    chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
-    assert.ok(
-        chatWindowStates,
-        "chat window manager should have storedChatWindowState key in store");
-    assert.ok(
-        chatWindowStates['mail.channel_20'],
-        "chat window state should be stored");
-    assert.strictEqual(
-        chatWindowStates['mail.channel_20'].scrollTop,
-        142,
-        "Chat window thread scroll positions should be the same as before showing home menu");
-    assert.strictEqual(
-        chatWindowStates['mail.channel_20'].composerTextInputHtmlContent,
-        "<p>XDU for the win !</p>",
-        "chat window composer text input html saved in store should be good");
-    assert.ok(
-        chatWindowStates['mail.channel_20'].composerAttachmentLocalIds.includes('ir.attachment_1'),
-        "chat window composer attachments should contain ir.attachment_1");
-    assert.ok(
-        chatWindowStates['mail.channel_20'].composerAttachmentLocalIds.includes('ir.attachment_2'),
-        "chat window composer attachments should contain ir.attachment_2");
-
-    // Close chat window
-    document
-        .querySelector(`
-            .o_ChatWindow
-            .o_ChatWindowHeader
-            .o_ChatWindowHeader_commandClose`)
-        .click();
-    chatWindowStates = this.store.state.chatWindowManager.storedChatWindowStates;
-    await testUtils.nextTick(); // re-render
-    assert.ok(
-        chatWindowStates,
-        "chat window manager should have storedChatWindowState key in store");
-    assert.notOk(
-        chatWindowStates['mail.channel_20'],
-        "chat window state should be deleted");
-});
-
 QUnit.test('chat window: state destroyed on close', async function (assert) {
     assert.expect(3);
 
@@ -973,22 +817,21 @@ QUnit.test('chat window: state destroyed on close', async function (assert) {
     document.execCommand('insertText', false, 'XDU for the win !');
 
     // - Set attachments of the composer
-    const composerLocalId = Object.keys(self.store.state.composers)[0];
-    const composerAttachmentLocalIds = [
-        this.store.dispatch('createAttachment', {
-            filename: 'blah.png',
-            id: 1,
-            name: 'blah',
+    const el = document.querySelector('.o_Composer .o_Composer_fileInput');
+    const files = [
+        await testUtils.file.createFile({
+            name: 'text.txt',
+            content: 'hello, world',
+            contentType: 'text/plain',
         }),
-        this.store.dispatch('createAttachment', {
-            filename: 'blah.pdf',
-            id: 2,
-            name: 'bluh',
-        }),
+        await testUtils.file.createFile({
+            name: 'text2.txt',
+            content: 'hello, xdu is da best man',
+            contentType: 'text/plain',
+        })
     ];
-    this.store.dispatch('linkAttachmentToComposer', composerLocalId, composerAttachmentLocalIds[0]);
-    this.store.dispatch('linkAttachmentToComposer', composerLocalId, composerAttachmentLocalIds[1]);
-    await testUtils.nextTick();
+    await testUtils.file.inputFiles(el, files);
+
     // -- Hide home menu
     await this.widget.call('chat_window', 'test:will_hide_home_menu');
     await this.widget.call('chat_window', 'test:hide_home_menu');

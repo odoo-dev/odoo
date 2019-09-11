@@ -73,8 +73,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
     }
 
     saveChatWindowsStates() {
-        this.dispatch('updateChatWindowManager', {
-            storedChatWindowStates: Object
+        this.dispatch('updateChatWindowsStates', Object
                 .entries(this.refs)
                 .reduce((acc, [refId, ref]) => {
                     if (!refId.startsWith('chatWindow_')) {
@@ -88,7 +87,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
                         [ref.props.chatWindowLocalId]: ref.getState(),
                     };
                 }, {})
-        });
+        );
     }
 
     //--------------------------------------------------------------------------
@@ -148,9 +147,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
         }
         this._lastAutofocusedChatWindowLocalId = this.storeProps.autofocusChatWindowLocalId;
         this._lastAutofocusedCounter = this.storeProps.autofocusCounter;
-        this.dispatch('updateChatWindowManager', {
-            notifiedAutofocusCounter: this._lastAutofocusedCounter,
-        });
+        this.dispatch('updateChatWindowManagerNotifiedAutofocusCounter', this._lastAutofocusedCounter);
     }
 
     //--------------------------------------------------------------------------

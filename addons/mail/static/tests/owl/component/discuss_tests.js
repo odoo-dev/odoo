@@ -3673,23 +3673,22 @@ QUnit.test('composer: add file as attachment', async function (assert) {
         content: 'hello, world',
         contentType: 'text/plain',
     });
-    await testUtils.file.inputFiles(document.querySelector('.o_Composer .o_Composer_fileInput'), [file]);
+    await testUtils.file.inputFiles(document.querySelector('.o_Composer_fileInput'), [file]);
 
     assert.ok(
-        document
-            .querySelector('.o_AttachmentList.o_Composer_attachmentList'),
+        document.querySelector('.o_Composer_attachmentList'),
         "should have an attachment list");
     assert.ok(
         document
             .querySelector(`
-            .o_AttachmentList.o_Composer_attachmentList
+            .o_Composer_attachmentList
             .o_Attachment
             `),
         "should have an attachment");
     assert.ok(
         document
             .querySelector(`
-            .o_AttachmentList.o_Composer_attachmentList
+            .o_Composer_attachmentList
             .o_Attachment
             .o_Attachment_image
             `),
@@ -3697,7 +3696,7 @@ QUnit.test('composer: add file as attachment', async function (assert) {
     assert.ok(
         document
             .querySelector(`
-            .o_AttachmentList.o_Composer_attachmentList
+            .o_Composer_attachmentList
             .o_Attachment
             .o_Attachment_main
             `),
@@ -3705,7 +3704,7 @@ QUnit.test('composer: add file as attachment', async function (assert) {
     assert.ok(
         document
             .querySelector(`
-            .o_AttachmentList.o_Composer_attachmentList
+            .o_Composer_attachmentList
             .o_Attachment
             .o_Attachment_main
             .o_Attachment_filename
@@ -3714,7 +3713,7 @@ QUnit.test('composer: add file as attachment', async function (assert) {
     assert.ok(
         document
             .querySelector(`
-            .o_AttachmentList.o_Composer_attachmentList
+            .o_Composer_attachmentList
             .o_Attachment
             .o_Attachment_main
             .o_Attachment_extension
@@ -3723,7 +3722,7 @@ QUnit.test('composer: add file as attachment', async function (assert) {
     assert.ok(
         document
             .querySelector(`
-            .o_AttachmentList.o_Composer_attachmentList
+            .o_Composer_attachmentList
             .o_Attachment
             .o_Attachment_aside
             `),
@@ -3731,7 +3730,7 @@ QUnit.test('composer: add file as attachment', async function (assert) {
     assert.ok(
         document
             .querySelector(`
-            .o_AttachmentList.o_Composer_attachmentList
+            .o_Composer_attachmentList
             .o_Attachment
             .o_Attachment_aside
             .o_Attachment_asideItemUploaded
@@ -3740,7 +3739,7 @@ QUnit.test('composer: add file as attachment', async function (assert) {
     assert.ok(
         document
             .querySelector(`
-            .o_AttachmentList.o_Composer_attachmentList
+            .o_Composer_attachmentList
             .o_Attachment
             .o_Attachment_aside
             .o_Attachment_asideItemUnlink

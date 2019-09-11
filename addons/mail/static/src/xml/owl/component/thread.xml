@@ -40,7 +40,7 @@
             threadCacheLocalId="storeProps.threadCacheLocalId"
             threadLocalId="props.threadLocalId"
             t-else=""
-            t-on-o-mounted.stop="_onMessageListMounted"
+            t-on-o-message-list-mounted.stop="_onMessageListMounted"
             t-ref="messageList"/>
         <Composer
             attachmentsLayout="props.composerAttachmentLayout"

@@ -81,7 +81,7 @@
             haveMessagesAuthorRedirect="storeProps.activeThread.channel_type !== 'chat'"
             haveMessagesMarkAsReadIcon="storeProps.activeThread.localId === 'mail.box_inbox'"
             haveMessagesReplyIcon="storeProps.activeThread.localId === 'mail.box_inbox'"
-            initialScrollTop="
+            messageListInitialScrollTop="
                 state.threadCachesStoredScrollTop[storeProps.activeThreadCacheLocalId] and
                 state.threadCachesStoredScrollTop[storeProps.activeThreadCacheLocalId].value"
             selectedMessageLocalId="state.replyingToMessageMessageLocalId"

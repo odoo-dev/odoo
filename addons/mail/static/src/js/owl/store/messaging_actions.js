@@ -341,7 +341,7 @@ const actions = {
         if (!visibleChatWindowLocalIds.includes(chatWindowLocalId)) {
             return;
         }
-        dispatch('updateChatWindowManager', {
+        dispatch('_updateChatWindowManager', {
             autofocusChatWindowLocalId: chatWindowLocalId,
             autofocusCounter: cwm.autofocusCounter + 1,
         });
@@ -1157,11 +1157,19 @@ const actions = {
     },
     /**
      * @param {Object} param0
-     * @param {Object} param0.state
-     * @param {Object} changes
+     * @param {function} param0.dispatch
+     * @param {Number} notifiedAutofocusCounter
      */
-    updateChatWindowManager({ state }, changes) {
-        Object.assign(state.chatWindowManager, changes);
+    updateChatWindowManagerNotifiedAutofocusCounter({ dispatch }, notifiedAutofocusCounter){
+        dispatch('_updateChatWindowManager', { notifiedAutofocusCounter });
+    },
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} newStates
+     */
+    updateChatWindowsStates({ dispatch }, newStates){
+        dispatch('_updateChatWindowManager', {storedChatWindowStates: newStates});
     },
     /**
      * @param {Object} param0
@@ -3469,6 +3477,15 @@ const actions = {
         const attachment = state.attachments[attachmentLocalId];
         Object.assign(attachment, changes);
         // aku todo: compute attachment links
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {Object} changes
+     */
+    _updateChatWindowManager({ state }, changes) {
+        Object.assign(state.chatWindowManager, changes);
     },
     /**
      * @private

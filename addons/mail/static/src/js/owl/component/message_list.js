@@ -42,7 +42,7 @@ class MessageList extends owl.store.ConnectedComponent {
     mounted() {
         this._checkThreadMarkAsRead();
         this._updateTrackedPatchInfo();
-        this.trigger('o-mounted');
+        this.trigger('o-message-list-mounted');
     }
 
     /**
@@ -218,12 +218,12 @@ class MessageList extends owl.store.ConnectedComponent {
     /**
      * @return {boolean}
      */
-    hasMessages(){
-        return this.messages && this.messages.length > 0;
+    hasMessages() {
+        return this.storeProps.messages && this.storeProps.messages.length > 0;
     }
 
     /**
-     * @return {Promise<void>}
+     * @return {Promise}
      */
     async scrollToLastMessage() {
         this._isAutoLoadOnScrollActive = false;
@@ -240,7 +240,8 @@ class MessageList extends owl.store.ConnectedComponent {
      */
     async setScrollTop(value) {
         this._isAutoLoadOnScrollActive = false;
-        await setTimeout(() => this.el.scrollTop = value, 0);
+        this.el.scrollTop = value;
+        await new Promise(resolve => setTimeout(resolve, 0));
         this._isAutoLoadOnScrollActive = true;
     }
 

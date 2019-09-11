@@ -224,6 +224,60 @@ QUnit.test('createThread: chat', async function (assert) {
     assert.strictEqual(directPartner.name, "Demo");
 });
 
+QUnit.test('updateChatWindowManagerNotifiedAutofocusCounter', async function (assert) {
+    assert.expect(2);
+    await this.start();
+
+    assert.strictEqual(
+        this.store.state.chatWindowManager.notifiedAutofocusCounter,
+        0,
+        "Initial value of notifiedAutofocusCounter is 0");
+
+    this.store.dispatch('updateChatWindowManagerNotifiedAutofocusCounter', 42);
+    assert.strictEqual(
+        this.store.state.chatWindowManager.notifiedAutofocusCounter,
+        42,
+        "notifiedAutofocusCounter has been updated to 42");
+});
+
+QUnit.test('updateChatWindowsStates', async function (assert) {
+    assert.expect(6);
+    await this.start();
+
+    assert.strictEqual(
+        Object.keys(this.store.state.chatWindowManager.storedChatWindowStates).length,
+        0,
+        "Initial value of storedChatWindowStates is {}");
+
+    this.store.dispatch('updateChatWindowsStates', {
+        chat_window_1: {
+            composerAttachmentLocalIds: ['ir.attachment-1', 'ir.attachment-2'],
+            composerTextInputHtmlContent: '<p><strong>XDU</strong></p>',
+            scrollTop: 42
+        }
+    });
+
+    assert.ok(
+        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1,
+        "A state has been stored for 'chat_window_1'");
+    assert.strictEqual(
+        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1.composerTextInputHtmlContent,
+        '<p><strong>XDU</strong></p>',
+        "Composer input html content should be stored in composerTextInputHtmlContent key");
+    assert.strictEqual(
+        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1.scrollTop,
+        42,
+        "Thread scrollTop value should be stored in scrollTop key");
+    assert.ok(
+        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1.composerAttachmentLocalIds
+            .includes('ir.attachment-1'),
+        "Attachment 'ir.attachment-1' is stored in chat window state");assert.ok(
+        this.store.state.chatWindowManager.storedChatWindowStates.chat_window_1.composerAttachmentLocalIds
+            .includes('ir.attachment-2'),
+        "Attachment 'ir.attachment-2' is stored in chat window state");
+});
+
+
 });
 });
 });
