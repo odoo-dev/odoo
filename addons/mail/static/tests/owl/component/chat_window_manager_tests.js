@@ -709,7 +709,7 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
         document.querySelectorAll(`
             .o_Composer
             .o_Attachment`)
-        .length,
+            .length,
         2,
         "Chat window composer should have 2 attachments");
 
@@ -733,7 +733,7 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
         document.querySelectorAll(`
             .o_Composer
             .o_Attachment`)
-        .length,
+            .length,
         2,
         "Chat window composer should have 2 attachments");
 });
