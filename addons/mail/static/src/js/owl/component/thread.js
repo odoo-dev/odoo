@@ -45,8 +45,7 @@ class Thread extends owl.store.ConnectedComponent {
         ) {
             this._loadThreadCache();
         }
-        if(this._isMessageListJustMounted)
-        {
+        if (this._isMessageListJustMounted) {
             this._isMessageListJustMounted = false;
             this._handleMessageListScrollOnMount();
         }
