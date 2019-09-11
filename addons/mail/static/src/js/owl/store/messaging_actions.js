@@ -1160,7 +1160,7 @@ const actions = {
      * @param {function} param0.dispatch
      * @param {Number} notifiedAutofocusCounter
      */
-    updateChatWindowManagerNotifiedAutofocusCounter({ dispatch }, notifiedAutofocusCounter){
+    updateChatWindowManagerNotifiedAutofocusCounter({ dispatch }, notifiedAutofocusCounter) {
         dispatch('_updateChatWindowManager', { notifiedAutofocusCounter });
     },
     /**
@@ -1168,7 +1168,7 @@ const actions = {
      * @param {function} param0.dispatch
      * @param {Object} newStates
      */
-    updateChatWindowsStates({ dispatch }, newStates){
+    updateChatWindowsStates({ dispatch }, newStates) {
         dispatch('_updateChatWindowManager', {storedChatWindowStates: newStates});
     },
     /**
