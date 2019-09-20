@@ -69,8 +69,6 @@
         'static/src/xml/owl/component/chat_window_header.xml',
         'static/src/xml/owl/component/chat_window_hidden_menu.xml',
         'static/src/xml/owl/component/chat_window_manager.xml',
-        'static/src/xml/owl/component/chatter.xml',
-        'static/src/xml/owl/component/chatter_attachment_box.xml',
         'static/src/xml/owl/component/composer.xml',
         'static/src/xml/owl/component/composer_text_input.xml',
         'static/src/xml/owl/component/dialog.xml',
