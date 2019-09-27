@@ -66,7 +66,7 @@
         <Thread
             areComposerAttachmentsEditable="true"
             class="o_Discuss_thread"
-            composerAttachmentLayout="'card'"
+            composerAttachmentDetailsMode="'card'"
             composerInitialAttachmentLocalIds="
                 storeProps.storedThreadComposers[storeProps.activeThreadLocalId] and
                 storeProps.storedThreadComposers[storeProps.activeThreadLocalId].attachmentLocalIds"
@@ -77,7 +77,6 @@
             hasComposer="storeProps.activeThread._model !== 'mail.box'"
             hasComposerCurrentPartnerAvatar="!storeProps.isMobile"
             hasSquashCloseMessages="storeProps.activeThread._model !== 'mail.box'"
-            haveComposerAttachmentsLabelForCardLayout="true"
             haveMessagesAuthorRedirect="storeProps.activeThread.channel_type !== 'chat'"
             haveMessagesMarkAsReadIcon="storeProps.activeThread.localId === 'mail.box_inbox'"
             haveMessagesReplyIcon="storeProps.activeThread.localId === 'mail.box_inbox'"

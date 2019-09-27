@@ -100,11 +100,29 @@ class Message extends owl.store.ConnectedComponent {
         );
     }
 
+    get imageAttachmentLocalIds(){
+        if (!this.storeProps.message.attachmentLocalIds) {
+            return [];
+        }
+        return this.storeProps.message.attachmentLocalIds.filter(attachmentLocalId =>
+            this.env.store.getters.attachmentFileType(attachmentLocalId) === 'image'
+        );
+    }
+
     /**
      * @return {boolean}
      */
     get isStarred() {
         return this.storeProps.message.threadLocalIds.includes('mail.box_starred');
+    }
+
+    get nonImageAttachmentLocalIds(){
+        if (!this.storeProps.message.attachmentLocalIds) {
+            return [];
+        }
+        return this.storeProps.message.attachmentLocalIds.filter(attachmentLocalId =>
+            this.env.store.getters.attachmentFileType(attachmentLocalId) !== 'image'
+        );
     }
 
     /**
@@ -413,6 +431,7 @@ Message.components = {
 };
 
 Message.defaultProps = {
+    attachmentsDetailsMode: 'auto',
     hasAuthorRedirect: false,
     hasMarkAsReadIcon: false,
     hasReplyIcon: false,
@@ -446,6 +465,10 @@ Message.mapStoreToProps = function (state, ownProps) {
 };
 
 Message.props = {
+    attachmentsDetailsMode: { // ['auto', 'card', 'hover', 'none']
+        type: String,
+        optional: true
+    },
     hasAuthorRedirect: Boolean,
     hasMarkAsReadIcon: Boolean,
     hasReplyIcon: Boolean,

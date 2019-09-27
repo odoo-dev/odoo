@@ -503,7 +503,7 @@ Composer.mapStoreToProps = function (
 
 Composer.props = {
     areButtonsInline: Boolean,
-    attachmentsLayout: {
+    attachmentsDetailsMode: {
         type: String,
         optional: true,
     },
@@ -513,7 +513,11 @@ Composer.props = {
     hasFollowers: Boolean,
     hasSendButton: Boolean,
     hasThreadName: Boolean,
-    haveAttachmentsLabelForCardLayout: {
+    showAttachmentsExtensions: {
+        type: Boolean,
+        optional: true,
+    },
+    showAttachmentsFilenames: {
         type: Boolean,
         optional: true,
     },

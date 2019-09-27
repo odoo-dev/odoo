@@ -1,139 +1,194 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-
+    <!-- TEMPLATE : Attachment -->
     <div
         class="o_Attachment"
         owl="1"
         t-att-class="{
-            'o-basic-layout': props.layout === 'basic',
-            'o-card-layout': props.layout === 'card',
             'o-downloadable': props.isDownloadable,
             'o-editable': props.isEditable,
             'o-temporary': storeProps.attachment.isTemporary,
-            'o-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+            'o-has-card-details': detailsMode === 'card',
+            'o-viewable':
+                props.allowPreview and
+                    env.store.getters.isAttachmentViewable(props.attachmentLocalId),
         }"
         t-att-data-attachment-local-id="storeProps.attachment.localId"
         t-att-title="env.store.getters.attachmentDisplayName(props.attachmentLocalId)"
         t-name="mail.component.Attachment">
-        <t t-if="props.layout === 'basic'">
-            <!-- o_image from mimetype.scss -->
+
+        <!-- Attachment Repr -->
+        <!-- o_image from mimetype.scss -->
+
+        <div
+            class="
+                o_Attachment_image
+                o_image"
+            t-att-class="{
+                'o-attachment-viewable':
+                    props.allowPreview and
+                        env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+            }"
+            t-att-data-mimetype="storeProps.attachment.mimetype"
+            t-att-href="attachmentUrl"
+            t-att-style="reprStyle"
+            t-on-click="_onClickImage">
             <div
-                class="
-                    o_Attachment_image
-                    o_image"
-                t-att-class="{
-                    'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
-                }"
-                t-att-data-mimetype="storeProps.attachment.mimetype"
-                t-att-href="attachmentUrl"
-                t-if="env.store.getters.attachmentFileType(props.attachmentLocalId) !== 'image'"
-                t-on-click="_onClickImage"/>
-            <!-- o_image from mimetype.scss -->
-            <img
-                class="
-                    o_Attachment_image
-                    o_image"
-                t-att-class="{
-                    'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
-                }"
-                t-att-data-mimetype="storeProps.attachment.mimetype"
-                t-attf-src="web/image/{{ storeProps.attachment.id }}/160x160"
-                t-else=""
-                t-on-click="_onClickImage"/>
-        </t>
-        <t t-elif="props.layout === 'card'">
-            <!-- o_image from mimetype.scss -->
-            <div
-                class="
-                    o-attachment-card-layout
-                    o_Attachment_image
-                    o_image"
-                t-att-class="{
-                    'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
-                }"
-                t-att-data-mimetype="storeProps.attachment.mimetype"
-                t-att-href="attachmentUrl"
-                t-att-style="env.store.getters.attachmentFileType(props.attachmentLocalId) === 'image' ? 'background-image:url(/web/image/' + storeProps.attachment.id + '/38x38/?crop=true' : ''"
-                t-on-click="_onClickImage"/>
-            <div
-                class="o_Attachment_main"
-                t-if="props.hasLabelForCardLayout">
-                <div class="o_Attachment_filename">
-                    <t t-esc="storeProps.attachment.filename"/>
-                </div>
-                <div class="o_Attachment_extension">
-                    <t t-esc="env.store.getters.attachmentExtension(props.attachmentLocalId)"/>
+                class="o_Attachment_overlay"
+                t-if="
+                    (props.showFilenameInDetails or props.showExtensionInDetails) and
+                    detailsMode === 'hover'">
+                <div class="o_Attachment_overlay_content">
+                    <div class="o_Attachment_details">
+                        <div class="o_Attachment_filename" t-if="props.showFilenameInDetails">
+                            <t t-esc="storeProps.attachment.filename"/>
+                        </div>
+                        <div class="o_Attachment_extension" t-if="props.showExtensionInDetails">
+                            <t t-esc="env.store.getters.attachmentExtension(props.attachmentLocalId)"/>
+                        </div>
+                    </div>
+                    <div class="o_Attachment_actions">
+                        <!-- Remove button -->
+                        <div
+                            aria-label="Remove"
+                            class="
+                                o_Attachment_action
+                                o_Attachment_actionUnlink"
+                            t-att-class="{
+                                'o-pretty': storeProps.attachment.composerId,
+                            }"
+                            title="Remove"
+                            t-if="
+                                props.isEditable and
+                                !storeProps.attachment.isTemporary"
+                            t-key="'unlink'"
+                            t-on-click.stop="_onClickUnlink">
+                            <i
+                                class="
+                                    fa
+                                    fa-times"/>
+                        </div>
+                        <!-- Download button -->
+                        <div
+                            aria-label="Download"
+                            class="
+                                o_Attachment_action
+                                o_Attachment_actionDownload"
+                            title="Download"
+                            t-if="
+                                props.isDownloadable and
+                                !storeProps.attachment.isTemporary"
+                            t-key="'download'"
+                            t-on-click.stop="_onClickDownload">
+                            <i
+                                class="
+                                    fa
+                                    fa-download"/>
+                            </div>
+                    </div>
                 </div>
             </div>
-            <div class="o_Attachment_aside">
-                <div
-                    aria-label="Uploading"
-                    class="
-                        o_Attachment_asideItem
-                        o_Attachment_asideItemUploading"
-                    title="Uploading"
-                    t-if="
-                        storeProps.attachment.composerId and
-                        storeProps.attachment.isTemporary"
-                    t-key="'uploading'">
-                    <i
-                        class="
-                            fa
-                            fa-spin
-                            fa-spinner"/>
-                </div>
-                <div
-                    aria-label="Uploaded"
-                    class="
-                        o_Attachment_asideItem
-                        o_Attachment_asideItemUploaded"
-                    title="Uploaded"
-                    t-if="
-                        storeProps.attachment.composerId and
-                        !storeProps.attachment.isTemporary"
-                    t-key="'uploaded'">
-                    <i
-                        class="
-                            fa
-                            fa-check"/>
-                </div>
-                <div
-                    aria-label="Remove"
-                    class="
-                        o_Attachment_asideItem
-                        o_Attachment_asideItemUnlink"
-                    t-att-class="{
-                        'o-pretty': storeProps.attachment.composerId,
-                    }"
-                    title="Remove"
-                    t-if="
-                        props.isEditable and
-                        !storeProps.attachment.isTemporary"
-                    t-key="'unlink'"
-                    t-on-click="_onClickUnlink">
-                    <i
-                        class="
-                            fa
-                            fa-times"/>
-                </div>
-                <div
-                    aria-label="Download"
-                    class="
-                        o_Attachment_asideItem
-                        o_Attachment_asideItemDownload"
-                    title="Download"
-                    t-if="
-                        props.isDownloadable and
-                        !storeProps.attachment.isTemporary"
-                    t-key="'download'"
-                    t-on-click="_onClickDownload">
-                    <i
-                        class="
-                            fa
-                            fa-download"/>
-                </div>
+        </div>
+        <!-- Attachment details -->
+        <div
+            class="o_Attachment_details"
+            t-if="
+                (props.showFilenameInDetails or props.showExtensionInDetails) and
+                detailsMode === 'card'">
+            <div class="o_Attachment_filename" t-if="props.showFilenameInDetails">
+                <t t-esc="storeProps.attachment.filename"/>
             </div>
-        </t>
+            <div class="o_Attachment_extension" t-if="props.showExtensionInDetails">
+                <t t-esc="env.store.getters.attachmentExtension(props.attachmentLocalId)"/>
+            </div>
+        </div>
+
+        <!-- Attachment aside -->
+        <t
+            t-call="mail.component.Attachment.Aside"
+            t-if="detailsMode !== 'hover'"/>
     </div>
 
+    <!-- TEMPLATE : Aside-->
+    <div
+        class="o_Attachment_aside"
+        owl="1"
+        t-att-class="{
+            'o-has-multiple-action': !storeProps.attachment.isTemporary and props.isDownloadable and props.isEditable
+        }"
+        t-if="
+            props.isDownloadable or
+            props.isEditable"
+        t-name="mail.component.Attachment.Aside">
+        <!-- Uploading icon -->
+        <div
+            aria-label="Uploading"
+            class="
+                o_Attachment_asideItem
+                o_Attachment_asideItemUploading"
+            title="Uploading"
+            t-if="
+                storeProps.attachment.composerId and
+                storeProps.attachment.isTemporary"
+            t-key="'uploading'">
+            <i
+                class="
+                    fa
+                    fa-spin
+                    fa-spinner"/>
+        </div>
+        <!-- Uploaded icon -->
+        <div
+            aria-label="Uploaded"
+            class="
+                o_Attachment_asideItem
+                o_Attachment_asideItemUploaded"
+            title="Uploaded"
+            t-if="
+                storeProps.attachment.composerId and
+                !storeProps.attachment.isTemporary"
+            t-key="'uploaded'">
+            <i
+                class="
+                    fa
+                    fa-check"/>
+        </div>
+        <!-- Remove button -->
+        <div
+            aria-label="Remove"
+            class="
+                o_Attachment_asideItem
+                o_Attachment_asideItemUnlink"
+            t-att-class="{
+                'o-pretty': storeProps.attachment.composerId,
+            }"
+            title="Remove"
+            t-if="
+                props.isEditable and
+                !storeProps.attachment.isTemporary"
+            t-key="'unlink'"
+            t-on-click="_onClickUnlink">
+            <i
+                class="
+                    fa
+                    fa-times"/>
+        </div>
+        <!-- Download button -->
+        <div
+            aria-label="Download"
+            class="
+                o_Attachment_asideItem
+                o_Attachment_asideItemDownload"
+            title="Download"
+            t-if="
+                props.isDownloadable and
+                !storeProps.attachment.isTemporary"
+            t-key="'download'"
+            t-on-click="_onClickDownload">
+            <i
+                class="
+                    fa
+                    fa-download"/>
+        </div>
+    </div>
 </templates>
