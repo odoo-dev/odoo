@@ -8,12 +8,40 @@
     &:hover .o_Attachment_asideItemUnlink.o-pretty {
         transform: translateX(0);
     }
+
+    &:not(.o-has-card-details) {
+        .o_Attachment_image {
+            position: relative;
+            min-width: 200px;
+            min-height: 200px;
+            &:hover {
+                .o_Attachment_overlay {
+                    opacity: 1;
+                    .o_Attachment_details{
+                        min-width: 0; /* This allows the text ellipsis in the flex element */
+                    }
+                }
+            }
+        }
+    }
+
+    > .o_Attachment_details {
+        width: 200px;
+        margin: 3px;
+    }
 }
 
 .o_Attachment_aside {
-    min-width: 50px;
     position: relative;
     overflow: hidden;
+    &:not(.o-has-multiple-action) {
+        min-width: 50px;
+    }
+    &.o-has-multiple-action {
+        min-width: 30px;
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .o_Attachment_asideItem {
@@ -40,9 +68,24 @@
     margin: 3px;
 }
 
-.o_Attachment_main {
-    width: 200px;
-    margin: 3px;
+.o_Attachment_overlay {
+    bottom: 0;
+    display:flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    left: 0;
+    padding: 10px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    .o_Attachment_overlay_content{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    .o_Attachment_action{
+        min-width: 20px;
+    }
 }
 
 // ------------------------------------------------------------------
@@ -51,7 +94,7 @@
 
 .o_Attachment {
 
-    &.o-card-layout {
+    &.o-has-card-details {
         background-color: gray('300');
         border-radius: 5px;
     }
@@ -59,6 +102,22 @@
 
 .o_Attachment_aside {
     border-radius: 0 5px 5px 0;
+}
+
+.o_Attachment_action{
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    &:hover{
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+.o_Attachment_asideItemDownload {
+    cursor: pointer;
+    &:hover {
+        background-color: gray('400');
+    }
 }
 
 .o_Attachment_asideItemUnlink {
@@ -102,9 +161,20 @@
     }
 }
 
+.o_Attachment_overlay{
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.9));
+    border-radius: 5px;
+    color:white;
+    opacity: 0;
+}
+
 // ------------------------------------------------------------------
 // Animation
 // ------------------------------------------------------------------
+
+.o_Attachment_overlay{
+    transition: all 0.3s ease 0s;
+}
 
 .o_Attachment_asideItemUnlink.o-pretty {
     transition: transform 0.3s ease 0s;

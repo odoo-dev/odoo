@@ -29,7 +29,7 @@
         <Thread
             areComposerAttachmentsEditable="true"
             class="o_ChatWindow_thread"
-            composerAttachmentLayout="'card'"
+            composerAttachmentDetailsMode="'card'"
             composerInitialAttachmentLocalIds="props.composerInitialAttachmentLocalIds"
             composerInitialTextInputHtmlContent="props.composerInitialTextInputHtmlContent"
             domain="[]"
@@ -37,7 +37,6 @@
             hasComposerCurrentPartnerAvatar="false"
             hasComposerSendButton="storeProps.isMobile"
             hasSquashCloseMessages="storeProps.thread._model !== 'mail.box'"
-            haveComposerAttachmentsLabelForCardLayout="false"
             haveMessagesAuthorRedirect="storeProps.thread.channel_type !== 'chat'"
             messageListInitialScrollTop="props.threadInitialScrollTop"
             threadLocalId="props.chatWindowLocalId"

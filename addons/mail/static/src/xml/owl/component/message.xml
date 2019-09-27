@@ -233,10 +233,18 @@
                 <AttachmentList
                     areAttachmentsDownloadable="true"
                     areAttachmentsEditable="true"
-                    attachmentLocalIds="storeProps.message.attachmentLocalIds"
-                    attachmentsImageSizeForBasicLayout="'medium'"
-                    attachmentsLayout="'card'"
-                    class="o_Message_attachmentList"/>
+                    attachmentLocalIds="imageAttachmentLocalIds"
+                    attachmentsDetailsMode="props.attachmentsDetailsMode"
+                    class="o_Message_attachmentList"
+                    t-if="imageAttachmentLocalIds and imageAttachmentLocalIds.length > 0"
+                />
+                <AttachmentList
+                    areAttachmentsDownloadable="true"
+                    areAttachmentsEditable="true"
+                    attachmentLocalIds="nonImageAttachmentLocalIds"
+                    attachmentsDetailsMode="props.attachmentsDetailsMode"
+                    class="o_Message_attachmentList"
+                    t-if="nonImageAttachmentLocalIds and nonImageAttachmentLocalIds.length > 0"/>
             </div>
         </div>
     </div>

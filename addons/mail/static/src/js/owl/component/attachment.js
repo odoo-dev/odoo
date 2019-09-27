@@ -28,6 +28,33 @@ class Attachment extends owl.store.ConnectedComponent {
         });
     }
 
+    /**
+     * Get the details mode after auto mode is computed
+     * @return {string} 'card', 'hover' or 'none'
+     */
+    get detailsMode() {
+        if (this.props.detailsMode !== 'auto') {
+            return this.props.detailsMode;
+        }
+        return this.env.store.getters.attachmentFileType(this.props.attachmentLocalId) !== 'image' ? 'card' : 'hover';
+    }
+
+    /**
+     * Get the attachment representation style to be applied
+     * @return {string}
+     */
+    get reprStyle() {
+        if (this.env.store.getters.attachmentFileType(this.props.attachmentLocalId) !== 'image') {
+            return '';
+        } else {
+            let size = '160x160';
+            if (this.detailsMode === 'card') {
+                size = '38x38';
+            }
+            return `background-image:url(/web/image/${this.storeProps.attachment.id}/${size}/?crop=true);`;
+        }
+    }
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -45,7 +72,10 @@ class Attachment extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickImage(ev) {
-        if (!this.env.store.getters.isAttachmentViewable(this.props.attachmentLocalId)) {
+        if (
+            !this.props.allowPreview ||
+            !this.env.store.getters.isAttachmentViewable(this.props.attachmentLocalId)
+        ) {
             return;
         }
         this.dispatch('viewAttachments', {
@@ -65,11 +95,12 @@ class Attachment extends owl.store.ConnectedComponent {
 }
 
 Attachment.defaultProps = {
-    hasLabelForCardLayout: true,
-    imageSizeForBasicLayout: 'medium',
+    allowPreview: true,
+    detailsMode: 'auto',
     isDownloadable: false,
     isEditable: true,
-    layout: 'basic',
+    showExtensionInDetails: true,
+    showFilenameInDetails: true,
 };
 
 /**
@@ -84,13 +115,14 @@ Attachment.mapStoreToProps = function (state, ownProps) {
 };
 
 Attachment.props = {
+    allowPreview: Boolean,
     attachment: Object, // {mail.store.model.Attachment}
     attachmentLocalId: String,
-    hasLabelForCardLayout: Boolean,
-    imageSizeForBasicLayout: String, // ['small', 'medium', 'large']
+    detailsMode: String, // ['auto', 'card', 'hover', 'none']
     isDownloadable: Boolean,
     isEditable: Boolean,
-    layout: String, // ['basic', 'card']
+    showExtensionInDetails: Boolean,
+    showFilenameInDetails: Boolean,
 };
 
 return Attachment;

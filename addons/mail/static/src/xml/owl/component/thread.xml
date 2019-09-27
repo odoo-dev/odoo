@@ -43,11 +43,12 @@
             t-on-o-message-list-mounted.stop="_onMessageListMounted"
             t-ref="messageList"/>
         <Composer
-            attachmentsLayout="props.composerAttachmentLayout"
+            attachmentsDetailsMode="props.composerAttachmentDetailsMode"
             class="o_Thread_composer"
             hasCurrentPartnerAvatar="props.hasComposerCurrentPartnerAvatar"
             hasSendButton="props.hasComposerSendButton"
-            haveAttachmentsLabelForCardLayout="props.haveComposerAttachmentsLabelForCardLayout"
+            showAttachmentsExtensions="props.showComposerAttachmentsExtensions"
+            showAttachmentsFilenames="props.showComposerAttachmentsFilenames"
             id="id + '_composer'"
             initialAttachmentLocalIds="props.composerInitialAttachmentLocalIds"
             initialTextInputHtmlContent="props.composerInitialTextInputHtmlContent"

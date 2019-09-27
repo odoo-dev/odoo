@@ -22,9 +22,9 @@ AttachmentList.defaultProps = {
     areAttachmentsDownloadable: false,
     areAttachmentsEditable: false,
     attachmentLocalIds: [],
-    attachmentsImageSizeForBasicLayout: 'medium',
-    attachmentsLayout: 'basic',
-    haveAttachmentsLabelForCardLayout: true,
+    attachmentsDetailsMode: 'auto',
+    showAttachmentsExtensions: true,
+    showAttachmentsFilenames: true,
 };
 
 AttachmentList.props = {
@@ -34,9 +34,9 @@ AttachmentList.props = {
         type: Array,
         element: String,
     },
-    attachmentsImageSizeForBasicLayout: String, // ['small', 'medium', 'large']
-    attachmentsLayout: String, // ['basic', 'card']
-    haveAttachmentsLabelForCardLayout: Boolean,
+    attachmentsDetailsMode: String, // ['auto', 'card', 'hover', 'none']
+    showAttachmentsExtensions: Boolean,
+    showAttachmentsFilenames: Boolean,
 };
 
 return AttachmentList;

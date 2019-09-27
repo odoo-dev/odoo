@@ -210,9 +210,10 @@
             <AttachmentList
                 areAttachmentsEditable="true"
                 attachmentLocalIds="storeProps.attachmentLocalIds"
-                attachmentsLayout="props.attachmentsLayout"
+                attachmentsDetailsMode="props.attachmentsDetailsMode"
                 class="o_Composer_attachmentList"
-                haveAttachmentsLabelForCardLayout="props.haveAttachmentsLabelForCardLayout"
+                showAttachmentsExtensions="props.showAttachmentsExtensions"
+                showAttachmentsFilenames="props.showAttachmentsFilenames"
                 t-if="storeProps.attachmentLocalIds.length > 0"/>
         </div>
     </div>
