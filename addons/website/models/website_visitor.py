@@ -159,7 +159,7 @@ class WebsiteVisitor(models.Model):
             'context': ctx,
         }
 
-    def _get_visitor_from_request(self):
+    def _get_visitor_from_request(self, force_create=False):
         """ Return the visitor as sudo from the request if there is a visitor_uuid cookie.
             It is possible that the partner has changed or has disconnected.
             In that case the cookie is still referencing the old visitor and need to be replaced
@@ -167,7 +167,8 @@ class WebsiteVisitor(models.Model):
 
         # This function can be called in json with mobile app.
         # In case of mobile app, no uid is set on the jsonRequest env.
-        if not request or not request.env.uid:
+        # In case of multi db, _env is None on request, and request.env unbound.
+        if not request or not request._env or not request.env.uid:
             return None
         Visitor = self.env['website.visitor'].sudo()
         visitor = Visitor
@@ -183,19 +184,20 @@ class WebsiteVisitor(models.Model):
         elif visitor and visitor.partner_id:
             # Cookie associated to a Partner
             visitor = Visitor
+
+        if force_create and not visitor:
+            visitor = self._create_visitor()
+
         return visitor
 
     def _get_visitor_from_request_or_create(self):
-        """ Return a tuple (visitor, response), see _get_visitor_from_request
+        """ Return a visitor, see _get_visitor_from_request
             If there is no visitor creates it and ensure the consistancy of the cookie. """
-        visitor_sudo = self._get_visitor_from_request()
-        if not visitor_sudo:
-            visitor_sudo = self._create_visitor()
-        return visitor_sudo
+        return self._get_visitor_from_request(force_create=True)
 
     def _handle_webpage_dispatch(self, response, website_page):
         # get visitor. Done here to avoid having to do it multiple times in case of override.
-        visitor_sudo = self._get_visitor_from_request_or_create()
+        visitor_sudo = self._get_visitor_from_request(force_create=True)
         if request.httprequest.cookies.get('visitor_uuid', '') != visitor_sudo.access_token:
             expiration_date = datetime.now() + timedelta(days=365)
             response.set_cookie('visitor_uuid', visitor_sudo.access_token, expires=expiration_date)

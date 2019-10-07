@@ -1255,7 +1255,7 @@ class WebsiteSale(http.Controller):
     @http.route('/shop/products/recently_viewed_update', type='json', auth='public', website=True)
     def products_recently_viewed_update(self, product_id, **kwargs):
         res = {}
-        visitor_sudo = request.env['website.visitor']._get_visitor_from_request_or_create()
+        visitor_sudo = request.env['website.visitor']._get_visitor_from_request(force_create=True)
         if request.httprequest.cookies.get('visitor_uuid', '') != visitor_sudo.access_token:
             res['visitor_uuid'] = visitor_sudo.access_token
         visitor_sudo._add_viewed_product(product_id)
