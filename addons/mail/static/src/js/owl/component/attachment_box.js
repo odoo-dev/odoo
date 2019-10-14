@@ -12,8 +12,8 @@ class AttachmentBox extends owl.store.ConnectedComponent {
      */
     constructor(...args) {
         super(...args);
-        this.template = 'mail.component.AttachmentBox';
         this.fileuploadId = _.uniqueId('o_AttachmentBox_fileupload');
+        this._fileInputRef = owl.hooks.useRef('fileInput');
     }
 
     /**
@@ -108,7 +108,7 @@ class AttachmentBox extends owl.store.ConnectedComponent {
             template.innerHTML = html.trim();
             window.eval.call(window, template.content.firstChild.textContent);
         }
-        this.refs.fileInput.value = '';
+        this._fileInputRef.el.value = '';
     }
 
     //--------------------------------------------------------------------------
@@ -166,7 +166,7 @@ class AttachmentBox extends owl.store.ConnectedComponent {
      * @param {Event} ev
      */
     _onClickAdd(ev) {
-        this.refs.fileInput.click();
+        this._fileInputRef.el.click();
     }
 }
 
@@ -193,6 +193,8 @@ AttachmentBox.mapStoreToProps = function (state, ownProps) {
 AttachmentBox.props = {
     threadLocalId: String,
 };
+
+AttachmentBox.template = 'mail.component.AttachmentBox';
 
 return AttachmentBox;
 

@@ -5,16 +5,6 @@ const AttachmentBox = require('mail.component.AttachmentBox');
 
 
 class Chatter extends owl.store.ConnectedComponent {
-
-    /**
-     * @param {...any} args
-     * @override
-     */
-    constructor(...args) {
-        super(...args);
-        this.template = 'mail.component.Chatter';
-    }
-
     /**
      * @override
      */
@@ -51,6 +41,8 @@ Chatter.props = {
     resId: String,
     resModel: String
 };
+
+Chatter.template = 'mail.component.Chatter';
 
 return Chatter;
 

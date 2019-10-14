@@ -79,6 +79,7 @@ QUnit.test('base rendering', async function (assert) {
     assert.expect(2);
 
     await this.start({
+        debug: true,
         async mockRPC(route, args){
             if (route.includes('ir.attachment/search_read'))
             {
@@ -115,6 +116,7 @@ QUnit.test('base rendering', async function (assert) {
             .length,
         1,
         "should have an attachment box in the chatter");
+    await pause();
 });
 
 });
