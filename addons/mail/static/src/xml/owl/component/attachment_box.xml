@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_AttachmentBox"
+        owl="1"
+        t-name="mail.component.AttachmentBox">
+            <AttachmentList
+                areAttachmentsEditable="true"
+                attachmentLocalIds="storeProps.attachmentLocalIds"
+                class="o_attachmentBox_attachmentList"
+                t-if="storeProps.attachmentLocalIds and storeProps.attachmentLocalIds.length > 0"/>
+            <button class="o_AttachmentBox_buttonAdd" type="button" t-on-click.stop.prevent="_onClickAdd">
+                <i class="fa fa-plus-square"/>
+                Add attachments
+            </button>
+            <input
+                class="o_AttachmentBox_fileInput"
+                multiple="true"
+                type="file"
+                t-key="'fileInput'"
+                t-on-change="_onChangeAttachment"
+                t-ref="fileInput"/>
+    </div>
+
+
+</templates>

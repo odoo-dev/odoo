@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div
+        class="o_Chatter"
+        owl="1"
+        t-name="mail.component.Chatter">
+            <div>
+                <span>ID:</span>
+                <strong t-esc="props.resId"/>
+                <span>Model:</span>
+                <strong t-esc="props.resModel"/>
+                <br />
+                <strong t-esc="storeProps.threadLocalId"/>
+            </div>
+            <AttachmentBox
+                t-if="storeProps.threadLocalId"
+                class="o_Chatter_attachmentBox"
+                threadLocalId="storeProps.threadLocalId"
+            />
+    </div>
+
+
+</templates>

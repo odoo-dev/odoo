@@ -62,10 +62,12 @@
         'static/src/xml/web_kanban_activity.xml',
 
         'static/src/xml/owl/component/attachment.xml',
+        'static/src/xml/owl/component/attachment_box.xml',
         'static/src/xml/owl/component/attachment_list.xml',
         'static/src/xml/owl/component/attachment_viewer.xml',
         'static/src/xml/owl/component/autocomplete_input.xml',
         'static/src/xml/owl/component/chat_window.xml',
+        'static/src/xml/owl/component/chatter.xml',
         'static/src/xml/owl/component/chat_window_header.xml',
         'static/src/xml/owl/component/chat_window_hidden_menu.xml',
         'static/src/xml/owl/component/chat_window_manager.xml',
