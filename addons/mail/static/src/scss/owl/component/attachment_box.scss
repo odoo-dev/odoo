@@ -1,3 +1,11 @@
-.o_AttachmentBox_fileInput {
-    display: none !important;
+.o_AttachmentBox{
+    border-top: 1px dashed #dee2e6;
+
+    .o_AttachmentBox_fileInput {
+        display: none;
+    }
+
+    .o_AttachmentBox_title {
+        text-align: center;
+    }
 }

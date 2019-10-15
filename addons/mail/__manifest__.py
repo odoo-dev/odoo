@@ -68,6 +68,7 @@
         'static/src/xml/owl/component/autocomplete_input.xml',
         'static/src/xml/owl/component/chat_window.xml',
         'static/src/xml/owl/component/chatter.xml',
+        'static/src/xml/owl/component/chatter_topbar.xml',
         'static/src/xml/owl/component/chat_window_header.xml',
         'static/src/xml/owl/component/chat_window_hidden_menu.xml',
         'static/src/xml/owl/component/chat_window_manager.xml',

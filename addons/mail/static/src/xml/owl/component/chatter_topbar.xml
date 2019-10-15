@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <div
+        class="o_ChatterTopbar"
+        owl="1"
+        t-name="mail.component.ChatterTopbar">
+            <div class="o_ChatterTopbar_LeftSection">
+                <button class="btn btn-link o_ChatterTopbar_buttonSendMessage">
+                    Send message
+                </button>
+                <button class="btn btn-link o_ChatterTopbar_buttonLogNote">
+                    Log note
+                </button>
+                <button class="btn btn-link o_ChatterTopbar_buttonScheduleActivity">
+                    <i class="fa fa-clock-o"/>
+                    Schedule activity
+                </button>
+                <button class="btn btn-link o_ChatterTopbar_buttonAttachments"
+                        t-on-click.prevent.stop="_onClickAttachments">
+                    <i class="fa fa-paperclip"/>
+                    <span class="o_ChatterTopbar_buttonAttachments_count pl-1" t-esc="storeProps.attachmentsAmount"/>
+                </button>
+            </div>
+            <div class="o_ChatterTopbar_RightSection">
+                <button class="btn btn-link o_ChatterTopbar_buttonFollow">
+                    Follow
+                </button>
+                <button class="btn btn-link o_ChatterTopbar_buttonFollowers">
+                    <i class="fa fa-user"/>
+                    <span class="o_ChatterTopbar_buttonFollowers_count pl-1" t-esc="storeProps.followersAmount"/>
+                </button>
+            </div>
+    </div>
+</templates>

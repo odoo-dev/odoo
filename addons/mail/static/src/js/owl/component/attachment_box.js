@@ -177,8 +177,7 @@ AttachmentBox.components = {
 /**
  * @param {Object} state
  * @param {Object} ownProps
- * @param {string} ownProps.resId
- * @param {string} ownProps.resModel
+ * @param {string} ownProps.threadLocalId
  * @return {Object}
  */
 AttachmentBox.mapStoreToProps = function (state, ownProps) {

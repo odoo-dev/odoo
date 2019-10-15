@@ -109,6 +109,7 @@
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/attachment_viewer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/autocomplete_input.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/chatter.js"></script>
+                <script type="text/javascript" src="/mail/static/src/js/owl/component/chatter_topbar.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/chat_window.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/chat_window_header.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/owl/component/chat_window_hidden_menu.js"></script>
@@ -155,6 +156,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/attachment_viewer.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/partner_im_status_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chatter.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chatter_topbar.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chat_window.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chat_window_header.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/owl/component/chat_window_hidden_menu.scss"/>
@@ -225,6 +227,7 @@
                 <script type="text/javascript" src="/mail/static/tests/owl/component/attachment_box_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/chat_window_manager_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/chatter_tests.js"></script>
+                <script type="text/javascript" src="/mail/static/tests/owl/component/chatter_topbar_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/composer_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/discuss_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/message_tests.js"></script>

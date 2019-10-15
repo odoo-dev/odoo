@@ -50,7 +50,7 @@ QUnit.module('Chatter', {
 });
 
 QUnit.test('base rendering when chatter has no attachments', async function (assert) {
-    assert.expect(2);
+    assert.expect(3);
 
     await this.start({
         async mockRPC(route, args) {
@@ -74,17 +74,24 @@ QUnit.test('base rendering when chatter has no attachments', async function (ass
         document
             .querySelectorAll(`
                 .o_Chatter
-                .o_Chatter_attachmentBox`)
+                .o_ChatterTopbar`)
             .length,
         1,
-        "should have an attachment box in the chatter");
+        "should have a chatter topbar");
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
+                .o_Chatter_attachmentBox`)
+            .length,
+        0,
+        "should not have an attachment box in the chatter");
 });
 
 QUnit.test('base rendering when chatter has attachments', async function (assert) {
-    assert.expect(2);
+    assert.expect(3);
 
     await this.start({
-        debug: true,
         async mockRPC(route, args) {
             if (route.includes('ir.attachment/search_read')) {
                 return [{
@@ -116,12 +123,104 @@ QUnit.test('base rendering when chatter has attachments', async function (assert
         document
             .querySelectorAll(`
                 .o_Chatter
+                .o_ChatterTopbar`)
+            .length,
+        1,
+        "should have a chatter topbar");
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
+                .o_Chatter_attachmentBox`)
+            .length,
+        0,
+        "should not have an attachment box in the chatter");
+});
+
+QUnit.test('show attachment box', async function (assert) {
+    assert.expect(6);
+
+    await this.start({
+        async mockRPC(route, args) {
+            if (route.includes('ir.attachment/search_read')) {
+                return [{
+                    id: 143,
+                    filename: 'Blah.txt',
+                    mimetype: 'text/plain',
+                    name: 'Blah.txt'
+                }, {
+                    id: 144,
+                    filename: 'Blu.txt',
+                    mimetype: 'text/plain',
+                    name: 'Blu.txt'
+                }];
+            }
+            return this._super(...arguments);
+        }
+    });
+    await this.createChatter('res.partner', '100');
+    await testUtils.nextTick();
+
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter`)
+            .length,
+        1,
+        "should have a chatter");
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
+                .o_ChatterTopbar`)
+            .length,
+        1,
+        "should have a chatter topbar");
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
+                .o_ChatterTopbar
+                .o_ChatterTopbar_buttonAttachments
+                `)
+            .length,
+        1,
+        "should have an attachments button in chatter topbar");
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
+                .o_ChatterTopbar
+                .o_ChatterTopbar_buttonAttachments
+                .o_ChatterTopbar_buttonAttachments_count
+                `)
+            .length,
+        1,
+        "attachments button should have a counter");
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
+                .o_Chatter_attachmentBox`)
+            .length,
+        0,
+        "should not have an attachment box in the chatter");
+    document
+        .querySelector(`
+            .o_Chatter
+            .o_ChatterTopbar
+            .o_ChatterTopbar_buttonAttachments`)
+        .click();
+    await testUtils.nextTick();
+
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
                 .o_Chatter_attachmentBox`)
             .length,
         1,
         "should have an attachment box in the chatter");
-
-    await pause();
 });
 
 });
