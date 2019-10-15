@@ -110,7 +110,7 @@ Attachment.props = {
     allowPreview: Boolean,
     attachment: Object, // {mail.store.model.Attachment}
     attachmentLocalId: String,
-    detailsMode: String, // ['auto', 'card', 'hover', 'none']
+    detailsMode: String, //['auto', 'card', 'hover', 'none']
     isDownloadable: Boolean,
     isEditable: Boolean,
     showExtensionInDetails: Boolean,

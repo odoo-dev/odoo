@@ -46,7 +46,7 @@ QUnit.module('Attachment', {
     }
 });
 
-QUnit.test('simplest layout', async function(assert){
+QUnit.test('simplest layout', async function (assert) {
     assert.expect(8);
     await this.start({});
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -119,7 +119,7 @@ QUnit.test('simplest layout', async function(assert){
         "attachment should not have an aside part");
 });
 
-QUnit.test('simplest layout + deletable', async function(assert){
+QUnit.test('simplest layout + deletable', async function (assert) {
     assert.expect(6);
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -185,7 +185,7 @@ QUnit.test('simplest layout + deletable', async function(assert){
         "attachment should have a delete button");
 });
 
-QUnit.test('simplest layout + downloadable', async function(assert){
+QUnit.test('simplest layout + downloadable', async function (assert) {
     assert.expect(6);
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -251,7 +251,7 @@ QUnit.test('simplest layout + downloadable', async function(assert){
         "attachment should have a download button");
 });
 
-QUnit.test('simplest layout + deletable + downloadable', async function(assert){
+QUnit.test('simplest layout + deletable + downloadable', async function (assert) {
     assert.expect(8);
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -334,7 +334,7 @@ QUnit.test('simplest layout + deletable + downloadable', async function(assert){
         "attachment should have a delete button");
 });
 
-QUnit.test('layout with card details', async function(assert){
+QUnit.test('layout with card details', async function (assert) {
     assert.expect(3);
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -378,7 +378,7 @@ QUnit.test('layout with card details', async function(assert){
         "attachment should not have an aside part");
 });
 
-QUnit.test('layout with card details and filename', async function(assert){
+QUnit.test('layout with card details and filename', async function (assert) {
     assert.expect(3);
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -424,7 +424,7 @@ QUnit.test('layout with card details and filename', async function(assert){
         "attachment should have its extension shown");
 });
 
-QUnit.test('layout with card details and extension', async function(assert){
+QUnit.test('layout with card details and extension', async function (assert) {
     assert.expect(3);
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -470,7 +470,7 @@ QUnit.test('layout with card details and extension', async function(assert){
         "attachment should have its extension shown");
 });
 
-QUnit.test('layout with card details and filename and extension', async function(assert){
+QUnit.test('layout with card details and filename and extension', async function (assert) {
     assert.expect(3);
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -516,7 +516,7 @@ QUnit.test('layout with card details and filename and extension', async function
         "attachment should have its extension shown");
 });
 
-QUnit.test('simplest layout with hover details and filename and extension', async function(assert){
+QUnit.test('simplest layout with hover details and filename and extension', async function (assert) {
     assert.expect(8);
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
@@ -608,7 +608,7 @@ QUnit.test('simplest layout with hover details and filename and extension', asyn
         "attachment should not have an aside element");
 });
 
-QUnit.test('auto layout with image', async function(assert){
+QUnit.test('auto layout with image', async function (assert) {
     assert.expect(7);
     await this.start({
         async mockRPC(route, args) {

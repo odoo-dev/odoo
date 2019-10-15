@@ -41,7 +41,7 @@ class AttachmentBox extends owl.store.ConnectedComponent {
      * @return {Promise}
      * @private
      */
-    async _createAttachment(fileData){
+    async _createAttachment(fileData) {
         return await this.dispatch('createAttachment', {
             ...fileData,
             threadLocalId: this.props.threadLocalId

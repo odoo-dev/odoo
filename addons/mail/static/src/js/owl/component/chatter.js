@@ -12,7 +12,7 @@ class Chatter extends owl.store.ConnectedComponent {
         this.dispatch('createChatter', {
             _model: this.props.resModel,
             id: this.props.resId,
-        })
+        });
         // TODO [create or reload] OR [delete on unmount]
     }
 }
@@ -29,7 +29,7 @@ Chatter.components = {
      * @param {string} ownProps.resModel
      * @returns {{threadLocalId: *}}
      */
-Chatter.mapStoreToProps = function(state, ownProps) {
+Chatter.mapStoreToProps = function (state, ownProps) {
     const threads = Object.values(state.threads).filter(thread =>
             thread._model === ownProps.resModel &&
             thread.id === ownProps.resId);
