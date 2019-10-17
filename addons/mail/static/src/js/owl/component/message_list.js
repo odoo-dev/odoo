@@ -98,7 +98,7 @@ class MessageList extends owl.store.ConnectedComponent {
         if (this.storeProps.messages.length === 0) {
             return;
         }
-        if (this._willPatchSnapshot.isPatchedWithLoadMoreMessages) {
+        if (this._willPatchSnapshot.isPatchedWithLoadMoreMessages && this.props.order === 'asc') {
             this.el.scrollTop =
                 this.el.scrollHeight -
                 this._willPatchSnapshot.scrollHeight +
@@ -302,16 +302,24 @@ class MessageList extends owl.store.ConnectedComponent {
      */
     _isLoadMoreVisible() {
         const loadMore = this._loadMoreRef.el;
-        if (!loadMore) {
+        if (!loadMore || this.storeProps.threadCache.isAllHistoryLoaded) {
             return false;
         }
         const loadMoreRect = loadMore.getBoundingClientRect();
         const elRect = this.el.getBoundingClientRect();
+        const offset = 15;
         // intersection with 15px offset
-        return (
-            loadMoreRect.top < elRect.bottom + 15 &&
-            elRect.top < loadMoreRect.bottom + 15
-        );
+        if (this.props.order === 'asc') {
+            return (
+                // loadMore top is upper than message list bottom (modulo offset)
+                // AND loadMore bottom is lower than message lit top (module offset)
+                loadMoreRect.top < elRect.bottom + offset &&
+                loadMoreRect.bottom > elRect.top - offset
+            );
+        } else {
+            // loadMore bottom is upper than message list bottom (modulo offset)
+            return loadMoreRect.bottom < elRect.bottom + offset;
+        }
     }
 
     /**
@@ -330,7 +338,7 @@ class MessageList extends owl.store.ConnectedComponent {
     async _scrollToMessage(messageLocalId) {
         this._isAutoLoadOnScrollActive = false;
         await this.__owl__.refs[messageLocalId].scrollIntoView({
-            block:'nearest',
+            block: 'nearest',
         });
         if (!this.el) {
             return;
