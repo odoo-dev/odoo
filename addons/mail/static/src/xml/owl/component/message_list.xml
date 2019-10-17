@@ -12,7 +12,9 @@
 
         <!-- No result messages -->
         <div
-            class="o_MessageList_empty"
+            class="
+                o_MessageList_empty
+                o_MessageList_item"
             t-if="storeProps.messages.length === 0"
             t-key="'empty'">
             <t t-if="storeProps.thread.localId === 'mail.box_inbox'">
@@ -47,6 +49,7 @@
         <t t-set="prev_message" t-value="0"/>
         <div
             class="
+                o_MessageList_item
                 o_MessageList_separator
                 o_MessageList_separatorNewMessages"
             t-att-class="{
@@ -69,6 +72,7 @@
             <t t-set="message_day" t-value="getDateDay(message)"/>
             <div
                 class="
+                    o_MessageList_item
                     o_MessageList_separator
                     o_MessageList_separatorDate"
                 t-if="current_day !== message_day"
@@ -84,7 +88,9 @@
                 <t t-set="isMessageSquashed" t-value="shouldMessageBeSquashed(prev_message, message)"/>
             </t>
             <Message
-                class="o_MessageList_message"
+                class="
+                    o_MessageList_item
+                    o_MessageList_message"
                 hasAuthorRedirect="props.haveMessagesAuthorRedirect"
                 hasMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
                 hasReplyIcon="props.haveMessagesReplyIcon"
@@ -100,6 +106,7 @@
             <t  t-set="prev_message" t-value="message"/>
             <div
                 class="
+                    o_MessageList_item
                     o_MessageList_separator
                     o_MessageList_separatorNewMessages"
                 t-att-class="{
@@ -128,7 +135,7 @@
     <t owl="1"
        t-name="mail.component.MessageListLoadMore">
         <div
-            class="o_MessageList_isLoadingMore"
+            class="o_MessageList_item o_MessageList_isLoadingMore"
             t-if="storeProps.threadCache.isLoadingMore"
             t-key="'isLoadingMore'">
             <i
@@ -139,7 +146,7 @@
                     o_MessageList_isLoadingMoreIcon"/>Loading...
         </div>
         <a
-            class="o_MessageList_loadMore"
+            class="o_MessageList_item o_MessageList_loadMore"
             href="#"
             t-elif="!storeProps.threadCache.isAllHistoryLoaded"
             t-key="'load_more'"

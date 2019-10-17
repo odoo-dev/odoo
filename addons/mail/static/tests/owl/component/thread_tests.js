@@ -98,7 +98,7 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
         "should have dropzone when dragging file over the thread");
 });
 
-QUnit.only('message list desc order', async function (assert) {
+QUnit.test('message list desc order', async function (assert) {
     assert.expect(5);
     let amountOfCalls = 0;
     let lastId = 10000;
@@ -158,17 +158,15 @@ QUnit.only('message list desc order', async function (assert) {
     // needed to allow scrolling
     this.thread.el.style.height = '300px';
     await testUtils.nextTick();
-    assert.strictEqual(
-        document
-            .querySelectorAll(`.o_MessageList_loadMore + .o_Message`)
-            .length,
-        0,
+    const messageItems = document.querySelectorAll(`
+        .o_MessageList
+        .o_MessageList_item
+    `);
+    assert.notOk(
+        messageItems[0].classList.contains("o_MessageList_loadMore"),
         "load more link should NOT be before messages");
-    assert.strictEqual(
-        document
-            .querySelectorAll(`.o_Message + .o_MessageList_loadMore`)
-            .length,
-        1,
+    assert.ok(
+        messageItems[messageItems.length - 1].classList.contains("o_MessageList_loadMore"),
         "load more link should be after messages");
     assert.strictEqual(
         document
@@ -206,7 +204,7 @@ QUnit.only('message list desc order', async function (assert) {
     );
 });
 
-QUnit.only('message list asc order', async function (assert) {
+QUnit.test('message list asc order', async function (assert) {
     assert.expect(5);
     let amountOfCalls = 0;
     let lastId = 10000;
@@ -266,17 +264,15 @@ QUnit.only('message list asc order', async function (assert) {
     // needed to allow scrolling
     this.thread.el.style.height = '300px';
     await testUtils.nextTick();
-    assert.strictEqual(
-        document
-            .querySelectorAll(`.o_MessageList_loadMore + .o_Message`)
-            .length,
-        1,
+    const messageItems = document.querySelectorAll(`
+        .o_MessageList
+        .o_MessageList_item
+    `);
+    assert.notOk(
+        messageItems[messageItems.length - 1].classList.contains("o_MessageList_loadMore"),
         "load more link should be before messages");
-    assert.strictEqual(
-        document
-            .querySelectorAll(`.o_Message + .o_MessageList_loadMore`)
-            .length,
-        0,
+    assert.ok(
+        messageItems[0].classList.contains("o_MessageList_loadMore"),
         "load more link should NOT be after messages");
     assert.strictEqual(
         document
@@ -284,19 +280,6 @@ QUnit.only('message list asc order', async function (assert) {
             .length,
         30,
         "should have 30 messages at the beginning"
-    );
-    // scroll to bottom
-    await scroll({
-        scrollableElement: document.querySelector(`.o_Thread_messageList`),
-        scrollTop: document.querySelector(`.o_Thread_messageList`).scrollHeight
-    });
-
-    assert.strictEqual(
-        document
-            .querySelectorAll(`.o_Message`)
-            .length,
-        30,
-        "scrolling to bottom should not trigger any message fetching"
     );
 
     // scroll to top
@@ -311,6 +294,19 @@ QUnit.only('message list asc order', async function (assert) {
             .length,
         60,
         "should have 60 messages after scrolled to bottom"
+    );
+
+    // scroll to bottom
+    await scroll({
+        scrollableElement: document.querySelector(`.o_Thread_messageList`),
+        scrollTop: document.querySelector(`.o_Thread_messageList`).scrollHeight
+    });
+    assert.strictEqual(
+        document
+            .querySelectorAll(`.o_Message`)
+            .length,
+        60,
+        "scrolling to bottom should not trigger any message fetching"
     );
 });
 
