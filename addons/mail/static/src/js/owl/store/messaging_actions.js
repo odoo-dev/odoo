@@ -3027,15 +3027,20 @@ const actions = {
         if (!thread.messageIds) {
             thread.messageIds = [];
         }
-        const messageIds = thread.messageIds;
+        let messageIds = thread.messageIds;
+        // FIXME: Condition ?
         // TODO: this is for document_thread inside chat window
-        // else {
-        //     const [{ messageIds }] = await env.rpc({
-        //         model: thread._model,
-        //         method: 'read',
-        //         args: [[thread.id], ['message_ids']]
-        //     });
-        // }
+
+        if (!messageIds || messageIds.length === 0)
+        {
+            const res = await env.rpc({
+                model: thread._model,
+                method: 'read',
+                args: [[thread.id], ['message_ids']]
+            });
+            messageIds = res[0].message_ids;
+        }
+
         const threadCacheLocalId = thread.cacheLocalIds['[]'];
         const threadCache = state.threadCaches[threadCacheLocalId];
         const loadedMessageIds = threadCache.messageLocalIds
@@ -3046,6 +3051,9 @@ const actions = {
             .filter(messageId => !loadedMessageIds.includes(messageId))
             .length > 0;
         if (!shouldFetch) {
+            dispatch('_handleThreadLoaded', threadLocalId, {
+                messagesData: [],
+            });
             return;
         }
         const idsToLoad = messageIds

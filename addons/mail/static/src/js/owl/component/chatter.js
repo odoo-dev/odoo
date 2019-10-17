@@ -3,6 +3,7 @@ odoo.define('mail.component.Chatter', function (require) {
 
 const AttachmentBox = require('mail.component.AttachmentBox');
 const ChatterTopbar = require('mail.component.ChatterTopbar');
+const Thread = require('mail.component.Thread');
 
 
 class Chatter extends owl.store.ConnectedComponent {
@@ -14,6 +15,7 @@ class Chatter extends owl.store.ConnectedComponent {
         this.state = owl.useState({
             isAttachmentBoxShown: false,
         });
+        this._threadRef = owl.hooks.useRef('thread');
     }
     /**
      * @override
@@ -41,7 +43,8 @@ class Chatter extends owl.store.ConnectedComponent {
 
 Chatter.components = {
     AttachmentBox,
-    ChatterTopbar
+    ChatterTopbar,
+    Thread
 };
 
 /**

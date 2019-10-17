@@ -49,13 +49,31 @@ QUnit.module('Chatter', {
     }
 });
 
-QUnit.test('base rendering when chatter has no attachments', async function (assert) {
-    assert.expect(3);
+QUnit.only('base rendering when chatter has no attachments', async function (assert) {
+    assert.expect(4);
 
     await this.start({
         async mockRPC(route, args) {
             if (route.includes('ir.attachment/search_read')) {
                 return [];
+            }
+            if (route.includes('res.partner/read')) {
+                return [{
+                    'message_ids': [100]
+                }];
+            }
+            if (args.method === 'message_format') {
+                return [{
+                    author_id: [100, `Jean Mich`],
+                    body: `<p>BLAH</p>`,
+                    channel_ids: [100],
+                    date: "2019-04-20 10:00:00",
+                    id: 100,
+                    message_type: 'comment',
+                    model: 'res.partner',
+                    record_name: 'Jean Eric',
+                    res_id: 100,
+                }];
             }
             return this._super(...arguments);
         }
@@ -86,6 +104,25 @@ QUnit.test('base rendering when chatter has no attachments', async function (ass
             .length,
         0,
         "should not have an attachment box in the chatter");
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
+                .o_Chatter_thread`)
+            .length,
+        1,
+        "should have a thread in the chatter");
+    assert.strictEqual(
+        document
+            .querySelector(`
+                .o_Chatter
+                .o_Chatter_thread
+            `)
+            .dataset
+            .threadLocalId,
+        'res.partner_100',
+        'thread should have the right thread local id'
+    );
 });
 
 QUnit.test('base rendering when chatter has attachments', async function (assert) {
