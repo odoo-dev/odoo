@@ -103,7 +103,6 @@ QUnit.only('message list desc order', async function (assert) {
     let amountOfCalls = 0;
     let lastId = 10000;
     await this.start({
-        debug: true,
         async mockRPC(route, args) {
             if (args.method === 'message_fetch') {
                 if (amountOfCalls > 4) {
@@ -212,7 +211,6 @@ QUnit.only('message list asc order', async function (assert) {
     let amountOfCalls = 0;
     let lastId = 10000;
     await this.start({
-        debug: true,
         async mockRPC(route, args) {
             if (args.method === 'message_fetch') {
                 if (amountOfCalls > 4) {
