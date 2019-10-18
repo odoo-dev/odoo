@@ -251,14 +251,14 @@ const actions = {
             }
         }
         // remove attachment from thread
-        if (attachment.threadLocalId){
+        if (attachment.threadLocalId) {
             const thread = state.threads[attachment.threadLocalId];
-            if (thread.attachmentLocalIds.includes(attachmentLocalId)){
+            if (thread.attachmentLocalIds.includes(attachmentLocalId)) {
                 dispatch('_updateThread', attachment.threadLocalId, {
                     attachmentLocalIds:
                         thread.attachmentLocalIds.filter(localId =>
                             localId !== attachmentLocalId)
-                })
+                });
             }
         }
         // remove attachment from messages
@@ -521,7 +521,7 @@ const actions = {
             args: [[channelId]]
         });
         const threadLocalId = dispatch('_createThread', { ...data });
-        if (state.threads[threadLocalId].is_minimized){
+        if (state.threads[threadLocalId].is_minimized) {
             dispatch('openThread', threadLocalId, {
                 chatWindowMode: 'last',
             });
@@ -564,10 +564,10 @@ const actions = {
      */
     async linkAttachmentToThread({ dispatch, state }, threadLocalId, attachmentLocalId) {
         const thread = state.threads[threadLocalId];
-        if (!thread.attachmentLocalIds.includes(attachmentLocalId)){
+        if (!thread.attachmentLocalIds.includes(attachmentLocalId)) {
             const attachmentLocalIds = thread.attachmentLocalIds;
             attachmentLocalIds.push(attachmentLocalId);
-            dispatch('_updateThread', threadLocalId, { attachmentLocalIds })
+            dispatch('_updateThread', threadLocalId, { attachmentLocalIds });
         }
     },
     /**
@@ -1242,7 +1242,7 @@ const actions = {
      * @param {any} changes
      */
     updateDialogInfo({ state }, id, changes) {
-        const dialog  = state.dialogManager.dialogs.find(dialog => dialog.id === id);
+        const dialog = state.dialogManager.dialogs.find(dialog => dialog.id === id);
         if (!dialog) {
             return;
         }
@@ -3027,12 +3027,13 @@ const actions = {
         if (!thread.messageIds) {
             thread.messageIds = [];
         }
-        let messageIds = thread.messageIds;
+
         // FIXME: Condition ?
         // TODO: this is for document_thread inside chat window
-
-        if (!messageIds || messageIds.length === 0)
-        {
+        let messageIds;
+        if (thread.messageIds && thread.messageIds.length > 0) {
+            messageIds = thread.messageIds;
+        } else {
             const res = await env.rpc({
                 model: thread._model,
                 method: 'read',
