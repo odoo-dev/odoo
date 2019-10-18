@@ -50,30 +50,37 @@ QUnit.module('Chatter', {
 });
 
 QUnit.only('base rendering when chatter has no attachments', async function (assert) {
-    assert.expect(4);
-
+    assert.expect(5);
+    let amountOfCalls = 0;
+    let lastId = 1000;
     await this.start({
         async mockRPC(route, args) {
             if (route.includes('ir.attachment/search_read')) {
                 return [];
             }
-            if (route.includes('res.partner/read')) {
-                return [{
-                    'message_ids': [100]
-                }];
-            }
-            if (args.method === 'message_format') {
-                return [{
-                    author_id: [100, `Jean Mich`],
-                    body: `<p>BLAH</p>`,
-                    channel_ids: [100],
-                    date: "2019-04-20 10:00:00",
-                    id: 100,
-                    message_type: 'comment',
-                    model: 'res.partner',
-                    record_name: 'Jean Eric',
-                    res_id: 100,
-                }];
+            if (args.method === 'message_fetch') {
+                // multiple calls here to be able to test load more (up to (10000 / 30) calls normally
+                let messagesData = [];
+                const amountOfMessages = 30;
+                const firstIValue = (lastId - amountOfCalls * amountOfMessages) - 1;
+                const lastIValue = firstIValue - amountOfMessages;
+
+                for (let i = firstIValue; i > lastIValue; i--) {
+                    messagesData.push({
+                        author_id: [firstIValue, `#${firstIValue}`],
+                        body: `<em>Page ${amountOfCalls + 1}</em><br/><p>#${i} message</p>`,
+                        channel_ids: [20],
+                        date: "2019-04-20 10:00:00",
+                        id: lastId + i,
+                        message_type: 'comment',
+                        model: 'mail.channel',
+                        record_name: 'General',
+                        res_id: 20,
+                    });
+                }
+                lastId = lastIValue;
+                amountOfCalls++;
+                return messagesData;
             }
             return this._super(...arguments);
         }
@@ -123,6 +130,16 @@ QUnit.only('base rendering when chatter has no attachments', async function (ass
         'res.partner_100',
         'thread should have the right thread local id'
     );
+    assert.strictEqual(
+        document
+            .querySelectorAll(`
+                .o_Chatter
+                .o_Chatter_thread
+                .o_Message
+            `)
+            .length,
+        30,
+        "the first 30 messages of thread should be loaded");
 });
 
 QUnit.test('base rendering when chatter has attachments', async function (assert) {

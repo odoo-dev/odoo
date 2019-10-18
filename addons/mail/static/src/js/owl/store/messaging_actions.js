@@ -3018,67 +3018,6 @@ const actions = {
      * @param {Object} param0.env
      * @param {Object} param0.state
      * @param {string} threadLocalId
-     */
-    async _loadMessagesOnDocumentThread(
-        { dispatch, env, state },
-        threadLocalId
-    ) {
-        const thread = state.threads[threadLocalId];
-        if (!thread.messageIds) {
-            thread.messageIds = [];
-        }
-
-        // FIXME: Condition ?
-        // TODO: this is for document_thread inside chat window
-        let messageIds;
-        if (thread.messageIds && thread.messageIds.length > 0) {
-            messageIds = thread.messageIds;
-        } else {
-            const res = await env.rpc({
-                model: thread._model,
-                method: 'read',
-                args: [[thread.id], ['message_ids']]
-            });
-            messageIds = res[0].message_ids;
-        }
-
-        const threadCacheLocalId = thread.cacheLocalIds['[]'];
-        const threadCache = state.threadCaches[threadCacheLocalId];
-        const loadedMessageIds = threadCache.messageLocalIds
-            .filter(localId => messageIds.includes(state.messages[localId].id))
-            .map(localId => state.messages[localId].id);
-        const shouldFetch = messageIds
-            .slice(0, state.MESSAGE_FETCH_LIMIT)
-            .filter(messageId => !loadedMessageIds.includes(messageId))
-            .length > 0;
-        if (!shouldFetch) {
-            dispatch('_handleThreadLoaded', threadLocalId, {
-                messagesData: [],
-            });
-            return;
-        }
-        const idsToLoad = messageIds
-            .filter(messageId => !loadedMessageIds.includes(messageId))
-            .slice(0, state.MESSAGE_FETCH_LIMIT);
-        threadCache.isLoading = true;
-        const messagesData = await env.rpc({
-            model: 'mail.message',
-            method: 'message_format',
-            args: [idsToLoad],
-            context: env.session.user_context
-        });
-        dispatch('_handleThreadLoaded', threadLocalId, {
-            messagesData,
-        });
-        // await dispatch('markMessagesAsRead', messageLocalIds);
-    },
-    /**
-     * @private
-     * @param {Object} param0
-     * @param {function} param0.dispatch
-     * @param {Object} param0.env
-     * @param {Object} param0.state
-     * @param {string} threadLocalId
      * @param {Object} [param2]
      * @param {Array} [param2.searchDomain=[]]
      */
@@ -3095,9 +3034,6 @@ const actions = {
                 stringifiedDomain,
                 threadLocalId,
             });
-        }
-        if (!['mail.box', 'mail.channel'].includes(thread._model)) {
-            return dispatch('_loadMessagesOnDocumentThread', threadLocalId);
         }
         const threadCache = state.threadCaches[threadCacheLocalId];
         if (threadCache.isLoaded && threadCache.isLoading) {
