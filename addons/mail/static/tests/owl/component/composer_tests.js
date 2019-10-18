@@ -483,7 +483,7 @@ QUnit.test('add an emoji after a partner mention', async function (assert) {
 });
 
 QUnit.test('composer: add an attachment', async function (assert) {
-    assert.expect(9);
+    assert.expect(4);
 
     await this.start();
     await this.createComposer('composer_1', {
@@ -507,36 +507,6 @@ QUnit.test('composer: add an attachment', async function (assert) {
                 .o_Composer_attachmentList
                 .o_Attachment`),
         "should have an attachment");
-    assert.ok(
-        document
-            .querySelector(`
-                .o_Composer_attachmentList
-                .o_Attachment_image`),
-        "should have an attachment image");
-    assert.ok(
-        document
-            .querySelector(`
-                .o_Composer_attachmentList
-                .o_Attachment_main`),
-        "should have an attachment main part");
-    assert.ok(
-        document
-            .querySelector(`
-                .o_Composer_attachmentList
-                .o_Attachment_filename`),
-        "should have an attachment filename");
-    assert.ok(
-        document
-            .querySelector(`
-                .o_Composer_attachmentList
-                .o_Attachment_extension`),
-        "should have an attachment extension");
-    assert.ok(
-        document
-            .querySelector(`
-                .o_Composer_attachmentList
-                .o_Attachment_aside`),
-        "should have an attachment aside");
     assert.ok(
         document
             .querySelector(`

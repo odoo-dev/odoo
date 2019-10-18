@@ -50,7 +50,7 @@ QUnit.module('Chatter', {
 });
 
 QUnit.test('base rendering when chatter has no attachments', async function (assert) {
-    assert.expect(5);
+    assert.expect(6);
     let amountOfCalls = 0;
     let lastId = 1000;
     await this.start({
