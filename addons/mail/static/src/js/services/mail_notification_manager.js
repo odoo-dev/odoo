@@ -551,8 +551,7 @@ MailManager.include({
      */
     _listenOnBuses: function () {
         this._super.apply(this, arguments);
-        // disable notification handling to prevent side-effect with messaging store
-        // this.call('bus_service', 'onNotification', this, this._onNotification);
+        this.call('bus_service', 'onNotification', this, this._onNotification);
     },
     /**
      * Update the message notification status of message based on update_message
@@ -593,8 +592,9 @@ MailManager.include({
      */
     _onNotification: function (notifs) {
         var self = this;
-        notifs = this._filterNotificationsOnUnsubscribe(notifs);
-        _.each(notifs, function (notif) {
+        let notifications = JSON.parse(JSON.stringify(notifs));
+        notifications = this._filterNotificationsOnUnsubscribe(notifications);
+        _.each(notifications, function (notif) {
             var model = notif[0][1];
             if (model === 'ir.needaction') {
                 self._handleNeedactionNotification(notif[1]);
