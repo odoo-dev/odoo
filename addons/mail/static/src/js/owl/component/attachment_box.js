@@ -106,7 +106,7 @@ class AttachmentBox extends owl.store.ConnectedComponent {
             let html = await response.text();
             const template = document.createElement('template');
             template.innerHTML = html.trim();
-            window.eval.call(window, template.content.firstChild.textContent);
+            window.eval(template.content.firstChild.textContent);
         }
         this._fileInputRef.el.value = '';
     }

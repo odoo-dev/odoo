@@ -204,7 +204,7 @@ class Composer extends owl.store.ConnectedComponent {
             let html = await response.text();
             const template = document.createElement('template');
             template.innerHTML = html.trim();
-            window.eval.call(window, template.content.firstChild.textContent);
+            window.eval(template.content.firstChild.textContent);
         }
         this._fileInputRef.el.value = '';
     }
@@ -288,7 +288,7 @@ class Composer extends owl.store.ConnectedComponent {
 
         const context = {
             // default_parent_id: this.id,
-            default_body: this._textInput.comp.getHtmlContent(),
+            default_body: this._textInputRef.comp.getHtmlContent(),
             default_attachment_ids: attachmentIds,
             // default_partner_ids: partnerIds,
             default_is_log: this.props.isLog,
@@ -326,7 +326,7 @@ class Composer extends owl.store.ConnectedComponent {
      */
     _onClickSend(ev) {
         if (
-            this._textInput.comp.isEmpty() &&
+            this._textInputRef.comp.isEmpty() &&
             this.storeProps.attachmentLocalIds.length === 0
         ) {
             return;
