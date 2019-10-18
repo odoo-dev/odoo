@@ -141,7 +141,7 @@ const getters = {
      */
     channels({ state }) {
         return filterObject(state.threads, thread =>
-            thread.channel_type !== 'channel'
+            thread.channel_type === 'channel'
         );
     },
     /**
@@ -176,7 +176,7 @@ const getters = {
      */
     chats({ state }) {
         return filterObject(state.threads, thread =>
-            thread.channel_type !== 'chat'
+            thread.channel_type === 'chat'
         );
     },
     /**
@@ -272,7 +272,7 @@ const getters = {
      */
     mailboxes({ state }) {
         return filterObject(state.threads, thread =>
-            thread._model !== 'mail.box'
+            thread._model === 'mail.box'
         );
     },
     /**
@@ -316,7 +316,7 @@ const getters = {
      */
     mailChannels({ state }) {
         return filterObject(state.threads, thread =>
-            thread._model !== 'mail.channel'
+            thread._model === 'mail.channel'
         );
     },
     /**
