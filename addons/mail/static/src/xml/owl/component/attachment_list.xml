@@ -7,7 +7,6 @@
         t-name="mail.component.AttachmentList">
         <Attachment
             attachmentLocalId="attachmentLocalId"
-            attachmentLocalIds="props.attachmentLocalIds"
             class="o_AttachmentList_attachment"
             hasLabelForCardLayout="props.haveAttachmentsLabelForCardLayout"
             imageSizeForBasicLayout="props.attachmentsImageSizeForBasicLayout"

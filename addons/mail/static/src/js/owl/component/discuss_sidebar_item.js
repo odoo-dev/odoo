@@ -210,7 +210,10 @@ DiscussSidebarItem.mapStoreToProps = function (state, ownProps, getters) {
 };
 
 DiscussSidebarItem.props = {
-    isActive: Boolean,
+    isActive: {
+        type: Boolean,
+        optional: true,
+    },
     threadLocalId: String,
 };
 

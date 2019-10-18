@@ -151,10 +151,10 @@ Thread.components = {
 Thread.defaultProps = {
     domain: [],
     hasComposer: false,
+    hasSquashCloseMessages: false,
     haveMessagesAuthorRedirect: false,
     haveMessagesMarkAsReadIcon: false,
     haveMessagesReplyIcon: false,
-    hasSquashCloseMessages: false,
     order: 'asc',
 };
 
@@ -198,8 +198,14 @@ Thread.props = {
         type: String,
         optional: true,
     },
-    domain: Array,
-    hasComposer: Boolean,
+    domain: {
+        type: Array,
+        optional: true,
+    },
+    hasComposer: {
+        type: Boolean,
+        optional: true,
+    },
     hasComposerCurrentPartnerAvatar: {
         type: Boolean,
         optional: true,
@@ -208,14 +214,26 @@ Thread.props = {
         type: Boolean,
         optional: true,
     },
-    hasSquashCloseMessages: Boolean,
+    hasSquashCloseMessages: {
+        type: Boolean,
+        optional: true,
+    },
     haveComposerAttachmentsLabelForCardLayout: {
         type: Boolean,
         optional: true,
     },
-    haveMessagesAuthorRedirect: Boolean,
-    haveMessagesMarkAsReadIcon: Boolean,
-    haveMessagesReplyIcon: Boolean,
+    haveMessagesAuthorRedirect: {
+        type: Boolean,
+        optional: true,
+    },
+    haveMessagesMarkAsReadIcon: {
+        type: Boolean,
+        optional: true,
+    },
+    haveMessagesReplyIcon: {
+        type: Boolean,
+        optional: true,
+    },
     /**
      * Set the initial scroll position of message list on mount. Note that
      * this prop is not directly passed to message list as props because
@@ -228,7 +246,10 @@ Thread.props = {
         type: Number,
         optional: true
     },
-    order: String, // ['asc', 'desc']
+    order: {
+        type: String, // ['asc', 'desc']
+        optional: true,
+    },
     selectedMessageLocalId: {
         type: String,
         optional: true,

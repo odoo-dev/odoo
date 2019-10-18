@@ -158,8 +158,6 @@ DiscussSidebar.props = {
         type: String,
         optional: true,
     },
-    addItemChannelInputPlaceholder: String,
-    addItemChatInputPlaceholder: String,
     isAddingChannel: Boolean,
     isAddingChat: Boolean,
     onAddChannelAutocompleteSelect: Function,
