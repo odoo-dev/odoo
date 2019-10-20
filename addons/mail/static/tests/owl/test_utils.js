@@ -203,7 +203,7 @@ function beforeEach(self) {
                 }));
                 const callback = formData.get('callback');
                 uploadedAttachmentsCount++;
-                // Needed to wait that attachment has bee nre-rendered as
+                // Needed to wait that attachment has been re-rendered as
                 // temporary to avoid conflicting rendering
                 // See https://github.com/odoo/owl/issues/268
                 await testUtils.nextTick();
@@ -267,7 +267,7 @@ async function inputFiles(el, files) {
     }
     el.files = dataTransfer.files;
     el.dispatchEvent(new Event('change'));
-    await new Promise(resolve => setTimeout(resolve, 100)); // AKU why 100ms wait???
+    await testUtils.nextTick();
 }
 
 /**
