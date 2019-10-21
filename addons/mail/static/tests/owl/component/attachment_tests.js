@@ -14,13 +14,13 @@ QUnit.module('component', {}, function () {
 QUnit.module('Attachment', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createAttachment = async (attachmentLocalId, otherProps) => {
+        this.createAttachmentComponent = async (attachmentLocalId, otherProps) => {
             const env = await this.widget.call('env', 'get');
             this.attachment = new Attachment(env, {
                 attachmentLocalId,
                 ...otherProps
             });
-            await this.attachment.mount(this.widget.$el[0]);
+            await this.attachment.mount(this.widget.el);
         };
         this.start = async params => {
             if (this.widget) {
@@ -48,20 +48,21 @@ QUnit.module('Attachment', {
 
 QUnit.test('simplest layout', async function (assert) {
     assert.expect(8);
-    await this.start({});
+
+    await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'none',
         isDownloadable: false,
         isEditable: false,
-        showExtensionInDetails: false,
-        showFilenameInDetails: false
+        showExtension: false,
+        showFilename: false
     });
     assert.strictEqual(
         document.querySelectorAll('.o_Attachment').length,
@@ -77,42 +78,37 @@ QUnit.test('simplest layout', async function (assert) {
         "test.txt",
         "attachment should have filename as title attribute");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_image`)
             .length,
         1,
         "attachment should have an image part");
     assert.ok(
-        attachment
+        document
             .querySelector(`
-                :scope
                 .o_Attachment_image`)
             .classList
             .contains('o_image'),
         "attachment should have o_image classname (required for mimetype.scss style)");
     assert.strictEqual(
-        attachment
+        document
             .querySelector(`
-                :scope
                 .o_Attachment_image`)
             .dataset
             .mimetype,
         'text/plain',
         "attachment should have data-mimetype set (required for mimetype.scss style)");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details`)
             .length,
         0,
         "attachment should not have a details part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside`)
             .length,
         0,
@@ -121,6 +117,7 @@ QUnit.test('simplest layout', async function (assert) {
 
 QUnit.test('simplest layout + deletable', async function (assert) {
     assert.expect(6);
+
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
@@ -128,57 +125,49 @@ QUnit.test('simplest layout + deletable', async function (assert) {
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'none',
         isDownloadable: false,
         isEditable: true,
-        showExtensionInDetails: false,
-        showFilenameInDetails: false
+        showExtension: false,
+        showFilename: false
     });
     assert.strictEqual(
         document.querySelectorAll('.o_Attachment').length,
         1,
         "should have attachment component in DOM");
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_image`)
             .length,
         1,
         "attachment should have an image part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details`)
             .length,
         0,
         "attachment should not have a details part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside`)
             .length,
         1,
         "attachment should have an aside part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_aside
                 .o_Attachment_asideItem`)
             .length,
         1,
         "attachment should have only one aside item");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_aside
                 .o_Attachment_asideItemUnlink`)
             .length,
         1,
@@ -187,6 +176,7 @@ QUnit.test('simplest layout + deletable', async function (assert) {
 
 QUnit.test('simplest layout + downloadable', async function (assert) {
     assert.expect(6);
+
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
@@ -194,56 +184,50 @@ QUnit.test('simplest layout + downloadable', async function (assert) {
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'none',
         isDownloadable: true,
         isEditable: false,
-        showExtensionInDetails: false,
-        showFilenameInDetails: false
+        showExtension: false,
+        showFilename: false
     });
     assert.strictEqual(
         document.querySelectorAll('.o_Attachment').length,
         1,
         "should have attachment component in DOM");
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_image`)
             .length,
         1,
         "attachment should have an image part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details`)
             .length,
         0,
         "attachment should not have a details part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside`)
             .length,
         1,
         "attachment should have an aside part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside
                 .o_Attachment_asideItem`)
             .length,
         1,
         "attachment should have only one aside item");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside
                 .o_Attachment_asideItemDownload`)
             .length,
@@ -253,6 +237,7 @@ QUnit.test('simplest layout + downloadable', async function (assert) {
 
 QUnit.test('simplest layout + deletable + downloadable', async function (assert) {
     assert.expect(8);
+
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
@@ -260,73 +245,65 @@ QUnit.test('simplest layout + deletable + downloadable', async function (assert)
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'none',
         isDownloadable: true,
         isEditable: true,
-        showExtensionInDetails: false,
-        showFilenameInDetails: false
+        showExtension: false,
+        showFilename: false
     });
     assert.strictEqual(
         document.querySelectorAll('.o_Attachment').length,
         1,
         "should have attachment component in DOM");
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_image`)
             .length,
         1,
         "attachment should have an image part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details`)
             .length,
         0,
         "attachment should not have a details part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside`)
             .length,
         1,
         "attachment should have an aside part");
     assert.ok(
-        attachment
+        document
             .querySelector(`
-                :scope
                 .o_Attachment_aside`)
             .classList
             .contains('o-has-multiple-action'),
-        "attachment aside should have o-has-multiple-action classname");
+        "attachment aside should contain multiple actions");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside
                 .o_Attachment_asideItem`)
             .length,
         2,
         "attachment should have only two aside items");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside
                 .o_Attachment_asideItemDownload`)
             .length,
         1,
         "attachment should have a download button");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside
                 .o_Attachment_asideItemUnlink`)
             .length,
@@ -336,6 +313,7 @@ QUnit.test('simplest layout + deletable + downloadable', async function (assert)
 
 QUnit.test('layout with card details', async function (assert) {
     assert.expect(3);
+
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
@@ -343,35 +321,31 @@ QUnit.test('layout with card details', async function (assert) {
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'card',
         isDownloadable: false,
         isEditable: false,
-        showExtensionInDetails: false,
-        showFilenameInDetails: false
+        showExtension: false,
+        showFilename: false
     });
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_image`)
             .length,
         1,
         "attachment should have an image part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details`)
             .length,
         0,
         "attachment should not have a details part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_aside`)
             .length,
         0,
@@ -380,6 +354,7 @@ QUnit.test('layout with card details', async function (assert) {
 
 QUnit.test('layout with card details and filename', async function (assert) {
     assert.expect(3);
+
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
@@ -387,36 +362,32 @@ QUnit.test('layout with card details and filename', async function (assert) {
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'card',
         isDownloadable: false,
         isEditable: false,
-        showExtensionInDetails: false,
-        showFilenameInDetails: true
+        showExtension: false,
+        showFilename: true
     });
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details`)
             .length,
         1,
         "attachment should have a details part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details
                 .o_Attachment_filename`)
             .length,
         1,
         "attachment should not have its filename shown");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details
                 .o_Attachment_extension`)
             .length,
@@ -426,6 +397,7 @@ QUnit.test('layout with card details and filename', async function (assert) {
 
 QUnit.test('layout with card details and extension', async function (assert) {
     assert.expect(3);
+
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
@@ -433,37 +405,31 @@ QUnit.test('layout with card details and extension', async function (assert) {
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'card',
         isDownloadable: false,
         isEditable: false,
-        showExtensionInDetails: true,
-        showFilenameInDetails: false
+        showExtension: true,
+        showFilename: false
     });
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details`)
             .length,
         1,
         "attachment should have a details part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_details
                 .o_Attachment_filename`)
             .length,
         0,
         "attachment should not have its filename shown");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_details
                 .o_Attachment_extension`)
             .length,
         1,
@@ -472,6 +438,7 @@ QUnit.test('layout with card details and extension', async function (assert) {
 
 QUnit.test('layout with card details and filename and extension', async function (assert) {
     assert.expect(3);
+
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
@@ -479,37 +446,31 @@ QUnit.test('layout with card details and filename and extension', async function
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'card',
         isDownloadable: false,
         isEditable: false,
-        showExtensionInDetails: true,
-        showFilenameInDetails: true
+        showExtension: true,
+        showFilename: true
     });
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_details`)
             .length,
         1,
         "attachment should have a details part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_details
                 .o_Attachment_filename`)
             .length,
         1,
         "attachment should have its filename shown");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_details
                 .o_Attachment_extension`)
             .length,
         1,
@@ -518,6 +479,7 @@ QUnit.test('layout with card details and filename and extension', async function
 
 QUnit.test('simplest layout with hover details and filename and extension', async function (assert) {
     assert.expect(8);
+
     await this.start();
     const attachmentLocalId = this.store.dispatch('createAttachment', {
         filename: "test.txt",
@@ -525,83 +487,69 @@ QUnit.test('simplest layout with hover details and filename and extension', asyn
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'hover',
         isDownloadable: true,
         isEditable: true,
-        showExtensionInDetails: true,
-        showFilenameInDetails: true
+        showExtension: true,
+        showFilename: true
     });
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                > .o_Attachment_details`)
+                .o_Attachment
+                .o_Attachment_details:not(.o_Attachment_imageOverlayDetails)`)
             .length,
         0,
         "attachment should not have a details part directly");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_overlay
-                .o_Attachment_details`)
+                .o_Attachment_imageOverlayDetails`)
             .length,
         1,
         "attachment should have a details part in the overlay");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_image`)
             .length,
         1,
         "attachment should have an image part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_image
-                .o_Attachment_overlay`)
+                .o_Attachment_imageOverlay`)
             .length,
         1,
         "attachment should have an image overlay part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_image
-                .o_Attachment_overlay
+                .o_Attachment_imageOverlay
                 .o_Attachment_filename`)
             .length,
         1,
         "attachment should have its filename shown");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_image
-                .o_Attachment_overlay
+                .o_Attachment_imageOverlay
                 .o_Attachment_extension`)
             .length,
         1,
         "attachment should have its extension shown");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_image
-                .o_Attachment_overlay
                 .o_Attachment_actions`)
             .length,
         1,
         "attachment should have an actions part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 o_Attachment_aside`)
             .length,
         0,
@@ -610,6 +558,7 @@ QUnit.test('simplest layout with hover details and filename and extension', asyn
 
 QUnit.test('auto layout with image', async function (assert) {
     assert.expect(7);
+
     await this.start({
         async mockRPC(route, args) {
             if (route.includes('web/image/750')) {
@@ -625,73 +574,62 @@ QUnit.test('auto layout with image', async function (assert) {
         name: "test.png",
     });
 
-    await this.createAttachment(attachmentLocalId, {
+    await this.createAttachmentComponent(attachmentLocalId, {
         allowPreview: false,
         detailsMode: 'auto',
         isDownloadable: false,
         isEditable: false,
-        showExtensionInDetails: true,
-        showFilenameInDetails: true
+        showExtension: true,
+        showFilename: true
     });
-    const attachment = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                > .o_Attachment_details`)
+                .o_Attachment
+                .o_Attachment_details:not(.o_Attachment_imageOverlayDetails)`)
             .length,
         0,
         "attachment should not have a details part directly");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_overlay
-                .o_Attachment_details`)
+                .o_Attachment_imageOverlayDetails`)
             .length,
         1,
         "attachment should have a details part in the overlay");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 .o_Attachment_image`)
             .length,
         1,
         "attachment should have an image part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_image
-                .o_Attachment_overlay`)
+                .o_Attachment_imageOverlay`)
             .length,
         1,
         "attachment should have an image overlay part");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_image
-                .o_Attachment_overlay
+                .o_Attachment_imageOverlay
                 .o_Attachment_filename`)
             .length,
         1,
         "attachment should have its filename shown");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
-                .o_Attachment_image
-                .o_Attachment_overlay
+                .o_Attachment_imageOverlay
                 .o_Attachment_extension`)
             .length,
         1,
         "attachment should have its extension shown");
     assert.strictEqual(
-        attachment
+        document
             .querySelectorAll(`
-                :scope
                 o_Attachment_aside`)
             .length,
         0,

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
+
     <div
         class="o_MessageList"
         owl="1"
@@ -9,7 +10,6 @@
         }"
         t-name="mail.component.MessageList"
         t-on-scroll="_onScroll">
-
         <!-- No result messages -->
         <div
             class="
@@ -39,11 +39,9 @@
                 There are no messages in this conversation.
             </t>
         </div>
-
         <!-- LOADING (if order asc)-->
         <t t-call="mail.component.MessageListLoadMore"
            t-if="props.order === 'asc' and storeProps.messages.length > 0"/>
-
         <!-- MESSAGES -->
         <t t-set="current_day" t-value="0"/>
         <t t-set="prev_message" t-value="0"/>
@@ -126,7 +124,6 @@
                     o_MessageList_separatorLabelNewMessages">New messages</span>
             </div>
         </t>
-
         <!-- LOADING (if order desc)-->
         <t t-call="mail.component.MessageListLoadMore"
            t-if="props.order === 'desc' and storeProps.messages.length > 0"/>
@@ -155,4 +152,5 @@
             Load more
         </a>
     </t>
+
 </templates>

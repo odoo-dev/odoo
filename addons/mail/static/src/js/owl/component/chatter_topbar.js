@@ -12,7 +12,7 @@ class ChatterTopbar extends owl.store.ConnectedComponent {
      * @param {Event} ev
      */
     _onClickAttachments(ev) {
-        this.trigger('o-attachments-clicked');
+        this.trigger('o-chatter-topbar-select-attachment');
     }
 }
 

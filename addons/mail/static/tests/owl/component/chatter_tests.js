@@ -16,7 +16,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('Chatter', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createChatter = async (resModel, resId, otherProps) => {
+        this.createChatter = async ({ resId, resModel }, otherProps) => {
             const env = await this.widget.call('env', 'get');
             this.chatter = new Chatter(env, {
                 resModel,
@@ -85,9 +85,11 @@ QUnit.test('base rendering when chatter has no attachments', async function (ass
             return this._super(...arguments);
         }
     });
-    await this.createChatter('res.partner', '100');
+    await this.createChatter({
+        resId: 100,
+        resModel: 'res.partner'
+    });
     await testUtils.nextTick();
-
     assert.strictEqual(
         document
             .querySelectorAll(`
@@ -98,7 +100,6 @@ QUnit.test('base rendering when chatter has no attachments', async function (ass
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_ChatterTopbar`)
             .length,
         1,
@@ -106,7 +107,6 @@ QUnit.test('base rendering when chatter has no attachments', async function (ass
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_Chatter_attachmentBox`)
             .length,
         0,
@@ -114,7 +114,6 @@ QUnit.test('base rendering when chatter has no attachments', async function (ass
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_Chatter_thread`)
             .length,
         1,
@@ -122,9 +121,7 @@ QUnit.test('base rendering when chatter has no attachments', async function (ass
     assert.strictEqual(
         document
             .querySelector(`
-                .o_Chatter
-                .o_Chatter_thread
-            `)
+                .o_Chatter_thread`)
             .dataset
             .threadLocalId,
         'res.partner_100',
@@ -133,10 +130,8 @@ QUnit.test('base rendering when chatter has no attachments', async function (ass
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_Chatter_thread
-                .o_Message
-            `)
+                .o_Message`)
             .length,
         30,
         "the first 30 messages of thread should be loaded");
@@ -163,9 +158,11 @@ QUnit.test('base rendering when chatter has attachments', async function (assert
             return this._super(...arguments);
         }
     });
-    await this.createChatter('res.partner', '100');
+    await this.createChatter({
+        resId: 100,
+        resModel: 'res.partner'
+    });
     await testUtils.nextTick();
-
     assert.strictEqual(
         document
             .querySelectorAll(`
@@ -176,7 +173,6 @@ QUnit.test('base rendering when chatter has attachments', async function (assert
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_ChatterTopbar`)
             .length,
         1,
@@ -184,7 +180,6 @@ QUnit.test('base rendering when chatter has attachments', async function (assert
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_Chatter_attachmentBox`)
             .length,
         0,
@@ -212,9 +207,11 @@ QUnit.test('show attachment box', async function (assert) {
             return this._super(...arguments);
         }
     });
-    await this.createChatter('res.partner', '100');
+    await this.createChatter({
+        resId: 100,
+        resModel: 'res.partner'
+    });
     await testUtils.nextTick();
-
     assert.strictEqual(
         document
             .querySelectorAll(`
@@ -225,7 +222,6 @@ QUnit.test('show attachment box', async function (assert) {
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_ChatterTopbar`)
             .length,
         1,
@@ -233,36 +229,27 @@ QUnit.test('show attachment box', async function (assert) {
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
-                .o_ChatterTopbar
-                .o_ChatterTopbar_buttonAttachments
-                `)
+                .o_ChatterTopbar_buttonAttachments`)
             .length,
         1,
         "should have an attachments button in chatter topbar");
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
-                .o_ChatterTopbar
-                .o_ChatterTopbar_buttonAttachments
-                .o_ChatterTopbar_buttonAttachments_count
-                `)
+                .o_ChatterTopbar_buttonAttachmentsCount`)
             .length,
         1,
         "attachments button should have a counter");
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_Chatter_attachmentBox`)
             .length,
         0,
         "should not have an attachment box in the chatter");
+
     document
         .querySelector(`
-            .o_Chatter
-            .o_ChatterTopbar
             .o_ChatterTopbar_buttonAttachments`)
         .click();
     await testUtils.nextTick();
@@ -270,7 +257,6 @@ QUnit.test('show attachment box', async function (assert) {
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_Chatter
                 .o_Chatter_attachmentBox`)
             .length,
         1,

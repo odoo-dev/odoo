@@ -8,35 +8,20 @@
     &:hover .o_Attachment_asideItemUnlink.o-pretty {
         transform: translateX(0);
     }
+}
 
-    &:not(.o-has-card-details) {
-        .o_Attachment_image {
-            position: relative;
-            min-width: 200px;
-            min-height: 200px;
-            &:hover {
-                .o_Attachment_overlay {
-                    opacity: 1;
-                    .o_Attachment_details{
-                        min-width: 0; /* This allows the text ellipsis in the flex element */
-                    }
-                }
-            }
-        }
-    }
-
-    > .o_Attachment_details {
-        width: 200px;
-        margin: 3px;
-    }
+.o_Attachment_details {
+    min-width: 0; /* This allows the text ellipsis in the flex element */
 }
 
 .o_Attachment_aside {
     position: relative;
     overflow: hidden;
+
     &:not(.o-has-multiple-action) {
         min-width: 50px;
     }
+
     &.o-has-multiple-action {
         min-width: 30px;
         display: flex;
@@ -66,9 +51,20 @@
 
 .o_Attachment_image {
     margin: 3px;
+    &.o-details-overlay{
+        position: relative;
+        min-width: 200px;
+        min-height: 200px;
+
+        &:hover {
+            .o_Attachment_imageOverlay {
+                opacity: 1;
+            }
+        }
+    }
 }
 
-.o_Attachment_overlay {
+.o_Attachment_imageOverlay {
     bottom: 0;
     display:flex;
     flex-direction: column;
@@ -78,25 +74,41 @@
     position: absolute;
     right: 0;
     top: 0;
-    .o_Attachment_overlay_content{
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-    }
-    .o_Attachment_action{
+    .o_Attachment_action {
         min-width: 20px;
     }
 }
+
+.o_Attachment_imageOverlayContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.o_Attachment_imageOverlayDetails {
+    width: 200px;
+    margin: 3px;
+}
+
 
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------
 
 .o_Attachment {
-
     &.o-has-card-details {
         background-color: gray('300');
         border-radius: 5px;
+    }
+}
+
+.o_Attachment_action {
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.2);
     }
 }
 
@@ -104,17 +116,9 @@
     border-radius: 0 5px 5px 0;
 }
 
-.o_Attachment_action{
-    border-radius: 10px;
-    cursor: pointer;
-    text-align: center;
-    &:hover{
-        background: rgba(255, 255, 255, 0.2);
-    }
-}
-
 .o_Attachment_asideItemDownload {
     cursor: pointer;
+
     &:hover {
         background-color: gray('400');
     }
@@ -151,17 +155,12 @@
 .o_Attachment_image.o-attachment-viewable {
     cursor: zoom-in;
 
-    &:hover {
+    &:not(.o-details-overlay):hover {
         opacity: 0.7;
-    }
-
-    &.o-attachment-card-layout {
-        width: 38px;
-        height: 38px;
     }
 }
 
-.o_Attachment_overlay{
+.o_Attachment_imageOverlay {
     background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.9));
     border-radius: 5px;
     color:white;
@@ -172,7 +171,7 @@
 // Animation
 // ------------------------------------------------------------------
 
-.o_Attachment_overlay{
+.o_Attachment_imageOverlay {
     transition: all 0.3s ease 0s;
 }
 

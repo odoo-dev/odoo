@@ -22,6 +22,7 @@ class Attachment extends owl.store.ConnectedComponent {
 
     /**
      * Get the details mode after auto mode is computed
+     *
      * @return {string} 'card', 'hover' or 'none'
      */
     get detailsMode() {
@@ -33,9 +34,10 @@ class Attachment extends owl.store.ConnectedComponent {
 
     /**
      * Get the attachment representation style to be applied
+     *
      * @return {string}
      */
-    get reprStyle() {
+    get imageStyle() {
         if (this.env.store.getters.attachmentFileType(this.props.attachmentLocalId) !== 'image') {
             return '';
         } else {
@@ -91,8 +93,8 @@ Attachment.defaultProps = {
     detailsMode: 'auto',
     isDownloadable: false,
     isEditable: true,
-    showExtensionInDetails: true,
-    showFilenameInDetails: true,
+    showExtension: true,
+    showFilename: true,
 };
 
 /**
@@ -113,8 +115,8 @@ Attachment.props = {
     detailsMode: String, //['auto', 'card', 'hover', 'none']
     isDownloadable: Boolean,
     isEditable: Boolean,
-    showExtensionInDetails: Boolean,
-    showFilenameInDetails: Boolean,
+    showExtension: Boolean,
+    showFilename: Boolean,
 };
 
 Attachment.template = 'mail.component.Attachment';

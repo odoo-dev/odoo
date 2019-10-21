@@ -1,11 +1,23 @@
-.o_AttachmentBox{
-    border-top: 1px dashed #dee2e6;
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
 
-    .o_AttachmentBox_fileInput {
-        display: none;
-    }
-
-    .o_AttachmentBox_title {
-        text-align: center;
-    }
+.o_AttachmentBox_fileInput {
+    display: none;
 }
+
+.o_AttachmentBox_title {
+    text-align: center;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_AttachmentBox {
+    border-top: 1px dashed #dee2e6;
+}
+
+// ------------------------------------------------------------------
+// Animation
+// ------------------------------------------------------------------

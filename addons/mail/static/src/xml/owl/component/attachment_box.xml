@@ -5,23 +5,23 @@
         class="o_AttachmentBox"
         owl="1"
         t-name="mail.component.AttachmentBox">
-            <div class="o_AttachmentBox_title">Attachments</div>
-            <AttachmentList
-                areAttachmentsEditable="true"
-                attachmentLocalIds="storeProps.attachmentLocalIds"
-                class="o_attachmentBox_attachmentList"
-                t-if="storeProps.attachmentLocalIds and storeProps.attachmentLocalIds.length > 0"/>
-            <button class="o_AttachmentBox_buttonAdd" type="button" t-on-click.prevent.stop="_onClickAdd">
-                <i class="fa fa-plus-square"/>
-                Add attachments
-            </button>
-            <input
-                class="o_AttachmentBox_fileInput"
-                multiple="true"
-                type="file"
-                t-key="'fileInput'"
-                t-on-change="_onChangeAttachment"
-                t-ref="fileInput"/>
+        <div class="o_AttachmentBox_title">Attachments</div>
+        <AttachmentList
+            areAttachmentsEditable="true"
+            attachmentLocalIds="storeProps.attachmentLocalIds"
+            class="o_attachmentBox_attachmentList"
+            t-if="storeProps.attachmentLocalIds and storeProps.attachmentLocalIds.length > 0"/>
+        <button class="o_AttachmentBox_buttonAdd" type="button" t-on-click.prevent.stop="_onClickAdd">
+            <i class="fa fa-plus-square"/>
+            Add attachments
+        </button>
+        <input
+            class="o_AttachmentBox_fileInput"
+            multiple="true"
+            type="file"
+            t-key="'fileInput'"
+            t-on-change="_onChangeAttachment"
+            t-ref="fileInput"/>
     </div>
 
 

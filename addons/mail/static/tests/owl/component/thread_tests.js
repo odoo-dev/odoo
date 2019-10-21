@@ -40,7 +40,10 @@ QUnit.module('Thread', {
                 threadLocalId,
                 ...otherProps,
             });
-            await this.thread.mount(this.widget.$el[0]);
+            // needed to allow scrolling
+            await this.thread.mount(this.widget.el);
+            this.thread.el.style.height = '300px';
+            await testUtils.nextTick();
         };
 
         this.start = async params => {
@@ -99,36 +102,30 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
 });
 
 QUnit.test('message list desc order', async function (assert) {
-    assert.expect(5);
-    let amountOfCalls = 0;
+    assert.expect(8);
     let lastId = 10000;
+    let amountOfCalls = 0;
     await this.start({
         async mockRPC(route, args) {
             if (args.method === 'message_fetch') {
-                if (amountOfCalls > 4) {
-                    return [];
-                }
-                // multiple calls here to be able to test load more (up to (10000 / 30) calls normally
-                let messagesData = [];
-                const amountOfMessages = 30;
-                const firstIValue = (lastId - amountOfCalls * amountOfMessages) - 1;
-                const lastIValue = firstIValue - amountOfMessages;
-
-                for (let i = firstIValue; i > lastIValue; i--) {
-                    messagesData.push({
-                        author_id: [firstIValue, `#${firstIValue}`],
-                        body: `<em>Page ${amountOfCalls + 1}</em><br/><p>#${i} message</p>`,
+                amountOfCalls ++;
+                assert.step(`message_fetch_${amountOfCalls}`);
+                // Just return 30 different messages
+                const messagesData = [...Array(30).keys()].reduce(function (acc, i) {
+                    acc.push({
+                        author_id: [i + 1, `Author #${i}`],
+                        body: `<p>The message</p>`,
                         channel_ids: [20],
                         date: "2019-04-20 10:00:00",
-                        id: lastId + i,
+                        id: lastId - i,
                         message_type: 'comment',
                         model: 'mail.channel',
                         record_name: 'General',
                         res_id: 20,
                     });
-                }
-                lastId = lastIValue;
-                amountOfCalls++;
+                    return acc;
+                }, []);
+                lastId -= 30;
                 return messagesData;
             }
             return this._super(...arguments);
@@ -155,8 +152,6 @@ QUnit.test('message list desc order', async function (assert) {
     await this.createThread(threadLocalId, {
         order: 'desc'
     });
-    // needed to allow scrolling
-    this.thread.el.style.height = '300px';
     await testUtils.nextTick();
     const messageItems = document.querySelectorAll(`
         .o_MessageList
@@ -194,7 +189,6 @@ QUnit.test('message list desc order', async function (assert) {
         scrollableElement: document.querySelector(`.o_Thread_messageList`),
         scrollTop: 0
     });
-
     assert.strictEqual(
         document
             .querySelectorAll(`.o_Message`)
@@ -202,39 +196,34 @@ QUnit.test('message list desc order', async function (assert) {
         60,
         "scrolling to top should not trigger any message fetching"
     );
+    assert.verifySteps(['message_fetch_1', 'message_fetch_2']);
 });
 
 QUnit.test('message list asc order', async function (assert) {
-    assert.expect(5);
-    let amountOfCalls = 0;
+    assert.expect(8);
     let lastId = 10000;
+    let amountOfCalls = 0;
     await this.start({
         async mockRPC(route, args) {
             if (args.method === 'message_fetch') {
-                if (amountOfCalls > 4) {
-                    return [];
-                }
-                // multiple calls here to be able to test load more (up to (10000 / 30) calls normally
-                let messagesData = [];
-                const amountOfMessages = 30;
-                const firstIValue = (lastId - amountOfCalls * amountOfMessages) - 1;
-                const lastIValue = firstIValue - amountOfMessages;
-
-                for (let i = firstIValue; i > lastIValue; i--) {
-                    messagesData.push({
-                        author_id: [firstIValue, `#${firstIValue}`],
-                        body: `<em>Page ${amountOfCalls + 1}</em><br/><p>#${i} message</p>`,
+                amountOfCalls ++;
+                assert.step(`message_fetch_${amountOfCalls}`);
+                // Just return 30 different messages
+                const messagesData = [...Array(30).keys()].reduce(function (acc, i) {
+                    acc.push({
+                        author_id: [i + 1, `Author #${i}`],
+                        body: `<p>The message</p>`,
                         channel_ids: [20],
                         date: "2019-04-20 10:00:00",
-                        id: lastId + i,
+                        id: lastId - i,
                         message_type: 'comment',
                         model: 'mail.channel',
                         record_name: 'General',
                         res_id: 20,
                     });
-                }
-                lastId = lastIValue;
-                amountOfCalls++;
+                    return acc;
+                }, []);
+                lastId -= 30;
                 return messagesData;
             }
             return this._super(...arguments);
@@ -261,8 +250,6 @@ QUnit.test('message list asc order', async function (assert) {
     await this.createThread(threadLocalId, {
         order: 'asc'
     });
-    // needed to allow scrolling
-    this.thread.el.style.height = '300px';
     await testUtils.nextTick();
     const messageItems = document.querySelectorAll(`
         .o_MessageList
@@ -287,7 +274,6 @@ QUnit.test('message list asc order', async function (assert) {
         scrollableElement: document.querySelector(`.o_Thread_messageList`),
         scrollTop: 0
     });
-
     assert.strictEqual(
         document
             .querySelectorAll(`.o_Message`)
@@ -308,6 +294,7 @@ QUnit.test('message list asc order', async function (assert) {
         60,
         "scrolling to bottom should not trigger any message fetching"
     );
+    assert.verifySteps(['message_fetch_1', 'message_fetch_2']);
 });
 
 });

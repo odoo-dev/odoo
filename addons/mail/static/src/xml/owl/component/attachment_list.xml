@@ -12,8 +12,8 @@
             detailsMode="props.attachmentsDetailsMode"
             isDownloadable="props.areAttachmentsDownloadable"
             isEditable="props.areAttachmentsEditable"
-            showExtensionInDetails="props.showAttachmentsExtensions"
-            showFilenameInDetails="props.showAttachmentsFilenames"
+            showExtension="props.showAttachmentsExtensions"
+            showFilename="props.showAttachmentsFilenames"
             t-as="attachmentLocalId"
             t-foreach="props.attachmentLocalIds"
             t-key="attachmentLocalId"/>

@@ -30,11 +30,11 @@ QUnit.module('ChatterTopbar', {
         };
         this.createChatterTopbar = async (threadLocalId, otherProps) => {
             const env = await this.widget.call('env', 'get');
-            this.chatter_topbar = new ChatterTopBar(env, {
+            this.chatterTopbar = new ChatterTopBar(env, {
                 threadLocalId,
                 ...otherProps
             });
-            await this.chatter_topbar.mount(this.widget.$el[0]);
+            await this.chatterTopbar.mount(this.widget.$el[0]);
         };
         this.start = async params => {
             if (this.widget) {
@@ -50,8 +50,8 @@ QUnit.module('ChatterTopbar', {
     },
     afterEach() {
         utilsAfterEach(this);
-        if (this.chatter_topbar) {
-            this.chatter_topbar.destroy();
+        if (this.chatterTopbar) {
+            this.chatterTopbar.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
@@ -73,6 +73,7 @@ QUnit.test('base rendering', async function (assert) {
     });
     await this.createThread({_model: 'res.partner', id: 100});
     await this.createChatterTopbar('res.partner_100');
+    await testUtils.nextTick();
     assert.strictEqual(
         document
             .querySelectorAll(`
@@ -121,7 +122,7 @@ QUnit.test('base rendering', async function (assert) {
             .querySelectorAll(`
                 .o_ChatterTopbar
                 .o_ChatterTopbar_buttonAttachments
-                .o_ChatterTopbar_buttonAttachments_count
+                .o_ChatterTopbar_buttonAttachmentsCount
                 `)
             .length,
         1,
@@ -149,7 +150,7 @@ QUnit.test('base rendering', async function (assert) {
             .querySelectorAll(`
                 .o_ChatterTopbar
                 .o_ChatterTopbar_buttonFollowers
-                .o_ChatterTopbar_buttonFollowers_count
+                .o_ChatterTopbar_buttonFollowersCount
                 `)
             .length,
         1,
@@ -169,6 +170,7 @@ QUnit.test('attachment count without attachments', async function (assert) {
     });
     await this.createThread({_model: 'res.partner', id: 100});
     await this.createChatterTopbar('res.partner_100');
+    await testUtils.nextTick();
     assert.strictEqual(
         document
             .querySelectorAll(`
@@ -190,7 +192,7 @@ QUnit.test('attachment count without attachments', async function (assert) {
             .querySelectorAll(`
                 .o_ChatterTopbar
                 .o_ChatterTopbar_buttonAttachments
-                .o_ChatterTopbar_buttonAttachments_count
+                .o_ChatterTopbar_buttonAttachmentsCount
                 `)
             .length,
         1,
@@ -200,7 +202,7 @@ QUnit.test('attachment count without attachments', async function (assert) {
             .querySelector(`
                 .o_ChatterTopbar
                 .o_ChatterTopbar_buttonAttachments
-                .o_ChatterTopbar_buttonAttachments_count
+                .o_ChatterTopbar_buttonAttachmentsCount
                 `)
             .textContent,
         '0',
@@ -231,6 +233,7 @@ QUnit.test('attachment count with attachments', async function (assert) {
     });
     await this.createThread({_model: 'res.partner', id: 100}, true);
     await this.createChatterTopbar('res.partner_100');
+    await testUtils.nextTick();
     assert.strictEqual(
         document
             .querySelectorAll(`
@@ -252,7 +255,7 @@ QUnit.test('attachment count with attachments', async function (assert) {
             .querySelectorAll(`
                 .o_ChatterTopbar
                 .o_ChatterTopbar_buttonAttachments
-                .o_ChatterTopbar_buttonAttachments_count
+                .o_ChatterTopbar_buttonAttachmentsCount
                 `)
             .length,
         1,
@@ -262,7 +265,7 @@ QUnit.test('attachment count with attachments', async function (assert) {
             .querySelector(`
                 .o_ChatterTopbar
                 .o_ChatterTopbar_buttonAttachments
-                .o_ChatterTopbar_buttonAttachments_count
+                .o_ChatterTopbar_buttonAttachmentsCount
                 `)
             .textContent,
         '2',

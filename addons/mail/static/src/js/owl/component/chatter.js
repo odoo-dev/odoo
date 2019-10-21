@@ -36,7 +36,7 @@ class Chatter extends owl.store.ConnectedComponent {
      * @private
      * @param {Event} ev
      */
-    _onClickAttachments(ev) {
+    _onTopbarSelectAttachment(ev) {
         this.state.isAttachmentBoxShown = !this.state.isAttachmentBoxShown;
     }
 }

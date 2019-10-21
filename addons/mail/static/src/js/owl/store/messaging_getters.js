@@ -38,7 +38,7 @@ const getters = {
             if (token.indexOf('watch') !== -1) {
                 token = token.split('v=')[1];
                 const amp = token.indexOf('&');
-                if (amp !== -1){
+                if (amp !== -1) {
                     token = token.substring(0, amp);
                 }
             }
@@ -215,6 +215,16 @@ const getters = {
     },
     /**
      * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} attachmentLocalId
+     * @return {boolean}
+     */
+    isAttachmentLinkedToComposer({ state }, attachmentLocalId) {
+        const attachment = state.attachments[attachmentLocalId];
+        return !!attachment.composerId;
+    },
+    /**
+     * @param {Object} param0
      * @param {Object} param0.getters
      * @param {string} attachmentLocalId
      * @return {boolean}
@@ -301,7 +311,7 @@ const getters = {
                     mailChannel1.message_unread_counter &&
                     mailChannel2.message_unread_counter &&
                     mailChannel1.message_unread_counter !== mailChannel2.message_unread_counter
-                )  {
+                ) {
                     return mailChannel1.message_unread_counter > mailChannel2.message_unread_counter ? -1 : 1;
                 }
                 const mailChannel1Name = getters.threadName(mailChannel1.localId);

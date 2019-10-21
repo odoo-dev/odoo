@@ -16,13 +16,13 @@ QUnit.module('component', {}, function () {
 QUnit.module('AttachmentBox', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createThread = async ({_model, id}, fetchAttachments = false) => {
+        this.createThread = async ({ model, id }, fetchAttachments=false) => {
             const env = await this.widget.call('env', 'get');
-            const threadLocalId = await env.store.dispatch('_createThread', { _model, id });
+            const threadLocalId = await env.store.dispatch('_createThread', { _model: model, id });
             if (fetchAttachments) {
                 await env.store.dispatch('fetchThreadAttachments', {
                     resId: id,
-                    resModel: _model,
+                    resModel: model,
                     threadLocalId
                 });
             }
@@ -34,7 +34,7 @@ QUnit.module('AttachmentBox', {
                 threadLocalId,
                 ...otherProps
             });
-            await this.attachmentBox.mount(this.widget.$el[0]);
+            await this.attachmentBox.mount(this.widget.el);
         };
         this.start = async params => {
             if (this.widget) {
@@ -72,32 +72,30 @@ QUnit.test('base empty rendering', async function (assert) {
         }
     });
     // attachmentBox needs an existing thread to work
-    await this.createThread({_model: 'res.partner', id: 100});
+    await this.createThread({ model: 'res.partner', id: 100 });
     await this.createAttachmentBox('res.partner_100');
     await testUtils.nextTick();
-
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_AttachmentBox`)
+                .o_AttachmentBox
+            `)
             .length,
         1,
         "should have an attachment box");
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_AttachmentBox
                 .o_AttachmentBox_buttonAdd
-                `)
+            `)
             .length,
         1,
         "should have a button add");
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_AttachmentBox
                 .o_AttachmentBox_fileInput
-                `)
+            `)
             .length,
         1,
         "should have a file input");
@@ -105,11 +103,11 @@ QUnit.test('base empty rendering', async function (assert) {
         document
             .querySelectorAll(`
                 .o_AttachmentBox
-                .o_attachmentBox_attachmentList
-                `)
+                .o_Attachment
+            `)
             .length,
         0,
-        "should not have an attachment list");
+        "should not have any attachment");
 });
 
 QUnit.test('base non-empty rendering', async function (assert) {
@@ -134,41 +132,39 @@ QUnit.test('base non-empty rendering', async function (assert) {
         }
     });
     // attachmentBox needs an existing thread to work
-    await this.createThread({_model: 'res.partner', id: 100}, true);
+    await this.createThread({ model: 'res.partner', id: 100 }, true);
     await this.createAttachmentBox('res.partner_100');
     await testUtils.nextTick();
 
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_AttachmentBox`)
+                .o_AttachmentBox
+            `)
             .length,
         1,
         "should have an attachment box");
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_AttachmentBox
                 .o_AttachmentBox_buttonAdd
-                `)
+            `)
             .length,
         1,
         "should have a button add");
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_AttachmentBox
                 .o_AttachmentBox_fileInput
-                `)
+            `)
             .length,
         1,
         "should have a file input");
     assert.strictEqual(
         document
             .querySelectorAll(`
-                .o_AttachmentBox
                 .o_attachmentBox_attachmentList
-                `)
+            `)
             .length,
         1,
         "should have an attachment list");
