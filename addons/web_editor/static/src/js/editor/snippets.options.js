@@ -426,6 +426,21 @@ var SnippetOption = Widget.extend({
         return buttonEl;
     },
     /**
+     * Build the correct DOM for a we-group element.
+     *
+     * @static
+     * @param {HTMLElement} groupEl
+     */
+    buildGroupElement: function (groupEl) {
+        var titleEl = SnippetOption.prototype.stringToTitle(groupEl);
+
+        if (groupEl.firstChild) {
+            groupEl.insertBefore(titleEl, groupEl.firstChild);
+        } else {
+            groupEl.appendChild(titleEl);
+        }
+    },
+    /**
      * Build the correct DOM for a we-select element.
      *
      * @static
