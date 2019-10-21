@@ -37,54 +37,52 @@
                 t-if="
                     (props.showFilename or props.showExtension) and
                     detailsMode === 'hover'">
-                <div class="o_Attachment_imageOverlayContent">
-                    <div class="o_Attachment_details o_Attachment_imageOverlayDetails">
-                        <div class="o_Attachment_filename" t-if="props.showFilename">
-                            <t t-esc="storeProps.attachment.filename"/>
-                        </div>
-                        <div class="o_Attachment_extension" t-if="props.showExtension">
-                            <t t-esc="env.store.getters.attachmentExtension(props.attachmentLocalId)"/>
-                        </div>
+                <div class="o_Attachment_details o_Attachment_imageOverlayDetails">
+                    <div class="o_Attachment_filename" t-if="props.showFilename">
+                        <t t-esc="storeProps.attachment.filename"/>
                     </div>
-                    <div class="o_Attachment_actions">
-                        <!-- Remove button -->
-                        <div
-                            aria-label="Remove"
-                            class="
-                                o_Attachment_action
-                                o_Attachment_actionUnlink"
-                            t-att-class="{
-                                'o-pretty': env.store.getters.isAttachmentLinkedToComposer(props.attachmentLocalId),
-                            }"
-                            title="Remove"
-                            t-if="
-                                props.isEditable and
-                                !storeProps.attachment.isTemporary"
-                            t-key="'unlink'"
-                            t-on-click.stop="_onClickUnlink">
-                            <i
-                                class="
-                                    fa
-                                    fa-times"/>
-                        </div>
-                        <!-- Download button -->
-                        <div
-                            aria-label="Download"
-                            class="
-                                o_Attachment_action
-                                o_Attachment_actionDownload"
-                            title="Download"
-                            t-if="
-                                props.isDownloadable and
-                                !storeProps.attachment.isTemporary"
-                            t-key="'download'"
-                            t-on-click.stop="_onClickDownload">
-                            <i
-                                class="
-                                    fa
-                                    fa-download"/>
-                            </div>
+                    <div class="o_Attachment_extension" t-if="props.showExtension">
+                        <t t-esc="env.store.getters.attachmentExtension(props.attachmentLocalId)"/>
                     </div>
+                </div>
+                <div class="o_Attachment_actions">
+                    <!-- Remove button -->
+                    <div
+                        aria-label="Remove"
+                        class="
+                            o_Attachment_action
+                            o_Attachment_actionUnlink"
+                        t-att-class="{
+                            'o-pretty': env.store.getters.isAttachmentLinkedToComposer(props.attachmentLocalId),
+                        }"
+                        title="Remove"
+                        t-if="
+                            props.isEditable and
+                            !storeProps.attachment.isTemporary"
+                        t-key="'unlink'"
+                        t-on-click.stop="_onClickUnlink">
+                        <i
+                            class="
+                                fa
+                                fa-times"/>
+                    </div>
+                    <!-- Download button -->
+                    <div
+                        aria-label="Download"
+                        class="
+                            o_Attachment_action
+                            o_Attachment_actionDownload"
+                        title="Download"
+                        t-if="
+                            props.isDownloadable and
+                            !storeProps.attachment.isTemporary"
+                        t-key="'download'"
+                        t-on-click.stop="_onClickDownload">
+                        <i
+                            class="
+                                fa
+                                fa-download"/>
+                        </div>
                 </div>
             </div>
         </div>
