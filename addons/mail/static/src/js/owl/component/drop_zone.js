@@ -1,7 +1,7 @@
 odoo.define('mail.component.DropZone', function (require) {
 'use strict';
 
-class DropZone extends owl.store.ConnectedComponent {
+class DropZone extends owl.Component {
 
     /**
      * @override

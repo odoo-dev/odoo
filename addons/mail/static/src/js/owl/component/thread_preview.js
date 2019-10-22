@@ -5,7 +5,38 @@ const MessageAuthorPrefix = require('mail.component.MessageAuthorPrefix');
 const PartnerImStatusIcon = require('mail.component.PartnerImStatusIcon');
 const mailUtils = require('mail.utils');
 
-class ThreadPreview extends owl.store.ConnectedComponent {
+class ThreadPreview extends owl.Component {
+
+    /**
+     * @override
+     * @param {...any} args
+     */
+    constructor(...args) {
+        super(...args);
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            const threadLocalId = props.threadLocalId;
+            const thread = state.threads[threadLocalId];
+            let lastMessage;
+            let lastMessageAuthor;
+            const { length: l, [l - 1]: lastMessageLocalId } = thread.messageLocalIds;
+            lastMessage = state.messages[lastMessageLocalId];
+            if (lastMessage) {
+                lastMessageAuthor = state.partners[lastMessage.authorLocalId];
+            }
+            return {
+                isMobile: state.isMobile,
+                lastMessage,
+                lastMessageAuthor,
+                thread,
+                threadDirectPartner: thread.directPartnerLocalId
+                    ? state.partners[thread.directPartnerLocalId]
+                    : undefined,
+                threadName: this.storeGetters.threadName(threadLocalId),
+            };
+        });
+    }
 
     //--------------------------------------------------------------------------
     // Getter / Setter
@@ -31,7 +62,7 @@ class ThreadPreview extends owl.store.ConnectedComponent {
             return '';
         }
         return mailUtils.parseAndTransform(
-            this.env.store.getters.messagePrettyBody(this.storeProps.lastMessage.localId),
+            this.storeGetters.messagePrettyBody(this.storeProps.lastMessage.localId),
             mailUtils.inline);
     }
 
@@ -88,42 +119,13 @@ class ThreadPreview extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickMarkAsRead(ev) {
-        this.dispatch('markThreadAsSeen', this.props.threadLocalId);
+        this.storeDispatch('markThreadAsSeen', this.props.threadLocalId);
     }
 }
 
 ThreadPreview.components = {
     MessageAuthorPrefix,
     PartnerImStatusIcon,
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.threadLocalId
- * @param {Object} getters
- * @return {Object}
- */
-ThreadPreview.mapStoreToProps = function (state, ownProps, getters) {
-    const threadLocalId = ownProps.threadLocalId;
-    const thread = state.threads[threadLocalId];
-    let lastMessage;
-    let lastMessageAuthor;
-    const { length: l, [l - 1]: lastMessageLocalId } = thread.messageLocalIds;
-    lastMessage = state.messages[lastMessageLocalId];
-    if (lastMessage) {
-        lastMessageAuthor = state.partners[lastMessage.authorLocalId];
-    }
-    return {
-        isMobile: state.isMobile,
-        lastMessage,
-        lastMessageAuthor,
-        thread,
-        threadDirectPartner: thread.directPartnerLocalId
-            ? state.partners[thread.directPartnerLocalId]
-            : undefined,
-        threadName: getters.threadName(threadLocalId),
-    };
 };
 
 ThreadPreview.props = {

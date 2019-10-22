@@ -3,7 +3,34 @@ odoo.define('mail.component.ThreadPreviewList', function (require) {
 
 const ThreadPreview = require('mail.component.ThreadPreview');
 
-class ThreadPreviewList extends owl.store.ConnectedComponent {
+class ThreadPreviewList extends owl.Component {
+
+    /**
+     * @override
+     * @param {...any} args
+     */
+    constructor(...args) {
+        super(...args);
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            let threadLocalIds;
+            if (props.filter === 'mailbox') {
+                threadLocalIds = this.storeGetters.mailboxList().map(mailbox => mailbox.localId);
+            } else if (props.filter === 'channel') {
+                threadLocalIds = this.storeGetters.channelList().map(channel => channel.localId);
+            } else if (props.filter === 'chat') {
+                threadLocalIds = this.storeGetters.chatList().map(chat => chat.localId);
+            } else {
+                // "All" filter is for channels and chats
+                threadLocalIds = this.storeGetters.mailChannelList().map(mailChannel => mailChannel.localId);
+            }
+            return {
+                isMobile: state.isMobile,
+                threadLocalIds,
+            };
+        });
+    }
 
     mounted() {
         this._loadPreviews();
@@ -36,7 +63,7 @@ class ThreadPreviewList extends owl.store.ConnectedComponent {
      * @private
      */
     async _loadPreviews() {
-        this.dispatch('loadThreadPreviews', this.storeProps.threadLocalIds);
+        this.storeDispatch('loadThreadPreviews', this.storeProps.threadLocalIds);
     }
 
     //--------------------------------------------------------------------------
@@ -62,31 +89,6 @@ ThreadPreviewList.components = {
 
 ThreadPreviewList.defaultProps = {
     filter: 'all',
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.filter
- * @param {Object} getters
- * @return {Object}
- */
-ThreadPreviewList.mapStoreToProps = function (state, ownProps, getters) {
-    let threadLocalIds;
-    if (ownProps.filter === 'mailbox') {
-        threadLocalIds = getters.mailboxList().map(mailbox => mailbox.localId);
-    } else if (ownProps.filter === 'channel') {
-        threadLocalIds = getters.channelList().map(channel => channel.localId);
-    } else if (ownProps.filter === 'chat') {
-        threadLocalIds = getters.chatList().map(chat => chat.localId);
-    } else {
-        // "All" filter is for channels and chats
-        threadLocalIds = getters.mailChannelList().map(mailChannel => mailChannel.localId);
-    }
-    return {
-        isMobile: state.isMobile,
-        threadLocalIds,
-    };
 };
 
 ThreadPreviewList.props = {

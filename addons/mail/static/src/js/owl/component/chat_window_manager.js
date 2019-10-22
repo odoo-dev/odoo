@@ -4,15 +4,31 @@ odoo.define('mail.component.ChatWindowManager', function (require) {
 const ChatWindow = require('mail.component.ChatWindow');
 const HiddenMenu = require('mail.component.ChatWindowHiddenMenu');
 
-class ChatWindowManager extends owl.store.ConnectedComponent {
+class ChatWindowManager extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
         super(...args);
         this.DEBUG = true;
-        // others
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeProps = owl.hooks.useStore(state => {
+            const {
+                autofocusCounter,
+                autofocusChatWindowLocalId,
+                computed,
+                storedChatWindowStates,
+            } = state.chatWindowManager;
+            return {
+                autofocusCounter,
+                autofocusChatWindowLocalId,
+                computed,
+                isMobile: state.isMobile,
+                storedChatWindowStates,
+            };
+        });
         this.TEXT_DIRECTION = this.env._t.database.parameters.direction;
         this._lastAutofocusedCounter = 0;
         this._lastAutofocusedChatWindowLocalId = undefined;
@@ -72,7 +88,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
      * (input content + attachments).
      */
     saveChatWindowsStates() {
-        this.dispatch('saveChatWindowsStates', Object
+        this.storeDispatch('saveChatWindowsStates', Object
             .entries(this.__owl__.refs)
             .reduce((acc, [refId, ref]) => {
                 if (!refId.startsWith('chatWindow_')) {
@@ -147,7 +163,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
         }
         this._lastAutofocusedChatWindowLocalId = this.storeProps.autofocusChatWindowLocalId;
         this._lastAutofocusedCounter = this.storeProps.autofocusCounter;
-        this.dispatch('setChatWindowManagerNotifiedAutofocusCounter', this._lastAutofocusedCounter);
+        this.storeDispatch('setChatWindowManagerNotifiedAutofocusCounter', this._lastAutofocusedCounter);
     }
 
     //--------------------------------------------------------------------------
@@ -186,7 +202,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
         const currentChatWindowIndex = orderedVisible.findIndex(item =>
             item.chatWindowLocalId === ev.detail.currentChatWindowLocalId);
         const nextIndex = _getNextOpenVisibleChatWindowIndex(currentChatWindowIndex);
-        this.dispatch('focusChatWindow', orderedVisible[nextIndex].chatWindowLocalId);
+        this.storeDispatch('focusChatWindow', orderedVisible[nextIndex].chatWindowLocalId);
     }
 
     /**
@@ -201,7 +217,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
      * @param {string} ev.detail.model
      */
     _onRedirect(ev) {
-        this.dispatch('redirect', {
+        this.storeDispatch('redirect', {
             ev,
             id: ev.detail.id,
             model: ev.detail.model,
@@ -215,7 +231,7 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
      * @param {string} ev.detail.chatWindowLocalId
      */
     _onSelectChatWindow(ev) {
-        this.dispatch('makeChatWindowVisible', ev.detail.chatWindowLocalId);
+        this.storeDispatch('makeChatWindowVisible', ev.detail.chatWindowLocalId);
     }
 
     /**
@@ -228,35 +244,15 @@ class ChatWindowManager extends owl.store.ConnectedComponent {
     _onSelectThreadChatWindow(ev) {
         const { chatWindowLocalId, threadLocalId } = ev.detail;
         if (!this.env.store.state.threads[threadLocalId].is_minimized) {
-            this.dispatch('openThread', threadLocalId, { chatWindowMode: 'last' });
+            this.storeDispatch('openThread', threadLocalId, { chatWindowMode: 'last' });
         }
-        this.dispatch('replaceChatWindow', chatWindowLocalId, threadLocalId);
+        this.storeDispatch('replaceChatWindow', chatWindowLocalId, threadLocalId);
     }
 }
 
 ChatWindowManager.components = {
     ChatWindow,
     HiddenMenu,
-};
-
-/**
- * @param {Object} state
- * @return {Object}
- */
-ChatWindowManager.mapStoreToProps = function (state) {
-    const {
-        autofocusCounter,
-        autofocusChatWindowLocalId,
-        computed,
-        storedChatWindowStates,
-    } = state.chatWindowManager;
-    return {
-        autofocusCounter,
-        autofocusChatWindowLocalId,
-        computed,
-        isMobile: state.isMobile,
-        storedChatWindowStates,
-    };
 };
 
 ChatWindowManager.template = 'mail.component.ChatWindowManager';

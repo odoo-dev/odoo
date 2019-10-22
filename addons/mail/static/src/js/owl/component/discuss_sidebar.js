@@ -4,15 +4,25 @@ odoo.define('mail.component.DiscussSidebar', function (require) {
 const AutocompleteInput = require('mail.component.AutocompleteInput');
 const SidebarItem = require('mail.component.DiscussSidebarItem');
 
-class DiscussSidebar extends owl.store.ConnectedComponent {
+class DiscussSidebar extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
         super(...args);
         this.state = owl.useState({
             quickSearchValue: "",
+        });
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore(() => {
+            return {
+                pinnedChannelList: this.storeGetters.pinnedChannelList(),
+                pinnedChatList: this.storeGetters.pinnedChatList(),
+                pinnedMailboxList: this.storeGetters.pinnedMailboxList(),
+                pinnedMailChannelAmount: this.storeGetters.pinnedMailChannelAmount(),
+            };
         });
         this._quickSearchRef = owl.hooks.useRef('quickSearch');
     }
@@ -30,7 +40,7 @@ class DiscussSidebar extends owl.store.ConnectedComponent {
         }
         const qsVal = this.state.quickSearchValue.toLowerCase();
         return this.storeProps.pinnedChannelList.filter(channel => {
-            const nameVal = this.env.store.getters.threadName(channel.localId).toLowerCase();
+            const nameVal = this.storeGetters.threadName(channel.localId).toLowerCase();
             return nameVal.indexOf(qsVal) !== -1;
         });
     }
@@ -44,7 +54,7 @@ class DiscussSidebar extends owl.store.ConnectedComponent {
         }
         const qsVal = this.state.quickSearchValue.toLowerCase();
         return this.storeProps.pinnedChatList.filter(chat => {
-            const nameVal = this.env.store.getters.threadName(chat.localId).toLowerCase();
+            const nameVal = this.storeGetters.threadName(chat.localId).toLowerCase();
             return nameVal.indexOf(qsVal) !== -1;
         });
     }
@@ -136,21 +146,6 @@ class DiscussSidebar extends owl.store.ConnectedComponent {
 DiscussSidebar.components = {
     AutocompleteInput,
     SidebarItem
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {Object} getters
- * @return {Object}
- */
-DiscussSidebar.mapStoreToProps = function (state, ownProps, getters) {
-    return {
-        pinnedChannelList: getters.pinnedChannelList(),
-        pinnedChatList: getters.pinnedChatList(),
-        pinnedMailboxList: getters.pinnedMailboxList(),
-        pinnedMailChannelAmount: getters.pinnedMailChannelAmount(),
-    };
 };
 
 DiscussSidebar.props = {

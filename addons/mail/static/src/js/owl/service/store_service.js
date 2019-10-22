@@ -28,7 +28,7 @@ const StoreService = AbstractService.extend(EnvMixin, {
             actions._startLoopFetchPartnerImStatus = () => {};
             actions._loopFetchPartnerImStatus = () => {};
         }
-        this.store = new owl.store.Store({
+        this.store = new owl.Store({
             actions,
             env,
             getters,

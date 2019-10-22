@@ -1,7 +1,22 @@
 odoo.define('mail.component.Attachment', function () {
 'use strict';
 
-class Attachment extends owl.store.ConnectedComponent {
+class Attachment extends owl.Component {
+
+    /**
+     * @override
+     * @param {...any} args
+     */
+    constructor(...args) {
+        super(...args);
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            return {
+                attachment: state.attachments[props.attachmentLocalId],
+            };
+        });
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -37,13 +52,13 @@ class Attachment extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickImage(ev) {
-        if (!this.env.store.getters.isAttachmentViewable(this.props.attachmentLocalId)) {
+        if (!this.storeGetters.isAttachmentViewable(this.props.attachmentLocalId)) {
             return;
         }
-        this.dispatch('viewAttachments', {
+        this.storeDispatch('viewAttachments', {
             attachmentLocalId: this.props.attachmentLocalId,
             attachmentLocalIds: this.props.attachmentLocalIds.filter(localId =>
-                this.env.store.getters.isAttachmentViewable(localId)),
+                this.storeGetters.isAttachmentViewable(localId)),
         });
     }
 
@@ -52,7 +67,7 @@ class Attachment extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickUnlink(ev) {
-        this.dispatch('unlinkAttachment', this.props.attachmentLocalId);
+        this.storeDispatch('unlinkAttachment', this.props.attachmentLocalId);
     }
 }
 
@@ -62,17 +77,6 @@ Attachment.defaultProps = {
     isDownloadable: false,
     isEditable: true,
     layout: 'basic',
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.attachmentLocalId
- */
-Attachment.mapStoreToProps = function (state, ownProps) {
-    return {
-        attachment: state.attachments[ownProps.attachmentLocalId],
-    };
 };
 
 Attachment.props = {

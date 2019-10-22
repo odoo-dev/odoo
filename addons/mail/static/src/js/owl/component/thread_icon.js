@@ -1,24 +1,26 @@
 odoo.define('mail.component.ThreadIcon', function () {
 'use strict';
 
-class ThreadIcon extends owl.store.ConnectedComponent {}
+class ThreadIcon extends owl.Component {
 
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.threadLocalId
- * @return {Object}
- */
-ThreadIcon.mapStoreToProps = function (state, ownProps) {
-    const thread = state.threads[ownProps.threadLocalId];
-    const directPartner = thread
-        ? state.partners[thread.directPartnerLocalId]
-        : undefined;
-    return {
-        directPartner,
-        thread,
-    };
-};
+    /**
+     * @override
+     * @param {...any} args
+     */
+    constructor(...args) {
+        super(...args);
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            const thread = state.threads[props.threadLocalId];
+            const directPartner = thread
+                ? state.partners[thread.directPartnerLocalId]
+                : undefined;
+            return {
+                directPartner,
+                thread,
+            };
+        });
+    }
+}
 
 ThreadIcon.props = {
     threadLocalId: String,

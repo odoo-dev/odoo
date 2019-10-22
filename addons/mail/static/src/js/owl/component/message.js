@@ -12,9 +12,10 @@ const _lt = core._lt;
 const READ_MORE = _lt("read more");
 const READ_LESS = _lt("read less");
 
-class Message extends owl.store.ConnectedComponent {
+class Message extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
@@ -22,6 +23,25 @@ class Message extends owl.store.ConnectedComponent {
         this.state = owl.useState({
             isClicked: false,
             timeElapsed: null,
+        });
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            const message = state.messages[props.messageLocalId];
+            const attachmentLocalIds = message.attachmentLocalIds;
+            const author = state.partners[message.authorLocalId];
+            const odoobot = state.partners['res.partner_odoobot'];
+            const originThread = state.threads[message.originThreadLocalId];
+            const thread = state.threads[props.threadLocalId];
+            return {
+                attachmentLocalIds,
+                author,
+                isMobile: state.isMobile,
+                message,
+                odoobot,
+                originThread,
+                thread,
+            };
         });
         this._contentRef = owl.hooks.useRef('content');
         this._intervalId = undefined;
@@ -69,7 +89,7 @@ class Message extends owl.store.ConnectedComponent {
      */
     get displayedAuthorName() {
         if (this.storeProps.author) {
-            return this.env.store.getters.partnerName(this.storeProps.author.localId);
+            return this.storeGetters.partnerName(this.storeProps.author.localId);
         }
         return this.storeProps.message.email_from || this.env._t("Anonymous");
     }
@@ -387,14 +407,14 @@ class Message extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickStar(ev) {
-        return this.dispatch('toggleStarMessage', this.props.messageLocalId);
+        return this.storeDispatch('toggleStarMessage', this.props.messageLocalId);
     }
 
     /**
      * @private
      */
     _onClickMarkAsRead() {
-        return this.dispatch('markMessagesAsRead', [this.props.messageLocalId]);
+        return this.storeDispatch('markMessagesAsRead', [this.props.messageLocalId]);
     }
 
     /**
@@ -419,32 +439,6 @@ Message.defaultProps = {
     isSelected: false,
     isSquashed: false,
 };
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.messageLocalId
- * @param {string} ownProps.threadLocalId
- * @return {Object}
- */
-Message.mapStoreToProps = function (state, ownProps) {
-    const message = state.messages[ownProps.messageLocalId];
-    const attachmentLocalIds = message.attachmentLocalIds;
-    const author = state.partners[message.authorLocalId];
-    const odoobot = state.partners['res.partner_odoobot'];
-    const originThread = state.threads[message.originThreadLocalId];
-    const thread = state.threads[ownProps.threadLocalId];
-    return {
-        attachmentLocalIds,
-        author,
-        isMobile: state.isMobile,
-        message,
-        odoobot,
-        originThread,
-        thread,
-    };
-};
-
 
 Message.props = {
     hasAuthorRedirect: {

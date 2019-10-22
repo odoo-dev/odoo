@@ -9,15 +9,23 @@ const EMPTY_HTML = "<p></p>";
 /**
  * ComposerInput relies on a minimal HTML editor in order to support mentions.
  */
-class ComposerTextInput extends owl.store.ConnectedComponent {
+class ComposerTextInput extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
         super(...args);
 
         this.MENTION_THROTTLE = 200;
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore(state => {
+            return {
+                isMobile: state.isMobile,
+            };
+        });
         this._$textarea = undefined;
         this._editable = undefined;
         this._lastRange = undefined;
@@ -296,7 +304,7 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
                 return self.env.qweb.renderToString('mail.component.ComposerTextInput.PartnerMentionMenuItem', {
                     isMobile: self.storeProps.isMobile,
                     item,
-                    partnerName: self.env.store.getters.partnerName(item.original.localId),
+                    partnerName: self.storeGetters.partnerName(item.original.localId),
                 });
             },
             selectTemplate(item) {
@@ -306,7 +314,7 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
                 }
                 return self.env.qweb.renderToString('mail.component.ComposerTextInput.PartnerMentionSelectItem', {
                     item,
-                    partnerName: self.env.store.getters.partnerName(item.original.localId),
+                    partnerName: self.storeGetters.partnerName(item.original.localId),
                 });
             },
             trigger: '@',
@@ -427,7 +435,7 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
      * @param {function} callback
      */
     async _searchPartnerMentionSuggestions(keyword, callback) {
-        this.dispatch('searchPartners', {
+        this.storeDispatch('searchPartners', {
             callback,
             keyword,
             limit: 10,
@@ -596,12 +604,6 @@ class ComposerTextInput extends owl.store.ConnectedComponent {
         this._saveRange();
     }
 }
-
-ComposerTextInput.mapStoreToProps = function (state) {
-    return {
-        isMobile: state.isMobile,
-    };
-};
 
 ComposerTextInput.props = {
     initialHtmlContent: {

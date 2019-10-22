@@ -200,7 +200,7 @@
             <div
                 class="o_Message_content"
                 t-ref="content">
-                <t t-raw="env.store.getters.messagePrettyBody(props.messageLocalId)"/>
+                <t t-raw="storeGetters.messagePrettyBody(props.messageLocalId)"/>
                 <ul
                     class="o_Message_trackingValues"
                     t-if="trackingValues.length > 0">

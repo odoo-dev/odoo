@@ -1,19 +1,21 @@
 odoo.define('mail.component.PartnerImStatusIcon', function () {
 'use strict';
 
-class PartnerImStatusIcon extends owl.store.ConnectedComponent {}
+class PartnerImStatusIcon extends owl.Component {
 
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.partnerLocalId
- * @return {Object}
- */
-PartnerImStatusIcon.mapStoreToProps = function (state, ownProps) {
-    return {
-        partner: state.partners[ownProps.partnerLocalId],
-    };
-};
+    /**
+     * @override
+     * @param {...any} args
+     */
+    constructor(...args) {
+        super(...args);
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            return {
+                partner: state.partners[props.partnerLocalId],
+            };
+        });
+    }
+}
 
 PartnerImStatusIcon.template = 'mail.component.PartnerImStatusIcon';
 

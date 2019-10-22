@@ -1,7 +1,21 @@
 odoo.define('mail.component.DiscussMobileMailboxSelection', function () {
 'use strict';
 
-class MobileMailboxSelection extends owl.store.ConnectedComponent {
+class MobileMailboxSelection extends owl.Component {
+
+    /**
+     * @override
+     * @param {...any} args
+     */
+    constructor(...args) {
+        super(...args);
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore(() => {
+            return {
+                pinnedMailboxList: this.storeGetters.pinnedMailboxList(),
+            };
+        });
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -17,18 +31,6 @@ class MobileMailboxSelection extends owl.store.ConnectedComponent {
         });
     }
 }
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {Object} getters
- * @return {Object}
- */
-MobileMailboxSelection.mapStoreToProps = function (state, ownProps, getters) {
-    return {
-        pinnedMailboxList: getters.pinnedMailboxList(),
-    };
-};
 
 MobileMailboxSelection.props = {
     activeThreadLocalId: {

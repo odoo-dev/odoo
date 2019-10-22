@@ -10,10 +10,10 @@
             'o-downloadable': props.isDownloadable,
             'o-editable': props.isEditable,
             'o-temporary': storeProps.attachment.isTemporary,
-            'o-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+            'o-viewable': storeGetters.isAttachmentViewable(props.attachmentLocalId),
         }"
         t-att-data-attachment-local-id="storeProps.attachment.localId"
-        t-att-title="env.store.getters.attachmentDisplayName(props.attachmentLocalId)"
+        t-att-title="storeGetters.attachmentDisplayName(props.attachmentLocalId)"
         t-name="mail.component.Attachment">
         <t t-if="props.layout === 'basic'">
             <!-- o_image from mimetype.scss -->
@@ -22,11 +22,11 @@
                     o_Attachment_image
                     o_image"
                 t-att-class="{
-                    'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+                    'o-attachment-viewable': storeGetters.isAttachmentViewable(props.attachmentLocalId),
                 }"
                 t-att-data-mimetype="storeProps.attachment.mimetype"
                 t-att-href="attachmentUrl"
-                t-if="env.store.getters.attachmentFileType(props.attachmentLocalId) !== 'image'"
+                t-if="storeGetters.attachmentFileType(props.attachmentLocalId) !== 'image'"
                 t-on-click="_onClickImage"/>
             <!-- o_image from mimetype.scss -->
             <img
@@ -34,7 +34,7 @@
                     o_Attachment_image
                     o_image"
                 t-att-class="{
-                    'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+                    'o-attachment-viewable': storeGetters.isAttachmentViewable(props.attachmentLocalId),
                 }"
                 t-att-data-mimetype="storeProps.attachment.mimetype"
                 t-attf-src="web/image/{{ storeProps.attachment.id }}/160x160"
@@ -49,11 +49,11 @@
                     o_Attachment_image
                     o_image"
                 t-att-class="{
-                    'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+                    'o-attachment-viewable': storeGetters.isAttachmentViewable(props.attachmentLocalId),
                 }"
                 t-att-data-mimetype="storeProps.attachment.mimetype"
                 t-att-href="attachmentUrl"
-                t-att-style="env.store.getters.attachmentFileType(props.attachmentLocalId) === 'image' ? 'background-image:url(/web/image/' + storeProps.attachment.id + '/38x38/?crop=true' : ''"
+                t-att-style="storeGetters.attachmentFileType(props.attachmentLocalId) === 'image' ? 'background-image:url(/web/image/' + storeProps.attachment.id + '/38x38/?crop=true' : ''"
                 t-on-click="_onClickImage"/>
             <div
                 class="o_Attachment_main"
@@ -62,7 +62,7 @@
                     <t t-esc="storeProps.attachment.filename"/>
                 </div>
                 <div class="o_Attachment_extension">
-                    <t t-esc="env.store.getters.attachmentExtension(props.attachmentLocalId)"/>
+                    <t t-esc="storeGetters.attachmentExtension(props.attachmentLocalId)"/>
                 </div>
             </div>
             <div class="o_Attachment_aside">

@@ -6,15 +6,29 @@ const Icon = require('mail.component.ThreadIcon');
 
 const Dialog = require('web.Dialog');
 
-class DiscussSidebarItem extends owl.store.ConnectedComponent {
+class DiscussSidebarItem extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
         super(...args);
         this.state = owl.useState({
             renaming: false,
+        });
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            const thread = state.threads[props.threadLocalId];
+            const directPartner = thread.directPartnerLocalId
+                ? state.partners[thread.directPartnerLocalId]
+                : undefined;
+            return {
+                directPartner,
+                thread,
+                threadName: this.storeGetters.threadName(props.threadLocalId),
+            };
         });
     }
 
@@ -134,7 +148,7 @@ class DiscussSidebarItem extends owl.store.ConnectedComponent {
             prom = Promise.resolve();
         }
         return prom.then(() =>
-            this.dispatch('unsubscribeFromChannel', this.props.threadLocalId));
+            this.storeDispatch('unsubscribeFromChannel', this.props.threadLocalId));
     }
 
     /**
@@ -164,7 +178,7 @@ class DiscussSidebarItem extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickUnpin(ev) {
-        return this.dispatch('unsubscribeFromChannel', this.storeProps.threadLocalId);
+        return this.storeDispatch('unsubscribeFromChannel', this.storeProps.threadLocalId);
     }
 
     /**
@@ -175,7 +189,7 @@ class DiscussSidebarItem extends owl.store.ConnectedComponent {
      */
     _onRename(ev) {
         this.state.renaming = false;
-        this.dispatch('renameThread',
+        this.storeDispatch('renameThread',
             this.props.threadLocalId,
             ev.detail.newName);
     }
@@ -188,25 +202,6 @@ DiscussSidebarItem.components = {
 
 DiscussSidebarItem.defaultProps = {
     isActive: false,
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.threadLocalId
- * @param {Object} state.getters
- * @return {Object}
- */
-DiscussSidebarItem.mapStoreToProps = function (state, ownProps, getters) {
-    const thread = state.threads[ownProps.threadLocalId];
-    const directPartner = thread.directPartnerLocalId
-        ? state.partners[thread.directPartnerLocalId]
-        : undefined;
-    return {
-        directPartner,
-        thread,
-        threadName: getters.threadName(ownProps.threadLocalId),
-    };
 };
 
 DiscussSidebarItem.props = {

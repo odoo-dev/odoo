@@ -5,9 +5,10 @@ const MIN_SCALE = 0.5;
 const SCROLL_ZOOM_STEP = 0.1;
 const ZOOM_STEP = 0.5;
 
-class AttachmentViewer extends owl.store.ConnectedComponent {
+class AttachmentViewer extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
@@ -17,6 +18,13 @@ class AttachmentViewer extends owl.store.ConnectedComponent {
             angle: 0,
             isImageLoading: false,
             scale: 1,
+        });
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            return {
+                attachment: state.attachments[props.info.attachmentLocalId],
+            };
         });
         this._imageRef = owl.hooks.useRef('image');
         this._translate = {
@@ -88,7 +96,7 @@ class AttachmentViewer extends owl.store.ConnectedComponent {
      * @private
      */
     _close() {
-        this.dispatch('closeDialog', this.props.dialogId);
+        this.storeDispatch('closeDialog', this.props.dialogId);
     }
 
     /**
@@ -103,7 +111,7 @@ class AttachmentViewer extends owl.store.ConnectedComponent {
      */
     _handleImageLoad() {
         if (
-            this.env.store.getters.attachmentFileType(this.props.info.attachmentLocalId) === 'image' &&
+            this.storeGetters.attachmentFileType(this.props.info.attachmentLocalId) === 'image' &&
             this._renderedAttachmentLocalId !== this.props.info.attachmentLocalId
         ) {
             this.state.isImageLoading = true;
@@ -118,7 +126,7 @@ class AttachmentViewer extends owl.store.ConnectedComponent {
         const index = this.props.info.attachmentLocalIds.findIndex(localId =>
             localId === this.props.info.attachmentLocalId);
         const nextIndex = (index + 1) % this.props.info.attachmentLocalIds.length;
-        this.dispatch('updateDialogInfo', this.props.dialogId, {
+        this.storeDispatch('updateDialogInfo', this.props.dialogId, {
             attachmentLocalId: this.props.info.attachmentLocalIds[nextIndex],
         });
     }
@@ -132,7 +140,7 @@ class AttachmentViewer extends owl.store.ConnectedComponent {
         const nextIndex = index === 0
             ? this.props.info.attachmentLocalIds.length - 1
             : index - 1;
-        this.dispatch('updateDialogInfo', this.props.dialogId, {
+        this.storeDispatch('updateDialogInfo', this.props.dialogId, {
             attachmentLocalId: this.props.info.attachmentLocalIds[nextIndex],
         });
     }
@@ -451,18 +459,6 @@ class AttachmentViewer extends owl.store.ConnectedComponent {
         }
     }
 }
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {Object} ownProps.info
- * @param {string} ownProps.info.attachmentLocalId
- */
-AttachmentViewer.mapStoreToProps = function (state, ownProps) {
-    return {
-        attachment: state.attachments[ownProps.info.attachmentLocalId],
-    };
-};
 
 AttachmentViewer.props = {
     id: String,

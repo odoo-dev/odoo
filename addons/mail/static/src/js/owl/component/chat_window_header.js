@@ -3,7 +3,29 @@ odoo.define('mail.component.ChatWindowHeader', function (require) {
 
 const Icon = require('mail.component.ThreadIcon');
 
-class ChatWindowHeader extends owl.store.ConnectedComponent {
+class ChatWindowHeader extends owl.Component {
+
+    /**
+     * @override
+     * @param {...any} args
+     */
+    constructor(...args) {
+        super(...args);
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            const chatWindowLocalId = props.chatWindowLocalId;
+            const thread = state.threads[chatWindowLocalId];
+            const threadName = thread
+                ? this.storeGetters.threadName(chatWindowLocalId)
+                : undefined;
+            return {
+                isMobile: state.isMobile,
+                thread,
+                threadName,
+            };
+        });
+    }
 
     //--------------------------------------------------------------------------
     // Getter / Setter
@@ -35,7 +57,7 @@ class ChatWindowHeader extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickClose(ev) {
-        this.dispatch('closeChatWindow', this.props.chatWindowLocalId);
+        this.storeDispatch('closeChatWindow', this.props.chatWindowLocalId);
     }
 
     /**
@@ -52,10 +74,10 @@ class ChatWindowHeader extends owl.store.ConnectedComponent {
                 active_id: this.storeProps.thread.localId,
                 on_reverse_breadcrumb: () =>
                     // ideally discuss should do it itself...
-                    this.dispatch('closeDiscuss'),
+                    this.storeDispatch('closeDiscuss'),
             });
         } else {
-            this.dispatch('openDocument', {
+            this.storeDispatch('openDocument', {
                 id: this.storeProps.thread.id,
                 model: this.storeProps.thread._model,
             });
@@ -67,7 +89,7 @@ class ChatWindowHeader extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickShiftLeft(ev) {
-        this.dispatch('shiftLeftChatWindow', this.props.chatWindowLocalId);
+        this.storeDispatch('shiftLeftChatWindow', this.props.chatWindowLocalId);
     }
 
     /**
@@ -75,7 +97,7 @@ class ChatWindowHeader extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickShiftRight(ev) {
-        this.dispatch('shiftRightChatWindow', this.props.chatWindowLocalId);
+        this.storeDispatch('shiftRightChatWindow', this.props.chatWindowLocalId);
     }
 }
 
@@ -88,26 +110,6 @@ ChatWindowHeader.defaultProps = {
     hasShiftLeft: false,
     hasShiftRight: false,
     isExpandable: false,
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.chatWindowLocalId
- * @param {Object} state.getters
- * @return {Object}
- */
-ChatWindowHeader.mapStoreToProps = function (state, ownProps, getters) {
-    const chatWindowLocalId = ownProps.chatWindowLocalId;
-    const thread = state.threads[chatWindowLocalId];
-    const threadName = thread
-        ? getters.threadName(chatWindowLocalId)
-        : undefined;
-    return {
-        isMobile: state.isMobile,
-        thread,
-        threadName,
-    };
 };
 
 ChatWindowHeader.props = {

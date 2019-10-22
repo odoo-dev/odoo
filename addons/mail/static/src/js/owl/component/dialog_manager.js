@@ -3,14 +3,18 @@ odoo.define('mail.component.DialogManager', function (require) {
 
 const Dialog = require('mail.component.Dialog');
 
-class DialogManager extends owl.store.ConnectedComponent {
+class DialogManager extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
         super(...args);
         this.DEBUG = true;
+        this.storeProps = owl.hooks.useStore(state => {
+            return Object.assign({}, state.dialogManager);
+        });
         if (this.DEBUG) {
             window.dialog_manager = this;
         }
@@ -42,14 +46,6 @@ class DialogManager extends owl.store.ConnectedComponent {
 
 DialogManager.components = {
     Dialog,
-};
-
-/**
- * @param {Object} state
- * @return {Object}
- */
-DialogManager.mapStoreToProps = function (state) {
-    return Object.assign({}, state.dialogManager);
 };
 
 DialogManager.template = 'mail.component.DialogManager';

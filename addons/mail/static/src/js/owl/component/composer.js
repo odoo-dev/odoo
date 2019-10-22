@@ -8,9 +8,10 @@ const TextInput = require('mail.component.ComposerTextInput');
 
 const core = require('web.core');
 
-class Composer extends owl.store.ConnectedComponent {
+class Composer extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
@@ -20,6 +21,22 @@ class Composer extends owl.store.ConnectedComponent {
             hasAllSuggestedRecipients: false,
             hasDropZone: false,
             hasTextInputContent: false,
+        });
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            const storeComposerState = _.defaults({}, state.composers[props.id], {
+                attachmentLocalIds: [],
+            });
+            return Object.assign({}, storeComposerState, {
+                fullSuggestedRecipients: (props.suggestedRecipients || []).map(recipient => {
+                    return Object.assign({}, recipient, {
+                        partner: state.partners[recipient.partnerLocalId],
+                    });
+                }),
+                isMobile: state.isMobile,
+                thread: state.threads[props.threadLocalId],
+            });
         });
         this._emojisButtonRef = owl.hooks.useRef('emojisButton');
         this._fileInputRef = owl.hooks.useRef('fileInput');
@@ -43,7 +60,7 @@ class Composer extends owl.store.ConnectedComponent {
         if (this.env.store.state.composers[this.props.id]) {
             throw new Error(`Already some store data in composer with id '${this.props.id}'`);
         }
-        this.dispatch('createComposer', this.props.id, {
+        this.storeDispatch('createComposer', this.props.id, {
             attachmentLocalIds: this.props.initialAttachmentLocalIds || [],
         });
         document.addEventListener('click', this._globalCaptureClickEventListener, true);
@@ -69,7 +86,7 @@ class Composer extends owl.store.ConnectedComponent {
     }
 
     willUnmount() {
-        this.dispatch('deleteComposer', this.props.id);
+        this.storeDispatch('deleteComposer', this.props.id);
         $(window).off(this.fileuploadId, this._attachmentUploadedEventListener);
         document.removeEventListener('click', this._globalCaptureClickEventListener, true);
         document.removeEventListener('dragleave', this._globalDragleaveListener);
@@ -146,14 +163,14 @@ class Composer extends owl.store.ConnectedComponent {
     async _postMessage() {
         // TODO: take suggested recipients into account
         try {
-            await this.dispatch('postMessageOnThread', this.props.threadLocalId, {
+            await this.storeDispatch('postMessageOnThread', this.props.threadLocalId, {
                 attachmentLocalIds: this.storeProps.attachmentLocalIds,
                 htmlContent: this._textInputRef.comp.getHtmlContent(),
                 isLog: this.props.isLog,
                 threadCacheLocalId: this.props.threadCacheLocalId,
             });
             this._textInputRef.comp.reset();
-            this.dispatch('unlinkAttachmentsFromComposer', this.props.id);
+            this.storeDispatch('unlinkAttachmentsFromComposer', this.props.id);
             // TODO: we might need to remove trigger and use the store to wait for
             // the post rpc to be done
             this.trigger('o-message-posted');
@@ -175,16 +192,16 @@ class Composer extends owl.store.ConnectedComponent {
                     attachment.name === file.name && attachment.size === file.size);
             // if the file already exists, delete the file before upload
             if (attachment) {
-                this.dispatch('unlinkAttachment', attachment.localId);
+                this.storeDispatch('unlinkAttachment', attachment.localId);
             }
         }
         for (const file of files) {
-            const attachmentLocalId = this.dispatch('createAttachment', {
+            const attachmentLocalId = this.storeDispatch('createAttachment', {
                 filename: file.name,
                 isTemporary: true,
                 name: file.name,
             });
-            this.dispatch('linkAttachmentToComposer', this.props.id, attachmentLocalId);
+            this.storeDispatch('linkAttachmentToComposer', this.props.id, attachmentLocalId);
         }
         let formData = new window.FormData();
         formData.append('callback', this.fileuploadId);
@@ -232,11 +249,11 @@ class Composer extends owl.store.ConnectedComponent {
                 this.env.do_warn(error);
                 const temporaryAttachmentLocalId = this.env.store.state.temporaryAttachmentLocalIds[filename];
                 if (temporaryAttachmentLocalId) {
-                    this.dispatch('deleteAttachment', temporaryAttachmentLocalId);
+                    this.storeDispatch('deleteAttachment', temporaryAttachmentLocalId);
                 }
                 return;
             }
-            this.dispatch('createAttachment', {
+            this.storeDispatch('createAttachment', {
                 filename,
                 id,
                 mimetype,
@@ -466,35 +483,6 @@ Composer.defaultProps = {
     isExpandable: false,
     isFocusOnMount: false,
     isLog: false,
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.id
- * @param {Object[]} [ownProps.suggestedRecipients=[]]
- * @param {string} [ownProps.threadLocalId]
- */
-Composer.mapStoreToProps = function (
-    state,
-    {
-        id,
-        suggestedRecipients=[],
-        threadLocalId,
-    }
-) {
-    const storeComposerState = _.defaults({}, state.composers[id], {
-        attachmentLocalIds: [],
-    });
-    return Object.assign({}, storeComposerState, {
-        fullSuggestedRecipients: suggestedRecipients.map(recipient => {
-            return Object.assign({}, recipient, {
-                partner: state.partners[recipient.partnerLocalId],
-            });
-        }),
-        isMobile: state.isMobile,
-        thread: state.threads[threadLocalId],
-    });
 };
 
 Composer.props = {

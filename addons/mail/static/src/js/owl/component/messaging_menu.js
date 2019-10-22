@@ -5,15 +5,25 @@ const AutocompleteInput = require('mail.component.AutocompleteInput');
 const MobileNavbar = require('mail.component.MobileMessagingNavbar');
 const ThreadPreviewList = require('mail.component.ThreadPreviewList');
 
-class MessagingMenu extends owl.store.ConnectedComponent {
+class MessagingMenu extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
         super(...args);
         this.DEBUG = true;
         this.id = _.uniqueId('o_messagingMenu_');
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore(state => {
+            return Object.assign({}, state.messagingMenu, {
+                counter: this.storeGetters.globalThreadUnreadCounter(),
+                isDiscussOpen: state.discuss.isOpen,
+                isMobile: state.isMobile,
+            });
+        });
 
         // bind since passed as props
         this._onMobileNewMessageInputSelect = this._onMobileNewMessageInputSelect.bind(this);
@@ -74,7 +84,7 @@ class MessagingMenu extends owl.store.ConnectedComponent {
     _onClickCaptureGlobal(ev) {
         if (
             this.storeProps.isMobile &&
-            this.env.store.getters.haveVisibleChatWindows()
+            this.storeGetters.haveVisibleChatWindows()
         ) {
             return;
         }
@@ -87,7 +97,7 @@ class MessagingMenu extends owl.store.ConnectedComponent {
         if (ev.target.closest(`.${this.id}_mobileNewMessageInputAutocomplete`)) {
             return;
         }
-        this.dispatch('closeMessagingMenu');
+        this.storeDispatch('closeMessagingMenu');
     }
 
     /**
@@ -95,7 +105,7 @@ class MessagingMenu extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickDesktopTabButton(ev) {
-        this.dispatch('updateMessagingMenu', {
+        this.storeDispatch('updateMessagingMenu', {
             activeTabId: ev.currentTarget.dataset.tabId,
         });
     }
@@ -106,10 +116,10 @@ class MessagingMenu extends owl.store.ConnectedComponent {
      */
     _onClickNewMessage(ev) {
         if (!this.storeProps.isMobile) {
-            this.dispatch('openThread', 'new_message');
-            this.dispatch('closeMessagingMenu');
+            this.storeDispatch('openThread', 'new_message');
+            this.storeDispatch('closeMessagingMenu');
         } else {
-            this.dispatch('toggleMessagingMenuMobileNewMessage');
+            this.storeDispatch('toggleMessagingMenuMobileNewMessage');
         }
     }
 
@@ -118,7 +128,7 @@ class MessagingMenu extends owl.store.ConnectedComponent {
      * @param {MouseEvent} ev
      */
     _onClickToggler(ev) {
-        this.dispatch('toggleMessagingMenuOpen');
+        this.storeDispatch('toggleMessagingMenuOpen');
     }
 
     /**
@@ -127,7 +137,7 @@ class MessagingMenu extends owl.store.ConnectedComponent {
      */
     _onHideMobileNewMessage(ev) {
         ev.stopPropagation();
-        this.dispatch('toggleMessagingMenuMobileNewMessage');
+        this.storeDispatch('toggleMessagingMenuMobileNewMessage');
     }
 
     /**
@@ -139,18 +149,18 @@ class MessagingMenu extends owl.store.ConnectedComponent {
      */
     _onMobileNewMessageInputSelect(ev, ui) {
         const partnerId = ui.item.id;
-        const chat = this.env.store.getters.chatFromPartner(`res.partner_${partnerId}`);
+        const chat = this.storeGetters.chatFromPartner(`res.partner_${partnerId}`);
         if (chat) {
-            this.dispatch('openThread', chat.localId);
+            this.storeDispatch('openThread', chat.localId);
         } else {
-            this.dispatch('createChannel', {
+            this.storeDispatch('createChannel', {
                 autoselect: true,
                 partnerId,
                 type: 'chat'
             });
         }
         if (!this.storeProps.isMobile) {
-            this.dispatch('closeMessagingMenu');
+            this.storeDispatch('closeMessagingMenu');
         }
     }
 
@@ -162,13 +172,13 @@ class MessagingMenu extends owl.store.ConnectedComponent {
      */
     _onMobileNewMessageInputSource(req, res) {
         const value = _.escape(req.term);
-        this.dispatch('searchPartners', {
+        this.storeDispatch('searchPartners', {
             callback: partners => {
                 const suggestions = partners.map(partner => {
                     return {
                         id: partner.id,
-                        value: this.env.store.getters.partnerName(partner.localId),
-                        label: this.env.store.getters.partnerName(partner.localId),
+                        value: this.storeGetters.partnerName(partner.localId),
+                        label: this.storeGetters.partnerName(partner.localId),
                     };
                 });
                 res(_.sortBy(suggestions, 'label'));
@@ -185,7 +195,7 @@ class MessagingMenu extends owl.store.ConnectedComponent {
      * @param {string} ev.detail.tabId
      */
     _onSelectMobileNavbarTab(ev) {
-        this.dispatch('updateMessagingMenu', {
+        this.storeDispatch('updateMessagingMenu', {
             activeTabId: ev.detail.tabId,
         });
     }
@@ -197,9 +207,9 @@ class MessagingMenu extends owl.store.ConnectedComponent {
      * @param {string} ev.detail.threadLocalId
      */
     _onSelectThread(ev) {
-        this.dispatch('openThread', ev.detail.threadLocalId);
+        this.storeDispatch('openThread', ev.detail.threadLocalId);
         if (!this.storeProps.isMobile) {
-            this.dispatch('closeMessagingMenu');
+            this.storeDispatch('closeMessagingMenu');
         }
     }
 }
@@ -208,20 +218,6 @@ MessagingMenu.components = {
     AutocompleteInput,
     MobileNavbar,
     ThreadPreviewList,
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {Object} getters
- * @return {Object}
- */
-MessagingMenu.mapStoreToProps = function (state, ownProps, getters) {
-    return Object.assign({}, state.messagingMenu, {
-        counter: getters.globalThreadUnreadCounter(),
-        isDiscussOpen: state.discuss.isOpen,
-        isMobile: state.isMobile,
-    });
 };
 
 MessagingMenu.template = 'mail.component.MessagingMenu';

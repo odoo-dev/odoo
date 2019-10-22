@@ -3,9 +3,10 @@ odoo.define('mail.component.ChatWindowHiddenMenu', function (require) {
 
 const ChatWindowHeader = require('mail.component.ChatWindowHeader');
 
-class HiddenMenu extends owl.store.ConnectedComponent {
+class HiddenMenu extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
@@ -13,6 +14,13 @@ class HiddenMenu extends owl.store.ConnectedComponent {
         this.id = _.uniqueId('o_chatWindowHiddenMenu_');
         this.state = owl.useState({
             isOpen: false,
+        });
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            return {
+                threads: props.chatWindowLocalIds
+                    .filter(chatWindowLocalId => chatWindowLocalId !== 'new_message')
+                    .map(chatWindowLocalId => state.threads[chatWindowLocalId]),
+            };
         });
         this._globalCaptureClickEventListener = ev => this._onClickCaptureGlobal(ev);
         this._listRef = owl.hooks.useRef('list');
@@ -132,20 +140,6 @@ HiddenMenu.components = {
 
 HiddenMenu.defaultProps = {
     direction: 'rtl',
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string[]} ownProps.chatWindowLocalIds
- * @return {Object}
- */
-HiddenMenu.mapStoreToProps = function (state, ownProps) {
-    return {
-        threads: ownProps.chatWindowLocalIds
-            .filter(chatWindowLocalId => chatWindowLocalId !== 'new_message')
-            .map(chatWindowLocalId => state.threads[chatWindowLocalId]),
-    };
 };
 
 HiddenMenu.props = {

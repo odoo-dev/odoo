@@ -9,9 +9,10 @@ const MobileNavbar = require('mail.component.MobileMessagingNavbar');
 const Thread = require('mail.component.Thread');
 const ThreadPreviewList = require('mail.component.ThreadPreviewList');
 
-class Discuss extends owl.store.ConnectedComponent {
+class Discuss extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
@@ -26,6 +27,30 @@ class Discuss extends owl.store.ConnectedComponent {
             replyingToMessageMessageLocalId: undefined,
             replyingToMessageThreadLocalId: undefined,
             threadCachesStoredScrollTop: {}, // key: threadCachelocalId, value: { value } (obj. to prevent 0 being falsy)
+        });
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore(state => {
+            const {
+                activeThreadLocalId,
+                stringifiedDomain,
+            } = state.discuss;
+            const activeThread = state.threads[activeThreadLocalId];
+            const activeThreadCacheLocalId = activeThread
+                ? activeThread.cacheLocalIds[stringifiedDomain]
+                : undefined;
+            const activeThreadCache = activeThreadCacheLocalId
+                ? state.threadCaches[activeThreadCacheLocalId]
+                : undefined;
+            return Object.assign({}, state.discuss, {
+                activeThread,
+                activeThreadCache,
+                activeThreadCacheLocalId,
+                // intentionally keep unsynchronize value of old thread counter
+                // useful in willUpdateProps to detect change of counter
+                activeThreadCounter: activeThread && activeThread.counter,
+                isMobile: state.isMobile,
+            });
         });
         this._addingChannelValue = "";
         this._globalCaptureClickEventListener = ev => this._onClickCaptureGlobal(ev);
@@ -75,7 +100,7 @@ class Discuss extends owl.store.ConnectedComponent {
 
     mounted() {
         document.addEventListener('click', this._globalCaptureClickEventListener, true);
-        this.dispatch('updateDiscuss', {
+        this.storeDispatch('updateDiscuss', {
             isOpen: true,
         });
         if (this.storeProps.activeThreadLocalId) {
@@ -83,7 +108,7 @@ class Discuss extends owl.store.ConnectedComponent {
                 activeThreadLocalId: this.props.initActiveThreadLocalId,
             });
         } else {
-            this.dispatch('openThread', this.props.initActiveThreadLocalId, {
+            this.storeDispatch('openThread', this.props.initActiveThreadLocalId, {
                 resetDiscussDomain: true,
             });
         }
@@ -147,7 +172,7 @@ class Discuss extends owl.store.ConnectedComponent {
 
     willUnmount() {
         document.removeEventListener('click', this._globalCaptureClickEventListener, true);
-        this.dispatch('closeDiscuss');
+        this.storeDispatch('closeDiscuss');
     }
 
     //--------------------------------------------------------------------------
@@ -213,7 +238,7 @@ class Discuss extends owl.store.ConnectedComponent {
      * @param {Array} domain
      */
     updateDomain(domain) {
-        this.dispatch('updateDiscuss', {
+        this.storeDispatch('updateDiscuss', {
             domain,
         });
     }
@@ -264,7 +289,7 @@ class Discuss extends owl.store.ConnectedComponent {
             this.storeProps.activeThreadCache &&
             this._threadRef.comp.props.hasComposer
         ) {
-            this.dispatch('updateDiscuss', {
+            this.storeDispatch('updateDiscuss', {
                 storedThreadComposers: Object.assign({}, this.storeProps.storedThreadComposers, {
                     [this.storeProps.activeThreadLocalId]: this._threadRef.comp.getComposerState(),
                 }),
@@ -273,10 +298,10 @@ class Discuss extends owl.store.ConnectedComponent {
         if (this.state.isReplyingToMessage) {
             this._cancelReplyingToMessage();
         }
-        this.dispatch('updateDiscuss', {
+        this.storeDispatch('updateDiscuss', {
             activeThreadLocalId: threadLocalId,
         });
-        this.dispatch('openThread', threadLocalId, {
+        this.storeDispatch('openThread', threadLocalId, {
             markAsDiscussTarget: true,
         });
     }
@@ -294,13 +319,13 @@ class Discuss extends owl.store.ConnectedComponent {
      */
     _onAddChannelAutocompleteSelect(ev, ui) {
         if (ui.item.special) {
-            this.dispatch('createChannel', {
+            this.storeDispatch('createChannel', {
                 name: this._addingChannelValue,
                 public: ui.item.special,
                 type: 'channel'
             });
         } else {
-            this.dispatch('joinChannel', ui.item.id, { autoselect: true });
+            this.storeDispatch('joinChannel', ui.item.id, { autoselect: true });
         }
         this._clearAddingItem();
     }
@@ -359,11 +384,11 @@ class Discuss extends owl.store.ConnectedComponent {
      */
     _onAddChatAutocompleteSelect(ev, ui) {
         const partnerId = ui.item.id;
-        const chat = this.env.store.getters.chatFromPartner(`res.partner_${partnerId}`);
+        const chat = this.storeGetters.chatFromPartner(`res.partner_${partnerId}`);
         if (chat) {
             this._openThread(chat.localId);
         } else {
-            this.dispatch('createChannel', {
+            this.storeDispatch('createChannel', {
                 autoselect: true,
                 partnerId,
                 type: 'chat'
@@ -380,13 +405,13 @@ class Discuss extends owl.store.ConnectedComponent {
      */
     _onAddChatAutocompleteSource(req, res) {
         const value = _.escape(req.term);
-        this.dispatch('searchPartners', {
+        this.storeDispatch('searchPartners', {
             callback: partners => {
                 const suggestions = partners.map(partner => {
                     return {
                         id: partner.id,
-                        value: this.env.store.getters.partnerName(partner.localId),
-                        label: this.env.store.getters.partnerName(partner.localId),
+                        value: this.storeGetters.partnerName(partner.localId),
+                        label: this.storeGetters.partnerName(partner.localId),
                     };
                 });
                 res(_.sortBy(suggestions, 'label'));
@@ -408,10 +433,10 @@ class Discuss extends owl.store.ConnectedComponent {
             ) ||
             (
                 this.storeProps.isMobile &&
-                !this.env.store.getters.haveVisibleChatWindows()
+                !this.storeGetters.haveVisibleChatWindows()
             )
         ) {
-            this.dispatch('updateDiscuss', {
+            this.storeDispatch('updateDiscuss', {
                 targetThreadLocalId: null,
             });
         }
@@ -465,7 +490,7 @@ class Discuss extends owl.store.ConnectedComponent {
      * @param {string} ev.detail.model
      */
     _onRedirect(ev) {
-        this.dispatch('redirect', {
+        this.storeDispatch('redirect', {
             ev,
             id: ev.detail.id,
             model: ev.detail.model,
@@ -485,8 +510,8 @@ class Discuss extends owl.store.ConnectedComponent {
     _onReplyingToMessageMessagePosted() {
         this.env.do_notify(
             _.str.sprintf(
-                this.env._t("Message posted on \"%s\""),
-                this.env.store.getters.threadName(this.state.replyingToMessageThreadLocalId)));
+                this.env._t(`Message posted on "%s"`),
+                this.storeGetters.threadName(this.state.replyingToMessageThreadLocalId)));
         this._cancelReplyingToMessage();
     }
 
@@ -521,7 +546,7 @@ class Discuss extends owl.store.ConnectedComponent {
             return;
         }
         this._cancelReplyingToMessage();
-        this.dispatch('updateDiscuss', {
+        this.storeDispatch('updateDiscuss', {
             activeMobileNavbarTabId: tabId,
         });
     }
@@ -574,33 +599,6 @@ Discuss.components = {
     Sidebar,
     Thread,
     ThreadPreviewList,
-};
-
-/**
- * @param {Object} state
- * @return {Object}
- */
-Discuss.mapStoreToProps = function (state) {
-    const {
-        activeThreadLocalId,
-        stringifiedDomain,
-    } = state.discuss;
-    const activeThread = state.threads[activeThreadLocalId];
-    const activeThreadCacheLocalId = activeThread
-        ? activeThread.cacheLocalIds[stringifiedDomain]
-        : undefined;
-    const activeThreadCache = activeThreadCacheLocalId
-        ? state.threadCaches[activeThreadCacheLocalId]
-        : undefined;
-    return Object.assign({}, state.discuss, {
-        activeThread,
-        activeThreadCache,
-        activeThreadCacheLocalId,
-        // intentionally keep unsynchronize value of old thread counter
-        // useful in willUpdateProps to detect change of counter
-        activeThreadCounter: activeThread && activeThread.counter,
-        isMobile: state.isMobile,
-    });
 };
 
 Discuss.props = {

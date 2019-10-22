@@ -16,7 +16,7 @@
                 class="
                     o_AttachmentViewer_headerItem
                     o_AttachmentViewer_icon"
-                t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId)"
+                t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId)"
                 t-key="'icon'">
                 <i
                     aria-label="Image"
@@ -25,7 +25,7 @@
                         fa-picture-o"
                     role="img"
                     title="Image"
-                    t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'image'"/>
+                    t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'image'"/>
                 <i
                     aria-label="PDF file"
                     class="
@@ -33,7 +33,7 @@
                         fa-file-text"
                     role="img"
                     title="PDF file"
-                    t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'application/pdf'"/>
+                    t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'application/pdf'"/>
                 <i
                     aria-label="Text file"
                     class="
@@ -41,7 +41,7 @@
                         fa-file-text"
                     role="img"
                     title="Text file"
-                    t-if="env.store.getters.isAttachmentTextFile(props.info.attachmentLocalId)"/>
+                    t-if="storeGetters.isAttachmentTextFile(props.info.attachmentLocalId)"/>
                 <i
                     aria-label="Video"
                     class="
@@ -49,13 +49,13 @@
                         fa-video-camera"
                     role="img"
                     title="Video"
-                    t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'video'"/>
+                    t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'video'"/>
             </div>
             <div
                 class="
                     o_AttachmentViewer_headerItem
                     o_AttachmentViewer_name">
-                <t t-esc="env.store.getters.attachmentDisplayName(props.info.attachmentLocalId)"/>
+                <t t-esc="storeGetters.attachmentDisplayName(props.info.attachmentLocalId)"/>
             </div>
             <div
                 class="
@@ -95,12 +95,12 @@
         <div
             class="o_AttachmentViewer_main"
             t-att-class="{
-                o_with_img: env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'image',
+                o_with_img: storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'image',
             }"
             t-on-mousemove="_onMousemoveView">
             <div
                 class="o_AttachmentViewer_zoomer"
-                t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'image'"
+                t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'image'"
                 t-ref="zoomer">
                 <div
                     class="o_AttachmentViewer_loading"
@@ -122,7 +122,7 @@
                         o_AttachmentViewer_view
                         o_AttachmentViewer_viewImage"
                     draggable="false"
-                    t-att-src="env.store.getters.attachmentDefaultSource(props.info.attachmentLocalId)"
+                    t-att-src="storeGetters.attachmentDefaultSource(props.info.attachmentLocalId)"
                     t-att-style="imageStyle"
                     t-on-click="_onClickImage"
                     t-on-mousedown="_onMousedownImage"
@@ -135,16 +135,16 @@
                     o_AttachmentViewer_view
                     o_AttachmentViewer_viewIframe
                     o_AttachmentViewer_viewPdf"
-                t-att-src="env.store.getters.attachmentDefaultSource(props.info.attachmentLocalId)"
-                t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'application/pdf'"
+                t-att-src="storeGetters.attachmentDefaultSource(props.info.attachmentLocalId)"
+                t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'application/pdf'"
                 t-key="props.info.attachmentLocalId"/>
             <iframe
                 class="
                     o_AttachmentViewer_view
                     o_AttachmentViewer_viewIframe
                     o_text"
-                t-att-src="env.store.getters.attachmentDefaultSource(props.info.attachmentLocalId)"
-                t-if="env.store.getters.isAttachmentTextFile(props.info.attachmentLocalId)"
+                t-att-src="storeGetters.attachmentDefaultSource(props.info.attachmentLocalId)"
+                t-if="storeGetters.isAttachmentTextFile(props.info.attachmentLocalId)"
                 t-key="props.info.attachmentLocalId"/>
             <iframe
                 allow="autoplay; encrypted-media"
@@ -153,8 +153,8 @@
                     o_AttachmentViewer_viewIframe
                     o_AttachmentViewer_youtube"
                 height="315"
-                t-att-src="env.store.getters.attachmentDefaultSource(props.info.attachmentLocalId)"
-                t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'youtu'"
+                t-att-src="storeGetters.attachmentDefaultSource(props.info.attachmentLocalId)"
+                t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'youtu'"
                 t-key="props.info.attachmentLocalId"
                 width="560"/>
             <video
@@ -162,18 +162,18 @@
                     o_AttachmentViewer_view
                     o_AttachmentViewer_viewVideo"
                 controls="controls"
-                t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'video'"
+                t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'video'"
                 t-key="props.info.attachmentLocalId"
                 t-on-click="_onClickVideo">
                 <source
                     t-att-data-type="props.attachment.mimetype"
-                    t-att-src="env.store.getters.attachmentDefaultSource(props.info.attachmentLocalId)"/>
+                    t-att-src="storeGetters.attachmentDefaultSource(props.info.attachmentLocalId)"/>
             </video>
         </div>
         <div
             class="o_AttachmentViewer_toolbar"
             role="toolbar"
-            t-if="env.store.getters.attachmentFileType(props.info.attachmentLocalId) === 'image'"
+            t-if="storeGetters.attachmentFileType(props.info.attachmentLocalId) === 'image'"
             t-key="'toolbar'">
             <div
                 class="o_AttachmentViewer_toolbarButton"

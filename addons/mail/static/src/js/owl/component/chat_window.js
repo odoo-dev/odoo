@@ -5,9 +5,10 @@ const AutocompleteInput = require('mail.component.AutocompleteInput');
 const Header = require('mail.component.ChatWindowHeader');
 const Thread = require('mail.component.Thread');
 
-class ChatWindow extends owl.store.ConnectedComponent {
+class ChatWindow extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
@@ -16,6 +17,14 @@ class ChatWindow extends owl.store.ConnectedComponent {
         this.state = owl.useState({
             focused: false,
             folded: false, // used for 'new_message' chat window
+        });
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeGetters = owl.hooks.useGetters();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            return {
+                isMobile: state.isMobile,
+                thread: state.threads[props.chatWindowLocalId],
+            };
         });
 
         this._globalCaptureFocusEventListener = ev => this._onFocusCaptureGlobal(ev);
@@ -146,15 +155,15 @@ class ChatWindow extends owl.store.ConnectedComponent {
     _onAutocompleteSelect(ev, ui) {
         const partnerId = ui.item.id;
         const partnerLocalId = `res.partner_${partnerId}`;
-        const chat = this.env.store.getters.chatFromPartner(partnerLocalId);
+        const chat = this.storeGetters.chatFromPartner(partnerLocalId);
         if (chat) {
             this.trigger('o-select-thread', {
                 chatWindowLocalId: this.props.chatWindowLocalId,
                 threadLocalId: chat.localId,
             });
         } else {
-            this.dispatch('closeChatWindow', this.props.chatWindowLocalId);
-            this.dispatch('createChannel', {
+            this.storeDispatch('closeChatWindow', this.props.chatWindowLocalId);
+            this.storeDispatch('createChannel', {
                 autoselect: true,
                 partnerId,
                 type: 'chat'
@@ -169,13 +178,13 @@ class ChatWindow extends owl.store.ConnectedComponent {
      * @param {function} res
      */
     _onAutocompleteSource(req, res) {
-        return this.dispatch('searchPartners', {
+        return this.storeDispatch('searchPartners', {
             callback: (partners) => {
                 const suggestions = partners.map(partner => {
                     return {
                         id: partner.id,
-                        value: this.env.store.getters.partnerName(partner.localId),
-                        label: this.env.store.getters.partnerName(partner.localId),
+                        value: this.storeGetters.partnerName(partner.localId),
+                        label: this.storeGetters.partnerName(partner.localId),
                     };
                 });
                 res(_.sortBy(suggestions, 'label'));
@@ -211,7 +220,7 @@ class ChatWindow extends owl.store.ConnectedComponent {
         if (!this.storeProps.thread) {
             this.state.folded = !this.state.folded;
         } else {
-            this.dispatch('toggleFoldThread', this.props.chatWindowLocalId);
+            this.storeDispatch('toggleFoldThread', this.props.chatWindowLocalId);
         }
     }
 
@@ -288,19 +297,6 @@ ChatWindow.defaultProps = {
     isDocked: false,
     isExpandable: false,
     isFullscreen: false,
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.chatWindowLocalId
- * @return {Object}
- */
-ChatWindow.mapStoreToProps = function (state, ownProps) {
-    return {
-        isMobile: state.isMobile,
-        thread: state.threads[ownProps.chatWindowLocalId],
-    };
 };
 
 ChatWindow.props = {

@@ -4,7 +4,7 @@ odoo.define('mail.component.Thread', function (require) {
 const Composer = require('mail.component.Composer');
 const MessageList = require('mail.component.MessageList');
 
-class Thread extends owl.store.ConnectedComponent {
+class Thread extends owl.Component {
 
     /**
      * @param {...any} args
@@ -12,6 +12,21 @@ class Thread extends owl.store.ConnectedComponent {
     constructor(...args) {
         super(...args);
         this.id = _.uniqueId('o_thread_');
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            const thread = state.threads[props.threadLocalId];
+            const threadCacheLocalId = thread
+                ? thread.cacheLocalIds[JSON.stringify(props.domain || [])]
+                : undefined;
+            const threadCache = threadCacheLocalId
+                ? state.threadCaches[threadCacheLocalId]
+                : undefined;
+            return {
+                isMobile: state.isMobile,
+                threadCache,
+                threadCacheLocalId,
+            };
+        });
         this._composerRef = owl.hooks.useRef('composer');
         /**
          * Track when message list has been mounted. Message list should notify
@@ -125,7 +140,7 @@ class Thread extends owl.store.ConnectedComponent {
      * @private
      */
     _loadThreadCache() {
-        this.dispatch('loadThreadCache', this.props.threadLocalId, {
+        this.storeDispatch('loadThreadCache', this.props.threadLocalId, {
             searchDomain: this.props.domain,
         });
     }
@@ -156,28 +171,6 @@ Thread.defaultProps = {
     haveMessagesMarkAsReadIcon: false,
     haveMessagesReplyIcon: false,
     order: 'asc',
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {Array} [ownProps.domain=[]]
- * @param {string} ownProps.threadLocalId
- * @return {Object}
- */
-Thread.mapStoreToProps = function (state, ownProps) {
-    const thread = state.threads[ownProps.threadLocalId];
-    const threadCacheLocalId = thread
-        ? thread.cacheLocalIds[JSON.stringify(ownProps.domain || [])]
-        : undefined;
-    const threadCache = threadCacheLocalId
-        ? state.threadCaches[threadCacheLocalId]
-        : undefined;
-    return {
-        isMobile: state.isMobile,
-        threadCache,
-        threadCacheLocalId,
-    };
 };
 
 Thread.props = {

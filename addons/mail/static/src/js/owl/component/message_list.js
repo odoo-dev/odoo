@@ -3,13 +3,26 @@ odoo.define('mail.component.MessageList', function (require) {
 
 const Message = require('mail.component.Message');
 
-class MessageList extends owl.store.ConnectedComponent {
+class MessageList extends owl.Component {
 
     /**
+     * @override
      * @param {...any} args
      */
     constructor(...args) {
         super(...args);
+        this.storeDispatch = owl.hooks.useDispatch();
+        this.storeProps = owl.hooks.useStore((state, props) => {
+            const threadCache = state.threadCaches[props.threadCacheLocalId];
+            return {
+                isMobile: state.isMobile,
+                messageLocalIds: threadCache.messageLocalIds,
+                messages: threadCache.messageLocalIds.map(localId => state.messages[localId]),
+                thread: state.threads[props.threadLocalId],
+                threadCache,
+                threadCacheCurrentPartnerMessagePostCounter: threadCache.currentPartnerMessagePostCounter,
+            };
+        });
         this._isAutoLoadOnScrollActive = true;
         this._loadMoreRef = owl.hooks.useRef('loadMore');
         this._onScroll = _.throttle(this._onScroll.bind(this), 100);
@@ -292,7 +305,7 @@ class MessageList extends owl.store.ConnectedComponent {
             !this.props.domain.length &&
             this.lastMessageRef.isPartiallyVisible()
         ) {
-            this.dispatch('markThreadAsSeen', this.props.threadLocalId);
+            this.storeDispatch('markThreadAsSeen', this.props.threadLocalId);
         }
     }
 
@@ -318,7 +331,7 @@ class MessageList extends owl.store.ConnectedComponent {
      * @private
      */
     _loadMore() {
-        this.dispatch('loadMoreMessagesOnThread', this.props.threadLocalId, {
+        this.storeDispatch('loadMoreMessagesOnThread', this.props.threadLocalId, {
             searchDomain: this.props.domain,
         });
     }
@@ -405,25 +418,6 @@ MessageList.defaultProps = {
     haveMessagesMarkAsReadIcon: false,
     haveMessagesReplyIcon: false,
     order: 'asc',
-};
-
-/**
- * @param {Object} state
- * @param {Object} ownProps
- * @param {string} ownProps.threadCacheLocalId
- * @param {string} ownProps.threadLocalId
- * @return {Object}
- */
-MessageList.mapStoreToProps = function (state, ownProps) {
-    const threadCache = state.threadCaches[ownProps.threadCacheLocalId];
-    return {
-        isMobile: state.isMobile,
-        messageLocalIds: threadCache.messageLocalIds,
-        messages: threadCache.messageLocalIds.map(localId => state.messages[localId]),
-        thread: state.threads[ownProps.threadLocalId],
-        threadCache,
-        threadCacheCurrentPartnerMessagePostCounter: threadCache.currentPartnerMessagePostCounter,
-    };
 };
 
 MessageList.props = {
