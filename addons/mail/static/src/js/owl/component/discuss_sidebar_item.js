@@ -182,7 +182,10 @@ DiscussSidebarItem.defaultProps = {
 };
 
 DiscussSidebarItem.props = {
-    isActive: Boolean,
+    isActive: {
+        type: Boolean,
+        optional: true,
+    },
     threadLocalId: String,
 };
 

@@ -272,8 +272,8 @@ class Discuss extends Component {
     _cancelReplyingToMessage() {
         this.state.isReplyingToMessage = false;
         this.state.replyingToMessageCounter = 0;
-        this.state.replyingToMessageMessageLocalId = null;
-        this.state.replyingToMessageThreadLocalId = null;
+        this.state.replyingToMessageMessageLocalId = undefined;
+        this.state.replyingToMessageThreadLocalId = undefined;
     }
 
     /**
