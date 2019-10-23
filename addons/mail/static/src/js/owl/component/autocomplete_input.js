@@ -119,9 +119,18 @@ AutocompleteInput.props = {
         type: Function,
         optional: true,
     },
-    isFocusOnMount: Boolean,
-    isHtml: Boolean,
-    placeholder: String,
+    isFocusOnMount: {
+        type: Boolean,
+        optional: true,
+    },
+    isHtml: {
+        type: Boolean,
+        optional: true,
+    },
+    placeholder: {
+        type: String,
+        optional: true,
+    },
     select: {
         type: Function,
         optional: true,

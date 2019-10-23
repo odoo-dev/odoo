@@ -75,6 +75,7 @@ MobileMessagingNavbar.props = {
                 label: String,
             },
         },
+        optional: true,
     },
 };
 

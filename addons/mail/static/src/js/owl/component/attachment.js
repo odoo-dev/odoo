@@ -80,13 +80,27 @@ Attachment.defaultProps = {
 };
 
 Attachment.props = {
-    attachment: Object, // {mail.store.model.Attachment}
     attachmentLocalId: String,
-    hasLabelForCardLayout: Boolean,
-    imageSizeForBasicLayout: String, // ['small', 'medium', 'large']
-    isDownloadable: Boolean,
-    isEditable: Boolean,
-    layout: String, // ['basic', 'card']
+    hasLabelForCardLayout: {
+        type: Boolean,
+        optional: true,
+    },
+    imageSizeForBasicLayout: {
+        type: String, // ['small', 'medium', 'large']
+        optional: true,
+    },
+    isDownloadable: {
+        type: Boolean,
+        optional: true,
+    },
+    isEditable: {
+        type: Boolean,
+        optional: true,
+    },
+    layout: {
+        type: String, // ['basic', 'card']
+        optional: true,
+    },
 };
 
 Attachment.template = 'mail.component.Attachment';
