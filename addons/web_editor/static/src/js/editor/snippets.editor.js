@@ -316,6 +316,9 @@ var SnippetEditor = Widget.extend({
         });
         this._customize$Elements.forEach(($el, i) => {
             var editor = $el.data('editor');
+            if (!editor) {
+                return;
+            }
             var styles = _.values(editor.styles);
             _.sortBy(styles, '__order').forEach(style => {
                 if (show) {
@@ -686,6 +689,7 @@ var SnippetsMenu = Widget.extend({
     cacheSnippetTemplate: {},
     events: {
         'click .o_install_btn': '_onInstallBtnClick',
+        'click .o_we_add_snippet_btn': '_onBlocksTabClick',
     },
     custom_events: {
         'activate_insertion_zones': '_onActivateInsertionZones',
@@ -703,6 +707,11 @@ var SnippetsMenu = Widget.extend({
         'block_preview_overlays': '_onBlockPreviewOverlays',
         'unblock_preview_overlays': '_onUnblockPreviewOverlays',
         'user_value_widget_opening': '_onUserValueWidgetOpening',
+    },
+    // enum of the SnippetsMenu's tabs.
+    tabs: {
+        BLOCKS: 'blocks',
+        OPTIONS: 'options',
     },
 
     /**
@@ -774,10 +783,6 @@ var SnippetsMenu = Widget.extend({
             });
 
             var $target = $(srcElement);
-            if ($target.closest('#snippets_menu').length) {
-                this._activateSnippet(false);
-                return;
-            }
             if (!$target.closest('body > *').length) {
                 return;
             }
@@ -1645,6 +1650,38 @@ var SnippetsMenu = Widget.extend({
                 return this.nodeType === 3 && this.textContent.match(/\S/);
             }).parent().addClass('o_default_snippet_text');
     },
+    /**
+     * Selects the block selection tab
+     *
+     * @private
+     */
+    _showBlockSelectionMenu: function () {
+        this._activateSnippet(false);
+        this._updateLeftPanelContent({
+            content: [],
+            tab: this.tabs.BLOCKS,
+        });
+    },
+    /**
+     * Changes the content of the left panel and selects a tab.
+     *
+     * @private
+     * @param {htmlString | Element | Text | Array | jQuery} content
+     * the new content of the customizePanel
+     * @param {this.tabs.VALUE} - the tab to select
+     */
+    _updateLeftPanelContent: function ({content, tab}) {
+        while (this.customizePanel.firstChild) {
+            this.customizePanel.removeChild(this.customizePanel.firstChild);
+        }
+        $(this.customizePanel).append(content);
+
+        this.customizePanel.classList.toggle('d-none', tab === this.tabs.BLOCKS);
+        this.$('#o_scroll').toggleClass('d-none', tab !== this.tabs.BLOCKS);
+
+        this.$('.o_we_add_snippet_btn').toggleClass('active', tab === this.tabs.BLOCKS);
+        this.$('.o_we_customize_snippet_btn').toggleClass('active', tab === this.tabs.OPTIONS);
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1795,6 +1832,12 @@ var SnippetsMenu = Widget.extend({
     /**
      * @private
      */
+    _onBlocksTabClick: function (ev) {
+        this._showBlockSelectionMenu();
+    },
+    /**
+     * @private
+     */
     _onBlockPreviewOverlays: function (ev) {
         this._blockPreviewOverlays = true;
     },
@@ -1828,17 +1871,10 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onUpdateCustomizeElements: function (ev) {
-        while (this.customizePanel.firstChild) {
-            this.customizePanel.removeChild(this.customizePanel.firstChild);
-        }
-        ev.data.customize$Elements.forEach($el => {
-            this.customizePanel.appendChild($el[0]);
+        this._updateLeftPanelContent({
+            content: ev.data.customize$Elements,
+            tab: ev.data.customize$Elements.length ? tabs.OPTIONS : tabs.BLOCKS,
         });
-        var customize = !!ev.data.customize$Elements.length;
-        this.$('#o_scroll').toggleClass('d-none', customize);
-        this.$('.o_we_add_snippet_btn').toggleClass('active', !customize);
-        this.customizePanel.classList.toggle('d-none', !customize);
-        this.$('.o_we_customize_snippet_btn').toggleClass('active', customize);
     },
     /**
      * Called when an user value widget is being opened -> close all the other
