@@ -203,10 +203,6 @@ function beforeEach(self) {
                 }));
                 const callback = formData.get('callback');
                 uploadedAttachmentsCount++;
-                // Needed to wait that attachment has been re-rendered as
-                // temporary to avoid conflicting rendering
-                // See https://github.com/odoo/owl/issues/268
-                await testUtils.nextTick();
                 return `
                     <script language="javascript" type="text/javascript">
                         var win = window.top.window;
