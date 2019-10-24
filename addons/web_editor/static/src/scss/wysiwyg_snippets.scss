@@ -819,6 +819,19 @@ body.editor_enable.editor_has_snippets {
                 }
             }
         }
+        
+        // Background position overlay
+        &.o_background_position_overlay {
+            background-color: rgba(0,0,0,.7);
+
+            .o_overlay_content {
+                cursor: grab;
+
+                .grabbing {
+                    cursor: grabbing;
+                }
+            }
+        }
     }
 
     .contact_menu {
