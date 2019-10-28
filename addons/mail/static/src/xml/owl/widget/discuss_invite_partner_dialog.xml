@@ -4,13 +4,10 @@
     <!--
         @param {mail.widget.DiscussInvitePartnerDialog} widget
     -->
-    <div t-name="mail.widget.DiscussInvitePartnerDialog">
-        <input
-            class="
-                o_dialog
-                o_input
-                o_invite_partner"
-            type="text"/>
-    </div>
+    <t t-name="mail.widget.DiscussInvitePartnerDialog">
+        <div>
+            <input class="o_dialog o_input o_invite_partner" type="text"/>
+        </div>
+    </t>
 
 </templates>

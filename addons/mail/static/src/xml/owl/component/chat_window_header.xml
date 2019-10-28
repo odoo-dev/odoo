@@ -1,129 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <div
-        class="o_ChatWindowHeader"
-        owl="1"
-        t-att-chat-window-local-id="props.chatWindowLocalId"
-        t-att-class="{
-            'o-mobile': storeProps.isMobile,
-        }"
-        t-name="mail.component.ChatWindowHeader"
-        t-on-click="_onClick">
-        <div
-            aria-label="Close conversation"
-            class="
-                o_ChatWindowHeader_command
-                o_ChatWindowHeader_commandBack
-                o_ChatWindowHeader_commandClose"
-            title="Close conversation"
-            t-att-class="{
-                'o-mobile': storeProps.isMobile,
-            }"
-            t-if="props.hasCloseAsBackButton"
-            t-on-click.stop="_onClickClose">
-            <i
-                class="
-                    fa
-                    fa-arrow-left"/>
-        </div>
-        <Icon
-            class="
-                o_ChatWindowHeader_icon
-                o_ChatWindowHeader_item"
-            threadLocalId="props.chatWindowLocalId"
-            t-if="storeProps.thread"/>
-        <div
-            class="
-                o_ChatWindowHeader_item
-                o_ChatWindowHeader_name"
-            t-att-title="name"
-            t-key="'name'">
-            <t t-esc="name"/>
-        </div>
-        <div
-            class="
-                o_ChatWindowHeader_counter
-                o_ChatWindowHeader_item"
-            t-if="
-                storeProps.thread and
-                storeProps.thread.message_unread_counter > 0"
-            t-key="'counter'">
-            (<t t-esc="storeProps.thread.message_unread_counter"/>)
-        </div>
-        <div class="o-autogrow"/>
-        <div
-            class="
-                o_ChatWindowHeader_item
-                o_ChatWindowHeader_rightArea">
-            <div
-                aria-label="Shift left"
-                class="
-                    o_ChatWindowHeader_command
-                    o_ChatWindowHeader_commandShiftLeft"
-                title="Shift left"
-                t-att-class="{
-                    'o-mobile': storeProps.isMobile,
-                }"
-                t-if="props.hasShiftLeft"
-                t-key="'shift_left'"
-                t-on-click.stop="_onClickShiftLeft">
-                <i
-                    class="
-                        fa
-                        fa-angle-left"/>
+    <t t-name="mail.component.ChatWindowHeader" owl="1">
+        <div class="o_ChatWindowHeader" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click="_onClick" t-att-data-chat-window-local-id="props.chatWindowLocalId">
+            <t t-if="props.hasCloseAsBackButton">
+                <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandBack o_ChatWindowHeader_commandClose" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click.stop="_onClickClose" title="Close conversation" aria-label="Close conversation">
+                    <i class="fa fa-arrow-left"/>
+                </div>
+            </t>
+            <t t-if="storeProps.thread">
+                <Icon
+                    class="o_ChatWindowHeader_icon o_ChatWindowHeader_item"
+                    threadLocalId="props.chatWindowLocalId"
+                />
+            </t>
+            <div class="o_ChatWindowHeader_item o_ChatWindowHeader_name" t-att-title="name" t-key="'name'">
+                <t t-esc="name"/>
             </div>
-            <div
-                aria-label="Shift right"
-                class="
-                    o_ChatWindowHeader_command
-                    o_ChatWindowHeader_commandShiftRight"
-                title="Shift right"
-                t-att-class="{
-                    'o-mobile': storeProps.isMobile,
-                }"
-                t-if="props.hasShiftRight"
-                t-key="'shift_right'"
-                t-on-click.stop="_onClickShiftRight">
-                <i
-                    class="
-                        fa
-                        fa-angle-right"/>
-            </div>
-            <div
-                aria-label="Open in Discuss"
-                class="
-                    o_ChatWindowHeader_command
-                    o_ChatWindowHeader_commandExpand"
-                title="Open in Discuss"
-                t-att-class="{
-                    'o-mobile': storeProps.isMobile,
-                }"
-                t-if="props.isExpandable"
-                t-key="'expand'"
-                t-on-click.stop="_onClickExpand">
-                <i
-                    class="
-                        fa
-                        fa-expand"/>
-            </div>
-            <div
-                aria-label="Close chat window"
-                class="
-                    o_ChatWindowHeader_command
-                    o_ChatWindowHeader_commandClose"
-                title="Close chat window"
-                t-att-class="{
-                    'o-mobile': storeProps.isMobile,
-                }"
-                t-if="!props.hasCloseAsBackButton"
-                t-on-click.stop="_onClickClose">
-                <i
-                    class="
-                        fa
-                        fa-close"/>
+            <t t-if="storeProps.thread and storeProps.thread.message_unread_counter > 0">
+                <div class="o_ChatWindowHeader_counter o_ChatWindowHeader_item" t-key="'counter'">
+                    (<t t-esc="storeProps.thread.message_unread_counter"/>)
+                </div>
+            </t>
+            <div class="o-autogrow"/>
+            <div class="o_ChatWindowHeader_item o_ChatWindowHeader_rightArea">
+                <t t-if="props.hasShiftLeft">
+                    <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandShiftLeft" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click.stop="_onClickShiftLeft" title="Shift left" aria-label="Shift left" t-key="'shift_left'">
+                        <i class="fa fa-angle-left"/>
+                    </div>
+                </t>
+                <t t-if="props.hasShiftRight">
+                    <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandShiftRight" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click.stop="_onClickShiftRight" title="Shift right" aria-label="Shift right" t-key="'shift_right'">
+                        <i class="fa fa-angle-right"/>
+                    </div>
+                </t>
+                <t t-if="props.isExpandable">
+                    <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandExpand" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click.stop="_onClickExpand" title="Open in Discuss" aria-label="Open in Discuss" t-key="'expand'">
+                        <i class="fa fa-expand"/>
+                    </div>
+                </t>
+                <t t-if="!props.hasCloseAsBackButton">
+                    <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandClose" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click.stop="_onClickClose" title="Close chat window" aria-label="Close chat window">
+                        <i class="fa fa-close"/>
+                    </div>
+                </t>
             </div>
         </div>
-    </div>
+    </t>
 
 </templates>
