@@ -25,10 +25,9 @@ QUnit.module('PartnerImStatusIcon', {
             if (this.wiget) {
                 this.widget.destroy();
             }
-            let { env, widget } = await utilsStart({
-                ...params,
+            let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,
-            });
+            }));
             this.env = env;
             this.widget = widget;
         };

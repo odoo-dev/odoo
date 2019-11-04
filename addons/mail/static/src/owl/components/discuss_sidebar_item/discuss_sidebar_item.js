@@ -26,14 +26,21 @@ class DiscussSidebarItem extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const thread = state.threads[props.threadLocalId];
-            const directPartner = thread.directPartnerLocalId
-                ? state.partners[thread.directPartnerLocalId]
-                : undefined;
             return {
-                directPartner,
-                thread,
-                threadName: this.storeGetters.threadName(props.threadLocalId),
+                thread: this.storeGetters.getStoreObject({
+                    storeKey: 'threads',
+                    localId: props.threadLocalId,
+                    keys: [
+                        'id', 'create_uid', '_model', 'counter', 'channel_type',
+                        'message_needaction_counter', 'message_unread_counter',
+                        'group_based_subscription',
+                    ],
+                    computes: [{
+                        name: 'directPartner', keys: ['name'],
+                    }, {
+                        name: 'name',
+                    }],
+                }),
             };
         });
     }

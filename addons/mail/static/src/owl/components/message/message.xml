@@ -20,7 +20,7 @@
                 <t t-if="!props.isSquashed">
                     <div class="o_Message_authorAvatarContainer o_Message_sidebarItem">
                         <img class="o_Message_authorAvatar rounded-circle" t-att-class="{ o_Message_authorRedirect: hasAuthorRedirect, o_redirect: hasAuthorRedirect }" t-att-src="avatar" t-on-click="_onClickAuthor" t-att-title="hasAuthorRedirect ? 'Open chat' : ''" alt=""/>
-                        <t t-if="storeProps.author.im_status">
+                        <t t-if="storeProps.message.author.im_status">
                             <PartnerImStatusIcon
                                 class="o_Message_partnerImStatusIcon"
                                 t-att-class="{
@@ -30,7 +30,7 @@
                                     'o-message-selected': props.isSelected,
                                     'o_Message_partnerImStatusIcon-mobile': storeProps.isMobile,
                                 }"
-                                partnerLocalId="storeProps.author.localId"
+                                partnerLocalId="storeProps.message.author.localId"
                             />
                         </t>
                     </div>
@@ -65,16 +65,16 @@
                         </div>
                         <t t-if="hasDifferentOriginThread">
                             <div class="o_Message_originThread" t-att-class="{ 'o-message-selected': props.isSelected }">
-                                <t t-if="storeProps.originThread._model === 'mail.channel'">
-                                    (from <a class="o_Message_originThreadLink" href="#" t-on-click="_onClickOriginThread">#<t t-esc="storeProps.originThread.name"/></a>)
+                                <t t-if="storeProps.message.originThread._model === 'mail.channel'">
+                                    (from <a class="o_Message_originThreadLink" href="#" t-on-click="_onClickOriginThread">#<t t-esc="storeProps.message.originThread.name"/></a>)
                                 </t>
                                 <t t-else="">
-                                    on <a class="o_Message_originThreadLink" href="#" t-on-click="_onClickOriginThread"><t t-esc="storeProps.originThread.name"/></a>
+                                    on <a class="o_Message_originThreadLink" href="#" t-on-click="_onClickOriginThread"><t t-esc="storeProps.message.originThread.name"/></a>
                                 </t>
                             </div>
                         </t>
                         <div class="o_Message_commands o_Message_headerCommands" t-att-class="{ 'o-mobile': storeProps.isMobile }">
-                            <t t-if="(storeProps.message.message_type !== 'notification' and storeProps.originThread and storeProps.originThread._model === 'mail.channel') or !storeProps.message.isTransient">
+                            <t t-if="(storeProps.message.message_type !== 'notification' and storeProps.message.originThread and storeProps.message.originThread._model === 'mail.channel') or !storeProps.message.isTransient">
                                 <span class="o_Message_command o_Message_commandStar o_Message_headerCommand fa"
                                     t-att-class="{
                                         'fa-star': isStarred,
@@ -127,7 +127,7 @@
                         </ul>
                     </t>
                 </div>
-                <t t-if="storeProps.attachmentLocalIds and storeProps.attachmentLocalIds.length > 0">
+                <t t-if="storeProps.message.attachmentLocalIds and storeProps.message.attachmentLocalIds.length > 0">
                     <div class="o_Message_footer">
                         <!-- TODO XDU This does not allow to preview all attachments at once, find somethind else -->
                         <t t-if="imageAttachmentLocalIds and imageAttachmentLocalIds.length > 0">

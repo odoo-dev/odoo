@@ -168,6 +168,7 @@ const Discuss = AbstractAction.extend(OwlMixin, {
      * @private
      */
     _updateControlPanel() {
+        // TODO SEB should probably not access storeProps from the outside like this
         const activeThreadLocalId = this.component.storeProps.activeThreadLocalId;
         const hasMessages = this.component.hasActiveThreadMessages();
         const isMobile = this.component.storeProps.isMobile;

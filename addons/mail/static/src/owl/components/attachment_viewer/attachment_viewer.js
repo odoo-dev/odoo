@@ -36,7 +36,18 @@ class AttachmentViewer extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             return {
-                attachment: state.attachments[props.info.attachmentLocalId],
+                attachment: this.storeGetters.getStoreObject({
+                    storeKey: 'attachments',
+                    localId: props.info.attachmentLocalId,
+                    keys: ['id'],
+                    computes: [{
+                        name: 'fileType',
+                    }, {
+                        name: 'defaultSource',
+                    }, {
+                        name: 'isTextFile',
+                    }],
+                }),
             };
         });
         /**
@@ -161,7 +172,7 @@ class AttachmentViewer extends Component {
      */
     _handleImageLoad() {
         if (
-            this.storeGetters.attachmentFileType(this.props.info.attachmentLocalId) === 'image' &&
+            this.storeProps.attachment.fileType === 'image' &&
             this._renderedAttachmentLocalId !== this.props.info.attachmentLocalId
         ) {
             this.state.isImageLoading = true;

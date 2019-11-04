@@ -19,6 +19,7 @@ class DiscussSidebar extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore(() => {
             return {
+                // TODO SEB use getStoreObject, make it recordset, and allow filter/sort
                 pinnedChannelList: this.storeGetters.pinnedChannelList(),
                 pinnedChatList: this.storeGetters.pinnedChatList(),
                 pinnedMailboxList: this.storeGetters.pinnedMailboxList(),

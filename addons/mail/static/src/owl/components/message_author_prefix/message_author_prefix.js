@@ -14,18 +14,24 @@ class MessageAuthorPrefix extends Component {
         super(...args);
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const message = state.messages[props.messageLocalId];
-            const author = state.partners[message.authorLocalId];
-            const thread = props.threadLocalId
-                ? state.threads[props.threadLocalId]
-                : undefined;
             return {
-                author,
-                authorName: author
-                    ? this.storeGetters.partnerName(author.localId)
-                    : undefined,
                 currentPartnerLocalId: state.currentPartnerLocalId,
-                thread,
+                message: this.storeGetters.getStoreObject({
+                    storeKey: 'messages',
+                    localId: props.messageLocalId,
+                    computes: [{
+                        name: 'author',
+                        keys: ['localId'],
+                        computes: [{
+                            name: 'name',
+                        }],
+                    }],
+                }),
+                thread: this.storeGetters.getStoreObject({
+                    storeKey: 'threads',
+                    localId: props.threadLocalId,
+                    keys: ['channel_type'],
+                }),
             };
         });
     }

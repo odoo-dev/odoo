@@ -37,7 +37,7 @@ QUnit.module('Thread', {
          */
         this.createThread = async (threadLocalId, otherProps, { isFixedSize=false }={}) => {
             Thread.env = this.env;
-            this.thread = new Thread(null, { threadLocalId, ...otherProps });
+            this.thread = new Thread(null, Object.assign({ threadLocalId }, otherProps));
             await this.thread.mount(this.widget.el);
             if (isFixedSize) {
                 // needed to allow scrolling in some tests
@@ -50,10 +50,9 @@ QUnit.module('Thread', {
             if (this.widget) {
                 this.widget.destroy();
             }
-            let { env, widget } = await utilsStart({
-                ...params,
+            let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,
-            });
+            }));
             this.env = env;
             this.widget = widget;
         };

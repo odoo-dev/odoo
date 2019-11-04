@@ -17,10 +17,9 @@ QUnit.module('Getters', {
             if (this.widget) {
                 this.widget.destroy();
             }
-            let { env, widget } = await utilsStart({
-                ...params,
+            let { env, widget } = await utilsStart(Object.assign({}, params,{
                 data: this.data,
-            });
+            }));
             this.env = env;
             this.widget = widget;
         };
@@ -69,7 +68,7 @@ QUnit.test('attachmentExtension', async function (assert) {
     assert.strictEqual(this.env.store.getters.attachmentExtension(attachment.localId), "txt");
 });
 
-QUnit.test('attachmentFileType', async function (assert) {
+QUnit.test('attachment: fileType', async function (assert) {
     assert.expect(3);
 
     await this.start();
@@ -81,12 +80,18 @@ QUnit.test('attachmentFileType', async function (assert) {
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    const attachment = this.env.store.state.attachments[attachmentLocalId];
+    const attachment = this.env.store.getters.getStoreObject({
+        storeKey: 'attachments',
+        localId: attachmentLocalId,
+        computes: [{
+            name: 'fileType',
+        }],
+    });
     assert.ok(attachment);
-    assert.strictEqual(this.env.store.getters.attachmentFileType(attachment.localId), 'text');
+    assert.strictEqual(attachment.fileType, 'text');
 });
 
-QUnit.test('isAttachmentTextFile', async function (assert) {
+QUnit.test('attachment: textFile', async function (assert) {
     assert.expect(3);
 
     await this.start();
@@ -98,12 +103,20 @@ QUnit.test('isAttachmentTextFile', async function (assert) {
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    const attachment = this.env.store.state.attachments[attachmentLocalId];
+    const attachment = this.env.store.getters.getStoreObject({
+        storeKey: 'attachments',
+        localId: attachmentLocalId,
+        computes: [{
+            name: 'fileType', // TODO SEB necessary to compute isTextFile
+        }, {
+            name: 'isTextFile',
+        }],
+    });
     assert.ok(attachment);
-    assert.ok(this.env.store.getters.isAttachmentTextFile(attachment.localId));
+    assert.ok(attachment.isTextFile);
 });
 
-QUnit.test('isAttachmentViewable', async function (assert) {
+QUnit.test('attachment: isViewable', async function (assert) {
     assert.expect(3);
 
     await this.start();
@@ -115,9 +128,19 @@ QUnit.test('isAttachmentViewable', async function (assert) {
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    const attachment = this.env.store.state.attachments[attachmentLocalId];
+    const attachment = this.env.store.getters.getStoreObject({
+        storeKey: 'attachments',
+        localId: attachmentLocalId,
+        computes: [{
+            name: 'fileType', // TODO SEB necessary to compute isTextFile
+        }, {
+            name: 'isTextFile', // TODO SEB necessary for isViewable
+        }, {
+            name: 'isViewable',
+        }],
+    });
     assert.ok(attachment);
-    assert.ok(this.env.store.getters.isAttachmentViewable(attachment.localId));
+    assert.ok(attachment.isViewable);
 });
 
 });

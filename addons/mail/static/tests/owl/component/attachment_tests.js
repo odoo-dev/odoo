@@ -17,7 +17,7 @@ QUnit.module('Attachment', {
         utilsBeforeEach(this);
         this.createAttachmentComponent = async (attachmentLocalId, otherProps) => {
             Attachment.env = this.env;
-            this.attachment = new Attachment(null, { attachmentLocalId, ...otherProps });
+            this.attachment = new Attachment(null, Object.assign({ attachmentLocalId }, otherProps));
             await this.attachment.mount(this.widget.el);
             await nextRender();
         };
@@ -25,10 +25,9 @@ QUnit.module('Attachment', {
             if (this.widget) {
                 this.widget.destroy();
             }
-            let { env, widget } = await utilsStart({
-                ...params,
+            let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,
-            });
+            }));
             this.env = env;
             this.widget = widget;
         };

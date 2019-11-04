@@ -56,27 +56,28 @@ class Discuss extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore(state => {
-            const {
-                activeThreadLocalId,
-                stringifiedDomain,
-            } = state.discuss;
-            const activeThread = state.threads[activeThreadLocalId];
-            const activeThreadCacheLocalId = activeThread
-                ? activeThread.cacheLocalIds[stringifiedDomain]
-                : undefined;
-            const activeThreadCache = activeThreadCacheLocalId
-                ? state.threadCaches[activeThreadCacheLocalId]
-                : undefined;
-            return Object.assign({}, state.discuss, {
-                activeThread,
-                activeThreadCache,
-                activeThreadCacheLocalId,
-                // intentionally keep unsynchronize value of old thread counter
-                // useful in willUpdateProps to detect change of counter
-                activeThreadCounter: activeThread && activeThread.counter,
+            return Object.assign({
                 isMessagingReady: state.isMessagingReady,
                 isMobile: state.isMobile,
-            });
+            }, this.storeGetters.getTopLevelStoreObject({
+                storeKey: 'discuss',
+                keys: [
+                    'activeThreadLocalId', 'activeMobileNavbarTabId',
+                    'inboxMarkAsReadCounter', 'activeThreadCacheLocalId',
+                    'domain',
+                ],
+                computes: [{
+                    name: 'activeThread',
+                    keys: ['_model', 'channel_type', 'localId', 'counter',
+                        'cacheLocalIds', // needed in compute of activeThreadCacheLocalId
+                    ],
+                }, {
+                    name: 'activeThreadCacheLocalId',
+                }, {
+                    name: 'activeThreadCache',
+                    keys: ['messageLocalIds', 'isLoaded'],
+                }],
+            }));
         });
         /**
          * Value that is used to create a channel from the sidebar.
@@ -159,7 +160,6 @@ class Discuss extends Component {
      *
      * @param {Object} nextStoreProps
      * @param {Object} [nextStoreProps.activeThread]
-     * @param {integer} [nextStoreProps.activeThreadCounter]
      */
     willUpdateProps(nextStoreProps) {
         const activeThread = this.storeProps.activeThread;
@@ -267,6 +267,7 @@ class Discuss extends Component {
      * @return {boolean}
      */
     hasActiveThreadMessages() {
+        // TODO SEB ensure if not the case that messageLocalIds in activeThreadCache is default to []
         if (!this.storeProps.activeThreadCache) {
             return false;
         }
@@ -509,7 +510,11 @@ class Discuss extends Component {
         this.env.do_notify(
             _.str.sprintf(
                 this.env._t(`Message posted on "%s"`),
-                this.storeGetters.threadName(this.state.replyingToMessageThreadLocalId)
+                this.storeGetters.getStoreObject({
+                    storeKey: 'threads',
+                    localId: this.state.replyingToMessageThreadLocalId,
+                    computes: [{ name: 'name' }],
+                }).name
             )
         );
         this._cancelReplyingToMessage();

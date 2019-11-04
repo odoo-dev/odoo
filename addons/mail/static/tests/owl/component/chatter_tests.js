@@ -16,8 +16,15 @@ QUnit.module('Chatter', {
     beforeEach() {
         utilsBeforeEach(this);
         this.createChatter = async ({ id, model }, otherProps) => {
+            // TODO SEB maybe move this back to component at some point, but in will start when owl bug fixed
+            await this.env.store.dispatch('initChatter', {
+                model: model,
+                id: id,
+            });
+
             Chatter.env = this.env;
-            this.chatter = new Chatter(null, { model, id, ...otherProps });
+
+            this.chatter = new Chatter(null, Object.assign({ model, id }, otherProps));
             await this.chatter.mount(this.widget.el);
             await nextRender();
         };
@@ -25,10 +32,9 @@ QUnit.module('Chatter', {
             if (this.widget) {
                 this.widget.destroy();
             }
-            let { env, widget } = await startUtils({
-                ...params,
+            let { env, widget } = await startUtils(Object.assign({}, params, {
                 data: this.data,
-            });
+            }));
             this.env = env;
             this.widget = widget;
         };

@@ -32,10 +32,17 @@ class ChatWindow extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            return {
+            const res = {
                 isMobile: state.isMobile,
-                thread: state.threads[props.chatWindowLocalId],
             };
+            if (props.chatWindowLocalId !== 'new_message') {
+                res.thread = this.storeGetters.getStoreObject({
+                    storeKey: 'threads',
+                    localId: props.chatWindowLocalId,
+                    keys: ['localId', '_model', 'channel_type', 'state'],
+                });
+            }
+            return res;
         });
         /**
          * Reference of the autocomplete input (new_message chat window only).

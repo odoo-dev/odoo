@@ -35,7 +35,7 @@ class FileUploader extends Component {
      */
     async uploadFiles(files) {
         await this._unlinkExistingAttachments(files);
-        await this._createTemporaryAttachments(files);
+        this._createTemporaryAttachments(files);
         await this._performUpload(files);
         this._fileInputRef.el.value = '';
     }
@@ -64,7 +64,7 @@ class FileUploader extends Component {
      * @param {File} file
      * @returns {FormData}
      */
-    _createFormData(file){
+    _createFormData(file) {
         let formData = new window.FormData();
         formData.append('callback', this.props.fileUploadId);
         formData.append('csrf_token', core.csrf_token);

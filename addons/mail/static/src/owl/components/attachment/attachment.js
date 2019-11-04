@@ -16,7 +16,18 @@ class Attachment extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             return {
-                attachment: state.attachments[props.attachmentLocalId],
+                attachment: this.storeGetters.getStoreObject({
+                    storeKey: 'attachments',
+                    localId: props.attachmentLocalId,
+                    keys: ['id', 'localId', 'composerLocalId', 'filename', 'isTemporary', 'mimetype'],
+                    computes: [{
+                        name: 'fileType',
+                    }, {
+                        name: 'isTextFile', // TODO SEB necessary for isViewable
+                    }, {
+                        name: 'isViewable',
+                    }],
+                }),
             };
         });
     }
@@ -50,9 +61,7 @@ class Attachment extends Component {
         if (this.props.detailsMode !== 'auto') {
             return this.props.detailsMode;
         }
-        const fileType =
-            this.storeGetters.attachmentFileType(this.props.attachmentLocalId);
-        if (fileType !== 'image') {
+        if (this.storeProps.attachment.fileType !== 'image') {
             return 'card';
         }
         return 'hover';
@@ -64,9 +73,7 @@ class Attachment extends Component {
      * @return {string}
      */
     get imageStyle() {
-        const fileType =
-            this.storeGetters.attachmentFileType(this.props.attachmentLocalId);
-        if (fileType !== 'image') {
+        if (this.storeProps.attachment.fileType !== 'image') {
             return '';
         }
         let size;
@@ -101,7 +108,7 @@ class Attachment extends Component {
      * @param {MouseEvent} ev
      */
     _onClickImage(ev) {
-        if (!this.storeGetters.isAttachmentViewable(this.props.attachmentLocalId)) {
+        if (!this.storeProps.attachment.isViewable) {
             return;
         }
         this.storeDispatch('viewAttachments', {

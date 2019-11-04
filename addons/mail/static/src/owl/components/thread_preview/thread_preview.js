@@ -19,6 +19,7 @@ class ThreadPreview extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
+            // TODO SEB use new stuff
             const threadLocalId = props.threadLocalId;
             const thread = state.threads[threadLocalId];
             let lastMessage;

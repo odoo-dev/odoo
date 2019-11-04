@@ -17,7 +17,7 @@ QUnit.module('Message', {
         utilsBeforeEach(this);
         this.createMessage = async (messageLocalId, otherProps) => {
             Message.env = this.env;
-            this.message = new Message(null, { messageLocalId, ...otherProps });
+            this.message = new Message(null, Object.assign({ messageLocalId }, otherProps));
             await this.message.mount(this.widget.$el[0]);
             await nextRender();
         };
@@ -25,10 +25,9 @@ QUnit.module('Message', {
             if (this.widget) {
                 this.widget.destroy();
             }
-            let { env, widget } = await startUtils({
-                ...params,
+            let { env, widget } = await startUtils(Object.assign({}, params, {
                 data: this.data,
-            });
+            }));
             this.env = env;
             this.widget = widget;
         };

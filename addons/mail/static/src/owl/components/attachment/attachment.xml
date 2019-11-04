@@ -8,14 +8,14 @@
                 'o-editable': props.isEditable,
                 'o-has-card-details': detailsMode === 'card',
                 'o-temporary': storeProps.attachment.isTemporary,
-                'o-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+                'o-viewable': storeProps.attachment.isViewable,
             }" t-att-title="env.store.getters.attachmentDisplayName(props.attachmentLocalId)" t-att-data-attachment-local-id="storeProps.attachment.localId"
         >
             <!-- Image style-->
             <!-- o_image from mimetype.scss -->
             <div class="o_Attachment_image o_image" t-on-click="_onClickImage"
                 t-att-class="{
-                    'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+                    'o-attachment-viewable': storeProps.attachment.isViewable,
                     'o-details-overlay': detailsMode !== 'card'
                 }" t-att-href="attachmentUrl" t-att-style="imageStyle" t-att-data-mimetype="storeProps.attachment.mimetype"
             >

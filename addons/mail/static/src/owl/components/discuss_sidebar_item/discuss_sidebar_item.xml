@@ -7,7 +7,7 @@
                 'o-active': props.isActive,
                 'o-starred-box': props.threadLocalId === 'mail.box_starred',
                 'o-unread': storeProps.thread.message_unread_counter > 0,
-            }" t-on-click="_onClick" t-att-data-thread-local-id="props.threadLocalId" t-att-data-thread-name="storeProps.threadName"
+            }" t-on-click="_onClick" t-att-data-thread-local-id="props.threadLocalId" t-att-data-thread-name="storeProps.thread.name"
         >
             <div class=" o_DiscussSidebarItem_activeIndicator o_DiscussSidebarItem_item" t-att-class="{ 'o-item-active': props.isActive }"/>
             <Icon class="o_DiscussSidebarItem_item" threadLocalId="props.threadLocalId"/>
@@ -15,8 +15,8 @@
                 <div class="o_DiscussSidebarItem_item o_DiscussSidebarItem_name o-editable">
                     <EditableText
                         class="o_DiscussSidebarItem_nameInput"
-                        placeholder="storeProps.directPartner.name"
-                        value="storeProps.threadName"
+                        placeholder="storeProps.thread.directPartner.name"
+                        value="storeProps.thread.name"
                         t-on-o-cancel="_onCancelRenaming"
                         t-on-o-clicked="_onClickedEditableText"
                         t-on-o-validate.stop="_onRename"
@@ -25,7 +25,7 @@
             </t>
             <t t-else="">
                 <div class="o_DiscussSidebarItem_item o_DiscussSidebarItem_name" t-att-class="{ 'o-item-unread': storeProps.thread.message_unread_counter > 0 }">
-                    <t t-esc="storeProps.threadName"/>
+                    <t t-esc="storeProps.thread.name"/>
                 </div>
             </t>
             <div class="o-autogrow o_DiscussSidebarItem_item"/>

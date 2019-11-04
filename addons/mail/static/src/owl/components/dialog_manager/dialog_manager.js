@@ -4,7 +4,7 @@ odoo.define('mail.component.DialogManager', function (require) {
 const Dialog = require('mail.component.Dialog');
 
 const { Component } = owl;
-const { useStore } = owl.hooks;
+const { useGetters, useStore } = owl.hooks;
 
 class DialogManager extends Component {
 
@@ -15,9 +15,13 @@ class DialogManager extends Component {
     constructor(...args) {
         super(...args);
         this.IS_DEV = true;
-        this.storeProps = useStore(state => {
-            return Object.assign({}, state.dialogManager);
-        });
+        this.storeGetters = useGetters();
+        this.storeProps = useStore(() =>
+            this.storeGetters.getTopLevelStoreObject({
+                storeKey: 'dialogManager',
+                keys: ['dialogs'],
+            })
+        );
         if (this.IS_DEV) {
             window.dialog_manager = this;
         }

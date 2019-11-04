@@ -5,7 +5,7 @@ const Composer = require('mail.component.Composer');
 const MessageList = require('mail.component.MessageList');
 
 const { Component } = owl;
-const { useDispatch, useRef, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
 
 class Thread extends Component {
 
@@ -22,19 +22,21 @@ class Thread extends Component {
          */
         this.id = _.uniqueId('o_thread_');
         this.storeDispatch = useDispatch();
+        this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const thread = state.threads[props.threadLocalId];
-            const threadCacheLocalId = thread
-                ? thread.cacheLocalIds[JSON.stringify(props.domain || [])]
-                : undefined;
-            const threadCache = threadCacheLocalId
-                ? state.threadCaches[threadCacheLocalId]
-                : undefined;
             return {
                 isMobile: state.isMobile,
-                thread,
-                threadCache,
-                threadCacheLocalId,
+                thread: this.storeGetters.getStoreObject({
+                    storeKey: 'threads',
+                    localId: props.threadLocalId,
+                    computes: [{
+                        name: 'threadCacheLocalId',
+                        stringifiedDomain: JSON.stringify(props.domain || []),
+                    }, {
+                        name: 'threadCache',
+                        keys: ['isLoaded', 'isLoading'],
+                    }],
+                }),
             };
         });
         /**
@@ -142,10 +144,10 @@ class Thread extends Component {
      * @private
      */
     _update() {
-        if (!this.storeProps.threadCache || (!this.storeProps.threadCache.isLoaded && !this.storeProps.threadCache.isLoading)) {
+        if (!this.storeProps.thread.threadCache || (!this.storeProps.thread.threadCache.isLoaded && !this.storeProps.thread.threadCache.isLoading)) {
             this._loadThreadCache();
         }
-        if (this._lastRenderedThreadCacheLocalId !== this.storeProps.threadCacheLocalId) {
+        if (this._lastRenderedThreadCacheLocalId !== this.storeProps.thread.threadCacheLocalId) {
             this._isChangeOfThreadCache = true;
         }
         if (this._isChangeOfThreadCache && this._messageListRef.comp) {
@@ -154,7 +156,7 @@ class Thread extends Component {
         } else if (this._messageListRef.comp) {
             this._messageListRef.comp.updateScroll();
         }
-        this._lastRenderedThreadCacheLocalId = this.storeProps.threadCacheLocalId;
+        this._lastRenderedThreadCacheLocalId = this.storeProps.thread.threadCacheLocalId;
         this.trigger('o-rendered');
     }
 }

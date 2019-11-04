@@ -5,7 +5,7 @@ const ChatWindow = require('mail.component.ChatWindow');
 const HiddenMenu = require('mail.component.ChatWindowHiddenMenu');
 
 const { Component } = owl;
-const { useDispatch, useStore } = owl.hooks;
+const { useDispatch, useGetters, useStore } = owl.hooks;
 
 class ChatWindowManager extends Component {
 
@@ -18,20 +18,20 @@ class ChatWindowManager extends Component {
         this.IS_DEV = true;
         this.TEXT_DIRECTION = this.env._t.database.parameters.direction;
         this.storeDispatch = useDispatch();
+        this.storeGetters = useGetters();
         this.storeProps = useStore(state => {
-            const {
-                autofocusCounter,
-                autofocusChatWindowLocalId,
-                chatWindowInitialScrollTops,
-                computed,
-            } = state.chatWindowManager;
-            return {
-                autofocusCounter,
-                autofocusChatWindowLocalId,
-                chatWindowInitialScrollTops,
-                computed,
-                isMobile: state.isMobile,
-            };
+            return Object.assign({ isMobile: state.isMobile }, this.storeGetters.getTopLevelStoreObject({
+                storeKey: 'chatWindowManager',
+                keys: ['autofocusCounter', 'autofocusChatWindowLocalId', 'chatWindowInitialScrollTops'],
+                computes: [{
+                    name: 'computed',
+                    keys: ['visible'], // TODO SEB [] -> chatWindowLocalId, offset
+                    computes: [{
+                        name: 'hidden',
+                        keys: ['isVisible', 'chatWindowLocalIds', 'offset'],
+                    }],
+                }],
+            }));
         });
         /**
          * Attributes that are used to track last autofocused chat window.

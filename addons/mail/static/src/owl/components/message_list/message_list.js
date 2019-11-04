@@ -4,7 +4,7 @@ odoo.define('mail.component.MessageList', function (require) {
 const Message = require('mail.component.Message');
 
 const { Component } = owl;
-const { useDispatch, useRef, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
 
 class MessageList extends Component {
 
@@ -15,16 +15,35 @@ class MessageList extends Component {
     constructor(...args) {
         super(...args);
         this.storeDispatch = useDispatch();
+        this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const threadCache = state.threadCaches[props.threadCacheLocalId];
-            return {
+            const res = {
                 isMobile: state.isMobile,
-                messageLocalIds: threadCache.messageLocalIds,
-                messages: threadCache.messageLocalIds.map(localId => state.messages[localId]),
-                thread: state.threads[props.threadLocalId],
-                threadCache,
-                threadCacheCurrentPartnerMessagePostCounter: threadCache.currentPartnerMessagePostCounter,
+                thread: this.storeGetters.getStoreObject({
+                    storeKey: 'threads',
+                    localId: props.threadLocalId,
+                    keys: ['localId', '_model', 'message_unread_counter', 'seen_message_id'],
+                    computes: [{
+                        name: 'threadCacheLocalId',
+                        stringifiedDomain: JSON.stringify(props.domain || []),
+                    }, {
+                        name: 'threadCache',
+                        keys: [
+                            'currentPartnerMessagePostCounter', 'messageLocalIds', 'isLoadingMore',
+                            'isAllHistoryLoaded',
+                        ],
+                        computes: [{
+                            name: 'messages',
+                            keys: ['id', 'localId', 'date', // date for dateDay
+                                'message_type', 'authorLocalId', 'originThreadLocalId'], // those are used for shouldMessageBeSquashed
+                            computes: [{
+                                name: 'dateDay',
+                            }],
+                        }],
+                    }],
+                }),
             };
+            return res;
         });
         /**
          * Determine whether the auto-scroll on load is active or not. This
@@ -79,13 +98,13 @@ class MessageList extends Component {
         const {
             length: l,
             0: firstMessageLocalId,
-            [l-1]: lastMessageLocalId,
-        } = this.storeProps.messageLocalIds;
+            [l - 1]: lastMessageLocalId,
+        } = this.storeProps.thread.threadCache.messageLocalIds;
 
         const firstMessageRef = this.firstMessageRef;
         const lastMessageRef = this.lastMessageRef;
         const isPatchedWithNewThreadCache =
-            this._renderedThreadCacheLocalId !== this.props.threadCacheLocalId;
+            this._renderedThreadCacheLocalId !== this.storeProps.thread.threadCacheLocalId;
 
         this._willPatchSnapshot = {
             isLastMessageVisible:
@@ -140,10 +159,11 @@ class MessageList extends Component {
      * @return {mail.component.Message|undefined}
      */
     get lastCurrentPartnerMessageRef() {
+        // TODO SEB what to do with this
         const currentPartnerMessageRefs = this.messageRefs.filter(messageRef =>
             messageRef.storeProps.author &&
             messageRef.storeProps.author.id === this.env.session.partner_id);
-        let { length: l, [l-1]: lastCurrentPartnerMessageRefs } = currentPartnerMessageRefs;
+        let { length: l, [l - 1]: lastCurrentPartnerMessageRefs } = currentPartnerMessageRefs;
         return lastCurrentPartnerMessageRefs;
     }
 
@@ -151,7 +171,7 @@ class MessageList extends Component {
      * @return {mail.component.Message|undefined}
      */
     get lastMessageRef() {
-        let { length: l, [l-1]: lastMessageRef } = this.messageRefs;
+        let { length: l, [l - 1]: lastMessageRef } = this.messageRefs;
         return lastMessageRef;
     }
 
@@ -162,6 +182,7 @@ class MessageList extends Component {
         return Object.entries(this.__owl__.refs)
             .filter(([refId, ref]) => refId.indexOf('mail.message') !== -1)
             .map(([refId, ref]) => ref)
+            // TODO SEB what?
             .sort((ref1, ref2) => (ref1.storeProps.message.id < ref2.storeProps.message.id ? -1 : 1));
     }
     /**
@@ -169,32 +190,14 @@ class MessageList extends Component {
      */
     get messages() {
         if (this.props.order === 'desc') {
-            return [ ...this.storeProps.messages ].reverse();
+            return [...this.storeProps.thread.threadCache.messages].reverse();
         }
-        return this.storeProps.messages;
+        return this.storeProps.thread.threadCache.messages;
     }
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
-
-    /**
-     * @param {mail.store.model.Message} message
-     * @return {string}
-     */
-    getDateDay(message) {
-        const date = message.date.format('YYYY-MM-DD');
-        if (date === moment().format('YYYY-MM-DD')) {
-            return this.env._t("Today");
-        } else if (
-            date === moment()
-                .subtract(1, 'days')
-                .format('YYYY-MM-DD')
-        ) {
-            return this.env._t("Yesterday");
-        }
-        return message.date.format('LL');
-    }
 
     /**
      * @return {integer}
@@ -207,13 +210,15 @@ class MessageList extends Component {
      * @return {boolean}
      */
     hasMessages() {
-        return this.storeProps.messages && this.storeProps.messages.length > 0;
+        return this.storeProps.thread.threadCache.messages && this.storeProps.thread.threadCache.messages.length > 0;
     }
 
     /**
      * @return {Promise}
      */
     async scrollToLastMessage() {
+        // TODO SEB it seems like a bad thing to have to toggle off the setting
+        // for this to work.
         this._isAutoLoadOnScrollActive = false;
         await this.lastMessageRef.scrollIntoView();
         if (!this.el) {
@@ -229,6 +234,7 @@ class MessageList extends Component {
     async setScrollTop(value) {
         this._isAutoLoadOnScrollActive = false;
         this.el.scrollTop = value;
+        // TODO SEB why?
         await new Promise(resolve => setTimeout(resolve, 0));
         this._isAutoLoadOnScrollActive = true;
     }
@@ -258,6 +264,7 @@ class MessageList extends Component {
         if (prevMessage.originThreadLocalId !== message.originThreadLocalId) {
             return false;
         }
+        // TODO SEB use getter here probably
         const prevOriginThread = this.env.store.state.threads[prevMessage.originThreadLocalId];
         const originThread = this.env.store.state.threads[message.originThreadLocalId];
         if (
@@ -302,7 +309,7 @@ class MessageList extends Component {
      * which is the case for the moment. Also changes to message list that
      */
     updateScroll() {
-        if (this.storeProps.messages.length === 0) {
+        if (this.storeProps.thread.threadCache.messages.length === 0) {
             return;
         }
         if (!this._willPatchSnapshot) {
@@ -324,7 +331,7 @@ class MessageList extends Component {
             this.scrollToLastMessage().then(() => this._onScroll());
         } else if (
             isPatchedWithNewMessages &&
-            this.storeProps.threadCacheCurrentPartnerMessagePostCounter !== this._threadCacheCurrentPartnerMessagePostCounter
+            this.storeProps.thread.threadCache.currentPartnerMessagePostCounter !== this._threadCacheCurrentPartnerMessagePostCounter
         ) {
             this._scrollToLastCurrentPartnerMessage().then(() => this._onScroll());
         } else if (
@@ -345,7 +352,7 @@ class MessageList extends Component {
      * @private
      */
     _checkThreadMarkAsRead() {
-        if (this.storeProps.messages.length === 0) {
+        if (this.storeProps.thread.threadCache.messages.length === 0) {
             return;
         }
         if (
@@ -421,10 +428,10 @@ class MessageList extends Component {
      * @private
      */
     _updateTrackedPatchInfo() {
-        this._renderedThreadCacheLocalId = this.props.threadCacheLocalId;
+        this._renderedThreadCacheLocalId = this.storeProps.thread.threadCacheLocalId;
         this._selectedMessageLocalId = this.props.selectedMessageLocalId;
         this._threadCacheCurrentPartnerMessagePostCounter =
-            this.storeProps.threadCacheCurrentPartnerMessagePostCounter;
+            this.storeProps.thread.threadCache.currentPartnerMessagePostCounter;
     }
 
     //--------------------------------------------------------------------------
@@ -493,7 +500,6 @@ MessageList.props = {
         type: String,
         optional: true,
     },
-    threadCacheLocalId: String,
     threadLocalId: String,
 };
 

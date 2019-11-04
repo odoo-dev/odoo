@@ -18,29 +18,24 @@ class Chatter extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const thread = this.storeGetters.thread({
-                _model: props.model,
-                id: props.id,
-            });
-            return {
-                threadLocalId: thread ? thread.localId : undefined,
+            const res = {
+                thread: this.storeGetters.getStoreObject({
+                    storeKey: 'threads',
+                    localId: `${props.model}_${props.id}`,
+                    keys: ['localId'],
+                }),
             };
+            return res;
         });
         this._threadRef = useRef('thread');
     }
 
-    mounted() {
         // TODO {xdu}
         // Need to say to the underlying Thread that there is no long polling
         // So when doing message_post, you need to do a read on the record and
         // then verify in the message_ids if there are missing messages or not
         // and then make a message_format call for each message (including the
         // one posted)
-        this.storeDispatch('initChatter', {
-            model: this.props.model,
-            id: this.props.id,
-        });
-    }
 
     //--------------------------------------------------------------------------
     // Handlers

@@ -25,11 +25,18 @@ const PartnerInviteDialog = Dialog.extend({
      * @param {owl.Store} param1.store
      */
     init: function (parent, { activeThreadLocalId, store }) {
-        const channelName = store.getters.threadName(activeThreadLocalId);
-        this.channelId = store.state.threads[activeThreadLocalId].id;
+        const channel = store.getters.getStoreObject({
+            storeKey: 'threads',
+            localId: activeThreadLocalId,
+            keys: ['id'],
+            computes: [{
+                name: 'name'
+            }],
+        });
+        this.channelId = channel.id;
         this.store = store;
         this._super(parent, {
-            title: _.str.sprintf(_t("Invite people to #%s"), channelName),
+            title: _.str.sprintf(_t("Invite people to #%s"), channel.name),
             size: 'medium',
             buttons: [{
                 text: _t("Invite"),

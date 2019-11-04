@@ -2,9 +2,9 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.component.MessageList" owl="1">
-        <div class="o_MessageList" t-att-class="{ 'o-empty': storeProps.messages.length === 0, 'o-has-message-selection': props.selectedMessageLocalId }" t-on-scroll="_onScroll">
+        <div class="o_MessageList" t-att-class="{ 'o-empty': storeProps.thread.threadCache.messages.length === 0, 'o-has-message-selection': props.selectedMessageLocalId }" t-on-scroll="_onScroll">
             <!-- No result messages -->
-            <t t-if="storeProps.messages.length === 0">
+            <t t-if="storeProps.thread.threadCache.messages.length === 0">
                 <div class="o_MessageList_empty o_MessageList_item">
                     <t t-if="storeProps.thread.localId === 'mail.box_inbox'">
                         <div class="o_MessageList_emptyTitle">
@@ -30,19 +30,19 @@
                 </div>
             </t>
             <!-- LOADING (if order asc)-->
-            <t t-if="props.order === 'asc' and storeProps.messages.length > 0">
+            <t t-if="props.order === 'asc' and storeProps.thread.threadCache.messages.length > 0">
                 <t t-call="mail.component.MessageList.loadMore"/>
             </t>
             <!-- MESSAGES -->
             <t t-set="current_day" t-value="0"/>
             <t t-set="prev_message" t-value="0"/>
             <t t-if="storeProps.thread._model === 'mail.channel' and storeProps.thread.message_unread_counter > 0 and !storeProps.thread.seen_message_id">
-                <div class="o_MessageList_separator o_MessageList_separatorNewMessages o_MessageList_item" t-att-class="{ 'o-is-test': env.isTes }" t-transition="fade">
+                <div class="o_MessageList_separator o_MessageList_separatorNewMessages o_MessageList_item" t-att-class="{ 'o-is-test': env.isTest }" t-transition="fade">
                     <hr class="o_MessageList_separatorLine o_MessageList_separatorLineNewMessages"/><span class="o_MessageList_separatorLabel o_MessageList_separatorLabelNewMessages">New messages</span>
                 </div>
             </t>
             <t t-foreach="messages" t-as="message" t-key="message.localId">
-                <t t-set="message_day" t-value="getDateDay(message)"/>
+                <t t-set="message_day" t-value="message.dateDay"/>
                 <t t-if="current_day !== message_day">
                     <div class="o_MessageList_separator o_MessageList_separatorDate o_MessageList_item">
                         <hr class="o_MessageList_separatorLine"/><span class="o_MessageList_separatorLabel o_MessageList_separatorLabelDate"><t t-esc="message_day"/></span><hr class="o_MessageList_separatorLine"/>
@@ -75,21 +75,26 @@
                 </t>
             </t>
             <!-- LOADING (if order desc)-->
-            <t t-if="props.order === 'desc' and storeProps.messages.length > 0">
+            <t t-if="props.order === 'desc' and storeProps.thread.threadCache.messages.length > 0">
                 <t t-call="mail.component.MessageList.loadMore"/>
             </t>
         </div>
     </t>
 
     <t t-name="mail.component.MessageList.loadMore" owl="1">
-        <t t-if="storeProps.threadCache.isLoadingMore">
+        <t t-if="storeProps.thread.threadCache.isLoadingMore">
             <div class="o_MessageList_item o_MessageList_isLoadingMore">
                 <i class="o_MessageList_isLoadingMoreIcon fa fa-spin fa-spinner"/>
                 Loading...
             </div>
         </t>
-        <t t-elif="!storeProps.threadCache.isAllHistoryLoaded">
+        <t t-elif="!storeProps.thread.threadCache.isAllHistoryLoaded">
             <a class="o_MessageList_item o_MessageList_loadMore" href="#" t-on-click="_onClickLoadMore" t-ref="loadMore">
+                <!--
+                    TODO SEB I don't understand 'isAllHistoryLoaded'
+                    why is it only false or depending on MESSAGE_FETCH_LIMIT?
+                    the button is always shown even when there are no remaining messages?
+                -->
                 Load more
             </a>
         </t>

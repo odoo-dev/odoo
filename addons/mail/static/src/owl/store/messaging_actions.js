@@ -394,15 +394,15 @@ const actions = {
     /**
      * @param {Object} param0
      * @param {function} param0.dispatch
-     * @param {Object} param0.getters
+     * @param {Object} param0.state
      * @param {Object} param1
      * @param {string} param1.model
      * @param {string} param1.id
      * @return {string}
      */
-    async initChatter({ dispatch, getters }, { model, id }) {
+    async initChatter({ dispatch, state }, { model, id }) {
         let threadLocalId;
-        const thread = getters.thread({ _model: model, id });
+        const thread = state.threads[`${model}_${id}`];
         if (!thread) {
             // TODO {xdu} maybe here add the name of the thread
             threadLocalId = await dispatch('_createThread', { _model: model, id });
@@ -479,10 +479,8 @@ const actions = {
         const kwargs = Object.assign({}, param1);
         delete kwargs.id;
         delete kwargs._model;
-        let thread = getters.thread({
-            _model,
-            id,
-        });
+        let thread = state.threads[`${_model}_${id}`];
+        // TODO SEB can't we know if we are creating or inserting on the caller?
         if (!thread) {
             const threadLocalId = dispatch('_createThread', param1);
             thread = state.threads[threadLocalId];
@@ -784,7 +782,7 @@ const actions = {
         const thread = state.threads[composer.threadLocalId];
         if (thread._model === 'mail.box') {
             const { res_id, res_model } = options;
-            const otherThread = getters.thread({ _model: res_model, id: res_id });
+            const otherThread = state.threads[`${res_model}_${res_id}`];
             return dispatch('postMessage', otherThread.composerLocalId, Object.assign({}, data));
         }
         const {
@@ -876,10 +874,7 @@ const actions = {
     ) {
         if (model === 'mail.channel') {
             ev.stopPropagation();
-            const channel = getters.thread({
-                _model: 'mail.channel',
-                id,
-            });
+            const channel = state.threads[`mail.channel_${id}`];
             if (!channel) {
                 dispatch('joinChannel', id, {
                     autoselect: true,
@@ -2154,10 +2149,7 @@ const actions = {
         if (currentPartner.id !== partner_id) {
             return;
         }
-        const channel = getters.thread({
-            _model: 'mail.channel',
-            id: channelId,
-        });
+        const channel = state.threads[`mail.channel_${channelId}`];
         Object.assign(channel, {
             message_unread_counter: 0,
             seen_message_id: last_message_id,

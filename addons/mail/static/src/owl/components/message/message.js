@@ -37,20 +37,36 @@ class Message extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const message = state.messages[props.messageLocalId];
-            const attachmentLocalIds = message.attachmentLocalIds;
-            const author = state.partners[message.authorLocalId];
-            const odoobot = state.partners['res.partner_odoobot'];
-            const originThread = state.threads[message.originThreadLocalId];
-            const thread = state.threads[props.threadLocalId];
             return {
-                attachmentLocalIds,
-                author,
                 isMobile: state.isMobile,
-                message,
-                odoobot,
-                originThread,
-                thread,
+                message: this.storeGetters.getStoreObject({
+                    storeKey: 'messages',
+                    localId: props.messageLocalId,
+                    keys: ['id', 'attachmentLocalIds', 'date', 'message_type',
+                        'email_from', 'threadLocalIds', 'tracking_value_ids', 'is_discussion', 'is_notification', 'isTransient',
+                    ],
+                    computes: [{
+                        name: 'attachments',
+                        computes: [{
+                            name: 'fileType',
+                        }],
+                    }, {
+                        name: 'author',
+                        keys: ['id', 'localId', '_model', 'im_status'],
+                        computes: [{
+                            name: 'name',
+                        }],
+                    }, {
+                        name: 'originThread',
+                        keys: ['id', 'localId', '_model'],
+                        computes: [{
+                            name: 'directPartner',
+                            keys: ['name'], // TODO SEB only computed for name
+                        }, {
+                            name: 'name',
+                        }]
+                    }],
+                }),
             };
         });
         /**
@@ -81,13 +97,11 @@ class Message extends Component {
      * @return {string}
      */
     get avatar() {
-        if (
-            this.storeProps.author &&
-            this.storeProps.author === this.storeProps.odoobot
-        ) {
-            return '/mail/static/src/img/odoobot.png';
-        } else if (this.storeProps.author) {
-            return `/web/image/res.partner/${this.storeProps.author.id}/image_128`;
+        if (this.storeProps.message.author) {
+            if (this.storeProps.message.author.localId === 'res.partner_odoobot') {
+                return '/mail/static/src/img/odoobot.png';
+            }
+            return `/web/image/res.partner/${this.storeProps.message.author.id}/image_128`;
         } else if (this.storeProps.message.message_type === 'email') {
             return '/mail/static/src/img/email_icon.png';
         }
@@ -109,8 +123,8 @@ class Message extends Component {
      * @return {string}
      */
     get displayedAuthorName() {
-        if (this.storeProps.author) {
-            return this.storeGetters.partnerName(this.storeProps.author.localId);
+        if (this.storeProps.message.author) {
+            return this.storeProps.message.author.name;
         }
         return this.storeProps.message.email_from || this.env._t("Anonymous");
     }
@@ -125,10 +139,10 @@ class Message extends Component {
         if (!this.props.hasAuthorRedirect) {
             return false;
         }
-        if (!this.storeProps.author) {
+        if (!this.storeProps.message.author) {
             return false;
         }
-        if (this.storeProps.author.id === this.env.session.partner_id) {
+        if (this.storeProps.message.author.id === this.env.session.partner_id) {
             return false;
         }
         return true;
@@ -144,8 +158,9 @@ class Message extends Component {
      */
     get hasDifferentOriginThread() {
         return (
-            this.storeProps.originThread &&
-            this.storeProps.originThread !== this.storeProps.thread
+            this.storeProps.message.originThread &&
+            this.storeProps.message.originThread.localId &&
+            this.storeProps.message.originThread.localId !== this.props.threadLocalId
         );
     }
 
@@ -153,12 +168,9 @@ class Message extends Component {
      * @return {string[]}
      */
     get imageAttachmentLocalIds() {
-        if (!this.storeProps.message.attachmentLocalIds) {
-            return [];
-        }
-        return this.storeProps.message.attachmentLocalIds.filter(attachmentLocalId =>
-            this.storeGetters.attachmentFileType(attachmentLocalId) === 'image'
-        );
+        return this.storeProps.message.attachments.filter(attachment =>
+            attachment.fileType === 'image'
+        ).map(attachment => attachment.localId);
     }
 
     /**
@@ -174,12 +186,9 @@ class Message extends Component {
      * @return {string[]}
      */
     get nonImageAttachmentLocalIds() {
-        if (!this.storeProps.message.attachmentLocalIds) {
-            return [];
-        }
-        return this.storeProps.message.attachmentLocalIds.filter(attachmentLocalId =>
-            this.storeGetters.attachmentFileType(attachmentLocalId) !== 'image'
-        );
+        return this.storeProps.message.attachments.filter(attachment =>
+            attachment.fileType !== 'image'
+        ).map(attachment => attachment.localId);
     }
 
     /**
@@ -434,12 +443,12 @@ class Message extends Component {
         if (!this.hasAuthorRedirect) {
             return;
         }
-        if (!this.storeProps.author) {
+        if (!this.storeProps.message.author) {
             return;
         }
         this._redirect({
-            id: this.storeProps.author.id,
-            model: this.storeProps.author._model,
+            id: this.storeProps.message.author.id,
+            model: this.storeProps.message.author._model,
         });
     }
 
@@ -450,8 +459,8 @@ class Message extends Component {
     _onClickOriginThread(ev) {
         ev.preventDefault();
         this.trigger('o-redirect', {
-            id: this.storeProps.originThread.id,
-            model: this.storeProps.originThread._model,
+            id: this.storeProps.message.originThread.id,
+            model: this.storeProps.message.originThread._model,
         });
     }
 

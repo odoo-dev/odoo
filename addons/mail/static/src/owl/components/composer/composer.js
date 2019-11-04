@@ -5,6 +5,7 @@ const AttachmentList = require('mail.component.AttachmentList');
 const DropZone = require('mail.component.DropZone');
 const EmojisButton = require('mail.component.EmojisButton');
 const FileUploader = require('mail.component.FileUploader');
+// TODO SEB import with the same name
 const TextInput = require('mail.component.ComposerTextInput');
 const useDragVisibleDropZone = require('mail.hooks.useDragVisibleDropZone');
 
@@ -31,12 +32,22 @@ class Composer extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const composer = state.composers[props.composerLocalId];
-            return {
-                composer,
+            const res = {
                 isMobile: state.isMobile,
-                thread: state.threads[composer.threadLocalId],
+                composer: this.storeGetters.getStoreObject({
+                    storeKey: 'composers',
+                    localId: props.composerLocalId,
+                    keys: ['attachmentLocalIds'],
+                    computes: [{
+                        name: 'thread',
+                        computes: [
+                            { name: 'directPartner', keys: ['name'] }, // TODO SEB this is only needed for the compute of name
+                            { name: 'name' },
+                        ],
+                    }],
+                }),
             };
+            return res;
         });
         /**
          * Reference of the emoji button. Useful to include emoji popover as
@@ -114,7 +125,7 @@ class Composer extends Component {
      */
     get hasHeader() {
         return (
-            (this.props.hasThreadName && this.storeProps.thread) ||
+            (this.props.hasThreadName && this.storeProps.composer.thread) ||
             (this.props.hasFollowers && !this.props.isLog)
         );
     }

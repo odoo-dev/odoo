@@ -15,6 +15,7 @@ class MobileMailboxSelection extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore(() => {
             return {
+                // TODO SEB use getStoreObject, make it recordset, and allow filter/sort
                 pinnedMailboxList: this.storeGetters.pinnedMailboxList(),
             };
         });

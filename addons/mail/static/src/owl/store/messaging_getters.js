@@ -1,10 +1,332 @@
 odoo.define('mail.store.getters', function (require) {
 'use strict';
 
+const core = require('web.core');
+const _t = core._t;
+
 const emojis = require('mail.emojis');
 const mailUtils = require('mail.utils');
 
 const { filterObject } = require('web.utils');
+
+/**
+ * Defines an `execute` method that has to be overriden to define the desired
+ * compute behavior. Allows to execute all kind of computes in a standard way.
+ */
+class AbstractCompute {
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @param {Object} param0.state
+     * @param {Object} sourceObject - the source object on which the compute has
+     *  to be executed
+     * @param {Object} params - arbitraty parameters allowing the caller to
+     *  adapt the result to its needs. Typically used to execute sub-computes
+     *  on the result without post-processing
+     */
+    execute({ getters, state }, sourceObject, params) {
+        throw new TypeError('AbstractCompute execute must be overriden.');
+    }
+
+}
+
+/**
+ * Follows a dynamic relation, returning one object.
+ */
+class RelationOne extends AbstractCompute {
+    /**
+     * @override
+     * @param {string} sourceKey - the key in the source object containing the
+     *  localId referencing the target object
+     * @param {string} targetStoreKey - the top-level key of the target object
+     *  in the store state
+     */
+    constructor(targetStoreKey, sourceKey) {
+        super();
+        this.targetStoreKey = targetStoreKey;
+        this.sourceKey = sourceKey;
+    }
+    /**
+     * @override
+     * @returns {Object}
+     */
+    execute({ getters, state }, sourceObject, params) {
+        return getters.getStoreObject(Object.assign({
+            storeKey: this.targetStoreKey,
+            localId: sourceObject[this.sourceKey],
+        }, params));
+    }
+}
+
+/**
+ * Follows a dynamic relation, returning many objects.
+ */
+class RelationMany extends RelationOne {
+    /**
+     * @override
+     * @param {string} sourceKey - the key in the source object containing the
+     *  localIds referencing the target objects
+     */
+    constructor(targetStoreKey, sourceKey) {
+        super(targetStoreKey, sourceKey);
+    }
+    /**
+     * @override
+     * @returns {Object[]}
+     */
+    execute({ getters, state }, sourceObject, params) {
+        return getters.getStoreObjects(Object.assign({
+            storeKey: this.targetStoreKey,
+            localIds: sourceObject[this.sourceKey],
+        }, params));
+    }
+}
+
+/**
+ * Follows a pre-defined sub-key, simply returning a sub-object.
+ */
+class SubKey extends AbstractCompute {
+    /**
+     * @override
+     * @param {string} targetKey - the target key on the source object
+     * @param {Object[]} targetDescription - the computes that are available on the
+     *  target object
+     */
+    constructor(targetKey, targetDescription) {
+        super();
+        this.targetKey = targetKey;
+        this.targetDescription = targetDescription;
+    }
+    /**
+     * @override
+     * @returns {Object}
+     */
+    execute({ getters, state }, sourceObject, params) {
+        return getters.processStoreObject(Object.assign({
+            storeObject: sourceObject[this.targetKey],
+            storeObjectDescription: this.targetDescription,
+        }, params));
+    }
+
+}
+
+/**
+ * Follows a dynamic key, returning a sub-object.
+ */
+class FollowKey extends AbstractCompute {
+    /**
+     * @override
+     * @param {string} sourceKey - the key in the source object containing the
+     *  key referencing the target object
+     * @param {string} targetKey - the key in the source object containing the
+     *  key to follow on the target object
+     * @param {Object[]} targetDescription - the computes that are available on the
+     *  target object
+     */
+    constructor(sourceKey, targetKey, targetDescription) {
+        super();
+        this.sourceKey = sourceKey;
+        this.targetKey = targetKey;
+        this.targetDescription = targetDescription;
+    }
+    /**
+     * @override
+     * @returns {Object}
+     */
+    execute({ getters, state }, sourceObject, params) {
+        return getters.processStoreObject(Object.assign({
+            storeObject: sourceObject[this.sourceKey][this.targetKey],
+            storeObjectDescription: this.targetDescription,
+        }, params));
+    }
+
+}
+
+class ComputeFn extends AbstractCompute {
+
+    constructor(computeFn) {
+        super();
+        this.computeFn = computeFn;
+    }
+
+    execute({ getters, state }, sourceObject, params) {
+        return this.computeFn({ getters, state }, sourceObject, params);
+    }
+
+}
+
+
+/**
+ * Define the compute methods that are allowed on each of the top-level store
+ * objects, and how they should operate.
+ *
+ * top-level keys: the corresponding top-level objects in the store state
+ * 2nd-level keys: the name of the compute, which will be the key on which the
+ *  result of the compute will be stored on the resulting objects
+ */
+const storeObjectDescriptions = {
+    'attachments': {
+        computes: {
+            /**
+             * @return {string|undefined}
+             */
+            'defaultSource': new ComputeFn((param0, attachment, params) => {
+                const fileType = attachment.fileType;
+                if (fileType === 'image') {
+                    return `/web/image/${attachment.id}?unique=1&amp;signature=${attachment.checksum}&amp;model=ir.attachment`;
+                }
+                if (fileType === 'application/pdf') {
+                    return `/web/static/lib/pdfjs/web/viewer.html?file=/web/content/${attachment.id}?model%3Dir.attachment`;
+                }
+                if (fileType && fileType.indexOf('text') !== -1) {
+                    return `/web/content/${attachment.id}?model%3Dir.attachment`;
+                }
+                if (fileType === 'youtu') {
+                    if (fileType !== 'youtu') {
+                        return undefined;
+                    }
+                    const urlArr = attachment.url.split('/');
+                    let token = urlArr[urlArr.length - 1];
+                    if (token.indexOf('watch') !== -1) {
+                        token = token.split('v=')[1];
+                        const amp = token.indexOf('&');
+                        if (amp !== -1) {
+                            token = token.substring(0, amp);
+                        }
+                    }
+                    return `https://www.youtube.com/embed/${token}`;
+                }
+                if (fileType === 'video') {
+                    return `/web/image/${attachment.id}?model=ir.attachment`;
+                }
+                return undefined;
+            }),
+            /**
+             * @return {string|undefined}
+             */
+            'fileType': new ComputeFn((param0, attachment, params) => {
+                if (attachment.type === 'url' && !attachment.url) {
+                    return undefined;
+                } else if (!attachment.mimetype) {
+                    return undefined;
+                }
+                const match = attachment.type === 'url'
+                    ? attachment.url.match('(youtu|.png|.jpg|.gif)')
+                    : attachment.mimetype.match('(image|video|application/pdf|text)');
+                if (!match) {
+                    return undefined;
+                }
+                if (match[1].match('(.png|.jpg|.gif)')) {
+                    return 'image';
+                }
+                return match[1];
+            }),
+            /**
+             * @return {boolean}
+             */
+            'isTextFile': new ComputeFn((param0, attachment, params) => {
+                // TODO SEB this depends on fileType
+                const fileType = attachment.fileType;
+                return (fileType && fileType.indexOf('text') !== -1) || false;
+            }),
+            /**
+             * @return {boolean}
+             */
+            'isViewable': new ComputeFn((param0, attachment, params) => {
+                // TODO SEB this depends on isTextFile
+                const mediaType = param0.getters.attachmentMediaType(attachment.localId);
+                return (
+                    mediaType === 'image' ||
+                    mediaType === 'video' ||
+                    attachment.mimetype === 'application/pdf' ||
+                    attachment.isTextFile
+                );
+            }),
+        },
+    },
+    'chatWindowManager': {
+        computes: {
+            'computed': new SubKey('computed', {
+                computes: {
+                    'hidden': new SubKey('hidden'),
+                },
+            }),
+        },
+    },
+    'composers': {
+        computes: {
+            'thread': new RelationOne('threads', 'threadLocalId'),
+        },
+        defaults: {
+            'attachmentLocalIds': [],
+        },
+    },
+    'discuss': {
+        computes: {
+            'activeThread': new RelationOne('threads', 'activeThreadLocalId'),
+            'activeThreadCacheLocalId': new ComputeFn((param0, discuss, params) => {
+                if (discuss.activeThread) {
+                    // TODO SEB cacheLocalIds is probably not available due to filtering
+                    // TODO SEB this should probably define activeThread.cacheLocalIds as a dependency
+                    return discuss.activeThread.cacheLocalIds[discuss.stringifiedDomain];
+                }
+            }),
+            'activeThreadCache': new RelationOne('threadCaches', 'activeThreadCacheLocalId'),
+        },
+    },
+    'messages': {
+        computes: {
+            'attachments': new RelationMany('attachments', 'attachmentLocalIds'),
+            'author': new RelationOne('partners', 'authorLocalId'),
+            'dateDay': new ComputeFn((param0, message, params) => {
+                const date = message.date.format('YYYY-MM-DD');
+                if (date === moment().format('YYYY-MM-DD')) {
+                    return _t("Today");
+                } else if (
+                    date === moment()
+                        .subtract(1, 'days')
+                        .format('YYYY-MM-DD')
+                ) {
+                    return _t("Yesterday");
+                }
+                return message.date.format('LL');
+            }),
+            'originThread': new RelationOne('threads', 'originThreadLocalId'),
+        },
+    },
+    'partners': {
+        computes: {
+            'name': new ComputeFn((param0, partner, params) => {
+                return partner.name || partner.display_name;
+            }),
+        },
+    },
+    'threads': {
+        computes: {
+            'threadCacheLocalId': new ComputeFn((param0, thread, params) => {
+                return thread.cacheLocalIds[params.stringifiedDomain];
+            }),
+            'threadCache': new RelationOne('threadCaches', 'threadCacheLocalId'),
+            'directPartner': new RelationOne('partners', 'directPartnerLocalId'),
+            // TODO SEB this should probably define directPartner.name as a dependency
+            'name': new ComputeFn((param0, thread, params) => {
+                if (thread.channel_type === 'chat') {
+                    if (thread.custom_channel_name) {
+                        return thread.custom_channel_name;
+                    } else if (thread.directPartner) {
+                        return thread.directPartner.name;
+                    }
+                }
+                return thread.name;
+            }),
+        },
+    },
+    'threadCaches': {
+        computes: {
+            'messages': new RelationMany('messages', 'messageLocalIds'),
+        },
+    },
+};
 
 const getters = {
 
@@ -12,45 +334,6 @@ const getters = {
     // Public
     //--------------------------------------------------------------------------
 
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.getters
-     * @param {Object} param0.state
-     * @param {string} attachmentLocalId
-     * @return {string|undefined}
-     */
-    attachmentDefaultSource({ getters, state }, attachmentLocalId) {
-        const attachment = state.attachments[attachmentLocalId];
-        const fileType = getters.attachmentFileType(attachmentLocalId);
-        if (fileType === 'image') {
-            return `/web/image/${attachment.id}?unique=1&amp;signature=${attachment.checksum}&amp;model=ir.attachment`;
-        }
-        if (fileType === 'application/pdf') {
-            return `/web/static/lib/pdfjs/web/viewer.html?file=/web/content/${attachment.id}?model%3Dir.attachment`;
-        }
-        if (fileType && fileType.indexOf('text') !== -1) {
-            return `/web/content/${attachment.id}?model%3Dir.attachment`;
-        }
-        if (fileType === 'youtu') {
-            if (fileType !== 'youtu') {
-                return undefined;
-            }
-            const urlArr = attachment.url.split('/');
-            let token = urlArr[urlArr.length - 1];
-            if (token.indexOf('watch') !== -1) {
-                token = token.split('v=')[1];
-                const amp = token.indexOf('&');
-                if (amp !== -1) {
-                    token = token.substring(0, amp);
-                }
-            }
-            return `https://www.youtube.com/embed/${token}`;
-        }
-        if (fileType === 'video') {
-            return `/web/image/${attachment.id}?model=ir.attachment`;
-        }
-        return undefined;
-    },
     /**
      * @param {Object} param0
      * @param {Object} param0.state
@@ -70,30 +353,6 @@ const getters = {
     attachmentExtension({ state }, attachmentLocalId) {
         const attachment = state.attachments[attachmentLocalId];
         return attachment.filename && attachment.filename.split('.').pop();
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.state
-     * @param {string} attachmentLocalId
-     * @return {string|undefined}
-     */
-    attachmentFileType({ state }, attachmentLocalId) {
-        const attachment = state.attachments[attachmentLocalId];
-        if (attachment.type === 'url' && !attachment.url) {
-            return undefined;
-        } else if (!attachment.mimetype) {
-            return undefined;
-        }
-        const match = attachment.type === 'url'
-            ? attachment.url.match('(youtu|.png|.jpg|.gif)')
-            : attachment.mimetype.match('(image|video|application/pdf|text)');
-        if (!match) {
-            return undefined;
-        }
-        if (match[1].match('(.png|.jpg|.gif)')) {
-            return 'image';
-        }
-        return match[1];
     },
     /**
      * @param {Object} param0
@@ -180,6 +439,169 @@ const getters = {
         );
     },
     /**
+     * @see processStoreObjects, but returning only a single object instead of
+     *  an array.
+     *
+     * @param {string} param1.storeObject - object to process
+     *
+     * @returns - object or primitive type depending on the given storeObject
+     */
+    processStoreObject({ getters }, { storeObject, keys, computes, storeObjectDescription }) {
+        const storeObjects = [storeObject];
+        return getters.processStoreObjects({
+            storeObjects, keys, computes, storeObjectDescription,
+        })[0];
+    },
+    /**
+     * Processes and returns store objects based on the given parameters.
+     *
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @param {Object} param0.state
+     * @param {Object} param1
+     * @param {Object[]} param1.storeObjects - array of objects to process
+     * @param {string[]} [param1.keys] - keys to return, all keys are returned
+     *  if not provided
+     * @param {Object[]} [param1.computes] - computes to execute and return
+     * @param {Object} [param1.storeObjectDescription] - description of defaults
+     *  and computes available on the storeObjects
+     *
+     * @returns {Array} array of objects or primitive types depending on the
+     *  given storeObjects
+     */
+    processStoreObjects({ getters, state }, { storeObjects, keys = [], computes = [], storeObjectDescription }) {
+        const filterKeys = [...keys];
+        // avoid modifying store state, assuming shallow copy is enough
+        const resObjects = storeObjects.map(o => o ? Object.assign({}, o) : o);
+
+        storeObjectDescription = Object.assign({
+            computes: {}, defaults: {},
+        }, storeObjectDescription);
+
+        // TODO SEB for each compute, read its dependencies
+        // for each dependency, if it wasn't already computed
+        // plan to compute it before the parent compute
+        // nested for dependencies of dependencies
+        // if the compute was planned but with other fields/sub computes,
+        // add them to what has to be done
+
+        // execute computes, in the same order as they are defined
+        // a compute can be based on the result of a previous compute
+        for (const compute of computes) {
+            // keep the result of the compute on the final filter
+            filterKeys.push(compute.name);
+            for (const resObject of resObjects) {
+                // don't process undefined input
+                if (!resObject) {
+                    continue;
+                }
+                resObject[compute.name] = storeObjectDescription.computes[compute.name].execute(
+                    { getters, state },
+                    resObject,
+                    compute
+                );
+            }
+        }
+
+        // fill defaults
+        for (const defaultIndex in storeObjectDescription.defaults) {
+            for (const resObject of resObjects) {
+                if (resObject && resObject[defaultIndex] === undefined) {
+                    resObject[defaultIndex] = resObject[storeObjectDescription.defaults[defaultIndex]];
+                }
+            }
+        }
+
+        // filter result keys
+        return resObjects.map(resObject => {
+            let filteredObject = resObject;
+            // don't process undefined input, don't filter if no keys given
+            if (resObject && keys.length) {
+                filteredObject = {};
+                for (const key of filterKeys) {
+                    // TODO SEB handle deep copy? for example with arrays
+                    filteredObject[key] = resObject[key];
+                }
+            }
+            return filteredObject;
+        });
+
+        // TODO SEB it would be nice if the result of this method was cached and
+        // could be compared with strict equality as long as it does not change
+    },
+    getTopLevelStoreObject({ getters, state }, { storeKey, keys, computes }) {
+        const storeObjectDescription = storeObjectDescriptions[storeKey];
+
+        const storeObject = state[storeKey];
+
+        if (!storeObject) {
+            throw new Error(`The requested root object ${storeKey} was not found in the store.`);
+        }
+
+        return getters.processStoreObject({
+            storeObject, keys, computes, storeObjectDescription,
+        });
+    },
+    /**
+     * @see getStoreObjects, but returning only a single element instead of an
+     *  array.
+     *
+     * @param {string} param1.localId - assuming the target element is an
+     *  array or an object, returns data based on its `localId` sub-element.
+     *
+     * @returns - object or primitive type depending on the target store key
+     */
+    getStoreObject({ getters }, { storeKey, localId, keys, computes }) {
+        const localIds = [localId];
+        return getters.getStoreObjects({ storeKey, localIds, keys, computes })[0];
+    },
+    /**
+     * Returns store data based on the given parameters.
+     *
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @param {Object} param0.state
+     * @param {Object} param1
+     * @param {string} param1.storeKey - returns data based on the `storeKey`
+     *  element of `state``
+     * @param {string[]} param1.localIds - assuming the target element is an
+     *  array or an object, returns an array of data based on each of its
+     *  sub-elements in `localIds`.
+     * @param {string[]} [param1.keys] - the returned elements will only
+     *  contain the keys specified in `keys` (and in `computes`).
+     * @param {Object[]} [param1.computes] - if the target elements defines the
+     *  given `computes`, they are followed, and their result is returned
+     *  together with the `keys`.
+     *  Each compute is an object that must contain the `name` of the compute,
+     *  and optionally selected `keys` and nested `computes`.
+     *
+     * @returns {Array} array of objects or primitive types depending on the
+     *  target store key
+     */
+    getStoreObjects({ getters, state }, { storeKey, localIds, keys, computes }) {
+        const storeObjectDescription = storeObjectDescriptions[storeKey];
+
+        const rootStoreObject = state[storeKey];
+
+        if (!rootStoreObject) {
+            throw new Error(`The requested root object ${storeKey} was not found in the store.`);
+        }
+
+        const storeObjects = [];
+
+        for (const localId of localIds) {
+            const storeObject = rootStoreObject[localId];
+            if (localId && !storeObject) {
+                console.error(`The requested object ${storeKey} ${localId} was not found in the store.`);
+            }
+            storeObjects.push(storeObject);
+        }
+
+        return getters.processStoreObjects({
+            storeObjects, keys, computes, storeObjectDescription,
+        });
+    },
+    /**
      * @param {Object} param0
      * @param {Object} param0.getters
      * @return {integer}
@@ -220,33 +642,6 @@ const getters = {
     isAttachmentLinkedToComposer({ state }, attachmentLocalId) {
         const attachment = state.attachments[attachmentLocalId];
         return !!attachment.composerId;
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.getters
-     * @param {string} attachmentLocalId
-     * @return {boolean}
-     */
-    isAttachmentTextFile({ getters }, attachmentLocalId) {
-        const fileType = getters.attachmentFileType(attachmentLocalId);
-        return (fileType && fileType.indexOf('text') !== -1) || false;
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.getters
-     * @param {Object} param0.state
-     * @param {string} attachmentLocalId
-     * @return {boolean}
-     */
-    isAttachmentViewable({ getters, state }, attachmentLocalId) {
-        const attachment = state.attachments[attachmentLocalId];
-        const mediaType = getters.attachmentMediaType(attachmentLocalId);
-        return (
-            mediaType === 'image' ||
-            mediaType === 'video' ||
-            attachment.mimetype === 'application/pdf' ||
-            getters.isAttachmentTextFile(attachmentLocalId)
-        );
     },
     /**
      * @param {Object} param0
@@ -460,17 +855,6 @@ const getters = {
         return filterObject(state.threads, thread =>
             thread.isPinned
         );
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.state
-     * @param {Object} param1
-     * @param {string} param1._model
-     * @param {integer} param1.id
-     * @return {mail.store.Thread|undefined}
-     */
-    thread({ state }, { _model, id }) {
-        return state.threads[`${_model}_${id}`];
     },
     /**
      * @param {Object} param0

@@ -26,11 +26,18 @@ class MessagingMenu extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore(state => {
-            return Object.assign({}, state.messagingMenu, {
-                counter: this.storeGetters.globalThreadUnreadCounter(),
-                isDiscussOpen: state.discuss.isOpen,
+            return {
                 isMobile: state.isMobile,
-            });
+                counter: this.storeGetters.globalThreadUnreadCounter(),
+                discuss: this.storeGetters.getTopLevelStoreObject({
+                    storeKey: 'discuss',
+                    keys: ['isOpen'],
+                }),
+                messagingMenu: this.storeGetters.getTopLevelStoreObject({
+                    storeKey: 'messagingMenu',
+                    keys: ['activeTabId', 'isMobileNewMessageToggled', 'isOpen'],
+                }),
+            };
         });
 
         /**

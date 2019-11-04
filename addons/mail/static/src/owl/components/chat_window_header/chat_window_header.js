@@ -17,16 +17,21 @@ class ChatWindowHeader extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const chatWindowLocalId = props.chatWindowLocalId;
-            const thread = state.threads[chatWindowLocalId];
-            const threadName = thread
-                ? this.storeGetters.threadName(chatWindowLocalId)
-                : undefined;
-            return {
+            const res = {
                 isMobile: state.isMobile,
-                thread,
-                threadName,
             };
+            if (props.chatWindowLocalId !== 'new_message') {
+                res.thread = this.storeGetters.getStoreObject({
+                    storeKey: 'threads',
+                    localId: props.chatWindowLocalId,
+                    keys: ['id', 'localId', '_model', 'message_unread_counter'],
+                    computes: [
+                        { name: 'directPartner', keys: ['name'] },
+                        { name: 'name' },
+                    ],
+                });
+            }
+            return res;
         });
     }
 
@@ -35,11 +40,12 @@ class ChatWindowHeader extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * TODO SEB this should be in the view
      * @return {string}
      */
     get name() {
         if (this.storeProps.thread) {
-            return this.storeProps.threadName;
+            return this.storeProps.thread.name;
         }
         return this.env._t("New message");
     }
