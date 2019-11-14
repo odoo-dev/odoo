@@ -38,7 +38,7 @@ class Message extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             return {
-                isMobile: state.isMobile,
+                isMobile: state.misc.isMobile,
                 message: this.storeGetters.getStoreObject({
                     storeKey: 'messages',
                     localId: props.messageLocalId,

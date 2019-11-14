@@ -9,11 +9,7 @@ const config = require('web.config');
  */
 function init(alteration) {
     let state = {
-        isMessagingReady: false,
-        MESSAGE_FETCH_LIMIT: 30,
-        PREVIEW_MSG_MAX_SIZE: 350,
         attachments: {},
-        attachmentNextTemporaryId: -1,
         cannedResponses: {},
         /**
          * State slice related to Chat Windows & Chat Window Manager
@@ -103,7 +99,6 @@ function init(alteration) {
         },
         commands: {},
         composers: {},
-        currentPartnerLocalId: undefined,
         /**
          * State slice related to Dialogs & Dialog Manager
          */
@@ -176,8 +171,6 @@ function init(alteration) {
             innerHeight: window.innerHeight,
             innerWidth: window.innerWidth,
         },
-        isMobile: config.device.isMobile,
-        isMyselfModerator: false,
         mailFailures: {},
         messages: {},
         /**
@@ -198,8 +191,17 @@ function init(alteration) {
              */
             isOpen: false,
         },
+        misc: {
+            attachmentNextTemporaryId: -1,
+            currentPartnerLocalId: undefined,
+            isMessagingReady: false,
+            isMobile: config.device.isMobile,
+            isMyselfModerator: false,
+            MESSAGE_FETCH_LIMIT: 30,
+            outOfFocusUnreadMessageCounter: 0,
+            PREVIEW_MSG_MAX_SIZE: 350,
+        },
         moderatedChannelIds: [],
-        outOfFocusUnreadMessageCounter: 0,
         partners: {},
         temporaryAttachmentLocalIds: {}, // key: filename, value: temporaryAttachmentLocalId
         threads: {},

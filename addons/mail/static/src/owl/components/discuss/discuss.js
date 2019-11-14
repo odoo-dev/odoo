@@ -57,8 +57,8 @@ class Discuss extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore(state => {
             return Object.assign({
-                isMessagingReady: state.isMessagingReady,
-                isMobile: state.isMobile,
+                isMessagingReady: state.misc.isMessagingReady,
+                isMobile: state.misc.isMobile,
             }, this.storeGetters.getTopLevelStoreObject({
                 storeKey: 'discuss',
                 keys: [

@@ -106,7 +106,7 @@ const OwlService = AbstractService.extend({
                 globalWindowInnerWidth: globalWindowInnerWidth ||
                     this._store.state.globalWindow.innerWidth,
                 isMobile: isMobile ||
-                    this._store.state.isMobile,
+                    this._store.state.misc.isMobile,
             });
         } else {
             this._store.dispatch('handleGlobalWindowResize', {

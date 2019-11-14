@@ -20,7 +20,7 @@ class ChatWindowManager extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore(state => {
-            return Object.assign({ isMobile: state.isMobile }, this.storeGetters.getTopLevelStoreObject({
+            return Object.assign({ isMobile: state.misc.isMobile }, this.storeGetters.getTopLevelStoreObject({
                 storeKey: 'chatWindowManager',
                 keys: ['autofocusCounter', 'autofocusChatWindowLocalId', 'chatWindowInitialScrollTops'],
                 computes: [{

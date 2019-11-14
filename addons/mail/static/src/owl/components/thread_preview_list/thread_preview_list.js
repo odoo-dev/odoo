@@ -29,7 +29,7 @@ class ThreadPreviewList extends Component {
                 threadLocalIds = this.storeGetters.mailChannelList().map(mailChannel => mailChannel.localId);
             }
             return {
-                isMobile: state.isMobile,
+                isMobile: state.misc.isMobile,
                 threadLocalIds,
             };
         });

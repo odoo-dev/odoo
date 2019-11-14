@@ -44,8 +44,8 @@ QUnit.test("current partner", async function (assert) {
             uid: 2,
         },
     });
-    assert.strictEqual(this.env.store.state.currentPartnerLocalId, 'res.partner_3');
-    const currentPartner = this.env.store.state.partners[this.env.store.state.currentPartnerLocalId];
+    assert.strictEqual(this.env.store.state.misc.currentPartnerLocalId, 'res.partner_3');
+    const currentPartner = this.env.store.state.partners[this.env.store.state.misc.currentPartnerLocalId];
     assert.strictEqual(currentPartner.display_name, "Your Company, Admin");
     assert.strictEqual(currentPartner.id, 3);
     assert.strictEqual(currentPartner.localId, 'res.partner_3');
@@ -84,10 +84,6 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
     assert.deepEqual(
         this.env.store.state,
         {
-            isMessagingReady: true,
-            MESSAGE_FETCH_LIMIT: 30,
-            PREVIEW_MSG_MAX_SIZE: 350,
-            attachmentNextTemporaryId: -1,
             attachments: {},
             cannedResponses: {},
             chatWindowManager: {
@@ -108,7 +104,6 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
             },
             commands: {},
             composers: {},
-            currentPartnerLocalId: 'res.partner_3',
             dialogManager: {
                 dialogs: [],
             },
@@ -126,8 +121,6 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                 innerHeight: 1080,
                 innerWidth: 1920,
             },
-            isMobile: false,
-            isMyselfModerator: false,
             mailFailures: {},
             messages: {},
             messagingMenu: {
@@ -135,8 +128,17 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                 isMobileNewMessageToggled: false,
                 isOpen: false,
             },
+            misc: {
+                attachmentNextTemporaryId: -1,
+                currentPartnerLocalId: 'res.partner_3',
+                isMessagingReady: true,
+                isMobile: false,
+                isMyselfModerator: false,
+                MESSAGE_FETCH_LIMIT: 30,
+                outOfFocusUnreadMessageCounter: 0,
+                PREVIEW_MSG_MAX_SIZE: 350,
+            },
             moderatedChannelIds: [],
-            outOfFocusUnreadMessageCounter: 0,
             partners: {
                 'res.partner_odoobot': {
                     _model: 'res.partner',

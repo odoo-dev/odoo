@@ -27,7 +27,7 @@ class MessagingMenu extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore(state => {
             return {
-                isMobile: state.isMobile,
+                isMobile: state.misc.isMobile,
                 counter: this.storeGetters.globalThreadUnreadCounter(),
                 discuss: this.storeGetters.getTopLevelStoreObject({
                     storeKey: 'discuss',

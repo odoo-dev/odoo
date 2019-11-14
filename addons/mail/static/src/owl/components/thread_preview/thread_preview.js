@@ -30,7 +30,7 @@ class ThreadPreview extends Component {
                 lastMessageAuthor = state.partners[lastMessage.authorLocalId];
             }
             return {
-                isMobile: state.isMobile,
+                isMobile: state.misc.isMobile,
                 lastMessage,
                 lastMessageAuthor,
                 thread,

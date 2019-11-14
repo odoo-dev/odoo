@@ -362,7 +362,15 @@ async function start({
             innerHeight: 1080,
             innerWidth: 1920,
         },
-        isMobile: false,
+        misc: {
+            attachmentNextTemporaryId: -1,
+            isMobile: false,
+            isMobile: false,
+            isMyselfModerator: false,
+            MESSAGE_FETCH_LIMIT: 30,
+            outOfFocusUnreadMessageCounter: 0,
+            PREVIEW_MSG_MAX_SIZE: 350,
+        },
     };
 
     // Enable test mode for chat window service

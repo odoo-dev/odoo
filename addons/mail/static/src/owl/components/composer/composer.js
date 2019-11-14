@@ -33,7 +33,7 @@ class Composer extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             const res = {
-                isMobile: state.isMobile,
+                isMobile: state.misc.isMobile,
                 composer: this.storeGetters.getStoreObject({
                     storeKey: 'composers',
                     localId: props.composerLocalId,

@@ -122,9 +122,9 @@ const actions = {
             threadLocalIds=[],
         } = data;
         if (isTemporary) {
-            id = state.attachmentNextTemporaryId;
+            id = state.misc.attachmentNextTemporaryId;
             mimetype = '';
-            state.attachmentNextTemporaryId--;
+            state.misc.attachmentNextTemporaryId--;
         }
         const attachment = {
             _model: 'ir.attachment',
@@ -360,7 +360,7 @@ const actions = {
         { dispatch, state },
         data
     ) {
-        const wasMobile = state.isMobile;
+        const wasMobile = state.misc.isMobile;
         const {
             globalWindowInnerHeight,
             globalWindowInnerWidth,
@@ -370,10 +370,10 @@ const actions = {
             innerHeight: globalWindowInnerHeight,
             innerWidth: globalWindowInnerWidth,
         });
-        state.isMobile = isMobile; // from `config.device.isMobile`
+        state.misc.isMobile = isMobile; // from `config.device.isMobile`
         // update discuss
         if (
-            state.isMobile &&
+            state.misc.isMobile &&
             !wasMobile &&
             state.discuss.isOpen &&
             state.discuss.activeThreadLocalId
@@ -454,7 +454,7 @@ const actions = {
         env.call('bus_service', 'on', 'window_focus', null, () =>
             dispatch('_handleGlobalWindowFocus')
         );
-        state.isMessagingReady = true;
+        state.misc.isMessagingReady = true;
         env.call('bus_service', 'startPolling');
         dispatch('_startLoopFetchPartnerImStatus');
     },
@@ -725,11 +725,11 @@ const actions = {
     ) {
         if (
             (
-                !state.isMobile &&
+                !state.misc.isMobile &&
                 state.discuss.isOpen
             ) ||
             (
-                state.isMobile &&
+                state.misc.isMobile &&
                 state.threads[threadLocalId]._model === 'mail.box'
             )
         ) {
@@ -746,7 +746,7 @@ const actions = {
                 mode: chatWindowMode,
             });
         }
-        if (!state.isMobile) {
+        if (!state.misc.isMobile) {
             dispatch('closeMessagingMenu');
         }
     },
@@ -1004,7 +1004,7 @@ const actions = {
             _.str.escapeRegExp(utils.unaccent(keyword)),
             'i'
         );
-        const currentPartner = state.partners[state.currentPartnerLocalId];
+        const currentPartner = state.partners[state.misc.currentPartnerLocalId];
         for (const partner of Object.values(state.partners)) {
             if (partners.length < limit) {
                 if (
@@ -1327,10 +1327,10 @@ const actions = {
     _computeChatWindows({ state }) {
         const BETWEEN_GAP_WIDTH = 5;
         const CHAT_WINDOW_WIDTH = 325;
-        const END_GAP_WIDTH = state.isMobile ? 0 : 10;
+        const END_GAP_WIDTH = state.misc.isMobile ? 0 : 10;
         const GLOBAL_WINDOW_WIDTH = state.globalWindow.innerWidth;
         const HIDDEN_MENU_WIDTH = 200; // max width, including width of dropup list items
-        const START_GAP_WIDTH = state.isMobile ? 0 : 10;
+        const START_GAP_WIDTH = state.misc.isMobile ? 0 : 10;
         const cwm = state.chatWindowManager;
         const isDiscussOpen = state.discuss.isOpen;
         const chatWindowLocalIds = cwm.chatWindowLocalIds;
@@ -1375,7 +1375,7 @@ const actions = {
              */
             visible: [],
         };
-        if (!state.isMobile && isDiscussOpen) {
+        if (!state.misc.isMobile && isDiscussOpen) {
             cwm.computed = computed;
             return;
         }
@@ -1389,7 +1389,7 @@ const actions = {
         let maxAmountWithHidden = Math.floor(
             (relativeGlobalWindowWidth - HIDDEN_MENU_WIDTH - BETWEEN_GAP_WIDTH) /
             (CHAT_WINDOW_WIDTH + BETWEEN_GAP_WIDTH));
-        if (state.isMobile) {
+        if (state.misc.isMobile) {
             maxAmountWithoutHidden = 1;
             maxAmountWithHidden = 1;
         }
@@ -1409,7 +1409,7 @@ const actions = {
                 computed.visible.push({ chatWindowLocalId, offset });
             }
             if (chatWindowLocalIds.length > maxAmountWithHidden) {
-                computed.hidden.isVisible = !state.isMobile;
+                computed.hidden.isVisible = !state.misc.isMobile;
                 computed.hidden.offset = computed.visible[maxAmountWithHidden-1].offset
                     + CHAT_WINDOW_WIDTH + BETWEEN_GAP_WIDTH;
             }
@@ -1419,7 +1419,7 @@ const actions = {
             computed.availableVisibleSlots = maxAmountWithHidden;
         } else {
             // all hidden
-            computed.hidden.isVisible = !state.isMobile;
+            computed.hidden.isVisible = !state.misc.isMobile;
             computed.hidden.offset = START_GAP_WIDTH;
             computed.hidden.chatWindowLocalIds.concat(chatWindowLocalIds);
             console.warn('cannot display any visible chat windows (screen is too small)');
@@ -1564,7 +1564,7 @@ const actions = {
             tracking_value_ids,
         };
         // 2. compute message links (<-- message)
-        const currentPartner = state.partners[state.currentPartnerLocalId];
+        const currentPartner = state.partners[state.misc.currentPartnerLocalId];
         let threadLocalIds = channel_ids.map(id => `mail.channel_${id}`);
         if (needaction_partner_ids.includes(currentPartner.id)) {
             threadLocalIds.push('mail.box_inbox');
@@ -2014,7 +2014,7 @@ const actions = {
     _getThreadFetchMessagesKwargs({ env, state }, threadLocalId) {
         const thread = state.threads[threadLocalId];
         let kwargs = {
-            limit: state.MESSAGE_FETCH_LIMIT,
+            limit: state.misc.MESSAGE_FETCH_LIMIT,
             context: env.session.user_context
         };
         if (thread.moderation) {
@@ -2030,7 +2030,7 @@ const actions = {
      * @param {Object} param0.state
      */
     async _handleGlobalWindowFocus({ env, state }) {
-        state.outOfFocusUnreadMessageCounter = 0;
+        state.misc.outOfFocusUnreadMessageCounter = 0;
         env.trigger_up('set_title_part', {
             part: '_chat',
         });
@@ -2110,7 +2110,7 @@ const actions = {
             }
         }
 
-        const currentPartner = state.partners[state.currentPartnerLocalId];
+        const currentPartner = state.partners[state.misc.currentPartnerLocalId];
         if (authorPartnerId === currentPartner.id) {
             return;
         }
@@ -2145,7 +2145,7 @@ const actions = {
         }
     ) {
 
-        const currentPartner = state.partners[state.currentPartnerLocalId];
+        const currentPartner = state.partners[state.misc.currentPartnerLocalId];
         if (currentPartner.id !== partner_id) {
             return;
         }
@@ -2267,7 +2267,7 @@ const actions = {
             info !== 'creation' &&
             (
                 !thread ||
-                !thread.memberLocalIds.includes(state.currentPartnerLocalId)
+                !thread.memberLocalIds.includes(state.misc.currentPartnerLocalId)
             )
         ) {
             env.do_notify(
@@ -2510,7 +2510,7 @@ const actions = {
     ) {
         const stringifiedDomain = JSON.stringify(searchDomain);
         const threadCacheLocalId = dispatch('_insertThreadCache', {
-            isAllHistoryLoaded: messagesData.length < state.MESSAGE_FETCH_LIMIT,
+            isAllHistoryLoaded: messagesData.length < state.misc.MESSAGE_FETCH_LIMIT,
             isLoaded: true,
             isLoading: false,
             isLoadingMore: false,
@@ -2759,7 +2759,7 @@ const actions = {
             name: env.session.name,
             userId: env.session.uid,
         });
-        state.currentPartnerLocalId = currentPartnerLocalId;
+        state.misc.currentPartnerLocalId = currentPartnerLocalId;
     },
     /**
      * Update existing attachment or create a new attachment
@@ -3177,15 +3177,15 @@ const actions = {
         }
         const notificationContent = getters
             .messagePrettyBody(message.localId)
-            .substr(0, state.PREVIEW_MSG_MAX_SIZE);
+            .substr(0, state.misc.PREVIEW_MSG_MAX_SIZE);
         env.call('bus_service', 'sendNotification', notificationTitle, notificationContent);
-        state.outOfFocusUnreadMessageCounter++;
-        const titlePattern = state.outOfFocusUnreadMessageCounter === 1
+        state.misc.outOfFocusUnreadMessageCounter++;
+        const titlePattern = state.misc.outOfFocusUnreadMessageCounter === 1
             ? _t("%d Message")
             : _t("%d Messages");
         env.trigger_up('set_title_part', {
             part: '_chat',
-            title: _.str.sprintf(titlePattern, state.outOfFocusUnreadMessageCounter),
+            title: _.str.sprintf(titlePattern, state.misc.outOfFocusUnreadMessageCounter),
         });
     },
     /**
@@ -3681,7 +3681,7 @@ const actions = {
             tracking_value_ids,
         });
         // 2. track old/new links
-        const currentPartner = state.partners[state.currentPartnerLocalId];
+        const currentPartner = state.partners[state.misc.currentPartnerLocalId];
         // 2.1. attachmentLocalIds
         const prevAttachmentLocalIds = message.attachmentLocalIds;
         const attachmentLocalIds = attachment_ids.map(({ id }) => `ir.attachment_${id}`);

@@ -33,7 +33,7 @@ class ChatWindow extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             const res = {
-                isMobile: state.isMobile,
+                isMobile: state.misc.isMobile,
             };
             if (props.chatWindowLocalId !== 'new_message') {
                 res.thread = this.storeGetters.getStoreObject({

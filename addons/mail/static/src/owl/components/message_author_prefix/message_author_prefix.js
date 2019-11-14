@@ -15,7 +15,7 @@ class MessageAuthorPrefix extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             return {
-                currentPartnerLocalId: state.currentPartnerLocalId,
+                currentPartnerLocalId: state.misc.currentPartnerLocalId,
                 message: this.storeGetters.getStoreObject({
                     storeKey: 'messages',
                     localId: props.messageLocalId,

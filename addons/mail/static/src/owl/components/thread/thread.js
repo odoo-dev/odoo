@@ -25,7 +25,7 @@ class Thread extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             return {
-                isMobile: state.isMobile,
+                isMobile: state.misc.isMobile,
                 thread: this.storeGetters.getStoreObject({
                     storeKey: 'threads',
                     localId: props.threadLocalId,

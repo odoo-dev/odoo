@@ -36,7 +36,7 @@ class ComposerTextInput extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore(state => {
             return {
-                isMobile: state.isMobile,
+                isMobile: state.misc.isMobile,
             };
         });
         /**
