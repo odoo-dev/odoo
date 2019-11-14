@@ -27,6 +27,8 @@
             <FileUploader
                 attachmentLocalIds="storeProps.attachmentLocalIds"
                 newAttachmentExtraData="newAttachmentExtraData"
+                uploadModel="storeProps.threadModel"
+                uploadId="storeProps.threadId"
                 t-ref="fileUploader"
             />
         </div>

@@ -4,26 +4,29 @@ odoo.define('mail.component.ChatterTopBarTests', function (require) {
 const ChatterTopBar = require('mail.component.ChatterTopbar');
 const {
     afterEach: utilsAfterEach,
+    afterNextRender,
     beforeEach: utilsBeforeEach,
     pause,
     start: utilsStart,
 } = require('mail.messagingTestUtils');
+
+const { makeTestPromise } = require('web.test_utils');
 
 QUnit.module('mail.messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('ChatterTopbar', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createThread = async ({ _model, id }, { fetchAttachments=false }={}) => {
-            const threadLocalId = this.env.store.dispatch('_createThread', { _model, id });
-            if (fetchAttachments) {
-                await this.env.store.dispatch('fetchThreadAttachments', threadLocalId);
-            }
-            return threadLocalId;
-        };
-        this.createChatterTopbar = async (threadLocalId, otherProps) => {
+        this.createChatterTopbar = async (chatterLocalId, otherProps) => {
             ChatterTopBar.env = this.env;
-            this.chatterTopbar = new ChatterTopBar(null, Object.assign({ threadLocalId }, otherProps));
+            const defaultProps = {
+                isComposerLog: false,
+                isComposerVisible: false
+            };
+            this.chatterTopbar = new ChatterTopBar(
+                null,
+                Object.assign({ chatterLocalId }, defaultProps, otherProps)
+            );
             await this.chatterTopbar.mount(this.widget.el);
         };
         this.start = async params => {
@@ -51,7 +54,7 @@ QUnit.module('ChatterTopbar', {
 });
 
 QUnit.test('base rendering', async function (assert) {
-    assert.expect(9);
+    assert.expect(10);
 
     await this.start({
         async mockRPC(route) {
@@ -61,8 +64,12 @@ QUnit.test('base rendering', async function (assert) {
             return this._super(...arguments);
         }
     });
-    const threadLocalId = await this.createThread({ _model: 'res.partner', id: 100 });
-    await this.createChatterTopbar(threadLocalId);
+    const chatterLocalId = this.env.store.dispatch('createChatter', {
+        initialThreadId: 100,
+        initialThreadModel: 'res.partner',
+    });
+    await this.createChatterTopbar(chatterLocalId);
+
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -88,6 +95,12 @@ QUnit.test('base rendering', async function (assert) {
         1,
         "should have an attachments button in chatter menu"
     );
+    await afterNextRender();
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
+        0,
+        "attachments button should not have a loader"
+    );
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
         1,
@@ -110,8 +123,8 @@ QUnit.test('base rendering', async function (assert) {
     );
 });
 
-QUnit.test('attachment count without attachments', async function (assert) {
-    assert.expect(4);
+QUnit.test('base disabled rendering', async function (assert) {
+    assert.expect(11);
 
     await this.start({
         async mockRPC(route) {
@@ -121,8 +134,78 @@ QUnit.test('attachment count without attachments', async function (assert) {
             return this._super(...arguments);
         }
     });
-    const threadLocalId = await this.createThread({ _model: 'res.partner', id: 100 });
-    await this.createChatterTopbar(threadLocalId);
+    const chatterLocalId = this.env.store.dispatch('createChatter', {
+        initialThreadModel: 'res.partner'
+    });
+    await this.createChatterTopbar(chatterLocalId);
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar`).length,
+        1,
+        "should have a chatter topbar"
+    );
+    assert.ok(
+        document.querySelector(`.o_ChatterTopbar_buttonSendMessage`).disabled,
+        "send message button should be disabled"
+    );
+    assert.ok(
+        document.querySelector(`.o_ChatterTopbar_buttonLogNote`).disabled,
+        "log note button should be disabled"
+    );
+    assert.ok(
+        document.querySelector(`.o_ChatterTopbar_buttonScheduleActivity`).disabled,
+        "schedule activity should be disabled"
+    );
+    assert.ok(
+        document.querySelector(`.o_ChatterTopbar_buttonAttachments`).disabled,
+        "attachments button should be disabled"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
+        0,
+        "attachments button should not have a loader"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
+        1,
+        "attachments button should have a counter"
+    );
+    assert.strictEqual(
+        document.querySelector(`.o_ChatterTopbar_buttonAttachmentsCount`).textContent,
+        '0',
+        "attachments button counter should be 0"
+    );
+    assert.ok(
+        document.querySelector(`.o_ChatterTopbar_buttonFollow`).disabled,
+        "follow button should be disabled"
+    );
+    assert.ok(
+        document.querySelector(`.o_ChatterTopbar_buttonFollowers`).disabled,
+        "followers button should be disabled"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonFollowersCount`).length,
+        1,
+        "followers button should have a counter"
+    );
+});
+
+QUnit.test('attachment counter while loading attachments', async function (assert) {
+    assert.expect(4);
+
+    await this.start({
+        async mockRPC(route) {
+            if (route.includes('ir.attachment/search_read')) {
+                return new Promise(() => {}); // simulate long loading
+            }
+            return this._super(...arguments);
+        }
+    });
+    const chatterLocalId = this.env.store.dispatch('createChatter', {
+        initialThreadId: 100,
+        initialThreadModel: 'res.partner',
+    });
+    await this.createChatterTopbar(chatterLocalId);
+
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -133,6 +216,104 @@ QUnit.test('attachment count without attachments', async function (assert) {
         1,
         "should have an attachments button in chatter menu"
     );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
+        1,
+        "attachments button should have a loader"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
+        0,
+        "attachments button should not have a counter"
+    );
+});
+
+QUnit.test('attachment counter transition when attachments become loaded)', async function (assert) {
+    assert.expect(7);
+
+    const attachmentPromise = makeTestPromise();
+    await this.start({
+        async mockRPC(route) {
+            if (route.includes('ir.attachment/search_read')) {
+                await attachmentPromise;
+                return [];
+            }
+            return this._super(...arguments);
+        }
+    });
+    const chatterLocalId = this.env.store.dispatch('createChatter', {
+        initialThreadId: 100,
+        initialThreadModel: 'res.partner',
+    });
+    await this.createChatterTopbar(chatterLocalId);
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar`).length,
+        1,
+        "should have a chatter topbar"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
+        1,
+        "should have an attachments button in chatter menu"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
+        1,
+        "attachments button should have a loader"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
+        0,
+        "attachments button should not have a counter"
+    );
+
+    attachmentPromise.resolve(); // Simulates attachments are loaded
+    await afterNextRender();
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
+        1,
+        "should have an attachments button in chatter menu"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
+        0,
+        "attachments button should not have a loader"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
+        1,
+        "attachments button should have a counter"
+    );
+});
+
+QUnit.test('attachment counter without attachments', async function (assert) {
+    assert.expect(4);
+
+    await this.start({
+        async mockRPC(route) {
+            if (route.includes('ir.attachment/search_read')) {
+                return [];
+            }
+            return this._super(...arguments);
+        }
+    });
+    const chatterLocalId = this.env.store.dispatch('createChatter', {
+        initialThreadId: 100,
+        initialThreadModel: 'res.partner',
+    });
+    await this.createChatterTopbar(chatterLocalId);
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar`).length,
+        1,
+        "should have a chatter topbar"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
+        1,
+        "should have an attachments button in chatter menu"
+    );
+    await afterNextRender(); // wait the attachments to be fetched
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
         1,
@@ -145,7 +326,7 @@ QUnit.test('attachment count without attachments', async function (assert) {
     );
 });
 
-QUnit.test('attachment count with attachments', async function (assert) {
+QUnit.test('attachment counter with attachments', async function (assert) {
     assert.expect(4);
 
     await this.start({
@@ -166,8 +347,12 @@ QUnit.test('attachment count with attachments', async function (assert) {
             return this._super(...arguments);
         }
     });
-    const threadLocalId = await this.createThread({ _model: 'res.partner', id: 100 }, { fetchAttachments: true });
-    await this.createChatterTopbar(threadLocalId);
+    const chatterLocalId = this.env.store.dispatch('createChatter', {
+        initialThreadId: 100,
+        initialThreadModel: 'res.partner',
+    });
+    await this.createChatterTopbar(chatterLocalId);
+
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -178,6 +363,7 @@ QUnit.test('attachment count with attachments', async function (assert) {
         1,
         "should have an attachments button in chatter menu"
     );
+    await afterNextRender(); // wait the attachments to be fetched
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
         1,

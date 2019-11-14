@@ -103,6 +103,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                 },
                 notifiedAutofocusCounter: 0,
             },
+            chatters: {},
             commands: {},
             composers: {},
             currentPartnerLocalId: 'res.partner_3',
@@ -196,6 +197,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
             threads: {
                 'mail.box_history': {
                     _model: 'mail.box',
+                    areAttachmentsLoaded: false,
                     attachmentLocalIds: [],
                     cacheLocalIds: {
                         '[]': 'mail.box_history_[]',
@@ -209,6 +211,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     group_based_subscription: undefined,
                     id: 'history',
                     isPinned: true,
+                    isTemporary: false,
                     is_minimized: undefined,
                     is_moderator: undefined,
                     localId: 'mail.box_history',
@@ -229,6 +232,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                 },
                 'mail.box_inbox': {
                     _model: 'mail.box',
+                    areAttachmentsLoaded: false,
                     attachmentLocalIds: [],
                     cacheLocalIds: {
                         '[]': 'mail.box_inbox_[]',
@@ -242,6 +246,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     group_based_subscription: undefined,
                     id: 'inbox',
                     isPinned: true,
+                    isTemporary: false,
                     is_minimized: undefined,
                     is_moderator: undefined,
                     localId: 'mail.box_inbox',
@@ -262,6 +267,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                 },
                 'mail.box_starred': {
                     _model: 'mail.box',
+                    areAttachmentsLoaded: false,
                     attachmentLocalIds: [],
                     cacheLocalIds: {
                         '[]': 'mail.box_starred_[]',
@@ -275,6 +281,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     group_based_subscription: undefined,
                     id: 'starred',
                     isPinned: true,
+                    isTemporary: false,
                     is_minimized: undefined,
                     is_moderator: undefined,
                     localId: 'mail.box_starred',

@@ -230,6 +230,7 @@
 
                 <!-- owl -->
                 <script type="text/javascript" src="/mail/static/tests/owl/test_utils.js"></script>
+                <script type="text/javascript" src="/mail/static/tests/owl/form_renderer_chatter_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/attachment_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/attachment_box_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/chat_window_manager_tests.js"></script>

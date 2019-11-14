@@ -3,26 +3,35 @@
 
     <t t-name="mail.component.Chatter" owl="1">
         <div class="o_Chatter">
-            <t t-if="storeProps.threadLocalId">
-                <ChatterTopbar
-                    class="o_Chatter_chatterTopbar"
-                    threadLocalId="storeProps.threadLocalId"
-                    t-on-o-chatter-topbar-select-attachment="_onTopbarSelectAttachment"
+            <ChatterTopbar
+                class="o_Chatter_topbar"
+                chatterLocalId="props.chatterLocalId"
+            />
+            <t t-if="storeProps.thread and storeProps.thread.composerLocalId and storeProps.chatter.isComposerVisible">
+                <Composer
+                    class="o_Chatter_composer"
+                    composerLocalId="storeProps.thread.composerLocalId"
+                    hasTextInputSendOnEnterEnabled="false"
+                    isCompact="false"
+                    isExpandable="true"
+                    isLog="storeProps.chatter.isComposerLog"
+                    t-on-o-message-posted="_onComposerMessagePosted"
+                    t-ref="composer"
                 />
             </t>
-            <t t-if="storeProps.threadLocalId and state.isAttachmentBoxVisible">
+            <t t-if="storeProps.chatter.isAttachmentBoxVisible">
                 <AttachmentBox
                     class="o_Chatter_attachmentBox"
-                    threadLocalId="storeProps.threadLocalId"
+                    threadLocalId="storeProps.chatter.threadLocalId"
                 />
             </t>
-            <t t-if="storeProps.threadLocalId" t-key="storeProps.threadLocalId">
+            <t t-if="storeProps.thread">
                 <Thread
                     class="o_Chatter_thread"
-                    domain="storeProps.domain"
                     hasComposer="false"
                     haveMessagesAuthorRedirect="true"
-                    threadLocalId="storeProps.threadLocalId"
+                    order="'desc'"
+                    threadLocalId="storeProps.thread.localId"
                     t-ref="thread"
                 />
             </t>

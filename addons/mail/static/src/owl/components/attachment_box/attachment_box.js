@@ -23,7 +23,9 @@ class AttachmentBox extends Component {
         this.storeProps = useStore((state, props) => {
             const thread = state.threads[props.threadLocalId];
             return {
-                attachmentLocalIds: thread ? thread.attachmentLocalIds : []
+                attachmentLocalIds: thread ? thread.attachmentLocalIds : [],
+                threadId: thread ? thread.id : undefined,
+                threadModel: thread ? thread._model : undefined
             };
         });
         /**

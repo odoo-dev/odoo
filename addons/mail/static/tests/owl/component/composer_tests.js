@@ -108,6 +108,10 @@ QUnit.test('add an emoji', async function (assert) {
         "😊",
         "emoji should be inserted in the composer text input"
     );
+    // ensure popover is closed
+    await nextAnimationFrame();
+    await nextAnimationFrame();
+    await nextAnimationFrame();
 });
 
 QUnit.test('add an emoji after some text', async function (assert) {
@@ -134,6 +138,10 @@ QUnit.test('add an emoji after some text', async function (assert) {
         "Blabla😊",
         "emoji should be inserted after the text"
     );
+    // ensure popover is closed
+    await nextAnimationFrame();
+    await nextAnimationFrame();
+    await nextAnimationFrame();
 });
 
 QUnit.test('add emoji replaces (keyboard) text selection', async function (assert) {
@@ -173,6 +181,10 @@ QUnit.test('add emoji replaces (keyboard) text selection', async function (asser
         "😊 ", // AKU: for some reasons, it adds &nbsp; after emoji
         "whole text selection should have been replaced by emoji"
     );
+    // ensure popover is closed
+    await nextAnimationFrame();
+    await nextAnimationFrame();
+    await nextAnimationFrame();
 });
 
 QUnit.test('add emoji replaces (mouse) text selection', async function (assert) {
@@ -211,6 +223,10 @@ QUnit.test('add emoji replaces (mouse) text selection', async function (assert) 
         "😊 ", // AKU: for some reasons, it adds &nbsp; after emoji
         "whole text selection should have been replaced by emoji"
     );
+    // ensure popover is closed
+    await nextAnimationFrame();
+    await nextAnimationFrame();
+    await nextAnimationFrame();
 });
 
 QUnit.test('display partner mention suggestions on typing "@"', async function (assert) {
@@ -356,6 +372,10 @@ QUnit.test('add an emoji after a partner mention', async function (assert) {
         "@OdooBot",
         "mention link should still have textual '@mention' as text content (no emoji)"
     );
+    // ensure popover is closed
+    await nextAnimationFrame();
+    await nextAnimationFrame();
+    await nextAnimationFrame();
 });
 
 QUnit.test('composer: add an attachment', async function (assert) {

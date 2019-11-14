@@ -4,6 +4,7 @@ odoo.define('mail.component.ChatterTopbar', function (require) {
 const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
+const { useDispatch } = owl.hooks;
 
 class ChatterTopbar extends Component {
     /**
@@ -12,14 +13,20 @@ class ChatterTopbar extends Component {
      */
     constructor(...args) {
         super(...args);
+        this.storeDispatch = useDispatch();
         this.storeProps = useStore((state, props) => {
-            const thread = state.threads[props.threadLocalId];
+            const chatter = state.chatters[props.chatterLocalId];
+            const thread = chatter.threadLocalId
+                ? state.threads[chatter.threadLocalId]
+                : undefined;
             return {
+                areAttachmentsLoaded: thread && thread.areAttachmentsLoaded,
                 attachmentsAmount: thread && thread.attachmentLocalIds
                     ? thread.attachmentLocalIds.length
                     : 0,
-                // TODO SEB this is currently always 0
-                followersAmount: 0
+                chatter,
+                // TODO SEB this is currently always 0 (yes I know - XDU)
+                followersAmount: 0,
             };
         });
     }
@@ -30,15 +37,67 @@ class ChatterTopbar extends Component {
 
     /**
      * @private
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      */
     _onClickAttachments(ev) {
-        this.trigger('o-chatter-topbar-select-attachment');
+        if (this.storeProps.chatter.isAttachmentBoxVisible) {
+            this.storeDispatch('hideChatterAttachmentBox', this.props.chatterLocalId);
+        } else {
+            this.storeDispatch('showChatterAttachmentBox', this.props.chatterLocalId);
+        }
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickFollow(ev) {
+        // TODO
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickFollowers(ev) {
+        // TODO
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickLogNote(ev) {
+        if (this.storeProps.chatter.isComposerVisible && this.storeProps.chatter.isComposerLog) {
+            this.storeDispatch('hideChatterComposer', this.props.chatterLocalId);
+        } else {
+            this.storeDispatch('showChatterLogNote', this.props.chatterLocalId);
+        }
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickScheduleActivity(ev) {
+        // TODO
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickSendMessage(ev) {
+        if (this.storeProps.chatter.isComposerVisible && !this.storeProps.chatter.isComposerLog) {
+            this.storeDispatch('hideChatterComposer', this.props.chatterLocalId);
+        } else {
+            this.storeDispatch('showChatterSendMessage', this.props.chatterLocalId);
+        }
     }
 }
 
 ChatterTopbar.props = {
-    threadLocalId: String,
+    chatterLocalId: String,
 };
 
 ChatterTopbar.template = 'mail.component.ChatterTopbar';

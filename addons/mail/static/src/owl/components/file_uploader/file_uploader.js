@@ -69,8 +69,8 @@ class FileUploader extends Component {
         let formData = new window.FormData();
         formData.append('callback', this.props.fileUploadId);
         formData.append('csrf_token', core.csrf_token);
-        formData.append('id', '0');
-        formData.append('model', 'mail.compose.message');
+        formData.append('id', this.props.uploadId);
+        formData.append('model', this.props.uploadModel);
         formData.append('ufile', file, file.name);
         return formData;
     }
@@ -176,7 +176,9 @@ class FileUploader extends Component {
 }
 
 FileUploader.defaultProps = {
-    fileUploadId: _.uniqueId('o_FileUploader_fileupload')
+    fileUploadId: _.uniqueId('o_FileUploader_fileupload'),
+    uploadId: 0,
+    uploadModel: 'mail.compose.message'
 };
 
 FileUploader.props = {
@@ -190,7 +192,9 @@ FileUploader.props = {
     newAttachmentExtraData: {
         type: Object,
         optional: true,
-    }
+    },
+    uploadId: Number,
+    uploadModel: String,
 };
 
 FileUploader.template = 'mail.component.FileUploader';

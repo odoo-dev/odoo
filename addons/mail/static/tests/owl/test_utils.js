@@ -16,6 +16,7 @@ const NotificationService = require('web.NotificationService');
 const RamStorage = require('web.RamStorage');
 const makeTestEnvironment = require('web.test_env');
 const {
+    createView,
     makeTestPromise,
     mock: {
         addMockEnvironment,
@@ -452,11 +453,15 @@ async function pause() {
  * Main function used to make a mocked environment with mocked messaging env.
  *
  * @param {Object} param0
+ * @param {string} [param0.arch] makes only sense when `param0.hasView` is set:
+ *   the arch to use in createView.
  * @param {Object} [param0.archs]
  * @param {boolean} [param0.autoOpenDiscuss=false] makes only sense when
  *   `param0.hasDiscuss` is set: determine whether mounted discuss should be
  *   open initially.
  * @param {boolean} [param0.debug=false]
+ * @param {Object} [param0.data] makes only sense when `param0.hasView` is set:
+ *   the data to use in createView.
  * @param {Object} [param0.discuss={}] makes only sense when `param0.hasDiscuss`
  *   is set: provide data that is passed to discuss widget (= client action) as
  *   2nd positional argument.
@@ -466,12 +471,22 @@ async function pause() {
  * @param {boolean} [param0.hasDiscuss=false] if set, mount discuss app.
  * @param {boolean} [param0.hasMessagingMenu=false] if set, mount messaging
  *   menu.
+ * @param {boolean} [param0.hasView=false] if set, use createView to create a
+ *   view instead of a generic widget.
+ * @param {string} [param0.model] makes only sense when `param0.hasView` is set:
+ *   the model to use in createView.
+ * @param {integer} [param0.res_id] makes only sense when `param0.hasView` is set:
+ *   the res_id to use in createView.
  * @param {Object} [param0.services]
  * @param {Object} [param0.session={}]
  * @param {string} [param0.session.name="Admin"]
  * @param {integer} [param0.session.partner_id=3]
  * @param {string} [param0.session.partner_display_name="Your Company, Admin"]
  * @param {integer} [param0.session.uid=2]
+ * @param {Object} [param0.View] makes only sense when `param0.hasView` is set:
+ *   the View class to use in createView.
+ * @param {Object} [param0.viewOptions] makes only sense when `param0.hasView`
+ *   is set: the view options to use in createView.
  * @param {...Object} [param0.kwargs]
  * @return {Object}
  */
@@ -486,10 +501,12 @@ async function start(param0) {
         hasChatWindow = false,
         hasDiscuss = false,
         hasMessagingMenu = false,
+        hasView = false,
     } = param0;
     delete param0.hasChatWindow;
     delete param0.hasDiscuss;
     delete param0.hasMessagingMenu;
+    delete param0.hasView;
     if (hasChatWindow) {
         callbacks = _useChatWindow(callbacks);
     }
@@ -517,57 +534,41 @@ async function start(param0) {
         services,
         session,
     }, param0);
-    const Parent = Widget.extend({ do_push_state() {} });
-    const parent = new Parent();
-    _.defaults(session, {
+        _.defaults(session, {
         name: "Admin",
         partner_id: 3,
         partner_display_name: "Your Company, Admin",
         uid: 2,
     });
+    patchMessagingService(services.messaging, session);
 
-    const _t = s => s;
-    _t.database = {
-        parameters: { direction: 'ltr' },
-    };
-    patch(services.messaging, {
-        registry: {
-            initialEnv: makeTestEnvironment({
-                _t,
-                session: Object.assign({
-                    is_bound: Promise.resolve(),
-                    name: 'Admin',
-                    partner_display_name: 'Mitchell Admin',
-                    partner_id: 3,
-                    url: s => s,
-                    userId: 2,
-                }, session),
-            }),
-            onMessagingEnvCreated: messagingEnv => {
-                Object.assign(messagingEnv.store.state, {
-                    globalWindow: {
-                        innerHeight: 1080,
-                        innerWidth: 1920,
-                    },
-                    isMobile: false,
-                });
-                messagingEnv.store.actions._fetchPartnerImStatus = () => {};
-                messagingEnv.store.actions._loopFetchPartnerImStatus = () => {};
-            },
-        },
-    });
-    addMockEnvironment(parent, kwargs);
+    let widget;
     const selector = debug ? 'body' : '#qunit-fixture';
-    const widget = new Widget(parent);
-    await widget.appendTo($(selector));
-    Object.assign(widget, {
-        destroy() {
-            delete widget.destroy;
-            destroyCallbacks.forEach(callback => callback({ widget }));
-            parent.destroy();
-            unpatch(services.messaging);
-        },
-    });
+    if (hasView) {
+        widget = await createView(kwargs);
+        patch(widget, {
+            destroy() {
+                this._super(...arguments);
+                destroyCallbacks.forEach(callback => callback({ widget }));
+                unpatch(services.messaging);
+                unpatch(widget);
+            }
+        });
+    } else {
+        const Parent = Widget.extend({ do_push_state() {} });
+        const parent = new Parent();
+        addMockEnvironment(parent, kwargs);
+        widget = new Widget(parent);
+        await widget.appendTo($(selector));
+        Object.assign(widget, {
+            destroy() {
+                delete widget.destroy;
+                destroyCallbacks.forEach(callback => callback({ widget }));
+                parent.destroy();
+                unpatch(services.messaging);
+            },
+        });
+    }
     await Promise.all(mountCallbacks.map(callback => callback({ selector, widget })));
     if (hasChatWindow || hasDiscuss || hasMessagingMenu) {
         await afterNextRender();
@@ -653,6 +654,39 @@ function pasteFiles(el, files) {
     el.dispatchEvent(ev);
 }
 
+function patchMessagingService(messaging_service, session = {}) {
+    const _t = s => s;
+    _t.database = {
+        parameters: { direction: 'ltr' },
+    };
+    patch(messaging_service, {
+        registry: {
+            initialEnv: makeTestEnvironment({
+                _t,
+                session: Object.assign({
+                    is_bound: Promise.resolve(),
+                    name: 'Admin',
+                    partner_display_name: 'Mitchell Admin',
+                    partner_id: 3,
+                    url: s => s,
+                    userId: 2,
+                }, session),
+            }),
+            onMessagingEnvCreated: messagingEnv => {
+                Object.assign(messagingEnv.store.state, {
+                    globalWindow: {
+                        innerHeight: 1080,
+                        innerWidth: 1920,
+                    },
+                    isMobile: false,
+                });
+                messagingEnv.store.actions._fetchPartnerImStatus = () => {};
+                messagingEnv.store.actions._loopFetchPartnerImStatus = () => {};
+            },
+        },
+    });
+}
+
 //------------------------------------------------------------------------------
 // Export
 //------------------------------------------------------------------------------
@@ -667,6 +701,7 @@ return {
     inputFiles,
     nextAnimationFrame,
     pasteFiles,
+    patchMessagingService,
     pause,
     start,
 };

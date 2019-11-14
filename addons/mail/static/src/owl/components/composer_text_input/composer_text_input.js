@@ -656,6 +656,9 @@ class ComposerTextInput extends Component {
      * @param {KeyboardEvent} ev
      */
     _onKeydownEditableEnter(ev) {
+        if (!this.props.hasSendOnEnterEnabled) {
+            return;
+        }
         if (this._tribute.isActive) {
             return;
         }
@@ -690,7 +693,12 @@ class ComposerTextInput extends Component {
     }
 }
 
+ComposerTextInput.defaultProps = {
+    hasSendOnEnterEnabled: true
+};
+
 ComposerTextInput.props = {
+    hasSendOnEnterEnabled: Boolean,
     initialHtmlContent: {
         type: String,
         optional: true,

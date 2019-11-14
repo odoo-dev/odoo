@@ -8,6 +8,7 @@ function initState() {
         isMessagingReady: false,
         attachments: {},
         cannedResponses: {},
+        chatters: {},
         /**
          * State slice related to Chat Windows & Chat Window Manager
          */

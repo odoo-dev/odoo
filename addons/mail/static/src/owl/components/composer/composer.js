@@ -105,7 +105,7 @@ class Composer extends Component {
      * @return {boolean}
      */
     get hasFooter() {
-        return this.storeProps.composer.attachmentLocalIds.length > 0;
+        return this.storeProps.composer.attachmentLocalIds.length > 0 || !this.props.isCompact;
     }
 
     /**
@@ -344,14 +344,15 @@ class Composer extends Component {
 Composer.components = { AttachmentList, DropZone, EmojisButton, FileUploader, TextInput };
 
 Composer.defaultProps = {
-    areButtonsInline: true,
     attachmentLocalIds: [],
     focusCounter: 0,
     hasCurrentPartnerAvatar: true,
     hasDiscardButton: false,
     hasFollowers: false,
     hasSendButton: true,
+    hasTextInputSendOnEnterEnabled: true,
     hasThreadName: false,
+    isCompact: true,
     isDiscardOnClickAway: false,
     isExpandable: false,
     isFocusOnMount: false,
@@ -359,9 +360,6 @@ Composer.defaultProps = {
 };
 
 Composer.props = {
-    areButtonsInline: {
-        type: Boolean,
-    },
     attachmentLocalIds: {
         type: Array,
         element: String,
@@ -386,6 +384,7 @@ Composer.props = {
     hasSendButton: {
         type: Boolean,
     },
+    hasTextInputSendOnEnterEnabled: Boolean,
     hasThreadName: {
         type: Boolean,
     },
@@ -405,6 +404,9 @@ Composer.props = {
     initialTextInputHtmlContent: {
         type: String,
         optional: true,
+    },
+    isCompact: {
+        type: Boolean,
     },
     isDiscardOnClickAway: {
         type: Boolean,

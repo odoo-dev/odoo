@@ -74,7 +74,7 @@
                             </div>
                         </t>
                         <div class="o_Message_commands o_Message_headerCommands" t-att-class="{ 'o-mobile': storeProps.isMobile }">
-                            <t t-if="(storeProps.message.message_type !== 'notification' and storeProps.originThread and storeProps.originThread._model === 'mail.channel') or !storeProps.message.isTransient">
+                            <t t-if="!storeProps.message.isTemporary and ((storeProps.message.message_type !== 'notification' and storeProps.originThread and storeProps.originThread._model === 'mail.channel') or !storeProps.message.isTransient)">
                                 <span class="o_Message_command o_Message_commandStar o_Message_headerCommand fa"
                                     t-att-class="{
                                         'fa-star': isStarred,
