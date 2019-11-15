@@ -35,11 +35,10 @@ QUnit.module('Discuss', {
             if (this.widget) {
                 this.widget.destroy();
             }
-            let { discuss, env, widget } = await utilsStart({
-                ...params,
+            let { discuss, env, widget } = await utilsStart(Object.assign({}, params, {
                 autoOpenDiscuss: true,
                 data: this.data,
-            });
+            }));
             this.discuss = discuss;
             this.env = env;
             this.widget = widget;

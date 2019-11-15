@@ -33,12 +33,11 @@ class DiscussSidebarItem extends Component {
                     keys: [
                         'id', 'create_uid', '_model', 'counter', 'channel_type',
                         'message_needaction_counter', 'message_unread_counter',
-                        'group_based_subscription',
+                        'group_based_subscription', 'name',
                     ],
                     computes: [{
-                        name: 'directPartner', keys: ['name'],
-                    }, {
-                        name: 'name',
+                        name: 'directPartner',
+                        keys: ['name'],
                     }],
                 }),
             };

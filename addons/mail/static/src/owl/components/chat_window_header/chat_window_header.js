@@ -24,11 +24,7 @@ class ChatWindowHeader extends Component {
                 res.thread = this.storeGetters.getStoreObject({
                     storeKey: 'threads',
                     localId: props.chatWindowLocalId,
-                    keys: ['id', 'localId', '_model', 'message_unread_counter'],
-                    computes: [
-                        { name: 'directPartner', keys: ['name'] },
-                        { name: 'name' },
-                    ],
+                    keys: ['id', 'localId', '_model', 'message_unread_counter', 'name'],
                 });
             }
             return res;

@@ -1,9 +1,6 @@
 odoo.define('mail.store.getters', function (require) {
 'use strict';
 
-const core = require('web.core');
-const _t = core._t;
-
 const emojis = require('mail.emojis');
 const mailUtils = require('mail.utils');
 
@@ -165,85 +162,6 @@ class ComputeFn extends AbstractCompute {
  *  result of the compute will be stored on the resulting objects
  */
 const storeObjectDescriptions = {
-    'attachments': {
-        computes: {
-            /**
-             * @return {string|undefined}
-             */
-            'defaultSource': new ComputeFn((param0, attachment, params) => {
-                const fileType = attachment.fileType;
-                if (fileType === 'image') {
-                    return `/web/image/${attachment.id}?unique=1&amp;signature=${attachment.checksum}&amp;model=ir.attachment`;
-                }
-                if (fileType === 'application/pdf') {
-                    return `/web/static/lib/pdfjs/web/viewer.html?file=/web/content/${attachment.id}?model%3Dir.attachment`;
-                }
-                if (fileType && fileType.indexOf('text') !== -1) {
-                    return `/web/content/${attachment.id}?model%3Dir.attachment`;
-                }
-                if (fileType === 'youtu') {
-                    if (fileType !== 'youtu') {
-                        return undefined;
-                    }
-                    const urlArr = attachment.url.split('/');
-                    let token = urlArr[urlArr.length - 1];
-                    if (token.indexOf('watch') !== -1) {
-                        token = token.split('v=')[1];
-                        const amp = token.indexOf('&');
-                        if (amp !== -1) {
-                            token = token.substring(0, amp);
-                        }
-                    }
-                    return `https://www.youtube.com/embed/${token}`;
-                }
-                if (fileType === 'video') {
-                    return `/web/image/${attachment.id}?model=ir.attachment`;
-                }
-                return undefined;
-            }),
-            /**
-             * @return {string|undefined}
-             */
-            'fileType': new ComputeFn((param0, attachment, params) => {
-                if (attachment.type === 'url' && !attachment.url) {
-                    return undefined;
-                } else if (!attachment.mimetype) {
-                    return undefined;
-                }
-                const match = attachment.type === 'url'
-                    ? attachment.url.match('(youtu|.png|.jpg|.gif)')
-                    : attachment.mimetype.match('(image|video|application/pdf|text)');
-                if (!match) {
-                    return undefined;
-                }
-                if (match[1].match('(.png|.jpg|.gif)')) {
-                    return 'image';
-                }
-                return match[1];
-            }),
-            /**
-             * @return {boolean}
-             */
-            'isTextFile': new ComputeFn((param0, attachment, params) => {
-                // TODO SEB this depends on fileType
-                const fileType = attachment.fileType;
-                return (fileType && fileType.indexOf('text') !== -1) || false;
-            }),
-            /**
-             * @return {boolean}
-             */
-            'isViewable': new ComputeFn((param0, attachment, params) => {
-                // TODO SEB this depends on isTextFile
-                const mediaType = param0.getters.attachmentMediaType(attachment.localId);
-                return (
-                    mediaType === 'image' ||
-                    mediaType === 'video' ||
-                    attachment.mimetype === 'application/pdf' ||
-                    attachment.isTextFile
-                );
-            }),
-        },
-    },
     'chatWindowManager': {
         computes: {
             'computed': new SubKey('computed', {
@@ -256,9 +174,6 @@ const storeObjectDescriptions = {
     'composers': {
         computes: {
             'thread': new RelationOne('threads', 'threadLocalId'),
-        },
-        defaults: {
-            'attachmentLocalIds': [],
         },
     },
     'discuss': {
@@ -278,27 +193,7 @@ const storeObjectDescriptions = {
         computes: {
             'attachments': new RelationMany('attachments', 'attachmentLocalIds'),
             'author': new RelationOne('partners', 'authorLocalId'),
-            'dateDay': new ComputeFn((param0, message, params) => {
-                const date = message.date.format('YYYY-MM-DD');
-                if (date === moment().format('YYYY-MM-DD')) {
-                    return _t("Today");
-                } else if (
-                    date === moment()
-                        .subtract(1, 'days')
-                        .format('YYYY-MM-DD')
-                ) {
-                    return _t("Yesterday");
-                }
-                return message.date.format('LL');
-            }),
             'originThread': new RelationOne('threads', 'originThreadLocalId'),
-        },
-    },
-    'partners': {
-        computes: {
-            'name': new ComputeFn((param0, partner, params) => {
-                return partner.name || partner.display_name;
-            }),
         },
     },
     'threads': {
@@ -308,17 +203,6 @@ const storeObjectDescriptions = {
             }),
             'threadCache': new RelationOne('threadCaches', 'threadCacheLocalId'),
             'directPartner': new RelationOne('partners', 'directPartnerLocalId'),
-            // TODO SEB this should probably define directPartner.name as a dependency
-            'name': new ComputeFn((param0, thread, params) => {
-                if (thread.channel_type === 'chat') {
-                    if (thread.custom_channel_name) {
-                        return thread.custom_channel_name;
-                    } else if (thread.directPartner) {
-                        return thread.directPartner.name;
-                    }
-                }
-                return thread.name;
-            }),
         },
     },
     'threadCaches': {

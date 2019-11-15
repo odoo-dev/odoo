@@ -39,14 +39,7 @@ class AttachmentViewer extends Component {
                 attachment: this.storeGetters.getStoreObject({
                     storeKey: 'attachments',
                     localId: props.info.attachmentLocalId,
-                    keys: ['id'],
-                    computes: [{
-                        name: 'fileType',
-                    }, {
-                        name: 'defaultSource',
-                    }, {
-                        name: 'isTextFile',
-                    }],
+                    keys: ['id', 'fileType', 'defaultSource', 'isTextFile'],
                 }),
             };
         });

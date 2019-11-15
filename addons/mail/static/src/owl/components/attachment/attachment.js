@@ -19,14 +19,8 @@ class Attachment extends Component {
                 attachment: this.storeGetters.getStoreObject({
                     storeKey: 'attachments',
                     localId: props.attachmentLocalId,
-                    keys: ['id', 'localId', 'composerLocalId', 'filename', 'isTemporary', 'mimetype'],
-                    computes: [{
-                        name: 'fileType',
-                    }, {
-                        name: 'isTextFile', // TODO SEB necessary for isViewable
-                    }, {
-                        name: 'isViewable',
-                    }],
+                    keys: ['id', 'localId', 'composerLocalId', 'filename', 'isTemporary', 'mimetype',
+                        'fileType', 'isViewable'],
                 }),
             };
         });

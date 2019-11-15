@@ -37,13 +37,10 @@ class Composer extends Component {
                 composer: this.storeGetters.getStoreObject({
                     storeKey: 'composers',
                     localId: props.composerLocalId,
-                    keys: ['attachmentLocalIds'],
+                    keys: ['attachmentLocalIds', 'name'],
                     computes: [{
                         name: 'thread',
-                        computes: [
-                            { name: 'directPartner', keys: ['name'] }, // TODO SEB this is only needed for the compute of name
-                            { name: 'name' },
-                        ],
+                        keys: ['name'],
                     }],
                 }),
             };

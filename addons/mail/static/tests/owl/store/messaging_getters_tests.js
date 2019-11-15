@@ -83,9 +83,7 @@ QUnit.test('attachment: fileType', async function (assert) {
     const attachment = this.env.store.getters.getStoreObject({
         storeKey: 'attachments',
         localId: attachmentLocalId,
-        computes: [{
-            name: 'fileType',
-        }],
+        keys: ['fileType'],
     });
     assert.ok(attachment);
     assert.strictEqual(attachment.fileType, 'text');
@@ -106,11 +104,7 @@ QUnit.test('attachment: textFile', async function (assert) {
     const attachment = this.env.store.getters.getStoreObject({
         storeKey: 'attachments',
         localId: attachmentLocalId,
-        computes: [{
-            name: 'fileType', // TODO SEB necessary to compute isTextFile
-        }, {
-            name: 'isTextFile',
-        }],
+        keys: ['isTextFile'],
     });
     assert.ok(attachment);
     assert.ok(attachment.isTextFile);
@@ -131,13 +125,7 @@ QUnit.test('attachment: isViewable', async function (assert) {
     const attachment = this.env.store.getters.getStoreObject({
         storeKey: 'attachments',
         localId: attachmentLocalId,
-        computes: [{
-            name: 'fileType', // TODO SEB necessary to compute isTextFile
-        }, {
-            name: 'isTextFile', // TODO SEB necessary for isViewable
-        }, {
-            name: 'isViewable',
-        }],
+        computes: ['isViewable'],
     });
     assert.ok(attachment);
     assert.ok(attachment.isViewable);

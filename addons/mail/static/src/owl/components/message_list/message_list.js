@@ -34,11 +34,8 @@ class MessageList extends Component {
                         ],
                         computes: [{
                             name: 'messages',
-                            keys: ['id', 'localId', 'date', // date for dateDay
-                                'message_type', 'authorLocalId', 'originThreadLocalId'], // those are used for shouldMessageBeSquashed
-                            computes: [{
-                                name: 'dateDay',
-                            }],
+                            keys: ['id', 'localId', 'dateDay',
+                                'date', 'message_type', 'authorLocalId', 'originThreadLocalId'], // those are used for shouldMessageBeSquashed
                         }],
                     }],
                 }),

@@ -21,10 +21,7 @@ class MessageAuthorPrefix extends Component {
                     localId: props.messageLocalId,
                     computes: [{
                         name: 'author',
-                        keys: ['localId'],
-                        computes: [{
-                            name: 'name',
-                        }],
+                        keys: ['localId', 'name'],
                     }],
                 }),
                 thread: this.storeGetters.getStoreObject({

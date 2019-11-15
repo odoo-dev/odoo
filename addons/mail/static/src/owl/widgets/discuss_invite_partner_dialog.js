@@ -28,10 +28,7 @@ const PartnerInviteDialog = Dialog.extend({
         const channel = store.getters.getStoreObject({
             storeKey: 'threads',
             localId: activeThreadLocalId,
-            keys: ['id'],
-            computes: [{
-                name: 'name'
-            }],
+            keys: ['id', 'name'],
         });
         this.channelId = channel.id;
         this.store = store;

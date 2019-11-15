@@ -12,7 +12,237 @@ const utils = require('web.utils');
 
 const _t = core._t;
 
+/**
+ * Defines an `execute` method that has to be overriden to define the desired
+ * action behavior. Allows to execute all kind of actions in a standard way.
+ */
+class AbstractAction {
+    /**
+     * @param {Object} sourceObject - the source object on which the action has
+     *  to be executed
+     */
+    execute(sourceObject) {
+        throw new TypeError('AbstractAction execute must be overriden.');
+    }
+}
+
+/**
+ * Assigns values to an object
+ */
+class Assign extends AbstractAction {
+    /**
+     * @override
+     * @param {string} vals - the values to assign
+     */
+    constructor(vals) {
+        super();
+        // TODO SEB maybe do vals validation
+        this.vals = vals;
+    }
+    /**
+     * @override
+     */
+    execute(sourceObject) {
+        // TODO SEB allow writing on relations?
+        Object.assign(sourceObject, this.vals);
+    }
+}
+/**
+ * Filters a sub-array.
+ */
+class FilterArray extends AbstractAction {
+    /**
+     * @override
+     * @param {string} sourceKey - the key in the source object referencing the
+     *  target sub-array
+     * @param {string} predicate - the key to remove on the target sub-object
+     */
+    constructor(sourceKey, predicate) {
+        super();
+        this.sourceKey = sourceKey;
+        this.predicate = predicate;
+    }
+    /**
+     * @override
+     */
+    execute(sourceObject) {
+        sourceObject[this.sourceKey] = sourceObject[this.sourceKey].filter(this.predicate);
+    }
+}
+/**
+ * Deletes a key from a sub-object.
+ */
+class DeleteSubKey extends AbstractAction {
+    /**
+     * @override
+     * @param {string} sourceKey - the key in the source object referencing the
+     *  target sub-object
+     * @param {string} targetKey - the key to remove on the target sub-object
+     */
+    constructor(sourceKey, targetKey) {
+        super();
+        this.sourceKey = sourceKey;
+        this.targetKey = targetKey;
+    }
+    /**
+     * @override
+     */
+    execute(sourceObject) {
+        delete sourceObject[this.sourceKey][this.targetKey];
+    }
+}
+
+const storeObjectComputes = {
+    'attachments': {
+        'fileType': attachment => {
+            if (attachment.type === 'url' && !attachment.url) {
+                return undefined;
+            } else if (!attachment.mimetype) {
+                return undefined;
+            }
+            const match = attachment.type === 'url'
+                ? attachment.url.match('(youtu|.png|.jpg|.gif)')
+                : attachment.mimetype.match('(image|video|application/pdf|text)');
+            if (!match) {
+                return undefined;
+            }
+            if (match[1].match('(.png|.jpg|.gif)')) {
+                return 'image';
+            }
+            return match[1];
+        },
+        'mediaType': attachment => {
+            return attachment.mimetype && attachment.mimetype.split('/').shift();
+        },
+        'defaultSource': attachment => {
+            const fileType = attachment.fileType;
+            if (fileType === 'image') {
+                return `/web/image/${attachment.id}?unique=1&amp;signature=${attachment.checksum}&amp;model=ir.attachment`;
+            }
+            if (fileType === 'application/pdf') {
+                return `/web/static/lib/pdfjs/web/viewer.html?file=/web/content/${attachment.id}?model%3Dir.attachment`;
+            }
+            if (fileType && fileType.indexOf('text') !== -1) {
+                return `/web/content/${attachment.id}?model%3Dir.attachment`;
+            }
+            if (fileType === 'youtu') {
+                if (fileType !== 'youtu') {
+                    return undefined;
+                }
+                const urlArr = attachment.url.split('/');
+                let token = urlArr[urlArr.length - 1];
+                if (token.indexOf('watch') !== -1) {
+                    token = token.split('v=')[1];
+                    const amp = token.indexOf('&');
+                    if (amp !== -1) {
+                        token = token.substring(0, amp);
+                    }
+                }
+                return `https://www.youtube.com/embed/${token}`;
+            }
+            if (fileType === 'video') {
+                return `/web/image/${attachment.id}?model=ir.attachment`;
+            }
+            return undefined;
+        },
+        'isTextFile': attachment => {
+            const fileType = attachment.fileType;
+            return (fileType && fileType.indexOf('text') !== -1) || false;
+        },
+        'isViewable': attachment => {
+            const mediaType = attachment.mediaType;
+            return (
+                mediaType === 'image' ||
+                mediaType === 'video' ||
+                attachment.mimetype === 'application/pdf' ||
+                attachment.isTextFile
+            );
+        },
+    },
+    'chatWindowManager': {
+        // TODO SEB _computeChatWindows
+    },
+    'composers': {
+        'attachmentLocalIds': composer => {
+            return composer.attachmentLocalIds || [];
+        },
+    },
+    'messages': {
+        'dateDay': message => {
+            const date = message.date.format('YYYY-MM-DD');
+            if (date === moment().format('YYYY-MM-DD')) {
+                return _t("Today");
+            } else if (
+                date === moment()
+                    .subtract(1, 'days')
+                    .format('YYYY-MM-DD')
+            ) {
+                return _t("Yesterday");
+            }
+            return message.date.format('LL');
+        },
+    },
+    'partners': {
+        'name': partner => {
+            return partner.name || partner.display_name;
+        },
+    },
+    'threads': {
+        'name': (thread, { state }) => {
+            if (thread.channel_type === 'chat') {
+                if (thread.custom_channel_name) {
+                    return thread.custom_channel_name;
+                }
+                // TODO SEB use getter?
+                const directPartner = state.partners[thread.directPartnerLocalId];
+                if (directPartner) {
+                    return directPartner.name;
+                }
+            }
+            return thread.name;
+        },
+    },
+};
+
 const actions = {
+
+    //--------------------------------------------------------------------------
+    // State Manipulation (ONLY HERE)
+    //--------------------------------------------------------------------------
+
+    deleteStoreObject({ state }, storeKey, localId) {
+        delete state[storeKey][localId];
+    },
+    /**
+     * Executes the given actions on the target object, and recomputes its
+     * computed values.
+     */
+    processWrite({ state }, storeObject, actions, computes = {}) {
+        for (const action of actions) {
+            action.execute(storeObject);
+        }
+
+        // order is important because of dependencies
+        for (const computeName of Object.keys(computes)) {
+            storeObject[computeName] = computes[computeName](storeObject, { state });
+        }
+    },
+    writeTopLevelStoreObject({ dispatch, state }, storeKey, actions) {
+        const storeObject = state[storeKey];
+        const computes = storeObjectComputes[storeKey];
+
+        dispatch('processWrite', storeObject, actions, computes);
+    },
+    writeStoreObject({ dispatch, state }, storeKey, localId, actions) {
+        if (!state[storeKey][localId]) {
+            state[storeKey][localId] = {};
+        }
+
+        const storeObject = state[storeKey][localId];
+        const computes = storeObjectComputes[storeKey];
+
+        dispatch('processWrite', storeObject, actions, computes);
+    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -23,10 +253,13 @@ const actions = {
      *
      * @param {Object} param0
      * @param {function} param0.dispatch
-     * @param {Object} param0.state
+     * @param {Object} param0.getters
      */
-    closeAllChatWindows({ dispatch, state }) {
-        const chatWindowLocalIds = state.chatWindowManager.chatWindowLocalIds;
+    closeAllChatWindows({ dispatch, getters }) {
+        const chatWindowLocalIds = getters.getTopLevelStoreObject({
+            storeKey: 'chatWindowManager',
+            keys: ['chatWindowLocalIds'],
+        }).chatWindowLocalIds;
         for (const chatWindowLocalId of chatWindowLocalIds) {
             dispatch('closeChatWindow', chatWindowLocalId);
         }
@@ -36,21 +269,23 @@ const actions = {
      *
      * @param {Object} param0
      * @param {function} param0.dispatch
-     * @param {Object} param0.state
+     * @param {Object} param0.getters
      * @param {string} chatWindowLocalId either 'new_message' or thread local
      *   Id, a valid Id in `chatWindowLocalIds` list of chat window manager.
      */
-    closeChatWindow({ dispatch, state }, chatWindowLocalId) {
-        const cwm = state.chatWindowManager;
-        cwm.chatWindowLocalIds = cwm.chatWindowLocalIds.filter(id => id !== chatWindowLocalId);
-        delete cwm.chatWindowInitialScrollTops[chatWindowLocalId];
+    closeChatWindow({ dispatch, getters }, chatWindowLocalId) {
+        dispatch('writeTopLevelStoreObject', 'chatWindowManager', [
+            new FilterArray('chatWindowLocalIds', id => id !== chatWindowLocalId),
+            new DeleteSubKey('chatWindowInitialScrollTops', chatWindowLocalId),
+        ]);
         if (chatWindowLocalId !== 'new_message') {
-            const thread = state.threads[chatWindowLocalId];
-            Object.assign(thread, {
-                is_minimized: false,
-                state: 'closed',
-            });
-            dispatch('_notifyServerThreadState', thread.localId);
+            dispatch('writeStoreObject', 'threads', chatWindowLocalId, [
+                new Assign({
+                    is_minimized: false,
+                    state: 'closed',
+                }),
+            ]);
+            dispatch('_notifyServerThreadState', chatWindowLocalId);
         }
         dispatch('_computeChatWindows');
     },
@@ -58,22 +293,28 @@ const actions = {
      * Close the specified dialog.
      *
      * @param {Object} param0
-     * @param {Object} param0.state
+     * @param {Object} param0.dispatch
      * @param {string} dialogId
      */
-    closeDialog({ state }, dialogId) {
-        state.dialogManager.dialogs =
-            state.dialogManager.dialogs.filter(item => item.id !== dialogId);
+    closeDialog({ dispatch }, dialogId) {
+        dispatch('writeTopLevelStoreObject', 'dialogManager', [
+            new FilterArray('dialogs', item => item.id !== dialogId),
+        ]);
     },
     /**
      * Close the discuss app. Should reset its internal state.
      *
      * @param {Object} param0
      * @param {function} param0.dispatch
-     * @param {Object} param0.state
+     * @param {Object} param0.getters
      */
-    closeDiscuss({ dispatch, state }) {
-        if (!state.discuss.isOpen) {
+    closeDiscuss({ dispatch, getters }) {
+        const discuss = getters.getTopLevelStoreObject({
+            storeKey: 'discuss',
+            keys: ['isOpen'],
+        });
+        // TODO SEB why this if
+        if (!discuss.isOpen) {
             return;
         }
         dispatch('updateDiscuss', { isOpen: false });
@@ -98,6 +339,7 @@ const actions = {
      *
      * @param {Object} param0
      * @param {function} param0.dispatch
+     * @param {Object} param0.getters
      * @param {Object} param0.state
      * @param {Object} data
      * @param {string} data.filename
@@ -108,7 +350,7 @@ const actions = {
      * @param {integer} [data.size]
      * @return {string} attachment local Id
      */
-    createAttachment({ dispatch, state }, data) {
+    createAttachment({ dispatch, getters, state }, data) {
         let {
             composerLocalId=null,
             filename,
@@ -122,9 +364,15 @@ const actions = {
             threadLocalIds=[],
         } = data;
         if (isTemporary) {
-            id = state.misc.attachmentNextTemporaryId;
+            const misc = getters.getTopLevelStoreObject({
+                storeKey: 'misc',
+                keys: ['attachmentNextTemporaryId'],
+            });
+            id = misc.attachmentNextTemporaryId;
             mimetype = '';
-            state.misc.attachmentNextTemporaryId--;
+            dispatch('writeTopLevelStoreObject', 'misc', [new Assign({
+                attachmentNextTemporaryId: id - 1,
+            })]);
         }
         const attachment = {
             _model: 'ir.attachment',
@@ -141,7 +389,8 @@ const actions = {
             size,
             threadLocalIds,
         };
-        state.attachments[attachment.localId] = attachment;
+        dispatch('writeStoreObject', 'attachments', attachment.localId, [new Assign(attachment)]);
+
         // compute attachment links (--> attachment)
         const temporaryAttachmentLocalId = state.temporaryAttachmentLocalIds[filename];
         if (isTemporary) {
@@ -480,12 +729,14 @@ const actions = {
         delete kwargs.id;
         delete kwargs._model;
         let thread = state.threads[`${_model}_${id}`];
+
         // TODO SEB can't we know if we are creating or inserting on the caller?
         if (!thread) {
             const threadLocalId = dispatch('_createThread', param1);
             thread = state.threads[threadLocalId];
         } else {
-            Object.assign(thread, kwargs); // aku todo
+            dispatch('writeStoreObject', 'threads', thread.localId, [new Assign(kwargs)]);
+            // aku todo
         }
         return thread.localId;
     },
@@ -1660,6 +1911,7 @@ const actions = {
     /**
      * @private
      * @param {Object} param0
+     * @param {function} param0.dispatch
      * @param {Object} param0.state
      * @param {Object} param1
      * @param {string} [param1.display_name]
@@ -1671,7 +1923,7 @@ const actions = {
      * @return {string} partner local Id
      */
     _createPartner(
-        { state },
+        { dispatch, state },
         {
             display_name,
             email,
@@ -1697,7 +1949,7 @@ const actions = {
             // partner already exists in store
             return;
         }
-        state.partners[partnerLocalId] = partner;
+        dispatch('writeStoreObject', 'partners', partnerLocalId, [new Assign(partner)]);
         // todo: links
         return partnerLocalId;
     },
@@ -1810,7 +2062,9 @@ const actions = {
                 : undefined,
             memberLocalIds: members.map(member => `res.partner_${member.id}`),
         });
-        state.threads[thread.localId] = thread;
+
+        dispatch('writeStoreObject', 'threads', thread.localId, [new Assign(thread)]);
+
         if (thread._model !== 'mail.box') {
             dispatch('_createComposer', { threadLocalId: thread.localId });
         }
@@ -3802,13 +4056,12 @@ const actions = {
     /**
      * @private
      * @param {Object} param0
-     * @param {Object} param0.state
+     * @param {function} param0.dispatch
      * @param {string} partnerLocalId
      * @param {Object} changes
      */
-    _updatePartner({ state }, partnerLocalId, changes) {
-        const partner = state.partners[partnerLocalId];
-        Object.assign(partner, changes);
+    _updatePartner({ dispatch }, partnerLocalId, changes) {
+        dispatch('writeStoreObject', 'partners', partnerLocalId, [new Assign(changes)]);
         // todo: changes of links, e.g. messageLocalIds
     },
     /**

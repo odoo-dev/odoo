@@ -47,24 +47,13 @@ class Message extends Component {
                     ],
                     computes: [{
                         name: 'attachments',
-                        computes: [{
-                            name: 'fileType',
-                        }],
+                        keys: ['fileType'],
                     }, {
                         name: 'author',
-                        keys: ['id', 'localId', '_model', 'im_status'],
-                        computes: [{
-                            name: 'name',
-                        }],
+                        keys: ['id', 'localId', '_model', 'im_status', 'name'],
                     }, {
                         name: 'originThread',
-                        keys: ['id', 'localId', '_model'],
-                        computes: [{
-                            name: 'directPartner',
-                            keys: ['name'], // TODO SEB only computed for name
-                        }, {
-                            name: 'name',
-                        }]
+                        keys: ['id', 'localId', '_model', 'name'],
                     }],
                 }),
             };

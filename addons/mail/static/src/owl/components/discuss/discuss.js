@@ -513,7 +513,7 @@ class Discuss extends Component {
                 this.storeGetters.getStoreObject({
                     storeKey: 'threads',
                     localId: this.state.replyingToMessageThreadLocalId,
-                    computes: [{ name: 'name' }],
+                    keys: ['name'],
                 }).name
             )
         );
