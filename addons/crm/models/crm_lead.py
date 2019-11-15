@@ -142,6 +142,9 @@ class Lead(models.Model):
     meeting_count = fields.Integer('# Meetings', compute='_compute_meeting_count')
     lost_reason = fields.Many2one('crm.lost.reason', string='Lost Reason', index=True, tracking=True)
 
+    # IAP enrichment -> this should ideally be in a bridge between crm and partner_autocomplete -> check with TDE
+    enrich_description = fields.Html('Information from the Enrichment service', readonly=True)
+
     _sql_constraints = [
         ('check_probability', 'check(probability >= 0 and probability <= 100)', 'The probability of closing the deal should be between 0% and 100%!')
     ]

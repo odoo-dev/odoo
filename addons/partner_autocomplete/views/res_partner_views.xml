@@ -15,6 +15,12 @@
                 <field name="partner_gid" invisible="True"/>
                 <field name="additional_info" invisible="True"/>
             </xpath>
+            <xpath expr="//page[@name='internal_notes']" position="inside">
+                <div class="mt-4" attrs="{'invisible': [('autocomplete_description', '=', False)]}">
+                    <hr class="pt-3 oe_read_only" />
+                    <field name="autocomplete_description" />
+                </div>
+            </xpath>
         </field>
     </record>
 

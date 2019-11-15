@@ -51,7 +51,6 @@ class CRMHelpers(models.Model):
             'zip': company_data['postal_code'],
             'country_id': country_id,
             'state_id': self._find_state_id(company_data['state_code'], country_id),
-            'description': self._prepare_lead_description(company_data),
         }
 
         # If type is people then add first contact in lead data
@@ -69,34 +68,6 @@ class CRMHelpers(models.Model):
         if state_id:
             return state_id.id
         return False
-
-    @api.model
-    def _prepare_lead_description(self, reveal_data):
-        description = ''
-        if reveal_data['sector']:
-            description += reveal_data['sector']
-        if reveal_data['website_title']:
-            description += '\n' + reveal_data['website_title']
-        if reveal_data['twitter_bio']:
-            description += '\n' + "Twitter Bio: " + reveal_data['twitter_bio']
-        if reveal_data['twitter_followers']:
-            description += ('\nTwitter %s followers, %s \n') % (reveal_data['twitter_followers'], reveal_data['twitter_location'] or '')
-
-        numbers = ['raised', 'market_cap', 'employees', 'estimated_annual_revenue']
-        millnames = ['', ' K', ' M', ' B', 'T']
-
-        def millify(n):
-            try:
-                n = float(n)
-                millidx = max(0, min(len(millnames) - 1, int(floor(0 if n == 0 else log10(abs(n)) / 3))))
-                return '{:.0f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
-            except Exception:
-                return n
-
-        for key in numbers:
-            if reveal_data.get(key):
-                description += ' %s : %s,' % (key.replace('_', ' ').title(), millify(reveal_data[key]))
-        return description
 
     @api.model
     def format_data_for_message_post(self, company_data, people_data):

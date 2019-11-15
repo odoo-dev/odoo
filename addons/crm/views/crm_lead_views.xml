@@ -226,7 +226,12 @@
 
                         <notebook>
                             <page string="Internal Notes">
+                                <!-- this should ideally be in a bridge between crm and partner_autocomplete -> check with TDE -->
                                 <field name="description" placeholder="Add a description..."/>
+                                <div class="mt-4" attrs="{'invisible': [('enrich_description', '=', False)]}">
+                                    <hr class="pt-3 oe_read_only" />
+                                    <field name="enrich_description" />
+                                </div>
                             </page>
                             <page name="extra" string="Extra Info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
                                 <group>

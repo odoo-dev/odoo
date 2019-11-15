@@ -18,6 +18,7 @@ class ResPartner(models.Model):
 
     partner_gid = fields.Integer('Company database ID')
     additional_info = fields.Char('Additional info')
+    autocomplete_description = fields.Html('Information from the Auto-Complete service', readonly=True)
 
     @api.model
     def _replace_location_code_by_id(self, record):
@@ -180,13 +181,25 @@ class ResPartner(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('additional_info'):
+                template_values = json.loads(vals.get('additional_info'))
+                template_values.update({
+                    'flavor_text': _("Partner created by Odoo Partner Autocomplete Service"),
+                    'form_display': True
+                })
+                vals['autocomplete_description'] = self.env['ir.ui.view'].render_template(
+                    'partner_autocomplete.enrich_service_information', template_values)
+
         partners = super(ResPartner, self).create(vals_list)
         if len(vals_list) == 1:
             partners._update_autocomplete_data(vals_list[0].get('vat', False))
             if partners.additional_info:
+                template_values = json.loads(partners.additional_info)
+                template_values['flavor_text'] = _("Partner created by Odoo Partner Autocomplete Service")
                 partners.message_post_with_view(
-                    'partner_autocomplete.additional_info_template',
-                    values=json.loads(partners.additional_info),
+                    'partner_autocomplete.enrich_service_information',
+                    values=template_values,
                     subtype_id=self.env.ref('mail.mt_note').id,
                 )
                 partners.write({'additional_info': False})
