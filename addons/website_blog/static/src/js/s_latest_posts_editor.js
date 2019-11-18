@@ -35,8 +35,8 @@ sOptions.registry.js_get_posts_selectBlog = sOptions.Class.extend({
     /**
      * @see this.selectClass for parameters
      */
-    filterByBlogId: function (previewMode, value, $opt) {
-        value = parseInt(value);
+    filterByBlogId: function (previewMode, widgetValue, params) {
+        const value = parseInt(widgetValue);
         this.$target.attr('data-filter-by-blog-id', value).data('filterByBlogId', value);
         this.trigger_up('widgets_start_request', {
             editableMode: true,

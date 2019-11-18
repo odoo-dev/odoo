@@ -91,7 +91,7 @@ odoo.define('website_form_editor', function (require) {
         },
 
         // Choose a model modal
-        website_form_model_modal: function (previewMode, value, $li) {
+        website_form_model_modal: function (previewMode, widgetValue, params) {
             var self = this;
             this._rpc({
                 model: "ir.model",
@@ -224,7 +224,7 @@ odoo.define('website_form_editor', function (require) {
         },
 
         // Choose a field modal
-        website_form_field_modal: function (previewMode, value, $li) {
+        website_form_field_modal: function (previewMode, widgetValue, params) {
             var self = this;
 
             this.fields().then(function (fields) {
@@ -261,13 +261,13 @@ odoo.define('website_form_editor', function (require) {
         },
 
         // Create a custom field
-        website_form_custom_field: function (previewMode, value, $li) {
-            var default_field_name = 'Custom ' + $li.text();
+        website_form_custom_field: function (previewMode, widgetValue, params) {
+            var default_field_name = 'Custom ' + params.widgetText;
             this.append_field({
                 name: default_field_name,
                 string: default_field_name,
                 custom: true,
-                type: value,
+                type: widgetValue,
                 // Default values for x2many fields
                 records: [
                     {
@@ -302,7 +302,7 @@ odoo.define('website_form_editor', function (require) {
         },
 
         // Re-render the field and replace the current one
-        // website_form_editor_field_reset: function(previewMode, value, $li) {
+        // website_form_editor_field_reset: function(previewMode, widgetValue, params) {
         //     var self = this;
         //     var target_field_name = this.$target.find('.col-form-label').attr('for');
         //     this.fields().then(function(fields){
@@ -476,9 +476,9 @@ odoo.define('website_form_editor', function (require) {
         /**
          * @see this.selectClass for parameters
          */
-        website_form_choice_field_display: function (previewMode, value, $opt) {
-            this.$target.toggleClass('o_website_form_flex_fw', value === 'vertical');
-            this.$target[0].dataset.display = value;
+        website_form_choice_field_display: function (previewMode, widgetValue, params) {
+            this.$target.toggleClass('o_website_form_flex_fw', widgetValue === 'vertical');
+            this.$target[0].dataset.display = widgetValue;
         },
 
         //----------------------------------------------------------------------
@@ -502,7 +502,7 @@ odoo.define('website_form_editor', function (require) {
         xmlDependencies: ['/website_form/static/src/xml/website_form_editor.xml'],
 
         // Option to toggle inputs required attribute
-        website_form_field_require: function (previewMode, value, $li) {
+        website_form_field_require: function (previewMode, widgetValue, params) {
             this.$target.find('.o_website_form_input').each(function (index, input) {
                 input.required = !input.required;
             });

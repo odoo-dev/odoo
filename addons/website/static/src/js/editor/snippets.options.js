@@ -19,14 +19,7 @@ options.Class.include({
     /**
      * @override
      */
-    setDataAttribute: function (previewMode, dataName, $opt) {
-        this._super(...arguments);
-        this._refreshPublicWidgets();
-    },
-    /**
-     * @override
-     */
-    selectDataAttribute: function (previewMode, value, $opt) {
+    selectDataAttribute: function (previewMode, widgetValue, params) {
         this._super(...arguments);
         this._refreshPublicWidgets();
     },
@@ -86,11 +79,11 @@ options.registry.background.include({
     /**
      * @override
      */
-    _setActive: function () {
-        this._super(...arguments);
-        if (this._hasBgvideo()) {
-            this.$el.find('[data-choose-image]').addClass('active');
+    _computeWidgetState: function (methodName, params) {
+        if (methodName === 'chooseImage') {
+            return this._hasBgvideo() ? 'true' : '';
         }
+        return this._super(...arguments);
     },
     /**
      * Updates the background video used by the snippet.
@@ -416,8 +409,8 @@ options.registry.CarouselItem = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    slide: function (previewMode, value) {
-        switch (value) {
+    slide: function (previewMode, widgetValue, params) {
+        switch (widgetValue) {
             case 'left':
                 this.$controls.filter('.carousel-control-prev')[0].click();
                 break;
@@ -458,7 +451,7 @@ options.registry.navTabs = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    addTab: function (previewMode, value, $opt) {
+    addTab: function (previewMode, widgetValue, params) {
         var $activeItem = this.$navLinks.filter('.active').parent();
         var $activePane = this.$tabPanes.filter('.active');
 
@@ -477,7 +470,7 @@ options.registry.navTabs = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    removeTab: function (previewMode, value, $opt) {
+    removeTab: function (previewMode, widgetValue, params) {
         var self = this;
 
         var $activeLink = this.$navLinks.filter('.active');
@@ -607,14 +600,24 @@ options.registry.layout_column = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    selectCount: function (previewMode, value, $opt) {
-        this._updateColumnCount(value - this.$target.children().length);
+    selectCount: function (previewMode, widgetValue, params) {
+        const nbColumns = parseInt(widgetValue);
+        this._updateColumnCount(nbColumns - this.$target.children().length);
     },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     */
+    _computeWidgetState: function (methodName, params) {
+        if (methodName === 'selectCount') {
+            return '' + this.$target.children().length;
+        }
+        return this._super(...arguments);
+    },
     /**
      * Adds new columns which are clones of the last column or removes the
      * last x columns.
@@ -663,14 +666,6 @@ options.registry.layout_column = options.Class.extend({
         if (colOffset) {
             $columns.first().addClass('offset-lg-' + colOffset);
         }
-    },
-    /**
-     * @override
-     */
-    _setActive: function () {
-        this._super.apply(this, arguments);
-        this.$el.find('[data-select-count]').removeClass('active')
-            .filter('[data-select-count=' + this.$target.children().length + ']').addClass('active');
     },
 });
 
@@ -931,7 +926,7 @@ options.registry.ul = options.Class.extend({
     /**
      * @override
      */
-    toggleClass: function () {
+    selectClass: function () {
         this._super.apply(this, arguments);
 
         this.trigger_up('widgets_stop_request', {
@@ -1133,11 +1128,12 @@ options.registry.gallery = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    columns: function (previewMode, value) {
-        this.$target.attr('data-columns', value);
+    columns: function (previewMode, widgetValue, params) {
+        const nbColumns = parseInt(widgetValue || '1');
+        this.$target.attr('data-columns', nbColumns);
 
         var $activeMode = this.$el.find('.active[data-mode]');
-        this.mode(null, $activeMode.data('mode'), $activeMode);
+        $activeMode.trigger('mouseenter').trigger('click');
     },
     /**
      * Get the image target's layout mode (slideshow, masonry, grid or nomode).
@@ -1226,12 +1222,12 @@ options.registry.gallery = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    mode: function (previewMode, value, $opt) {
+    mode: function (previewMode, widgetValue, params) {
         this.$target.css('height', '');
-        this[value]();
+        this[widgetValue]();
         this.$target
             .removeClass('o_nomode o_masonry o_grid o_slideshow')
-            .addClass('o_' + value);
+            .addClass('o_' + widgetValue);
         this.trigger_up('cover_update');
     },
     /**
@@ -1486,14 +1482,14 @@ options.registry.gallery_img = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    position: function (previewMode, value) {
+    position: function (previewMode, widgetValue, params) {
         this.trigger_up('deactivate_snippet');
         this.trigger_up('option_update', {
             optionName: 'gallery',
             name: 'image_index_request',
             data: {
                 $image: this.$target,
-                position: value,
+                position: widgetValue,
             },
         });
     },
@@ -1510,7 +1506,7 @@ options.registry.topMenuTransparency = options.Class.extend({
      *
      * @see this.selectClass for params
      */
-    transparent: function (previewMode, value, $opt) {
+    transparent: function (previewMode, widgetValue, params) {
         var self = this;
         this.trigger_up('action_demand', {
             actionName: 'toggle_page_option',
@@ -1630,7 +1626,7 @@ options.registry.anchor = options.Class.extend({
     /**
      * @see this.selectClass for parameters
      */
-    openAnchorDialog: function (previewMode, value, $opt) {
+    openAnchorDialog: function (previewMode, widgetValue, params) {
         var self = this;
         var buttons = [{
             text: _t("Save & copy"),
@@ -1757,14 +1753,14 @@ options.registry.CoverProperties = options.Class.extend({
     /**
      * @see this.selectClass for parameters
      */
-    clear: function (previewMode, value, $opt) {
-        this.selectClass(previewMode, '', $());
+    clear: function (previewMode, widgetValue, params) {
+        this.selectClass(previewMode, '', {});
         this.$image.css('background-image', '');
     },
     /**
      * @see this.selectClass for parameters
      */
-    change: function (previewMode, value, $opt) {
+    change: function (previewMode, widgetValue, params) {
         var $image = $('<img/>');
         var background = this.$image.css('background-image');
         if (background && background !== 'none') {
@@ -1780,8 +1776,7 @@ options.registry.CoverProperties = options.Class.extend({
             var src = image.src;
             this.$image.css('background-image', src ? ('url(' + src + ')') : '');
             if (!this.$target.hasClass('o_record_has_cover')) {
-                var $opt = this.$el.find('.o_record_cover_opt_size_default[data-select-class]');
-                this.selectClass(previewMode, $opt.data('selectClass'), $opt);
+                this.$el.find('.o_record_cover_opt_size_default[data-select-class]').click();
             }
             this._updateUI();
         });
@@ -1789,16 +1784,16 @@ options.registry.CoverProperties = options.Class.extend({
     /**
      * @see this.selectClass for parameters
      */
-    filterValue: function (previewMode, value, $opt) {
-        this.$filter.css('opacity', value);
+    filterValue: function (previewMode, widgetValue, params) {
+        this.$filter.css('opacity', widgetValue || 0);
     },
     /**
      * @see this.selectClass for parameters
      */
-    filterColor: function (previewMode, value, $opt) {
+    filterColor: function (previewMode, widgetValue, params) {
         this.$filter.removeClass(this.filterColorClasses);
-        if (value) {
-            this.$filter.addClass(value);
+        if (widgetValue) {
+            this.$filter.addClass(widgetValue);
         }
 
         var $firstVisibleFilterOpt = this.$filterValueOpts.eq(1);
@@ -1878,35 +1873,6 @@ options.registry.SectionStretch = options.Class.extend({
 
         return this._super.apply(this, arguments);
     },
-
-    //--------------------------------------------------------------------------
-    // Options
-    //--------------------------------------------------------------------------
-
-    /**
-     * @see this.selectClass for parameters
-     */
-    toggleContainerFluid: function (previewMode, value, $opt) {
-        var isFluid = this.$el.find('[data-toggle-container-fluid]').hasClass('active');
-        this.$target.toggleClass('container', !isFluid)
-                    .toggleClass('container-fluid', isFluid);
-        if (previewMode !== 'reset') {
-            this.$target.toggleClass('container').toggleClass('container-fluid');
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _setActive: function () {
-        this._super.apply(this, arguments);
-        var isFluid = this.$target.hasClass('container-fluid');
-        this.$el.find('[data-toggle-container-fluid]').toggleClass('active', isFluid);
-    },
 });
 
 /**
@@ -1922,10 +1888,6 @@ options.registry.SnippetMove = options.Class.extend({
         $overlayArea.prepend($buttons[0]);
         $overlayArea.append($buttons[1]);
 
-        // TODO this is kinda hack but not worth a complex system while no
-        // other use case is implemented.
-        $buttons.on('click', this._onOptionSelection.bind(this));
-
         return this._super(...arguments);
     },
 
@@ -1938,8 +1900,8 @@ options.registry.SnippetMove = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    moveSnippet: function (previewMode, value, $opt) {
-        switch (value) {
+    moveSnippet: function (previewMode, widgetValue, params) {
+        switch (widgetValue) {
             case 'prev':
                 this.$target.prev().before(this.$target);
                 break;
