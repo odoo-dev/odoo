@@ -1540,7 +1540,7 @@ options.registry.topMenuTransparency = options.Class.extend({
     },
 });
 
-options.registry.topMenuColor = options.registry.colorpicker.extend({
+options.registry.topMenuColor = options.Class.extend({
     /**
      * @override
      */
