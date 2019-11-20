@@ -2,6 +2,61 @@ odoo.define('mail.store.state', function (require) {
 'use strict';
 
 const config = require('web.config');
+const core = require('web.core');
+
+const _t = core._t;
+/**
+ * Main interface to standardize the definition of store state.
+ * A basic object of which key/value pairs have no specific meaning.
+ *
+ * Primitive types are not allowed at the top level of the store by convention.
+ */
+class BasicStoreObject {
+    constructor(storeKey) {
+        this.storeKey = storeKey;
+    }
+    initStore({ state }) {
+        state[this.storeKey] = {};
+    }
+    readValues({ state }) {
+        return Object.assign({}, state[this.storeKey]);
+    }
+    writeValues({ state }, vals) {
+        Object.assign(state[this.storeKey], vals);
+    }
+}
+
+/**
+ * An object having localId as keys and BasicObject as values.
+ */
+class LocalIdStoreObject extends BasicStoreObject {
+
+}
+
+/**
+ * An array of which the elements have no specific meaning.
+ */
+class ArrayStoreObject extends BasicStoreObject {
+    initStore({ state }) {
+        state[this.storeKey] = [];
+    }
+    readValues({ state }) {
+        return state[this.storeKey].map(v => v);
+    }
+    writeValues({ state }, vals) {
+        state[this.storeKey] = vals;
+    }
+}
+
+const Attachment = new LocalIdStoreObject({
+    name: _t("Store Attachment"),
+    getterKey: 'Attachment',
+    storeKey: 'attachments',
+    defaultProps: {},
+    props: {},
+    computes: {},
+    relations: {},
+});
 
 /**
  * @param {Object} [alteration] used for tests to partially alter state initially
@@ -213,6 +268,9 @@ function init(alteration) {
     return state;
 }
 
-return { init };
+return {
+    Attachment,
+    init,
+};
 
 });

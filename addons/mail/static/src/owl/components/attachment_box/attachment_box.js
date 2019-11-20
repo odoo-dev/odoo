@@ -10,6 +10,8 @@ const { Component } = owl;
 const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
 
 
+const threadStoreProps = ['attachmentLocalIds'];
+
 class AttachmentBox extends Component {
 
     /**
@@ -22,10 +24,9 @@ class AttachmentBox extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const thread = this.storeGetters.getStoreObject({
-                storeKey: 'threads',
+            const thread = this.storeGetters.Thread({
                 localId: props.threadLocalId,
-                keys: ['attachmentLocalIds'],
+                props: threadStoreProps,
             });
             return {
                 attachmentLocalIds: thread.attachmentLocalIds,

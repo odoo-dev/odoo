@@ -849,6 +849,7 @@ QUnit.test('sidebar: rename chat', async function (assert) {
         },
     });
     await this.start({
+        debug: 1,
         mockRPC(route, args) {
             if (args.method === 'channel_set_custom_name') {
                 return Promise.resolve();
@@ -902,6 +903,7 @@ QUnit.test('sidebar: rename chat', async function (assert) {
         "Demo",
         "chat should have renamed name as name"
     );
+    await pause();
 });
 
 QUnit.test('default thread rendering', async function (assert) {

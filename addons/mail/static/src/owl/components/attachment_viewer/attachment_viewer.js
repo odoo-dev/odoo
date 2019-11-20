@@ -8,6 +8,8 @@ const MIN_SCALE = 0.5;
 const SCROLL_ZOOM_STEP = 0.1;
 const ZOOM_STEP = 0.5;
 
+const attachmentStoreProps = ['id', 'fileType', 'defaultSource', 'isTextFile'];
+
 class AttachmentViewer extends Component {
 
     /**
@@ -36,10 +38,9 @@ class AttachmentViewer extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             return {
-                attachment: this.storeGetters.getStoreObject({
-                    storeKey: 'attachments',
+                attachment: this.storeGetters.Attachment({
                     localId: props.info.attachmentLocalId,
-                    keys: ['id', 'fileType', 'defaultSource', 'isTextFile'],
+                    props: attachmentStoreProps,
                 }),
             };
         });

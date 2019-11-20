@@ -188,6 +188,7 @@ const storeObjectComputes = {
         },
     },
     'threads': {
+        // TODO SEB this is a problem because it will not get recomputed on partner name change
         'name': (thread, { state }) => {
             if (thread.channel_type === 'chat') {
                 if (thread.custom_channel_name) {
@@ -1566,9 +1567,9 @@ const actions = {
             method: 'search',
             args: [[['partner_id', '=', partner.id]]],
         });
-        dispatch('_updatePartner', partnerLocalId, {
+        dispatch('writeStoreObject', 'partners', partnerLocalId, [new Assign({
             userId: userIds.length ? userIds[0] : null,
-        });
+        })]);
     },
     /**
      * @private
@@ -2063,6 +2064,17 @@ const actions = {
             memberLocalIds: members.map(member => `res.partner_${member.id}`),
         });
 
+        /* Update thread relationships, before thread to correctly compute name */
+        if (members) {
+            for (const member of members) {
+                dispatch('_insertPartner', member);
+            }
+        }
+
+        if (directPartnerData) {
+            dispatch('_insertPartner', directPartnerData);
+        }
+
         dispatch('writeStoreObject', 'threads', thread.localId, [new Assign(thread)]);
 
         if (thread._model !== 'mail.box') {
@@ -2070,15 +2082,6 @@ const actions = {
         }
         // compute thread links (--> thread)
         dispatch('_createThreadCache', { threadLocalId: thread.localId });
-        /* Update thread relationships */
-        if (members) {
-            for (const member of members) {
-                dispatch('_insertPartner', member);
-            }
-        }
-        if (directPartnerData) {
-            dispatch('_insertPartner', directPartnerData);
-        }
         return thread.localId;
     },
     /**
@@ -2178,16 +2181,16 @@ const actions = {
             },
         }, { shadow: true });
         for (const data of dataList) {
-            dispatch('_updatePartner', `res.partner_${data.id}`, {
+            dispatch('writeStoreObject', 'partners', `res.partner_${data.id}`, [new Assign({
                 im_status: data.im_status
-            });
+            })]);
             delete partnerIdToLocalId[data.id];
         }
         // partners with no im_status => set null
         for (const noImStatusPartnerLocalId of Object.values(partnerIdToLocalId)) {
-            dispatch('_updatePartner', noImStatusPartnerLocalId, {
+            dispatch('writeStoreObject', 'partners', noImStatusPartnerLocalId, [new Assign({
                 im_status: null,
-            });
+            })]);
         }
     },
     /**
@@ -3076,10 +3079,11 @@ const actions = {
         const id = param1.id;
         const kwargs = Object.assign({}, param1);
         const partnerLocalId = `res.partner_${id}`;
+
         if (!state.partners[partnerLocalId]) {
             dispatch('_createPartner', Object.assign({ id }, kwargs));
         } else {
-            dispatch('_updatePartner', partnerLocalId, kwargs);
+            dispatch('writeStoreObject', 'partners', partnerLocalId, [new Assign(kwargs)]);
         }
         return partnerLocalId;
     },
@@ -3190,9 +3194,9 @@ const actions = {
         if (partner.authorMessageLocalIds.includes(messageLocalId)) {
             return;
         }
-        dispatch('_updatePartner', partnerLocalId, {
+        dispatch('writeStoreObject', 'partners', partnerLocalId, [new Assign({
             authorMessageLocalIds: partner.authorMessageLocalIds.concat([messageLocalId])
-        });
+        })]);
     },
     /**
      * @private
@@ -3730,11 +3734,9 @@ const actions = {
         if (partner.authorMessageLocalIds.includes(messageLocalId)) {
             return;
         }
-        dispatch('_updatePartner', partnerLocalId, {
-            authorMessageLocalIds:
-                partner.authorMessageLocalIds.filter(localId =>
-                    localId !== messageLocalId),
-        });
+        dispatch('writeStoreObject', 'partners', partnerLocalId, [
+            new FilterArray('authorMessageLocalIds', localId => localId !== messageLocalId),
+        ]);
     },
     /**
      * @private

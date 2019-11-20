@@ -4,6 +4,11 @@ odoo.define('mail.component.Attachment', function () {
 const { Component } = owl;
 const { useDispatch, useGetters, useStore } = owl.hooks;
 
+const attachmentStoreProps = [
+    'id', 'localId', 'composerLocalId', 'filename', 'isTemporary', 'mimetype',
+    'fileType', 'isViewable'
+];
+
 class Attachment extends Component {
 
     /**
@@ -16,11 +21,9 @@ class Attachment extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             return {
-                attachment: this.storeGetters.getStoreObject({
-                    storeKey: 'attachments',
+                attachment: this.storeGetters.Attachment({
                     localId: props.attachmentLocalId,
-                    keys: ['id', 'localId', 'composerLocalId', 'filename', 'isTemporary', 'mimetype',
-                        'fileType', 'isViewable'],
+                    props: attachmentStoreProps,
                 }),
             };
         });
