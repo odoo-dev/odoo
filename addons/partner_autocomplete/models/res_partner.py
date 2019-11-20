@@ -84,8 +84,8 @@ class ResPartner(models.Model):
 
     @api.model
     def _rpc_remote_api(self, action, params, timeout=15):
-        if self.env.registry.in_test_mode() :
-            return False, 'Insufficient Credit'
+        # if self.env.registry.in_test_mode() :
+        #     return False, 'Insufficient Credit'
         url = '%s/%s' % (self.get_endpoint(), action)
         account = self.env['iap.account'].get('partner_autocomplete')
         if not account.account_token:
