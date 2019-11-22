@@ -106,7 +106,7 @@ options.registry.background.include({
             delete target.dataset.bgVideoSrc;
         }
         this._refreshPublicWidgets();
-        this._updateUI();
+        this.updateUI();
     },
     /**
      * Returns whether the current target has a background video or not.
@@ -348,12 +348,18 @@ options.registry.CarouselItem = options.Class.extend({
         this._super(...arguments);
         this.$carousel.off('.carousel_item_option');
     },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
     /**
      * Updates the slide counter.
      *
      * @override
      */
-    onFocus: function () {
+    updateUI: function () {
+        this._super(...arguments);
         const $items = this.$carousel.find('.carousel-item');
         const $activeSlide = $items.filter('.active');
         const updatedText = ` (${$activeSlide.index() + 1}/${$items.length})`;
@@ -481,9 +487,21 @@ options.registry.navTabs = options.Class.extend({
             $activeLink.parent().remove();
             $activePane.remove();
             self._findLinksAndPanes();
-            self._updateUI(); // TODO forced to do this because we do not return deferred for options
+            self.updateUI(); // TODO forced to do this because we do not return deferred for options
         });
         $next.tab('show');
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    updateUI: function () {
+        this._super(...arguments);
+        this.$el.filter('[data-remove-tab]').toggleClass('d-none', this.$tabPanes.length <= 2);
     },
 
     //--------------------------------------------------------------------------
@@ -519,14 +537,6 @@ options.registry.navTabs = options.Class.extend({
                 'aria-labelledby': idLink,
             });
         }
-    },
-    /**
-     * @private
-     * @override
-     */
-    _updateUI: function () {
-        this._super.apply(this, arguments);
-        this.$el.filter('[data-remove-tab]').toggleClass('d-none', this.$tabPanes.length <= 2);
     },
 });
 
@@ -1118,7 +1128,7 @@ options.registry.gallery = options.Class.extend({
             }
             self._reset();
             self.trigger_up('cover_update');
-            this._updateUI();
+            this.updateUI();
         });
         dialog.open();
     },
@@ -1552,10 +1562,16 @@ options.registry.topMenuColor = options.Class.extend({
         });
         return def;
     },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
     /**
      * @override
      */
-    onFocus: function () {
+    updateUI: function () {
+        this._super(...arguments);
         this.trigger_up('action_demand', {
             actionName: 'get_page_option',
             params: ['header_overlay'],
@@ -1778,7 +1794,7 @@ options.registry.CoverProperties = options.Class.extend({
             if (!this.$target.hasClass('o_record_has_cover')) {
                 this.$el.find('.o_record_cover_opt_size_default[data-select-class]').click();
             }
-            this._updateUI();
+            this.updateUI();
         });
     },
     /**

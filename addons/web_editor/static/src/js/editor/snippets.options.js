@@ -846,7 +846,7 @@ const MultiUserValueWidget = UserValueWidget.extend({
     },
 });
 
-const ColorpickerUserValueWidget = SelectUserValueWidget.extend({ // FIXME should be reloaded on focus
+const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
     custom_events: {
         'color_picked': '_onColorPicked',
         'color_hover': '_onColorHovered',
@@ -1069,16 +1069,6 @@ const SnippetOptionWidget = Widget.extend({
         this._super(...arguments);
         this.el.appendChild(this.uiFragment);
         this.uiFragment = null;
-    },
-    /**
-     * Called when the option is initialized (i.e. the parent edition overlay is
-     * shown for the first time).
-     *
-     * @override
-     */
-    start: function () {
-        this._updateUI();
-        return this._super.apply(this, arguments);
     },
     /**
      * Called when the parent edition overlay is covering the associated snippet
@@ -1318,8 +1308,29 @@ const SnippetOptionWidget = Widget.extend({
      */
     setTarget: function ($target) {
         this.$target = $target;
-        this._updateUI();
+        this.updateUI();
         this.$target.trigger('snippet-option-change', [this]);
+    },
+    /**
+     * Updates the UI. For widget update, @see _computeWidgetState.
+     */
+    updateUI: function () {
+        this._setActive();
+
+        // For each widget, for each of their option method, notify to the
+        // widget the current value they should hold according to the $target's
+        // current state, related for that method.
+        this._userValueWidgets.forEach(widget => {
+            widget.getMethodsNames().forEach(methodName => {
+                const value = this._computeWidgetState(methodName, widget.getMethodsParams(methodName));
+                const normalizedValue = this._normalizeWidgetValue(value);
+                widget.setValue(normalizedValue, methodName);
+            });
+        });
+
+        // Refresh the UI of all widgets (after all the current values they hold
+        // have been updated).
+        this._userValueWidgets.forEach(widget => widget.updateUI());
     },
 
     //--------------------------------------------------------------------------
@@ -1477,7 +1488,6 @@ const SnippetOptionWidget = Widget.extend({
 
         return uiFragment;
     },
-
     /**
      * @private
      * @param {HTMLElement} parentEl
@@ -1523,7 +1533,7 @@ const SnippetOptionWidget = Widget.extend({
 
         return this._renderOriginalXML($xml).then(uiFragment => {
             this.$el.append(uiFragment);
-            this._updateUI();
+            this.updateUI();
         });
     },
     /**
@@ -1562,40 +1572,17 @@ const SnippetOptionWidget = Widget.extend({
         });
 
         if (!previewMode) {
-            this._updateUI();
+            this.updateUI();
         }
 
         this.$target.trigger('content_changed');
     },
     /**
      * @private
-     * @deprecated all implementation should use _computeWidgetState or _updateUI
+     * @deprecated all implementation should use _computeWidgetState or updateUI
      *             methods, this method will be removed as soon as possible.
      */
     _setActive: function () {},
-    /**
-     * @private
-     */
-    _updateUI: function () {
-        this._setActive();
-
-        // For each widget, for each of their option method, notify to the
-        // widget the current value they should hold according to the $target's
-        // current state, related for that method.
-        this._userValueWidgets.forEach(widget => {
-            widget.getMethodsNames().forEach(methodName => {
-                const value = this._computeWidgetState(methodName, widget.getMethodsParams(methodName));
-                const normalizedValue = this._normalizeWidgetValue(value);
-                widget.setValue(normalizedValue, methodName);
-            });
-        });
-
-        // Refresh the UI of all widgets (after all the current values they hold
-        // have been updated).
-        this._userValueWidgets.forEach(widget => {
-            widget.updateUI();
-        });
-    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1756,11 +1743,6 @@ registry.sizing = SnippetOptionWidget.extend({
      * @override
      */
     onFocus: function () {
-        var resizeValues = this._getSize();
-        _.each(resizeValues, (value, key) => {
-            this.$handles.filter('.' + key).toggleClass('readonly', !value);
-        });
-
         this._onResize();
     },
     /**
@@ -1780,6 +1762,16 @@ registry.sizing = SnippetOptionWidget.extend({
     setTarget: function () {
         this._super.apply(this, arguments);
         this._onResize();
+    },
+    /**
+     * @override
+     */
+    updateUI: function () {
+        this._super(...arguments);
+        const resizeValues = this._getSize();
+        _.each(resizeValues, (value, key) => {
+            this.$handles.filter('.' + key).toggleClass('readonly', !value);
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -1975,6 +1967,20 @@ registry.background = SnippetOptionWidget.extend({
         this.bindBackgroundEvents();
         this.__customImageSrc = this._getSrcFromCssValue();
     },
+    /**
+     * @override
+     */
+    updateUI: function () {
+        this._super(...arguments);
+        var src = this._getSrcFromCssValue();
+        this.removeBgWidget.el.classList.toggle('d-none', !src);
+        if (src) {
+            var split = src.split('/');
+            this.editBgTextEl.textContent = split[split.length - 1];
+        } else {
+            this.editBgTextEl.textContent = this._getDefaultTextContent();
+        }
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -2036,20 +2042,6 @@ registry.background = SnippetOptionWidget.extend({
     /**
      * @override
      */
-    _updateUI: function () {
-        this._super.apply(this, arguments);
-        var src = this._getSrcFromCssValue();
-        this.removeBgWidget.el.classList.toggle('d-none', !src);
-        if (src) {
-            var split = src.split('/');
-            this.editBgTextEl.textContent = split[split.length - 1];
-        } else {
-            this.editBgTextEl.textContent = this._getDefaultTextContent();
-        }
-    },
-    /**
-     * @override
-     */
     _renderCustomWidgets: async function (uiFragment) {
         // Build option UI controls
         this.editBgTextEl = document.createElement('span');
@@ -2088,7 +2080,7 @@ registry.background = SnippetOptionWidget.extend({
         this.__customImageSrc = value;
         this.background(false, this.__customImageSrc, {});
         this.$target.toggleClass('oe_custom_bg', !!value);
-        this._updateUI();
+        this.updateUI();
         this.$target.trigger('snippet-option-change', [this]);
     },
 
@@ -2147,7 +2139,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
 
         this.$target.on('snippet-option-change', () => {
             // Hides option if the bg image is removed in favor of a bg color
-            this._updateUI();
+            this.updateUI();
             // this.img is used to compute dragging speed
             this.img.src = this._getSrcFromCssValue();
         });
@@ -2164,12 +2156,6 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         this._toggleBgOverlay(false);
         $(window).off('.bgposition');
         this._super.apply(this, arguments);
-    },
-    /**
-     * @override
-     */
-    onFocus: function () {
-        this._updateUI();
     },
 
     //--------------------------------------------------------------------------
@@ -2214,6 +2200,21 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
             return;
         }
         this._super(...arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+    /**
+     * Disables background position if no background image, disables size inputs
+     * in cover mode.
+     *
+     * @override
+     */
+    updateUI: function () {
+        this._super(...arguments);
+        this.$el.toggleClass('d-none', this.$target.css('background-image') === 'none');
+        this.$el.find('we-input').toggleClass('d-none', this.$target.css('background-repeat') !== 'repeat');
     },
 
     //--------------------------------------------------------------------------
@@ -2321,17 +2322,6 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         // Needs to be deferred or the click event that activated the overlay deactivates it as well.
         // This is caused by the click event which we are currently handling bubbling up to the document.
         window.setTimeout(() => $(document).on('click.bgposition', this._onDocumentClicked.bind(this)), 0);
-    },
-    /**
-     * Disables background position if no background image, disables size inputs
-     * in cover mode.
-     *
-     * @override
-     */
-    _updateUI: function () {
-        this._super.apply(this, arguments);
-        this.$el.toggleClass('d-none', this.$target.css('background-image') === 'none');
-        this.$el.find('we-input').toggleClass('d-none', this.$target.css('background-repeat') !== 'repeat');
     },
     /**
      * Returns the src value from a css value related to a background image

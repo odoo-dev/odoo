@@ -22,7 +22,6 @@ sOptions.registry.js_get_posts_selectBlog = sOptions.Class.extend({
                 el.textContent = blog.name;
                 menuEl.appendChild(el);
             }
-            this._updateUI();
         });
 
         return Promise.all([this._super.apply(this, arguments), def]);
