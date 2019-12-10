@@ -8,6 +8,7 @@ const FileUploader = require('mail.component.FileUploader');
 const TextInput = require('mail.component.ComposerTextInput');
 const useDragVisibleDropZone = require('mail.hooks.useDragVisibleDropZone');
 const useStore = require('mail.hooks.useStore');
+const mailUtils = require('mail.utils');
 
 const { Component } = owl;
 const { useDispatch, useGetters, useRef, useState } = owl.hooks;
@@ -20,14 +21,6 @@ class Composer extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.state = useState({
-            /**
-             * Determine whether there are some text content. Useful to prevent
-             * user to post something when there are no text content and no
-             * attachments.
-             */
-            hasTextInputContent: false,
-        });
         this.isDropZoneVisible = useDragVisibleDropZone();
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
@@ -160,16 +153,12 @@ class Composer extends Component {
      *
      * @private
      */
-    async _postMessage() {
+    _postMessage() {
         // TODO: take suggested recipients into account
         this.storeDispatch('postMessage', this.props.composerLocalId, {
-            htmlContent: this._textInputRef.comp.getHtmlContent(),
             isLog: this.props.isLog,
         });
-        this._textInputRef.comp.reset();
-        this.storeDispatch('unlinkAttachmentsFromComposer', this.props.composerLocalId);
-        // TODO: we might need to remove trigger and use the store to wait for
-        // the post rpc to be done
+        // TODO: we might need to remove trigger and use the store to wait for the post rpc to be done
         this.trigger('o-message-posted');
     }
 
@@ -221,7 +210,7 @@ class Composer extends Component {
 
         const context = {
             // default_parent_id: this.id,
-            default_body: this._textInputRef.comp.getHtmlContent(),
+            default_body: mailUtils.escapeAndCompactTextContent(this._textInputRef.comp.getContent()),
             default_attachment_ids: attachmentIds,
             // default_partner_ids: partnerIds,
             default_is_log: this.props.isLog,
@@ -263,7 +252,7 @@ class Composer extends Component {
      */
     _onClickSend(ev) {
         if (
-            this._textInputRef.comp.isEmpty() &&
+            !this.storeProps.composer.textInputContent &&
             this.storeProps.composer.attachmentLocalIds.length === 0
         ) {
             return;
@@ -303,14 +292,20 @@ class Composer extends Component {
      * @param {string} ev.detail.unicode
      */
     _onEmojiSelection(ev) {
-        this._textInputRef.comp.insertTextContent(ev.detail.unicode);
+        this._textInputRef.comp.saveStateInStore();
+        this.storeDispatch(
+            'insertEmojiInComposerTextInput',
+            this.props.composerLocalId,
+            ev.detail.unicode,
+        );
+        this._textInputRef.comp.focus();
     }
 
     /**
      * @private
      */
     _onInputTextInput() {
-        this.state.hasTextInputContent = !this._textInputRef.comp.isEmpty();
+        this._textInputRef.comp.saveStateInStore();
     }
 
     /**
@@ -331,14 +326,13 @@ class Composer extends Component {
     _onTextInputKeydownEnter(ev) {
         // TODO SEB this is the same code as _onClickSend
         if (
-            this._textInputRef.comp.isEmpty() &&
+            !this.storeProps.composer.textInputContent &&
             this.storeProps.composer.attachmentLocalIds.length === 0
         ) {
             return;
         }
         this._postMessage();
     }
-
 }
 
 Composer.components = { AttachmentList, DropZone, EmojisButton, FileUploader, TextInput };

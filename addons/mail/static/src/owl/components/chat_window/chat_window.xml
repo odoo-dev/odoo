@@ -9,7 +9,7 @@
                 'o-fullscreen': props.isFullscreen,
                 'o-mobile': storeProps.isMobile,
                 'o-new-message': props.chatWindowLocalId === 'new_message',
-            }" t-on-click.stop="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_focusout" t-att-data-chat-window-local-id="props.chatWindowLocalId" t-att-data-thread-local-id="storeProps.thread ? storeProps.thread.localId : ''"
+            }" t-on-click.stop="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window-local-id="props.chatWindowLocalId" t-att-data-thread-local-id="storeProps.thread ? storeProps.thread.localId : ''"
         >
             <Header
                 class="o_ChatWindow_header"

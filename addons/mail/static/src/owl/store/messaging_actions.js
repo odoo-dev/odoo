@@ -528,6 +528,29 @@ const actions = {
         dispatch('_startLoopFetchPartnerImStatus');
     },
     /**
+     *
+     * Inserts an emoji at the position saved in the store.
+     *
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} emoji
+     * @param {string} composerLocalId
+     */
+    insertEmojiInComposerTextInput(
+        { state },
+        composerLocalId,
+        emoji,
+    ) {
+        const composer = state.composers[composerLocalId];
+        const partA = composer.textInputContent.slice(0, composer.textInputCursorStart);
+        const partB = composer.textInputContent.slice(composer.textInputCursorEnd, composer.textInputContent.length);
+        Object.assign(composer, {
+            textInputContent: partA + emoji + partB,
+            textInputCursorStart: composer.textInputCursorStart + emoji.length,
+            textInputCursorEnd: composer.textInputCursorStart + emoji.length,
+        });
+    },
+    /**
      * Update existing thread or create a new thread.
      *
      * @param {Object} param0
@@ -834,7 +857,6 @@ const actions = {
      * @param {string[]} data.attachmentLocalIds
      * @param {*[]} data.canned_response_ids
      * @param {integer[]} data.channel_ids
-     * @param {string} data.htmlContent
      * @param {boolean} [data.isLog=false]
      * @param {string} data.subject
      * @param {integer} [data.subtype_id]
@@ -860,13 +882,13 @@ const actions = {
             canned_response_ids,
             channel_ids=[],
             context,
-            htmlContent,
             isLog=false,
             subject,
             subtype_id,
             // subtype_xmlid='mail.mt_comment',
         } = data;
-        let body = htmlContent.replace(/&nbsp;/g, ' ').trim();
+        const escapedAndCompactContent = mailUtils.escapeAndCompactTextContent(composer.textInputContent);
+        let body = escapedAndCompactContent.replace(/&nbsp;/g, ' ').trim();
         // This message will be received from the mail composer as html content
         // subtype but the urls will not be linkified. If the mail composer
         // takes the responsibility to linkify the urls we end up with double
@@ -924,6 +946,7 @@ const actions = {
             }));
             dispatch('_loadNewMessagesOnThread', thread.localId);
         }
+        dispatch('_resetComposer', composerLocalId);
     },
     /**
      * Handles redirection to a model and id. Try to handle it in the context
@@ -1052,6 +1075,22 @@ const actions = {
         newChatWindowInitialScrollTops[chatWindowLocalId] = scrollTop;
         dispatch('_updateChatWindowManager', {
             chatWindowInitialScrollTops: newChatWindowInitialScrollTops,
+        });
+    },
+    /**
+     * @param {Object} state
+     * @param {string} composerLocalId
+     * @param {Object} data
+     */
+    saveComposerTextInput(
+        { state },
+        composerLocalId,
+        data,
+    ) {
+        Object.assign(state.composers[composerLocalId], {
+            textInputContent: data.textInputContent,
+            textInputCursorStart: data.textInputCursorStart,
+            textInputCursorEnd: data.textInputCursorEnd,
         });
     },
     /**
@@ -1264,27 +1303,6 @@ const actions = {
             args: [attachment.id],
         }, { shadow: true });
         dispatch('deleteAttachment', attachmentLocalId);
-    },
-    /**
-     * Remove the links of all attachment of provided composer.
-     * Note that attachments are not globally "unlinked", per-say.
-     *
-     * @param {Object} param0
-     * @param {function} param0.dispatch
-     * @param {Object} param0.state
-     * @param {string} composerLocalId
-     */
-    unlinkAttachmentsFromComposer({ dispatch, state }, composerLocalId) {
-        const composer = state.composers[composerLocalId];
-        const attachmentLocalIds = composer.attachmentLocalIds;
-        composer.attachmentLocalIds = [];
-        for (const attachmentLocalId of attachmentLocalIds) {
-            const attachment = state.attachments[attachmentLocalId];
-            if (!attachment.composerLocalId === composer.localId) {
-                return;
-            }
-            dispatch('_updateAttachment', attachmentLocalId, { composerLocalId: undefined });
-        }
     },
     /**
      * Unstar all starred messages of current user.
@@ -1609,8 +1627,11 @@ const actions = {
     _createComposer({ state }, { threadLocalId }={}) {
         const composerLocalId = _.uniqueId('mail.composer_');
         state.composers[composerLocalId] = {
-            localId: composerLocalId,
             attachmentLocalIds: [],
+            localId: composerLocalId,
+            textInputContent: '',
+            textInputCursorStart: 0,
+            textInputCursorEnd: 0,
             threadLocalId,
         };
         if (threadLocalId) {
@@ -3677,6 +3698,21 @@ const actions = {
      * @private
      * @param {Object} param0
      * @param {function} param0.dispatch
+     * @param {Object} param0.state
+     * @param {string} composerLocalId
+     */
+    _resetComposer({ dispatch, state }, composerLocalId) {
+        Object.assign(state.composers[composerLocalId], {
+            textInputContent: '',
+            textInputCursorStart: 0,
+            textInputCursorEnd: 0,
+        });
+        dispatch('_unlinkAttachmentsFromComposer', composerLocalId);
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
      */
     async _startLoopFetchPartnerImStatus({ dispatch }) {
         await dispatch('_fetchPartnerImStatus');
@@ -3719,6 +3755,28 @@ const actions = {
         const message = state.messages[messageLocalId];
         message.attachmentLocalIds = message.attachmentLocalIds.filter(localId =>
             localId !== attachmentLocalId);
+    },
+    /**
+     * Remove the links of all attachment of provided composer.
+     * Note that attachments are not globally "unlinked", per-say.
+     *
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.state
+     * @param {string} composerLocalId
+     */
+    _unlinkAttachmentsFromComposer({ dispatch, state }, composerLocalId) {
+        const composer = state.composers[composerLocalId];
+        const attachmentLocalIds = composer.attachmentLocalIds;
+        composer.attachmentLocalIds = [];
+        for (const attachmentLocalId of attachmentLocalIds) {
+            const attachment = state.attachments[attachmentLocalId];
+            if (attachment.composerLocalId !== composer.localId) {
+                return;
+            }
+            dispatch('_updateAttachment', attachmentLocalId, { composerLocalId: undefined });
+        }
     },
     /**
      * @private

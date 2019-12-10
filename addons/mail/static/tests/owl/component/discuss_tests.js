@@ -2853,7 +2853,7 @@ QUnit.test('toggle_star message', async function (assert) {
     );
 });
 
-QUnit.skip('composer state: text save and restore', async function (assert) {
+QUnit.test('composer state: text save and restore', async function (assert) {
     /**
      * Skipped because composer state should now be synchronized by means
      * of the store. However, this does not work good with summernote, and since
@@ -2888,32 +2888,32 @@ QUnit.skip('composer state: text save and restore', async function (assert) {
         },
     });
     // Write text in composer for #general
-    document.querySelector(`.o_ComposerTextInput_editable`).focus();
-    document.execCommand('insertText', false, "XDU for the win");
-    document.querySelector(`.o_ComposerTextInput_editable`)
+    document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+    document.execCommand('insertText', false, "A message");
+    document.querySelector(`.o_ComposerTextInput_textarea`)
         .dispatchEvent(new window.KeyboardEvent('input'));
     await afterNextRender();
     document.querySelector(`.o_DiscussSidebarItem[data-thread-name="Special"]`).click();
     await afterNextRender();
-    document.querySelector(`.o_ComposerTextInput_editable`).focus();
-    document.execCommand('insertText', false, "They see me rollin'");
-    document.querySelector(`.o_ComposerTextInput_editable`)
+    document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+    document.execCommand('insertText', false, "An other message");
+    document.querySelector(`.o_ComposerTextInput_textarea`)
         .dispatchEvent(new window.KeyboardEvent('input'));
     await afterNextRender();
     // Switch back to #general
     document.querySelector(`.o_DiscussSidebarItem[data-thread-name="General"]`).click();
     await afterNextRender();
     assert.strictEqual(
-        document.querySelector(`.o_ComposerTextInput_editable`).textContent,
-        "XDU for the win",
+        document.querySelector(`.o_ComposerTextInput_textarea`).value,
+        "A message",
         "should restore the input text"
     );
 
     document.querySelector(`.o_DiscussSidebarItem[data-thread-name="Special"]`).click();
     await afterNextRender();
     assert.strictEqual(
-        document.querySelector(`.o_ComposerTextInput_editable`).textContent,
-        "They see me rollin'",
+        document.querySelector(`.o_ComposerTextInput_textarea`).value,
+        "An other message",
         "should restore the input text"
     );
 });
@@ -3059,7 +3059,7 @@ QUnit.test('post a simple message', async function (assert) {
                 );
                 assert.strictEqual(
                     args.kwargs.body,
-                    "Test<p></p>", // AKU: summernote adds extra <p> for some reasons
+                    "Test",
                     "should post with provided content in composer input"
                 );
                 assert.strictEqual(
@@ -3109,26 +3109,26 @@ QUnit.test('post a simple message', async function (assert) {
         "should display no message initially"
     );
     assert.strictEqual(
-        document.querySelector(`.o_ComposerTextInput_editable`).textContent,
+        document.querySelector(`.o_ComposerTextInput_textarea`).value,
         "",
         "should have empty content initially"
     );
 
     // insert some HTML in editable
-    document.querySelector(`.o_ComposerTextInput_editable`).focus();
+    document.querySelector(`.o_ComposerTextInput_textarea`).focus();
     document.execCommand('insertText', false, "Test");
     assert.strictEqual(
-        document.querySelector(`.o_ComposerTextInput_editable`).textContent,
+        document.querySelector(`.o_ComposerTextInput_textarea`).value,
         "Test",
         "should have inserted text in editable"
     );
 
-    document.querySelector(`.o_ComposerTextInput_editable`)
+    document.querySelector(`.o_ComposerTextInput_textarea`)
         .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
     await afterNextRender();
     assert.verifySteps(['message_post']);
     assert.strictEqual(
-        document.querySelector(`.o_ComposerTextInput_editable`).textContent,
+        document.querySelector(`.o_ComposerTextInput_textarea`).value,
         "",
         "should have no content in composer input after posting message"
     );
@@ -3437,7 +3437,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
                 );
                 assert.strictEqual(
                     args.kwargs.body,
-                    "Test<p></p>", // AKU: summernote adds extra <p> for some reasons
+                    "Test",
                     "should post with provided content in composer input"
                 );
                 assert.strictEqual(
@@ -3505,12 +3505,12 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
     );
     assert.strictEqual(
         document.activeElement,
-        document.querySelector(`.o_ComposerTextInput_editable`),
+        document.querySelector(`.o_ComposerTextInput_textarea`),
         "composer text input should be auto-focus"
     );
 
     document.execCommand('insertText', false, "Test");
-    document.querySelector(`.o_ComposerTextInput_editable`)
+    document.querySelector(`.o_ComposerTextInput_textarea`)
         .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
     assert.verifySteps(['message_post']);
     await afterNextRender();

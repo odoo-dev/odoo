@@ -2,19 +2,9 @@ odoo.define('mail.component.ComposerTextInput', function (require) {
 'use strict';
 
 const useStore = require('mail.hooks.useStore');
-const ajax = require('web.ajax');
-const utils = require('web.utils');
 
 const { Component } = owl;
 const { useDispatch, useGetters, useRef } = owl.hooks;
-
-/**
- * Enforced empty content of the contenteditable. This is necessary because
- * a contenteditable may have many different value when empty, like "", "<br/>",
- * or even "<p><br/></p>". This is dependent of user interaction and browser
- * specific, hence this value is enforced when contenteditable should be empty.
- */
-const EMPTY_HTML = "<p></p>";
 
 /**
  * ComposerInput relies on a minimal HTML editor in order to support mentions.
@@ -27,86 +17,34 @@ class ComposerTextInput extends Component {
      */
     constructor(...args) {
         super(...args);
-
-        /**
-         * Max frequency for searching for mention suggestions. Useful to
-         * limit amount of RPC while user types something that starts a mention.
-         */
-        this.MENTION_THROTTLE = 200;
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
-        this.storeProps = useStore(state => {
+        this.storeProps = useStore((state, props) => {
             return {
                 isMobile: state.isMobile,
+                composer: state.composers[props.composerLocalId],
             };
         });
         /**
-         * jQuery node reference to textarea that is used to configure
-         * summernote editor on. Useful to invoke summernote commands.
-         */
-        this._$textarea = undefined;
-        /**
-         * Node reference of the contenteditable that is part of summernote
-         * editor. Useful to interact with content of the composer.
-         */
-        this._editable = undefined;
-        /**
-         * Last tracked range in the contenteditable. Useful to correctly insert
-         * some content at the correct position.
-         */
-        this._lastRange = undefined;
-        /**
-         * Reference of the textarea. Only useful to compute the jQuery node
-         * reference of it...
+         * Reference of the textarea. Useful to set height, selection and content.
          */
         this._textareaRef = useRef('textarea');
-        /**
-         * Tribute instance that has been configured on contenteditable of
-         * summernote editor. Tribute is a small framework to enable mentions
-         * in the contenteditable.
-         */
-        this._tribute = undefined; // list of tribute mentions (partner, canned responses, etc.)
-
-        this._searchChannelMentionSuggestions = _.throttle(
-            this._searchChannelMentionSuggestions.bind(this),
-            this.MENTION_THROTTLE
-        );
-        this._searchPartnerMentionSuggestions = _.throttle(
-            this._searchPartnerMentionSuggestions.bind(this),
-            this.MENTION_THROTTLE
-        );
     }
 
     /**
-     * Load summernote, since this is not in the assets bundle.
-     */
-    willStart() {
-        return this._loadSummernote();
-    }
-
-    /**
-     * Configure summernote and tribute on mount
+     * Updates the composer text input content when composer is mounted
+     * as textarea content can't be changed from the DOM.
      */
     mounted() {
-        const {
-            $textarea,
-            editable,
-        } = this._configSummernote();
-        const tribute = this._configTribute({ editable });
-
-        this._$textarea = $textarea;
-        this._editable = editable;
-        this._tribute = tribute;
-
-        if (this.props.initialHtmlContent) {
-            this.setHtmlContent(this.props.initialHtmlContent);
-        }
-        this._update(); // remove initial <p></br></p>
+        this._update();
     }
 
-    willUnmount() {
-        this._tribute.detach(this._editable);
-        this._$textarea.summernote('destroy');
+    /**
+     * Updates the composer text input content when composer has changed
+     * as textarea content can't be changed from the DOM.
+     */
+    patched() {
+        this._update();
     }
 
     //--------------------------------------------------------------------------
@@ -114,423 +52,95 @@ class ComposerTextInput extends Component {
     //--------------------------------------------------------------------------
 
     focus() {
-        this._editable.focus();
+        this._textareaRef.el.focus();
     }
 
     focusout() {
-        this._editable.blur();
+        this.saveStateInStore();
+        this._textareaRef.el.blur();
     }
 
     /**
-     * @return {string}
-     */
-    getHtmlContent() {
-        return this._editable.innerHTML;
-    }
-
-    /**
-     * Insert some text content in the contenteditable.
+     * Returns textarea current content.
      *
-     * @param {string} textContent
+     * @returns {string}
      */
-    insertTextContent(textContent) {
-        if (!this._lastRange) {
-            this._placeCursorAtEnd();
-        } else if (this._lastRange.sc.nodeType === 3) {
-            /**
-             * Restore range only if it makes sense, i.e. it targets a text node.
-             * This is not the case right after mentioning, in which the cursor
-             * position is buggy. Summernote fallbacks by inserting content as
-             * child of editor's container, which is very bad... This instead
-             * insert text at the default position, which is the beginning of
-             * the editor.
-             */
-            if (this._lastRange.so <= this._lastRange.sc.length) {
-                this._$textarea.summernote('editor.restoreRange');
-            } else {
-                this._placeCursorAtEnd();
-            }
-        }
-        this._$textarea.summernote('editor.insertText', textContent);
-        this._update();
+    getContent() {
+        return this._textareaRef.el.value;
     }
 
     /**
-     * Determine whether the editable is empty or not.
-     *
-     * @return {boolean}
+     * Saves the composer text input state in store
      */
-    isEmpty() {
-        return this._editable.innerHTML === EMPTY_HTML;
-    }
-
-    reset() {
-        this._editable.innerHTML = EMPTY_HTML;
-        this._update();
-    }
-
-    /**
-     * Insert some HTML content in the textarea. This is useful when we need
-     * to restore the content in the contenteditable, while preserving the
-     * mentions.
-     *
-     * @param {string} htmlContent
-     */
-    setHtmlContent(htmlContent) {
-        this.focus();
-        if (htmlContent.startsWith('<')) {
-            this._$textarea.code(htmlContent);
-        } else {
-            this._$textarea.summernote('editor.pasteHTML', htmlContent);
-        }
-        this._placeCursorAtEnd();
+    saveStateInStore() {
+        const data = {
+            textInputContent: this.getContent(),
+            textInputCursorStart: this._getSelectionStart(),
+            textInputCursorEnd: this._getSelectionEnd(),
+        };
+        this.storeDispatch(
+            'saveComposerTextInput',
+            this.props.composerLocalId,
+            data,
+        );
     }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Configure summernote editor using the textarea.
-     *
-     * @private
-     * @return {Object}
-     */
-    _configSummernote() {
-        const $textarea = $(this._textareaRef.el);
-
-        $textarea.summernote({
-            callbacks: {
-                onPaste(ev) {
-                    const bufferText = ((ev.originalEvent || ev).clipboardData ||
-                        window.clipboardData).getData('Text');
-                    ev.preventDefault();
-                    document.execCommand('insertText', false, bufferText);
-                },
-            },
-            disableDragAndDrop: true,
-            disableResizeEditor: true,
-            placeholder: this.env._t("Write something..."),
-            popover: {
-                image: [],
-                link: [],
-                air: [],
-            },
-            shortcuts: false,
-            toolbar: false,
-        });
-
-        const editingArea = this.el.querySelector(':scope > .note-editor > .note-editing-area');
-        const editable = editingArea.querySelector(':scope .note-editable');
-        $textarea.summernote('removeModule', 'autoLink'); // conflict with this summernote module and tribute
-
-        editable.classList.add('o_ComposerTextInput_editable');
-        editable.addEventListener('click', ev => this._onClickEditable(ev));
-        editable.addEventListener('input', ev => this._onInputEditable(ev));
-        editable.addEventListener('keydown', ev => this._onKeydownEditable(ev));
-        editable.addEventListener('keyup', ev => this._onKeyupEditable(ev));
-        editable.addEventListener('selectionchange', ev => this._onSelectionChangeEditable(ev));
-
-        return { $textarea, editable };
-    }
-
-    /**
-     * Configure tribute with the contenteditable made with summernote editor.
-     * This enables mentions.
-     *
-     * @private
-     * @param {Object} param0
-     * @param {HTMLElement} param0.editable
-     * @return {Object} tribute object
-     */
-    _configTribute({ editable }) {
-        const tribute = new window.Tribute({
-            collection: [
-                this._configTributeCollectionItemCannedResponse(),
-                this._configTributeCollectionItemChannel(),
-                this._configTributeCollectionItemCommand(),
-                this._configTributeCollectionItemPartner(),
-            ],
-        });
-
-        tribute.attach(editable);
-        return tribute;
-    }
-
-    /**
-     * Configure canned responses with tribute.
-     *
-     * @private
-     * @return {Object}
-     */
-    _configTributeCollectionItemCannedResponse() {
-        const self = this;
-        const collectionItem = {
-            lookup: 'source',
-            menuItemTemplate(item) {
-                return self.env.qweb.renderToString('mail.component.ComposerTextInput.CannedReponseMentionMenuItem', {
-                    isMobile: self.storeProps.isMobile,
-                    item,
-                });
-            },
-            selectTemplate(item) {
-                return item ? item.original.substitution : null;
-            },
-            trigger: ':',
-            values(keyword, callback) {
-                const cannedResponses = self._searchCannedResponseSuggestions(keyword);
-                callback(cannedResponses);
-            },
-        };
-        return collectionItem;
-    }
-
-    /**
-     * Configure channel mentions with tribute.
-     *
-     * @private
-     * @return {Object}
-     */
-    _configTributeCollectionItemChannel() {
-        const self = this;
-        const collectionItem = {
-            lookup: 'name',
-            menuItemTemplate(item) {
-                return self.env.qweb.renderToString('mail.component.ComposerTextInput.ChannelMentionMenuItem', {
-                    isMobile: self.storeProps.isMobile,
-                    item,
-                });
-            },
-            selectTemplate(item) {
-                if (!item) {
-                    // no match keeps mentioning state, hence handle no item selection
-                    return null;
-                }
-                return self.env.qweb.renderToString('mail.component.ComposerTextInput.ChannelMentionSelectItem', { item });
-            },
-            trigger: '#',
-            values(keyword, callback) {
-                self._searchChannelMentionSuggestions(keyword, channels => callback(channels));
-            },
-        };
-        return collectionItem;
-    }
-
-    /**
-     * Configure commands with tribute.
-     *
-     * @private
-     * @return {Object}
-     */
-    _configTributeCollectionItemCommand() {
-        const self = this;
-        const collectionItem = {
-            lookup: 'name',
-            menuItemTemplate(item) {
-                return self.env.qweb.renderToString('mail.component.ComposerTextInput.CommandMentionMenuItem', {
-                    isMobile: self.storeProps.isMobile,
-                    item,
-                });
-            },
-            selectTemplate(item) {
-                return item ? '/' + item.original.name : null;
-            },
-            trigger: '/',
-            values(keyword, callback) {
-                const commands = self._searchCommandSuggestions(keyword);
-                callback(commands);
-            },
-        };
-        return collectionItem;
-    }
-
-    /**
-     * Configure partner mentions with tribute.
-     *
-     * @private
-     * @return {Object}
-     */
-    _configTributeCollectionItemPartner() {
-        const self = this;
-        const collectionItem = {
-            lookup: 'name',
-            menuItemTemplate(item) {
-                return self.env.qweb.renderToString('mail.component.ComposerTextInput.PartnerMentionMenuItem', {
-                    isMobile: self.storeProps.isMobile,
-                    item,
-                    partnerName: self.storeGetters.partnerName(item.original.localId),
-                });
-            },
-            selectTemplate(item) {
-                if (!item) {
-                    // no match may keep mentioning state, hence handle no item selection
-                    return null;
-                }
-                return self.env.qweb.renderToString('mail.component.ComposerTextInput.PartnerMentionSelectItem', {
-                    item,
-                    partnerName: self.storeGetters.partnerName(item.original.localId),
-                });
-            },
-            trigger: '@',
-            values(keyword, callback) {
-                self._searchPartnerMentionSuggestions(keyword, partners => callback(partners));
-            },
-        };
-        return collectionItem;
-    }
-
-    /**
-     * @private
-     * @returns {Promise}
-     */
-    _loadSummernote() {
-        return ajax.loadLibs({
-            assetLibs: ['web_editor.compiled_assets_wysiwyg'],
-        });
-    }
-
-    /**
-     * Places the cursor at the end of a contenteditable container
-     * (should also work for textarea / input)
-     *
-     * @private
-     */
-    _placeCursorAtEnd() {
-        const el = this._editable;
-        const childLength = el.childNodes.length;
-        if (childLength === 0) {
-            return;
-        }
-        const range = document.createRange();
-        const sel = window.getSelection();
-        const lastNode = el.childNodes[childLength - 1];
-        const lastNodeChildren = lastNode.childNodes.length;
-        range.setStart(lastNode, lastNodeChildren);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
-
-    /**
-     * Save the range of the contenteditable. This is useful in order to set
-     * content in it at the correct position, after losing the focus, such as
-     * when adding an emoji from the emoji button.
-     *
-     * @private
-     */
-    _saveRange() {
-        this._$textarea.summernote('editor.saveRange');
-        if (this.isEmpty()) {
-            this._lastRange = undefined;
-        } else {
-            this._lastRange = this._$textarea.summernote('editor.createRange');
-        }
-    }
-
-    /**
-     * Search available canned responses based on typed characters after the
-     * canned response mention trigger character.
-     *
-     * @private
-     * @param {string} keyword
-     * @returns {Object[]}
-     */
-    _searchCannedResponseSuggestions(keyword) {
-        const cannedResponseList = Object.values(this.env.store.state.cannedResponses);
-        const matches = fuzzy.filter(
-            utils.unaccent(keyword),
-            cannedResponseList.map(cannedResponse => cannedResponse.source));
-        return matches.slice(0, 10).map(match => cannedResponseList[match.index]);
-    }
-
-    /**
-     * Search available channel mentions suggestions based on typed characters
-     * after the channel mention trigger character.
-     *
-     * @private
-     * @param {string} keyword
-     * @param {function} callback
-     */
-    async _searchChannelMentionSuggestions(keyword, callback) {
-        const suggestions = await this.env.rpc({
-            model: 'mail.channel',
-            method: 'get_mention_suggestions',
-            kwargs: {
-                limit: 10,
-                search: keyword,
-            },
-        });
-        callback(suggestions);
-    }
-
-    /**
-     * Search available commands based on typed characters after the command
-     * trigger character. This should only work when the trigger character is
-     * the 1st character in the contenteditable, because commands should only
-     * work on the whole composer text input content.
-     *
-     * @private
-     * @param {string} keyword
-     * @return {Object[]}
-     */
-    _searchCommandSuggestions(keyword) {
-        const selection = window.getSelection();
-        if (!selection) {
-            return [];
-        }
-        if (!selection.anchorNode) {
-            return [];
-        }
-        if (!selection.anchorNode.parentNode) {
-            return [];
-        }
-
         /**
-         * @return {DOMNode}
-         */
-        function getAnchorParentFirstChildNotEmptyText() {
-            return Array.prototype.find.call(selection.anchorNode.parentNode.childNodes, childNode =>
-                childNode.nodeType !== 3 || childNode.textContent.trim().length !== 0);
-        }
-
-        if (getAnchorParentFirstChildNotEmptyText() !== selection.anchorNode) {
-            return [];
-        }
-
-        if (this._tribute.current.selectedOffset - 1 !== keyword.length) {
-            return [];
-        }
-
-        const commandList = Object.values(this.env.store.state.commands);
-        const matches = fuzzy.filter(
-            utils.unaccent(keyword),
-            commandList.map(command => command.name));
-        return matches.slice(0, 10).map(match => commandList[match.index]);
-    }
-
-    /**
-     * Search available partner mention suggestions based on typed characters
-     * after the partner mention trigger character.
+     * Returns selection end position.
      *
      * @private
-     * @param {string} keyword
-     * @param {function} callback
+     * @returns {integer}
      */
-    async _searchPartnerMentionSuggestions(keyword, callback) {
-        this.storeDispatch('searchPartners', { callback, keyword, limit: 10 });
+    _getSelectionEnd() {
+        return this._textareaRef.el.selectionEnd;
     }
 
     /**
-     * Called when contenteditable content should be checked for emptiness.
-     * Useful to enforce html value for "empty".
+     * Returns selection start position.
+     *
+     * @private
+     * @returns {integer}
+     *
+     */
+    _getSelectionStart() {
+        return this._textareaRef.el.selectionStart;
+    }
+
+    /**
+     * Determines whether the textarea is empty or not.
+     *
+     * @private
+     * @return {boolean}
+     */
+    _isEmpty() {
+        return this.getContent() === "";
+    }
+
+    /**
+     * Updates the content and height of a textarea
      *
      * @private
      */
     _update() {
-        if (this._editable.textContent.length === 0) {
-            this._editable.innerHTML = EMPTY_HTML;
-        }
-        this._editable.classList.toggle('o-empty', this.isEmpty());
+        this._textareaRef.el.value = this.storeProps.composer.textInputContent;
+        this._textareaRef.el.setSelectionRange(
+            this.storeProps.composer.textInputCursorStart,
+            this.storeProps.composer.textInputCursorEnd);
+        this._updateHeight();
+    }
+
+    /**
+     * Updates the textarea height.
+     *
+     * @private
+     */
+    _updateHeight() {
+        this._textareaRef.el.style.height = "0px";
+        this._textareaRef.el.style.height = (this._textareaRef.el.scrollHeight) + "px";
     }
 
     //--------------------------------------------------------------------------
@@ -538,24 +148,10 @@ class ComposerTextInput extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * Called when clicking on the contenteditable.
-     *
      * @private
-     * @param {MouseEvent} ev
      */
-    _onClickEditable(ev) {
-        this._saveRange();
-    }
-
-    /**
-     * Called whenever there are changes on the contenteditable.
-     *
-     * @private
-     * @param {KeyboardEvent} ev
-     */
-    _onInputEditable(ev) {
-        this._update();
-        this._saveRange();
+    _onInputTextarea() {
+        this._updateHeight();
         this.trigger('o-input-composer-text-input');
     }
 
@@ -563,17 +159,13 @@ class ComposerTextInput extends Component {
      * @private
      * @param {KeyboardEvent} ev
      */
-    _onKeydownEditable(ev) {
-        this._saveRange();
+    _onKeydownTextarea(ev) {
         switch (ev.key) {
-            case 'Backspace':
-                this._onKeydownEditableBackspace(ev);
-                break;
             case 'Enter':
-                this._onKeydownEditableEnter(ev);
+                this._onKeydownTextareaEnter(ev);
                 break;
             case 'Escape':
-                this._onKeydownEditableEscape(ev);
+                this._onKeydownTextareaEscape(ev);
                 break;
             default:
                 break;
@@ -584,82 +176,8 @@ class ComposerTextInput extends Component {
      * @private
      * @param {KeyboardEvent} ev
      */
-    _onKeyupEditable(ev) {
-        this._saveRange();
-    }
-
-    /**
-     * Force deleting contenteditable = 'false' inside editable.
-     * It works by default on Chrome and Safari works fine, but not on Firefox
-     * due to following bug:
-     * https://bugzilla.mozilla.org/show_bug.cgi?id=685452
-     *
-     * Adapted code from:
-     * https://stackoverflow.com/questions/2177958/how-to-delete-an-html-element-inside-a-div-with-attribute-contenteditable/30574622#30574622
-     *
-     * @private
-     * @param {KeyboardEvent} ev
-     */
-    _onKeydownEditableBackspace(ev) {
-        if (this.isEmpty()) {
-            return;
-        }
-        const selection = window.getSelection();
-        if (!selection.isCollapsed || !selection.rangeCount) {
-            return;
-        }
-        const curRange = selection.getRangeAt(selection.rangeCount - 1);
-        if (curRange.commonAncestorContainer.nodeType === 3 && curRange.startOffset > 0) {
-            // we are in child selection. The characters of the text node is being deleted
-            return;
-        }
-
-        const range = document.createRange();
-        if (selection.anchorNode !== ev.target) {
-            // selection is in character mode. expand it to the whole editable field
-            range.selectNodeContents(ev.target);
-            range.setEndBefore(selection.anchorNode);
-        } else if (selection.anchorOffset > 0) {
-            range.setEnd(ev.target, selection.anchorOffset);
-        } else {
-            // reached the beginning of editable field
-            return;
-        }
-        try {
-            range.setStart(ev.target, range.endOffset - 2);
-        } catch (err) {
-            return;
-        }
-        const previousNode = range.cloneContents().lastChild;
-        if (previousNode) {
-            if (previousNode.contentEditable === 'false') {
-                range.deleteContents();
-                ev.preventDefault();
-            }
-            /**
-             * Prevent cursor bug in Firefox with contenteditable='false'
-             * inside contenteditable='true', by having more aggressive delete
-             * behaviour:
-             * https://bugzilla.mozilla.org/show_bug.cgi?id=685452
-             */
-            const formerPreviousNode = previousNode.previousSibling;
-            if (formerPreviousNode && formerPreviousNode.contentEditable === 'false') {
-                range.deleteContents();
-                ev.preventDefault();
-            }
-        }
-        this._update();
-    }
-
-    /**
-     * @private
-     * @param {KeyboardEvent} ev
-     */
-    _onKeydownEditableEnter(ev) {
+    _onKeydownTextareaEnter(ev) {
         if (!this.props.hasSendOnEnterEnabled) {
-            return;
-        }
-        if (this._tribute.isActive) {
             return;
         }
         if (ev.shiftKey) {
@@ -676,20 +194,12 @@ class ComposerTextInput extends Component {
      * @private
      * @param {KeyboardEvent} ev
      */
-    _onKeydownEditableEscape(ev) {
-        if (this._editable.innerHTML.length !== 0) {
+    _onKeydownTextareaEscape(ev) {
+        if (!this._isEmpty()) {
             return;
         }
         this.trigger('o-discard');
         ev.preventDefault();
-    }
-
-    /**
-     * @private
-     * @param {Event} ev
-     */
-    _onSelectionChangeEditable(ev) {
-        this._saveRange();
     }
 }
 
@@ -699,10 +209,7 @@ ComposerTextInput.defaultProps = {
 
 ComposerTextInput.props = {
     hasSendOnEnterEnabled: Boolean,
-    initialHtmlContent: {
-        type: String,
-        optional: true,
-    },
+    composerLocalId: String,
 };
 
 ComposerTextInput.template = 'mail.component.ComposerTextInput';

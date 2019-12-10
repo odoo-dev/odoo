@@ -3,7 +3,7 @@
 
     <t t-name="mail.component.ComposerTextInput" owl="1">
         <div class="o_ComposerTextInput">
-            <textarea t-ref="textarea"/>
+            <textarea class="o_ComposerTextInput_textarea" t-esc="storeProps.composer.textInputContent" placeholder="Write something..." t-on-keydown="_onKeydownTextarea" t-on-input="_onInputTextarea" t-ref="textarea" />
         </div>
     </t>
 

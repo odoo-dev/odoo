@@ -143,20 +143,6 @@ class ChatWindow extends Component {
         this.el.style[oppositeFrom] = 'auto';
     }
 
-    /**
-     * Focus out the chat window.
-     *
-     * @private
-     */
-    _focusout() {
-        this.state.isFocused = false;
-        if (!this.storeProps.thread) {
-            this._inputRef.comp.focusout();
-        } else {
-            this._threadRef.comp.focusout();
-        }
-    }
-
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -260,6 +246,20 @@ class ChatWindow extends Component {
      */
     _onFocusinThread(ev) {
         this.state.isFocused = true;
+    }
+
+    /**
+     * Focus out the chat window.
+     *
+     * @private
+     */
+    _onFocusout() {
+        this.state.isFocused = false;
+        if (!this.storeProps.thread) {
+            this._inputRef.comp.focusout();
+        } else {
+            this._threadRef.comp.focusout();
+        }
     }
 
     /**

@@ -102,10 +102,6 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/kanban_view.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/attachment_box.scss"/>
 
-                <!-- <t t-call-assets="web_editor.summernote"/> -->
-
-                <!-- lib -->
-                <script type="text/javascript" src="/mail/static/lib/tribute/tribute.js"></script>
                 <!-- owl -->
                 <script type="text/javascript" src="/mail/static/src/owl/components/attachment/attachment.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/attachment_box/attachment_box.js"></script>

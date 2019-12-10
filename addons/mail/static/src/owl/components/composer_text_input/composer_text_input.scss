@@ -4,54 +4,15 @@
 
 .o_ComposerTextInput {
     min-width: 0;
-
-    &.o-mobile > .note-editor > .note-editing-area {
-        padding: 15px 10px 10px 10px;
-    }
-
-    > .note-editor {
-        height: 100%;
-
-        > .note-editing-area {
-            overflow: auto;
-            height: 100%;
-
-            > .note-editable[contenteditable=true] {
-                max-height: 200px;
-                height: 100%;
-            }
-
-            > .note-placeholder {
-                padding: 0;
-            }
-        }
-
-        > .note-statusbar {
-            display: none;
-        }
-
-        > .note-toolbar {
-            border: 0;
-            padding: 0;
-        }
-    }
 }
 
-.o_ComposerTextInput_editable {
-
-    &.o-empty:before {
-        content: attr(data-placeholder);
-        position: absolute;
-    }
-
-    .o_mention {
-        display: inline-block;
-        line-height: 1;
-    }
-
-    p {
-        margin-bottom: 0;
-    }
+.o_ComposerTextInput_textarea {
+    padding: 10px;
+    max-height: 200px;
+    resize: none;
+    border-radius: 10px 0 0 10px;
+    border: none;
+    overflow: auto
 }
 
 .o_ComposerTextInput_mentionMenuItem {
@@ -93,15 +54,5 @@
         text-overflow: ellipsis;
         font-style: italic;
         color: gray('500');
-    }
-}
-
-.o_ComposerTextInput_editable {
-    &.o-empty:before {
-        color: gray('500');
-    }
-
-    .o_mention {
-        color: $o-brand-primary;
     }
 }

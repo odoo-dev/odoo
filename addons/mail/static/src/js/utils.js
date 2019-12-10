@@ -17,6 +17,7 @@ function parseAndTransform(htmlString, transformFunction) {
     return _parseAndTransform(children, transformFunction)
                 .replace(new RegExp(openToken, "g"), "&lt;");
 }
+
 function _parseAndTransform(nodes, transformFunction) {
     return _.map(nodes, function (node) {
         return transformFunction(node, function () {
@@ -84,6 +85,23 @@ function parseEmail(text) {
     }
 }
 
+/**
+ * Returns an escaped conversion of a content.
+ *
+ * @param {string} content
+ * @returns {string}
+ */
+function escapeAndCompactTextContent(content) {
+    //Removing unwanted extra spaces from message
+    let value = _.escape(content).trim();
+    value = value.replace(/(\r|\n){2,}/g, '<br/><br/>');
+    value = value.replace(/(\r|\n)/g, '<br/>');
+
+    // prevent html space collapsing
+    value = value.replace(/ /g, '&nbsp;').replace(/([^>])&nbsp;([^<])/g, '$1 $2');
+    return value;
+}
+
 // Replaces textarea text into html text (add <p>, <a>)
 // TDE note : should be done server-side, in Python -> use mail.compose.message ?
 function getTextToHTML(text) {
@@ -118,6 +136,7 @@ return {
     timeFromNow: timeFromNow,
     clearTimeout: o_clearTimeout,
     setTimeout: o_setTimeout,
+    escapeAndCompactTextContent,
 };
 
 });
