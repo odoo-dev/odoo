@@ -44,7 +44,7 @@
 
                 <!-- since the body content take the whole page we need a way to add margin
                      back on content outside the ISR so it does not overlap with the header -->
-                <div id="content_outside_isr">
+                <div id="content_outside_isr" t-attf-style="padding-left: {{ invoice.company_id.l10n_ch_isr_margin_left }}mm;">
                     <h1>ISR for invoice <t t-esc="invoice.name"/></h1>
                 </div>
 
