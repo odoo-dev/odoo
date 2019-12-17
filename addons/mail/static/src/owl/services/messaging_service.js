@@ -13,14 +13,12 @@ const { Store } = owl;
 
 const MessagingService = AbstractService.extend({
     /**
-     * Optional functions that are called after creating messaging store env and
-     * messaging env.
-     * Useful to make changes to env and/or store in tests.
+     * Optional functions that are called after creating messaging env.
+     * Useful to make changes to store in tests.
      */
     registry: {
         initialEnv: env,
         onMessagingEnvCreated: messagingEnv => {},
-        onMessagingStoreEnvCreated: messagingStoreEnv => {},
     },
     /**
      * @override {web.AbstractService}
@@ -31,7 +29,6 @@ const MessagingService = AbstractService.extend({
         const {
             initialEnv,
             onMessagingEnvCreated,
-            onMessagingStoreEnvCreated,
         } = this.registry;
 
         /**
@@ -40,9 +37,6 @@ const MessagingService = AbstractService.extend({
         let messagingStoreEnv = Object.create(initialEnv);
         Object.assign(messagingStoreEnv, {
             disableAnimation: false,
-            isDev: true,
-            isTest: false,
-            testServiceTarget: 'body',
             call: (...args) => this.call(...args),
             do_action: (...args) => this.do_action(...args),
             do_notify: (...args) => this.do_notify(...args),
@@ -50,7 +44,6 @@ const MessagingService = AbstractService.extend({
             rpc: (...args) => this._rpc(...args),
             trigger_up: (...args) => this.trigger_up(...args)
         });
-        onMessagingStoreEnvCreated(messagingStoreEnv);
 
         /**
          * Messaging store
