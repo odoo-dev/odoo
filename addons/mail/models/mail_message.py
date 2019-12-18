@@ -80,6 +80,9 @@ class Message(models.Model):
     author_id = fields.Many2one(
         'res.partner', 'Author', index=True, ondelete='set null',
         help="Author of the message. If not set, email_from may hold an email address that did not match any partner.")
+    sender_id = fields.Many2one(
+        'res.partner', 'Sender', index=True, ondelete='set null',
+        help="Sender of the message. Save the actual user as the sender")
     author_avatar = fields.Binary("Author's avatar", related='author_id.image_128', readonly=False)
     # recipients: include inactive partners (they may have been archived after
     # the message was sent, but they should remain visible in the relation)
@@ -1100,7 +1103,7 @@ class Message(models.Model):
 
     def _get_message_format_fields(self):
         return [
-            'id', 'body', 'date', 'author_id', 'email_from',  # base message fields
+            'id', 'body', 'date', 'author_id', 'email_from', 'sender_id', # base message fields
             'message_type', 'subtype_id', 'subject',  # message specific
             'model', 'res_id', 'record_name',  # document related
             'channel_ids', 'partner_ids',  # recipients

@@ -60,6 +60,18 @@ function factory(dependencies) {
                     ];
                 }
             }
+            if ('sender_id' in data) {
+                if (!data.sender_id) {
+                    data2.sender = [['unlink-all']]
+                } else if (data.sender_id[0] !== 0) {
+                    data2.sender = [
+                        ['insert', {
+                            display_name: data.sender_id[1],
+                            id: data.sender_id[0],
+                        }]
+                    ];
+                }
+            }
             if ('body' in data) {
                 data2.body = data.body;
             }
@@ -541,6 +553,9 @@ function factory(dependencies) {
         }),
         author: many2one('mail.partner', {
             inverse: 'messagesAsAuthor',
+        }),
+        sender: many2one('mail.partner', {
+            inverse: 'messagesAsSender',
         }),
         /**
          * This value is meant to be returned by the server

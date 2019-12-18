@@ -30,7 +30,9 @@ class MailTemplate(models.Model):
     model_id = fields.Many2one('ir.model', 'Applies to', help="The type of document this template can be used with")
     model = fields.Char('Related Document Model', related='model_id.model', index=True, store=True, readonly=True)
     subject = fields.Char('Subject', translate=True, help="Subject (placeholders may be used here)")
-    email_from = fields.Char('From',
+    author = fields.Char('From (User)',
+        help="Author of the mail. If set and not email_from, we will use the email of the user specified.")
+    email_from = fields.Char('From (Email)',
                              help="Sender address (placeholders may be used here). If not set, the default "
                                   "value will be the author's email alias if configured, or email address.")
     # recipients
@@ -176,6 +178,11 @@ class MailTemplate(models.Model):
             # update values for all res_ids
             for res_id in template_res_ids:
                 values = results[res_id]
+                if 'author' in fields and values.get('author'):
+                    author_id = self.env['res.users'].browse(int(values.get('author')))
+                    values['author'] = author_id.partner_id.id
+                    if 'email_from' in fields and not values.get('email_from'):
+                        values['email_from'] = author_id.email_formatted
                 if values.get('body_html'):
                     values['body'] = tools.html_sanitize(values['body_html'])
                 # technical settings
