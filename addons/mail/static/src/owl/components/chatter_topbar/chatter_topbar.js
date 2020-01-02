@@ -1,8 +1,9 @@
 odoo.define('mail.component.ChatterTopbar', function (require) {
 'use strict';
 
+const useStore = require('mail.hooks.useStore');
+
 const { Component } = owl;
-const { useStore } = owl.hooks;
 
 class ChatterTopbar extends Component {
     /**
@@ -17,6 +18,7 @@ class ChatterTopbar extends Component {
                 attachmentsAmount: thread && thread.attachmentLocalIds
                     ? thread.attachmentLocalIds.length
                     : 0,
+                // TODO SEB this is currently always 0
                 followersAmount: 0
             };
         });

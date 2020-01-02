@@ -3,9 +3,10 @@ odoo.define('mail.component.Thread', function (require) {
 
 const Composer = require('mail.component.Composer');
 const MessageList = require('mail.component.MessageList');
+const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
-const { useDispatch, useRef, useStore } = owl.hooks;
+const { useDispatch, useRef } = owl.hooks;
 
 class Thread extends Component {
 

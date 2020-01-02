@@ -3,9 +3,10 @@ odoo.define('mail.component.DiscussSidebar', function (require) {
 
 const AutocompleteInput = require('mail.component.AutocompleteInput');
 const SidebarItem = require('mail.component.DiscussSidebarItem');
+const useStore = require('mail.hooks.useStore');
 
 const { Component, useState } = owl;
-const { useGetters, useRef, useStore } = owl.hooks;
+const { useGetters, useRef } = owl.hooks;
 
 class DiscussSidebar extends Component {
 
@@ -24,6 +25,13 @@ class DiscussSidebar extends Component {
                 pinnedMailboxList: this.storeGetters.pinnedMailboxList(),
                 pinnedMailChannelAmount: this.storeGetters.pinnedMailChannelAmount(),
             };
+        }, {
+            compareDepth: {
+                pinnedChannelList: 1,
+                pinnedChatList: 1,
+                pinnedMailboxList: 1,
+                pinnedMailChannelAmount: 1,
+            },
         });
         /**
          * Reference of the quick search input. Useful to filter channels and

@@ -2,9 +2,10 @@ odoo.define('mail.component.ChatWindowHiddenMenu', function (require) {
 'use strict';
 
 const ChatWindowHeader = require('mail.component.ChatWindowHeader');
+const useStore = require('mail.hooks.useStore');
 
 const { Component, useState } = owl;
-const { useRef, useStore } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class HiddenMenu extends Component {
 
@@ -21,6 +22,10 @@ class HiddenMenu extends Component {
                     .filter(chatWindowLocalId => chatWindowLocalId !== 'new_message')
                     .map(chatWindowLocalId => state.threads[chatWindowLocalId]),
             };
+        }, {
+            compareDepth: {
+                threads: 1,
+            },
         });
         this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);
         /**

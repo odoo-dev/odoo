@@ -2,9 +2,10 @@ odoo.define('mail.component.ChatWindowHeader', function (require) {
 'use strict';
 
 const Icon = require('mail.component.ThreadIcon');
+const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useStore } = owl.hooks;
+const { useDispatch, useGetters } = owl.hooks;
 
 class ChatWindowHeader extends Component {
 

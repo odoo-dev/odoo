@@ -4,9 +4,10 @@ odoo.define('mail.component.ChatWindow', function (require) {
 const AutocompleteInput = require('mail.component.AutocompleteInput');
 const Header = require('mail.component.ChatWindowHeader');
 const Thread = require('mail.component.Thread');
+const useStore = require('mail.hooks.useStore');
 
 const { Component, useState } = owl;
-const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 class ChatWindow extends Component {
 

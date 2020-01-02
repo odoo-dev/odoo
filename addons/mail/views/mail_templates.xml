@@ -141,6 +141,7 @@
                 <script type="text/javascript" src="/mail/static/src/owl/components/thread_icon/thread_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/thread_preview/thread_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/thread_preview_list/thread_preview_list.js"></script>
+                <script type="text/javascript" src="/mail/static/src/owl/hooks/use_store.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/hooks/use_drag_visible_dropzone.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/hooks/use_refs.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/services/chat_window_service.js"></script>
@@ -240,6 +241,7 @@
                 <script type="text/javascript" src="/mail/static/tests/owl/component/messaging_menu_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/partner_im_status_icon_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/component/thread_tests.js"></script>
+                <script type="text/javascript" src="/mail/static/tests/owl/hooks/use_store_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/store/messaging_actions_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/store/messaging_getters_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/owl/store/messaging_state_tests.js"></script>

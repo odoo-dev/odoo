@@ -1,8 +1,10 @@
 odoo.define('mail.component.AttachmentViewer', function (require) {
 'use strict';
 
+const useStore = require('mail.hooks.useStore');
+
 const { Component, QWeb, useState } = owl;
-const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 const MIN_SCALE = 0.5;
 const SCROLL_ZOOM_STEP = 0.1;

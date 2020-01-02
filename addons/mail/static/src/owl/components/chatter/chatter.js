@@ -4,9 +4,10 @@ odoo.define('mail.component.Chatter', function (require) {
 const AttachmentBox = require('mail.component.AttachmentBox');
 const ChatterTopbar = require('mail.component.ChatterTopbar');
 const Thread = require('mail.component.Thread');
+const useStore = require('mail.hooks.useStore');
 
 const { Component, useState } = owl;
-const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 class Chatter extends Component {
     /**

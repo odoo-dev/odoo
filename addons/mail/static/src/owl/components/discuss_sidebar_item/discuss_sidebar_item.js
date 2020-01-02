@@ -3,11 +3,12 @@ odoo.define('mail.component.DiscussSidebarItem', function (require) {
 
 const EditableText = require('mail.component.EditableText');
 const Icon = require('mail.component.ThreadIcon');
+const useStore = require('mail.hooks.useStore');
 
 const Dialog = require('web.Dialog');
 
 const { Component, useState } = owl;
-const { useDispatch, useGetters, useStore } = owl.hooks;
+const { useDispatch, useGetters } = owl.hooks;
 
 class DiscussSidebarItem extends Component {
 

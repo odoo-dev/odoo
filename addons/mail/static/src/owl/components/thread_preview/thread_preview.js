@@ -3,10 +3,11 @@ odoo.define('mail.component.ThreadPreview', function (require) {
 
 const MessageAuthorPrefix = require('mail.component.MessageAuthorPrefix');
 const PartnerImStatusIcon = require('mail.component.PartnerImStatusIcon');
+const useStore = require('mail.hooks.useStore');
 const mailUtils = require('mail.utils');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useStore } = owl.hooks;
+const { useDispatch, useGetters } = owl.hooks;
 
 class ThreadPreview extends Component {
 

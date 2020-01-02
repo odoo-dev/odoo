@@ -1,8 +1,10 @@
 odoo.define('mail.component.MessageAuthorPrefix', function (require) {
 'use strict';
 
+const useStore = require('mail.hooks.useStore');
+
 const { Component } = owl;
-const { useGetters, useStore } = owl.hooks;
+const { useGetters } = owl.hooks;
 
 class MessageAuthorPrefix extends Component {
 

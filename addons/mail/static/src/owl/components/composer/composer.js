@@ -7,9 +7,10 @@ const EmojisButton = require('mail.component.EmojisButton');
 const FileUploader = require('mail.component.FileUploader');
 const TextInput = require('mail.component.ComposerTextInput');
 const useDragVisibleDropZone = require('mail.hooks.useDragVisibleDropZone');
+const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useRef, useState, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef, useState } = owl.hooks;
 
 class Composer extends Component {
 
@@ -328,6 +329,7 @@ class Composer extends Component {
      * @param {CustomEvent} ev
      */
     _onTextInputKeydownEnter(ev) {
+        // TODO SEB this is the same code as _onClickSend
         if (
             this._textInputRef.comp.isEmpty() &&
             this.storeProps.composer.attachmentLocalIds.length === 0

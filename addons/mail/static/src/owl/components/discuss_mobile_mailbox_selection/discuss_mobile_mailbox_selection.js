@@ -1,8 +1,10 @@
 odoo.define('mail.component.DiscussMobileMailboxSelection', function (require) {
 'use strict';
 
+const useStore = require('mail.hooks.useStore');
+
 const { Component } = owl;
-const { useGetters, useStore } = owl.hooks;
+const { useGetters } = owl.hooks;
 
 class MobileMailboxSelection extends Component {
 
@@ -17,6 +19,10 @@ class MobileMailboxSelection extends Component {
             return {
                 pinnedMailboxList: this.storeGetters.pinnedMailboxList(),
             };
+        }, {
+            compareDepth: {
+                pinnedMailboxList: 1,
+            },
         });
     }
 

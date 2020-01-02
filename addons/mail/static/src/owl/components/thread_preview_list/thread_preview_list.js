@@ -2,9 +2,10 @@ odoo.define('mail.component.ThreadPreviewList', function (require) {
 'use strict';
 
 const ThreadPreview = require('mail.component.ThreadPreview');
+const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useStore } = owl.hooks;
+const { useDispatch, useGetters } = owl.hooks;
 
 class ThreadPreviewList extends Component {
 
@@ -32,6 +33,10 @@ class ThreadPreviewList extends Component {
                 isMobile: state.isMobile,
                 threadLocalIds,
             };
+        }, {
+            compareDepth: {
+                threadLocalIds: 1,
+            },
         });
     }
 

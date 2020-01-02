@@ -5,9 +5,10 @@ const AttachmentList = require('mail.component.AttachmentList');
 const DropZone = require('mail.component.DropZone');
 const FileUploader = require('mail.component.FileUploader');
 const useDragVisibleDropZone = require('mail.hooks.useDragVisibleDropZone');
+const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
-const { useDispatch, useRef, useStore } = owl.hooks;
+const { useDispatch, useRef } = owl.hooks;
 
 class AttachmentBox extends Component {
 

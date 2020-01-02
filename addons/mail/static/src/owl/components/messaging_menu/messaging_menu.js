@@ -4,9 +4,10 @@ odoo.define('mail.component.MessagingMenu', function (require) {
 const AutocompleteInput = require('mail.component.AutocompleteInput');
 const MobileNavbar = require('mail.component.MobileMessagingNavbar');
 const ThreadPreviewList = require('mail.component.ThreadPreviewList');
+const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 class MessagingMenu extends Component {
 

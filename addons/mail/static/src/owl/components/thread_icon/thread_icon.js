@@ -1,8 +1,9 @@
 odoo.define('mail.component.ThreadIcon', function (require) {
 'use strict';
 
+const useStore = require('mail.hooks.useStore');
+
 const { Component } = owl;
-const { useStore } = owl.hooks;
 
 class ThreadIcon extends Component {
 

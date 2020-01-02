@@ -1,11 +1,12 @@
 odoo.define('mail.component.ComposerTextInput', function (require) {
 'use strict';
 
+const useStore = require('mail.hooks.useStore');
 const ajax = require('web.ajax');
 const utils = require('web.utils');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 /**
  * Enforced empty content of the contenteditable. This is necessary because

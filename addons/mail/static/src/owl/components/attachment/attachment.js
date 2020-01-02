@@ -1,8 +1,10 @@
 odoo.define('mail.component.Attachment', function (require) {
 'use strict';
 
+const useStore = require('mail.hooks.useStore');
+
 const { Component } = owl;
-const { useDispatch, useGetters, useStore } = owl.hooks;
+const { useDispatch, useGetters } = owl.hooks;
 
 class Attachment extends Component {
 

@@ -4,9 +4,10 @@ odoo.define('mail.component.ChatWindowManager', function (require) {
 const ChatWindow = require('mail.component.ChatWindow');
 const HiddenMenu = require('mail.component.ChatWindowHiddenMenu');
 const useRefs = require('mail.hooks.useRefs');
+const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
-const { useDispatch, useStore } = owl.hooks;
+const { useDispatch } = owl.hooks;
 
 class ChatWindowManager extends Component {
 
@@ -20,6 +21,7 @@ class ChatWindowManager extends Component {
         this._getRefs = useRefs();
         this.storeDispatch = useDispatch();
         this.storeProps = useStore(state => {
+            // TODO SEB transform into storeProps.chatWindowManager...
             const {
                 autofocusCounter,
                 autofocusChatWindowLocalId,

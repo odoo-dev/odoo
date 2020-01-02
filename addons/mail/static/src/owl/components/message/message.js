@@ -3,13 +3,14 @@ odoo.define('mail.component.Message', function (require) {
 
 const AttachmentList = require('mail.component.AttachmentList');
 const PartnerImStatusIcon = require('mail.component.PartnerImStatusIcon');
+const useStore = require('mail.hooks.useStore');
 const mailUtils = require('mail.utils');
 
 const core = require('web.core');
 const time = require('web.time');
 
 const { Component, useState } = owl;
-const { useDispatch, useGetters, useRef, useStore } = owl.hooks;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 const _lt = core._lt;
 const READ_MORE = _lt("read more");
