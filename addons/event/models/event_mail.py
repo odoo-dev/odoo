@@ -85,6 +85,9 @@ class EventMailScheduler(models.Model):
     mail_sent = fields.Boolean('Mail Sent on Event', copy=False)
     done = fields.Boolean('Sent', compute='_compute_done', store=True, copy=False)
 
+    event_mail_state = fields.Selection([('running', 'Running'), ('scheduled', 'Scheduled'), ('sent', 'Sent')], compute='_compute_event_mail_state')
+    contact_count = fields.Integer('# Sent', readonly=True, copy=False)
+
     @api.depends('mail_sent', 'interval_type', 'event_id.registration_ids', 'mail_registration_ids')
     def _compute_done(self):
         for mail in self:
@@ -92,6 +95,18 @@ class EventMailScheduler(models.Model):
                 mail.done = mail.mail_sent
             else:
                 mail.done = len(mail.mail_registration_ids) == len(mail.event_id.registration_ids) and all(mail.mail_sent for mail in mail.mail_registration_ids)
+
+    @api.depends('done', 'interval_type', 'scheduled_date', 'mail_sent')
+    def _compute_event_mail_state(self):
+        for mail in self:
+            if mail.interval_type == 'after_sub':
+                mail.event_mail_state = 'running'
+            elif mail.mail_sent:
+                mail.event_mail_state = 'sent'
+            elif mail.scheduled_date:
+                mail.event_mail_state = 'scheduled'
+            else:
+                mail.event_mail_state = 'running'
 
     @api.depends('event_id.date_begin', 'interval_type', 'interval_unit', 'interval_nbr')
     def _compute_scheduled_date(self):
@@ -118,11 +133,16 @@ class EventMailScheduler(models.Model):
                     mail.write({'mail_registration_ids': lines})
                 # execute scheduler on registrations
                 mail.mail_registration_ids.filtered(lambda reg: reg.scheduled_date and reg.scheduled_date <= now).execute()
+
+                mail.contact_count = len(mail.mail_registration_ids.filtered(lambda reg: reg.mail_sent))
             else:
                 # Do not send emails if the mailing was scheduled before the event but the event is over
                 if not mail.mail_sent and (mail.interval_type != 'before_event' or mail.event_id.date_end > now) and mail.notification_type == 'mail':
                     mail.event_id.mail_attendees(mail.template_id.id)
                     mail.write({'mail_sent': True})
+
+                    mail.contact_count = len(mail.event_id.registration_ids.filtered(lambda reg: reg.state != 'cancel'))
+
         return True
 
     @api.model
