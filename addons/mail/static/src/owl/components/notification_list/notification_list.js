@@ -2,6 +2,7 @@ odoo.define('mail.component.NotificationList', function (require) {
 'use strict';
 
 const ThreadPreview = require('mail.component.ThreadPreview');
+const MailFailureNotification = require('mail.component.MailFailureNotification');
 const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
@@ -77,7 +78,7 @@ class NotificationList extends Component {
 }
 
 Object.assign(NotificationList, {
-    components: { ThreadPreview },
+    components: { MailFailureNotification, ThreadPreview },
     defaultProps: {
         filter: 'all',
     },

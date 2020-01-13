@@ -95,7 +95,8 @@ class MessagingMenu extends Component {
                 return acc;
             }, 0);
         const mailboxInboxCounter = state.threads['mail.box_inbox'].counter;
-        const counter = unreadMailChannelCounter + mailboxInboxCounter;
+        const mailFailureCounter = Object.values(state.mailFailures).length;
+        const counter = unreadMailChannelCounter + mailboxInboxCounter + mailFailureCounter;
 
         return Object.assign({}, state.messagingMenu, {
             counter,

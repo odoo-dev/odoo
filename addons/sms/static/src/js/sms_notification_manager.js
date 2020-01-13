@@ -16,6 +16,7 @@ MailManager.include({
      * @param {integer} data.id
      */
     _handlePartnerNotification: function (data) {
+        // TODO SEB this needs to be adapted with owl
         if (data.type === 'sms_update') {
             this._handleSMSUpdateNotification(data);
         } else {
@@ -32,6 +33,7 @@ MailManager.include({
      *   has a sms failure.
      */
     _handleSMSUpdateNotification: function (datas) {
+        // TODO SEB this needs to be adapted with owl
         var self = this;
         _.each(datas.elements, function (data) {
             var isNewFailure = data.sms_status === 'error';

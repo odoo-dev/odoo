@@ -69,6 +69,7 @@ class ThreadPreview extends Component {
         if (!this.storeProps.lastMessage) {
             return '';
         }
+        // TODO FIXME don't forget to port the fix for performance here too
         return mailUtils.parseAndTransform(
             this.storeGetters.messagePrettyBody(this.storeProps.lastMessage.localId),
             mailUtils.inline);

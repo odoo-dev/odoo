@@ -355,7 +355,6 @@ var Discuss = AbstractAction.extend({
             displayNoMatchFound: !hasThreadMessages && !!this.domain.length,
             displaySubjectOnMessages: this._thread.isMassMailing() ||
                 this._thread.getID() === 'mailbox_inbox',
-            displayEmailIcons: false,
             displayReplyIcons: true,
             displayBottomThreadFreeSpace: true,
         };

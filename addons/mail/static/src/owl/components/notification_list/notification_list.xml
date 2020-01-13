@@ -10,14 +10,25 @@
             </t>
             <t t-else="">
                 <t t-foreach="storeProps.notifications" t-as="notification" t-key="notification.uniqueId">
-                    <t t-if="notification.type === 'thread'">
+                    <t name="firstCondition" t-if="notification.type === 'thread'">
                         <ThreadPreview
                             class="o_NotificationList_preview"
                             t-att-class="{ 'o-mobile': storeProps.isMobile }"
                             threadLocalId="notification.threadLocalId"
                         />
                     </t>
-                    <t name="separatorCondition" t-if="!notification_last">
+                    <t t-if="notification.notificationType === 'mailFailure'">
+                        <MailFailureNotification
+                            class="o_NotificationList_preview"
+                            t-att-class="{ '.o-mobile': storeProps.isMobile }"
+                            failure="notification.failure"
+                            unreadCounter="notification.unreadCounter"
+                            isSameDocument="notification.isSameDocument"
+                            t-on-o-clicked="_onClickedPreview"
+                            t-key="notification.failure.localId"
+                        />
+                    </t>
+                    <t t-if="!notification_last">
                         <div class="o_NotificationList_separator"/>
                     </t>
                 </t>

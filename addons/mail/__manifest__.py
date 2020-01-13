@@ -85,6 +85,7 @@
         'static/src/owl/components/emojis_button/emojis_button.xml',
         'static/src/owl/components/emojis_popover/emojis_popover.xml',
         'static/src/owl/components/file_uploader/file_uploader.xml',
+        'static/src/owl/components/mail_failure_notification/mail_failure_notification.xml',
         'static/src/owl/components/message/message.xml',
         'static/src/owl/components/message_author_prefix/message_author_prefix.xml',
         'static/src/owl/components/message_list/message_list.xml',

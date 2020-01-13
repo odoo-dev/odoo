@@ -836,8 +836,6 @@ const actions = {
             views: [[false, 'form']],
             res_id: id,
         });
-        dispatch('closeMessagingMenu');
-        dispatch('closeAllChatWindows');
     },
     /**
      * Open provided thread, either in discuss app or as a chat window.
@@ -1716,6 +1714,92 @@ const actions = {
     /**
      * @private
      * @param {Object} param0
+     * @param {Object} param0.dispatch
+     * @param {Object} param0.state
+     * @param {Object} [param1={}]
+     * @param {string} [param1.message_id]
+     * @return {string} mail failure local id
+     */
+    _createMailFailure({ dispatch, state }, {
+        message_id,
+        res_id,
+        model,
+        last_message_date,
+        failure_type = 'mail',
+        module_icon,
+        model_name,
+        notifications,
+    }) {
+        const mailFailureLocalId = `mail.failure_${message_id}`;
+
+        if (state.mailFailures[mailFailureLocalId]) {
+            console.warn(`${mailFailureLocalId} already exists in store`);
+            return;
+        }
+
+        if (last_message_date) {
+            last_message_date = moment(time.str_to_datetime(last_message_date));
+        } else {
+            last_message_date = moment(); // by default: current datetime
+        }
+
+        const mailFailure = {
+            id: message_id,
+            localId: mailFailureLocalId,
+            res_id,
+            model,
+            last_message_date,
+            failure_type,
+            module_icon,
+            model_name,
+            notifications,
+        };
+
+        mailFailure.threadLocalId = dispatch('insertThread', {
+            _model: mailFailure.model,
+            id: mailFailure.res_id,
+        });
+
+        var isNewFailure = _.some(mailFailure.notifications, function (notif) {
+            return notif[0] === 'exception' || notif[0] === 'bounce';
+        });
+
+        var matchedFailure = state.mailFailures[mailFailureLocalId];
+        if (matchedFailure) {
+            if (isNewFailure) {
+                Object.assign(state.mailFailures[mailFailureLocalId], mailFailure);
+            } else {
+                delete state.mailFailures[mailFailureLocalId];
+            }
+        } else if (isNewFailure) {
+            state.mailFailures[mailFailure.localId] = mailFailure;
+        }
+
+        // TODO SEB the failure information could be stored in the message? but problem to easily count it
+        const messageLocalId = dispatch('_insertMessage', {
+            id: mailFailure.id,
+            customer_email_status: isNewFailure ? 'exception' : 'sent',
+        });
+        const message = state.messages[messageLocalId];
+
+        _.each(mailFailure.notifications, function (notif, id) {
+            var partnerName = notif[1];
+            var notifStatus = notif[0];
+            var res = _.find(message.customer_email_data, function (entry) {
+                return entry[0] === parseInt(id);
+            });
+            if (res) {
+                res[2] = notifStatus;
+            } else {
+                message.customer_email_data.push([parseInt(id), partnerName, notifStatus]);
+            }
+        });
+        
+        return mailFailure.localId;
+    },
+    /**
+     * @private
+     * @param {Object} param0
      * @param {function} param0.dispatch
      * @param {Object} param0.state
      * @param {Object} param1
@@ -1773,7 +1857,7 @@ const actions = {
             ]=[],
             body,
             channel_ids=[],
-            customer_email_data,
+            customer_email_data = [],
             customer_email_status,
             date,
             email_from,
@@ -2665,10 +2749,14 @@ const actions = {
     },
     /**
      * @private
-     * @param {Object} unused
-     * @param {Array} elements
+     * @param {Object} param0
+     * @param {Object} param0.dispatch
+     * @param {Array} mailFailures
      */
-    _handleNotificationPartnerMailFailure(unused, elements) {
+    _handleNotificationPartnerMailFailure({ dispatch }, mailFailures) {
+        _.each(mailFailures, function (mailFailure) {
+            dispatch('_insertMailFailure', mailFailure);
+        });
     },
     /**
      * @private
@@ -3107,34 +3195,13 @@ const actions = {
     /**
      * @private
      * @param {Object} param0
-     * @param {Object} param0.state
-     * @param {Object[]} mailFailuresData
+     * @param {Object} param0.dispatch
+     * @param {Array} mailFailures
      */
-    _initMessagingMailFailures({ state }, mailFailuresData) {
-        for (const data of mailFailuresData) {
-            const mailFailure = Object.assign({}, data, {
-                _model: 'mail.failure',
-                localId: `mail.failure_${data.message_id}`,
-            });
-            // /**
-            //  * Get a valid object for the 'mail.preview' template
-            //  *
-            //  * @returns {Object}
-            //  */
-            // getPreview () {
-            //     const preview = {
-            //         body: _t("An error occured when sending an email"),
-            //         date: this._lastMessageDate,
-            //         documentId: this.documentId,
-            //         documentModel: this.documentModel,
-            //         id: 'mail_failure',
-            //         imageSRC: this._moduleIcon,
-            //         title: this._modelName,
-            //     };
-            //     return preview;
-            // },
-            state.mailFailures[mailFailure.localId] = mailFailure;
-        }
+    _initMessagingMailFailures({ dispatch }, mailFailures) {
+        _.each(mailFailures, function (mailFailure) {
+            dispatch('_insertMailFailure', mailFailure);
+        });
     },
     /**
      * @private
@@ -3206,6 +3273,27 @@ const actions = {
             dispatch('_updateAttachment', attachmentLocalId, kwargs);
         }
         return attachmentLocalId;
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.state
+     * @param {Object} param1
+     * @param {integer} param1.id
+     * @param {...Object} param1.kwargs
+     * @return {string} mail failure local Id
+     */
+    _insertMailFailure({ dispatch, state }, param1) {
+        const id = param1.id;
+        const kwargs = Object.assign({}, param1);
+        const mailFailureLocalId = `mail.failure_${id}`;
+        if (!state.mailFailures[mailFailureLocalId]) {
+            dispatch('_createMailFailure', Object.assign({ id }, kwargs));
+        } else {
+            dispatch('_updateMailFailure', mailFailureLocalId, kwargs);
+        }
+        return mailFailureLocalId;
     },
     /**
      * @private

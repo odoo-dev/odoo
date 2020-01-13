@@ -1,0 +1,134 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_MailFailureNotification {
+    display: flex;
+    align-items: center;
+
+    &:hover .o_MailFailureNotification_discard {
+        display: flex;
+    }
+}
+
+.o_MailFailureNotification_content {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    align-self: flex-start;
+    min-width: 0;
+    margin: 3px;
+}
+
+.o_MailFailureNotification_core {
+    display: flex;
+}
+
+.o_MailFailureNotification_coreItem {
+    margin: 0 3px;
+
+    &:first-child {
+        margin-left: 0px;
+    }
+
+    &:last-child {
+        margin-right: 0px;
+    }
+}
+
+.o_MailFailureNotification_counter {
+    margin: 0 3px;
+}
+
+.o_MailFailureNotification_date {
+    flex: 0 0 auto;
+}
+
+.o_MailFailureNotification_header {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.o_MailFailureNotification_image {
+    width: 100%;
+    height: 100%;
+}
+
+.o_MailFailureNotification_imageContainer {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.o_MailFailureNotification_inlineText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.o-empty::before {
+        content: '\00a0'; // keep line-height as if it had content
+    }
+}
+
+.o_MailFailureNotification_discard {
+    display: none;
+    flex: 0 0 auto;
+}
+
+.o_MailFailureNotification_name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.o-mobile {
+        font-size: 1.1em;
+    }
+}
+
+.o_MailFailureNotification_sidebar {
+    margin: 3px;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_MailFailureNotification {
+    background-color: white;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+        background-color: darken(white, 7%);
+    }
+
+    .o_MailFailureNotification_counter,
+    .o_MailFailureNotification_date,
+    .o_MailFailureNotification_name {
+        font-weight: bold;
+    }
+
+    .o_MailFailureNotification_date {
+        color: $o-brand-primary,
+    }
+}
+
+.o_MailFailureNotification_core {
+    color: gray('500');
+}
+
+.o_MailFailureNotification_date {
+    font-size: x-small;
+    color: gray('500');
+}
+
+.o_MailFailureNotification_discard {
+
+    &:hover {
+        opacity: 1;
+        color: gray('600');
+    }
+
+    &:not(:hover) {
+        opacity: 0.8;
+    }
+}

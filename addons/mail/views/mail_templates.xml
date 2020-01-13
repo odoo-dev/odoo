@@ -19,7 +19,6 @@
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_window_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_service.js"></script>
                 <!-- Models -->
-                <script type="text/javascript" src="/mail/static/src/js/models/mail_failure.js"></script>
                     <!-- messages -->
                     <script type="text/javascript" src="/mail/static/src/js/models/messages/abstract_message.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/models/messages/message.js"></script>
@@ -125,6 +124,7 @@
                 <script type="text/javascript" src="/mail/static/src/owl/components/emojis_button/emojis_button.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/emojis_popover/emojis_popover.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/file_uploader/file_uploader.js"></script>
+                <script type="text/javascript" src="/mail/static/src/owl/components/mail_failure_notification/mail_failure_notification.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/message/message.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/message_author_prefix/message_author_prefix.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/message_list/message_list.js"></script>
@@ -176,6 +176,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/drop_zone/drop_zone.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/emojis_popover/emojis_popover.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/file_uploader/file_uploader.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/mail_failure_notification/mail_failure_notification.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/message/message.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/message_author_prefix/message_author_prefix.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/message_list/message_list.scss"/>

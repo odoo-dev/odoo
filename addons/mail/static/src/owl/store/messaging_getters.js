@@ -425,6 +425,85 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.state
+     * @param {Object} param0.getters
+     * @param {Object} param1
+     * @param {string} filter
+     * @return {Object[]}
+     */
+    notifications({ state, getters }, { filter }) {
+        let notifications = [];
+        let threadLocalIds;
+        if (filter === 'mailbox') {
+            threadLocalIds = getters.mailboxList().map(mailbox => mailbox.localId);
+        } else if (filter === 'channel') {
+            threadLocalIds = getters.channelList().map(channel => channel.localId);
+        } else if (filter === 'chat') {
+            threadLocalIds = getters.chatList().map(chat => chat.localId);
+        } else {
+            // order: failures > inbox > channel, each group must be sorted
+
+            var failureItems = [];
+            const sortedFailures = Object.values(state.mailFailures).sort((att1, att2) => {
+                return att1.last_message_date.isAfter(att2.last_message_date) ? -1 : 1;
+            });
+            _.each(sortedFailures, function (failure) {
+                // TODO SEB replace isSameDocument by a list of local ids?
+                var isSameDocument = true;
+                var sameModelAndTypeItemIndex = _.findIndex(failureItems, function (item) {
+                    if (
+                        item.failure.model &&
+                        item.failure.res_id &&
+                        item.failure.model === failure.model &&
+                        item.failure.failureType === failure.failureType
+                    ) {
+                        isSameDocument = item.failure.res_id === failure.res_id;
+                        if (failure.model === 'mail.channel') {
+                            // Only regroup channel for the same document
+                            // because there is no kanban or list view to
+                            // display several of them.
+                            return isSameDocument;
+                        }
+                        return true;
+                    }
+                    return false;
+                });
+                if (
+                    failure.model && failure.res_id && sameModelAndTypeItemIndex !== -1
+                ) {
+                    const existingItem = failureItems[sameModelAndTypeItemIndex];
+                    Object.assign(failureItems[sameModelAndTypeItemIndex], {
+                        unreadCounter: existingItem.unreadCounter + 1,
+                        isSameDocument: existingItem.isSameDocument && isSameDocument,
+                    });
+                } else {
+                    failureItems.push({
+                        unreadCounter: 1,
+                        failure: failure,
+                        isSameDocument: true,
+                    });
+                }
+            });
+
+            notifications = notifications.concat(failureItems.map(item => {
+                return Object.assign(item, {
+                    notificationType: 'mailFailure',
+                });
+            }));
+
+            // "All" filter is for channels and chats
+            threadLocalIds = getters.mailChannelList().map(mailChannel => mailChannel.localId);
+        }
+
+        return notifications.concat(threadLocalIds.map(threadLocalId => {
+            return {
+                notificationType: 'thread',
+                threadLocalId: threadLocalId,
+            };
+        }));
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
      * @param {string} partnerLocalId
      * @return {string}
      */

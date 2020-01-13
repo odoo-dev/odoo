@@ -63,7 +63,6 @@ var ThreadWidget = Widget.extend({
             displayDocumentLinks: true,
             displayAvatars: true,
             squashCloseMessages: true,
-            displayEmailIcons: true,
             displayReplyIcons: false,
             loadMoreOnScroll: false,
             hasMessageAttachmentDeletable: false,
@@ -76,7 +75,6 @@ var ThreadWidget = Widget.extend({
             displayDocumentLinks: false,
             displayAvatars: this._enabledOptions.displayAvatars,
             squashCloseMessages: false,
-            displayEmailIcons: false,
             displayReplyIcons: false,
             loadMoreOnScroll: this._enabledOptions.loadMoreOnScroll,
             hasMessageAttachmentDeletable: false,
@@ -450,6 +448,7 @@ var ThreadWidget = Widget.extend({
      *   permitted.
      */
     _renderMessageMailPopover: function (messages) {
+        // TODO SEB convert this to owl
         if (this._messageMailPopover) {
             this._messageMailPopover.popover('hide');
         }
