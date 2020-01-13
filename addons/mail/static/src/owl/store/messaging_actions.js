@@ -795,8 +795,6 @@ const actions = {
             views: [[false, 'form']],
             res_id: id,
         });
-        dispatch('closeMessagingMenu');
-        dispatch('closeAllChatWindows');
     },
     /**
      * Open provided thread, either in discuss app or as a chat window.
@@ -2472,7 +2470,7 @@ const actions = {
              */
             return; // disabled
         } else if (type === 'mail_failure') {
-            return dispatch('_handleNotificationPartnerMailFailure', data.elements);
+            return dispatch('_updateMailFailure', data.elements);
         } else if (type === 'mark_as_read') {
             return dispatch('_handleNotificationPartnerMarkAsRead', data);
         } else if (type === 'moderator') {
@@ -2546,13 +2544,6 @@ const actions = {
                 });
             }
         }
-    },
-    /**
-     * @private
-     * @param {Object} unused
-     * @param {Array} elements
-     */
-    _handleNotificationPartnerMailFailure(unused, elements) {
     },
     /**
      * @private
@@ -2831,7 +2822,7 @@ const actions = {
             needaction_inbox_counter,
             starred_counter
         });
-        dispatch('_initMessagingMailFailures', mail_failures);
+        dispatch('_updateMailFailure', mail_failures);
         dispatch('_initMessagingCannedResponses', shortcodes);
         dispatch('_initMessagingMentionPartnerSuggestions', mention_partner_suggestions);
         dispatch('updateDiscuss', {
@@ -2955,38 +2946,6 @@ const actions = {
                 id: 'moderation',
                 name: _t("Moderate Messages"),
             });
-        }
-    },
-    /**
-     * @private
-     * @param {Object} param0
-     * @param {Object} param0.state
-     * @param {Object[]} mailFailuresData
-     */
-    _initMessagingMailFailures({ state }, mailFailuresData) {
-        for (const data of mailFailuresData) {
-            const mailFailure = Object.assign({}, data, {
-                _model: 'mail.failure',
-                localId: `mail.failure_${data.message_id}`,
-            });
-            // /**
-            //  * Get a valid object for the 'mail.preview' template
-            //  *
-            //  * @returns {Object}
-            //  */
-            // getPreview () {
-            //     const preview = {
-            //         body: _t("An error occured when sending an email"),
-            //         date: this._lastMessageDate,
-            //         documentId: this.documentId,
-            //         documentModel: this.documentModel,
-            //         id: 'mail_failure',
-            //         imageSRC: this._moduleIcon,
-            //         title: this._modelName,
-            //     };
-            //     return preview;
-            // },
-            state.mailFailures[mailFailure.localId] = mailFailure;
         }
     },
     /**
@@ -3801,6 +3760,53 @@ const actions = {
         }
         partner.authorMessageLocalIds = partner.authorMessageLocalIds.filter(localId =>
             localId !== messageLocalId);
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {Object} param0.dispatch
+     * @param {Array} elements
+     */
+    _updateMailFailure({ state, dispatch }, elements) {
+        _.each(elements, function (data) {
+            const threadLocalId = dispatch('insertThread', { _model: data.model, id: data.res_id });
+            const mailFailureLocalId = `mail.failure_${data.message_id}`;
+            let lastMessageDate = moment(); // by default: current datetime
+            if (data.last_message_date) {
+                lastMessageDate = moment(time.str_to_datetime(data.last_message_date));
+            }
+            data = {
+                documentId: data.res_id,
+                documentModel: data.model,
+                failureType: data.failure_type || 'mail',
+                lastMessageDate: lastMessageDate,
+                messageId: data.message_id,
+                moduleIcon: data.module_icon,
+                modelName: data.model_name,
+                notifications: data.notifications,
+                recordName: data.record_name,
+                uuid: data.uuid,
+                _model: 'mail.failure',
+                localId: mailFailureLocalId,
+                threadLocalId,
+            };
+            var isNewFailure = _.some(data.notifications, function (notif) {
+                return notif[0] === 'exception' || notif[0] === 'bounce';
+            });
+            var matchedFailure = state.mailFailures[mailFailureLocalId];
+            if (matchedFailure) {
+                if (isNewFailure) {
+                    Object.assign(state.mailFailures[mailFailureLocalId], data);
+                } else {
+                    delete state.mailFailures[mailFailureLocalId];
+                }
+            } else if (isNewFailure) {
+                state.mailFailures[mailFailureLocalId] = Object.assign({}, data);
+            }
+            // TODO SEB update inverse relation: message customer email status related to this failure
+            // @see bottom of _handlePartnerMailFailureNotification
+        });
     },
     /**
      * @private

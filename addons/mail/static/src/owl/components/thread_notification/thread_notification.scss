@@ -2,16 +2,16 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_ThreadPreview {
+.o_ThreadNotification {
     display: flex;
     align-items: center;
 
-    &:hover .o_ThreadPreview_markAsRead {
+    &:hover .o_ThreadNotification_markAsRead {
         display: flex;
     }
 }
 
-.o_ThreadPreview_content {
+.o_ThreadNotification_content {
     display: flex;
     flex-flow: column;
     flex: 1 1 auto;
@@ -20,11 +20,11 @@
     margin: 3px;
 }
 
-.o_ThreadPreview_core {
+.o_ThreadNotification_core {
     display: flex;
 }
 
-.o_ThreadPreview_coreItem {
+.o_ThreadNotification_coreItem {
     margin: 0 3px;
 
     &:first-child {
@@ -36,31 +36,31 @@
     }
 }
 
-.o_ThreadPreview_counter {
+.o_ThreadNotification_counter {
     margin: 0 3px;
 }
 
-.o_ThreadPreview_date {
+.o_ThreadNotification_date {
     flex: 0 0 auto;
 }
 
-.o_ThreadPreview_header {
+.o_ThreadNotification_header {
     display: flex;
     margin-bottom: 5px;
 }
 
-.o_ThreadPreview_image {
+.o_ThreadNotification_image {
     width: 100%;
     height: 100%;
 }
 
-.o_ThreadPreview_imageContainer {
+.o_ThreadNotification_imageContainer {
     position: relative;
     width: 40px;
     height: 40px;
 }
 
-.o_ThreadPreview_inlineText {
+.o_ThreadNotification_inlineText {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -70,12 +70,12 @@
     }
 }
 
-.o_ThreadPreview_markAsRead {
+.o_ThreadNotification_markAsRead {
     display: none;
     flex: 0 0 auto;
 }
 
-.o_ThreadPreview_name {
+.o_ThreadNotification_name {
     overflow: hidden;
     text-overflow: ellipsis;
 
@@ -84,14 +84,14 @@
     }
 }
 
-.o_ThreadPreview_partnerImStatusIcon {
+.o_ThreadNotification_partnerImStatusIcon {
     @include o-position-absolute($bottom: 0, $right: 0);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.o_ThreadPreview_sidebar {
+.o_ThreadNotification_sidebar {
     margin: 3px;
 }
 
@@ -99,19 +99,19 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_ThreadPreview {
+.o_ThreadNotification {
     background-color: gray('100');
     cursor: pointer;
     user-select: none;
 
-    .o_ThreadPreview_partnerImStatusIcon {
+    .o_ThreadNotification_partnerImStatusIcon {
         color: gray('100');
     }
 
     &:hover {
         background-color: darken(gray('100'), 7%);
 
-        .o_ThreadPreview_partnerImStatusIcon {
+        .o_ThreadNotification_partnerImStatusIcon {
             color: darken(gray('100'), 7%);
         }
     }
@@ -119,40 +119,40 @@
     &.o-unread {
         background-color: white;
 
-        .o_ThreadPreview_partnerImStatusIcon {
+        .o_ThreadNotification_partnerImStatusIcon {
             color: white;
         }
 
         &:hover {
             background-color: darken(white, 7%);
 
-            .o_ThreadPreview_partnerImStatusIcon {
+            .o_ThreadNotification_partnerImStatusIcon {
                 color: darken(white, 7%);
             }
         }
 
-        .o_ThreadPreview_counter,
-        .o_ThreadPreview_date,
-        .o_ThreadPreview_name {
+        .o_ThreadNotification_counter,
+        .o_ThreadNotification_date,
+        .o_ThreadNotification_name {
             font-weight: bold;
         }
 
-        .o_ThreadPreview_date {
+        .o_ThreadNotification_date {
             color: $o-brand-primary,
         }
     }
 }
 
-.o_ThreadPreview_core {
+.o_ThreadNotification_core {
     color: gray('500');
 }
 
-.o_ThreadPreview_date {
+.o_ThreadNotification_date {
     font-size: x-small;
     color: gray('500');
 }
 
-.o_ThreadPreview_markAsRead {
+.o_ThreadNotification_markAsRead {
 
     &:hover {
         opacity: 1;
@@ -164,6 +164,6 @@
     }
 }
 
-.o_ThreadPreview_partnerImStatusIcon:not(.o_ThreadPreview_partnerImStatusIcon-mobile) {
+.o_ThreadNotification_partnerImStatusIcon:not(.o_ThreadNotification_partnerImStatusIcon-mobile) {
     font-size: x-small;
 }

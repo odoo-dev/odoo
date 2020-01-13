@@ -300,6 +300,7 @@ MailManager.include({
      *   failure (e.g. 'exception').
      */
     _handlePartnerMailFailureNotification: function (datas) {
+        // TODO SEB remove this once it is done correctly with owl
         var self = this;
         _.each(datas.elements, function (data) {
             var isNewFailure = _.some(data.notifications, function (notif) {

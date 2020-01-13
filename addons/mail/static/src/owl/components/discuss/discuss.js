@@ -7,7 +7,7 @@ const MobileMailboxSelection = require('mail.component.DiscussMobileMailboxSelec
 const Sidebar = require('mail.component.DiscussSidebar');
 const MobileNavbar = require('mail.component.MobileMessagingNavbar');
 const Thread = require('mail.component.Thread');
-const ThreadPreviewList = require('mail.component.ThreadPreviewList');
+const NotificationList = require('mail.component.NotificationList');
 const useStore = require('mail.hooks.useStore');
 
 const { Component, useState } = owl;
@@ -592,7 +592,7 @@ Object.assign(Discuss, {
         MobileNavbar,
         Sidebar,
         Thread,
-        ThreadPreviewList,
+        NotificationList,
     },
     props: {
         initActiveThreadLocalId: String,

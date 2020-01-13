@@ -28,6 +28,7 @@ var MailFailure = Class.extend(Mixins.EventDispatcherMixin, ServicesMixin, {
         Mixins.EventDispatcherMixin.init.call(this, arguments);
         this.setParent(parent);
 
+        // TODO SEB this can be removed when done with Owl
         this._documentID = data.res_id;
         this._documentModel = data.model;
         this._failureType = data.failure_type || 'mail';

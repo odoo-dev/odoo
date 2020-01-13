@@ -52,12 +52,11 @@
                                 />
                             </t>
                         </div>
-                        <ThreadPreviewList
-                            class="o_MessagingMenu_threadPreviewList"
-                            t-att-class="{ 'o_MessagingMenu_threadPreviewList-mobile': storeProps.isMobile }"
+                        <NotificationList
+                            class="o_MessagingMenu_NotificationList"
+                            t-att-class="{ 'o_MessagingMenu_NotificationList-mobile': storeProps.isMobile }"
                             filter="storeProps.activeTabId"
                             t-on-o-select-thread.stop="_onSelectThread"
-                            t-ref="threadPreviewList"
                         />
                         <t t-if="storeProps.isMobile">
                             <MobileNavbar

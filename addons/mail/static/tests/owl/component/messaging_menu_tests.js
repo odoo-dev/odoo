@@ -207,7 +207,7 @@ QUnit.test('basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreviewList`
+            .o_NotificationList`
         ).length,
         1,
         "should display thread preview list"
@@ -215,7 +215,7 @@ QUnit.test('basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreviewList_noConversation`
+            .o_NotificationList_noConversation`
         ).length,
         1,
         "should display no conversation in thread preview list"
@@ -445,7 +445,7 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(
-            `.o_MessagingMenu_dropdownMenu .o_ThreadPreview`
+            `.o_MessagingMenu_dropdownMenu .o_ThreadNotification`
         ).length,
         1,
         "should have one preview"
@@ -453,7 +453,7 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_sidebar`
+            .o_ThreadNotification_sidebar`
         ).length,
         1,
         "preview should have a sidebar"
@@ -461,7 +461,7 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_content`
+            .o_ThreadNotification_content`
         ).length,
         1,
         "preview should have some content"
@@ -469,7 +469,7 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_header`
+            .o_ThreadNotification_header`
         ).length,
         1,
         "preview should have header in content"
@@ -477,8 +477,8 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_header
-            .o_ThreadPreview_name`
+            .o_ThreadNotification_header
+            .o_ThreadNotification_name`
         ).length,
         1,
         "preview should have name in header of content"
@@ -486,15 +486,15 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_name`
+            .o_ThreadNotification_name`
         ).textContent,
         "General", "preview should have name of channel"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_content
-            .o_ThreadPreview_core`
+            .o_ThreadNotification_content
+            .o_ThreadNotification_core`
         ).length,
         1,
         "preview should have core in content"
@@ -502,8 +502,8 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_core
-            .o_ThreadPreview_inlineText`
+            .o_ThreadNotification_core
+            .o_ThreadNotification_inlineText`
         ).length,
         1,
         "preview should have inline text in core of content"
@@ -511,8 +511,8 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_core
-            .o_ThreadPreview_inlineText`
+            .o_ThreadNotification_core
+            .o_ThreadNotification_inlineText`
         ).textContent.trim(),
         "Demo: test",
         "preview should have message content as inline text of core content"
@@ -573,14 +573,14 @@ QUnit.test('filtered previews', async function (assert) {
     document.querySelector(`.o_MessagingMenu_toggler`).click();
     await afterNextRender();
     assert.strictEqual(
-        document.querySelectorAll(`.o_MessagingMenu_dropdownMenu .o_ThreadPreview`).length,
+        document.querySelectorAll(`.o_MessagingMenu_dropdownMenu .o_ThreadNotification`).length,
         2,
         "should have 2 previews"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_10"]`
+            .o_ThreadNotification[data-thread-local-id="mail.channel_10"]`
         ).length,
         1,
         "should have preview of chat"
@@ -588,7 +588,7 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_20"]`
+            .o_ThreadNotification[data-thread-local-id="mail.channel_20"]`
         ).length,
         1,
         "should have preview of channel"
@@ -597,14 +597,14 @@ QUnit.test('filtered previews', async function (assert) {
     document.querySelector(`.o_MessagingMenu_tabButton[data-tab-id="chat"]`).click();
     await afterNextRender();
     assert.strictEqual(
-        document.querySelectorAll(`.o_MessagingMenu_dropdownMenu .o_ThreadPreview`).length,
+        document.querySelectorAll(`.o_MessagingMenu_dropdownMenu .o_ThreadNotification`).length,
         1,
         "should have one preview"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_10"]`
+            .o_ThreadNotification[data-thread-local-id="mail.channel_10"]`
         ).length,
         1,
         "should have preview of chat"
@@ -612,7 +612,7 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_20"]`
+            .o_ThreadNotification[data-thread-local-id="mail.channel_20"]`
         ).length,
         0,
         "should not have preview of channel"
@@ -623,7 +623,7 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview`
+            .o_ThreadNotification`
         ).length,
         1,
         "should have one preview"
@@ -631,7 +631,7 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_10"]`
+            .o_ThreadNotification[data-thread-local-id="mail.channel_10"]`
         ).length,
         0,
         "should not have preview of chat"
@@ -639,7 +639,7 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_20"]`
+            .o_ThreadNotification[data-thread-local-id="mail.channel_20"]`
         ).length,
         1,
         "should have preview of channel"
@@ -648,14 +648,14 @@ QUnit.test('filtered previews', async function (assert) {
     document.querySelector(`.o_MessagingMenu_tabButton[data-tab-id="all"]`).click();
     await afterNextRender();
     assert.strictEqual(
-        document.querySelectorAll(`.o_MessagingMenu_dropdownMenu .o_ThreadPreview`).length,
+        document.querySelectorAll(`.o_MessagingMenu_dropdownMenu .o_ThreadNotification`).length,
         2,
         "should have 2 previews"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_10"]`
+            .o_ThreadNotification[data-thread-local-id="mail.channel_10"]`
         ).length,
         1,
         "should have preview of chat"
@@ -663,7 +663,7 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_20"]`
+            .o_ThreadNotification[data-thread-local-id="mail.channel_20"]`
         ).length,
         1,
         "should have preview of channel"
@@ -694,7 +694,7 @@ QUnit.test('open chat window from preview', async function (assert) {
 
     document.querySelector(`.o_MessagingMenu_toggler`).click();
     await afterNextRender();
-    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_ThreadPreview`).click();
+    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_ThreadNotification`).click();
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatWindow`).length,

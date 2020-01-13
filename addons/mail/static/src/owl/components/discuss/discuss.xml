@@ -88,11 +88,10 @@
             </div>
         </t>
         <t t-if="storeProps.isMobile and storeProps.activeMobileNavbarTabId !== 'mailbox'">
-            <ThreadPreviewList
-                class="o_Discuss_threadPreviewList"
+            <NotificationList
+                class="o_Discuss_NotificationList"
                 filter="storeProps.activeMobileNavbarTabId"
                 t-on-o-select-thread="_onSelectThread"
-                t-ref="threadPreviewList"
             />
         </t>
         <t t-if="storeProps.isMobile and !state.isReplyingToMessage">

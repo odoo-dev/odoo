@@ -69,6 +69,7 @@ var MessagingMenu = Widget.extend({
      * @param {$.Element} $target DOM of preview element clicked
      */
     _clickMailFailurePreview: function ($target) {
+        // TODO SEB this can be removed when done with owl
         var documentID = $target.data('document-id');
         var documentModel = $target.data('document-model');
         if (documentModel && documentID) {
@@ -321,6 +322,7 @@ var MessagingMenu = Widget.extend({
         var previewID = $target.data('preview-id');
 
         if (previewID === 'mail_failure') {
+            // TODO SEB this can be removed when done with owl
             this._clickMailFailurePreview($target);
         } else if (previewID === 'mailbox_inbox') {
             // inbox preview for non-document thread,

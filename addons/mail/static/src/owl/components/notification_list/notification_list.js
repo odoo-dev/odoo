@@ -1,13 +1,14 @@
-odoo.define('mail.component.ThreadPreviewList', function (require) {
+odoo.define('mail.component.NotificationList', function (require) {
 'use strict';
 
-const ThreadPreview = require('mail.component.ThreadPreview');
+const ThreadNotification = require('mail.component.ThreadNotification');
+const MailFailureNotification = require('mail.component.MailFailureNotification');
 const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
 const { useDispatch, useGetters } = owl.hooks;
 
-class ThreadPreviewList extends Component {
+class NotificationList extends Component {
 
     /**
      * @override
@@ -18,24 +19,13 @@ class ThreadPreviewList extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            let threadLocalIds;
-            if (props.filter === 'mailbox') {
-                threadLocalIds = this.storeGetters.mailboxList().map(mailbox => mailbox.localId);
-            } else if (props.filter === 'channel') {
-                threadLocalIds = this.storeGetters.channelList().map(channel => channel.localId);
-            } else if (props.filter === 'chat') {
-                threadLocalIds = this.storeGetters.chatList().map(chat => chat.localId);
-            } else {
-                // "All" filter is for channels and chats
-                threadLocalIds = this.storeGetters.mailChannelList().map(mailChannel => mailChannel.localId);
-            }
             return {
                 isMobile: state.isMobile,
-                threadLocalIds,
+                notifications: this.storeGetters.notifications({ filter: props.filter }),
             };
         }, {
             compareDepth: {
-                threadLocalIds: 1,
+                notifications: 1,
             },
         });
     }
@@ -55,7 +45,11 @@ class ThreadPreviewList extends Component {
      * @private
      */
     async _loadPreviews() {
-        this.storeDispatch('loadThreadPreviews', this.storeProps.threadLocalIds);
+        this.storeDispatch('loadThreadPreviews',
+            this.storeProps.notifications
+                .filter(notification => notification.threadLocalId)
+                .map(notification => notification.threadLocalId)
+        );
     }
 
     //--------------------------------------------------------------------------
@@ -75,20 +69,20 @@ class ThreadPreviewList extends Component {
     }
 }
 
-ThreadPreviewList.components = { ThreadPreview };
+NotificationList.components = { ThreadNotification, MailFailureNotification };
 
-ThreadPreviewList.defaultProps = {
+NotificationList.defaultProps = {
     filter: 'all',
 };
 
-ThreadPreviewList.props = {
+NotificationList.props = {
     filter: {
         type: String, // ['all', 'mailbox', 'channel', 'chat']
     },
 };
 
-ThreadPreviewList.template = 'mail.component.ThreadPreviewList';
+NotificationList.template = 'mail.component.NotificationList';
 
-return ThreadPreviewList;
+return NotificationList;
 
 });

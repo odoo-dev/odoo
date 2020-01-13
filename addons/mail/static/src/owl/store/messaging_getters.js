@@ -193,7 +193,8 @@ const getters = {
                 return acc;
             }, 0);
         const mailboxInboxCounter = state.threads['mail.box_inbox'].counter;
-        return unreadMailChannelCounter + mailboxInboxCounter;
+        const mailFailureCounter = Object.values(state.mailFailures).length;
+        return unreadMailChannelCounter + mailboxInboxCounter + mailFailureCounter;
     },
     /**
      * @return {boolean}
@@ -373,6 +374,83 @@ const getters = {
         return getters
             .attachments({ resId, resModel })
             .filter(attachment => getters.attachmentMediaType(attachment.localId) !== 'image');
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {Object} param0.getters
+     * @param {Object} param1
+     * @param {string} filter
+     * @return {Object[]}
+     */
+    notifications({ state, getters }, { filter }) {
+        let notifications = [];
+        let threadLocalIds;
+        if (filter === 'mailbox') {
+            threadLocalIds = getters.mailboxList().map(mailbox => mailbox.localId);
+        } else if (filter === 'channel') {
+            threadLocalIds = getters.channelList().map(channel => channel.localId);
+        } else if (filter === 'chat') {
+            threadLocalIds = getters.chatList().map(chat => chat.localId);
+        } else {
+            // "All" filter is for channels and chats
+            threadLocalIds = getters.mailChannelList().map(mailChannel => mailChannel.localId);
+
+            var failureItems = [];
+            const sortedFailures = Object.values(state.mailFailures).sort((att1, att2) => {
+                return att1.lastMessageDate.isAfter(att2.lastMessageDate) ? -1 : 1;
+            });
+            _.each(sortedFailures, function (failure) {
+                // TODO SEB replace isSameDocument by a list of local ids?
+                var isSameDocument = true;
+                var sameModelAndTypeItemIndex = _.findIndex(failureItems, function (item) {
+                    if (
+                        item.failure.documentModel &&
+                        item.failure.documentId &&
+                        item.failure.documentModel === failure.documentModel &&
+                        item.failure.failureType === failure.failureType
+                    ) {
+                        isSameDocument = item.failure.documentId === failure.documentId;
+                        if (failure.documentModel === 'mail.channel') {
+                            // Only regroup channel for the same document
+                            // because there is no kanban or list view to
+                            // display several of them.
+                            return isSameDocument;
+                        }
+                        return true;
+                    }
+                    return false;
+                });
+                if (
+                    failure.documentModel && failure.documentId && sameModelAndTypeItemIndex !== -1
+                ) {
+                    const existingItem = failureItems[sameModelAndTypeItemIndex];
+                    Object.assign(failureItems[sameModelAndTypeItemIndex], {
+                        unreadCounter: existingItem.unreadCounter + 1,
+                        isSameDocument: existingItem.isSameDocument && isSameDocument,
+                    });
+                } else {
+                    failureItems.push({
+                        unreadCounter: 1,
+                        failure: failure,
+                        isSameDocument: true,
+                    });
+                }
+            });
+
+            notifications = notifications.concat(failureItems.map(item => {
+                return Object.assign(item, {
+                    notificationType: 'mailFailure',
+                });
+            }));
+        }
+
+        return notifications.concat(threadLocalIds.map(threadLocalId => {
+            return {
+                notificationType: 'thread',
+                threadLocalId: threadLocalId,
+            };
+        }));
     },
     /**
      * @param {Object} param0

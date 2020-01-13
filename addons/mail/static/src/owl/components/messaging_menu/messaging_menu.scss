@@ -25,7 +25,7 @@
         width: 350px;
         min-height: 50px;
         max-height: 400px;
-        z-index: 1100; // on top of chat windows
+        z-index: 1000;
     }
 
     &.o-mobile {
@@ -83,7 +83,7 @@
     margin-top: 10px
 }
 
-.o_MessagingMenu_threadPreviewList-mobile {
+.o_MessagingMenu_NotificationList-mobile {
     flex: 1 1 auto;
     overflow-y: auto;
 }

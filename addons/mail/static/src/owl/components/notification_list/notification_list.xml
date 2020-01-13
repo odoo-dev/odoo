@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.component.NotificationList" owl="1">
+        <div class="o_NotificationList" t-att-class="{ 'o-empty': storeProps.notifications.length === 0 }">
+            <t t-if="storeProps.notifications.length === 0">
+                <div class="o_NotificationList_noConversation">
+                    No conversation yet...
+                </div>
+            </t>
+            <t t-else="">
+                <t t-foreach="storeProps.notifications" t-as="notification">
+                    <t t-if="notification.notificationType === 'thread'">
+                        <ThreadNotification
+                            class="o_NotificationList_preview"
+                            t-att-class="{ 'o_NotificationList_preview-mobile': storeProps.isMobile }"
+                            threadLocalId="notification.threadLocalId"
+                            t-on-o-clicked="_onClickedPreview"
+                            t-key="notification.threadLocalId"
+                        />
+                    </t>
+                    <t t-if="notification.notificationType === 'mailFailure'">
+                        <MailFailureNotification
+                            class="o_NotificationList_preview"
+                            t-att-class="{ 'o_NotificationList_preview-mobile': storeProps.isMobile }"
+                            failure="notification.failure"
+                            unreadCounter="notification.unreadCounter"
+                            isSameDocument="notification.isSameDocument"
+                            t-on-o-clicked="_onClickedPreview"
+                            t-key="notification.failure.localId"
+                        />
+                    </t>
+                    <t t-if="!notification_last">
+                        <div class="o_NotificationList_separator"/>
+                    </t>
+                </t>
+            </t>
+        </div>
+    </t>
+
+</templates>

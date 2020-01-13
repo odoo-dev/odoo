@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.component.MailFailureNotification" owl="1">
+        <!-- The template is used by the systray menu in order to show notification of mail failures. -->
+        <div class="o_MailFailureNotification" t-on-click="_onClickFailureNotification">
+            <div class="o_MailFailureNotification_sidebar">
+                <div class="o_MailFailureNotification_imageContainer o_MailFailureNotification_sidebarItem">
+                    <img class="o_MailFailureNotification_image rounded-circle" t-att-src="props.failure.moduleIcon" alt=""/>
+                </div>
+            </div>
+            <div class="o_MailFailureNotification_content">
+                <div class="o_MailFailureNotification_header">
+                    <span class="o_MailFailureNotification_name" t-att-class="{ 'o-mobile': storeProps.isMobile }">
+                        <t t-esc="props.failure.modelName"/>
+                    </span>
+                    <span class="o_MailFailureNotification_counter">
+                        (<t t-esc="props.unreadCounter"/>)
+                    </span>
+                    <span class="o-autogrow"/>
+                    <span class="o_MailFailureNotification_date">
+                        <t t-esc="props.failure.lastMessageDate.fromNow()"/>
+                    </span>
+                </div>
+                <div class="o_MailFailureNotification_core">
+                    <span class="o_MailFailureNotification_coreItem o_MailFailureNotification_inlineText">
+                        An error occurred when sending an email.
+                    </span>
+                    <span class="o-autogrow"/>
+                    <span class="o_MailFailureNotification_coreItem o_MailFailureNotification_discard fa fa-check" title="Discard mail delivery failures" t-on-click.stop="_onClickFailureDiscard"/>
+                </div>
+            </div>
+        </div>
+
+    </t>
+
+</templates>

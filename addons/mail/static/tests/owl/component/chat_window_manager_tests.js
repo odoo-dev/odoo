@@ -229,7 +229,7 @@ QUnit.test('chat window: basic rendering', async function (assert) {
     });
     document.querySelector(`.o_MessagingMenu_toggler`).click();
     await afterNextRender();
-    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_ThreadPreviewList_preview`).click();
+    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_NotificationList_preview`).click();
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatWindow`).length,
@@ -368,7 +368,7 @@ QUnit.test('chat window: fold', async function (assert) {
     // Open Thread
     document.querySelector(`.o_MessagingMenu_toggler`).click();
     await afterNextRender();
-    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_ThreadPreviewList_preview`).click();
+    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_NotificationList_preview`).click();
     await afterNextRender();
     // Fold chat window
     document.querySelector(`.o_ChatWindow_header`).click();
@@ -391,7 +391,7 @@ QUnit.test('chat window: open / close', async function (assert) {
     async function openThread() {
         document.querySelector(`.o_MessagingMenu_toggler`).click();
         await afterNextRender();
-        document.querySelector(`.o_MessagingMenu_dropdownMenu .o_ThreadPreviewList_preview`).click();
+        document.querySelector(`.o_MessagingMenu_dropdownMenu .o_NotificationList_preview`).click();
         await afterNextRender();
     }
 
@@ -545,7 +545,7 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     });
     document.querySelector(`.o_MessagingMenu_toggler`).click();
     await afterNextRender();
-    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_ThreadPreviewList_preview`).click();
+    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_NotificationList_preview`).click();
     await afterNextRender();
     // Set a scroll position to chat window
     document.querySelector(`.o_Thread_messageList`).scrollTop = 142;
@@ -695,7 +695,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_ThreadPreviewList_preview[data-thread-local-id="mail.channel_10"]`).click();
+        .o_NotificationList_preview[data-thread-local-id="mail.channel_10"]`).click();
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatWindow`).length,
@@ -717,7 +717,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_ThreadPreviewList_preview[data-thread-local-id="mail.channel_20"]`
+        .o_NotificationList_preview[data-thread-local-id="mail.channel_20"]`
     ).click();
     await afterNextRender();
     assert.strictEqual(
@@ -804,7 +804,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_ThreadPreviewList_preview[data-thread-local-id="mail.channel_1"]`
+        .o_NotificationList_preview[data-thread-local-id="mail.channel_1"]`
     ).click();
     await afterNextRender();
     assert.strictEqual(
@@ -827,7 +827,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_ThreadPreviewList_preview[data-thread-local-id="mail.channel_2"]`
+        .o_NotificationList_preview[data-thread-local-id="mail.channel_2"]`
     ).click();
     await afterNextRender();
     assert.strictEqual(
@@ -850,7 +850,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_ThreadPreviewList_preview[data-thread-local-id="mail.channel_3"]`
+        .o_NotificationList_preview[data-thread-local-id="mail.channel_3"]`
     ).click();
     await afterNextRender();
     assert.strictEqual(

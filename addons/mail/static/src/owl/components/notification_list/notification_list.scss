@@ -2,7 +2,7 @@
 // Layout
 // ------------------------------------------------------------------
 
- .o_ThreadPreviewList {
+ .o_NotificationList {
     display: flex;
     flex-flow: column;
     overflow: auto;
@@ -12,22 +12,22 @@
     }
 }
 
-.o_ThreadPreviewList_noConversation {
+.o_NotificationList_noConversation {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 50px;
 }
 
-.o_ThreadPreviewList_preview {
+.o_NotificationList_preview {
     padding: 3px;
 
-    &.o_ThreadPreviewList_preview-mobile {
+    &.o_NotificationList_preview-mobile {
         padding: 5px;
     }
 }
 
-.o_ThreadPreviewList_separator {
+.o_NotificationList_separator {
     flex: 0 0 auto;
     width: 100%;
 }
@@ -36,6 +36,6 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_ThreadPreviewList_separator {
+.o_NotificationList_separator {
     border-bottom: 1px solid gray('400');
 }

@@ -1,4 +1,4 @@
-odoo.define('mail.component.ThreadPreview', function (require) {
+odoo.define('mail.component.ThreadNotification', function (require) {
 'use strict';
 
 const MessageAuthorPrefix = require('mail.component.MessageAuthorPrefix');
@@ -9,7 +9,7 @@ const mailUtils = require('mail.utils');
 const { Component } = owl;
 const { useDispatch, useGetters } = owl.hooks;
 
-class ThreadPreview extends Component {
+class ThreadNotification extends Component {
 
     /**
      * @override
@@ -69,6 +69,7 @@ class ThreadPreview extends Component {
         if (!this.storeProps.lastMessage) {
             return '';
         }
+        // TODO SEB don't forget to port the fix for performance here too
         return mailUtils.parseAndTransform(
             this.storeGetters.messagePrettyBody(this.storeProps.lastMessage.localId),
             mailUtils.inline);
@@ -110,17 +111,17 @@ class ThreadPreview extends Component {
     }
 }
 
-ThreadPreview.components = {
+ThreadNotification.components = {
     MessageAuthorPrefix,
     PartnerImStatusIcon,
 };
 
-ThreadPreview.props = {
+ThreadNotification.props = {
     threadLocalId: String,
 };
 
-ThreadPreview.template = 'mail.component.ThreadPreview';
+ThreadNotification.template = 'mail.component.ThreadNotification';
 
-return ThreadPreview;
+return ThreadNotification;
 
 });

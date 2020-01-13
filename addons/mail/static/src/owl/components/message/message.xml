@@ -39,6 +39,7 @@
                     <div class="o_Message_date o_Message_sidebarItem o-message-squashed" t-att-class="{ 'o-message-selected': props.isSelected }">
                         <t t-esc="shortTime"/>
                     </div>
+                    <!-- TODO SEB here we need to display the customer email status (only in chatter? need to check what is the condition) -->
                     <div class="o_Message_commands o_Message_sidebarCommands o_Message_sidebarItem o-message-squashed" t-att-class="{ 'o-message-selected': props.isSelected, 'o-mobile': storeProps.isMobile }">
                         <t t-if="storeProps.message.message_type !== 'notification'">
                             <div class="o_Message_command o_Message_commandStar fa"
