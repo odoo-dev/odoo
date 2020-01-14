@@ -16,6 +16,7 @@ MailManager.include({
      * @param {integer} data.id
      */
     _handlePartnerNotification: function (data) {
+        // TODO SEB convert to Owl
         if (data.type === 'snailmail_update') {
             this._handleSnailmailUpdateNotification(data);
         } else {
@@ -34,6 +35,7 @@ MailManager.include({
      * @param {string} datas.elements[].snailmail_status status of the letter
      */
     _handleSnailmailUpdateNotification: function (datas) {
+        // TODO SEB this needs to be adapted with owl
         var self = this;
         _.each(datas.elements, function (data) {
             var isNewFailure = data.snailmail_error;

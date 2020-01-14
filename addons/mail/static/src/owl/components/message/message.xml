@@ -55,6 +55,7 @@
                 </t>
             </div>
             <div class="o_Message_core">
+                <!-- TODO SEB don't squash if message has status icon (envelope?) -->
                 <t t-if="!props.isSquashed">
                     <div class="o_Message_header">
                         <div class="o_Message_authorName" t-att-class="hasAuthorRedirect ? 'o_Message_authorRedirect o_redirect' : ''" t-on-click="_onClickAuthor" t-att-title="hasAuthorRedirect ? 'Open chat' : ''">
@@ -73,11 +74,13 @@
                                 </t>
                             </div>
                         </t>
+                        <!-- TODO SEB need to update css -->
                         <span t-if="(storeProps.message.customer_email_data or ['exception', 'bounce'].indexOf(storeProps.message.customer_email_status) > -1)" class="o_thread_tooltip_container">
                             <t t-set="fatype" t-value="''"/>
                             <t t-if="storeProps.message.customer_email_status === 'sent' or storeProps.message.customer_email_status === 'ready'">
                                 <t t-set="fatype" t-value="'-o'"/>
                             </t>
+                            <!-- TODO SEB need to add popover for o_thread_tooltip -->
                             <i t-att-class="'o_thread_tooltip o_thread_message_email o_thread_message_email_' + storeProps.message.customer_email_status + ' fa fa-envelope' + fatype"/>
                         </span>
 

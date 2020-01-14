@@ -15,6 +15,7 @@ MailFailure.include({
      * @override
      */
     getPreview: function () {
+        // TODO SEB convert to Owl
         var preview = this._super.apply(this, arguments);
         if (this._failureType === 'snailmail') {
             _.extend(preview, {

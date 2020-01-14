@@ -16,6 +16,7 @@ MailFailure.include({
      */
     getPreview: function () {
         var preview = this._super.apply(this, arguments);
+        // TODO SEB convert to owl
         if (this._failureType === 'sms') {
             _.extend(preview, {
                 body: _t('An error occurred when sending an SMS'),
