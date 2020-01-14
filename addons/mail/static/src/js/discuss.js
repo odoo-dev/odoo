@@ -470,7 +470,6 @@ var Discuss = AbstractAction.extend({
             displaySubjectOnMessages: this._thread.isMassMailing() ||
                 this._thread.getID() === 'mailbox_inbox' ||
                 this._thread.getID() === 'mailbox_moderation',
-            displayEmailIcons: false,
             displayReplyIcons: true,
             displayBottomThreadFreeSpace: true,
             displayModerationCommands: true,

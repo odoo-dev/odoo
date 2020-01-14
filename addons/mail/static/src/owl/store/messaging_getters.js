@@ -393,6 +393,8 @@ const getters = {
         } else if (filter === 'chat') {
             threadLocalIds = getters.chatList().map(chat => chat.localId);
         } else {
+            // order: failures > inbox > channel, each group must be sorted
+
             // "All" filter is for channels and chats
             threadLocalIds = getters.mailChannelList().map(mailChannel => mailChannel.localId);
 

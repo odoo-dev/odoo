@@ -29,7 +29,6 @@ var AbstractService = require('web.AbstractService');
 var DMChat = require('mail.model.DMChat');
 var Livechat = require('mail.model.Livechat');
 var Mailbox = require('mail.model.Mailbox');
-var MailFailure = require('mail.model.MailFailure');
 var Message = require('mail.model.Message');
 var MultiUserChannel = require('mail.model.MultiUserChannel');
 var mailUtils = require('mail.utils');
@@ -198,14 +197,6 @@ var MailManager =  AbstractService.extend({
         });
     },
     /**
-     * Returns a list of mail failures
-     *
-     * @returns {mail.model.MailFailure[]} list of mail failures
-     */
-    getMailFailures: function () {
-        return this._mailFailures;
-    },
-    /**
      * Get partners as mentions from a chatter
      * Typically all employees as partner suggestions.
      *
@@ -238,15 +229,13 @@ var MailManager =  AbstractService.extend({
 
         var channelDef = this._getSystrayChannelPreviews(filter);
         var inboxDef = this._getSystrayInboxPreviews(filter);
-        var failureDef = this._getSystrayMailFailurePreviews(filter);
 
-        return Promise.all([channelDef, inboxDef, failureDef])
-            .then(function (result) { //previewsChannel, previewsInbox, previewsFailure
-                // order: failures > inbox > channel, each group must be sorted
+        return Promise.all([channelDef, inboxDef])
+            .then(function (result) { //previewsChannel, previewsInbox
+                // order: inbox > channel, each group must be sorted
                 var previewsChannel = self._sortPreviews(result[0]);
                 var previewsInbox = self._sortPreviews(result[1]);
-                var previewsFailure = self._sortPreviews(result[2]);
-                return _.union(previewsFailure, previewsInbox, previewsChannel);
+                return _.union(previewsInbox, previewsChannel);
             });
     },
     /**
@@ -705,72 +694,6 @@ var MailManager =  AbstractService.extend({
         });
     },
     /**
-     * Get the previews of the mail failures
-     * Mail failures of a same model with the same type are grouped together, so
-     * that there are few preview items on the messaging menu in the systray.
-     *
-     * To determine whether this is a model preview or a document preview review
-     * the documentID is omitted for a model preview, whereas it is set for a
-     * preview of a failure related to a document.
-     *
-     * @returns {Promise<Object[]>} resolved with previews of mail failures
-     */
-    _getMailFailurePreviews: function () {
-        // TODO SEB this can be removed when done with owl
-        // items = list of objects:
-        //  item = {
-        //      unreadCounter: {integer},
-        //      failure: {mail.model.MailFailure},
-        //      isSameDocument: {boolean}
-        //  }
-        var items = [];
-        _.each(this._mailFailures, function (failure) {
-            var unreadCounter = 1;
-            var isSameDocument = true;
-            var sameModelAndTypeItem = _.find(items, function (item) {
-                if (
-                    item.failure.isLinkedToDocument() &&
-                    (item.failure.getDocumentModel() === failure.getDocumentModel()) &&
-                    (item.failure.getFailureType() === failure.getFailureType())
-                ) {
-                    isSameDocument = item.failure.getDocumentID() === failure.getDocumentID();
-                    return true;
-                }
-                return false;
-            });
-
-            if (failure.isLinkedToDocument() && sameModelAndTypeItem) {
-                unreadCounter = sameModelAndTypeItem.unreadCounter + 1;
-                isSameDocument = sameModelAndTypeItem.isSameDocument && isSameDocument;
-                var index = _.findIndex(items, sameModelAndTypeItem);
-                items[index] = {
-                    unreadCounter: unreadCounter,
-                    failure: failure,
-                    isSameDocument: isSameDocument,
-                };
-            } else {
-                items.push({
-                    unreadCounter: unreadCounter,
-                    failure: failure,
-                    isSameDocument: true,
-                });
-            }
-        });
-        return _.map(items, function (item) {
-            // return preview with correct unread counter
-            // also unset documentID if the grouped mail failures are from
-            // same model but different document
-            var preview = {};
-            _.extend(preview, item.failure.getPreview(), {
-                unreadCounter: item.unreadCounter,
-            });
-            if (!item.isSameDocument) {
-                preview.documentID = undefined;
-            }
-            return preview;
-        });
-    },
-    /**
      * @private
      * @param {string|undefined} [filter] the filter to apply on channel
      *   previews in systray messaging menu
@@ -820,26 +743,11 @@ var MailManager =  AbstractService.extend({
      *   mail.Preview on inbox message previews
      */
     _getSystrayInboxPreviews: function (filter) {
-        // 'All' filter, show messages preview from inbox and mail failures
+        // 'All' filter, show messages preview from inbox
         // inbox previews
         if (filter === 'mailbox_inbox' || !filter) {
             var inbox = this.getMailbox('inbox');
             return inbox.getMessagePreviews();
-        } else {
-            return Promise.resolve([]);
-        }
-    },
-    /**
-     * Get the previews of mail failure, based on selected filter.
-     *
-     * @private
-     * @param {string|undefined} [filter]
-     */
-    _getSystrayMailFailurePreviews: function (filter) {
-        // TODO SEB remove this after having adapted it in owl
-        // mail failure previews
-        if (filter === 'mailbox_inbox' || !filter) {
-            return this._getMailFailurePreviews();
         } else {
             return Promise.resolve([]);
         }
@@ -857,7 +765,6 @@ var MailManager =  AbstractService.extend({
         this._discussMenuID = undefined;
         this._discussOpen = false;
         this._isMyselfModerator = false;
-        this._mailFailures = [];
         // list of employees for chatter mentions
         this._mentionPartnerSuggestions = [];
         this._messages = [];
@@ -1266,7 +1173,6 @@ var MailManager =  AbstractService.extend({
         var prom = this._updateChannelsFromServer(result);
         this._updateModerationSettingsFromServer(result);
         this._updateMailboxesFromServer(result);
-        this._updateMailFailuresFromServer(result);
         this._updateCannedResponsesFromServer(result);
 
         this._mentionPartnerSuggestions = result.mention_partner_suggestions;
@@ -1312,21 +1218,6 @@ var MailManager =  AbstractService.extend({
                 mailboxCounter: data.moderation_counter || 0,
             });
         }
-    },
-    /**
-     * Update mail failures with mail data fetched from the server
-     *
-     * @private
-     * @param {Object} data
-     * @param {Object[]} data.mail_failures data to update mail failures
-     *   locally
-     */
-    _updateMailFailuresFromServer: function (data) {
-        var self = this;
-        // TODO SEB this is init messaging, it is already done in owl, so it can be removed here
-        this._mailFailures = _.map(data.mail_failures, function (mailFailureData) {
-            return new MailFailure(self, mailFailureData);
-        });
     },
     /**
      * Update moderation settings with mail data fetched from server

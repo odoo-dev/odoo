@@ -253,7 +253,6 @@
         @param {Object} options
         @param {boolean} [options.displayAvatars]
         @param {boolean} [options.displayDocumentLinks]
-        @param {boolean} [options.displayEmailIcons]
         @param {boolean} [options.displayMarkAsRead]
         @param {boolean} [options.displayModerationCommands] when set, display the moderation commands on
           the message. This includes the moderation checkboxes (needs a control panel such as in Discuss app).
@@ -324,14 +323,6 @@
                     <t t-if="message.originatesFromChannel() and (message.getOriginChannelID() !== thread.getID())">
                         (<small>from</small> <a t-att-data-oe-id="message.getOriginChannelID()" href="#">#<t t-esc="message.getOriginChannelName()"/></a>)
                     </t>
-                    <span t-if="options.displayEmailIcons and (message.hasCustomerEmailData() or ['exception', 'bounce'].indexOf(message._customerEmailStatus) > -1)" class="o_thread_tooltip_container">
-
-                        <t t-set="fatype" t-value="''"/>
-                        <t t-if="message.getCustomerEmailStatus() === 'sent' or message.getCustomerEmailStatus() === 'ready'">
-                            <t t-set="fatype" t-value="'-o'"/>
-                        </t>
-                        <i t-att-class="'o_thread_tooltip o_thread_message_email o_thread_message_email_' + message.getCustomerEmailStatus() + ' fa fa-envelope' + fatype" t-att-data-message-id="message.getID()"/>
-                    </span>
                     <span t-attf-class="o_thread_icons">
                         <t t-if="thread.hasSeenFeature()" t-call="mail.widget.Thread.Message.SeenIcon"/>
                         <i t-if="options.displayStars and !message.isSystemNotification() and !message.needsModeration()"

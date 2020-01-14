@@ -8,7 +8,6 @@ odoo.define('mail.Manager.Notification', function (require) {
  * the longpoll bus, which are data received from the server.
  */
 var MailManager = require('mail.Manager');
-var MailFailure = require('mail.model.MailFailure');
 
 const config = require('web.config');
 var core = require('web.core');
@@ -287,54 +286,6 @@ MailManager.include({
         this._handleChannelSeenNotification(data.channel_id, data);
     },
     /**
-     * Add or remove failure when receiving a failure update message
-     *
-     * @private
-     * @param {Object} datas
-     * @param {Object[]} datas.elements list of mail failure data
-     * @param {string} datas.elements[].message_id ID of related message that
-     *   has a mail failure.
-     * @param {Array} datas.elements[].notifications list of notifications
-     *   that is related to a mail failure.
-     * @param {string} datas.elements[].notifications[0] sending state of a mail
-     *   failure (e.g. 'exception').
-     */
-    _handlePartnerMailFailureNotification: function (datas) {
-        // TODO SEB remove this once it is done correctly with owl
-        var self = this;
-        _.each(datas.elements, function (data) {
-            var isNewFailure = _.some(data.notifications, function (notif) {
-                return notif[0] === 'exception' || notif[0] === 'bounce';
-            });
-            var matchedFailure = _.find(self._mailFailures, function (failure) {
-                return failure.getMessageID() === data.message_id;
-            });
-            if (matchedFailure) {
-                var index = _.findIndex(self._mailFailures, matchedFailure);
-                if (isNewFailure) {
-                    self._mailFailures[index] = new MailFailure(self, data);
-                } else {
-                    self._mailFailures.splice(index, 1);
-                }
-            } else if (isNewFailure) {
-                self._mailFailures.push(new MailFailure(self, data));
-            }
-            var message = _.find(self._messages, function (msg) {
-                return msg.getID() === data.message_id;
-            });
-            if (message) {
-                if (isNewFailure) {
-                    message.updateCustomerEmailStatus('exception');
-                } else {
-                    message.updateCustomerEmailStatus('sent');
-                }
-                self._updateMessageNotificationStatus(data, message);
-                self._mailBus.trigger('update_message', message);
-            }
-        });
-        this._mailBus.trigger('update_needaction', this.needactionCounter);
-    },
-    /**
      * Updates mailbox_inbox when a message has marked as read.
      *
      * @private
@@ -439,8 +390,6 @@ MailManager.include({
             this._handlePartnerTransientMessageNotification(data);
         } else if (data.type === 'activity_updated') {
             this._handlePartnerActivityUpdateNotification(data);
-        } else if (data.type === 'mail_failure') {
-            this._handlePartnerMailFailureNotification(data);
         } else if (data.type === 'user_connection') {
             this._handlePartnerUserConnectionNotification(data);
         } else if (data.info === 'channel_seen') {
@@ -562,28 +511,6 @@ MailManager.include({
     _listenOnBuses: function () {
         this._super.apply(this, arguments);
         this.call('bus_service', 'onNotification', this, this._onNotification);
-    },
-    /**
-     * Update the message notification status of message based on update_message
-     *
-     * @private
-     * @param {Object} data
-     * @param {Object[]} data.notifications
-     * @param {mail.model.Message} message
-     */
-    _updateMessageNotificationStatus: function (data, message) {
-        _.each(data.notifications, function (notif, id) {
-            var partnerName = notif[1];
-            var notifStatus = notif[0];
-            var res = _.find(message.getCustomerEmailData(), function (entry) {
-                return entry[0] === parseInt(id);
-            });
-            if (res) {
-                res[2] = notifStatus;
-            } else {
-                message.addCustomerEmailData([parseInt(id), partnerName, notifStatus]);
-            }
-        });
     },
 
     //--------------------------------------------------------------------------

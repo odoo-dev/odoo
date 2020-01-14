@@ -1698,7 +1698,7 @@ const actions = {
             ]=[],
             body,
             channel_ids=[],
-            customer_email_data,
+            customer_email_data = [],
             customer_email_status,
             date,
             email_from,
@@ -3804,8 +3804,25 @@ const actions = {
             } else if (isNewFailure) {
                 state.mailFailures[mailFailureLocalId] = Object.assign({}, data);
             }
-            // TODO SEB update inverse relation: message customer email status related to this failure
-            // @see bottom of _handlePartnerMailFailureNotification
+
+            const messageLocalId = dispatch('_insertMessage', {
+                id: data.messageId,
+                customer_email_status: isNewFailure ? 'exception' : 'sent',
+            });
+            const message = state.messages[messageLocalId];
+
+            _.each(data.notifications, function (notif, id) {
+                var partnerName = notif[1];
+                var notifStatus = notif[0];
+                var res = _.find(message.customer_email_data, function (entry) {
+                    return entry[0] === parseInt(id);
+                });
+                if (res) {
+                    res[2] = notifStatus;
+                } else {
+                    message.customer_email_data.push([parseInt(id), partnerName, notifStatus]);
+                }
+            });
         });
     },
     /**

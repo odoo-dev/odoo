@@ -199,15 +199,6 @@ var AbstractMessage =  Class.extend({
         return !!(this._serverAuthorID && this._serverAuthorID[0]);
     },
     /**
-     * State whether this message contains some customer email data
-     * By default, messages do not have any customer email data
-     *
-     * @return {boolean}
-     */
-    hasCustomerEmailData: function () {
-        return false;
-    },
-    /**
      * State whether this message has an email of its sender.
      * By default, messages do not have any email of its sender.
      *

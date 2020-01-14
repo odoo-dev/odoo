@@ -61,12 +61,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
     //--------------------------------------------------------------------------
 
     /**
-     * @param {Object} data
-     */
-    addCustomerEmailData: function (data) {
-        this._customerEmailData.push(data);
-    },
-    /**
      * @override
      * @return {string|undefined}
      */
@@ -100,30 +94,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
             return '/mail/static/src/img/email_icon.png';
         }
         return '/mail/static/src/img/smiley/avatar.jpg';
-    },
-    /**
-     * Get the customer email data of this email, if any.
-     * If this message has no such data, returns 'undefined'
-     *
-     * @return {Object[]|undefined}
-     */
-    getCustomerEmailData: function () {
-        if (!this.hasCustomerEmailData()) {
-            return undefined;
-        }
-        return this._customerEmailData;
-    },
-    /**
-     * Get the customer email status of this email, if any.
-     * If this message has no such data, returns 'undefined'
-     *
-     * @return {string|undefined}
-     */
-    getCustomerEmailStatus: function () {
-        if (!this.hasCustomerEmailData()) {
-            return undefined;
-        }
-        return this._customerEmailStatus;
     },
     /**
      * Get the text to display for the author of the message
@@ -312,15 +282,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      */
     getURL: function () {
         return session.url('/mail/view?message_id=' + this._id);
-    },
-    /**
-     * State whether this message contains some customer email data
-     *
-     * @override
-     * @return {boolean}
-     */
-    hasCustomerEmailData: function () {
-        return !!(this._customerEmailData && (this._customerEmailData.length > 0));
     },
     /**
      * State whether this message has an email of its sender.
@@ -521,14 +482,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
                 method: 'toggle_message_starred',
                 args: [[this._id]],
             });
-    },
-    /**
-     * Update the customer email status
-     *
-     * @param {string} newCustomerEmailStatus
-     */
-    updateCustomerEmailStatus: function (newCustomerEmailStatus) {
-        this._customerEmailStatus = newCustomerEmailStatus;
     },
 
     //--------------------------------------------------------------------------
@@ -751,9 +704,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {string} [data.subtype_description]
      * @param {Object[]} [data.tracking_value_ids]
      */
-    _setInitialData: function (data){
-        this._customerEmailData = data.customer_email_data || [];
-        this._customerEmailStatus = data.customer_email_status;
+    _setInitialData: function (data) {
         this._documentModel = data.model;
         this._documentName = data.record_name;
         this._documentID = data.res_id;

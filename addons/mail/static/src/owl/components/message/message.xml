@@ -39,7 +39,6 @@
                     <div class="o_Message_date o_Message_sidebarItem o-message-squashed" t-att-class="{ 'o-message-selected': props.isSelected }">
                         <t t-esc="shortTime"/>
                     </div>
-                    <!-- TODO SEB here we need to display the customer email status (only in chatter? need to check what is the condition) -->
                     <div class="o_Message_commands o_Message_sidebarCommands o_Message_sidebarItem o-message-squashed" t-att-class="{ 'o-message-selected': props.isSelected, 'o-mobile': storeProps.isMobile }">
                         <t t-if="storeProps.message.message_type !== 'notification'">
                             <div class="o_Message_command o_Message_commandStar fa"
@@ -74,6 +73,14 @@
                                 </t>
                             </div>
                         </t>
+                        <span t-if="(storeProps.message.customer_email_data or ['exception', 'bounce'].indexOf(storeProps.message.customer_email_status) > -1)" class="o_thread_tooltip_container">
+                            <t t-set="fatype" t-value="''"/>
+                            <t t-if="storeProps.message.customer_email_status === 'sent' or storeProps.message.customer_email_status === 'ready'">
+                                <t t-set="fatype" t-value="'-o'"/>
+                            </t>
+                            <i t-att-class="'o_thread_tooltip o_thread_message_email o_thread_message_email_' + storeProps.message.customer_email_status + ' fa fa-envelope' + fatype"/>
+                        </span>
+
                         <div class="o_Message_commands o_Message_headerCommands" t-att-class="{ 'o-mobile': storeProps.isMobile }">
                             <t t-if="!storeProps.message.isTemporary and ((storeProps.message.message_type !== 'notification' and storeProps.originThread and storeProps.originThread._model === 'mail.channel') or !storeProps.message.isTransient)">
                                 <span class="o_Message_command o_Message_commandStar o_Message_headerCommand fa"

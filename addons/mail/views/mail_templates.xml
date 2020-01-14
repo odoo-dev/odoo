@@ -19,7 +19,6 @@
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_window_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_service.js"></script>
                 <!-- Models -->
-                <script type="text/javascript" src="/mail/static/src/js/models/mail_failure.js"></script>
                     <!-- messages -->
                     <script type="text/javascript" src="/mail/static/src/js/models/messages/abstract_message.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/models/messages/message.js"></script>
