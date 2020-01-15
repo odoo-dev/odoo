@@ -6,20 +6,20 @@
         <div class="o_MailFailureNotification" t-on-click="_onClickFailureNotification">
             <div class="o_MailFailureNotification_sidebar">
                 <div class="o_MailFailureNotification_imageContainer o_MailFailureNotification_sidebarItem">
-                    <img class="o_MailFailureNotification_image rounded-circle" t-att-src="props.failure.moduleIcon" alt=""/>
+                    <img class="o_MailFailureNotification_image rounded-circle" t-att-src="props.failure.module_icon" alt=""/>
                 </div>
             </div>
             <div class="o_MailFailureNotification_content">
                 <div class="o_MailFailureNotification_header">
                     <span class="o_MailFailureNotification_name" t-att-class="{ 'o-mobile': storeProps.isMobile }">
-                        <t t-esc="props.failure.modelName"/>
+                        <t t-esc="props.failure.model_name"/>
                     </span>
                     <span class="o_MailFailureNotification_counter">
                         (<t t-esc="props.unreadCounter"/>)
                     </span>
                     <span class="o-autogrow"/>
                     <span class="o_MailFailureNotification_date">
-                        <t t-esc="props.failure.lastMessageDate.fromNow()"/>
+                        <t t-esc="props.failure.last_message_date.fromNow()"/>
                     </span>
                 </div>
                 <div class="o_MailFailureNotification_core">

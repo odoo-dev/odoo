@@ -395,25 +395,22 @@ const getters = {
         } else {
             // order: failures > inbox > channel, each group must be sorted
 
-            // "All" filter is for channels and chats
-            threadLocalIds = getters.mailChannelList().map(mailChannel => mailChannel.localId);
-
             var failureItems = [];
             const sortedFailures = Object.values(state.mailFailures).sort((att1, att2) => {
-                return att1.lastMessageDate.isAfter(att2.lastMessageDate) ? -1 : 1;
+                return att1.last_message_date.isAfter(att2.last_message_date) ? -1 : 1;
             });
             _.each(sortedFailures, function (failure) {
                 // TODO SEB replace isSameDocument by a list of local ids?
                 var isSameDocument = true;
                 var sameModelAndTypeItemIndex = _.findIndex(failureItems, function (item) {
                     if (
-                        item.failure.documentModel &&
-                        item.failure.documentId &&
-                        item.failure.documentModel === failure.documentModel &&
+                        item.failure.model &&
+                        item.failure.res_id &&
+                        item.failure.model === failure.model &&
                         item.failure.failureType === failure.failureType
                     ) {
-                        isSameDocument = item.failure.documentId === failure.documentId;
-                        if (failure.documentModel === 'mail.channel') {
+                        isSameDocument = item.failure.res_id === failure.res_id;
+                        if (failure.model === 'mail.channel') {
                             // Only regroup channel for the same document
                             // because there is no kanban or list view to
                             // display several of them.
@@ -424,7 +421,7 @@ const getters = {
                     return false;
                 });
                 if (
-                    failure.documentModel && failure.documentId && sameModelAndTypeItemIndex !== -1
+                    failure.model && failure.res_id && sameModelAndTypeItemIndex !== -1
                 ) {
                     const existingItem = failureItems[sameModelAndTypeItemIndex];
                     Object.assign(failureItems[sameModelAndTypeItemIndex], {
@@ -445,6 +442,9 @@ const getters = {
                     notificationType: 'mailFailure',
                 });
             }));
+
+            // "All" filter is for channels and chats
+            threadLocalIds = getters.mailChannelList().map(mailChannel => mailChannel.localId);
         }
 
         return notifications.concat(threadLocalIds.map(threadLocalId => {

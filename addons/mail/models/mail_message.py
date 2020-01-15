@@ -1036,9 +1036,15 @@ class Message(models.Model):
         return True
 
     def message_fetch_failed(self):
+        """Return all the messages sent by the current user that have related
+        notifications currently in a failure status (exception or bounce).
+
+        The return value is a dict, where the keys are the message id, and the
+        values a list of their corresponding failure notifications.
+        """
         messages = self.search([
             ('has_error', '=', True),
-            ('author_id.id', '=', self.env.user.partner_id.id), 
+            ('author_id.id', '=', self.env.user.partner_id.id),
             ('res_id', '!=', 0),
             ('model', '!=', False),
             ('message_type', '!=', 'user_notification')

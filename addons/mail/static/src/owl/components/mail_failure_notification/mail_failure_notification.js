@@ -28,15 +28,15 @@ class MailFailureNotification extends Component {
      */
     _onClickFailureNotification() {
         if (this.props.isSameDocument) {
-            if (this.props.failure.documentModel === 'mail.channel') {
+            if (this.props.failure.model === 'mail.channel') {
                 this.storeDispatch('openThread', this.props.failure.threadLocalId);
             } else {
                 this.storeDispatch('openDocument', {
-                    model: this.props.failure.documentModel,
-                    id: this.props.failure.documentId,
+                    model: this.props.failure.model,
+                    id: this.props.failure.res_id,
                 });
             }
-        } else if (this.props.failure.documentModel !== 'mail.channel') {
+        } else if (this.props.failure.model !== 'mail.channel') {
             // preview of mail failures grouped to different document of same model
             this.env.do_action({
                 name: "Mail failures",
@@ -44,7 +44,7 @@ class MailFailureNotification extends Component {
                 view_mode: 'kanban,list,form',
                 views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
                 target: 'current',
-                res_model: this.props.failure.documentModel,
+                res_model: this.props.failure.model,
                 domain: [['message_has_error', '=', true]],
             });
         }
@@ -56,7 +56,7 @@ class MailFailureNotification extends Component {
     _onClickFailureDiscard() {
         this.env.do_action('mail.mail_resend_cancel_action', {
             additional_context: {
-                default_model: this.props.failure.documentModel,
+                default_model: this.props.failure.model,
                 unread_counter: this.props.unreadCounter,
             }
         });

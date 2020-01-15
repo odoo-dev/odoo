@@ -49,7 +49,7 @@ const MessagingService = AbstractService.extend({
          * Messaging store
          */
         const store = new Store({
-            actions,
+            actions: this._getStoreActions(),
             env: messagingStoreEnv,
             getters,
             state: initializeState(),
@@ -76,6 +76,17 @@ const MessagingService = AbstractService.extend({
     getMessagingEnv() {
         return this.messagingEnv;
     },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @return {Object}
+     */
+    _getStoreActions() {
+        return actions;
+    }
 });
 
 serviceRegistry.add('messaging', MessagingService);

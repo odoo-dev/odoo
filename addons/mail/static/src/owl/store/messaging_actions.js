@@ -1641,6 +1641,92 @@ const actions = {
     /**
      * @private
      * @param {Object} param0
+     * @param {Object} param0.dispatch
+     * @param {Object} param0.state
+     * @param {Object} [param1={}]
+     * @param {string} [param1.message_id]
+     * @return {string} mail failure local id
+     */
+    _createMailFailure({ dispatch, state }, {
+        message_id,
+        res_id,
+        model,
+        last_message_date,
+        failure_type = 'mail',
+        module_icon,
+        model_name,
+        notifications,
+    }) {
+        const mailFailureLocalId = `mail.failure_${message_id}`;
+
+        if (state.mailFailures[mailFailureLocalId]) {
+            console.warn(`${mailFailureLocalId} already exists in store`);
+            return;
+        }
+
+        if (last_message_date) {
+            last_message_date = moment(time.str_to_datetime(last_message_date));
+        } else {
+            last_message_date = moment(); // by default: current datetime
+        }
+
+        const mailFailure = {
+            id: message_id,
+            localId: mailFailureLocalId,
+            res_id,
+            model,
+            last_message_date,
+            failure_type,
+            module_icon,
+            model_name,
+            notifications,
+        };
+
+        mailFailure.threadLocalId = dispatch('insertThread', {
+            _model: mailFailure.model,
+            id: mailFailure.res_id,
+        });
+
+        var isNewFailure = _.some(mailFailure.notifications, function (notif) {
+            return notif[0] === 'exception' || notif[0] === 'bounce';
+        });
+
+        var matchedFailure = state.mailFailures[mailFailureLocalId];
+        if (matchedFailure) {
+            if (isNewFailure) {
+                Object.assign(state.mailFailures[mailFailureLocalId], mailFailure);
+            } else {
+                delete state.mailFailures[mailFailureLocalId];
+            }
+        } else if (isNewFailure) {
+            state.mailFailures[mailFailure.localId] = mailFailure;
+        }
+
+        // TODO SEB the failure information could be stored in the message? but problem to easily count it
+        const messageLocalId = dispatch('_insertMessage', {
+            id: mailFailure.id,
+            customer_email_status: isNewFailure ? 'exception' : 'sent',
+        });
+        const message = state.messages[messageLocalId];
+
+        _.each(mailFailure.notifications, function (notif, id) {
+            var partnerName = notif[1];
+            var notifStatus = notif[0];
+            var res = _.find(message.customer_email_data, function (entry) {
+                return entry[0] === parseInt(id);
+            });
+            if (res) {
+                res[2] = notifStatus;
+            } else {
+                message.customer_email_data.push([parseInt(id), partnerName, notifStatus]);
+            }
+        });
+        
+        return mailFailure.localId;
+    },
+    /**
+     * @private
+     * @param {Object} param0
      * @param {function} param0.dispatch
      * @param {Object} param0.state
      * @param {Object} param1
@@ -2470,7 +2556,7 @@ const actions = {
              */
             return; // disabled
         } else if (type === 'mail_failure') {
-            return dispatch('_updateMailFailure', data.elements);
+            return dispatch('_handleNotificationPartnerMailFailure', data.elements);
         } else if (type === 'mark_as_read') {
             return dispatch('_handleNotificationPartnerMarkAsRead', data);
         } else if (type === 'moderator') {
@@ -2544,6 +2630,17 @@ const actions = {
                 });
             }
         }
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {Object} param0.dispatch
+     * @param {Array} mailFailures
+     */
+    _handleNotificationPartnerMailFailure({ dispatch }, mailFailures) {
+        _.each(mailFailures, function (mailFailure) {
+            dispatch('_insertMailFailure', mailFailure);
+        });
     },
     /**
      * @private
@@ -2822,7 +2919,7 @@ const actions = {
             needaction_inbox_counter,
             starred_counter
         });
-        dispatch('_updateMailFailure', mail_failures);
+        dispatch('_initMessagingMailFailures', mail_failures);
         dispatch('_initMessagingCannedResponses', shortcodes);
         dispatch('_initMessagingMentionPartnerSuggestions', mention_partner_suggestions);
         dispatch('updateDiscuss', {
@@ -2951,6 +3048,17 @@ const actions = {
     /**
      * @private
      * @param {Object} param0
+     * @param {Object} param0.dispatch
+     * @param {Array} mailFailures
+     */
+    _initMessagingMailFailures({ dispatch }, mailFailures) {
+        _.each(mailFailures, function (mailFailure) {
+            dispatch('_insertMailFailure', mailFailure);
+        });
+    },
+    /**
+     * @private
+     * @param {Object} param0
      * @param {function} param0.dispatch
      * @param {Object[]} mentionPartnerSuggestionsData
      */
@@ -3008,6 +3116,27 @@ const actions = {
             dispatch('_updateAttachment', attachmentLocalId, kwargs);
         }
         return attachmentLocalId;
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.state
+     * @param {Object} param1
+     * @param {integer} param1.id
+     * @param {...Object} param1.kwargs
+     * @return {string} mail failure local Id
+     */
+    _insertMailFailure({ dispatch, state }, param1) {
+        const id = param1.id;
+        const kwargs = Object.assign({}, param1);
+        const mailFailureLocalId = `mail.failure_${id}`;
+        if (!state.mailFailures[mailFailureLocalId]) {
+            dispatch('_createMailFailure', Object.assign({ id }, kwargs));
+        } else {
+            dispatch('_updateMailFailure', mailFailureLocalId, kwargs);
+        }
+        return mailFailureLocalId;
     },
     /**
      * @private
@@ -3760,70 +3889,6 @@ const actions = {
         }
         partner.authorMessageLocalIds = partner.authorMessageLocalIds.filter(localId =>
             localId !== messageLocalId);
-    },
-    /**
-     * @private
-     * @param {Object} param0
-     * @param {Object} param0.state
-     * @param {Object} param0.dispatch
-     * @param {Array} elements
-     */
-    _updateMailFailure({ state, dispatch }, elements) {
-        _.each(elements, function (data) {
-            const threadLocalId = dispatch('insertThread', { _model: data.model, id: data.res_id });
-            const mailFailureLocalId = `mail.failure_${data.message_id}`;
-            let lastMessageDate = moment(); // by default: current datetime
-            if (data.last_message_date) {
-                lastMessageDate = moment(time.str_to_datetime(data.last_message_date));
-            }
-            data = {
-                documentId: data.res_id,
-                documentModel: data.model,
-                failureType: data.failure_type || 'mail',
-                lastMessageDate: lastMessageDate,
-                messageId: data.message_id,
-                moduleIcon: data.module_icon,
-                modelName: data.model_name,
-                notifications: data.notifications,
-                recordName: data.record_name,
-                uuid: data.uuid,
-                _model: 'mail.failure',
-                localId: mailFailureLocalId,
-                threadLocalId,
-            };
-            var isNewFailure = _.some(data.notifications, function (notif) {
-                return notif[0] === 'exception' || notif[0] === 'bounce';
-            });
-            var matchedFailure = state.mailFailures[mailFailureLocalId];
-            if (matchedFailure) {
-                if (isNewFailure) {
-                    Object.assign(state.mailFailures[mailFailureLocalId], data);
-                } else {
-                    delete state.mailFailures[mailFailureLocalId];
-                }
-            } else if (isNewFailure) {
-                state.mailFailures[mailFailureLocalId] = Object.assign({}, data);
-            }
-
-            const messageLocalId = dispatch('_insertMessage', {
-                id: data.messageId,
-                customer_email_status: isNewFailure ? 'exception' : 'sent',
-            });
-            const message = state.messages[messageLocalId];
-
-            _.each(data.notifications, function (notif, id) {
-                var partnerName = notif[1];
-                var notifStatus = notif[0];
-                var res = _.find(message.customer_email_data, function (entry) {
-                    return entry[0] === parseInt(id);
-                });
-                if (res) {
-                    res[2] = notifStatus;
-                } else {
-                    message.customer_email_data.push([parseInt(id), partnerName, notifStatus]);
-                }
-            });
-        });
     },
     /**
      * @private
