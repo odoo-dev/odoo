@@ -15,15 +15,16 @@ class FileUploader extends Component {
         super(...args);
         this.storeDispatch = useDispatch();
         this._fileInputRef = useRef('fileInput');
+        this._fileUploadId = _.uniqueId('o_FileUploader_fileupload');
         this._onAttachmentUploaded = this._onAttachmentUploaded.bind(this);
     }
 
     mounted() {
-        $(window).on(this.props.fileUploadId, this._onAttachmentUploaded);
+        $(window).on(this._fileUploadId, this._onAttachmentUploaded);
     }
 
     willUnmount() {
-        $(window).off(this.props.fileUploadId);
+        $(window).off(this._fileUploadId);
     }
 
     //--------------------------------------------------------------------------
@@ -67,7 +68,7 @@ class FileUploader extends Component {
      */
     _createFormData(file) {
         let formData = new window.FormData();
-        formData.append('callback', this.props.fileUploadId);
+        formData.append('callback', this._fileUploadId);
         formData.append('csrf_token', core.csrf_token);
         formData.append('id', this.props.uploadId);
         formData.append('model', this.props.uploadModel);
@@ -176,7 +177,6 @@ class FileUploader extends Component {
 }
 
 FileUploader.defaultProps = {
-    fileUploadId: _.uniqueId('o_FileUploader_fileupload'),
     uploadId: 0,
     uploadModel: 'mail.compose.message'
 };
@@ -185,9 +185,6 @@ FileUploader.props = {
     attachmentLocalIds: {
         type: Array,
         element: String,
-    },
-    fileUploadId: {
-        type: String,
     },
     newAttachmentExtraData: {
         type: Object,
