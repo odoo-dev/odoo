@@ -228,7 +228,7 @@
         <field name="code">tax_ro_baza_rd92</field>
         <field name="sequence" eval="25"/>
         <field name="parent_id" ref="account_tax_report_ro_baza_rd9"/>
-        <field name="formula">0.5 * tax_ro_baza_rd222</field>
+        <field name="formula">0.5 * tax_ro_baza_rd242</field>
         <field name="report_id" ref="tax_report"/>
     </record>
 
@@ -281,7 +281,7 @@
         <field name="name">10_2 - BAZA</field>
         <field name="code">tax_ro_baza_rd102</field>
         <field name="sequence" eval="31"/>
-        <field name="formula">0.5 * tax_ro_baza_rd232</field>
+        <field name="formula">0.5 * tax_ro_baza_rd252</field>
         <field name="parent_id" ref="account_tax_report_ro_baza_rd10"/>
         <field name="report_id" ref="tax_report"/>
     </record>
@@ -850,7 +850,7 @@
         <field name="report_id" ref="tax_report"/>
     </record>
 
-    <record id="account_tax_report_ro_baza_rd2572" model="account.tax.report.line">
+    <record id="account_tax_report_ro_baza_rd272" model="account.tax.report.line">
         <field name="name">27.2 - BAZA - Achizitii de bunuri, taxabile cu cota 9% (rd.25.2=rd.12.2)</field>
         <field name="tag_name">27_2 - BAZA</field>
         <field name="code">tax_ro_baza_rd272</field>
@@ -873,7 +873,7 @@
         <field name="tag_name">27_3 - BAZA</field>
         <field name="code">tax_ro_baza_rd273</field>
         <field name="sequence" eval="94"/>
-        <field name="parent_id" ref="account_tax_report_ro_baza_rd257"/>
+        <field name="parent_id" ref="account_tax_report_ro_baza_rd27"/>
         <field name="report_id" ref="tax_report"/>
     </record>
 
@@ -922,9 +922,9 @@
         <field name="report_id" ref="tax_report"/>
     </record>
 
-    <record id="account_tax_report_ro_baza_rd31" model="account.tax.report.line">
+    <record id="account_tax_report_ro_baza_total_rd31" model="account.tax.report.line">
         <field name="name">31 - BAZA - TOTAL TAXĂ DEDUCTIBILĂ ( sumă de la rd.20 până la rd.29, cu excepţia celor de la rd.20.1,22.1, 27.1, 27.2, 27.3)</field>
-        <field name="code">tax_ro_baza_rd31</field>
+        <field name="code">tax_ro_baza_total_rd31</field>
         <field name="sequence" eval="100"/>
         <field name="formula">tax_ro_baza_intracom_eu_a + tax_ro_baza_achiz</field>
         <field name="report_id" ref="tax_report"/>
