@@ -18,6 +18,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
@@ -29,6 +30,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -162,6 +164,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
@@ -173,6 +176,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -306,6 +310,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
@@ -317,6 +322,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -450,6 +456,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
@@ -461,6 +468,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -591,20 +599,25 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -746,6 +759,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
@@ -757,6 +771,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -924,20 +939,24 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -1334,20 +1353,24 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -1538,20 +1561,24 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
