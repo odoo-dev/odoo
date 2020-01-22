@@ -13,7 +13,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd15')],
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd14')],
             }),
             (0,0, {
                 'factor_percent': 100,
@@ -25,7 +25,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd15')],
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd14')],
             }),
             (0,0, {
                 'factor_percent': 100,
@@ -159,7 +159,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd15')],
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd14')],
             }),
             (0,0, {
                 'factor_percent': 100,
@@ -171,7 +171,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd15')],
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd14')],
             }),
             (0,0, {
                 'factor_percent': 100,
@@ -586,38 +586,35 @@
 
     <record id="tvaic_00" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">13</field>
         <field name="name">TVA la Incasare - colectat 0%</field>
         <field name="description">TVA 0%</field>
         <field name="amount">0</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="tax_exigibility">on_payment</field>
-        <field name="cash_basis_transition_account_id" ref="pcg_44281"/>
-        <field name="sequence">13</field>
         <field name="tax_group_id" ref="tax_group_tva_0"/>
         <field name="invoice_repartition_line_ids" eval="[(5,0,0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [],
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd14')],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('pcg_4427'),
-                'minus_report_line_ids': [],
+                'plus_report_line_ids': [],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5,0,0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [],
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd14')],
             }),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'plus_report_line_ids': [],
+                'minus_report_line_ids': [],
             }),
         ]"/>
     </record>
@@ -1193,6 +1190,39 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd30')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd30')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvatiscdeda_intr" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">61</field>
+        <field name="name">TVA Taxare Scutita Achizitii Intracomunitare</field>
+        <field name="description">Scutit-AI</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_scutit"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
                 'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd30'),
                                          ref('account_tax_report_ro_baza_rd301')],
             }),
@@ -1228,6 +1258,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'plus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
@@ -1238,6 +1269,7 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
+                'minus_report_line_ids': [],
             }),
             (0,0, {
                 'factor_percent': 100,
