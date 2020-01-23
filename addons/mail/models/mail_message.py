@@ -949,26 +949,19 @@ class Message(models.Model):
             :param list messages: list of message, as get_dict result
             :param dict message_tree: {[msg.id]: msg browse record as super user}
         """
-        # 1. Aggregate partners (author_id and partner_ids) and tracking values
+        # 1. Aggregate notifications
 
         safari = request and request.httprequest.user_agent.browser == 'safari'
 
-        partners = self.env['res.partner'].sudo()
         message_ids = list(message_tree.keys())
         email_notification_tree = {}
         for message in message_tree.values():
-            if message.author_id:
-                partners |= message.author_id
             # find all notified partners
             email_notification_tree[message.id] = message.notification_ids.filtered(
                 lambda n: n.notification_type == 'email' and n.res_partner_id.active and
                 (n.notification_status in ('bounce', 'exception', 'canceled') or n.res_partner_id.partner_share))
-        partners |= self.env['mail.notification'].concat(*email_notification_tree.values()).mapped('res_partner_id')
-        # Read partners as SUPERUSER -> message being browsed as SUPERUSER it is already the case
-        partners_names = partners.name_get()
-        partner_tree = dict((partner[0], partner) for partner in partners_names)
 
-        # 2. Tracking values
+        # 2. Aggregate tracking values
         tracking_values = self.env['mail.tracking.value'].sudo().search([('mail_message_id', 'in', message_ids)])
         message_to_tracking = dict()
         tracking_tree = dict.fromkeys(tracking_values.ids, False)
@@ -988,8 +981,10 @@ class Message(models.Model):
         for message_dict in messages:
             message_id = message_dict.get('id')
             message = message_tree[message_id]
+
+            # Author
             if message.author_id:
-                author = partner_tree[message.author_id.id]
+                author = message.author_id.name_get()[0]
             else:
                 author = (0, message.email_from)
             customer_email_status = (
@@ -1000,7 +995,8 @@ class Message(models.Model):
             )
             customer_email_data = []
             for notification in email_notification_tree[message.id]:
-                customer_email_data.append((partner_tree[notification.res_partner_id.id][0], partner_tree[notification.res_partner_id.id][1], notification.notification_status))
+                partner_name_get = notification.res_partner_id.name_get()[0]
+                customer_email_data.append((partner_name_get[0], partner_name_get[1], notification.notification_status))
 
             has_access_to_model = message.model and self.env[message.model].check_access_rights('read', raise_exception=False)
 
