@@ -951,24 +951,6 @@ class Message(models.Model):
         """
         safari = request and request.httprequest.user_agent.browser == 'safari'
 
-        message_ids = list(message_tree.keys())
-        tracking_values = self.env['mail.tracking.value'].sudo().search([('mail_message_id', 'in', message_ids)])
-        # Aggregate tracking values
-        message_to_tracking = dict()
-        tracking_tree = dict.fromkeys(tracking_values.ids, False)
-        for tracking in tracking_values:
-            groups = tracking.field_groups
-            if not groups or self.env.is_superuser() or self.user_has_groups(groups):
-                message_to_tracking.setdefault(tracking.mail_message_id.id, list()).append(tracking.id)
-                tracking_tree[tracking.id] = {
-                    'id': tracking.id,
-                    'changed_field': tracking.field_desc,
-                    'old_value': tracking.get_old_display_value()[0],
-                    'new_value': tracking.get_new_display_value()[0],
-                    'field_type': tracking.field_type,
-                }
-
-        # Update message dictionaries
         for message_dict in messages:
             message_id = message_dict.get('id')
             message = message_tree[message_id]
@@ -1013,9 +995,16 @@ class Message(models.Model):
 
             # Tracking values
             tracking_value_ids = []
-            for tracking_value_id in message_to_tracking.get(message_id, list()):
-                if tracking_value_id in tracking_tree:
-                    tracking_value_ids.append(tracking_tree[tracking_value_id])
+            for tracking in message.tracking_value_ids:
+                groups = tracking.field_groups
+                if not groups or self.env.is_superuser() or self.user_has_groups(groups):
+                    tracking_value_ids.append({
+                        'id': tracking.id,
+                        'changed_field': tracking.field_desc,
+                        'old_value': tracking.get_old_display_value()[0],
+                        'new_value': tracking.get_new_display_value()[0],
+                        'field_type': tracking.field_type,
+                    })
 
             message_dict.update({
                 'author_id': author,

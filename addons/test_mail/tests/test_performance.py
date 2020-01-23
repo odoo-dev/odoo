@@ -268,7 +268,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
                 'partner_ids': [(4, customer_id)],
             })
 
-        with self.assertQueryCount(__system__=37, emp=43):
+        with self.assertQueryCount(__system__=36, emp=42):
             composer.send_mail()
 
     @users('__system__', 'emp')
@@ -287,7 +287,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
             }).create({})
             composer.onchange_template_id_wrapper()
 
-        with self.assertQueryCount(__system__=45, emp=50):
+        with self.assertQueryCount(__system__=44, emp=49):
             composer.send_mail()
 
         # remove created partner to ensure tests are the same each run
@@ -308,7 +308,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
     @warmup
     def test_message_assignation_inbox(self):
         record = self.env['mail.test.track'].create({'name': 'Test'})
-        with self.assertQueryCount(__system__=26, emp=28):
+        with self.assertQueryCount(__system__=25, emp=27):
             record.write({
                 'user_id': self.user_test.id,
             })
@@ -364,7 +364,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
     def test_message_post_one_inbox_notification(self):
         record = self.env['mail.test.simple'].create({'name': 'Test'})
 
-        with self.assertQueryCount(__system__=21, emp=23):
+        with self.assertQueryCount(__system__=20, emp=22):
             record.message_post(
                 body='<p>Test Post Performances with an inbox ping</p>',
                 partner_ids=self.user_test.partner_id.ids,
@@ -792,7 +792,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
             ]
         }])
 
-        with self.assertQueryCount(__system__=12, emp=12):
+        with self.assertQueryCount(__system__=11, emp=11):
             res = messages.message_format()
             self.assertEqual(len(res), 2)
             for message in res:
@@ -801,7 +801,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
         messages.flush()
         messages.invalidate_cache()
 
-        with self.assertQueryCount(__system__=20, emp=20):
+        with self.assertQueryCount(__system__=22, emp=22):
             res = messages.message_format()
             self.assertEqual(len(res), 2)
             for message in res:
@@ -926,7 +926,7 @@ class TestMailHeavyPerformancePost(BaseMailPerformance):
         ]
         self.attachements = self.env['ir.attachment'].with_user(self.env.user).create(self.vals)
         attachement_ids = self.attachements.ids
-        with self.assertQueryCount(emp=96):
+        with self.assertQueryCount(emp=95):
             self.cr.sql_log = self.warm and self.cr.sql_log_count
             record.with_context({}).message_post(
                 body='<p>Test body <img src="cid:cid1"> <img src="cid:cid2"></p>',
