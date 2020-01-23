@@ -77,11 +77,16 @@
                         </t>
                         <div class="o_Composer_primaryToolButtons">
                             <EmojisButton
-                                class="o_Composer_button o_Composer_buttonEmojis o_Composer_toolButton"
+                                class="o_Composer_button o_Composer_buttonEmojis o_Composer_toolButton btn-secondary"
+                                placement="'top'"
                                 t-att-class="{ 'o-mobile': storeProps.isMobile }"
                                 t-on-o-emoji-selection.stop="_onEmojiSelection"
                                 t-ref="emojisButton"
-                            />
+                            >
+                                <t t-set="buttonHtml">
+                                    <i class="fa fa-smile-o"/>
+                                </t>
+                            </EmojisButton>
                             <button class="o_Composer_button o_Composer_buttonAttachment o_Composer_toolButton btn btn-secondary fa fa-paperclip" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click="_onClickAddAttachment" title="Add attachment" type="button" aria-label="Add attachment"/>
                         </div>
                         <t t-if="props.isExpandable">

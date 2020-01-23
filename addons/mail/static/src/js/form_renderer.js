@@ -147,13 +147,21 @@ FormRenderer.include({
         await this._super(...arguments);
         if (this._hasChatter()) {
             Chatter.env = this.env;
+            const context = this.record ? this.record.getContext() : {};
+            const activityIds = this.state.data.activity_ids
+                ? this.state.data.activity_ids.res_ids
+                : [];
             if (!this._chatterLocalId) {
                 this._chatterLocalId = this.env.store.dispatch('createChatter', {
+                    activityIds,
+                    context,
                     initialThreadId: this.state.res_id,
                     initialThreadModel: this.state.model,
                 });
             } else {
                 this.env.store.dispatch('updateChatter', this._chatterLocalId, {
+                    activityIds,
+                    context,
                     threadId: this.state.res_id,
                     threadModel: this.state.model
                 });

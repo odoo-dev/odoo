@@ -26,6 +26,9 @@ const {
 } = require('web.test_utils');
 const Widget = require('web.Widget');
 
+const { Component, tags: { xml } } = owl;
+const useStore = require('mail.hooks.useStore');
+
 //------------------------------------------------------------------------------
 // Private
 //------------------------------------------------------------------------------
@@ -725,6 +728,7 @@ function patchMessagingService(messaging_service, session = {}) {
                 messagingEnv.store.actions._loopFetchPartnerImStatus = () => {};
                 // TODO FIXME `mail_bot` should not have an impact on `mail` tests
                 messagingEnv.store.actions.checkOdoobotRequest = state => state.mailbotHasRequest = false;
+                messagingEnv.store.env.disableAnimation = true;
             },
         },
     });

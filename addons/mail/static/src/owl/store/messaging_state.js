@@ -6,6 +6,7 @@ const config = require('web.config');
 function initState() {
     const state = {
         isMessagingReady: false,
+        activities: {},
         attachments: {},
         cannedResponses: {},
         chatters: {},
@@ -166,6 +167,7 @@ function initState() {
         },
         isMobile: config.device.isMobile,
         mailFailures: {},
+        mailTemplates: {},
         messages: {},
         /**
          * State slice related to Messaging Menu in the Systray

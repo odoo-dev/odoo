@@ -22,7 +22,7 @@ QUnit.module('AttachmentBox', {
         this.createThread = async ({ model, id }, { fetchAttachments = false } = {}) => {
             const threadLocalId = this.env.store.dispatch('_createThread', { _model: model, id });
             if (fetchAttachments) {
-                await this.env.store.dispatch('fetchThreadAttachments', threadLocalId);
+                await this.env.store.dispatch('_fetchThreadAttachments', threadLocalId);
             }
             return threadLocalId;
         };

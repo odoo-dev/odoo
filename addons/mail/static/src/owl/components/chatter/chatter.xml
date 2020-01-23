@@ -26,6 +26,12 @@
                 />
             </t>
             <t t-if="storeProps.thread">
+                <t t-if="storeProps.chatter.activityLocalIds and storeProps.chatter.activityLocalIds.length > 0">
+                    <ActivityBox
+                        class="o_Chatter_activityBox"
+                        chatterLocalId="storeProps.chatter.localId"
+                    />
+                </t>
                 <Thread
                     class="o_Chatter_thread"
                     hasComposer="false"

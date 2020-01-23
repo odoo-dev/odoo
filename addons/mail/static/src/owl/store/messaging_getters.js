@@ -14,6 +14,15 @@ const getters = {
 
     /**
      * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {integer} id
+     * @return {Object|undefined}
+     */
+    activity({ state }, id) {
+        return Object.values(state.activities).find(activity => activity.id === id);
+    },
+    /**
+     * @param {Object} param0
      * @param {Object} param0.getters
      * @param {Object} param0.state
      * @param {string} attachmentLocalId
@@ -376,6 +385,15 @@ const getters = {
         return filterObject(state.threads, thread =>
             thread._model === 'mail.channel'
         );
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {integer} id
+     * @return {Object|undefined}
+     */
+    mailTemplate({ state }, id) {
+        return Object.values(state.mailTemplates).find(activity => activity.id === id);
     },
     /**
      * @param {Object} param0

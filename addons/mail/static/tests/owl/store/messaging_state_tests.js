@@ -85,6 +85,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
         this.env.store.state,
         {
             isMessagingReady: true,
+            activities: {},
             attachments: {},
             cannedResponses: {},
             chatWindowManager: {
@@ -125,6 +126,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
             },
             isMobile: false,
             mailFailures: {},
+            mailTemplates: {},
             messages: {},
             messagingMenu: {
                 activeTabId: 'all',

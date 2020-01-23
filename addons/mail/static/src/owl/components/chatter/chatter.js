@@ -1,6 +1,7 @@
 odoo.define('mail.component.Chatter', function (require) {
 'use strict';
 
+const ActivityBox = require('mail.component.ActivityBox');
 const AttachmentBox = require('mail.component.AttachmentBox');
 const ChatterTopbar = require('mail.component.ChatterTopbar');
 const Composer = require('mail.component.Composer');
@@ -75,7 +76,7 @@ class Chatter extends Component {
     }
 }
 
-Chatter.components = { AttachmentBox, ChatterTopbar, Composer, Thread };
+Chatter.components = { ActivityBox, AttachmentBox, ChatterTopbar, Composer, Thread };
 
 Chatter.props = {
     chatterLocalId: String,

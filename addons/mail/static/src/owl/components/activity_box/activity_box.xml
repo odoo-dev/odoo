@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.component.ActivityBox" owl="1">
+        <div class="o_ActivityBox">
+            <t t-if="storeProps.chatter.activityLocalIds">
+                <a role="button" class="o_ActivityBox_title btn" t-on-click="_onClickTitle">
+                    <hr class="o_ActivityBox_titleLine" />
+                    <span class="o_ActivityBox_titleText">
+                        <i class="fa fa-fw" t-att-class="storeProps.chatter.isActivityBoxVisible ? 'fa-caret-right' : 'fa-caret-down'"/>
+                        Planned activities
+                    </span>
+                    <t t-if="!storeProps.chatter.isActivityBoxVisible">
+                        <span class="o_ActivityBox_titleBadges">
+                            <t t-if="storeProps.overdueActivitiesCount > 0">
+                                <span class="o_ActivityBox_titleBadge badge rounded-circle badge-danger">
+                                    <t t-esc="storeProps.overdueActivitiesCount"/>
+                                </span>
+                            </t>
+                            <t t-if="storeProps.todayActivitiesCount > 0">
+                                <span class="o_ActivityBox_titleBadge badge rounded-circle badge-warning">
+                                    <t t-esc="storeProps.todayActivitiesCount"/>
+                                </span>
+                            </t>
+                            <t t-if="storeProps.futureActivitiesCount > 0">
+                                <span class="o_ActivityBox_titleBadge badge rounded-circle badge-success">
+                                    <t t-esc="storeProps.futureActivitiesCount"/>
+                                </span>
+                            </t>
+                        </span>
+                    </t>
+                    <hr class="o_ActivityBox_titleLine" />
+                </a>
+                <t t-if="storeProps.chatter.isActivityBoxVisible">
+                    <div class="o_ActivityList">
+                        <t t-foreach="storeProps.chatter.activityLocalIds" t-as="activityLocalId" t-key="activityLocalId">
+                            <Activity class="o_ActivityBox_activity" activityLocalId="activityLocalId" />
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </div>
+    </t>
+</templates>

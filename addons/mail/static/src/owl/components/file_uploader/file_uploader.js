@@ -53,9 +53,10 @@ class FileUploader extends Component {
     /**
      * @private
      * @param {Object} fileData
+     * @return {string}
      */
      _createAttachment(fileData) {
-        this.storeDispatch('createAttachment', Object.assign({},
+        return this.storeDispatch('createAttachment', Object.assign({},
             fileData,
             this.props.newAttachmentExtraData
         ));
@@ -159,7 +160,14 @@ class FileUploader extends Component {
             // Without this the useStore selector of component could be not called
             // E.g. in attachment_box_tests.js
             await new Promise(resolve => setTimeout(resolve));
-            this._createAttachment({ filename, id, mimetype, name, size });
+            const attachmentLocalId = this._createAttachment({
+                filename,
+                id,
+                mimetype,
+                name,
+                size,
+            });
+            this.trigger('o-attachment-created', { attachmentLocalId });
         }
     }
 

@@ -257,16 +257,23 @@ const actions = {
     /**
      * @param {Object} param0
      * @param {function} param0.dispatch
-     * @param {Object} param0.getters
      * @param {Object} param0.state
      * @param {Object} param1
+     * @param {Array} param1.activityIds
+     * @param {Array} param1.context
      * @param {string} [param1.initialThreadId]
      * @param {string} param1.initialThreadModel
      * @return {string}
      */
-    createChatter({ dispatch, getters, state }, { initialThreadId, initialThreadModel }) {
+    createChatter(
+        { dispatch, state },
+        { activityIds, context, initialThreadId, initialThreadModel }
+    ) {
         const chatterLocalId = _.uniqueId('o_Chatter');
         const chatter = {
+            activityIds,
+            context,
+            isActivityBoxVisible: true,
             isAttachmentBoxVisible: false,
             isComposerLog: true,
             isComposerVisible: false,
@@ -279,6 +286,22 @@ const actions = {
         state.chatters[chatterLocalId] = chatter;
         dispatch('_computeChatter', chatterLocalId);
         return chatterLocalId;
+    },
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param {string} activityLocalId
+     */
+    deleteActivity({ dispatch, env, state }, activityLocalId) {
+        const activity = state.activities[activityLocalId];
+        env.rpc({
+            model: 'mail.activity',
+            method: 'unlink',
+            args: [[activity.id]],
+        });
+        dispatch('_deleteActivity', activityLocalId);
     },
     /**
      * Delete an attachment from the store.
@@ -357,46 +380,6 @@ const actions = {
         }
     },
     /**
-     * Fetch attachments linked to a record. Useful for populating the store
-     * with these attachments, which are used by attachment box in the chatter.
-     *
-     * @param {Object} param0
-     * @param {function} param0.dispatch
-     * @param {Object} param0.env
-     * @param {Object} param0.state
-     * @param {string} threadLocalId
-     */
-    async fetchThreadAttachments(
-        { dispatch, env, state },
-        threadLocalId
-    ) {
-        const thread = state.threads[threadLocalId];
-        const attachmentsData = await env.rpc({
-            model: 'ir.attachment',
-            method: 'search_read',
-            domain: [
-                ['res_id', '=', thread.id],
-                ['res_model', '=', thread._model],
-            ],
-            orderBy: [{ name: 'id', asc: false }],
-            fields: ['id', 'name', 'mimetype'],
-        });
-        const attachmentLocalIds = [];
-        for (const attachmentData of attachmentsData) {
-            const attachmentLocalId = await dispatch('_insertAttachment', Object.assign({
-                res_id: thread.id,
-                res_model: thread.model,
-                threadLocalIds: [threadLocalId],
-            }, attachmentData));
-            attachmentLocalIds.push(attachmentLocalId);
-        }
-        await dispatch('_updateThread', threadLocalId, {
-            areAttachmentsLoaded: true,
-            attachmentLocalIds
-        });
-        return attachmentLocalIds;
-    },
-    /**
      * Programmatically auto-focus an existing chat window.
      *
      * @param {Object} param0
@@ -464,6 +447,15 @@ const actions = {
         }
         // update docked chat windows
         dispatch('_computeChatWindows');
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} chatterLocalId
+     */
+    hideChatterActivityBox({ state }, chatterLocalId) {
+        const chatter = state.chatters[chatterLocalId];
+        chatter.isActivityBoxVisible = false;
     },
     /**
      * @param {Object} param0
@@ -707,6 +699,69 @@ const actions = {
         for (const preview of messagePreviews) {
             dispatch('_insertMessage', preview.last_message);
         }
+    },
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param {string} activityLocalId
+     * @param {Object} param2
+     * @param {string|boolean} param2.feedback
+     * @param {Array} [param2.attachmentLocalIds=[]]
+     */
+    async markActivityAsDone(
+        { dispatch, env, state },
+        activityLocalId,
+        { feedback=false, attachmentLocalIds=[] }
+    ) {
+        const activity = state.activities[activityLocalId];
+        const chatter = state.chatters[activity.chatterLocalId];
+        const attachmentIds = [];
+        for (const attachmentLocalId in attachmentLocalIds) {
+            if (state.attachments[attachmentLocalId]) {
+                attachmentIds.push(state.attachments[attachmentLocalId].id);
+            }
+        }
+        await env.rpc({
+            model: 'mail.activity',
+            method: 'action_feedback',
+            args: [[activity.id]],
+            kwargs: {
+                attachment_ids: attachmentIds,
+                context: chatter.context,
+                feedback,
+            },
+        });
+        dispatch('_deleteActivity', activityLocalId);
+        dispatch('refreshChatter', activity.chatterLocalId);
+    },
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param {string} activityLocalId
+     * @param {Object} param2
+     * @param {string} param2.feedback
+     */
+    async markActivityAsDoneAndScheduleNext(
+        { dispatch, env, state },
+        activityLocalId,
+        { feedback }
+    ) {
+        const activity = state.activities[activityLocalId];
+        const action = await env.rpc({
+            model: 'mail.activity',
+            method: 'action_feedback_schedule_next',
+            args: [[activity.id]],
+            kwargs: { feedback }
+        });
+        dispatch('_deleteActivity', activityLocalId);
+        if (activity.chatterLocalId) {
+            dispatch('refreshChatter', activity.chatterLocalId);
+        }
+        return action;
     },
     /**
      * Mark all messages of current user with given domain as read.
@@ -991,6 +1046,39 @@ const actions = {
         dispatch('_resetComposer', composerLocalId);
     },
     /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param {string} mailTemplateLocalId
+     * @param {string} activityLocalId
+     */
+    previewMailTemplate({ dispatch, env, state }, mailTemplateLocalId, activityLocalId) {
+        const activity = state.activities[activityLocalId];
+        const mailTemplate = state.mailTemplates[mailTemplateLocalId];
+        const action = {
+            name: env._t("Compose Email"),
+            type: 'ir.actions.act_window',
+            res_model: 'mail.compose.message',
+            views: [[false, 'form']],
+            target: 'new',
+            context: {
+                default_res_id: activity.resId,
+                default_model: activity.model,
+                default_use_template: true,
+                default_template_id: mailTemplate.id,
+                force_email: true,
+            },
+        };
+        env.do_action(action, {
+            on_close: () => {
+                if (activity.chatterLocalId) {
+                    dispatch('refreshChatter', activity.chatterLocalId);
+                }
+            }
+        });
+    },
+    /**
      * Handles redirection to a model and id. Try to handle it in the context
      * of messaging (e.g. open chat if this is a user), otherwise fallback to
      * opening form view of record.
@@ -1062,6 +1150,38 @@ const actions = {
                 id,
             });
         }
+    },
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.state
+     * @param chatterLocalId
+     */
+    refreshChatter({ dispatch, state }, chatterLocalId) {
+        const chatter = state.chatters[chatterLocalId];
+        const thread = state.threads[chatter.threadLocalId];
+        if (!thread.isTemporary) {
+            dispatch('_loadNewMessagesOnThread', chatter.threadLocalId);
+            dispatch('_fetchThreadAttachments', chatter.threadLocalId);
+        }
+    },
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param chatterLocalId
+     */
+    async refreshChatterActivities({ dispatch, env, state }, chatterLocalId) {
+        // A bit "extreme", may be improved
+        const chatter = state.chatters[chatterLocalId];
+        const [{ activity_ids: newActivityIds }] = await env.rpc({
+            model: chatter.threadModel,
+            method: 'read',
+            args: [chatter.threadId, ['activity_ids']]
+        });
+        chatter.activityLocalIds = await dispatch('_fetchActivities', newActivityIds, chatter.localId);
+        delete chatter.activityIds;
     },
     /**
      * Rename the given thread with provided new name.
@@ -1184,6 +1304,27 @@ const actions = {
         }
         callback(partners);
     },
+
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param {string} mailTemplateLocalId
+     * @param {string} activityLocalId
+     */
+    async sendMailTemplate({ dispatch, env, state }, mailTemplateLocalId, activityLocalId) {
+        const activity = state.activities[activityLocalId];
+        const mailTemplate = state.mailTemplates[mailTemplateLocalId];
+        await env.rpc({
+            model: activity.model,
+            method: 'activity_send_mail',
+            args: [[activity.resId], mailTemplate.id],
+        });
+        if (activity.chatterLocalId) {
+            dispatch('refreshChatter', activity.chatterLocalId);
+        }
+    },
     /**
      * @param {Object} param0
      * @param {function} param0.dispatch
@@ -1267,6 +1408,15 @@ const actions = {
         cwm.chatWindowLocalIds[index-1] = chatWindowLocalId;
         dispatch('_computeChatWindows');
         dispatch('focusChatWindow', chatWindowLocalId);
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} chatterLocalId
+     */
+    showChatterActivityBox({ state }, chatterLocalId) {
+        const chatter = state.chatters[chatterLocalId];
+        chatter.isActivityBoxVisible = true;
     },
     /**
      * @param {Object} param0
@@ -1416,28 +1566,51 @@ const actions = {
     /**
      * @param {Object} param0
      * @param {function} param0.dispatch
-     * @param {Object} param0.getters
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param activityLocalId
+     */
+    async updateActivity({ dispatch, env, state }, activityLocalId) {
+        const activity = state.activities[activityLocalId];
+        const rpcResult = await env.rpc({
+            model: 'mail.activity',
+            method: 'activity_format',
+            args: [activity.id]
+        });
+        dispatch('_updateActivity', activityLocalId, rpcResult[0]);
+        if (activity.chatterLocalId) {
+            dispatch('refreshChatter', activity.chatterLocalId);
+        }
+    },
+    /**
+     * @param {Object} param0
+     * @param {function} param0.dispatch
      * @param {Object} param0.state
      * @param chatterLocalId
      * @param {Object} param2
+     * @param {Array} param2.activityIds
+     * @param {Object} param2.context
      * @param {string} param2.threadId
      * @param {string} param2.threadModel
      */
-    updateChatter({ dispatch, getters, state }, chatterLocalId, { threadId, threadModel}) {
+    updateChatter(
+        { dispatch, state },
+        chatterLocalId,
+        { activityIds, context, threadId, threadModel }
+    ) {
         const chatter = state.chatters[chatterLocalId];
         const thread = state.threads[chatter.threadLocalId];
         const prevThreadId = chatter.threadId;
         const prevThreadModel = chatter.threadModel;
         Object.assign(chatter, {
+            activityIds,
+            context,
             isDisabled: !threadId,
             threadId,
             threadModel,
         });
         if (prevThreadId === threadId && prevThreadModel === threadModel) {
-            // "Nothing to do" but we check if no new message has to be fetched
-            if (!thread.isTemporary) {
-                dispatch('_loadNewMessagesOnThread', chatter.threadLocalId);
-            }
+            dispatch('refreshChatter', chatter.localId);
             return;
         }
 
@@ -1578,7 +1751,16 @@ const actions = {
                 threadLocalId = thread.localId;
                 await dispatch('_loadNewMessagesOnThread', threadLocalId);
             }
-            await dispatch('fetchThreadAttachments', threadLocalId);
+            await dispatch('_fetchThreadAttachments', threadLocalId);
+            if (chatter.activityIds) {
+                if (chatter.activityIds.length > 0) {
+                    chatter.activityLocalIds = await dispatch('_fetchActivities',
+                        chatter.activityIds,
+                        chatter.localId
+                    );
+                }
+                delete chatter.activityIds;
+            }
         }
         chatter.threadLocalId = threadLocalId;
     },
@@ -1693,6 +1875,78 @@ const actions = {
     /**
      * @private
      * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.state
+     * @param {Object} activityData
+     * @param {String} chatterLocalId
+     * @return {string} activity local id
+     */
+    _createActivity({ dispatch, state }, activityData, chatterLocalId) {
+        const activityLocalId = _.uniqueId('mail.activity_');
+        const {
+            activity_category: activityCategory,
+            activity_type_id: [
+                activityTypeId,
+                activityTypeDisplayName,
+            ]=[],
+            can_write: canWrite,
+            create_date: dateCreate,
+            create_uid: [
+                creatorId,
+                creatorDisplayName,
+            ]=[],
+            date_deadline: dateDeadline,
+            force_next: forceNext,
+            icon,
+            id,
+            mail_template_ids: mailTemplates,
+            note,
+            res_id: resId,
+            res_model: model,
+            state: activityState,
+            summary,
+            user_id: [
+                userId,
+                userDisplayName,
+            ]=[],
+        } = activityData;
+        const mailTemplateLocalIds = [];
+        if (mailTemplates) {
+            for (const i in mailTemplates) {
+                let mailTemplateLocalId = dispatch('_insertMailTemplate', mailTemplates[i]);
+                mailTemplateLocalIds.push(mailTemplateLocalId);
+            }
+        }
+        const activity = {
+            activityCategory,
+            activityState,
+            activityTypeId,
+            activityTypeDisplayName,
+            attachmentLocalIds: [],
+            canWrite,
+            chatterLocalId,
+            creatorId,
+            creatorDisplayName,
+            dateCreate,
+            dateDeadline,
+            forceNext,
+            icon,
+            id,
+            localId: activityLocalId,
+            mailTemplateLocalIds,
+            model,
+            note,
+            resId,
+            summary,
+            userDisplayName,
+            userId,
+        };
+        state.activities[activityLocalId] = activity;
+        return activityLocalId;
+    },
+    /**
+     * @private
+     * @param {Object} param0
      * @param {Object} param0.state
      * @param {Object} [param1={}]
      * @param {string} [param1.threadLocalId]
@@ -1713,6 +1967,27 @@ const actions = {
             thread.composerLocalId = composerLocalId;
         }
         return composerLocalId;
+    },
+
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {Object} mailTemplateData
+     * @param {String} activityLocalId
+     * @return {string} mail template local id
+     */
+    _createMailTemplate({ state }, mailTemplateData, activityLocalIds) {
+        const mailTemplateLocalId = _.uniqueId('mail.mailTemplate_');
+        const { id, name } = mailTemplateData;
+        const mailTemplate = {
+            activityLocalIds,
+            id,
+            localId: mailTemplateLocalId,
+            name,
+        };
+        state.mailTemplates[mailTemplateLocalId] = mailTemplate;
+        return mailTemplateLocalId;
     },
     /**
      * @private
@@ -2176,6 +2451,31 @@ const actions = {
     },
     /**
      * @private
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} activityLocalId
+     */
+    _deleteActivity({ state }, activityLocalId) {
+        const activity = state.activities[activityLocalId];
+        if (activity.chatterLocalId) {
+            const chatter = state.chatters[activity.chatterLocalId];
+            const index = chatter.activityLocalIds.findIndex(localId =>
+                localId === activityLocalId);
+            if (index >= 0) {
+                chatter.activityLocalIds.splice(index, 1);
+            }
+        }
+        if (activity.mailTemplateLocalIds && activity.mailTemplateLocalIds.length > 0) {
+            for (const mailTemplateLocalId of activity.mailTemplateLocalIds) {
+                const mailTemplate = state.mailTemplates[mailTemplateLocalId];
+                mailTemplate.activityLocalIds = mailTemplate.activityLocalIds.filter(localId =>
+                    localId !== activityLocalId);
+            }
+        }
+        delete state.activities[activityLocalId];
+    },
+    /**
+     * @private
      * Delete a thread from the store
      * @param {Object} param0
      * @param {function} param0.dispatch
@@ -2228,6 +2528,28 @@ const actions = {
      * @param {Object} param0
      * @param {function} param0.dispatch
      * @param {Object} param0.env
+     * @param {Array} activityIds
+     * @param {String} chatterLocalId
+     * @returns {Promise<Array>}
+     */
+    async _fetchActivities({ dispatch, env }, activityIds, chatterLocalId) {
+        const activities = await env.rpc({
+            model: 'mail.activity',
+            method: 'activity_format',
+            args: [activityIds]
+        });
+        const activityLocalIds = [];
+        for (const activity of activities) {
+            const activityLocalId = dispatch('_insertActivity', activity, chatterLocalId);
+            activityLocalIds.push(activityLocalId);
+        }
+        return activityLocalIds;
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.env
      * @param {Object} param0.state
      */
     async _fetchPartnerImStatus({ dispatch, env, state }) {
@@ -2263,6 +2585,46 @@ const actions = {
                 im_status: null,
             });
         }
+    },
+    /**
+     * Fetch attachments linked to a record. Useful for populating the store
+     * with these attachments, which are used by attachment box in the chatter.
+     *
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param {string} threadLocalId
+     */
+    async _fetchThreadAttachments(
+        { dispatch, env, state },
+        threadLocalId
+    ) {
+        const thread = state.threads[threadLocalId];
+        const attachmentsData = await env.rpc({
+            model: 'ir.attachment',
+            method: 'search_read',
+            domain: [
+                ['res_id', '=', thread.id],
+                ['res_model', '=', thread._model],
+            ],
+            fields: ['id', 'name', 'mimetype'],
+            orderBy: [{ name: 'id', asc: false }],
+        });
+        const attachmentLocalIds = [];
+        for (const attachmentData of attachmentsData) {
+            const attachmentLocalId = await dispatch('_insertAttachment', Object.assign({
+                res_id: thread.id,
+                res_model: thread.model,
+                threadLocalIds: [threadLocalId],
+            }, attachmentData));
+            attachmentLocalIds.push(attachmentLocalId);
+        }
+        await dispatch('_updateThread', threadLocalId, {
+            areAttachmentsLoaded: true,
+            attachmentLocalIds
+        });
+        return attachmentLocalIds;
     },
     /**
      * @private
@@ -3186,6 +3548,27 @@ const actions = {
         }
     },
     /**
+     * Update existing activity or create a new activity
+     *
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.getters
+     * @param {Object} activityData
+     * @param {integer} activityData.id
+     * @param {string} chatterLocalId
+     * @return {string} the existing or created activity local id
+     */
+    _insertActivity({ dispatch, getters }, activityData, chatterLocalId) {
+        const existingActivity = getters.activity(activityData.id);
+        if (existingActivity) {
+            dispatch('_updateActivity', existingActivity.localId, activityData);
+            return existingActivity.localId;
+        } else {
+            return dispatch('_createActivity', activityData, chatterLocalId);
+        }
+    },
+    /**
      * Update existing attachment or create a new attachment
      *
      * @private
@@ -3208,6 +3591,27 @@ const actions = {
             dispatch('_updateAttachment', attachmentLocalId, kwargs);
         }
         return attachmentLocalId;
+    },
+    /**
+     * Update existing mail template or create a new mail template
+     *
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.getters
+     * @param {Object} mailTemplateData
+     * @param {integer} mailTemplateData.id
+     * @param {string} [activityLocalId]
+     * @return {string} the existing or created mail template local id
+     */
+    _insertMailTemplate({ dispatch, getters }, mailTemplateData, activityLocalId) {
+        const existingMailTemplate = getters.mailTemplate(mailTemplateData.id);
+        if (existingMailTemplate) {
+            dispatch('_updateMailTemplate', existingMailTemplate.localId, mailTemplateData, activityLocalId);
+            return existingMailTemplate.localId;
+        } else {
+            return dispatch('_createMailTemplate', mailTemplateData, [activityLocalId]);
+        }
     },
     /**
      * @private
@@ -4088,6 +4492,56 @@ const actions = {
      * @private
      * @param {Object} param0
      * @param {Object} param0.state
+     * @param {string} activityLocalId
+     * @param {Object} activityData
+     */
+    _updateActivity({ state }, activityLocalId, activityData) {
+        const {
+            activity_category: activityCategory,
+            activity_type_id: [
+                activityTypeId,
+                activityTypeDisplayName,
+            ],
+            can_write: canWrite,
+            create_date: dateCreate,
+            create_uid: [
+                creatorId,
+                creatorDisplayName,
+            ],
+            date_deadline: dateDeadline,
+            icon,
+            mail_template_ids: mailTemplates,
+            note,
+            state: activityState,
+            summary,
+            user_id: [
+                userId,
+                userDisplayName,
+            ],
+        } = activityData;
+        const activity = state.activities[activityLocalId];
+        Object.assign(activity, {
+            activityCategory,
+            activityState,
+            activityTypeId,
+            activityTypeDisplayName,
+            canWrite,
+            creatorId,
+            creatorDisplayName,
+            dateCreate,
+            dateDeadline,
+            icon,
+            mailTemplates,
+            note,
+            summary,
+            userDisplayName,
+            userId,
+        });
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {Object} param0.state
      * @param {string} attachmentLocalId
      * @param {Object} changes
      */
@@ -4104,6 +4558,25 @@ const actions = {
      */
     _updateChatWindowManager({ state }, changes) {
         Object.assign(state.chatWindowManager, changes);
+    },
+        /**
+     * @private
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} mailTemplateLocalId
+     * @param {Object} mailTemplateData
+     * @param {string} activityLocalId
+     */
+    _updateMailTemplate({ state }, mailTemplateLocalId, mailTemplateData, activityLocalId) {
+        const {
+            id,
+            name,
+        } = mailTemplateData;
+        const mailTemplate = state.mailTemplates[mailTemplateLocalId];
+        Object.assign(mailTemplate, { id, name });
+        if (!mailTemplate.activityLocalIds.includes(activityLocalId)) {
+            mailTemplate.activityLocalIds.push(activityLocalId);
+        }
     },
     /**
      * AKU TODO: REDESIGN

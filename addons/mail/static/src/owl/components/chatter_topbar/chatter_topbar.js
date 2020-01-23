@@ -80,7 +80,25 @@ class ChatterTopbar extends Component {
      * @param {MouseEvent} ev
      */
     _onClickScheduleActivity(ev) {
-        // TODO
+        const action = {
+            type: 'ir.actions.act_window',
+            name: this.env._t("Schedule Activity"),
+            res_model: 'mail.activity',
+            view_mode: 'form',
+            views: [[false, 'form']],
+            target: 'new',
+            context: {
+                default_res_id: this.storeProps.chatter.threadId,
+                default_res_model: this.storeProps.chatter.threadModel,
+            },
+            res_id: false,
+        };
+        return this.env.do_action(action, {
+            on_close: () => {
+                // A bit "extreme", could be improved : normally only an activity is created (no update nor delete)
+                this.storeDispatch('refreshChatterActivities', this.props.chatterLocalId);
+            }
+        });
     }
 
     /**
