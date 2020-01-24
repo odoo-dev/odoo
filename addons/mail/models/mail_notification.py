@@ -82,3 +82,32 @@ class Notification(models.Model):
             ('notification_status', 'in', ('sent', 'canceled'))
         ]
         return self.search(domain).unlink()
+
+    @api.model
+    def _types_for_message_list(self):
+        """Returns the types of notifications allowed on the message list."""
+        return ['email']
+
+    @api.model
+    def _status_for_message_list(self):
+        """Returns the status of notifications allowed on the message list."""
+        return ['bounce', 'exception', 'canceled']
+
+    def _filtered_for_message_list(self):
+        """Returns only the notifications to show on the message list."""
+        return self.filtered(
+            lambda n:
+                n.notification_type in self ._types_for_message_list() and
+                (n.notification_status in self ._status_for_message_list() or n.res_partner_id.partner_share)
+        )
+
+    def _format_notifications(self):
+        return {
+            notif.id: {
+                'notification_id': notif.id,
+                'notification_type': notif.notification_type,
+                'notification_status': notif.notification_status,
+                'failure_type': notif.failure_type,
+                'partner_name': notif.res_partner_id.display_name,
+            } for notif in self
+        }

@@ -16,3 +16,7 @@ class Notification(models.Model):
         ('sms_credit', 'Insufficient Credit'),
         ('sms_server', 'Server Error')]
     )
+
+    @api.model
+    def _types_for_message_list(self):
+        return super()._types_for_message_list() + ['sms']
