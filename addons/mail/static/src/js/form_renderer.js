@@ -1,41 +1,57 @@
 odoo.define('mail.form_renderer', function (require) {
 "use strict";
 
-var Chatter = require('mail.Chatter');
-var FormRenderer = require('web.FormRenderer');
+const Chatter = require('mail.component.Chatter');
+const FormRenderer = require('web.FormRenderer');
 
 /**
  * Include the FormRenderer to instanciate the chatter area containing (a
  * subset of) the mail widgets (mail_thread, mail_followers and mail_activity).
  */
 FormRenderer.include({
-    /**
-     * @override
-     */
-    init: function (parent, state, params) {
-        this._super.apply(this, arguments);
-        this.mailFields = params.mailFields;
-        this.chatter = undefined;
-    },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * Updates the chatter area with the new state if its fields has changed
-     *
-     * @override
-     */
-    confirmChange: function (state, id, fields) {
-        if (this.chatter) {
-            var chatterFields = ['message_attachment_count'].concat(_.values(this.mailFields));
-            var updatedMailFields = _.intersection(fields, chatterFields);
-            if (updatedMailFields.length) {
-                this.chatter.update(state, updatedMailFields);
+    async on_attach_callback() {
+        this._super(...arguments);
+        // Useful when (re)loading view
+        if (this._chatterContainerTarget) {
+            if (!this._chatterComponent) {
+                this._makeChatterComponent();
             }
+            await this._mountChatterComponent();
         }
-        return this._super.apply(this, arguments);
+    },
+    on_detach_callback() {
+        this._super(...arguments);
+        // When the view is detached, we totally delete chatter state from store
+        // and chatter component to avoid any problem when view will be
+        // reattached
+        if (this._chatterComponent) {
+            this._destroyChatter();
+        }
+    },
+    /**
+     * @override
+     */
+    init(parent, state, params) {
+        this._super(...arguments);
+        this.env = this.call('messaging', 'getMessagingEnv');
+        this.mailFields = params.mailFields;
+        this._chatterComponent = undefined;
+        /**
+         * Determine where the chatter will be appended in the DOM
+         */
+        this._chatterContainerTarget = undefined;
+        this._chatterLocalId = undefined;
+        // Do not load chatter in form view dialogs
+        this._isFromFormViewDialog = params.isFromFormViewDialog;
+    },
+    /**
+     * @override
+     */
+    destroy() {
+        this._super(...arguments);
+        if (this._chatterContainerTarget) {
+            this._destroyChatter();
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -43,33 +59,82 @@ FormRenderer.include({
     //--------------------------------------------------------------------------
 
     /**
-     * Overrides the function that renders the nodes to return the chatter's $el
-     * for the 'oe_chatter' div node.
+     * Destroy the chatter component
+     *
+     * @private
+     */
+    _destroyChatter() {
+        if (this._chatterComponent) {
+            this._chatterComponent.destroy();
+            this._chatterComponent = undefined;
+        }
+        if (this._chatterLocalId) {
+            this.env.store.dispatch('deleteChatter', this._chatterLocalId);
+            this._chatterLocalId = undefined;
+        }
+    },
+    /**
+     * @private
+     */
+    _makeChatterComponent() {
+        this._chatterComponent = new Chatter(null, { chatterLocalId: this._chatterLocalId });
+    },
+    /**
+     * Mount the chatter
+     *
+     * FIXME {xdu} could be better to mount in "replace" mode but the mount is
+     * failing with that mode.
+     * (just use { position: 'self' } as second parameter of mount)
+     *
+     * @private
+     */
+    async _mountChatterComponent() {
+        /**
+         * Force re-mounting chatter component in DOM. This is necessary
+         * because each time `_renderView` is called, it puts old content
+         * in a fragment.
+         */
+        this._chatterComponent.__owl__.isMounted = false;
+        await this._chatterComponent.mount(this._chatterContainerTarget);
+    },
+    /**
+     * @override
+     * @private
+     */
+    _renderNode(node) {
+        if (!this._isFromFormViewDialog && node.tag === 'div' && node.attrs.class === 'oe_chatter') {
+            const $el = $('<div class="o_FormRenderer_chatterContainer"/>');
+            this._chatterContainerTarget = $el[0];
+            return $el;
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Overrides the function to render the chatter once the form view is
+     * rendered.
      *
      * @override
      * @private
      */
-    _renderNode: function (node) {
-        var self = this;
-        if (node.tag === 'div' && node.attrs.class === 'oe_chatter') {
-            if (!this.chatter) {
-                this.chatter = new Chatter(this, this.state, this.mailFields, {
-                    isEditable: this.activeActions.edit,
-                    viewType: 'form',
+    async _renderView() {
+        await this._super(...arguments);
+        if (this._chatterContainerTarget) {
+            Chatter.env = this.env;
+            if (!this._chatterLocalId) {
+                this._chatterLocalId = this.env.store.dispatch('createChatter', {
+                    initialThreadId: this.state.res_id,
+                    initialThreadModel: this.state.model,
                 });
-
-                var $temporaryParentDiv = $('<div>');
-                this.defs.push(this.chatter.appendTo($temporaryParentDiv).then(function () {
-                    self.chatter.$el.unwrap();
-                    self._handleAttributes(self.chatter.$el, node);
-                }));
-                return $temporaryParentDiv;
             } else {
-                this.chatter.update(this.state);
-                return this.chatter.$el;
+                this.env.store.dispatch('updateChatter', this._chatterLocalId, {
+                    threadId: this.state.res_id,
+                    threadModel: this.state.model
+                });
             }
-        } else {
-            return this._super.apply(this, arguments);
+            if (!this._chatterComponent) {
+                this._makeChatterComponent();
+            }
+            await this._mountChatterComponent();
         }
     },
 });

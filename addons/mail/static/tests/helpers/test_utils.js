@@ -4,12 +4,13 @@ odoo.define('mail.testUtils', function (require) {
 var BusService = require('bus.BusService');
 
 var Discuss = require('mail.Discuss');
+const { patchMessagingService } = require('mail.messagingTestUtils');
 var MailService = require('mail.Service');
+const MessagingService = require('mail.service.Messaging');
 var mailUtils = require('mail.utils');
 
 var AbstractStorageService = require('web.AbstractStorageService');
 var Class = require('web.Class');
-var ControlPanelView = require('web.ControlPanelView');
 var RamStorage = require('web.RamStorage');
 var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
@@ -67,6 +68,10 @@ var MockMailService = Class.extend({
     mail_service: function () {
         return MailService;
     },
+    messaging() {
+        patchMessagingService(MessagingService);
+        return MessagingService;
+    },
     local_storage: function () {
         return AbstractStorageService.extend({
             storage: new RamStorage(),
@@ -75,6 +80,7 @@ var MockMailService = Class.extend({
     getServices: function () {
         return {
             mail_service: this.mail_service(),
+            messaging: this.messaging(),
             bus_service: this.bus_service(),
             local_storage: this.local_storage(),
         };

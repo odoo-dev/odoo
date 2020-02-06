@@ -54,6 +54,7 @@ QUnit.module('Basic', {
             },
         };
         this.services = mailTestUtils.getMailServices();
+
         this.ORIGINAL_THREAD_WINDOW_APPENDTO = this.services.mail_service.prototype.THREAD_WINDOW_APPENDTO;
 
         this.createParent = function (params) {
@@ -683,7 +684,7 @@ QUnit.test('receive 2 new DM messages in quick succession (no chat window initia
         res_id: 10,
     };
     this.data['mail.message'].records.push(messageData1);
-    const notification1 = [[false, 'mail.channel', 2], messageData1];
+    const notification1 = [[false, 'mail.channel', 10], messageData1];
     parent.call('bus_service', 'trigger', 'notification', [notification1]);
     // simulate short delay for receiving new message
     await testUtils.nextMicrotaskTick();
@@ -696,7 +697,7 @@ QUnit.test('receive 2 new DM messages in quick succession (no chat window initia
         res_id: 10,
     };
     this.data['mail.message'].records.push(messageData2);
-    const notification2 = [[false, 'mail.channel', 2], messageData2];
+    const notification2 = [[false, 'mail.channel', 10], messageData2];
     parent.call('bus_service', 'trigger', 'notification', [notification2]);
     await testUtils.nextTick();
     assert.containsOnce(

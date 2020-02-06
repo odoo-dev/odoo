@@ -269,6 +269,7 @@ QUnit.test('moderator: accept pending moderation message', function (assert) {
         moderation_status: 'pending_moderation',
         need_moderation: true,
         res_id: 1,
+        starred_partner_ids: [],
     }];
 
     createDiscuss({
@@ -670,9 +671,10 @@ QUnit.test('author: sent message accepted in moderated channel', function (asser
             channel_ids: [],
             id: 100,
             model: 'mail.channel',
-            moderation_status: 'accepted'
+            moderation_status: 'accepted',
+            res_id: 1,
         };
-        var metaData = [dbName, 'mail.channel'];
+        var metaData = [dbName, 'mail.channel', 1];
         var notification = [metaData, messageData];
         discuss.call('bus_service', 'trigger', 'notification', [notification]);
         await testUtils.nextTick();

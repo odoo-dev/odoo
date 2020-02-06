@@ -1413,7 +1413,7 @@ QUnit.test('no quick search channels in the sidebar with less than 20 channels',
     assert.expect(3);
 
     var channelsData = [];
-    _.each(_.range(0, 19), function (num) {
+    _.each(_.range(1, 20), function (num) {
         channelsData.push({
             id: num,
             channel_type: "channel",
@@ -1433,7 +1433,7 @@ QUnit.test('no quick search channels in the sidebar with less than 20 channels',
         params: {},
         data: this.data,
         services: this.services,
-    })
+    });
 
     var $sidebar = discuss.$('.o_mail_discuss_sidebar');
 
@@ -1452,8 +1452,8 @@ QUnit.test('quick search channels in the sidebar with more than 20 channels', as
     assert.expect(7);
 
     var channelsData = [];
-    var channelANum = 15;
-    _.each(_.range(0, channelANum), function (num) {
+    var channelANum = 16;
+    _.each(_.range(1, channelANum), function (num) {
         var channel = {
             id: num,
             channel_type: "channel",
@@ -1483,7 +1483,7 @@ QUnit.test('quick search channels in the sidebar with more than 20 channels', as
         params: {},
         data: this.data,
         services: this.services,
-    })
+    });
 
     var $sidebar = discuss.$('.o_mail_discuss_sidebar');
 
