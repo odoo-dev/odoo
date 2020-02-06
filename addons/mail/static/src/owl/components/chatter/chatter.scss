@@ -1,0 +1,26 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_Chatter {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: auto;
+    padding: 0;
+}
+
+.o_FormRenderer_chatterContainer {
+    display: flex;
+    flex: 1 1 auto;
+    width: 530px;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_Chatter {
+    border-left: 1px solid gray('300');
+    background-color: white;
+}

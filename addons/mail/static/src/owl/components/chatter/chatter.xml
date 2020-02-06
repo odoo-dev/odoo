@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.component.Chatter" owl="1">
+        <div class="o_Chatter">
+            <ChatterTopbar
+                class="o_Chatter_topbar"
+                chatterLocalId="props.chatterLocalId"
+            />
+            <t t-if="storeProps.thread and storeProps.thread.composerLocalId and storeProps.chatter.isComposerVisible">
+                <Composer
+                    class="o_Chatter_composer"
+                    composerLocalId="storeProps.thread.composerLocalId"
+                    hasTextInputSendOnEnterEnabled="false"
+                    isCompact="false"
+                    isExpandable="true"
+                    isLog="storeProps.chatter.isComposerLog"
+                    t-on-o-message-posted="_onComposerMessagePosted"
+                    t-ref="composer"
+                />
+            </t>
+            <t t-if="storeProps.chatter.isAttachmentBoxVisible">
+                <AttachmentBox
+                    class="o_Chatter_attachmentBox"
+                    threadLocalId="storeProps.chatter.threadLocalId"
+                />
+            </t>
+            <t t-if="storeProps.thread">
+                <Thread
+                    class="o_Chatter_thread"
+                    hasComposer="false"
+                    haveMessagesAuthorRedirect="true"
+                    order="'desc'"
+                    threadLocalId="storeProps.thread.localId"
+                    t-ref="thread"
+                />
+            </t>
+        </div>
+    </t>
+
+</templates>

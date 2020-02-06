@@ -219,7 +219,7 @@ MockServer.include({
                 var dbName = undefined; // useless for tests
                 var messageData = message;
                 message.moderation_status = 'accepted';
-                var metaData = [dbName, 'mail.channel'];
+                var metaData = [dbName, 'mail.channel', message.res_id];
                 var notification = [metaData, messageData];
                 notifications.push(notification);
             });
