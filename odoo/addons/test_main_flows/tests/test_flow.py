@@ -1,6 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
 
 import odoo.tests
 
@@ -8,7 +7,6 @@ import odoo.tests
 @odoo.tests.tagged('post_install', '-at_install')
 class TestUi(odoo.tests.HttpCase):
 
-    @skip('skip because enterprise -> account moves the chatter below on invoices')
     def test_01_main_flow_tour(self):
         # Define minimal accounting data to run without CoA
         a_expense = self.env['account.account'].create({
