@@ -4,9 +4,9 @@
    <t t-name="mail.component.Dialog" owl="1">
       <div class="o_Dialog">
          <t
-            t-component="props.componentName"
+            t-component="{{ props.componentName }}"
             class="o_Dialog_component"
-            dialogId="props.id"
+            id="props.id"
             info="props.info"
             t-on-o-close.stop="_onClose"
             t-ref="component"

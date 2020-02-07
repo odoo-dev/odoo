@@ -17,6 +17,8 @@
                         class="o_attachmentBox_attachmentList"
                         areAttachmentsEditable="true"
                         attachmentLocalIds="storeProps.attachmentLocalIds"
+                        areAttachmentsDownloadable="true"
+                        showAttachmentsFilenames="true"
                     />
                 </t>
                 <button class="o_AttachmentBox_buttonAdd" type="button" t-on-click.prevent.stop="_onClickAdd">

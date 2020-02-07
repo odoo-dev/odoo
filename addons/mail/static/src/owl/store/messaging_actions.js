@@ -305,7 +305,7 @@ const actions = {
         for (const threadLocalId of attachment.threadLocalIds) {
             const thread = state.threads[threadLocalId];
             if (thread.attachmentLocalIds.includes(attachmentLocalId)) {
-                dispatch('_updateThread', attachment.threadLocalId, {
+                dispatch('_updateThread', threadLocalId, {
                     attachmentLocalIds:
                         thread.attachmentLocalIds.filter(localId =>
                             localId !== attachmentLocalId)
