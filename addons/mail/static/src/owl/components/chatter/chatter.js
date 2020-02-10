@@ -20,9 +20,19 @@ class Chatter extends Component {
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             const chatter = state.chatters[props.chatterLocalId];
-            const thread = chatter.threadLocalId
-                ? state.threads[chatter.threadLocalId]
-                : undefined;
+            const threadLocalId = chatter.threadLocalId;
+            const thread = threadLocalId ? state.threads[threadLocalId] : undefined;
+            if (thread) {
+                const attachments = thread.attachmentLocalIds.map(attachmentLocalId =>
+                    state.attachments[attachmentLocalId]
+                );
+                if (this.props.formRendererBus) {
+                    this.props.formRendererBus.trigger('o-chatter-use-store-thread-and-attachments', {
+                        attachments,
+                        threadLocalId
+                    });
+                }
+            }
             return { chatter, thread };
         });
         this._threadRef = useRef('thread');
@@ -44,6 +54,10 @@ Chatter.components = { AttachmentBox, ChatterTopbar, Composer, Thread };
 
 Chatter.props = {
     chatterLocalId: String,
+    formRendererBus: {
+        type: Object,
+        optional: true,
+    },
 };
 
 Chatter.template = 'mail.component.Chatter';
