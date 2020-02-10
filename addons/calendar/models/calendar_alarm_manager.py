@@ -2,9 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from odoo import api, fields, models
+from odoo.tools import plaintext2html
 
 _logger = logging.getLogger(__name__)
 
@@ -146,7 +147,7 @@ class AlarmManager(models.AbstractModel):
         already.
         """
         self.env.cr.execute('''
-            SELECT "event"."id"
+            SELECT "event"."id", "alarm"."id"
               FROM "calendar_event" AS "event"
               JOIN "calendar_alarm_calendar_event_rel" AS "event_alarm_rel"
                 ON "event"."id" = "event_alarm_rel"."calendar_event_id"
@@ -159,19 +160,27 @@ class AlarmManager(models.AbstractModel):
                AND "event"."start" - CAST("alarm"."duration" || ' ' || "alarm"."interval" AS Interval) < now() at time zone 'utc'
              )''', [ttype, self.env.context['lastcall']])
 
-        ids = [row[0] for row in self.env.cr.fetchall()]
-        return self.env['calendar.event'].browse(ids)
+        results = self.env.cr.fetchall()
+        alarms_by_event = dict.fromkeys(set(event[0] for event in results), list())
+        for result in results:
+            alarms_by_event[result[0]].append(result[1])
+        return alarms_by_event
 
     @api.model
     def _send_reminder(self):
         # Executed via cron
-        events = self._get_events_to_notify('email')
-        attendees = events.attendee_ids.filtered(lambda a: a.state != 'declined')
-        attendees._send_mail_to_attendees(
-            'calendar.calendar_template_meeting_reminder',
-            force_send=True,
-            ignore_recurrence=True,
-        )
+        alarms_by_event = self._get_events_to_notify('email')
+        if alarms_by_event:
+            events = self.env['calendar.event'].browse(list(alarms_by_event.keys()))
+            attendees = events.attendee_ids.filtered(lambda a: a.state != 'declined')
+            for event_id in alarms_by_event.keys():
+                event_attendees = attendees.filtered(lambda attendee: attendee.event_id.id == event_id)
+                event_alarms = attendees.event_id.alarm_ids.filtered(lambda alarm: alarm.id in alarms_by_event.get(event_id, []))
+                for alarm in event_alarms:
+                    event_attendees.with_context(mail_notify_force_send=True)._send_mail_to_attendees(
+                        alarm.mail_template_id,
+                        ignore_recurrence=True,
+                    )
 
     @api.model
     def get_next_notif(self):
@@ -199,6 +208,9 @@ class AlarmManager(models.AbstractModel):
 
         if alarm.alarm_type == 'notification':
             message = meeting.display_time
+            if alarm.body:
+                formatted_body = plaintext2html(alarm.body)
+                message += '<p>%s</p>' % formatted_body
 
             delta = alert['notify_at'] - fields.Datetime.now()
             delta = delta.seconds + delta.days * 3600 * 24
