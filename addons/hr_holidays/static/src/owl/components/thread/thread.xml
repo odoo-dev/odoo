@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="mail.component.Thread" t-inherit-mode="extension">
+        <xpath expr="//*[@name='loadingCondition']" position="before">
+            <t t-if="storeProps.directPartner and storeProps.directPartner.out_of_office_date_end">
+                <div class="o_Thread_outOfOffice alert alert-primary" t-esc="getOutOfOfficeText()" role="alert"/>
+            </t>
+        </xpath>
+    </t>
+</templates>

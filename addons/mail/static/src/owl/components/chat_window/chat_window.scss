@@ -72,10 +72,6 @@
             filter: brightness(0.95);
         }
 
-        &:not(.o-folded) .o_ChatWindow_header {
-            border-bottom: 1px solid white;
-        }
-
         &.o-focused {
             box-shadow: -5px -5px 10px rgba(black, 0.18);
         }
