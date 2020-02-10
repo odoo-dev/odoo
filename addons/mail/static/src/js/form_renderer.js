@@ -4,6 +4,8 @@ odoo.define('mail.form_renderer', function (require) {
 const Chatter = require('mail.component.Chatter');
 const FormRenderer = require('web.FormRenderer');
 
+const { EventBus } = owl.core;
+
 /**
  * Include the FormRenderer to instanciate the chatter area containing (a
  * subset of) the mail widgets (mail_thread, mail_followers and mail_activity).
@@ -14,6 +16,12 @@ FormRenderer.include({
         // Useful when (re)loading view
         if (this._chatterContainerTarget) {
             if (!this._chatterComponent) {
+                if (!this._chatterLocalId) {
+                    this._chatterLocalId = this.env.store.dispatch('createChatter', {
+                        initialThreadId: this.state.res_id,
+                        initialThreadModel: this.state.model,
+                    });
+                }
                 this._makeChatterComponent();
             }
             await this._mountChatterComponent();
@@ -35,6 +43,7 @@ FormRenderer.include({
         this._super(...arguments);
         this.env = this.call('messaging', 'getMessagingEnv');
         this.mailFields = params.mailFields;
+        this._chatterBus = new EventBus();
         this._chatterComponent = undefined;
         /**
          * Determine where the chatter will be appended in the DOM
@@ -43,6 +52,10 @@ FormRenderer.include({
         this._chatterLocalId = undefined;
         // Do not load chatter in form view dialogs
         this._isFromFormViewDialog = params.isFromFormViewDialog;
+
+        this._chatterBus.on('o-chatter-use-store-thread-and-attachments', this, (...args) => {
+            this._onChatterUseStoreThreadAndAttachments(...args);
+        });
     },
     /**
      * @override
@@ -77,7 +90,10 @@ FormRenderer.include({
      * @private
      */
     _makeChatterComponent() {
-        this._chatterComponent = new Chatter(null, { chatterLocalId: this._chatterLocalId });
+        this._chatterComponent = new Chatter(null, {
+            chatterLocalId: this._chatterLocalId,
+            formRendererBus: this._chatterBus,
+        });
     },
     /**
      * Mount the chatter
@@ -137,6 +153,17 @@ FormRenderer.include({
             await this._mountChatterComponent();
         }
     },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @abstract
+     * @private
+     * @param {...any} args
+     */
+    _onChatterUseStoreThreadAndAttachments(...args) {},
 });
 
 });

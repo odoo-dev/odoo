@@ -3360,6 +3360,9 @@ const actions = {
         { searchDomain=[] }={}
     ) {
         const thread = state.threads[threadLocalId];
+        if (!thread) {
+            return;
+        }
         const stringifiedDomain = JSON.stringify(searchDomain);
         let threadCacheLocalId = thread.cacheLocalIds[stringifiedDomain];
         if (!threadCacheLocalId) {
