@@ -7,7 +7,9 @@
                 'o-away': storeProps.partner.im_status === 'away',
                 'o-offline': storeProps.partner.im_status === 'offline',
                 'o-online': storeProps.partner.im_status === 'online',
-            }" t-att-data-partner-local-id="storeProps.partner.localId">
+            }" t-att-data-partner-local-id="storeProps.partner.localId"
+            name="root"
+        >
             <i class="o_PartnerImStatusIcon_outerBackground fa fa-circle fa-stack-1x"/>
             <i class="o_PartnerImStatusIcon_innerBackground fa fa-circle fa-stack-1x"/>
             <t t-if="storeProps.partner.im_status === 'online'">

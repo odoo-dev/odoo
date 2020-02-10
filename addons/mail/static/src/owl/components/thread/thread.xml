@@ -3,7 +3,7 @@
 
     <t t-name="mail.component.Thread" owl="1">
         <div class="o_Thread" t-att-data-thread-local-id="props.threadLocalId">
-            <t t-if="!storeProps.threadCache or (storeProps.threadCache and (storeProps.threadCache.isLoading or !storeProps.threadCache.isLoaded))">
+            <t t-if="!storeProps.threadCache or (storeProps.threadCache and (storeProps.threadCache.isLoading or !storeProps.threadCache.isLoaded))" name="loadingCondition">
                 <div class="o_Thread_loading">
                     <span><i class="o_Thread_loadingIcon fa fa-spinner fa-spin" title="Loading..." role="img" aria-label="Loading..."/>Loading...</span>
                 </div>

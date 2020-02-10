@@ -23,21 +23,7 @@ class Thread extends Component {
          */
         this.id = _.uniqueId('o_thread_');
         this.storeDispatch = useDispatch();
-        this.storeProps = useStore((state, props) => {
-            const thread = state.threads[props.threadLocalId];
-            const threadCacheLocalId = thread
-                ? thread.cacheLocalIds[JSON.stringify(props.domain || [])]
-                : undefined;
-            const threadCache = threadCacheLocalId
-                ? state.threadCaches[threadCacheLocalId]
-                : undefined;
-            return {
-                isMobile: state.isMobile,
-                thread,
-                threadCache,
-                threadCacheLocalId,
-            };
-        });
+        this.storeProps = useStore((...args) => this._useStore(...args));
         /**
          * Reference of the composer. Useful to set focus on composer when
          * thread has the focus.
@@ -158,6 +144,30 @@ class Thread extends Component {
         }
         this._lastRenderedThreadCacheLocalId = this.storeProps.threadCacheLocalId;
         this.trigger('o-rendered');
+    }
+
+    /**
+     * Returns data selected from the store.
+     *
+     * @private
+     * @param {Object} state
+     * @param {Object} props
+     * @returns {Object}
+     */
+    _useStore(state, props) {
+        const thread = state.threads[props.threadLocalId];
+        const threadCacheLocalId = thread
+            ? thread.cacheLocalIds[JSON.stringify(props.domain || [])]
+            : undefined;
+        const threadCache = threadCacheLocalId
+            ? state.threadCaches[threadCacheLocalId]
+            : undefined;
+        return {
+            isMobile: state.isMobile,
+            thread,
+            threadCache,
+            threadCacheLocalId,
+        };
     }
 }
 

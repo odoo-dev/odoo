@@ -32,8 +32,8 @@
                 <t t-elif="storeProps.directPartner.im_status === 'bot'">
                     <div class="o_ThreadIcon_online fa fa-heart" title="Bot"/>
                 </t>
-                <t t-else="">
-                    <div class="fa fa-question-circle" title="No IM status available"/>
+                <t t-else="" name="noImStatusCondition">
+                    <div class="o_ThreadIcon_noImStatus fa fa-question-circle" title="No IM status available"/>
                 </t>
             </t>
             <t t-elif="storeProps.thread._model === 'mail.box'">

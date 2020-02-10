@@ -588,37 +588,6 @@ QUnit.test('do not auto-focus chat window on receiving new message from new DM',
     parent.destroy();
 });
 
-QUnit.test('no out-of-office status in thread window', async function (assert) {
-    assert.expect(1);
-    this.data.initMessaging = {
-        channel_slots: {
-            channel_channel: [{
-                id: 1,
-                name: "DM",
-                channel_type: "chat",
-                message_unread_counter: 0,
-                direct_partner: [{ id: 666, name: 'DemoUser1', im_status: 'online'}],
-            }],
-        },
-    };
-    var parent = this.createParent({
-        data: this.data,
-        services: this.services,
-    });
-    await testUtils.nextTick();
-
-    // detach channel 1, so that it opens corresponding thread window.
-    var channel = parent.call('mail_service', 'getChannel', 1);
-    await testUtils.nextTick();
-    channel.detach();
-    await testUtils.nextTick();
-
-    var $threadWindow = $('.o_thread_window');
-    assert.containsNone($threadWindow, '.o_out_of_office_text');
-
-    parent.destroy();
-});
-
 QUnit.test('receive 2 new DM messages in quick succession (no chat window initially)', async function (assert) {
     assert.expect(3);
 
