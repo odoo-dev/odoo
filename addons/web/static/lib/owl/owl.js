@@ -1547,7 +1547,8 @@
                     let textNode;
                     while ((textNode = node.previousSibling) !== prevElem) {
                         if (textNode.nodeValue.trim().length) {
-                            throw new Error("text is not allowed between branching directives");
+                            // temporary fix for https://github.com/odoo/owl/issues/636
+                            //throw new Error("text is not allowed between branching directives");
                         }
                         textNode.remove();
                     }
