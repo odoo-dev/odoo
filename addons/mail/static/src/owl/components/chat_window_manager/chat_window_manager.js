@@ -120,6 +120,56 @@ class ChatWindowManager extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * Cycles to the next possible chat window starting from the
+     * `currentChatWindowLocalId`, following the natural order based on the
+     * current text direction, and with the possibility to `reverse` based on
+     * the given parameter.
+     *
+     * @private
+     * @param {integer} currentChatWindowLocalId
+     * @param {Object} [param1={}]
+     * @param {boolean} [param1.reverse=false]
+     */
+    _cycleNextChatWindow(currentChatWindowLocalId, { reverse = false } = {}) {
+        const orderedVisible = this.orderedVisible;
+        if (orderedVisible.length <= 1) {
+            return;
+        }
+
+        /**
+         * Return index of next visible chat window of a given visible chat
+         * window index. The direction of "next" chat window depends on
+         * `reverse` option.
+         *
+         * @param {integer} index
+         * @return {integer}
+         */
+        const _getNextIndex = index => {
+            const directionOffset = reverse ? -1 : 1;
+            let nextIndex = index + directionOffset;
+            if (nextIndex > orderedVisible.length - 1) {
+                nextIndex = 0;
+            }
+            if (nextIndex < 0) {
+                nextIndex = orderedVisible.length - 1;
+            }
+            return nextIndex;
+        };
+
+        const currentChatWindowIndex = orderedVisible.findIndex(
+            item => item.chatWindowLocalId === currentChatWindowLocalId
+        );
+
+        let nextIndex = _getNextIndex(currentChatWindowIndex);
+        let nextToFocusChatWindowLocalId = orderedVisible[nextIndex].chatWindowLocalId;
+        while (this._getChatWindowRef(nextToFocusChatWindowLocalId).isFolded()) {
+            nextIndex = _getNextIndex(nextIndex);
+            nextToFocusChatWindowLocalId = orderedVisible[nextIndex].chatWindowLocalId;
+        }
+
+        this.storeDispatch('focusChatWindow', orderedVisible[nextIndex].chatWindowLocalId);
+    }
+    /**
      * Get references of all chat windows. Useful to set auto-focus when
      * necessary.
      *
@@ -198,33 +248,17 @@ class ChatWindowManager extends Component {
      * @param {string} ev.detail.currentChatWindowLocalId
      */
     _onFocusNextChatWindow(ev) {
-        const orderedVisible = this.orderedVisible;
-        if (orderedVisible.length === 1) {
-            return;
-        }
-
-        const _getNextVisibleChatWindowIndex = index => {
-            let nextIndex = index + 1;
-            if (nextIndex > orderedVisible.length - 1) {
-                nextIndex = 0;
-            }
-            return nextIndex;
-        };
-
-        const _getNextOpenVisibleChatWindowIndex = currentChatWindowIndex => {
-            let nextIndex = _getNextVisibleChatWindowIndex(currentChatWindowIndex);
-            let nextToFocusChatWindowLocalId = orderedVisible[nextIndex].chatWindowLocalId;
-            while (this._getChatWindowRef(nextToFocusChatWindowLocalId).isFolded()) {
-                nextIndex = _getNextVisibleChatWindowIndex(nextIndex);
-                nextToFocusChatWindowLocalId = orderedVisible[nextIndex].chatWindowLocalId;
-            }
-            return nextIndex;
-        };
-
-        const currentChatWindowIndex = orderedVisible.findIndex(item =>
-            item.chatWindowLocalId === ev.detail.currentChatWindowLocalId);
-        const nextIndex = _getNextOpenVisibleChatWindowIndex(currentChatWindowIndex);
-        this.storeDispatch('focusChatWindow', orderedVisible[nextIndex].chatWindowLocalId);
+        this._cycleNextChatWindow(ev.detail.currentChatWindowLocalId);
+    }
+    /**
+     * Called when a chat window asks to focus the previous chat window.
+     *
+     * @private
+     * @param {CustomEvent} ev
+     * @param {string} ev.detail.currentChatWindowLocalId
+     */
+    _onFocusPreviousChatWindow(ev) {
+        this._cycleNextChatWindow(ev.detail.currentChatWindowLocalId, { reverse: true });
     }
 
     /**

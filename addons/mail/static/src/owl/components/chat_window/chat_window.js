@@ -274,9 +274,15 @@ class ChatWindow extends Component {
         ev.stopPropagation();
         if (ev.key === 'Tab') {
             ev.preventDefault();
-            this.trigger('o-focus-next-chat-window', {
-                currentChatWindowLocalId: this.props.chatWindowLocalId,
-            });
+            if (ev.shiftKey) {
+                this.trigger('o-focus-previous-chat-window', {
+                    currentChatWindowLocalId: this.props.chatWindowLocalId,
+                });
+            } else {
+                this.trigger('o-focus-next-chat-window', {
+                    currentChatWindowLocalId: this.props.chatWindowLocalId,
+                });
+            }
         }
     }
 
