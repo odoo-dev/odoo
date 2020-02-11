@@ -779,6 +779,27 @@ const actions = {
         thread.message_unread_counter = 0;
     },
     /**
+     * Opens an existing or new chat with the given partner.
+     *
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.getters
+     * @param {integer} partnerId
+     */
+    openChatWithPartner({ dispatch, getters }, partnerId) {
+        const partnerLocalId = `res.partner_${partnerId}`;
+        const chat = getters.chatFromPartner(partnerLocalId);
+        if (chat) {
+            dispatch('openThread', chat.localId);
+        } else {
+            dispatch('createChannel', {
+                autoselect: true,
+                partnerId,
+                type: 'chat',
+            });
+        }
+    },
+    /**
      * Open the form view of the record with provided id and model.
      *
      * @param {Object} param0
