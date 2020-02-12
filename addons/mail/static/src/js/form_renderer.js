@@ -14,7 +14,7 @@ FormRenderer.include({
     async on_attach_callback() {
         this._super(...arguments);
         // Useful when (re)loading view
-        if (this._chatterContainerTarget) {
+        if (this._hasChatter()) {
             if (!this._chatterComponent) {
                 if (!this._chatterLocalId) {
                     this._chatterLocalId = this.env.store.dispatch('createChatter', {
@@ -46,7 +46,8 @@ FormRenderer.include({
         this._chatterBus = new EventBus();
         this._chatterComponent = undefined;
         /**
-         * Determine where the chatter will be appended in the DOM
+         * The target of chatter, if chatter has to be appended to the DOM.
+         * This is set when arch contains `div.oe_chatter`.
          */
         this._chatterContainerTarget = undefined;
         this._chatterLocalId = undefined;
@@ -62,7 +63,7 @@ FormRenderer.include({
      */
     destroy() {
         this._super(...arguments);
-        if (this._chatterContainerTarget) {
+        if (this._hasChatter()) {
             this._destroyChatter();
         }
     },
@@ -85,6 +86,16 @@ FormRenderer.include({
             this.env.store.dispatch('deleteChatter', this._chatterLocalId);
             this._chatterLocalId = undefined;
         }
+    },
+    /**
+     * Determine whether the form renderer has a chatter to display or not.
+     * This is based on arch, which should have `div.oe_chatter`.
+     *
+     * @private
+     * @return {boolean}
+     */
+    _hasChatter() {
+        return !!this._chatterContainerTarget;
     },
     /**
      * @private
@@ -134,7 +145,7 @@ FormRenderer.include({
      */
     async _renderView() {
         await this._super(...arguments);
-        if (this._chatterContainerTarget) {
+        if (this._hasChatter()) {
             Chatter.env = this.env;
             if (!this._chatterLocalId) {
                 this._chatterLocalId = this.env.store.dispatch('createChatter', {
