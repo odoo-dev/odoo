@@ -3381,12 +3381,15 @@ const actions = {
             threadLocalId,
         });
         threadCache.isLoading = true;
-        const messagesData = await env.rpc({
-            model: 'mail.message',
-            method: 'message_fetch',
-            args: [domain],
-            kwargs: dispatch('_getThreadFetchMessagesKwargs', threadLocalId),
-        }, { shadow: true });
+        let messagesData = [];
+        if (!thread.isTemporary) {
+            messagesData = await env.rpc({
+                model: 'mail.message',
+                method: 'message_fetch',
+                args: [domain],
+                kwargs: dispatch('_getThreadFetchMessagesKwargs', threadLocalId),
+            }, { shadow: true });
+        }
         dispatch('_handleThreadLoaded', threadLocalId, {
             messagesData,
             searchDomain,
