@@ -6,6 +6,8 @@ const Composer = require('mail.component.Composer');
 const MobileMailboxSelection = require('mail.component.DiscussMobileMailboxSelection');
 const Sidebar = require('mail.component.DiscussSidebar');
 const MobileNavbar = require('mail.component.MobileMessagingNavbar');
+const ModerationDiscardDialog = require('mail.component.ModerationDiscardDialog');
+const ModerationRejectDialog = require('mail.component.ModerationRejectDialog');
 const Thread = require('mail.component.Thread');
 const ThreadPreviewList = require('mail.component.ThreadPreviewList');
 const useStore = require('mail.hooks.useStore');
@@ -22,6 +24,10 @@ class Discuss extends Component {
     constructor(...args) {
         super(...args);
         this.state = useState({
+            // Determine if the moderation discard dialog is displayed.
+            hasModerationDiscardDialog: false,
+            // Determine if the moderation reject dialog is displayed.
+            hasModerationRejectDialog: false,
             /**
              * Determine whether current user is currently adding a channel from
              * the sidebar.
@@ -67,6 +73,19 @@ class Discuss extends Component {
             const activeThreadCache = activeThreadCacheLocalId
                 ? state.threadCaches[activeThreadCacheLocalId]
                 : undefined;
+            // control panel
+            const checkedMessageLocalIds = activeThreadCache
+                ? activeThreadCache.messageLocalIds.filter(messageLocalId =>
+                    this.storeGetters.hasMessageCheckbox(messageLocalId) &&
+                    activeThreadCache.checkedMessageLocalIds.includes(messageLocalId)
+                )
+                : [];
+            const uncheckedMessageLocalIds = activeThreadCache
+                ? activeThreadCache.messageLocalIds.filter(messageLocalId =>
+                    this.storeGetters.hasMessageCheckbox(messageLocalId) &&
+                    !activeThreadCache.checkedMessageLocalIds.includes(messageLocalId)
+                )
+                : [];
             // TODO SEB: transform into storeProps.discuss...
             return Object.assign({}, state.discuss, {
                 activeThread,
@@ -75,9 +94,17 @@ class Discuss extends Component {
                 // intentionally keep unsynchronize value of old thread counter
                 // useful in willUpdateProps to detect change of counter
                 activeThreadCounter: activeThread && activeThread.counter,
+                checkedMessageLocalIds,
                 isMessagingReady: state.isMessagingReady,
                 isMobile: state.isMobile,
+                stringifiedDomain,
+                uncheckedMessageLocalIds,
             });
+        }, {
+            compareDepth: {
+                checkedMessageLocalIds: 1,
+                uncheckedMessageLocalIds: 1,
+            },
         });
         this._updateLocalStoreProps();
         /**
@@ -418,7 +445,18 @@ class Discuss extends Component {
         }
         this._clearAddingItem();
     }
-
+    /**
+     * @private
+     */
+    _onDialogClosedModerationDiscard() {
+        this.state.hasModerationDiscardDialog = false;
+    }
+    /**
+     * @private
+     */
+    _onDialogClosedModerationReject() {
+        this.state.hasModerationRejectDialog = false;
+    }
     /**
      * @private
      * @param {Object} req
@@ -599,6 +637,8 @@ Object.assign(Discuss, {
         Composer,
         MobileMailboxSelection,
         MobileNavbar,
+        ModerationDiscardDialog,
+        ModerationRejectDialog,
         Sidebar,
         Thread,
         ThreadPreviewList,

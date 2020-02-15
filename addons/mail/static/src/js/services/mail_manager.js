@@ -76,7 +76,6 @@ var MailManager =  AbstractService.extend({
      *
      * @param {Object} data message data
      * @param {integer} data.id
-     * @param {string} [data.moderation_status]
      * @param {Object} [options]
      * @param {Array} [options.domain]
      * @param {boolean} [options.incrementUnread] whether we should increment
@@ -92,11 +91,6 @@ var MailManager =  AbstractService.extend({
         if (!message) {
             prom = this._addNewMessage(data, options);
         } else {
-            if (data.moderation_status === 'accepted') {
-                message.setModerationStatus('accepted', {
-                    additionalThreadIDs: data.channel_ids
-                });
-            }
             this._addMessageToThreads(message, options);
             prom = Promise.resolve(message);
         }
@@ -250,14 +244,6 @@ var MailManager =  AbstractService.extend({
             });
     },
     /**
-     * Get the list of channel IDs where the current user is a moderator
-     *
-     * @returns {integer[]}
-     */
-    getModeratedChannelIDs: function () {
-        return this._moderatedChannelIDs || [];
-    },
-    /**
      * Get the OdooBot ID, which is the default authorID for transient messages
      *
      * @returns {Array<string>}
@@ -283,14 +269,6 @@ var MailManager =  AbstractService.extend({
      */
     getThreads: function () {
         return this._threads;
-    },
-    /**
-     * States whether the current user is a moderator or not
-     *
-     * @returns {boolean}
-     */
-    isMyselfModerator: function () {
-        return this._isMyselfModerator;
     },
     /**
      * States whether the mail manager is ready or not
@@ -378,20 +356,6 @@ var MailManager =  AbstractService.extend({
         } else {
             this._redirectDefault(resModel, resID);
         }
-    },
-    /**
-     * Remove the message from all of its threads
-     *
-     * @param {mail.model.Message} message
-     */
-    removeMessageFromThreads: function (message) {
-        var self = this;
-        _.each(message.getThreadIDs(), function (threadID) {
-            var thread = self.getThread(threadID);
-            if (thread) {
-                thread.removeMessage(message.getID());
-            }
-        });
     },
     /**
      * Search among prefetched partners, using the string 'searchVal'
@@ -854,12 +818,10 @@ var MailManager =  AbstractService.extend({
         this._commands = [];
         this._discussMenuID = undefined;
         this._discussOpen = false;
-        this._isMyselfModerator = false;
         this._mailFailures = [];
         // list of employees for chatter mentions
         this._mentionPartnerSuggestions = [];
         this._messages = [];
-        this._moderatedChannelIDs = [];
         // # of message received when odoo is out of focus
         this._outOfFocusUnreadMessageCounter = 0;
         // partner_ids we have a pinned DM chat with
@@ -1265,7 +1227,6 @@ var MailManager =  AbstractService.extend({
         // commands are needed for channel instantiation
         this._updateCommandsFromServer(result);
         var prom = this._updateChannelsFromServer(result);
-        this._updateModerationSettingsFromServer(result);
         this._updateMailboxesFromServer(result);
         this._updateMailFailuresFromServer(result);
         this._updateCannedResponsesFromServer(result);
@@ -1277,14 +1238,10 @@ var MailManager =  AbstractService.extend({
     },
     /**
      * Update the mailboxes with mail data fetched from server, namely 'Inbox',
-     * 'Starred', 'History', and 'Moderation Queue' if the user is a moderator of a channel
+     * 'Starred', 'History'
      *
      * @private
      * @param {Object} data
-     * @param {boolean} [data.is_moderator=false] states whether the user is
-     *   moderator of a channel
-     * @param {integer} [data.moderation_counter=0] states the mailbox counter
-     *   to set to 'Moderation Queue'
      * @param {integer} [data.needaction_inbox_counter=0] states the mailbox
      *   counter to set to 'Inbox'
      * @param {integer} [data.starred_counter=0] states the mailbox counter to
@@ -1315,18 +1272,6 @@ var MailManager =  AbstractService.extend({
         this._mailFailures = _.map(data.mail_failures, function (mailFailureData) {
             return new MailFailure(self, mailFailureData);
         });
-    },
-    /**
-     * Update moderation settings with mail data fetched from server
-     *
-     * @private
-     * @param {Object} data
-     * @param {boolean} [data.is_moderator=false]
-     * @param {integer[]} [data.moderation_channel_ids]
-     */
-    _updateModerationSettingsFromServer: function (data) {
-        this._isMyselfModerator = data.is_moderator;
-        this._moderatedChannelIDs = data.moderation_channel_ids;
     },
 
     //--------------------------------------------------------------------------

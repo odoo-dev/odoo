@@ -24,6 +24,12 @@
                         </div>
                         Messages marked as read will appear in the history.
                     </t>
+                    <t t-elif="storeProps.thread.localId === 'mail.box_moderation'">
+                        <div class="o_MessageList_emptyTitle">
+                            You have no messages to moderate.
+                        </div>
+                        Messages pending moderation appear here.
+                    </t>
                     <t t-else="">
                         There are no messages in this conversation.
                     </t>
@@ -60,11 +66,13 @@
                     }"
                     hasAuthorRedirect="props.haveMessagesAuthorRedirect"
                     hasMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
+                    hasCheckbox="props.hasMessageCheckbox"
                     hasReplyIcon="props.haveMessagesReplyIcon"
                     isSelected="props.selectedMessageLocalId === message.localId"
                     isSquashed="isMessageSquashed"
                     messageLocalId="message.localId"
-                    threadLocalId="props.threadLocalId"
+                    threadLocalId="storeProps.thread.localId"
+                    threadStringifiedDomain="storeProps.threadCache.stringifiedDomain"
                     t-ref="{{ message.localId }}"
                 />
                 <t t-set="prev_message" t-value="message"/>

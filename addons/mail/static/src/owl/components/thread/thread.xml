@@ -12,6 +12,7 @@
                 <MessageList
                     class="o_Thread_messageList"
                     domain="props.domain"
+                    hasMessageCheckbox="props.hasMessageCheckbox"
                     hasSquashCloseMessages="props.hasSquashCloseMessages"
                     haveMessagesAuthorRedirect="props.haveMessagesAuthorRedirect"
                     haveMessagesMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"

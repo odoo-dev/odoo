@@ -170,8 +170,6 @@ var Mailbox = SearchableThread.extend({
             return [['starred', '=', true]];
         } else if (this._id === 'mailbox_history') {
             return [['needaction', '=', false]];
-        } else if (this._id === 'mailbox_moderation') {
-            return [['need_moderation', '=', true]];
         } else {
             throw (_.str(_t("Missing domain for mailbox with ID '%s'"), this._id));
         }

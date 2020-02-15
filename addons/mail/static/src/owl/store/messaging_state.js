@@ -185,7 +185,7 @@ function initState() {
              */
             isOpen: false,
         },
-        moderatedChannelIds: [],
+        moderatedChannelLocalIds: [],
         outOfFocusUnreadMessageCounter: 0,
         partners: {},
         temporaryAttachmentLocalIds: {}, // key: filename, value: temporaryAttachmentLocalId

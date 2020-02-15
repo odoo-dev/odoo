@@ -2,17 +2,19 @@ odoo.define('mail.component.Message', function (require) {
 'use strict';
 
 const AttachmentList = require('mail.component.AttachmentList');
+const ModerationBanDialog = require('mail.component.ModerationBanDialog');
+const ModerationDiscardDialog = require('mail.component.ModerationDiscardDialog');
+const ModerationRejectDialog = require('mail.component.ModerationRejectDialog');
 const PartnerImStatusIcon = require('mail.component.PartnerImStatusIcon');
 const useStore = require('mail.hooks.useStore');
 const mailUtils = require('mail.utils');
 
-const core = require('web.core');
+const { _lt } = require('web.core');
 const time = require('web.time');
 
 const { Component, useState } = owl;
 const { useDispatch, useGetters, useRef } = owl.hooks;
 
-const _lt = core._lt;
 const READ_MORE = _lt("read more");
 const READ_LESS = _lt("read less");
 
@@ -25,6 +27,12 @@ class Message extends Component {
     constructor(...args) {
         super(...args);
         this.state = useState({
+            // Determine if the moderation ban dialog is displayed.
+            hasModerationBanDialog: false,
+            // Determine if the moderation discard dialog is displayed.
+            hasModerationDiscardDialog: false,
+            // Determine if the moderation reject dialog is displayed.
+            hasModerationRejectDialog: false,
             /**
              * Determine whether the message is clicked. When message is in
              * clicked state, it keeps displaying the commands.
@@ -44,9 +52,17 @@ class Message extends Component {
             const odoobot = state.partners['res.partner_odoobot'];
             const originThread = state.threads[message.originThreadLocalId];
             const thread = state.threads[props.threadLocalId];
+            const hasCheckbox = this.storeGetters.hasMessageCheckbox(message.localId);
+            const isChecked = this.storeGetters.isMessageChecked(
+                message.localId,
+                thread.localId,
+                props.threadStringifiedDomain
+            );
             return {
                 attachmentLocalIds,
                 author,
+                hasCheckbox,
+                isChecked,
                 isMobile: state.isMobile,
                 message,
                 odoobot,
@@ -58,6 +74,8 @@ class Message extends Component {
          * Reference to the content of the message.
          */
         this._contentRef = useRef('content');
+        // To get checkbox state.
+        this._checkboxRef = useRef('checkbox');
         /**
          * Id of setInterval used to auto-update time elapsed of message at
          * regular time.
@@ -443,7 +461,46 @@ class Message extends Component {
             model: this.storeProps.author._model,
         });
     }
-
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickModerationAccept(ev) {
+        ev.preventDefault();
+        this.storeDispatch('moderateMessages', [this.props.messageLocalId], 'accept');
+    }
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickModerationAllow(ev) {
+        ev.preventDefault();
+        this.storeDispatch('moderateMessages', [this.props.messageLocalId], 'allow');
+    }
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickModerationBan(ev) {
+        ev.preventDefault();
+        this.state.hasModerationBanDialog = true;
+    }
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickModerationDiscard(ev) {
+        ev.preventDefault();
+        this.state.hasModerationDiscardDialog = true;
+    }
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickModerationReject(ev) {
+        ev.preventDefault();
+        this.state.hasModerationRejectDialog = true;
+    }
     /**
      * @private
      * @param {MouseEvent} ev
@@ -479,16 +536,55 @@ class Message extends Component {
             messageLocalId: this.props.messageLocalId,
         });
     }
+    /**
+     * @private
+     */
+    _onDialogClosedModerationBan() {
+        this.state.hasModerationBanDialog = false;
+    }
+    /**
+     * @private
+     */
+    _onDialogClosedModerationDiscard() {
+        this.state.hasModerationDiscardDialog = false;
+    }
+    /**
+     * @private
+     */
+    _onDialogClosedModerationReject() {
+        this.state.hasModerationRejectDialog = false;
+    }
+    /**
+     * @private
+     */
+    _onChangeCheckbox() {
+        this.env.store.dispatch('setMessagesCheck',
+            [this.storeProps.message.localId],
+            this.storeProps.thread.localId,
+            this.props.threadStringifiedDomain,
+            {
+                checkValue: this._checkboxRef.el.checked,
+            },
+        );
+    }
 }
 
-Message.components = { AttachmentList, PartnerImStatusIcon };
+Message.components = {
+    AttachmentList,
+    ModerationBanDialog,
+    ModerationDiscardDialog,
+    ModerationRejectDialog,
+    PartnerImStatusIcon,
+};
 
 Message.defaultProps = {
     hasAuthorRedirect: false,
+    hasCheckbox: false,
     hasMarkAsReadIcon: false,
     hasReplyIcon: false,
     isSelected: false,
     isSquashed: false,
+    threadStringifiedDomain: '[]',
 };
 
 Message.props = {
@@ -499,6 +595,7 @@ Message.props = {
     hasAuthorRedirect: {
         type: Boolean,
     },
+    hasCheckbox: Boolean,
     hasMarkAsReadIcon: {
         type: Boolean,
     },
@@ -516,6 +613,7 @@ Message.props = {
         type: String,
         optional: true,
     },
+    threadStringifiedDomain: String,
 };
 
 Message.template = 'mail.component.Message';

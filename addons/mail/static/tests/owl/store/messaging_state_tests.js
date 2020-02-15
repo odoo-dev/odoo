@@ -131,7 +131,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                 isMobileNewMessageToggled: false,
                 isOpen: false,
             },
-            moderatedChannelIds: [],
+            moderatedChannelLocalIds: [],
             outOfFocusUnreadMessageCounter: 0,
             partners: {
                 'res.partner_odoobot': {
@@ -160,6 +160,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
             temporaryAttachmentLocalIds: {},
             threadCaches: {
                 'mail.box_history_[]': {
+                    checkedMessageLocalIds: [],
                     currentPartnerMessagePostCounter: 0,
                     isAllHistoryLoaded: false,
                     isLoaded: false,
@@ -171,6 +172,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     threadLocalId: 'mail.box_history',
                 },
                 'mail.box_inbox_[]': {
+                    checkedMessageLocalIds: [],
                     currentPartnerMessagePostCounter: 0,
                     isAllHistoryLoaded: false,
                     isLoaded: false,
@@ -182,6 +184,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     threadLocalId: 'mail.box_inbox',
                 },
                 'mail.box_starred_[]': {
+                    checkedMessageLocalIds: [],
                     currentPartnerMessagePostCounter: 0,
                     isAllHistoryLoaded: false,
                     isLoaded: false,
