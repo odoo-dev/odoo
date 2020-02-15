@@ -17,7 +17,15 @@ QUnit.module('Message', {
         utilsBeforeEach(this);
         this.createMessage = async (messageLocalId, otherProps) => {
             Message.env = this.env;
-            this.message = new Message(null, Object.assign({ messageLocalId }, otherProps));
+            // messages must be displayed in the context of a thread
+            const threadLocalId = this.env.store.dispatch('_createThread', {
+                _model: 'mail.channel',
+                id: 20,
+            });
+            this.message = new Message(null, Object.assign({
+                messageLocalId,
+                threadLocalId,
+            }, otherProps));
             await this.message.mount(this.widget.$el[0]);
             await afterNextRender();
         };
@@ -136,6 +144,71 @@ QUnit.test('deleteAttachment', async function (assert) {
     await afterNextRender();
     assert.ok(!this.env.store.state.attachments['ir.attachment_10']);
     assert.ok(!this.env.store.state.messages[messageLocalId].attachmentLocalIds['ir.attachment_10']);
+});
+
+QUnit.test('moderation: moderated channel with pending moderation message (author)', async function (assert) {
+    assert.expect(1);
+    await this.start();
+    const messageLocalId = this.env.store.dispatch('_createMessage', {
+        author_id: [1, "Admin"],
+        body: "<p>Test</p>",
+        id: 100,
+        model: 'mail.channel',
+        moderation_status: 'pending_moderation',
+        res_id: 20,
+    });
+    await this.createMessage(messageLocalId);
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Message_moderationPending.o-author`).length,
+        1,
+        "should have the message pending moderation"
+    );
+});
+
+QUnit.test('moderation: moderated channel with pending moderation message (moderator)', async function (assert) {
+    assert.expect(9);
+    Object.assign(this.data.initMessaging, {
+        moderation_channel_ids: [20],
+    });
+    await this.start();
+    const messageLocalId = this.env.store.dispatch('_createMessage', {
+        author_id: [7, "Demo User"],
+        body: "<p>Test</p>",
+        id: 100,
+        model: 'mail.channel',
+        moderation_status: 'pending_moderation',
+        res_id: 20,
+    });
+    await this.createMessage(messageLocalId);
+    const message = document.querySelector('.o_Message');
+    assert.ok(message, "should display a message");
+    assert.containsOnce(message, `.o_Message_moderationSubHeader`,
+        "should have the message pending moderation"
+    );
+    assert.containsNone(message, `.o_Message_checkbox`,
+        "should not have the moderation checkbox by default"
+    );
+    const moderationActionSelector = '.o_Message_moderationAction';
+    assert.containsN(message, moderationActionSelector, 5,
+        "there should be 5 contextual moderation decisions next to the message"
+    );
+    assert.containsOnce(message, moderationActionSelector + '.o-accept',
+        "there should be a contextual moderation decision to accept the message"
+    );
+    assert.containsOnce(message, moderationActionSelector + '.o-reject',
+        "there should be a contextual moderation decision to reject the message"
+    );
+    assert.containsOnce(message, moderationActionSelector + '.o-discard',
+        "there should be a contextual moderation decision to discard the message"
+    );
+    assert.containsOnce(message, moderationActionSelector + '.o-allow',
+        "there should be a contextual moderation decision to allow the user of the message)"
+    );
+    assert.containsOnce(message, moderationActionSelector + '.o-ban',
+        "there should be a contextual moderation decision to ban the user of the message"
+    );
+    // The actions are tested as part of discuss tests.
 });
 
 });

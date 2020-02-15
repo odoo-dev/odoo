@@ -36,6 +36,13 @@
                     </div>
                 </t>
             </t>
+
+            <t t-if="state.hasModerationDiscardDialog">
+                <ModerationDiscardDialog messageLocalIds="storeProps.checkedMessageLocalIds" t-on-dialog-closed="_onDialogClosedModerationDiscard"/>
+            </t>
+            <t t-if="state.hasModerationRejectDialog">
+                <ModerationRejectDialog messageLocalIds="storeProps.checkedMessageLocalIds" t-on-dialog-closed="_onDialogClosedModerationReject"/>
+            </t>
         </div>
     </t>
 
@@ -67,6 +74,7 @@
                 domain="storeProps.domain"
                 hasComposer="storeProps.activeThread._model !== 'mail.box'"
                 hasComposerCurrentPartnerAvatar="!storeProps.isMobile"
+                hasMessageCheckbox="true"
                 hasSquashCloseMessages="storeProps.activeThread._model !== 'mail.box'"
                 haveMessagesAuthorRedirect="storeProps.activeThread.channel_type !== 'chat'"
                 haveMessagesMarkAsReadIcon="storeProps.activeThread.localId === 'mail.box_inbox'"

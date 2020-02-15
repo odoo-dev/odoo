@@ -91,8 +91,6 @@ MailManager.include({
      * @private
      * @param {Object} messageData
      * @param {integer[]} messageData.channel_ids channel IDs of this message
-     *   (note that 'pending moderation' messages in moderated channels do not
-     *   have the moderated channels in this array).
      */
     _handleChannelMessageNotification: function (messageData) {
         var self = this;
@@ -368,48 +366,6 @@ MailManager.include({
         this._mailBus.trigger('update_needaction', inbox.getMailboxCounter());
     },
     /**
-     * On receiving a message made by the current user, on a moderated channel,
-     * which is pending moderation.
-     *
-     * @private
-     * @param {Object} data
-     * @param {Object} data.message server-side data of the message
-     */
-    _handlePartnerMessageAuthorNotification: function (data) {
-        this.addMessage(data.message);
-    },
-    /**
-     * Notification to delete several messages locally
-     * Useful when a pending moderation message has been rejected, so that
-     * this message should not be displayed anymore.
-     *
-     * @private
-     * @param {Object} data
-     * @param {Object[]} [data.message_ids] IDs of messages to delete locally.
-     */
-    _handlePartnerMessageDeletionNotification: function (data) {
-        var self = this;
-        _.each(data.message_ids, function (messageID) {
-            var message = self.getMessage(messageID);
-            if (message) {
-                message.setModerationStatus('rejected');
-            }
-        });
-    },
-    /**
-     * On receiving a message pending moderation, and current user is moderator
-     * of such message.
-     *
-     * @param {Object} data notification data
-     * @param {Object} data.message data of message
-     */
-    _handlePartnerMessageModeratorNotification: function (data) {
-        var self = this;
-        this.addMessage(data.message).then(function () {
-            self._mailBus.trigger('update_moderation_counter');
-        });
-    },
-    /**
      * On receiving a notification that is specific to a user
      *
      * @private
@@ -423,12 +379,6 @@ MailManager.include({
             this._handlePartnerToggleStarNotification(data);
         } else if (data.type === 'mark_as_read') {
             this._handlePartnerMarkAsReadNotification(data);
-        } else if (data.type === 'moderator') {
-            this._handlePartnerMessageModeratorNotification(data);
-        } else if (data.type === 'author') {
-            this._handlePartnerMessageAuthorNotification(data);
-        } else if (data.type === 'deletion') {
-            this._handlePartnerMessageDeletionNotification(data);
         } else if (data.info === 'transient_message') {
             this._handlePartnerTransientMessageNotification(data);
         } else if (data.type === 'activity_updated') {
