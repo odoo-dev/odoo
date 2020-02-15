@@ -265,6 +265,12 @@ class MessageList extends Component {
         if (prevMessage.originThreadLocalId !== message.originThreadLocalId) {
             return false;
         }
+        if (
+            prevMessage.moderation_status === 'pending_moderation' ||
+            message.moderation_status === 'pending_moderation'
+        ) {
+            return false;
+        }
         const prevOriginThread = this.env.store.state.threads[prevMessage.originThreadLocalId];
         const originThread = this.env.store.state.threads[message.originThreadLocalId];
         if (
@@ -470,6 +476,7 @@ MessageList.components = { Message };
 
 MessageList.defaultProps = {
     domain: [],
+    hasMessageCheckbox: false,
     hasSquashCloseMessages: false,
     haveMessagesAuthorRedirect: false,
     haveMessagesMarkAsReadIcon: false,
@@ -481,6 +488,7 @@ MessageList.props = {
     domain: {
         type: Array,
     },
+    hasMessageCheckbox: Boolean,
     hasSquashCloseMessages: {
         type: Boolean,
     },

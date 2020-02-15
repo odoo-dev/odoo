@@ -352,15 +352,6 @@ var AbstractMessage =  Class.extend({
         return false;
     },
     /**
-     * States whether the current message needs moderation in general.
-     * By default, messages do not require any moderation.
-     *
-     * @returns {boolean}
-     */
-    needsModeration: function () {
-        return false;
-    },
-    /**
      * @params {integer[]} attachmentIDs
      */
     removeAttachments: function (attachmentIDs) {

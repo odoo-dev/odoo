@@ -29,7 +29,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {string} [data.email_from]
      * @param {string} [data.info]
      * @param {string} [data.model]
-     * @param {string} [data.moderation_status='accepted']
      * @param {string} [data.module_icon]
      * @param {Array} [data.needaction_partner_ids = []]
      * @param {Array} [data.history_partner_ids = []]
@@ -51,7 +50,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
 
         this._processBody(emojis);
         this._processMailboxes();
-        this._processModeration();
         this._processDocumentThread();
         this._processTrackingValues();
     },
@@ -380,24 +378,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         return this._isMyselfAuthor();
     },
     /**
-     * States whether the current message needs moderation in general.
-     *
-     * @override
-     * @returns {boolean}
-     */
-    needsModeration: function () {
-        return this._moderationStatus === 'pending_moderation';
-    },
-    /**
-     * States whether the current message needs moderation by the current user.
-     * Such a message should be in the moderation mailbox.
-     *
-     * @returns {boolean}
-     */
-    needsModerationByUser: function () {
-        return _.contains(this._threadIDs, 'mailbox_moderation');
-    },
-    /**
      * State whether this message is needaction
      *
      * @override
@@ -442,29 +422,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      */
     removeThread: function (threadID) {
         this._threadIDs = _.without(this._threadIDs, threadID);
-    },
-    /**
-     * Update the moderation status of the message, so that it is now accepted
-     * or rejected. When the message is accepted, it may be linked to more
-     * threads, which is the case for relay channels on moderated channels.
-     *
-     * @param {string} newModerationStatus ['accepted', 'rejected']
-     * @param {Object} [options]
-     * @param {Object} [options.additionalThreadIDs] contains additional thread
-     *   IDs to be registered on the message.
-     */
-    setModerationStatus: function (newModerationStatus, options) {
-        var self = this;
-        if (newModerationStatus === this._moderationStatus) {
-            return;
-        }
-        this._moderationStatus = newModerationStatus;
-        if (newModerationStatus === 'accepted' && options) {
-            _.each(options.additionalThreadIDs, function (threadID) {
-                self._addThread(threadID);
-            });
-        }
-        this._warnMessageModerated();
     },
     /**
      * Set whether the message is starred or not.
@@ -652,40 +609,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         if (_.contains(this._historyPartnerIDs, session.partner_id)) {
             this._setHistory(true);
         }
-        if (
-            this.originatesFromChannel() &&
-            _.contains(
-                this.call('mail_service', 'getModeratedChannelIDs'),
-                this.getOriginChannelID()
-            ) &&
-            this.needsModeration()
-        ) {
-            this._setModeratedByUser(true);
-        }
-    },
-    /**
-     * Do some extra processing at message init, related to the
-     * moderated status of the message.
-     *
-     * If the message needs moderation, it is not yet linked to the
-     * moderated channel server-side. Therefore, it is not registered
-     * in the list of threadIDs, as it is built on server-side information
-     * at message initialisation (using data.channel_ids).
-     *
-     * Since the web client uses the list of thread IDs to show visually the
-     * message in a thread, we should hack the response of the server so that
-     * it assumes the message really belongs to this thread.
-     *
-     * @private
-     */
-    _processModeration: function () {
-        if (this.needsModeration()) {
-            // the message is not linked to the moderated channel on the
-            // server, therefore this message has not this channel in
-            // channel_ids. Here, just to show this message in the channel
-            // visually, it links this message to the channel
-            this._threadIDs.push(this.getOriginChannelID());
-        }
     },
     /**
      * Process the tracking values on message creation, which
@@ -740,7 +663,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {string} [data.email_from]
      * @param {string} [data.info]
      * @param {string} [data.model]
-     * @param {string} [data.moderation_status='accepted']
      * @param {string} [data.module_icon]
      * @param {Array} [data.needaction_partner_ids = []]
      * @param {Array} [data.history_partner_ids = []]
@@ -751,7 +673,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {string} [data.subtype_description]
      * @param {Object[]} [data.tracking_value_ids]
      */
-    _setInitialData: function (data){
+    _setInitialData: function (data) {
         this._customerEmailData = data.customer_email_data || [];
         this._customerEmailStatus = data.customer_email_status;
         this._documentModel = data.model;
@@ -768,8 +690,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         this._subtypeDescription = data.subtype_description;
         this._threadIDs = data.channel_ids || [];
         this._trackingValueIDs = data.tracking_value_ids;
-
-        this._moderationStatus = data.moderation_status || 'accepted';
     },
     /*
      * Set whether the message is history or not.
@@ -787,22 +707,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         }
     },
     /**
-     * Set whether the message is moderated by current user or not.
-     * If it is moderated by the current user, the message is moved to the
-     * "Moderation" mailbox. Note that this function only applies it locally,
-     * the server is not aware
-     *
-     * @private
-     * @param {boolean} moderated if set, the message is moderated by user
-     */
-    _setModeratedByUser: function (moderated) {
-        if (moderated) {
-            this._addThread('mailbox_moderation');
-        } else {
-            this.removeThread('mailbox_moderation');
-        }
-    },
-    /**
      * Set whether the message is needaction or not.
      * If it is needaction, the message is moved to the "Inbox" mailbox.
      * Note that this function only applies it locally, the server is not aware
@@ -817,24 +721,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
             this.removeThread('mailbox_inbox');
         }
     },
-    /**
-     * @private
-     */
-    _warnMessageModerated: function () {
-        var mailBus = this.call('mail_service', 'getMailBus');
-        if (this.needsModerationByUser()) {
-            this._setModeratedByUser(false);
-            var moderationBox = this.call('mail_service', 'getMailbox', 'moderation');
-            moderationBox.decrementMailboxCounter();
-            moderationBox.removeMessage(this.getID());
-            mailBus.trigger('update_moderation_counter');
-        }
-        if (this._moderationStatus !== 'accepted') {
-            this.call('mail_service', 'removeMessageFromThreads', this);
-        }
-        mailBus.trigger('update_message', this);
-    },
-
 });
 
 return Message;

@@ -196,6 +196,19 @@ const getters = {
         return unreadMailChannelCounter + mailboxInboxCounter;
     },
     /**
+     * Returns whether the given message has any batch action available, for
+     * which a checkbox has to be displayed.
+     * Currently this is only the case for moderation.
+     *
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @param {string} messageLocalId
+     * @return {boolean}
+     */
+    hasMessageCheckbox({ getters }, messageLocalId) {
+        return getters.isMessageModeratedByUser(messageLocalId);
+    },
+    /**
      * @return {boolean}
      */
     haveVisibleChatWindows({ state }) {
@@ -247,6 +260,48 @@ const getters = {
             attachment.mimetype === 'application/pdf' ||
             getters.isAttachmentTextFile(attachmentLocalId)
         );
+    },
+    /**
+     * Returns whether the given message is checked in the current thread (based
+     * on stringifiedDomain).
+     *
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} messageLocalId
+     * @param {string} threadLocalId
+     * @param {string} stringifiedDomain
+     * @return {boolean}
+     */
+    isMessageChecked({ state }, messageLocalId, threadLocalId, stringifiedDomain) {
+        const thread = state.threads[threadLocalId];
+        const threadCacheLocalId = thread.cacheLocalIds[stringifiedDomain];
+        const threadCache = state.threadCaches[threadCacheLocalId];
+        return threadCache.checkedMessageLocalIds.includes(messageLocalId);
+    },
+    /**
+     * Returns whether the given message is moderated by the current user.
+     *
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @param {Object} param0.state
+     * @param {string} messageLocalId
+     * @return {boolean}
+     */
+    isMessageModeratedByUser({ getters, state }, messageLocalId) {
+        const message = state.messages[messageLocalId];
+        return message.moderation_status === 'pending_moderation' &&
+            getters.isThreadModeratedByUser(message.originThreadLocalId);
+    },
+    /**
+     * Returns whether the given thread is moderated by the current user.
+     *
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} threadLocalId
+     * @return {boolean}
+     */
+    isThreadModeratedByUser({ state }, threadLocalId) {
+        return state.moderatedChannelLocalIds.filter(localId => localId === threadLocalId).length;
     },
     /**
      * @param {Object} param0

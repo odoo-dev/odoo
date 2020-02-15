@@ -180,6 +180,7 @@ Thread.defaultProps = {
     composerAttachmentsDetailsMode: 'auto',
     domain: [],
     hasComposer: false,
+    hasMessageCheckbox: false,
     hasSquashCloseMessages: false,
     haveMessagesAuthorRedirect: false,
     haveMessagesMarkAsReadIcon: false,
@@ -207,6 +208,7 @@ Thread.props = {
         type: Boolean,
         optional: true,
     },
+    hasMessageCheckbox: Boolean,
     hasSquashCloseMessages: {
         type: Boolean,
     },

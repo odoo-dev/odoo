@@ -31,7 +31,7 @@ const DiscussWidget = AbstractAction.extend({
 
         // render buttons in control panel
         this.$buttons = $(qweb.render('mail.widget.DiscussControlButtons'));
-        this.$buttons.find('button').css({ display:'inline-block' });
+        this.$buttons.find('button').css({ display: 'inline-block' });
         this.$buttons.on('click', '.o_invite', ev => this._onClickInvite(ev));
         this.$buttons.on('click', '.o_widget_Discuss_controlPanelButtonMarkAllRead',
             ev => this._onClickMarkAllAsRead(ev)
@@ -39,6 +39,11 @@ const DiscussWidget = AbstractAction.extend({
         this.$buttons.on('click', '.o_mobile_new_channel', ev => this._onClickMobileNewChannel(ev));
         this.$buttons.on('click', '.o_mobile_new_message', ev => this._onClickMobileNewMessage(ev));
         this.$buttons.on('click', '.o_unstar_all', ev => this._onClickUnstarAll(ev));
+        this.$buttons.on('click', '.o_widget_Discuss_controlPanelButtonSelectAll', ev => this._onClickSelectAll(ev));
+        this.$buttons.on('click', '.o_widget_Discuss_controlPanelButtonUnselectAll', ev => this._onClickUnselectAll(ev));
+        this.$buttons.on('click', '.o_widget_Discuss_controlPanelButtonModeration.o-accept', ev => this._onClickModerationAccept(ev));
+        this.$buttons.on('click', '.o_widget_Discuss_controlPanelButtonModeration.o-discard', ev => this._onClickModerationDiscard(ev));
+        this.$buttons.on('click', '.o_widget_Discuss_controlPanelButtonModeration.o-reject', ev => this._onClickModerationReject(ev));
 
         // control panel attributes
         this.action = action;
@@ -173,6 +178,9 @@ const DiscussWidget = AbstractAction.extend({
         const isMobile = this.component.storeProps.isMobile;
         const activeThread = this.component.storeProps.activeThread;
         const activeMobileNavbarTabId = this.component.storeProps.activeMobileNavbarTabId;
+        const checkedMessageLocalIds = this.component.storeProps.checkedMessageLocalIds;
+        const uncheckedMessageLocalIds = this.component.storeProps.uncheckedMessageLocalIds;
+
         // Invite
         if (activeThread && activeThread.channel_type === 'channel') {
             this.$buttons.find('.o_invite').removeClass('o_hidden');
@@ -230,6 +238,30 @@ const DiscussWidget = AbstractAction.extend({
             }
             this._setTitle(title);
         }
+        // Select All & Unselect All
+        const $selectAll = this.$buttons.find('.o_widget_Discuss_controlPanelButtonSelectAll');
+        const $unselectAll = this.$buttons.find('.o_widget_Discuss_controlPanelButtonUnselectAll');
+        if (checkedMessageLocalIds.length > 0 || uncheckedMessageLocalIds.length > 0) {
+            $selectAll.removeClass('o_hidden');
+            $selectAll.toggleClass('disabled', uncheckedMessageLocalIds.length === 0);
+            $unselectAll.removeClass('o_hidden');
+            $unselectAll.toggleClass('disabled', checkedMessageLocalIds.length === 0);
+        } else {
+            $selectAll.addClass('o_hidden');
+            $selectAll.addClass('disabled');
+            $unselectAll.addClass('o_hidden');
+            $unselectAll.addClass('disabled');
+        }
+        // Moderation Actions
+        const $moderationButtons = this.$buttons.find('.o_widget_Discuss_controlPanelButtonModeration');
+        const nonModerableMessageLocalIds = checkedMessageLocalIds.filter(messageLocalId =>
+            !this.env.store.getters.isMessageModeratedByUser(messageLocalId)
+        );
+        if (checkedMessageLocalIds.length > 0 && nonModerableMessageLocalIds.length === 0) {
+            $moderationButtons.removeClass('o_hidden');
+        } else {
+            $moderationButtons.addClass('o_hidden');
+        }
         this.updateControlPanel({
             cp_content: {
                 $buttons: this.$buttons,
@@ -267,6 +299,53 @@ const DiscussWidget = AbstractAction.extend({
      */
     _onClickMobileNewMessage() {
         this.component.doMobileNewMessage();
+    },
+    /**
+     * @private
+     */
+    _onClickModerationAccept() {
+        this.env.store.dispatch('moderateMessages',
+            this.component.storeProps.checkedMessageLocalIds,
+            'accept'
+        );
+    },
+    /**
+     * @private
+     */
+    _onClickModerationDiscard() {
+        this.component.state.hasModerationDiscardDialog = true;
+    },
+    /**
+     * @private
+     */
+    _onClickModerationReject() {
+        this.component.state.hasModerationRejectDialog = true;
+    },
+    /**
+     * @private
+     */
+    _onClickSelectAll() {
+        this.env.store.dispatch('setMessagesCheck',
+            this.component.storeProps.uncheckedMessageLocalIds,
+            this.component.storeProps.activeThread.localId,
+            this.component.storeProps.stringifiedDomain,
+            {
+                checkValue: true,
+            },
+        );
+    },
+    /**
+     * @private
+     */
+    _onClickUnselectAll() {
+        this.env.store.dispatch('setMessagesCheck',
+            this.component.storeProps.checkedMessageLocalIds,
+            this.component.storeProps.activeThread.localId,
+            this.component.storeProps.stringifiedDomain,
+            {
+                checkValue: false,
+            },
+        );
     },
     /**
      * @private

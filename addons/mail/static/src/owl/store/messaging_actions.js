@@ -775,6 +775,30 @@ const actions = {
         thread.message_unread_counter = 0;
     },
     /**
+     * Applies the moderation `decision` on the messages in `messageLocalIds`.
+     *
+     * @private
+     * @param {Object} param0
+     * @param {Object} param0.env
+     * @param {Object} param0.state
+     * @param {string[]} messageLocalIds
+     * @param {string} decision: 'accept', 'allow', ban', 'discard', or 'reject'
+     * @param {Object|undefined} [kwargs] optional data to pass on
+     *  message moderation. This is provided when rejecting the messages
+     *  for which title and comment give reason(s) for reject.
+     * @param {string} [kwargs.title]
+     * @param {string} [kwargs.comment]
+     */
+    async moderateMessages({ env, state }, messageLocalIds, decision, kwargs) {
+        const messageIds = messageLocalIds.map(localId => state.messages[localId].id);
+        return env.rpc({
+            model: 'mail.message',
+            method: 'moderate',
+            args: [messageIds, decision],
+            kwargs: kwargs,
+        });
+    },
+    /**
      * Opens an existing or new chat with the given partner.
      *
      * @param {Object} param0
@@ -1166,6 +1190,38 @@ const actions = {
      */
     setChatWindowManagerNotifiedAutofocusCounter({ dispatch }, notifiedAutofocusCounter) {
         dispatch('_updateChatWindowManager', { notifiedAutofocusCounter });
+    },
+    /**
+     * Checks or unchecks the given messages in the context of the current
+     * thread (based on stringifiedDomain).
+     *
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string[]} messageLocalIds
+     * @param {string} threadLocalId
+     * @param {string} stringifiedDomain
+     * @param {Object} param4
+     * @param {boolean} param4.checkValue
+     */
+    setMessagesCheck({ state }, messageLocalIds, threadLocalId, stringifiedDomain, { checkValue }) {
+        const thread = state.threads[threadLocalId];
+        const threadCacheLocalId = thread.cacheLocalIds[stringifiedDomain];
+        const threadCache = state.threadCaches[threadCacheLocalId];
+
+        for (const messageLocalId of messageLocalIds) {
+            const index = threadCache.checkedMessageLocalIds.findIndex(
+                localId => localId === messageLocalId
+            );
+            if (checkValue) {
+                if (index === -1) {
+                    threadCache.checkedMessageLocalIds.push(messageLocalId);
+                }
+            } else {
+                if (index !== -1) {
+                    threadCache.checkedMessageLocalIds.splice(index, 1);
+                }
+            }
+        }
     },
     /**
      * Shift provided chat window to the left on screen.
@@ -1746,9 +1802,7 @@ const actions = {
     ) {
         const messageLocalId = `mail.message_${id}`;
         if (state.messages[messageLocalId]) {
-            // message already exists in store
-            console.warn(`${messageLocalId} already exists in store`);
-            return;
+            throw new Error(`${messageLocalId} already exists in store`);
         }
         // 1. make message
         const message = {
@@ -2095,6 +2149,7 @@ const actions = {
         { stringifiedDomain='[]', threadLocalId }
     ) {
         const threadCache = {
+            checkedMessageLocalIds: [],
             currentPartnerMessagePostCounter: 0,
             isAllHistoryLoaded: false,
             isLoaded: false,
@@ -2352,6 +2407,7 @@ const actions = {
      * @param {Object} param0
      * @param {function} param0.dispatch
      * @param {Object} param0.env
+     * @param {Object} param0.getters
      * @param {Object} param0.state
      * @param {Object} param1
      * @param {integer} param1.channelId
@@ -2360,9 +2416,7 @@ const actions = {
      * @param {integer} param1.data.author_id[0]
      * @param {integer[]} param1.data.channel_ids
      */
-    async _handleNotificationChannelMessage(
-        { dispatch, env, state },
-        param1) {
+    async _handleNotificationChannelMessage({ dispatch, env, getters, state }, param1) {
         const channelId = param1.channelId;
         const data = Object.assign({}, param1);
         delete data.channelId;
@@ -2373,8 +2427,28 @@ const actions = {
         if (channel_ids.length === 1) {
             await dispatch('joinChannel', channel_ids[0]);
         }
-        const messageLocalId = dispatch('_createMessage', data);
+        const oldMessage = state.messages[`mail.message_${data.id}`];
+        const oldModerationStatus = oldMessage ? oldMessage.moderation_status : '';
+        const messageLocalId = dispatch('_insertMessage', data);
         const message = state.messages[messageLocalId];
+
+        if (oldMessage) {
+            if (
+                oldModerationStatus === 'pending_moderation' &&
+                message.moderation_status !== 'pending_moderation' &&
+                getters.isThreadModeratedByUser(message.originThreadLocalId)
+            ) {
+                const moderation = state.threads['mail.box_moderation'];
+                if (moderation) {
+                    moderation.counter -= 1;
+                    dispatch('_unlinkMessageFromThread', {
+                        messageLocalId,
+                        threadLocalId: 'mail.box_moderation',
+                    });
+                }
+            }
+            return;
+        }
         for (const threadLocalId of message.threadLocalIds) {
             const thread = state.threads[threadLocalId];
             if (thread._model === 'mail.channel') {
@@ -2473,30 +2547,22 @@ const actions = {
             type,
         } = data;
         if (type === 'activity_updated') {
+            console.warn('activity_updated not handled', data);
             /**
              * data.activity_created
              * data.activity_deleted
              */
             return; // disabled
         } else if (type === 'author') {
-            /**
-             * data.message
-             */
-            return; // disabled
+            return dispatch('_handleNotificationPartnerAuthor', data);
         } else if (type === 'deletion') {
-            /**
-             * data.message_ids
-             */
-            return; // disabled
+            return dispatch('_handleNotificationPartnerDeletion', data);
         } else if (type === 'mail_failure') {
             return dispatch('_handleNotificationPartnerMailFailure', data.elements);
         } else if (type === 'mark_as_read') {
             return dispatch('_handleNotificationPartnerMarkAsRead', data);
         } else if (type === 'moderator') {
-            /**
-             * data.message
-             */
-            return; // disabled
+            return dispatch('_handleNotificationPartnerModerator', data);
         } else if (type === 'toggle_star') {
             return dispatch('_handleNotificationPartnerToggleStar', data);
         } else if (info === 'transient_message') {
@@ -2508,6 +2574,16 @@ const actions = {
         } else {
             return dispatch('_handleNotificationPartnerChannel', data);
         }
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} data
+     * @param {Object} data.message
+     */
+    _handleNotificationPartnerAuthor({ dispatch }, data) {
+        dispatch('_insertMessage', data.message);
     },
     /**
      * @private
@@ -2564,6 +2640,32 @@ const actions = {
             }
         }
     },
+
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.getters
+     * @param {Object} param0.state
+     * @param {Object} data
+     * @param {integer[]} data.message_ids
+     */
+    _handleNotificationPartnerDeletion({ dispatch, getters, state }, data) {
+        for (const id of data.message_ids) {
+            const messageLocalId = `mail.message_${id}`;
+            const message = state.messages[messageLocalId];
+            if (
+                message && message.moderation_status === 'pending_moderation' &&
+                getters.isThreadModeratedByUser(message.originThreadLocalId)
+            ) {
+                const moderation = state.threads['mail.box_moderation'];
+                if (moderation) {
+                    moderation.counter -= 1;
+                }
+            }
+            dispatch('deleteMessage', messageLocalId);
+        }
+    },
     /**
      * @private
      * @param {Object} unused
@@ -2618,6 +2720,25 @@ const actions = {
             mailChannel.message_needaction_counter = 0;
         }
         inbox.counter -= message_ids.length;
+    },
+    /**
+     * @private
+     * @param {Object} param0
+     * @param {function} param0.dispatch
+     * @param {Object} param0.state
+     * @param {Object} data
+     * @param {Object} data.message
+     */
+    _handleNotificationPartnerModerator({ dispatch, state }, data) {
+        const messageLocalId = dispatch('_insertMessage', data.message);
+        const moderation = state.threads['mail.box_moderation'];
+        if (moderation) {
+            moderation.counter += 1;
+            dispatch('_linkMessageToThread', {
+                messageLocalId,
+                threadLocalId: 'mail.box_moderation',
+            });
+        }
     },
     /**
      * @private
@@ -2844,9 +2965,10 @@ const actions = {
         dispatch('_initMessagingCommands', commands);
         dispatch('_initMessagingMailboxes', {
             is_moderator,
+            moderation_channel_ids,
             moderation_counter,
             needaction_inbox_counter,
-            starred_counter
+            starred_counter,
         });
         dispatch('_initMessagingMailFailures', mail_failures);
         dispatch('_initMessagingCannedResponses', shortcodes);
@@ -2950,6 +3072,7 @@ const actions = {
      * @param {Object} param0.state
      * @param {Object} param1
      * @param {boolean} param1.is_moderator
+     * @param {integer} param1.moderation_channel_ids
      * @param {integer} param1.moderation_counter
      * @param {integer} param1.needaction_inbox_counter
      * @param {integer} param1.starred_counter
@@ -2958,6 +3081,7 @@ const actions = {
         { dispatch, state },
         {
             is_moderator,
+            moderation_channel_ids,
             moderation_counter,
             needaction_inbox_counter,
             starred_counter
@@ -2970,8 +3094,15 @@ const actions = {
                 _model: 'mail.box',
                 counter: moderation_counter,
                 id: 'moderation',
-                name: _t("Moderate Messages"),
+                name: _t("Moderation"),
             });
+        }
+        for (const threadId of moderation_channel_ids) {
+            const threadLocalId = dispatch('insertThread', {
+                _model: 'mail.channel',
+                id: threadId,
+            });
+            state.moderatedChannelLocalIds.push(threadLocalId);
         }
     },
     /**
@@ -3276,6 +3407,10 @@ const actions = {
             newMessageLocalIds.push(messageLocalId);
         }
         thread.messageLocalIds = newMessageLocalIds;
+        for (const threadCacheDomain in thread.cacheLocalIds) {
+            const threadCacheLocalId = thread.cacheLocalIds[threadCacheDomain];
+            dispatch('_linkMessageToThreadCache', { messageLocalId, threadCacheLocalId });
+        }
     },
     /**
      * @private
@@ -3881,14 +4016,14 @@ const actions = {
         { messageLocalId, threadLocalId }
     ) {
         const thread = state.threads[threadLocalId];
-        if (!thread.messageLocalIds.includes(messageLocalId)) {
-            return;
-        }
         for (const threadCacheLocalId of Object.values(thread.cacheLocalIds)) {
             dispatch('_unlinkMessageFromThreadCache', {
                 messageLocalId,
                 threadCacheLocalId,
             });
+        }
+        if (!thread.messageLocalIds.includes(messageLocalId)) {
+            return;
         }
         thread.messageLocalIds = thread.messageLocalIds.filter(localId =>
             localId !== messageLocalId);
