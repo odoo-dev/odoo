@@ -22,20 +22,41 @@ class Chatter extends Component {
             const chatter = state.chatters[props.chatterLocalId];
             const threadLocalId = chatter.threadLocalId;
             const thread = threadLocalId ? state.threads[threadLocalId] : undefined;
+            let attachments;
             if (thread) {
-                const attachments = thread.attachmentLocalIds.map(attachmentLocalId =>
+                attachments = thread.attachmentLocalIds.map(attachmentLocalId =>
                     state.attachments[attachmentLocalId]
                 );
-                if (this.props.formRendererBus) {
-                    this.props.formRendererBus.trigger('o-chatter-use-store-thread-and-attachments', {
-                        attachments,
-                        threadLocalId
-                    });
-                }
             }
-            return { chatter, thread };
+            return { attachments, chatter, thread };
         });
         this._threadRef = useRef('thread');
+    }
+
+    mounted() {
+        if (this.props.formRendererBus && this.storeProps.thread) {
+            this._notifyRendered();
+        }
+    }
+
+    patched() {
+        if (this.props.formRendererBus && this.storeProps.thread) {
+            this._notifyRendered();
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _notifyRendered() {
+        this.props.formRendererBus.trigger('o-chatter-rendered', {
+            attachments: this.storeProps.attachments,
+            threadLocalId: this.storeProps.thread.localId,
+        });
     }
 
     //--------------------------------------------------------------------------

@@ -54,7 +54,7 @@ FormRenderer.include({
         // Do not load chatter in form view dialogs
         this._isFromFormViewDialog = params.isFromFormViewDialog;
 
-        this._chatterBus.on('o-chatter-use-store-thread-and-attachments', this, (...args) => {
+        this._chatterBus.on('o-chatter-rendered', this, (...args) => {
             this._onChatterUseStoreThreadAndAttachments(...args);
         });
     },
