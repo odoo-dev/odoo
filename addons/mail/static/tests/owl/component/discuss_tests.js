@@ -4049,6 +4049,119 @@ QUnit.test('receive new channel messages: out of odoo focus (tab title)', async 
     assert.verifySteps(['set_title_part']);
 });
 
+QUnit.test('auto-focus composer on opening thread', async function (assert) {
+    assert.expect(14);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 20,
+                message_unread_counter: 0,
+                name: "General",
+            }],
+            channel_direct_message: [{
+                channel_type: "chat",
+                direct_partner: [{
+                    id: 7,
+                    name: "Demo User",
+                }],
+                id: 10,
+                message_unread_counter: 0,
+            }],
+        },
+    });
+    await this.start();
+    assert.strictEqual(
+        document.querySelectorAll(
+            `.o_DiscussSidebar_item[data-thread-name="Inbox"]`
+        ).length,
+        1,
+        "should have mailbox 'Inbox' in the sidebar"
+    );
+    assert.ok(
+        document.querySelector(
+            `.o_DiscussSidebar_item[data-thread-name="Inbox"]`
+        ).classList.contains('o-active'),
+        "mailbox 'Inbox' should be active initially"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(
+            `.o_DiscussSidebar_item[data-thread-name="General"]`
+        ).length,
+        1,
+        "should have channel 'General' in the sidebar"
+    );
+    assert.notOk(
+        document.querySelector(
+            `.o_DiscussSidebar_item[data-thread-name="General"]`
+        ).classList.contains('o-active'),
+        "channel 'General' should not be active initially"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(
+            `.o_DiscussSidebar_item[data-thread-name="Demo User"]`
+        ).length,
+        1,
+        "should have chat 'Demo User' in the sidebar"
+    );
+    assert.notOk(
+        document.querySelector(
+            `.o_DiscussSidebar_item[data-thread-name="Demo User"]`
+        ).classList.contains('o-active'),
+        "chat 'Demo User' should not be active initially"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Composer`).length,
+        0,
+        "there should be no composer when active thread of discuss is mailbox 'Inbox'"
+    );
+
+    document.querySelector(`.o_DiscussSidebar_item[data-thread-name="General"]`).click();
+    await afterNextRender();
+    assert.ok(
+        document.querySelector(
+            `.o_DiscussSidebar_item[data-thread-name="General"]`
+        ).classList.contains('o-active'),
+        "channel 'General' should become active after selecting it from the sidebar"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Composer`).length,
+        1,
+        "there should be a composer when active thread of discuss is channel 'General'"
+    );
+    assert.strictEqual(
+        document.activeElement,
+        document.querySelector(`.o_ComposerTextInput_textarea`),
+        "composer of channel 'General' should be automatically focused on opening"
+    );
+
+    document.querySelector(`.o_ComposerTextInput_textarea`).blur();
+    assert.notOk(
+        document.activeElement === document.querySelector(`.o_ComposerTextInput_textarea`),
+        "composer of channel 'General' should no longer focused on click away"
+    );
+
+    document.querySelector(`.o_DiscussSidebar_item[data-thread-name="Demo User"]`).click();
+    await afterNextRender();
+    assert.ok(
+        document.querySelector(
+            `.o_DiscussSidebar_item[data-thread-name="Demo User"]`
+        ).classList.contains('o-active'),
+        "chat 'Demo User' should become active after selecting it from the sidebar"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Composer`).length,
+        1,
+        "there should be a composer when active thread of discuss is chat 'Demo User'"
+    );
+    assert.strictEqual(
+        document.activeElement,
+        document.querySelector(`.o_ComposerTextInput_textarea`),
+        "composer of chat 'Demo User' should be automatically focused on opening"
+    );
+});
+
 });
 });
 });

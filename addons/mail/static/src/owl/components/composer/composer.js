@@ -51,6 +51,8 @@ class Composer extends Component {
          * should auto focus this composer when patched.
          */
         this._focusCount = 0;
+        // to focus if the prop changes
+        this._lastComposerLocalId = this.props.composerLocalId;
         this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);
     }
 
@@ -62,6 +64,15 @@ class Composer extends Component {
     }
 
     patched() {
+        // focus when changing composer
+        if (
+            this.props.isFocusOnMount &&
+            this._lastComposerLocalId !== this.props.composerLocalId
+        ) {
+            this.focus();
+        }
+        this._lastComposerLocalId = this.props.composerLocalId;
+        // focus requested by parent
         if (this._focusCount !== this.props.focusCounter) {
             this.focus();
         }
