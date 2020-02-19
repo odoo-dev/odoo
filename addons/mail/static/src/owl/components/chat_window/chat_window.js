@@ -263,26 +263,33 @@ class ChatWindow extends Component {
     }
 
     /**
-     * Prevent auto-focus of fuzzy search in the home menu.
-     * Useful in order to allow copy/paste content inside chat window with
-     * CTRL-C & CTRL-V when on the home menu.
-     *
      * @private
      * @param {KeyboardEvent} ev
      */
     _onKeydown(ev) {
+        /**
+         * Prevent auto-focus of fuzzy search in the home menu.
+         * Useful in order to allow copy/paste content inside chat window with
+         * CTRL-C & CTRL-V when on the home menu.
+         */
         ev.stopPropagation();
-        if (ev.key === 'Tab') {
-            ev.preventDefault();
-            if (ev.shiftKey) {
-                this.trigger('o-focus-previous-chat-window', {
-                    currentChatWindowLocalId: this.props.chatWindowLocalId,
-                });
-            } else {
-                this.trigger('o-focus-next-chat-window', {
-                    currentChatWindowLocalId: this.props.chatWindowLocalId,
-                });
-            }
+        switch (ev.key) {
+            case 'Tab':
+                ev.preventDefault();
+                if (ev.shiftKey) {
+                    this.trigger('o-focus-previous-chat-window', {
+                        currentChatWindowLocalId: this.props.chatWindowLocalId,
+                    });
+                } else {
+                    this.trigger('o-focus-next-chat-window', {
+                        currentChatWindowLocalId: this.props.chatWindowLocalId,
+                    });
+                }
+                break;
+            case 'Escape':
+                ev.preventDefault();
+                this.storeDispatch('closeChatWindow', this.props.chatWindowLocalId);
+                break;
         }
     }
 

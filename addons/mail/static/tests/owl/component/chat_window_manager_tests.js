@@ -493,6 +493,59 @@ QUnit.test('chat window: open / close', async function (assert) {
     assert.verifySteps(['rpc:channel_minimize']);
 });
 
+QUnit.test('chat window: close on ESCAPE', async function (assert) {
+    assert.expect(4);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: 'channel',
+                id: 20,
+                is_minimized: false,
+                name: "General",
+                state: 'open',
+                uuid: 'channel-20-uuid',
+            }],
+        },
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'channel_fetch_preview') {
+                return [{
+                    id: 20,
+                    last_message: {
+                        author_id: [7, "Demo"],
+                        body: "<p>test</p>",
+                        channel_ids: [20],
+                        id: 100,
+                        message_type: 'comment',
+                        model: 'mail.channel',
+                        res_id: 20,
+                    },
+                }];
+            } else if (args.method === 'channel_fold') {
+                assert.step(`rpc:channel_fold/${args.kwargs.state}`);
+                return [];
+            } else if (args.method === 'channel_minimize') {
+                assert.step('rpc:channel_minimize');
+                return [];
+            }
+            return this._super(...arguments);
+        },
+    });
+    document.querySelector(`.o_MessagingMenu_toggler`).click();
+    await afterNextRender();
+    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_ThreadPreviewList_preview`).click();
+    await afterNextRender();
+    assert.verifySteps(['rpc:channel_minimize']);
+
+    document.querySelector(`.o_ChatWindow`).focus();
+    const kevt = new window.KeyboardEvent('keydown', { bubbles: true, key: "Escape" });
+    document.querySelector(`.o_ChatWindow`).dispatchEvent(kevt);
+    await afterNextRender();
+    assert.verifySteps(['rpc:channel_fold/closed']);
+});
+
 QUnit.test('chat window: state conservation on toggle home menu', async function (assert) {
     assert.expect(9);
 
