@@ -14,19 +14,18 @@ $enable-deprecation-messages: false !default;
     @return o-get-most-contrast($color, $light, $dark, $background, $threshold, $cross-mix);
 }
 
-@mixin o-bg-color($color, $text-color: null, $with-muted: true) {
+@mixin o-bg-color($color, $text-color: null, $with-muted: true, $important: true) {
     @if ($color) {
         $-yiq-color: if($text-color, $text-color, color-yiq($color));
-        background-color: $color !important;
+        background-color: $color#{if($important, ' !important', '')};
         color: $-yiq-color; // not important so that text utilities still work
 
         @if ($with-muted) {
             .text-muted {
-                color: rgba($-yiq-color, 0.4) !important;
+                // Always important since the basic BS rule is important
+                color: rgba($-yiq-color, 0.6) !important;
             }
         }
-
-        @include o-bg-color-extension($color, $text-color, $with-muted);
     }
 }
 

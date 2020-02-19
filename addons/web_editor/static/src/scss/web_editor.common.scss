@@ -517,3 +517,101 @@ blockquote {
     border-left: 5px solid $gray-300;
     font-style: italic
 }
+
+// Bg/text color classes generation
+@for $index from 1 through length($o-color-combinations) {
+    $config: nth($o-color-combinations, $index);
+    $-bg: map-get($config, 'bg');
+    $-text: map-get($config, 'text');
+    $-headings: map-get($config, 'headings');
+    $-h2: map-get($config, 'h2');
+    $-h3: map-get($config, 'h3');
+    $-h4: map-get($config, 'h4');
+    $-h5: map-get($config, 'h5');
+    $-h6: map-get($config, 'h6');
+    $-link: map-get($config, 'link');
+    $-btn-primary: map-get($config, 'btn-primary');
+    $-btn-primary-border: map-get($config, 'btn-primary-border');
+    $-btn-secondary: map-get($config, 'btn-secondary');
+    $-btn-secondary-border: map-get($config, 'btn-secondary-border');
+
+    // Those color classes color multiple elements when applied on a snippet.
+    // Those rules are not important so that they can be overridden through
+    // bg and text utility classes. **
+    .o_cc#{$index} {
+        // Allow presets to work inside presets for 3 levels (unfortunately need
+        // the use of an extra class on all levels to reduce css and because a
+        // preset will be possible to apply through css-only).
+        &, .o_cc &, .o_cc .o_cc & {
+            // Background & Text
+            @include o-bg-color(o-color($-bg), o-color($-text), $important: false);
+
+            // Headings
+            h1, h2, h3, h4, h5, h6 {
+                // 'inherit' so that the default color is the same as the text one
+                // of this preset (otherwise it would be the headings color when
+                // there is no preset, which can be chosen by the users).
+                color: o-color($-headings) or inherit;
+            }
+            h2, h3, h4, h5, h6 {
+                color: o-color($-h2);
+            }
+            h3, h4, h5, h6 {
+                color: o-color($-h3);
+            }
+            h4, h5, h6 {
+                color: o-color($-h4);
+            }
+            h5, h6 {
+                color: o-color($-h5);
+            }
+            h6 {
+                color: o-color($-h6);
+            }
+
+            // Links
+            $-link-color: if($-link, o-color($-link), theme-color('primary'));
+            $-link-hover-color: darken($-link-color, 15%);
+            a:not(.btn), .btn-link {
+                color: $-link-color;
+
+                @include hover {
+                    color: $-link-hover-color;
+                }
+            }
+
+            // Buttons
+
+            // Primary
+            $-btn-primary-color: if($-btn-primary, o-color($-btn-primary), theme-color('primary'));
+            $-btn-primary-border-color: if($-btn-primary-border, o-color($-btn-primary-border), $-btn-primary-color);
+            .btn-fill-primary {
+                @include button-variant($-btn-primary-color, $-btn-primary-border-color);
+            }
+            .btn-outline-primary {
+                @include button-outline-variant($-btn-primary-border-color);
+            }
+
+            // Secondary
+            $-btn-secondary-color: if($-btn-secondary, o-color($-btn-secondary), theme-color('secondary'));
+            $-btn-secondary-border-color: if($-btn-secondary-border, o-color($-btn-secondary-border), $-btn-secondary-color);
+            .btn-fill-secondary {
+                @include button-variant($-btn-secondary-color, $-btn-secondary-border-color);
+            }
+            .btn-outline-secondary {
+                @include button-outline-variant($-btn-secondary-border-color);
+            }
+
+            // 'Active' states. Note: this only emulates very common components
+            // used in snippets. This might need to be more complexe the day we
+            // can apply color combinations anywhere (page-item, dropdown, ...).
+            .nav-pills {
+                .nav-link.active,
+                .show > .nav-link {
+                    background-color: $-btn-primary-color;
+                    color: color-yiq($-btn-primary-color);
+                }
+            }
+        }
+    }
+}
