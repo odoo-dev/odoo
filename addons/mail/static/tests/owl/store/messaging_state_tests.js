@@ -114,7 +114,6 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                 activeMobileNavbarTabId: 'mailbox',
                 activeThreadLocalId: undefined,
                 domain: [],
-                inboxMarkAsReadCounter: 0,
                 isOpen: false,
                 menu_id: false,
                 stringifiedDomain: '[]',

@@ -79,19 +79,11 @@ class Discuss extends Component {
                 isMobile: state.isMobile,
             });
         });
+        this._updateLocalStoreProps();
         /**
          * Value that is used to create a channel from the sidebar.
          */
         this._addingChannelValue = "";
-        /**
-         * Locally tracked store props `activeThreadCacheLocalId`.
-         * Useful to-set scroll position from last stored one.
-         */
-        this._activeThreadCacheLocalId = null;
-        /**
-         * Locally tracked store props `inboxMarkAsReadCounter`.
-         */
-        this._inboxMarkAsReadCounter = 0;
         /**
          * Reference of the composer that is used to reply to messages from
          * inbox. Useful to auto-set focus when starting reply operation.
@@ -116,13 +108,6 @@ class Discuss extends Component {
             isReplyingToMessage: false,
             replyingToMessageCounter: 0,
         };
-        /**
-         * Determine whether messaging was ready before previous mounted/patched
-         * of discuss. Useful to delay opening thread when messaging is not yet
-         * ready. This is important because data on thread may require messaging
-         * to be ready.
-         */
-        this._wasMessagingReady = false;
 
         // bind since passed as props
         this._onAddChannelAutocompleteSelect = this._onAddChannelAutocompleteSelect.bind(this);
@@ -148,8 +133,7 @@ class Discuss extends Component {
                 resetDiscussDomain: true,
             });
         }
-        this._activeThreadCacheLocalId = this.storeProps.activeThreadCacheLocalId;
-        this._wasMessagingReady = this.storeProps.isMessagingReady;
+        this._updateLocalStoreProps();
     }
 
     /**
@@ -190,7 +174,11 @@ class Discuss extends Component {
         this.trigger('o-push-state-action-manager', {
             activeThreadLocalId: this.storeProps.activeThreadLocalId,
         });
-        if (this._inboxMarkAsReadCounter < this.storeProps.inboxMarkAsReadCounter) {
+        if (
+            this.storeProps.activeThread.localId === 'mail.box_inbox' &&
+            this._lastActiveThreadCacheLocalId === this.storeProps.activeThreadCacheLocalId &&
+            this._lastActiveThreadCounter > 0 && this.storeProps.activeThreadCounter === 0
+        ) {
             this.trigger('o-show-rainbow-man');
         }
         if (!this._wasMessagingReady && this.storeProps.isMessagingReady) {
@@ -198,10 +186,8 @@ class Discuss extends Component {
                 resetDiscussDomain: true,
             });
         }
-        this._activeThreadCacheLocalId = this.storeProps.activeThreadCacheLocalId;
-        this._inboxMarkAsReadCounter = this.storeProps.inboxMarkAsReadCounter;
         this._willPatchSnapshot = {};
-        this._wasMessagingReady = this.storeProps.isMessagingReady;
+        this._updateLocalStoreProps();
     }
 
     willUnmount() {
@@ -322,6 +308,29 @@ class Discuss extends Component {
             activeThreadLocalId: threadLocalId,
         });
         this.storeDispatch('openThread', threadLocalId);
+    }
+    /**
+     * @private
+     */
+    _updateLocalStoreProps() {
+        /**
+         * Locally tracked store props `activeThreadCacheLocalId`.
+         * Useful to set scroll position from last stored one and to display
+         * rainbox man on inbox.
+         */
+        this._lastActiveThreadCacheLocalId = this.storeProps.activeThreadCacheLocalId;
+        /**
+         * Locally tracked store props `activeThreadCounter`.
+         * Useful to display the rainbow man on inbox.
+         */
+        this._lastActiveThreadCounter = this.storeProps.activeThreadCounter;
+        /**
+         * Determine whether messaging was ready before previous mounted/patched
+         * of discuss. Useful to delay opening thread when messaging is not yet
+         * ready. This is important because data on thread may require messaging
+         * to be ready.
+         */
+        this._wasMessagingReady = this.storeProps.isMessagingReady;
     }
 
     //--------------------------------------------------------------------------

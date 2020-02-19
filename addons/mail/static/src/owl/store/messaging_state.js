@@ -128,12 +128,6 @@ function initState() {
              */
             domain: [],
             /**
-             * Amount of times "mark as read" from the control panel has been
-             * clicked by user while discuss app is open. This is used to
-             * display rainbow man.
-             */
-            inboxMarkAsReadCounter: 0,
-            /**
              * Whether the discuss app is open or not. Useful to determine
              * whether the discuss or chat window logic should be applied.
              */

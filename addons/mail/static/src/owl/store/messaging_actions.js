@@ -724,9 +724,6 @@ const actions = {
                 domain
             }
         });
-        if (state.discuss.isOpen) {
-            state.discuss.inboxMarkAsReadCounter++;
-        }
     },
     /**
      * Mark all specified messages as read.
