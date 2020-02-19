@@ -720,7 +720,6 @@ const actions = {
             model: 'mail.message',
             method: 'mark_all_as_read',
             kwargs: {
-                channel_ids: [],
                 domain
             }
         });

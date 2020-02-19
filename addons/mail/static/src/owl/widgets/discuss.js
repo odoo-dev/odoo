@@ -33,7 +33,9 @@ const DiscussWidget = AbstractAction.extend({
         this.$buttons = $(qweb.render('mail.widget.DiscussControlButtons'));
         this.$buttons.find('button').css({ display:'inline-block' });
         this.$buttons.on('click', '.o_invite', ev => this._onClickInvite(ev));
-        this.$buttons.on('click', '.o_mark_all_read', ev => this._onClickMarkAllAsRead(ev));
+        this.$buttons.on('click', '.o_widget_Discuss_controlPanelButtonMarkAllRead',
+            ev => this._onClickMarkAllAsRead(ev)
+        );
         this.$buttons.on('click', '.o_mobile_new_channel', ev => this._onClickMobileNewChannel(ev));
         this.$buttons.on('click', '.o_mobile_new_message', ev => this._onClickMobileNewMessage(ev));
         this.$buttons.on('click', '.o_unstar_all', ev => this._onClickUnstarAll(ev));
@@ -179,14 +181,14 @@ const DiscussWidget = AbstractAction.extend({
         }
         // Mark All Read
         if (activeThreadLocalId === 'mail.box_inbox') {
-            this.$buttons.find('.o_mark_all_read').removeClass('o_hidden')
+            this.$buttons.find('.o_widget_Discuss_controlPanelButtonMarkAllRead').removeClass('o_hidden')
                 .prop('disabled', !hasMessages);
         }
         if (
             activeThreadLocalId !== 'mail.box_inbox' ||
             activeMobileNavbarTabId !== 'mailbox'
         ) {
-            this.$buttons.find('.o_mark_all_read').addClass('o_hidden');
+            this.$buttons.find('.o_widget_Discuss_controlPanelButtonMarkAllRead').addClass('o_hidden');
         }
         // Unstar All
         if (activeThreadLocalId === 'mail.box_starred') {

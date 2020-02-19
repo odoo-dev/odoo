@@ -362,11 +362,6 @@ MailManager.include({
                     channel.decrementNeedactionCounter(data.message_ids.length, 0);
                 }
             });
-        } else {
-            // if no channel_ids specified, this is a 'mark all read' in inbox
-            _.each(this.getChannels(), function (channel) {
-                channel.resetNeedactionCounter();
-            });
         }
         var inbox = this.getMailbox('inbox');
         inbox.decrementMailboxCounter(data.message_ids.length);

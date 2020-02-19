@@ -338,12 +338,6 @@ var Channel = SearchableThread.extend(ThreadTypingMixin, {
         this._detached = 'detached' in params ? params.detached : this._detached;
         this._warnUpdatedWindowState();
     },
-    /**
-     * Reset the needaction counter to 0.
-     */
-    resetNeedactionCounter: function () {
-        this._needactionCounter = 0;
-    },
 
     //--------------------------------------------------------------------------
     // Private

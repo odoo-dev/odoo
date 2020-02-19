@@ -3807,6 +3807,104 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
     );
 });
 
+
+QUnit.test('all messages in "Inbox" in "History" after marked all as read', async function (assert) {
+    assert.expect(10);
+
+    const self = this;
+    const messagesData = [];
+    const messageOffset = 200;
+    const partnerOffset = 100;
+    for (let i = messageOffset; i < messageOffset + 40; i++) {
+        messagesData.push({
+            author_id: [partnerOffset + i, 'User ' + (partnerOffset + i)],
+            body: '<p>test ' + i + '</p>',
+            id: i,
+            needaction: true,
+            needaction_partner_ids: [3],
+        });
+    }
+
+    this.data['mail.message'].records = messagesData;
+
+    let messageFetchCount = 0;
+    const initDef = makeTestPromise();
+    const markAllReadDef = makeTestPromise();
+    const clickHistoryDef = makeTestPromise();
+    const loadMoreDef = makeTestPromise();
+
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'mark_all_as_read') {
+                const messageIDs = [];
+                for (let i = 0; i < messagesData.length; i++) {
+                    this.data['mail.message'].records[i].history_partner_ids = [3];
+                    this.data['mail.message'].records[i].needaction_partner_ids = [];
+                    this.data['mail.message'].records[i].needaction = false;
+                    messageIDs.push(messageOffset + i);
+                }
+                const notificationData = {
+                    type: 'mark_as_read',
+                    message_ids: messageIDs,
+                };
+                const notification = [[false, 'res.partner', 3], notificationData];
+                self.widget.call('bus_service', 'trigger', 'notification', [notification]);
+                markAllReadDef.resolve();
+                return 3;
+            }
+            if (args.method === 'message_fetch') {
+                // 1st message_fetch: 'Inbox' initially
+                // 2nd message_fetch: 'History' initially
+                // 3rd message_fetch: 'History' load more
+                assert.step(args.method);
+
+                messageFetchCount++;
+                if (messageFetchCount === 1) {
+                    initDef.resolve();
+                }
+                if (messageFetchCount === 2) {
+                    clickHistoryDef.resolve();
+                }
+                if (messageFetchCount === 3) {
+                    loadMoreDef.resolve();
+                }
+            }
+            return this._super(...arguments);
+        },
+    });
+
+    await initDef;
+    assert.verifySteps(['message_fetch'],
+        "should fetch messages once for needaction messages (Inbox)");
+    assert.containsN(document.body, '.o_Message', 30,
+        "there should be 30 messages that are loaded in Inbox");
+
+    const markAllReadButton = document.querySelector('.o_widget_Discuss_controlPanelButtonMarkAllRead');
+    markAllReadButton.click();
+    await markAllReadDef;
+    await afterNextRender();
+    assert.containsNone(document.body, '.o_Message',
+        "there should no message in inbox anymore");
+
+    const history = document.querySelector('.o_DiscussSidebarItem[data-thread-local-id="mail.box_history"]');
+    history.click();
+    await clickHistoryDef;
+    await afterNextRender();
+    assert.verifySteps(['message_fetch'],
+        "should fetch messages once for history");
+    assert.containsN(document.body, '.o_Message', 30,
+        "there should be 30 messages in History");
+
+    // simulate a scroll to top to load more messages
+    document.querySelector('.o_MessageList').scrollTop = 0;
+    await loadMoreDef;
+    await afterNextRender();
+    assert.verifySteps(['message_fetch'],
+        "should fetch more messages in history for loadMore");
+     assert.containsN(document.body, '.o_Message', 40,
+        "there should be 40 messages in History");
+});
+
 QUnit.test('receive new channel message: out of odoo focus (notification, channel)', async function (assert) {
     assert.expect(7);
 

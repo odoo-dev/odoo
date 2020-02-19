@@ -743,7 +743,6 @@ var Discuss = AbstractAction.extend({
         this.$buttons.find('button').css({display:'inline-block'});
         this.$buttons
             .on('click', '.o_mail_discuss_button_invite', this._onInviteButtonClicked.bind(this))
-            .on('click', '.o_mail_discuss_button_mark_all_read', this._onMarkAllAsReadClicked.bind(this))
             .on('click', '.o_mail_discuss_button_unstar_all', this._onUnstarAllClicked.bind(this))
             .on('click', '.o_mail_discuss_button_moderate_all', this._onModerateAllClicked.bind(this))
             .on('click', '.o_mail_discuss_button_select_all', this._onSelectAllClicked.bind(this))
@@ -1061,19 +1060,6 @@ var Discuss = AbstractAction.extend({
      * @param {string} type
      */
     _updateButtonStatus: function (disabled, type) {
-        if (this._thread.getID() === 'mailbox_inbox') {
-            this.$buttons
-                .find('.o_mail_discuss_button_mark_all_read')
-                .toggleClass('disabled', disabled);
-            // Display Rainbowman when all inbox messages are read through
-            // 'MARK ALL READ' or marking last inbox message as read
-            if (disabled && type === 'mark_as_read') {
-                this.trigger_up('show_effect', {
-                    message: _t("Congratulations, your inbox is empty!"),
-                    type: 'rainbow_man',
-                });
-            }
-        }
         if (this._thread.getID() === 'mailbox_starred') {
             this.$buttons
                 .find('.o_mail_discuss_button_unstar_all')
@@ -1116,18 +1102,6 @@ var Discuss = AbstractAction.extend({
         } else {
             this.$buttons
                 .find('.o_mail_discuss_button_invite, .o_mail_discuss_button_settings')
-                .removeClass('d-none d-md-inline-block')
-                .addClass('d-none');
-        }
-        // Mark All Read
-        if (thread.getID() === 'mailbox_inbox') {
-            this.$buttons
-                .find('.o_mail_discuss_button_mark_all_read')
-                .removeClass('d-none d-md-inline-block')
-                .addClass('d-none d-md-inline-block');
-        } else {
-            this.$buttons
-                .find('.o_mail_discuss_button_mark_all_read')
                 .removeClass('d-none d-md-inline-block')
                 .addClass('d-none');
         }
@@ -1366,12 +1340,6 @@ var Discuss = AbstractAction.extend({
         if (ev.which === $.ui.keyCode.ESCAPE && this._selectedMessage) {
             this._unselectMessage();
         }
-    },
-    /**
-     * @private
-     */
-    _onMarkAllAsReadClicked: function () {
-        this._thread.markAllMessagesAsRead(this.domain);
     },
     /**
      * @private
