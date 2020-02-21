@@ -3,7 +3,7 @@ odoo.define('mail.component.MessagingMenu', function (require) {
 
 const AutocompleteInput = require('mail.component.AutocompleteInput');
 const MobileNavbar = require('mail.component.MobileMessagingNavbar');
-const ThreadPreviewList = require('mail.component.ThreadPreviewList');
+const NotificationList = require('mail.component.NotificationList');
 const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
@@ -25,14 +25,7 @@ class MessagingMenu extends Component {
         this.id = _.uniqueId('o_messagingMenu_');
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
-        this.storeProps = useStore(state => {
-            return Object.assign({}, state.messagingMenu, {
-                counter: this.storeGetters.globalThreadUnreadCounter(),
-                isDiscussOpen: state.discuss.isOpen,
-                isMessagingReady: state.isMessagingReady,
-                isMobile: state.isMobile,
-            });
-        });
+        this.storeProps = useStore((...args) => this._useStore(...args));
 
         /**
          * Reference of the new message input in mobile. Useful to include it
@@ -84,6 +77,32 @@ class MessagingMenu extends Component {
             id: 'channel',
             label: this.env._t("Channel"),
         }];
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _useStore(state, props) {
+        const unreadMailChannelCounter = this.storeGetters.mailChannelList()
+            .reduce((acc, mailChannel) => {
+                if (mailChannel.message_unread_counter > 0) {
+                    acc++;
+                }
+                return acc;
+            }, 0);
+        const mailboxInboxCounter = state.threads['mail.box_inbox'].counter;
+        const counter = unreadMailChannelCounter + mailboxInboxCounter;
+
+        return Object.assign({}, state.messagingMenu, {
+            counter,
+            isDiscussOpen: state.discuss.isOpen,
+            isMessagingReady: state.isMessagingReady,
+            isMobile: state.isMobile,
+        });
     }
 
     //--------------------------------------------------------------------------
@@ -234,7 +253,7 @@ Object.assign(MessagingMenu, {
     components: {
         AutocompleteInput,
         MobileNavbar,
-        ThreadPreviewList,
+        NotificationList,
     },
     template: 'mail.component.MessagingMenu',
 });

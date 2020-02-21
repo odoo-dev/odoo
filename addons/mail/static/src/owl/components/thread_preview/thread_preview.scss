@@ -3,8 +3,7 @@
 // ------------------------------------------------------------------
 
 .o_ThreadPreview {
-    display: flex;
-    align-items: center;
+    @include o-mail-notification-list-item-layout();
 
     &:hover .o_ThreadPreview_markAsRead {
         display: flex;
@@ -12,32 +11,19 @@
 }
 
 .o_ThreadPreview_content {
-    display: flex;
-    flex-flow: column;
-    flex: 1 1 auto;
-    align-self: flex-start;
-    min-width: 0;
-    margin: 3px;
+    @include o-mail-notification-list-item-content-layout();
 }
 
 .o_ThreadPreview_core {
-    display: flex;
+    @include o-mail-notification-list-item-core-layout();
 }
 
 .o_ThreadPreview_coreItem {
-    margin: 0 3px;
-
-    &:first-child {
-        margin-left: 0px;
-    }
-
-    &:last-child {
-        margin-right: 0px;
-    }
+    @include o-mail-notification-list-item-core-item-layout();
 }
 
 .o_ThreadPreview_counter {
-    margin: 0 3px;
+    margin: map-get($spacers, 0) map-get($spacers, 2);
 }
 
 .o_ThreadPreview_date {
@@ -45,25 +31,19 @@
 }
 
 .o_ThreadPreview_header {
-    display: flex;
-    margin-bottom: 5px;
+    @include o-mail-notification-list-item-header-layout();
 }
 
 .o_ThreadPreview_image {
-    width: 100%;
-    height: 100%;
+    @include o-mail-notification-list-item-image-layout();
 }
 
 .o_ThreadPreview_imageContainer {
-    position: relative;
-    width: 40px;
-    height: 40px;
+    @include o-mail-notification-list-item-image-container-layout();
 }
 
 .o_ThreadPreview_inlineText {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    @include o-mail-notification-list-item-inline-text-layout();
 
     &.o-empty::before {
         content: '\00a0'; // keep line-height as if it had content
@@ -76,23 +56,15 @@
 }
 
 .o_ThreadPreview_name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    &.o-mobile {
-        font-size: 1.1em;
-    }
+    @include o-mail-notification-list-item-name-layout();
 }
 
 .o_ThreadPreview_partnerImStatusIcon {
-    @include o-position-absolute($bottom: 0, $right: 0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @include o-mail-notification-list-item-partner-im-status-icon-layout();
 }
 
 .o_ThreadPreview_sidebar {
-    margin: 3px;
+    @include o-mail-notification-list-item-sidebar-layout();
 }
 
 // ------------------------------------------------------------------
@@ -100,70 +72,54 @@
 // ------------------------------------------------------------------
 
 .o_ThreadPreview {
-    background-color: gray('100');
-    cursor: pointer;
-    user-select: none;
-
-    .o_ThreadPreview_partnerImStatusIcon {
-        color: gray('100');
-    }
+    @include o-mail-notification-list-item-style();
 
     &:hover {
-        background-color: darken(gray('100'), 7%);
-
         .o_ThreadPreview_partnerImStatusIcon {
-            color: darken(gray('100'), 7%);
+            @include o-mail-notification-list-item-hover-partner-im-status-icon-style();
         }
     }
 
-    &.o-unread {
-        background-color: white;
-
-        .o_ThreadPreview_partnerImStatusIcon {
-            color: white;
-        }
-
+    &.o-muted {
         &:hover {
-            background-color: darken(white, 7%);
-
             .o_ThreadPreview_partnerImStatusIcon {
-                color: darken(white, 7%);
+                @include o-mail-notification-list-item-muted-hover-partner-im-status-icon-style();
             }
-        }
-
-        .o_ThreadPreview_counter,
-        .o_ThreadPreview_date,
-        .o_ThreadPreview_name {
-            font-weight: bold;
-        }
-
-        .o_ThreadPreview_date {
-            color: $o-brand-primary,
         }
     }
 }
 
 .o_ThreadPreview_core {
-    color: gray('500');
+    @include o-mail-notification-list-item-core-style();
+}
+
+.o_ThreadPreview_counter {
+    @include o-mail-notification-list-item-bold-style();
 }
 
 .o_ThreadPreview_date {
+    @include o-mail-notification-list-item-bold-style();
     font-size: x-small;
-    color: gray('500');
+    color: $o-brand-primary;
+
+    &.o-muted {
+        color: gray('500');
+    }
 }
 
 .o_ThreadPreview_markAsRead {
+    opacity: 0.8;
 
     &:hover {
         opacity: 1;
         color: gray('600');
     }
-
-    &:not(:hover) {
-        opacity: 0.8;
-    }
 }
 
-.o_ThreadPreview_partnerImStatusIcon:not(.o_ThreadPreview_partnerImStatusIcon-mobile) {
-    font-size: x-small;
+.o_ThreadPreview_name {
+    @include o-mail-notification-list-item-bold-style();
+}
+
+.o_ThreadPreview_partnerImStatusIcon {
+    @include o-mail-notification-list-item-partner-im-status-icon-style();
 }

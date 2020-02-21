@@ -83,7 +83,7 @@ function useStore(selector, options = {}) {
             }
             let ok = true;
             const newKeys = Object.keys(b);
-            if (Object.keys(a).length !== newKeys.length) {
+            if (!a || (Object.keys(a).length !== newKeys.length)) {
                 ok = false;
             }
             for (const key of newKeys) {
@@ -104,7 +104,7 @@ function useStore(selector, options = {}) {
                 }
                 // It is important to not break too early, the comparator has to
                 // be called for every key to remember their current states.
-                if (!comparators[key](a[key], b[key])) {
+                if (!comparators[key](a ? a[key] : a, b[key])) {
                     ok = false;
                 }
             }

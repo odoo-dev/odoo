@@ -180,22 +180,6 @@ const getters = {
         );
     },
     /**
-     * @param {Object} param0
-     * @param {Object} param0.getters
-     * @return {integer}
-     */
-    globalThreadUnreadCounter({ getters, state }) {
-        const unreadMailChannelCounter = getters.mailChannelList()
-            .reduce((acc, mailChannel) => {
-                if (mailChannel.message_unread_counter > 0) {
-                    acc++;
-                }
-                return acc;
-            }, 0);
-        const mailboxInboxCounter = state.threads['mail.box_inbox'].counter;
-        return unreadMailChannelCounter + mailboxInboxCounter;
-    },
-    /**
      * Returns whether the given message has any batch action available, for
      * which a checkbox has to be displayed.
      * Currently this is only the case for moderation.

@@ -133,11 +133,11 @@
                 <script type="text/javascript" src="/mail/static/src/owl/components/moderation_ban_dialog/moderation_ban_dialog.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/moderation_discard_dialog/moderation_discard_dialog.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/moderation_reject_dialog/moderation_reject_dialog.js"></script>
+                <script type="text/javascript" src="/mail/static/src/owl/components/notification_list/notification_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/partner_im_status_icon/partner_im_status_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/thread/thread.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/thread_icon/thread_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/components/thread_preview/thread_preview.js"></script>
-                <script type="text/javascript" src="/mail/static/src/owl/components/thread_preview_list/thread_preview_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/hooks/use_store.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/hooks/use_drag_visible_dropzone.js"></script>
                 <script type="text/javascript" src="/mail/static/src/owl/hooks/use_refs.js"></script>
@@ -153,6 +153,8 @@
 
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/tribute_custom.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/variables.scss"/>
+                <!-- notification_list_item.scss contains variables/mixins, it must be positioned before sub-components of NotificationList -->
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/notification_list/notification_list_item.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/attachment/attachment.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/attachment_box/attachment_box.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/attachment_list/attachment_list.scss"/>
@@ -179,10 +181,10 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/message_list/message_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/messaging_menu/messaging_menu.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/mobile_messaging_navbar/mobile_messaging_navbar.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/notification_list/notification_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/thread/thread.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/thread_icon/thread_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/thread_preview/thread_preview.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/components/thread_preview_list/thread_preview_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/owl/widgets/discuss.scss"/>
             </xpath>
         </template>
