@@ -3712,9 +3712,7 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
         mail_message_id: 1,
         res_partner_id: 3,
     }];
-    this.data.initMessaging = {
-        needaction_inbox_counter: 2,
-    };
+    this.data.initMessaging.needaction_inbox_counter = 2;
     await this.start({
         discuss: {
             params: {
@@ -4264,7 +4262,7 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
     assert.expect(38);
 
     const moderatedChannelId = 20;
-    this.data.initMessaging = {
+    Object.assign(this.data.initMessaging, {
         channel_slots: {
             channel_channel: [{
                 id: moderatedChannelId,
@@ -4276,7 +4274,7 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
         is_moderator: true,
         moderation_counter: 1,
         moderation_channel_ids: [moderatedChannelId],
-    };
+    });
     this.data['mail.message'].records = [{
         author_id: [2, "Someone"],
         body: "<p>test</p>",

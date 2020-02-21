@@ -133,16 +133,17 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
             },
             moderatedChannelLocalIds: [],
             outOfFocusUnreadMessageCounter: 0,
+            partnerRootLocalId: 'res.partner_2',
             partners: {
-                'res.partner_odoobot': {
+                'res.partner_2': {
                     _model: 'res.partner',
                     authorMessageLocalIds: [],
-                    display_name: undefined,
+                    display_name: "OdooBot",
                     email: undefined,
-                    id: 'odoobot',
+                    id: 2,
                     im_status: undefined,
-                    localId: 'res.partner_odoobot',
-                    name: "OdooBot",
+                    localId: 'res.partner_2',
+                    name: undefined,
                     userId: undefined,
                 },
                 'res.partner_3': {

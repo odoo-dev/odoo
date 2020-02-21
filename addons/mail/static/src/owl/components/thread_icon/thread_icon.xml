@@ -29,8 +29,8 @@
                         <span class="o_ThreadIcon_typingDot"/>
                     </div>
                 </t>
-                <t t-elif="storeProps.directPartner.im_status === 'bot'">
-                    <div class="o_ThreadIcon_online fa fa-heart" title="Bot"/>
+                <t t-elif="storeGetters.isPartnerRoot(storeProps.directPartner.localId)">
+                    <div class="o_ThreadIcon_bot fa fa-heart" title="Bot"/>
                 </t>
                 <t t-else="" name="noImStatusCondition">
                     <div class="o_ThreadIcon_noImStatus fa fa-question-circle" title="No IM status available"/>

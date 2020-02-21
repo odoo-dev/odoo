@@ -5,6 +5,7 @@
         <span class="o_PartnerImStatusIcon fa-stack"
             t-att-class="{
                 'o-away': storeProps.partner.im_status === 'away',
+                'o-bot': storeGetters.isPartnerRoot(storeProps.partner.localId),
                 'o-offline': storeProps.partner.im_status === 'offline',
                 'o-online': storeProps.partner.im_status === 'online',
             }" t-att-data-partner-local-id="storeProps.partner.localId"
@@ -20,6 +21,9 @@
             </t>
             <t t-if="storeProps.partner.im_status === 'offline'">
                 <i class="o_PartnerImStatusIcon_icon o-offline fa fa-circle-o fa-stack-1x" title="Offline" role="img" aria-label="User is offline"/>
+            </t>
+            <t t-if="storeGetters.isPartnerRoot(storeProps.partner.localId)">
+                <i class="o_PartnerImStatusIcon_icon o-bot fa fa-heart fa-stack-1x" title="Bot" role="img" aria-label="User is a bot"/>
             </t>
         </span>
     </t>

@@ -2,7 +2,9 @@ odoo.define('mail.FormRendererChatterTests', function (require) {
 "use strict";
 
 const {
+    afterEach: utilsAfterEach,
     afterNextRender,
+    beforeEach: utilsBeforeEach,
     pause,
     start,
 } = require('mail.messagingTestUtils');
@@ -12,6 +14,7 @@ const FormView = require('web.FormView');
 QUnit.module('mail.messaging', {}, function () {
 QUnit.module('Chatter', {
     beforeEach() {
+        utilsBeforeEach(this);
         this.underscoreDebounce = _.debounce;
         this.underscoreThrottle = _.throttle;
         _.debounce = _.identity;
@@ -28,45 +31,22 @@ QUnit.module('Chatter', {
         if (this.view) {
             this.view.destroy();
         }
+        utilsAfterEach(this);
     }
 });
 
 QUnit.test('basic chatter rendering', async function (assert) {
     assert.expect(1);
+    this.data['res.partner'].records = [{
+        id: 2,
+        display_name: "second partner",
+    }];
     await this.createView({
+        data: this.data,
         hasView: true,
-        async mockRPC(route, args) {
-            if (route === '/mail/init_messaging') {
-                return {
-                    channel_slots: {},
-                    commands: [],
-                    is_moderator: false,
-                    mail_failures: [],
-                    mention_partner_suggestions: [],
-                    menu_id: false,
-                    moderation_counter: 0,
-                    moderation_channel_ids: [],
-                    needaction_inbox_counter: 0,
-                    shortcodes: [],
-                    starred_counter: 0,
-                };
-            }
-            return this._super(...arguments);
-        },
         // View params
         View: FormView,
         model: 'res.partner',
-        data: {
-            'res.partner': {
-                fields: {
-                    display_name: { string: "Displayed name", type: "char" },
-                },
-                records: [{
-                    id: 2,
-                    display_name: "second partner",
-                }]
-            }
-        },
         arch: `<form string="Partners">
                 <sheet>
                     <field name="name"/>
@@ -85,26 +65,29 @@ QUnit.test('basic chatter rendering', async function (assert) {
 
 QUnit.test('chatter updating', async function (assert) {
     assert.expect(7);
-
+    this.data['ir.attachment'].records = [{
+        id: 1, type: 'url', mimetype: 'image/png', name: 'filename.jpg',
+        res_id: 7, res_model: 'partner'
+    }, {
+        id: 2, type: 'binary', mimetype: "application/x-msdos-program",
+        name: "file2.txt", res_id: 7, res_model: 'partner'
+    }, {
+        id: 3, type: 'binary', mimetype: "application/x-msdos-program",
+        name: "file3.txt", res_id: 5, res_model: 'partner'
+    }];
+    this.data['res.partner'].records = [{
+        id: 1,
+        display_name: "first partner",
+    }, {
+        id: 2,
+        display_name: "second partner",
+    }];
     let callCount = 0;
     await this.createView({
+        data: this.data,
         hasView: true,
         async mockRPC(route, args) {
-            if (route === '/mail/init_messaging') {
-                return {
-                    channel_slots: {},
-                    commands: [],
-                    is_moderator: false,
-                    mail_failures: [],
-                    mention_partner_suggestions: [],
-                    menu_id: false,
-                    moderation_counter: 0,
-                    moderation_channel_ids: [],
-                    needaction_inbox_counter: 0,
-                    shortcodes: [],
-                    starred_counter: 0,
-                };
-            } else if (route === '/web/dataset/call_kw/mail.message/message_fetch') {
+            if (route === '/web/dataset/call_kw/mail.message/message_fetch') {
                 callCount++;
                 if (callCount === 1) {
                     assert.step('message_fetch:1');
@@ -127,91 +110,6 @@ QUnit.test('chatter updating', async function (assert) {
         // View params
         View: FormView,
         model: 'res.partner',
-        data: {
-            'ir.attachment': {
-                fields: {
-                    name: { type: 'char', string: "attachment name", required: true },
-                    res_model: { type: 'char', string: "res model" },
-                    res_id: { type: 'integer', string: "res id" },
-                    url: { type: 'char', string: 'url' },
-                    type: { type: 'selection', selection: [['url', "URL"], ['binary', "BINARY"]] },
-                    mimetype: { type: 'char', string: "mimetype" },
-                },
-                records: [
-                    {
-                        id: 1, type: 'url', mimetype: 'image/png', name: 'filename.jpg',
-                        res_id: 7, res_model: 'partner'
-                    },
-                    {
-                        id: 2, type: 'binary', mimetype: "application/x-msdos-program",
-                        name: "file2.txt", res_id: 7, res_model: 'partner'
-                    },
-                    {
-                        id: 3, type: 'binary', mimetype: "application/x-msdos-program",
-                        name: "file3.txt", res_id: 5, res_model: 'partner'
-                    },
-                ],
-            },
-            'mail.message': {
-                fields: {
-                    attachment_ids: {
-                        string: "Attachments",
-                        type: 'many2many',
-                        relation: 'ir.attachment',
-                        default: [],
-                    },
-                    author_id: {
-                        string: "Author",
-                        relation: 'res.partner',
-                    },
-                    body: {
-                        string: "Contents",
-                        type: 'html',
-                    },
-                    date: {
-                        string: "Date",
-                        type: 'datetime',
-                    },
-                    is_note: {
-                        string: "Note",
-                        type: 'boolean',
-                    },
-                    is_discussion: {
-                        string: "Discussion",
-                        type: 'boolean',
-                    },
-                    is_notification: {
-                        string: "Notification",
-                        type: 'boolean',
-                    },
-                    is_starred: {
-                        string: "Starred",
-                        type: 'boolean',
-                    },
-                    model: {
-                        string: "Related Document Model",
-                        type: 'char',
-                    },
-                    res_id: {
-                        string: "Related Document ID",
-                        type: 'integer',
-                    }
-                },
-                records: [],
-            },
-            'res.partner': {
-                fields: {
-                    display_name: { string: "Displayed name", type: "char" },
-                },
-                records: [{
-                    id: 1,
-                    display_name: "first partner",
-                }, {
-                    id: 2,
-                    display_name: "second partner",
-                }]
-            }
-        },
         res_id: 1,
         viewOptions: {
             ids: [1, 2],
