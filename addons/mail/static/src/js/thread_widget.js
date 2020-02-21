@@ -37,7 +37,6 @@ var ThreadWidget = Widget.extend({
         'click .o_attachment_view': '_onAttachmentView',
         'click .o_attachment_delete_cross': '_onDeleteAttachment',
         'click .o_thread_message_needaction': '_onClickMessageNeedaction',
-        'click .o_thread_message_star': '_onClickMessageStar',
         'click .o_thread_message_reply': '_onClickMessageReply',
         'click .oe_mail_expand': '_onClickMailExpand',
         'click .o_thread_message': '_onClickMessage',
@@ -604,14 +603,6 @@ var ThreadWidget = Widget.extend({
             .addClass('o_thread_selected_message');
         this.trigger('select_message', this._selectedMessageID);
         ev.stopPropagation();
-    },
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickMessageStar: function (ev) {
-        var messageID = $(ev.currentTarget).data('message-id');
-        this.trigger('toggle_star_status', messageID);
     },
     /**
      * @private

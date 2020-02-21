@@ -5,8 +5,6 @@
         @param {string|integer} activeThreadID
         @param {mail.model.Channel[]} channels
         @param {mail.model.Mailbox} inbox
-        @param {mail.model.Mailbox} starred
-        @param {mail.model.Mailbox|undefined} moderation set if current user is moderator
         @param {boolean} displayQuickSearch
         @param {Object} options
     -->

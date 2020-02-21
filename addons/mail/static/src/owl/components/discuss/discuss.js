@@ -374,9 +374,10 @@ class Discuss extends Component {
     _onAddChannelAutocompleteSelect(ev, ui) {
         if (ui.item.special) {
             this.storeDispatch('createChannel', {
+                autoselect: true,
                 name: this._addingChannelValue,
                 public: ui.item.special,
-                type: 'channel'
+                type: 'channel',
             });
         } else {
             this.storeDispatch('joinChannel', ui.item.id, { autoselect: true });

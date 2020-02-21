@@ -166,8 +166,6 @@ var Mailbox = SearchableThread.extend({
     _getThreadDomain: function () {
         if (this._id === 'mailbox_inbox') {
             return [['needaction', '=', true]];
-        } else if (this._id === 'mailbox_starred') {
-            return [['starred', '=', true]];
         } else if (this._id === 'mailbox_history') {
             return [['needaction', '=', false]];
         } else {

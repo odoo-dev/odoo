@@ -28,10 +28,6 @@ QUnit.module('Document Thread', {
                         type: 'many2many',
                         relation: 'mail.channel',
                     },
-                    starred: {
-                        string: "Starred",
-                        type: 'boolean',
-                    },
                     needaction: {
                       string: "Need Action",
                       type: 'boolean',
@@ -41,10 +37,6 @@ QUnit.module('Document Thread', {
                         type: 'one2many',
                         relation: 'res.partner',
                     },
-                    starred_partner_ids: {
-                      string: "partner ids",
-                      type: 'integer',
-                    }
                 },
                 records: [{
                     id: 1,

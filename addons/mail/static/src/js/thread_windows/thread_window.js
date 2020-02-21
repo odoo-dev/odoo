@@ -198,7 +198,6 @@ var ThreadWindow = AbstractThreadWindow.extend({
         this._threadWidget
             .on('redirect', this, this._onRedirect)
             .on('redirect_to_channel', this, this._onRedirectToChannel)
-            .on('toggle_star_status', this, this._onToggleStarStatus);
     },
     /**
      * Open this thread window.
@@ -345,14 +344,6 @@ var ThreadWindow = AbstractThreadWindow.extend({
             this.removePassive();
             this._thread.markAsRead();
         }
-    },
-    /**
-     * @private
-     * @param {integer} messageID
-     */
-    _onToggleStarStatus: function (messageID) {
-        var message = this.call('mail_service', 'getMessage', messageID);
-        message.toggleStarStatus();
     },
     /**
      * @private

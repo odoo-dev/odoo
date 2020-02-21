@@ -2771,6 +2771,7 @@ const actions = {
                     messageLocalId,
                     threadLocalId: 'mail.box_starred',
                 });
+                // TODO FIXME message is not linked to thread cache
                 starredBox.counter++;
             } else {
                 const message = state.messages[messageLocalId];

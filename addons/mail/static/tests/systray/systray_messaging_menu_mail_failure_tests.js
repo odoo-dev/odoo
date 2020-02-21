@@ -32,10 +32,6 @@ QUnit.module('MessagingMenu (Mail Failures)', {
                         type: 'many2many',
                         relation: 'mail.channel',
                     },
-                    starred: {
-                        string: "Starred",
-                        type: 'boolean',
-                    },
                     needaction: {
                       string: "Need Action",
                       type: 'boolean',
@@ -45,10 +41,6 @@ QUnit.module('MessagingMenu (Mail Failures)', {
                         type: 'one2many',
                         relation: 'res.partner',
                     },
-                    starred_partner_ids: {
-                      string: "partner ids",
-                      type: 'integer',
-                    }
                 },
                 records: [],
             },
