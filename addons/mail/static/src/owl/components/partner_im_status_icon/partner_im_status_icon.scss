@@ -29,6 +29,10 @@
         color: theme-color('warning');
     }
 
+    &.o-bot {
+        color: $o-enterprise-primary-color;
+    }
+
     &.o-offline {
         color: gray('700');
     }

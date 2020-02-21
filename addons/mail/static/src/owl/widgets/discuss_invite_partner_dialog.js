@@ -53,6 +53,7 @@ const PartnerInviteDialog = Dialog.extend({
             multiple: true,
             formatResult: item => {
                 let status;
+                // TODO FIXME fix this, why do we even have an old widget here
                 if (item.id === 'odoobot') {
                     status = 'bot';
                 } else {

@@ -308,30 +308,69 @@ function beforeEach(self) {
             moderation_counter: 0,
             moderation_channel_ids: [],
             needaction_inbox_counter: 0,
+            partner_root: [2, "OdooBot"],
             shortcodes: [],
             starred_counter: 0,
         },
         'ir.attachment': {
-            fields: {},
+            fields: {
+                name: { type: 'char', string: "attachment name", required: true },
+                res_model: { type: 'char', string: "res model" },
+                res_id: { type: 'integer', string: "res id" },
+                url: { type: 'char', string: 'url' },
+                type: { type: 'selection', selection: [['url', "URL"], ['binary', "BINARY"]] },
+                mimetype: { type: 'char', string: "mimetype" },
+            },
         },
         'mail.message': {
             fields: {
-                body: {
-                    string: "Contents",
-                    type: 'html',
+                attachment_ids: {
+                    string: "Attachments",
+                    type: 'many2many',
+                    relation: 'ir.attachment',
+                    default: [],
                 },
                 author_id: {
                     string: "Author",
                     relation: 'res.partner',
+                },
+                body: {
+                    string: "Contents",
+                    type: 'html',
                 },
                 channel_ids: {
                     string: "Channels",
                     type: 'many2many',
                     relation: 'mail.channel',
                 },
-                starred: {
+                date: {
+                    string: "Date",
+                    type: 'datetime',
+                },
+                history_partner_ids: {
+                    string: "Partners with History",
+                    type: 'many2many',
+                    relation: 'res.partner',
+                },
+                is_discussion: {
+                    string: "Discussion",
+                    type: 'boolean',
+                },
+                is_note: {
+                    string: "Note",
+                    type: 'boolean',
+                },
+                is_notification: {
+                    string: "Notification",
+                    type: 'boolean',
+                },
+                is_starred: {
                     string: "Starred",
                     type: 'boolean',
+                },
+                model: {
+                    string: "Related Document model",
+                    type: 'char',
                 },
                 needaction: {
                     string: "Need Action",
@@ -342,23 +381,18 @@ function beforeEach(self) {
                     type: 'many2many',
                     relation: 'res.partner',
                 },
+                res_id: {
+                    string: "Related Document ID",
+                    type: 'integer',
+                },
+                starred: {
+                    string: "Starred",
+                    type: 'boolean',
+                },
                 starred_partner_ids: {
                     string: "Favorited By",
                     type: 'many2many',
                     relation: 'res.partner',
-                },
-                history_partner_ids: {
-                    string: "Partners with History",
-                    type: 'many2many',
-                    relation: 'res.partner',
-                },
-                model: {
-                    string: "Related Document model",
-                    type: 'char',
-                },
-                res_id: {
-                    string: "Related Document ID",
-                    type: 'integer',
                 },
             },
         },
@@ -382,11 +416,13 @@ function beforeEach(self) {
         },
         'res.partner': {
             fields: {
+                display_name: { string: "Displayed name", type: "char" },
                 im_status: {
                     string: "status",
                     type: 'char',
                 },
             },
+            records: [],
         },
     };
 

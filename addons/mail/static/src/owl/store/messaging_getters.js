@@ -289,6 +289,15 @@ const getters = {
     },
     /**
      * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} partnerLocalId
+     * @return {boolean}
+     */
+    isPartnerRoot({ state }, partnerLocalId) {
+        return state.partnerRootLocalId === partnerLocalId;
+    },
+    /**
+     * @param {Object} param0
      * @param {Object} param0.getters
      * @return {mail.store.model.Thread[]} ordered list of mailboxes
      */

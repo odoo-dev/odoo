@@ -4,6 +4,7 @@ odoo.define('mail.component.PartnerImStatusIcon', function (require) {
 const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
+const { useGetters } = owl.hooks;
 
 class PartnerImStatusIcon extends Component {
 
@@ -13,9 +14,12 @@ class PartnerImStatusIcon extends Component {
      */
     constructor(...args) {
         super(...args);
+        this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             return {
                 partner: state.partners[props.partnerLocalId],
+                // used through isPartnerRoot getter
+                partnerRootLocalId: state.partnerRootLocalId,
             };
         });
     }

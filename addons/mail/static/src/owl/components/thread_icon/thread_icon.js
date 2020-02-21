@@ -4,6 +4,7 @@ odoo.define('mail.component.ThreadIcon', function (require) {
 const useStore = require('mail.hooks.useStore');
 
 const { Component } = owl;
+const { useGetters } = owl.hooks;
 
 class ThreadIcon extends Component {
 
@@ -13,6 +14,7 @@ class ThreadIcon extends Component {
      */
     constructor(...args) {
         super(...args);
+        this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
             const thread = state.threads[props.threadLocalId];
             const directPartner = thread
@@ -20,6 +22,8 @@ class ThreadIcon extends Component {
                 : undefined;
             return {
                 directPartner,
+                // used through isPartnerRoot getter
+                partnerRootLocalId: state.partnerRootLocalId,
                 thread,
             };
         });

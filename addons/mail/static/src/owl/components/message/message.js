@@ -49,7 +49,6 @@ class Message extends Component {
             const message = state.messages[props.messageLocalId];
             const attachmentLocalIds = message.attachmentLocalIds;
             const author = state.partners[message.authorLocalId];
-            const odoobot = state.partners['res.partner_odoobot'];
             const originThread = state.threads[message.originThreadLocalId];
             const thread = state.threads[props.threadLocalId];
             const hasCheckbox = this.storeGetters.hasMessageCheckbox(message.localId);
@@ -65,8 +64,9 @@ class Message extends Component {
                 isChecked,
                 isMobile: state.isMobile,
                 message,
-                odoobot,
                 originThread,
+                // used through isPartnerRoot getter
+                partnerRootLocalId: state.partnerRootLocalId,
                 thread,
             };
         });
@@ -102,7 +102,7 @@ class Message extends Component {
     get avatar() {
         if (
             this.storeProps.author &&
-            this.storeProps.author === this.storeProps.odoobot
+            this.storeGetters.isPartnerRoot(this.storeProps.author.localId)
         ) {
             return '/mail/static/src/img/odoobot.png';
         } else if (this.storeProps.author) {

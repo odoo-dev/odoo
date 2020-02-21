@@ -1962,8 +1962,7 @@ const actions = {
         };
         const partnerLocalId = partner.localId;
         if (state.partners[partnerLocalId]) {
-            // partner already exists in store
-            return partnerLocalId;
+            throw new Error(`${partnerLocalId} already exists in store`);
         }
         state.partners[partnerLocalId] = partner;
         // todo: links
@@ -2233,13 +2232,11 @@ const actions = {
     async _fetchPartnerImStatus({ dispatch, env, state }) {
         let toFetchPartnersLocalIds = [];
         let partnerIdToLocalId = {};
-        for (const partner of Object.values(state.partners)) {
-            if (
-                typeof partner.id !== 'number' || // ignore odoobot
-                partner.im_status === null // already fetched and this partner has no im_status
-            ) {
-                continue;
-            }
+        const toFetchPartners = Object.values(state.partners).filter(partner => {
+            // already fetched and this partner has no im_status
+            return partner.im_status !== null;
+        });
+        for (const partner of toFetchPartners) {
             toFetchPartnersLocalIds.push(partner.localId);
             partnerIdToLocalId[partner.id] = partner.localId;
         }
@@ -2804,9 +2801,9 @@ const actions = {
         param1
     ) {
         const messageIds = Object.values(state.messages).map(message => message.id);
-        const odoobot = state.partners['res.partner_odoobot'];
+        const partnerRoot = state.partners[state.partnerRootLocalId];
         dispatch('_createMessage', Object.assign({}, param1, {
-            author_id: [odoobot.id, odoobot.name],
+            author_id: [partnerRoot.id, partnerRoot.display_name],
             id: (messageIds ? Math.max(...messageIds) : 0) + 0.01,
             isTransient: true,
         }));
@@ -2941,6 +2938,7 @@ const actions = {
      * @param {Object[]} [param1.moderation_channel_ids=[]]
      * @param {integer} [param1.moderation_counter=0]
      * @param {integer} [param1.needaction_inbox_counter=0]
+     * @param {Array} param1.partner_root
      * @param {Object[]} [param1.shortcodes=[]]
      * @param {integer} [param1.starred_counter=0]
      */
@@ -2956,11 +2954,12 @@ const actions = {
             moderation_channel_ids=[],
             moderation_counter=0,
             needaction_inbox_counter=0,
+            partner_root,
             shortcodes=[],
             starred_counter=0
         }
     ) {
-        dispatch('_initMessagingPartners');
+        dispatch('_initMessagingPartners', partner_root);
         dispatch('_initMessagingChannels', channel_slots);
         dispatch('_initMessagingCommands', commands);
         dispatch('_initMessagingMailboxes', {
@@ -3160,19 +3159,29 @@ const actions = {
      * @param {function} param0.dispatch
      * @param {Object} param0.env
      * @param {Object} param0.state
+     * @param {Array} param1 result of name_get
+     * @param {integer} param1[0] partner id
+     * @param {string} param1[1] partner display name
      */
-    _initMessagingPartners({ dispatch, env, state }) {
-        dispatch('_createPartner', {
-            id: 'odoobot',
-            name: _t("OdooBot"),
-        });
-        const currentPartnerLocalId = dispatch('_createPartner', {
+    _initMessagingPartners({ dispatch, env, state }, [partnerRootId, partnerRootDisplayName]) {
+        // current user
+        const currentPartnerId = env.session.partner_id;
+        state.currentPartnerLocalId = dispatch('_createPartner', {
             display_name: env.session.partner_display_name,
-            id: env.session.partner_id,
+            id: currentPartnerId,
             name: env.session.name,
             userId: env.session.uid,
         });
-        state.currentPartnerLocalId = currentPartnerLocalId;
+        // OdooBot
+        if (partnerRootId !== currentPartnerId) {
+            state.partnerRootLocalId = dispatch('_createPartner', {
+                display_name: partnerRootDisplayName,
+                id: partnerRootId,
+            });
+        } else {
+            // special case when the current user is OdooBot
+            state.partnerRootLocalId = state.currentPartnerLocalId;
+        }
     },
     /**
      * Update existing attachment or create a new attachment
