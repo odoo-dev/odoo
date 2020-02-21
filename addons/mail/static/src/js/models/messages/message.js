@@ -34,7 +34,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {Array} [data.history_partner_ids = []]
      * @param {string} [data.record_name]
      * @param {integer} [data.res_id]
-     * @param {Array} [data.starred_partner_ids = []]
      * @param {string} [data.subject]
      * @param {string} [data.subtype_description]
      * @param {Object[]} [data.tracking_value_ids]
@@ -387,15 +386,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         return _.contains(this._threadIDs, 'mailbox_inbox');
     },
     /**
-     * State whether this message is starred
-     *
-     * @override
-     * @returns {boolean}
-     */
-    isStarred: function () {
-        return _.contains(this._threadIDs, 'mailbox_starred');
-    },
-    /**
      * State whether this message is a system notification
      *
      * @override
@@ -424,20 +414,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         this._threadIDs = _.without(this._threadIDs, threadID);
     },
     /**
-     * Set whether the message is starred or not.
-     * If it is starred, the message is moved to the "Starred" mailbox.
-     * Note that this function only applies it locally, the server is not aware
-     *
-     * @param {boolean} starred if set, the message is starred
-     */
-    setStarred: function (starred) {
-        if (starred) {
-            this._addThread('mailbox_starred');
-        } else {
-            this.removeThread('mailbox_starred');
-        }
-    },
-    /**
      * State whether this message should display the subject
      *
      * @return {boolean}
@@ -461,25 +437,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         return this._super.apply(this, arguments) && !this._isOdoobotAuthor();
     },
     /**
-     * Toggle the star status of the message
-     *
-     * It relies on the star status of the message from the date of the server.
-     * The star status is updated from a 'toggle_star' notification on the
-     * longpoll bus
-     *
-     * @see {mail.Manager.Notification} for the receipt of 'toggle_star'
-     *   notification after this rpc.
-     *
-     * @return {Promise}
-     */
-    toggleStarStatus: function () {
-        return this._rpc({
-                model: 'mail.message',
-                method: 'toggle_message_starred',
-                args: [[this._id]],
-            });
-    },
-    /**
      * Update the customer email status
      *
      * @param {string} newCustomerEmailStatus
@@ -495,7 +452,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
     /**
      * Register a thread to the message
      * Useful when you mark a message as 'to do'.
-     * This message will be available in 'Starred' mailbox.
      *
      * @private
      * @param  {string|integer} threadID
@@ -603,9 +559,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         if (_.contains(this._needactionPartnerIDs, session.partner_id)) {
             this._setNeedaction(true);
         }
-        if (_.contains(this._starredPartnerIDs, session.partner_id)) {
-            this.setStarred(true);
-        }
         if (_.contains(this._historyPartnerIDs, session.partner_id)) {
             this._setHistory(true);
         }
@@ -668,7 +621,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {Array} [data.history_partner_ids = []]
      * @param {string} [data.record_name]
      * @param {integer} [data.res_id]
-     * @param {Array} [data.starred_partner_ids = []]
      * @param {string} [data.subject]
      * @param {string} [data.subtype_description]
      * @param {Object[]} [data.tracking_value_ids]
@@ -684,7 +636,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         this._isNote = data.is_note;
         this._moduleIcon = data.module_icon;
         this._needactionPartnerIDs = data.needaction_partner_ids || [];
-        this._starredPartnerIDs = data.starred_partner_ids || [];
         this._historyPartnerIDs = data.history_partner_ids || [];
         this._subject = data.subject;
         this._subtypeDescription = data.subtype_description;

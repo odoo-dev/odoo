@@ -33,21 +33,12 @@ QUnit.module('Discuss', {
                         type: 'many2many',
                         relation: 'mail.channel',
                     },
-                    starred: {
-                        string: "Starred",
-                        type: 'boolean',
-                    },
                     needaction: {
                         string: "Need Action",
                         type: 'boolean',
                     },
                     needaction_partner_ids: {
                         string: "Partners with Need Action",
-                        type: 'many2many',
-                        relation: 'res.partner',
-                    },
-                    starred_partner_ids: {
-                        string: "Favorited By",
                         type: 'many2many',
                         relation: 'res.partner',
                     },
@@ -108,7 +99,7 @@ QUnit.module('Discuss', {
 });
 
 QUnit.test('basic rendering', async function (assert) {
-    assert.expect(6);
+    assert.expect(5);
 
     var discuss = await createDiscuss({
         id: 1,
@@ -131,10 +122,6 @@ QUnit.test('basic rendering', async function (assert) {
     var $inbox = $sidebar.find('.o_mail_discuss_item[data-thread-id=mailbox_inbox]');
     assert.strictEqual($inbox.length, 1,
         "should have the mailbox item 'mailbox_inbox' in the sidebar");
-
-    var $starred = $sidebar.find('.o_mail_discuss_item[data-thread-id=mailbox_starred]');
-    assert.strictEqual($starred.length, 1,
-        "should have the mailbox item 'mailbox_starred' in the sidebar");
 
     var $history = $sidebar.find('.o_mail_discuss_item[data-thread-id=mailbox_history]');
     assert.strictEqual($history.length, 1,
@@ -901,76 +888,6 @@ QUnit.test('older messages are loaded on scroll', async function (assert) {
         "should fetch a third time for general channel messages (5 remaining messages)");
     assert.containsN(discuss, '.o_thread_message', 35,
         "all messages should now be loaded");
-
-    discuss.destroy();
-});
-
-QUnit.test('"Unstar all" button should reset the starred counter', async function (assert) {
-    assert.expect(2);
-
-    var messageData = [];
-    _.each(_.range(1, 41), function (num) {
-        messageData.push({
-                id: num,
-                body: "<p>test" + num + "</p>",
-                author_id: ["1", "Me"],
-                channel_ids: [1],
-                starred: true,
-                starred_partner_ids: [1],
-            }
-        );
-    });
-
-    this.data.initMessaging = {
-            channel_slots: {
-                channel_channel: [{
-                    id: 1,
-                    channel_type: "channel",
-                    name: "general",
-                }],
-            },
-            starred_counter: messageData.length,
-    };
-    this.data['mail.message'].records = messageData;
-
-    var objectDiscuss;
-    var discuss = await createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
-        mockRPC: function (route, args) {
-            if (args.method === 'unstar_all') {
-                var data = {
-                    message_ids: _.range(1, 41),
-                    starred: false,
-                    type: 'toggle_star',
-                };
-                var notification = [[false, 'res.partner'], data];
-                objectDiscuss.call('bus_service', 'trigger', 'notification', [notification]);
-                return Promise.resolve(42);
-            }
-            return this._super.apply(this, arguments);
-        },
-        session: {partner_id: 1},
-    })
-
-    objectDiscuss = discuss;
-
-    var $starred = discuss.$('.o_mail_discuss_sidebar').find('.o_mail_mailbox_title_starred');
-    var $starredCounter = $('.o_mail_mailbox_title_starred > .o_mail_sidebar_needaction');
-
-    // Go to Starred channel
-    await testUtils.dom.click($starred);
-    // Test Initial Value
-    assert.strictEqual($starredCounter.text().trim(), "40", "40 messages should be starred");
-
-    // Unstar all and wait 'update_starred'
-    await testUtils.dom.click($('.o_control_panel .o_mail_discuss_button_unstar_all'));
-    $starredCounter = $('.o_mail_mailbox_title_starred > .o_mail_sidebar_needaction');
-    assert.strictEqual($starredCounter.text().trim(), "0",
-        "All messages should be unstarred");
 
     discuss.destroy();
 });

@@ -161,10 +161,6 @@ QUnit.module('Chatter', {
                         string: "Notification",
                         type: 'boolean',
                     },
-                    is_starred: {
-                        string: "Starred",
-                        type: 'boolean',
-                    },
                     model: {
                         string: "Related Document Model",
                         type: 'char',
@@ -1448,7 +1444,6 @@ QUnit.skip('chatter: suggested partner auto-follow on message post', async funct
         is_note: false,
         is_discussion: true,
         is_notification: false,
-        is_starred: false,
         model: 'partner',
         res_id: 2,
     }];
@@ -1517,7 +1512,6 @@ QUnit.skip('chatter: suggested partner auto-follow on message post', async funct
                     is_note: args.kwargs.subtype_xmlid === 'mail.mt_note',
                     is_discussion: args.kwargs.subtype_xmlid === 'mail.mt_comment',
                     is_notification: false,
-                    is_starred: false,
                     model: 'partner',
                     res_id: 2,
                 });

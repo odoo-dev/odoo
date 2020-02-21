@@ -25,7 +25,6 @@
         @param {string|integer} activeThreadID
         @param {mail.model.Channel[]} channels
         @param {mail.model.Mailbox} inbox
-        @param {mail.model.Mailbox} starred
         @param {boolean} displayQuickSearch
         @param {Object} options
     -->
@@ -48,19 +47,12 @@
     <!--
         @param {string|integer} activeThreadID
         @param {mail.model.Mailbox} inbox
-        @param {mail.model.Mailbox} starred
     -->
     <t t-name="mail.discuss.SidebarMailboxes">
         <div t-attf-class="o_mail_discuss_title_main o_mail_discuss_item #{(activeThreadID === 'mailbox_inbox') ? 'o_active': ''}"
                 data-thread-id="mailbox_inbox">
             <span class="o_thread_name"><i class="fa fa-inbox mr8"/>Inbox</span>
             <t t-set="counter" t-value="inbox.getMailboxCounter()"/>
-            <t t-call="mail.discuss.SidebarCounter"/>
-        </div>
-        <div t-attf-class="o_mail_discuss_title_main o_mail_mailbox_title_starred o_mail_discuss_item #{(activeThreadID === 'mailbox_starred') ? 'o_active': ''}"
-                data-thread-id="mailbox_starred">
-            <span class="o_thread_name"><i class="fa fa-star-o mr8"/>Starred</span>
-            <t t-set="counter" t-value="starred.getMailboxCounter()"/>
             <t t-call="mail.discuss.SidebarCounter"/>
         </div>
         <div t-attf-class="o_mail_discuss_title_main o_mail_discuss_item #{(activeThreadID === 'mailbox_history') ? 'o_active': ''}"
@@ -206,7 +198,6 @@
     <t t-name="mail.discuss.ControlButtons">
         <div>
             <button type="button" class="btn btn-primary o_mail_discuss_button_invite d-none d-md-inline-block" title="Invite people">Invite</button>
-            <button type="button" class="btn btn-secondary o_mail_discuss_button_unstar_all" title="Unstar all messages">Unstar all</button>
             <button type="button" class="btn btn-secondary o_mail_discuss_button_dm_chat o_hidden d-md-none" title="New Message">New Message</button>
             <button t-if="!disableAddThread" type="button" class="btn btn-secondary o_mail_discuss_button_multi_user_channel d-block d-md-none" title="New Channel">New Channel</button>
         </div>
@@ -228,9 +219,6 @@
             <div class="o_mail_discuss_mobile_mailboxes_buttons">
                 <button type="button" class="btn btn-primary d-inline d-md-none o_mailbox_inbox_item" title="Inbox" data-type="mailbox_inbox">
                     Inbox
-                </button>
-                <button type="button" class="btn btn-secondary d-inline d-md-none o_mailbox_inbox_item" title="Starred" data-type="mailbox_starred">
-                    Starred
                 </button>
                 <button type="button" class="btn btn-secondary d-inline d-md-none o_mailbox_inbox_item" title="History" data-type="mailbox_history">
                     History

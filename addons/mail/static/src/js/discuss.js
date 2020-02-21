@@ -323,7 +323,6 @@ var Discuss = AbstractAction.extend({
                     self._thread,
                     self._getThreadRenderingOptions()
                 );
-                self._updateButtonStatus(!self._thread.hasMessages());
                 return self._loadEnoughMessages();
             });
     },
@@ -558,7 +557,6 @@ var Discuss = AbstractAction.extend({
         this.$buttons.find('button').css({display:'inline-block'});
         this.$buttons
             .on('click', '.o_mail_discuss_button_invite', this._onInviteButtonClicked.bind(this))
-            .on('click', '.o_mail_discuss_button_unstar_all', this._onUnstarAllClicked.bind(this))
     },
     /**
      * Render the sidebar of discuss app
@@ -572,7 +570,6 @@ var Discuss = AbstractAction.extend({
         var $sidebar = $(QWeb.render('mail.discuss.Sidebar', {
             activeThreadID: this._thread ? this._thread.getID() : undefined,
             inbox: this.call('mail_service', 'getMailbox', 'inbox'),
-            starred: this.call('mail_service', 'getMailbox', 'starred'),
             channels: channels,
             displayQuickSearch: channels.length >= this.options.channelQuickSearchThreshold,
             options: this.options,
@@ -609,7 +606,6 @@ var Discuss = AbstractAction.extend({
             QWeb.render('mail.discuss.SidebarMailboxes', {
                 activeThreadID: this._thread ? this._thread.getID() : undefined,
                 inbox: this.call('mail_service', 'getMailbox', 'inbox'),
-                starred: this.call('mail_service', 'getMailbox', 'starred'),
             })
         );
     },
@@ -651,10 +647,6 @@ var Discuss = AbstractAction.extend({
             .on('load_more_messages', this, this._loadMoreMessages)
             .on('mark_as_read', this, function (messageID) {
                 this.call('mail_service', 'markMessagesAsRead', [messageID]);
-            })
-            .on('toggle_star_status', this, function (messageID) {
-                var message = this.call('mail_service', 'getMessage', messageID);
-                message.toggleStarStatus();
             })
             .on('select_message', this, this._selectMessage)
             .on('unselect_message', this, this._unselectMessage);
@@ -814,7 +806,6 @@ var Discuss = AbstractAction.extend({
             .on('unsubscribe_from_channel', this, this._onChannelLeft)
             .on('updated_im_status', this, this._onUpdatedImStatus)
             .on('update_needaction', this, this._onUpdateNeedaction)
-            .on('update_starred', this, this._onUpdateStarred)
             .on('update_thread_unread_counter', this, this._onUpdateThreadUnreadCounter)
             .on('activity_updated', this, this._onActivityUpdated)
             .on('update_typing_partners', this, this._onTypingPartnersUpdated)
@@ -863,18 +854,6 @@ var Discuss = AbstractAction.extend({
     },
     /**
      * @private
-     * @param {boolean} disabled
-     * @param {string} type
-     */
-    _updateButtonStatus: function (disabled, type) {
-        if (this._thread.getID() === 'mailbox_starred') {
-            this.$buttons
-                .find('.o_mail_discuss_button_unstar_all')
-                .toggleClass('disabled', disabled);
-        }
-    },
-    /**
-     * @private
      */
     _updateControlPanel: function () {
         this.updateControlPanel({
@@ -901,16 +880,6 @@ var Discuss = AbstractAction.extend({
             this.$buttons
                 .find('.o_mail_discuss_button_invite, .o_mail_discuss_button_settings')
                 .removeClass('d-none d-md-inline-block')
-                .addClass('d-none');
-        }
-        // Unstar All
-        if (thread.getID() === 'mailbox_starred') {
-            this.$buttons
-                .find('.o_mail_discuss_button_unstar_all')
-                .removeClass('d-none');
-        } else {
-            this.$buttons
-                .find('.o_mail_discuss_button_unstar_all')
                 .addClass('d-none');
         }
 
@@ -1091,16 +1060,12 @@ var Discuss = AbstractAction.extend({
         var self = this;
         var currentThreadID = this._thread.getID();
         if (
-            (currentThreadID === 'mailbox_starred' && !message.isStarred()) ||
             (currentThreadID === 'mailbox_inbox' && !message.isNeedaction())
         ) {
             this._thread.fetchMessages(this.domain)
                 .then(function () {
                     var options = self._getThreadRenderingOptions();
-                    self._threadWidget.removeMessageAndRender(message.getID(), self._thread, options)
-                        .then(function () {
-                            self._updateButtonStatus(!self._thread.hasMessages(), type);
-                        });
+                    self._threadWidget.removeMessageAndRender(message.getID(), self._thread, options);
                 });
         } else if (_.contains(message.getThreadIDs(), currentThreadID)) {
             this._fetchAndRenderThread();
@@ -1240,12 +1205,6 @@ var Discuss = AbstractAction.extend({
     },
     /**
      * @private
-     */
-    _onUnstarAllClicked: function () {
-        this.call('mail_service', 'unstarAll');
-    },
-    /**
-     * @private
      * @param {integer} channelID
      */
     _onUpdateChannel: function (channelID) {
@@ -1264,12 +1223,6 @@ var Discuss = AbstractAction.extend({
      * @private
      */
     _onUpdateNeedaction: function () {
-        this._throttledUpdateThreads();
-    },
-    /**
-     * @private
-     */
-    _onUpdateStarred: function () {
         this._throttledUpdateThreads();
     },
     /**

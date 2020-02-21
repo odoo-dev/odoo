@@ -385,17 +385,6 @@ var MailManager =  AbstractService.extend({
             return _.sortBy(suggestions, 'label');
         });
     },
-    /**
-     * Unstars all messages from all channels
-     *
-     * @returns {Promise}
-     */
-    unstarAll: function () {
-        return this._rpc({
-            model: 'mail.message',
-            method: 'unstar_all',
-        });
-    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -834,10 +823,6 @@ var MailManager =  AbstractService.extend({
             name: _t("Inbox"),
         });
         this._addMailbox({
-            id: 'starred',
-            name: _t("Starred"),
-        });
-        this._addMailbox({
             id: 'history',
             name: _t("History"),
         });
@@ -1147,7 +1132,7 @@ var MailManager =  AbstractService.extend({
     /**
      * Sort threads
      *
-     * In case of mailboxes (Inbox, Starred), the name is translated
+     * In case of mailboxes (Inbox) the name is translated
      * thanks to _lt (lazy translate). In this case, channel.getName() is an
      * object, not a string.
      *
@@ -1238,26 +1223,15 @@ var MailManager =  AbstractService.extend({
     },
     /**
      * Update the mailboxes with mail data fetched from server, namely 'Inbox',
-     * 'Starred', 'History'
+     * 'History'.
      *
      * @private
      * @param {Object} data
      * @param {integer} [data.needaction_inbox_counter=0] states the mailbox
      *   counter to set to 'Inbox'
-     * @param {integer} [data.starred_counter=0] states the mailbox counter to
-     *   set to 'Starred'
      */
     _updateMailboxesFromServer: function (data) {
         this.getMailbox('inbox').setMailboxCounter(data.needaction_inbox_counter || 0);
-        this.getMailbox('starred').setMailboxCounter(data.starred_counter || 0);
-
-        if (data.is_moderator) {
-            this._addMailbox({
-                id: 'moderation',
-                name: _t("Moderate Messages"),
-                mailboxCounter: data.moderation_counter || 0,
-            });
-        }
     },
     /**
      * Update mail failures with mail data fetched from the server
