@@ -8,8 +8,8 @@ const Sidebar = require('mail.component.DiscussSidebar');
 const MobileNavbar = require('mail.component.MobileMessagingNavbar');
 const ModerationDiscardDialog = require('mail.component.ModerationDiscardDialog');
 const ModerationRejectDialog = require('mail.component.ModerationRejectDialog');
+const NotificationList = require('mail.component.NotificationList');
 const Thread = require('mail.component.Thread');
-const ThreadPreviewList = require('mail.component.ThreadPreviewList');
 const useStore = require('mail.hooks.useStore');
 
 const { Component, useState } = owl;
@@ -639,9 +639,9 @@ Object.assign(Discuss, {
         MobileNavbar,
         ModerationDiscardDialog,
         ModerationRejectDialog,
+        NotificationList,
         Sidebar,
         Thread,
-        ThreadPreviewList,
     },
     props: {
         initActiveThreadLocalId: String,

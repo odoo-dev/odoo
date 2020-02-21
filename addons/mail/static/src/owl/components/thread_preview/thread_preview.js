@@ -96,11 +96,10 @@ class ThreadPreview extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        this.trigger('o-clicked', {
-            threadLocalId: this.props.threadLocalId,
+        this.trigger('o-select-thread', {
+            threadLocalId: this.storeProps.thread.localId,
         });
     }
-
     /**
      * @private
      * @param {MouseEvent} ev

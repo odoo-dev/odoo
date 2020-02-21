@@ -207,7 +207,7 @@ QUnit.test('basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreviewList`
+            .o_NotificationList`
         ).length,
         1,
         "should display thread preview list"
@@ -215,7 +215,7 @@ QUnit.test('basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreviewList_noConversation`
+            .o_NotificationList_noConversation`
         ).length,
         1,
         "should display no conversation in thread preview list"
