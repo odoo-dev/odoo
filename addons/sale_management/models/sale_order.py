@@ -220,11 +220,11 @@ class SaleOrderOption(models.Model):
             return [('line_id', '=', False)]
         return [('line_id', '!=', False)]
 
-    @api.onchange('product_id', 'uom_id')
+    @api.onchange('product_id', 'uom_id', 'quantity')
     def _onchange_product_id(self):
         if not self.product_id:
             return
-        product = self.product_id.with_context(lang=self.order_id.partner_id.lang)
+        product = self.product_id.with_context(lang=self.order_id.partner_id.lang, quantity=self.quantity)
         self.name = product.get_product_multiline_description_sale()
         self.uom_id = self.uom_id or product.uom_id
         # To compute the discount a so line is created in cache
