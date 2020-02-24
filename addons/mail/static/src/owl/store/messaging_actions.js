@@ -961,7 +961,7 @@ const actions = {
                 model: thread._model,
                 res_id: thread.id
             }));
-            dispatch('_loadNewMessagesOnThread', thread.localId);
+            await dispatch('_loadNewMessagesOnThread', thread.localId);
         }
         dispatch('_resetComposer', composerLocalId);
     },
