@@ -431,6 +431,7 @@ function beforeEach(self) {
         '_.throttle': _.throttle,
         'ComposerTestInput._loadSummernote': ComposerTextInput.prototype._loadSummernote,
         'window.fetch': window.fetch,
+        'window.Notification': window.Notification,
     };
 
     (function patch() {
@@ -460,6 +461,9 @@ function beforeEach(self) {
                 }
             };
         };
+        window.Notification = {
+            permission: "denied",
+        };
     })();
 
     function unpatch() {
@@ -467,6 +471,7 @@ function beforeEach(self) {
         _.throttle = originals['_.throttle'];
         window.fetch = originals['window.fetch'];
         ComposerTextInput.prototype._loadSummernote = originals['ComposerTestInput._loadSummernote'];
+        window.Notification = originals['window.Notification'];
     }
 
     Object.assign(self, { data, unpatch });
@@ -718,6 +723,8 @@ function patchMessagingService(messaging_service, session = {}) {
                 });
                 messagingEnv.store.actions._fetchPartnerImStatus = () => {};
                 messagingEnv.store.actions._loopFetchPartnerImStatus = () => {};
+                // TODO FIXME `mail_bot` should not have an impact on `mail` tests
+                messagingEnv.store.actions.checkOdoobotRequest = state => state.mailbotHasRequest = false;
             },
         },
     });

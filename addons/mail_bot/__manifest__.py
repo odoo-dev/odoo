@@ -22,5 +22,8 @@
     ],
     'qweb': [
         'views/discuss.xml',
+        'static/src/owl/components/messaging_menu/messaging_menu.xml',
+        'static/src/owl/components/notification_list/notification_list.xml',
+        'static/src/owl/components/notification_request/notification_request.xml',
     ],
 }
