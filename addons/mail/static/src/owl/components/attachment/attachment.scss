@@ -61,10 +61,21 @@
 
 .o_Attachment_image {
     margin: 3px;
-    &.o-details-overlay{
+    &.o-details-overlay {
         position: relative;
-        min-width: 200px;
-        min-height: 200px;
+
+        &.o-small {
+            min-width: 100px;
+            min-height: 100px;
+        }
+        &.o-medium {
+            min-width: 200px;
+            min-height: 200px;
+        }
+        &.o-large {
+            min-width: 400px;
+            min-height: 400px;
+        }
 
         &:hover {
             .o_Attachment_imageOverlay {

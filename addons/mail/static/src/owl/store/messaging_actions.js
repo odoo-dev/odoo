@@ -378,6 +378,7 @@ const actions = {
                 ['res_id', '=', thread.id],
                 ['res_model', '=', thread._model],
             ],
+            orderBy: [{ name: 'id', asc: false }],
             fields: ['id', 'name', 'mimetype'],
         });
         const attachmentLocalIds = [];
@@ -3326,7 +3327,7 @@ const actions = {
         const threadAttachmentLocalIds = thread.attachmentLocalIds;
         if (!threadAttachmentLocalIds || !threadAttachmentLocalIds.includes(attachmentLocalId)) {
             dispatch('_updateThread', threadLocalId, {
-                attachmentLocalIds: threadAttachmentLocalIds.concat([attachmentLocalId]),
+                attachmentLocalIds: [attachmentLocalId].concat(threadAttachmentLocalIds),
             });
         }
         // ATTACHMENT --> THREAD LINK

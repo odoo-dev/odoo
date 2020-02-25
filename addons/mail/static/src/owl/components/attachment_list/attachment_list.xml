@@ -9,6 +9,7 @@
                     attachmentLocalId="attachmentLocalId"
                     attachmentLocalIds="props.attachmentLocalIds"
                     detailsMode="props.attachmentsDetailsMode"
+                    imageSize="props.attachmentsImageSize"
                     isDownloadable="props.areAttachmentsDownloadable"
                     isEditable="props.areAttachmentsEditable"
                     showExtension="props.showAttachmentsExtensions"
