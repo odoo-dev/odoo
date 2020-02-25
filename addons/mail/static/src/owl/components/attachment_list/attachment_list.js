@@ -30,6 +30,10 @@ AttachmentList.props = {
         type: String, //['auto', 'card', 'hover', 'none']
         optional: true,
     },
+    attachmentsImageSize: {
+        type: String, //['small', 'medium', 'large']
+        optional: true,
+    },
     showAttachmentsExtensions: {
         type: Boolean,
         optional: true,

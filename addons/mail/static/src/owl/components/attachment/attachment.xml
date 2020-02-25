@@ -16,7 +16,10 @@
             <div class="o_Attachment_image o_image" t-on-click="_onClickImage"
                 t-att-class="{
                     'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
-                    'o-details-overlay': detailsMode !== 'card'
+                    'o-details-overlay': detailsMode !== 'card',
+                    'o-large': props.imageSize === 'large',
+                    'o-medium': props.imageSize === 'medium',
+                    'o-small': props.imageSize === 'small',
                 }" t-att-href="attachmentUrl" t-att-style="imageStyle" t-att-data-mimetype="storeProps.attachment.mimetype"
             >
                 <t t-if="(props.showFilename or props.showExtension) and detailsMode === 'hover'">
@@ -24,7 +27,7 @@
                         <div class="o_Attachment_details o_Attachment_imageOverlayDetails">
                             <t t-if="props.showFilename">
                                 <div class="o_Attachment_filename">
-                                    <t t-esc="storeProps.attachment.filename"/>
+                                    <t t-esc="env.store.getters.attachmentDisplayName(props.attachmentLocalId)"/>
                                 </div>
                             </t>
                             <t t-if="props.showExtension">
@@ -59,7 +62,7 @@
                 <div class="o_Attachment_details">
                     <t t-if="props.showFilename">
                         <div class="o_Attachment_filename">
-                            <t t-esc="storeProps.attachment.filename"/>
+                            <t t-esc="env.store.getters.attachmentDisplayName(props.attachmentLocalId)"/>
                         </div>
                     </t>
                     <t t-if="props.showExtension">

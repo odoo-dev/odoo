@@ -124,6 +124,7 @@ class Attachment extends Component {
 Attachment.defaultProps = {
     attachmentLocalIds: [],
     detailsMode: 'auto',
+    imageSize: 'medium',
     isDownloadable: false,
     isEditable: true,
     showExtension: true,
@@ -138,9 +139,8 @@ Attachment.props = {
         type: Array,
         element: String,
     },
-    detailsMode: {
-        type: String,
-    }, //['auto', 'card', 'hover', 'none']
+    detailsMode: String, //['auto', 'card', 'hover', 'none']
+    imageSize: String, //['small', 'medium', 'large']
     isDownloadable: {
         type: Boolean,
     },
