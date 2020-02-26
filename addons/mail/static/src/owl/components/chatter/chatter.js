@@ -22,13 +22,17 @@ class Chatter extends Component {
             const chatter = state.chatters[props.chatterLocalId];
             const threadLocalId = chatter.threadLocalId;
             const thread = threadLocalId ? state.threads[threadLocalId] : undefined;
-            let attachments;
+            let attachments = [];
             if (thread) {
                 attachments = thread.attachmentLocalIds.map(attachmentLocalId =>
                     state.attachments[attachmentLocalId]
                 );
             }
             return { attachments, chatter, thread };
+        }, {
+            compareDepth: {
+                attachments: 1,
+            },
         });
         this._threadRef = useRef('thread');
     }
