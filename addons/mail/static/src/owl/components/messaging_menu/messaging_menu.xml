@@ -3,7 +3,8 @@
 
     <t t-name="mail.component.MessagingMenu" owl="1">
         <li class="o_MessagingMenu" t-att-class="{ show: storeProps.isOpen, 'o-mobile': storeProps.isMobile }">
-            <t t-if="!storeProps.isMobile or !props.activeMobileThread">
+            <!-- TODO FIXME restore mobile stuff here (activeMobileThread) -->
+            <t t-if="!storeProps.isMobile or true">
                 <a class="o_MessagingMenu_toggler o-no-caret" t-att-class="{ show: storeProps.isOpen }" href="#" t-on-click.stop.prevent="_onClickToggler" data-toggle="dropdown" data-display="static" title="Conversations" role="button" aria-expanded="false">
                     <i class="o_MessagingMenu_icon fa fa-comments-o" role="img" aria-label="Messages"/>
                     <t t-if="!storeProps.isMessagingReady">
@@ -16,7 +17,8 @@
                     </t>
                 </a>
             </t>
-            <t t-if="storeProps.isOpen and (!storeProps.isMobile or !props.activeMobileThread)">
+            <!-- TODO FIXME restore mobile stuff here (activeMobileThread) -->
+            <t t-if="storeProps.isOpen and (!storeProps.isMobile or true)">
                 <div class="o_MessagingMenu_dropdownMenu dropdown-menu dropdown-menu-right" t-att-class="{ 'o-mobile': storeProps.isMobile, 'o-messaging-not-ready': !storeProps.isMessagingReady }" role="menu">
                     <t t-if="!storeProps.isMessagingReady">
                         <span><i class="o_MessagingMenu_dropdownLoadingIcon fa fa-spinner fa-spin"/>Please wait...</span>
@@ -59,8 +61,8 @@
                             t-on-o-select-thread.stop="_onSelectThread"
                         />
                         <t t-if="storeProps.isMobile">
-                            <MobileNavbar
-                                class="o_MessagingMenu_mobileNavbar"
+                            <MobileMessagingNavbar
+                                class="o_MessagingMenu_mobileMessagingNavbar"
                                 activeTabId="storeProps.activeTabId"
                                 tabs="tabs"
                                 t-on-o-select-mobile-messaging-navbar-tab.stop="_onSelectMobileNavbarTab"

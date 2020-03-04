@@ -5,7 +5,7 @@ const AutocompleteInput = require('mail.component.AutocompleteInput');
 const Composer = require('mail.component.Composer');
 const MobileMailboxSelection = require('mail.component.DiscussMobileMailboxSelection');
 const Sidebar = require('mail.component.DiscussSidebar');
-const MobileNavbar = require('mail.component.MobileMessagingNavbar');
+const MobileMessagingNavbar = require('mail.component.MobileMessagingNavbar');
 const ModerationDiscardDialog = require('mail.component.ModerationDiscardDialog');
 const ModerationRejectDialog = require('mail.component.ModerationRejectDialog');
 const NotificationList = require('mail.component.NotificationList');
@@ -239,10 +239,21 @@ class Discuss extends Component {
         return this.env._t("Search user...");
     }
 
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    doMobileNewChannel() {
+        this.state.isAddingChannel = true;
+    }
+
+    doMobileNewMessage() {
+        this.state.isAddingChat = true;
+    }
     /**
      * @return {Object[]}
      */
-    get mobileNavbarTabs() {
+    getMobileMessagingNavbarTabs() {
         return [{
             icon: 'fa fa-inbox',
             id: 'mailbox',
@@ -257,19 +268,6 @@ class Discuss extends Component {
             label: this.env._t("Channel"),
         }];
     }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    doMobileNewChannel() {
-        this.state.isAddingChannel = true;
-    }
-
-    doMobileNewMessage() {
-        this.state.isAddingChat = true;
-    }
-
     /**
      * @return {boolean}
      */
@@ -637,7 +635,7 @@ Object.assign(Discuss, {
         AutocompleteInput,
         Composer,
         MobileMailboxSelection,
-        MobileNavbar,
+        MobileMessagingNavbar,
         ModerationDiscardDialog,
         ModerationRejectDialog,
         NotificationList,

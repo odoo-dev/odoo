@@ -1203,6 +1203,8 @@ const actions = {
                     name: newName,
                 },
             });
+        } else {
+            throw new Error(`Cannot rename ${threadLocalId}`);
         }
         thread.custom_channel_name = newName;
     },
@@ -2285,6 +2287,7 @@ const actions = {
      * @param {Object} param0.state
      * @param {Object} param1
      * @param {boolean} [param1.areAttachmentsLoaded=false]
+     * @param {string} [param1.correspondent_name] // TODO FIXME move this into im_livechat when we have entities
      * @param {string} [param1.channel_type]
      * @param {integer} [param1.counter]
      * @param {integer} [param1.create_uid]
@@ -2322,6 +2325,7 @@ const actions = {
         {
             areAttachmentsLoaded=false,
             channel_type,
+            correspondent_name, // TODO FIXME move this into im_livechat when we have entities
             counter,
             create_uid,
             custom_channel_name,
@@ -2361,6 +2365,7 @@ const actions = {
             cacheLocalIds: [],
             channel_type,
             composerLocalId: undefined,
+            correspondent_name, // TODO FIXME move this into im_livechat when we have entities
             counter,
             create_uid,
             custom_channel_name,
@@ -3365,6 +3370,7 @@ const actions = {
      * @param {Object} param1
      * @param {Object[]} [param1.channel_channel=[]]
      * @param {Object[]} [param1.channel_direct_message=[]]
+     * @param {Object[]} [param1.channel_livechat=[]] // TODO FIXME move this into im_livechat when we have entities
      * @param {Object[]} [param1.channel_private_group=[]]
      */
     _initMessagingChannels(
@@ -3372,6 +3378,7 @@ const actions = {
         {
             channel_channel=[],
             channel_direct_message=[],
+            channel_livechat = [], // TODO FIXME move this into im_livechat when we have entities
             channel_private_group=[],
         }
     ) {
@@ -3398,6 +3405,18 @@ const actions = {
             }
         }
         for (const data of channel_private_group) {
+            const threadLocalId = dispatch('insertThread', Object.assign({
+                _model: 'mail.channel',
+            }, data));
+            const thread = state.threads[threadLocalId];
+            if (thread.is_minimized) {
+                dispatch('openThread', thread.localId, {
+                    chatWindowMode: 'last',
+                });
+            }
+        }
+        // TODO FIXME move this into im_livechat when we have entities
+        for (const data of channel_livechat) {
             const threadLocalId = dispatch('insertThread', Object.assign({
                 _model: 'mail.channel',
             }, data));

@@ -18,10 +18,9 @@ class ChatWindowHeader extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const chatWindowLocalId = props.chatWindowLocalId;
-            const thread = state.threads[chatWindowLocalId];
+            const thread = state.threads[props.chatWindowLocalId];
             const threadName = thread
-                ? this.storeGetters.threadName(chatWindowLocalId)
+                ? this.storeGetters.threadName(thread.localId)
                 : undefined;
             return {
                 isMobile: state.isMobile,
@@ -29,20 +28,6 @@ class ChatWindowHeader extends Component {
                 threadName,
             };
         });
-    }
-
-    //--------------------------------------------------------------------------
-    // Getter / Setter
-    //--------------------------------------------------------------------------
-
-    /**
-     * @return {string}
-     */
-    get name() {
-        if (this.storeProps.thread) {
-            return this.storeProps.threadName;
-        }
-        return this.env._t("New message");
     }
 
     //--------------------------------------------------------------------------

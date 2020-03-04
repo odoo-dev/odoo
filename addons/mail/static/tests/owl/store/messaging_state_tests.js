@@ -209,6 +209,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     },
                     channel_type: undefined,
                     composerLocalId: undefined,
+                    correspondent_name: undefined, // TODO FIXME this should be added from im_livechat
                     counter: undefined,
                     create_uid: undefined,
                     custom_channel_name: undefined,
@@ -244,6 +245,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     },
                     channel_type: undefined,
                     composerLocalId: undefined,
+                    correspondent_name: undefined, // TODO FIXME this should be added from im_livechat
                     counter: 0,
                     create_uid: undefined,
                     custom_channel_name: undefined,
@@ -279,6 +281,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     },
                     channel_type: undefined,
                     composerLocalId: undefined,
+                    correspondent_name: undefined, // TODO FIXME this should be added from im_livechat
                     counter: 0,
                     create_uid: undefined,
                     custom_channel_name: undefined,
@@ -304,7 +307,7 @@ QUnit.test("global state after default '/mail/init_messaging' RPC data", async f
                     state: undefined,
                     typingMemberLocalIds: [],
                     uuid: undefined,
-                }
+                },
             }
         }
     );

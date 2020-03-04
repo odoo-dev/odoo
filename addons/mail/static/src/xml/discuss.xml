@@ -69,7 +69,6 @@
         <t t-set="type" t-value="'multi_user_channel'"/>
         <t t-call="mail.discuss.SidebarTitle">
             <t t-set="title">Channels</t>
-            <t t-set="icon" t-value="fa-users"/>
         </t>
         <t t-call="mail.discuss.SidebarItems">
             <t t-set="displayHash" t-value="true"/>
@@ -79,7 +78,6 @@
         <t t-set="type" t-value="'dm_chat'"/>
         <t t-call="mail.discuss.SidebarTitle">
             <t t-set="title">Direct Messages</t>
-            <t t-set="icon" t-value="fa-user"/>
         </t>
         <t t-call="mail.discuss.SidebarItems">
             <t t-set="displayStatus" t-value="true"/>

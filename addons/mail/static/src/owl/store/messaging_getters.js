@@ -140,7 +140,7 @@ const getters = {
             .sort((channel1, channel2) => {
                 const channel1Name = getters.threadName(channel1.localId);
                 const channel2Name = getters.threadName(channel2.localId);
-                channel1Name < channel2Name ? -1 : 1;
+                return channel1Name < channel2Name ? -1 : 1;
             });
     },
     /**
@@ -174,7 +174,7 @@ const getters = {
             .sort((chat1, chat2) => {
                 const chat1Name = getters.threadName(chat1.localId);
                 const chat2Name = getters.threadName(chat2.localId);
-                chat1Name < chat2Name ? -1 : 1;
+                return chat1Name < chat2Name ? -1 : 1;
             });
     },
     /**
@@ -306,6 +306,39 @@ const getters = {
         return state.partnerRootLocalId === partnerLocalId;
     },
     /**
+     * TODO FIXME move this into im_livechat when we have entities
+     *
+     * @private
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @return {Object} filtered threads that are livechats
+     */
+    livechats({ state }) {
+        return filterObject(state.threads, thread =>
+            thread.channel_type === 'livechat'
+        );
+    },
+    /**
+     * TODO FIXME move this into im_livechat when we have entities
+     *
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @return {mail.store.model.Thread[]} ordered list of livechats
+     */
+    livechatList({ getters }) {
+        const livechats = getters.livechats();
+        return Object
+            .values(livechats)
+            .sort((livechat1, livechat2) => {
+                const livechat1Name = getters.threadName(livechat1.localId);
+                const livechat2Name = getters.threadName(livechat2.localId);
+                // TODO FIXME, should be sorted by create date for consistency maybe?
+                // but in master it is sorted by last message date (in discuss)
+                // (and should always be by counter (yes/no) and then last message date in messaging menu)
+                return livechat1Name < livechat2Name ? -1 : 1;
+            });
+    },
+    /**
      * @param {Object} param0
      * @param {Object} param0.getters
      * @return {mail.store.model.Thread[]} ordered list of mailboxes
@@ -329,7 +362,7 @@ const getters = {
                 }
                 const mailbox1Name = getters.threadName(mailbox1.localId);
                 const mailbox2Name = getters.threadName(mailbox2.localId);
-                mailbox1Name < mailbox2Name ? -1 : 1;
+                return mailbox1Name < mailbox2Name ? -1 : 1;
             });
     },
     /**
@@ -364,6 +397,7 @@ const getters = {
                 ) {
                     return 1;
                 }
+                // TODO FIXME they are sorted by date of last message on master (for messaging menu)
                 if (
                     mailChannel1.message_unread_counter &&
                     mailChannel2.message_unread_counter &&
@@ -373,7 +407,7 @@ const getters = {
                 }
                 const mailChannel1Name = getters.threadName(mailChannel1.localId);
                 const mailChannel2Name = getters.threadName(mailChannel2.localId);
-                mailChannel1Name < mailChannel2Name ? -1 : 1;
+                return mailChannel1Name < mailChannel2Name ? -1 : 1;
             });
     },
     /**
@@ -489,6 +523,16 @@ const getters = {
         );
     },
     /**
+     * TODO FIXME move this into im_livechat when we have entities
+     *
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @return {Object} filtered livechats that are pinned
+     */
+    pinnedLivechatList({ getters }) {
+        return getters.livechatList().filter(livechat => livechat.isPinned);
+    },
+    /**
      * @param {Object} param0
      * @param {Object} param0.getters
      * @return {mail.store.model.Thread[]} ordered list of pinned mailboxes
@@ -515,7 +559,9 @@ const getters = {
     pinnedMailChannelAmount({ getters }) {
         const pinnedChannelAmount = getters.pinnedChannelList().length;
         const pinnedChatAmount = getters.pinnedChatList().length;
-        return pinnedChannelAmount + pinnedChatAmount;
+        // TODO FIXME move this into im_livechat when we have entities
+        const pinnedLivechatAmount = getters.pinnedLivechatList().length;
+        return pinnedChannelAmount + pinnedChatAmount + pinnedLivechatAmount;
     },
     /**
      * @param {Object} param0
@@ -549,6 +595,10 @@ const getters = {
         if (thread.channel_type === 'chat' && thread.directPartnerLocalId) {
             const directPartner = state.partners[thread.directPartnerLocalId];
             return thread.custom_channel_name || directPartner.name;
+        }
+        // TODO FIXME move this into im_livechat when we have entities
+        if (thread.channel_type === 'livechat' && thread.correspondent_name) {
+            return thread.correspondent_name;
         }
         return thread.name;
     },

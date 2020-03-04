@@ -103,10 +103,10 @@
             />
         </t>
         <t t-if="storeProps.isMobile and !state.isReplyingToMessage">
-            <MobileNavbar
-                class="o_Discuss_mobileNavbar"
+            <MobileMessagingNavbar
+                class="o_Discuss_mobileMessagingNavbar"
                 activeTabId="storeProps.activeMobileNavbarTabId"
-                tabs="mobileNavbarTabs"
+                tabs="getMobileMessagingNavbarTabs()"
                 t-on-o-select-mobile-messaging-navbar-tab.stop="_onSelectMobileNavbarTab"
             />
         </t>

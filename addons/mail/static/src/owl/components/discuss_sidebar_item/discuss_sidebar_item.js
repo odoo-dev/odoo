@@ -40,6 +40,17 @@ class DiscussSidebarItem extends Component {
     }
 
     //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {boolean}
+     */
+    hasUnpin() {
+        return this.storeProps.thread.channel_type === 'chat';
+    }
+
+    //--------------------------------------------------------------------------
     // Getters / Setters
     //--------------------------------------------------------------------------
 
@@ -159,7 +170,7 @@ class DiscussSidebarItem extends Component {
      * @param {MouseEvent} ev
      */
     _onClickUnpin(ev) {
-        return this.storeDispatch('unsubscribeFromChannel', this.storeProps.threadLocalId);
+        return this.storeDispatch('unsubscribeFromChannel', this.storeProps.thread.localId);
     }
 
     /**

@@ -20,7 +20,7 @@
                 <t t-if="!props.isSquashed">
                     <div class="o_Message_authorAvatarContainer o_Message_sidebarItem">
                         <img class="o_Message_authorAvatar rounded-circle" t-att-class="{ o_Message_authorRedirect: hasAuthorRedirect, o_redirect: hasAuthorRedirect }" t-att-src="avatar" t-on-click="_onClickAuthor" t-att-title="hasAuthorRedirect ? 'Open chat' : ''" alt=""/>
-                        <t t-if="storeProps.author.im_status">
+                        <t t-if="storeProps.author and storeProps.author.im_status">
                             <PartnerImStatusIcon
                                 class="o_Message_partnerImStatusIcon"
                                 t-att-class="{

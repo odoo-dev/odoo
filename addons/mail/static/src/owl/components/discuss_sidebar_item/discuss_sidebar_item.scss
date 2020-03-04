@@ -5,7 +5,7 @@
 .o_DiscussSidebarItem {
     display: flex;
     align-items: center;
-    padding: 5px 0;
+    padding: map-get($spacers, 1) 0;
 
     &:hover .o_DiscussSidebarItem_commands {
         display: flex;

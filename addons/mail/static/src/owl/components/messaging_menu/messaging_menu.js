@@ -2,7 +2,7 @@ odoo.define('mail.component.MessagingMenu', function (require) {
 'use strict';
 
 const AutocompleteInput = require('mail.component.AutocompleteInput');
-const MobileNavbar = require('mail.component.MobileMessagingNavbar');
+const MobileMessagingNavbar = require('mail.component.MobileMessagingNavbar');
 const NotificationList = require('mail.component.NotificationList');
 const useStore = require('mail.hooks.useStore');
 
@@ -252,7 +252,7 @@ class MessagingMenu extends Component {
 Object.assign(MessagingMenu, {
     components: {
         AutocompleteInput,
-        MobileNavbar,
+        MobileMessagingNavbar,
         NotificationList,
     },
     template: 'mail.component.MessagingMenu',

@@ -37,8 +37,10 @@
                             <div class="o_DiscussSidebarItem_command o_DiscussSidebarItem_commandLeave fa fa-times" t-on-click.stop="_onClickLeave" title="Leave this channel" role="img" aria-label="Leave this channel"/>
                         </t>
                     </t>
-                    <t t-elif="storeProps.thread.channel_type === 'chat'">
+                    <t t-if="storeProps.thread.channel_type === 'chat'">
                         <div class="o_DiscussSidebarItem_command o_DiscussSidebarItem_commandRename fa fa-cog" t-on-click.stop="_onClickRename" title="Rename conversation" role="img" aria-label="Rename conversation"/>
+                    </t>
+                    <t t-if="hasUnpin()">
                         <t t-if="!storeProps.thread.message_unread_counter">
                             <div class="fa fa-times o_DiscussSidebarItem_command o_DiscussSidebarItem_commandUnpin" t-on-click.stop="_onClickUnpin" title="Unpin conversation" role="img" aria-label="Unpin conversation"/>
                         </t>

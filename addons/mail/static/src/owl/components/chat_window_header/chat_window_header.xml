@@ -14,8 +14,11 @@
                     threadLocalId="props.chatWindowLocalId"
                 />
             </t>
-            <div class="o_ChatWindowHeader_item o_ChatWindowHeader_name" t-att-title="name">
-                <t t-esc="name"/>
+            <div class="o_ChatWindowHeader_item o_ChatWindowHeader_name">
+                <t t-if="storeProps.thread">
+                    <t t-esc="storeProps.threadName"/>
+                </t>
+                <t t-else="">New message</t>
             </div>
             <t t-if="storeProps.thread and storeProps.thread.message_unread_counter > 0">
                 <div class="o_ChatWindowHeader_counter o_ChatWindowHeader_item">

@@ -7,9 +7,13 @@
         -->
         <template id="assets_backend" name="im_livechat assets backend" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/im_livechat/static/src/js/im_livechat_backend.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/src/js/im_livechat_channel_form_view.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/src/js/im_livechat_channel_form_controller.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/owl/components/discuss/discuss.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/owl/components/discuss_sidebar/discuss_sidebar.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/owl/components/discuss_sidebar_item/discuss_sidebar_item.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/owl/components/notification_list/notification_list.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/owl/components/thread_preview/thread_preview.js"></script>
                 <link rel="stylesheet" type="text/scss" href="/im_livechat/static/src/scss/im_livechat_history.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/im_livechat/static/src/scss/im_livechat_form.scss"/>
             </xpath>
@@ -21,7 +25,7 @@
                 <script type="text/javascript" src="/im_livechat/static/src/js/models/website_livechat.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/src/js/models/website_livechat_message.js"></script>
 
-                <script type="text/javascript" src="/im_livechat/static/tests/discuss_livechat_tests.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/owl/components/discuss/discuss_tests.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/tests/website_livechat_window_tests.js"></script>
             </xpath>
         </template>

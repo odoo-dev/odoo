@@ -10,7 +10,7 @@
         <div class="o_ThreadPreview" t-att-class="{ 'o-muted': storeProps.thread.message_unread_counter === 0 }" t-on-click="_onClick" t-att-data-thread-local-id="props.threadLocalId">
             <div class="o_ThreadPreview_sidebar">
                 <div class="o_ThreadPreview_imageContainer o_ThreadPreview_sidebarItem">
-                    <img class="o_ThreadPreview_image rounded-circle" t-att-src="image" alt=""/>
+                    <img class="o_ThreadPreview_image rounded-circle" t-att-src="getImage()" alt="Thread Image"/>
                     <t t-if="storeProps.threadDirectPartner and storeProps.threadDirectPartner.im_status">
                         <PartnerImStatusIcon
                             class="o_ThreadPreview_partnerImStatusIcon"

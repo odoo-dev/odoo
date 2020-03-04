@@ -47,20 +47,6 @@ class ThreadPreview extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * Get the image route of the thread.
-     *
-     * @return {string}
-     */
-    get image() {
-        const directPartnerLocalId = this.storeProps.thread.directPartnerLocalId;
-        if (directPartnerLocalId) {
-            const directPartner = this.env.store.state.partners[directPartnerLocalId];
-            return `/web/image/res.partner/${directPartner.id}/image_128`;
-        }
-        return `/web/image/mail.channel/${this.storeProps.thread.id}/image_128`;
-    }
-
-    /**
      * Get inline content of the last message of this conversation.
      *
      * @return {string}
@@ -72,6 +58,24 @@ class ThreadPreview extends Component {
         return mailUtils.parseAndTransform(
             this.storeGetters.messagePrettyBody(this.storeProps.lastMessage.localId),
             mailUtils.inline);
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * Get the image route of the thread.
+     *
+     * @return {string}
+     */
+    getImage() {
+        const directPartnerLocalId = this.storeProps.thread.directPartnerLocalId;
+        if (directPartnerLocalId) {
+            const directPartner = this.env.store.state.partners[directPartnerLocalId];
+            return `/web/image/res.partner/${directPartner.id}/image_128`;
+        }
+        return `/web/image/mail.channel/${this.storeProps.thread.id}/image_128`;
     }
 
     /**

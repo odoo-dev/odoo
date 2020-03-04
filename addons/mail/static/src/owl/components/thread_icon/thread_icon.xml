@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.component.ThreadIcon" owl="1">
-        <div class="o_ThreadIcon">
+        <div name="root" class="o_ThreadIcon">
             <t t-if="storeProps.thread.channel_type === 'channel'">
                 <t t-if="storeProps.thread.public === 'private'">
                     <!-- AKU TODO: channel of type 'groups' should maybe also have lock icon -->
@@ -22,6 +22,7 @@
                 <t t-elif="storeProps.directPartner.im_status === 'away'">
                     <div class="o_ThreadIcon_away fa fa-circle" title="Away"/>
                 </t>
+                <!-- TODO FIXME this condition should probably be at the top to be applied before the others -->
                 <t t-elif="storeProps.thread.typingMemberLocalIds.includes(storeProps.thread.directPartnerLocalId)">
                     <div class="o_ThreadIcon_typing" title="Is typing...">
                         <span class="o_ThreadIcon_typingDot"/>

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.component.DiscussSidebar" owl="1">
-        <div class="o_DiscussSidebar">
+        <div name="root" class="o_DiscussSidebar">
             <div class="o_DiscussSidebar_group o_DiscussSidebar_groupMailbox">
                 <t t-foreach="storeProps.pinnedMailboxList" t-as="mailbox" t-key="mailbox.localId">
                     <SidebarItem

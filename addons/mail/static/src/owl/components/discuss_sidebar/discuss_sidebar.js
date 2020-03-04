@@ -18,20 +18,8 @@ class DiscussSidebar extends Component {
         super(...args);
         this.state = useState({ quickSearchValue: "" });
         this.storeGetters = useGetters();
-        this.storeProps = useStore(() => {
-            return {
-                pinnedChannelList: this.storeGetters.pinnedChannelList(),
-                pinnedChatList: this.storeGetters.pinnedChatList(),
-                pinnedMailboxList: this.storeGetters.pinnedMailboxList(),
-                pinnedMailChannelAmount: this.storeGetters.pinnedMailChannelAmount(),
-            };
-        }, {
-            compareDepth: {
-                pinnedChannelList: 1,
-                pinnedChatList: 1,
-                pinnedMailboxList: 1,
-                pinnedMailChannelAmount: 1,
-            },
+        this.storeProps = useStore((...args) => this._useStore(...args), {
+            compareDepth: () => this._compareDepth(),
         });
         /**
          * Reference of the quick search input. Useful to filter channels and
@@ -56,7 +44,7 @@ class DiscussSidebar extends Component {
         const qsVal = this.state.quickSearchValue.toLowerCase();
         return this.storeProps.pinnedChannelList.filter(channel => {
             const nameVal = this.storeGetters.threadName(channel.localId).toLowerCase();
-            return nameVal.indexOf(qsVal) !== -1;
+            return nameVal.includes(qsVal);
         });
     }
 
@@ -72,8 +60,39 @@ class DiscussSidebar extends Component {
         const qsVal = this.state.quickSearchValue.toLowerCase();
         return this.storeProps.pinnedChatList.filter(chat => {
             const nameVal = this.storeGetters.threadName(chat.localId).toLowerCase();
-            return nameVal.indexOf(qsVal) !== -1;
+            return nameVal.includes(qsVal);
         });
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @returns {Object}
+     */
+    _compareDepth() {
+        return {
+            pinnedChannelList: 1,
+            pinnedChatList: 1,
+            pinnedMailboxList: 1,
+            pinnedMailChannelAmount: 1,
+        };
+    }
+    /**
+     * @private
+     * @param {Object} state
+     * @param {Object} props
+     * @returns {Object}
+     */
+    _useStore(state, props) {
+        return {
+            pinnedChannelList: this.storeGetters.pinnedChannelList(),
+            pinnedChatList: this.storeGetters.pinnedChatList(),
+            pinnedMailboxList: this.storeGetters.pinnedMailboxList(),
+            pinnedMailChannelAmount: this.storeGetters.pinnedMailChannelAmount(),
+        };
     }
 
     //--------------------------------------------------------------------------

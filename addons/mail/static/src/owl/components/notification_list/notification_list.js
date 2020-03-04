@@ -51,22 +51,12 @@ class NotificationList extends Component {
      * @private
      */
     _useStore(state, props) {
-        let threadLocalIds;
-        if (props.filter === 'mailbox') {
-            threadLocalIds = this.storeGetters.mailboxList().map(mailbox => mailbox.localId);
-        } else if (props.filter === 'channel') {
-            threadLocalIds = this.storeGetters.channelList().map(channel => channel.localId);
-        } else if (props.filter === 'chat') {
-            threadLocalIds = this.storeGetters.chatList().map(chat => chat.localId);
-        } else {
-            // "All" filter is for channels and chats
-            threadLocalIds = this.storeGetters.mailChannelList().map(mailChannel => mailChannel.localId);
-        }
-        const notifications = threadLocalIds.map(threadLocalId => {
+        const threads = this._useStoreThreads(state, props);
+        const notifications = threads.map(thread => {
             return {
-                threadLocalId,
+                threadLocalId: thread.localId,
                 type: 'thread',
-                uniqueId: threadLocalId,
+                uniqueId: thread.localId,
             };
         });
         return {
@@ -74,9 +64,30 @@ class NotificationList extends Component {
             notifications,
         };
     }
+    /**
+     * @private
+     * @param {Object} state
+     * @param {Object} props
+     * @returns {Object[]} threads
+     */
+    _useStoreThreads(state, props) {
+        if (props.filter === 'mailbox') {
+            return this.storeGetters.mailboxList();
+        } else if (props.filter === 'channel') {
+            return this.storeGetters.channelList();
+        } else if (props.filter === 'chat') {
+            return this.storeGetters.chatList();
+        } else if (props.filter === 'all') {
+            // "All" filter is for channels and chats
+            return this.storeGetters.mailChannelList();
+        } else {
+            throw new Error(`Unsupported filter ${props.filter}`);
+        }
+    }
 }
 
 Object.assign(NotificationList, {
+    _allowedFilters: ['all', 'mailbox', 'channel', 'chat'],
     components: { ThreadPreview },
     defaultProps: {
         filter: 'all',
@@ -84,7 +95,7 @@ Object.assign(NotificationList, {
     props: {
         filter: {
             type: String,
-            validate: prop => ['all', 'mailbox', 'channel', 'chat'].includes(prop),
+            validate: prop => NotificationList._allowedFilters.includes(prop),
         },
     },
     template: 'mail.component.NotificationList',
