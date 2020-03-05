@@ -126,6 +126,7 @@ function ChatterFactory({ Entity }) {
          */
         _update(data) {
             const prevActivityIds = this.activityIds || [];
+            const prevFollowerIds = this.followerIds || [];
             const prevMessageIds = this.messageIds || [];
             const prevThreadModel = this.threadModel;
             const prevThreadId = this.threadId;
@@ -191,6 +192,9 @@ function ChatterFactory({ Entity }) {
 
             if (prevActivityIds.join(',') !== this.activityIds.join(',')) {
                 this.refreshActivities();
+            }
+            if (prevFollowerIds.join(',') !== this.followerIds.join(',')) {
+                this.thread.refreshFollowers();
             }
             if (
                 this.threadId !== prevThreadId ||

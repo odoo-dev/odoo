@@ -1,8 +1,10 @@
 odoo.define('mail.messaging.component.Dialog', function (require) {
 'use strict';
 
+const useStore = require('mail.messaging.component_hook.useStore');
+
 const { Component } = owl;
-const { useRef, useStore } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class Dialog extends Component {
 

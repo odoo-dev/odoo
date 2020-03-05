@@ -6,7 +6,7 @@
     display: flex;
     align-items: center;
     flex: 0 0 auto;
-    margin-top: map_get($spacers, 4);
+    margin-top: map-get($spacers, 4);
     margin-bottom: map-get($spacers, 4);
 }
 

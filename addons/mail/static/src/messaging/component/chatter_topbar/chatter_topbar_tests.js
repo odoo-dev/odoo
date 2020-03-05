@@ -54,7 +54,7 @@ QUnit.module('ChatterTopbar', {
 });
 
 QUnit.test('base rendering', async function (assert) {
-    assert.expect(10);
+    assert.expect(8);
 
     await this.start({
         async mockRPC(route) {
@@ -106,24 +106,14 @@ QUnit.test('base rendering', async function (assert) {
         "attachments button should have a counter"
     );
     assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonFollow`).length,
+        document.querySelectorAll(`.o_ChatterTopbar_followerListMenu`).length,
         1,
-        "should have a follow button in chatter menu"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonFollowers`).length,
-        1,
-        "should have a followers button in chatter menu"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonFollowersCount`).length,
-        1,
-        "followers button should have a counter"
+        "should have a follower menu"
     );
 });
 
 QUnit.test('base disabled rendering', async function (assert) {
-    assert.expect(11);
+    assert.expect(8);
 
     await this.start({
         async mockRPC(route) {
@@ -172,19 +162,6 @@ QUnit.test('base disabled rendering', async function (assert) {
         document.querySelector(`.o_ChatterTopbar_buttonAttachmentsCount`).textContent,
         '0',
         "attachments button counter should be 0"
-    );
-    assert.ok(
-        document.querySelector(`.o_ChatterTopbar_buttonFollow`).disabled,
-        "follow button should be disabled"
-    );
-    assert.ok(
-        document.querySelector(`.o_ChatterTopbar_buttonFollowers`).disabled,
-        "followers button should be disabled"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonFollowersCount`).length,
-        1,
-        "followers button should have a counter"
     );
 });
 

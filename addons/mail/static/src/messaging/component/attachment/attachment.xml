@@ -43,14 +43,14 @@
                                     <div class="o_Attachment_action o_Attachment_actionUnlink"
                                         t-att-class="{
                                             'o-pretty': attachment.isLinkedToComposer,
-                                        }" t-on-click="_onClickUnlink" aria-label="Remove" title="Remove"
+                                        }" t-on-click="_onClickUnlink" title="Remove"
                                     >
                                         <i class="fa fa-times"/>
                                     </div>
                                 </t>
                                 <!-- Download button -->
                                 <t t-if="props.isDownloadable and !attachment.isTemporary" t-key="'download'">
-                                    <div class="o_Attachment_action o_Attachment_actionDownload" t-on-click="_onClickDownload" title="Download" aria-label="Download">
+                                    <div class="o_Attachment_action o_Attachment_actionDownload" t-on-click="_onClickDownload" title="Download">
                                         <i class="fa fa-download"/>
                                     </div>
                                 </t>
@@ -78,25 +78,25 @@
                     <div class="o_Attachment_aside" t-att-class="{ 'o-has-multiple-action': !attachment.isTemporary and props.isDownloadable and props.isEditable }">
                         <!-- Uploading icon -->
                         <t t-if="attachment.isTemporary and attachment.isLinkedToComposer">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemUploading" aria-label="Uploading" title="Uploading">
+                            <div class="o_Attachment_asideItem o_Attachment_asideItemUploading" title="Uploading">
                                 <i class="fa fa-spin fa-spinner"/>
                             </div>
                         </t>
                         <!-- Uploaded icon -->
                         <t t-if="!attachment.isTemporary and attachment.isLinkedToComposer">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemUploaded" title="Uploaded" aria-label="Uploaded">
+                            <div class="o_Attachment_asideItem o_Attachment_asideItemUploaded" title="Uploaded">
                                 <i class="fa fa-check"/>
                             </div>
                         </t>
                         <!-- Remove button -->
                         <t t-if="props.isEditable and !attachment.isTemporary">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemUnlink" t-att-class="{ 'o-pretty': attachment.isLinkedToComposer }" t-on-click="_onClickUnlink" title="Remove" aria-label="Remove">
+                            <div class="o_Attachment_asideItem o_Attachment_asideItemUnlink" t-att-class="{ 'o-pretty': attachment.isLinkedToComposer }" t-on-click="_onClickUnlink" title="Remove">
                                 <i class="fa fa-times"/>
                             </div>
                         </t>
                         <!-- Download button -->
                         <t t-if="props.isDownloadable and !attachment.isTemporary">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemDownload" t-on-click="_onClickDownload" title="Download" aria-label="Download">
+                            <div class="o_Attachment_asideItem o_Attachment_asideItemDownload" t-on-click="_onClickDownload" title="Download">
                                 <i class="fa fa-download"/>
                             </div>
                         </t>

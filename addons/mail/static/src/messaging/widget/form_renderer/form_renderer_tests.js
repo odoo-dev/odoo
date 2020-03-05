@@ -5,7 +5,6 @@ const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
-    pause,
     start,
 } = require('mail.messaging.testUtils');
 
@@ -95,7 +94,7 @@ QUnit.test('basic chatter rendering', async function (assert) {
 });
 
 QUnit.test('basic chatter rendering without followers', async function (assert) {
-    assert.expect(7);
+    assert.expect(6);
 
     this.data['res.partner'].records = [{
         activity_ids: [],
@@ -124,31 +123,40 @@ QUnit.test('basic chatter rendering without followers', async function (assert) 
         res_id: 2,
     });
 
-    assert.containsOnce(document.body, `.o_Chatter`,
+    assert.containsOnce(
+        document.body,
+        '.o_Chatter',
         "there should be a chatter"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar`,
+    assert.containsOnce(
+        document.body,
+        '.o_ChatterTopbar',
         "there should be a chatter topbar"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonAttachments`,
+    assert.containsOnce(
+        document.body,
+        '.o_ChatterTopbar_buttonAttachments',
         "there should be an attachment button"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonScheduleActivity`,
+    assert.containsOnce(
+        document.body,
+        '.o_ChatterTopbar_buttonScheduleActivity',
         "there should be a schedule activity button"
     );
-    assert.containsNone(document.body, `.o_ChatterTopbar_buttonFollow`,
-        "there should be no follow button"
+    assert.containsNone(
+        document.body,
+        '.o_FollowerListMenu',
+        "there should be no followers menu"
     );
-    assert.containsNone(document.body, `.o_ChatterTopbar_buttonFollowers`,
-        "there should be no followers button"
-    );
-    assert.containsOnce(document.body, `.o_Chatter_thread`,
+    assert.containsOnce(
+        document.body,
+        '.o_Chatter_thread',
         "there should be a thread"
     );
 });
 
 QUnit.test('basic chatter rendering without activities', async function (assert) {
-    assert.expect(7);
+    assert.expect(6);
 
     this.data['res.partner'].records = [{
         activity_ids: [],
@@ -177,31 +185,40 @@ QUnit.test('basic chatter rendering without activities', async function (assert)
         res_id: 2,
     });
 
-    assert.containsOnce(document.body, `.o_Chatter`,
+    assert.containsOnce(
+        document.body,
+        '.o_Chatter',
         "there should be a chatter"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar`,
+    assert.containsOnce(
+        document.body,
+        '.o_ChatterTopbar',
         "there should be a chatter topbar"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonAttachments`,
+    assert.containsOnce(
+        document.body,
+        '.o_ChatterTopbar_buttonAttachments',
         "there should be an attachment button"
     );
-    assert.containsNone(document.body, `.o_ChatterTopbar_buttonScheduleActivity`,
+    assert.containsNone(
+        document.body,
+        '.o_ChatterTopbar_buttonScheduleActivity',
         "there should be a schedule activity button"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonFollow`,
-        "there should be no follow button"
+    assert.containsOnce(
+        document.body,
+        '.o_FollowerListMenu',
+        "there should be a followers menu"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonFollowers`,
-        "there should be no followers button"
-    );
-    assert.containsOnce(document.body, `.o_Chatter_thread`,
+    assert.containsOnce(
+        document.body,
+        '.o_Chatter_thread',
         "there should be a thread"
     );
 });
 
 QUnit.test('basic chatter rendering without messages', async function (assert) {
-    assert.expect(7);
+    assert.expect(6);
 
     this.data['res.partner'].records = [{
         activity_ids: [],
@@ -230,25 +247,34 @@ QUnit.test('basic chatter rendering without messages', async function (assert) {
         res_id: 2,
     });
 
-    assert.containsOnce(document.body, `.o_Chatter`,
+    assert.containsOnce(
+        document.body,
+        '.o_Chatter',
         "there should be a chatter"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar`,
+    assert.containsOnce(
+        document.body,
+        '.o_ChatterTopbar',
         "there should be a chatter topbar"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonAttachments`,
+    assert.containsOnce(
+        document.body,
+        '.o_ChatterTopbar_buttonAttachments',
         "there should be an attachment button"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonScheduleActivity`,
+    assert.containsOnce(
+        document.body,
+        '.o_ChatterTopbar_buttonScheduleActivity',
         "there should be a schedule activity button"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonFollow`,
-        "there should be no follow button"
+    assert.containsOnce(
+        document.body,
+        '.o_FollowerListMenu',
+        "there should be a followers menu"
     );
-    assert.containsOnce(document.body, `.o_ChatterTopbar_buttonFollowers`,
-        "there should be no followers button"
-    );
-    assert.containsNone(document.body, `.o_Chatter_thread`,
+    assert.containsNone(
+        document.body,
+        '.o_Chatter_thread',
         "there should be a thread"
     );
 });
@@ -317,22 +343,23 @@ QUnit.test('chatter updating', async function (assert) {
             </form>
         `,
     });
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Chatter`).length,
-        1,
+    assert.containsOnce(
+        document.body,
+        '.o_Chatter',
         "there should be a chatter"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Message`).length,
-        0,
+    assert.containsNone(
+        document.body,
+        '.o_Message',
         "there should be no message"
     );
 
-    document.querySelector(`.o_pager_next`).click();
-    await afterNextRender();
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Message`).length,
-        1,
+    await afterNextRender(() => {
+        document.querySelector('.o_pager_next').click();
+    });
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
         "there should be a message"
     );
 });

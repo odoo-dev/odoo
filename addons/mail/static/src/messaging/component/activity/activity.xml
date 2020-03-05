@@ -9,14 +9,15 @@
                         <t t-if="activity.assignee">
                             <img class="o_Activity_userAvatar" t-attf-src="/web/image/res.users/{{ activity.assignee.id }}/image_128" t-att-alt="activity.assignee.nameOrDisplayName"/>
                         </t>
-                        <i class="o_Activity_icon fa"
+                        <div class="o_Activity_icon"
                             t-att-class="{
                                 'bg-success-full': activity.state === 'planned',
                                 'bg-warning-full': activity.state === 'today',
                                 'bg-danger-full': activity.state === 'overdue',
                             }"
-                            t-attf-class="{{ activity.icon }}"
-                        />
+                        >
+                            <i t-attf-class="{{ activity.icon }}"/>
+                        </div>
                     </div>
                 </div>
                 <div class="o_Activity_core">
@@ -47,7 +48,7 @@
                             </div>
                         </t>
                         <a class="o_Activity_detailsButton btn btn-link" t-on-click="_onClickDetailsButton" role="button">
-                            <i class="fa fa-info-circle" role="img" title="Info" aria-label="Info"/>
+                            <i class="fa fa-info-circle" role="img" title="Info"/>
                         </a>
                     </div>
 

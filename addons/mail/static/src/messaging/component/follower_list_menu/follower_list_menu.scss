@@ -1,0 +1,20 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_FollowerListMenu {
+    margin-inline-end: map-get($spacers, 3);
+    position: relative;
+}
+
+.o_FollowerListMenu_dropdown {
+    display: flex;
+    flex-flow: column;
+    padding-top: map-get($spacers, 0);
+    padding-bottom: map-get($spacers, 0);
+    overflow-y: auto;
+}
+
+.o_FollowerListMenu_followers {
+    display: flex;
+}

@@ -4,7 +4,7 @@
     <t t-name="mail.messaging.component.MailTemplate" owl="1">
         <div class="o_MailTemplate">
             <t t-if="mailTemplate">
-                <i class="fa fa-envelope-o" title="Mail" aria-label="Mail" role="img"/>
+                <i class="fa fa-envelope-o" title="Mail" role="img"/>
                 <span class="o_MailTemplate_name" t-esc="mailTemplate.name"/>
                 <span>:</span>
                 <button

@@ -177,7 +177,7 @@ function ThreadFactory({ Entity }) {
          */
         static async joinChannel(channelId, { autoselect = false } = {}) {
             const channel = this.channelFromId(channelId);
-            if (channel) {
+            if (channel && channel.isPinned) {
                 return;
             }
             const data = await this.env.rpc({
@@ -307,6 +307,31 @@ function ThreadFactory({ Entity }) {
         }
 
         /**
+         * Add current user to provided thread's followers.
+         */
+        async follow() {
+            await this.env.rpc({
+                model: this.model,
+                method: 'message_subscribe',
+                args: [[this.id]],
+                kwargs: {
+                    partner_ids: [this.env.messaging.currentPartner.id],
+                    context: {}, // FIXME empty context to be overridden in session.js with 'allowed_company_ids' task-2243187
+                },
+            });
+            this.refreshFollowers();
+        }
+
+        /**
+         * @returns {boolean}
+         */
+        get isCurrentPartnerFollowing() {
+            return this.followers.some(follower =>
+                follower.partner && follower.partner === this.env.messaging.currentPartner
+            );
+        }
+
+        /**
          * @returns {boolean}
          */
         get isModeratedByUser() {
@@ -419,6 +444,48 @@ function ThreadFactory({ Entity }) {
         }
 
         /**
+         * Open a dialog to add channels as followers.
+         */
+        promptAddChannelFollower() {
+            this._promptAddFollower({ mail_invite_follower_channel_only: true });
+        }
+
+        /**
+         * Open a dialog to add partners as followers.
+         */
+        promptAddPartnerFollower() {
+            this._promptAddFollower({ mail_invite_follower_channel_only: false });
+        }
+
+        /**
+         * Refresh followers information from server.
+         */
+        async refreshFollowers() {
+            // FIXME Do that with only one RPC (see task-2243180)
+            const [{ message_follower_ids: followerIds }] = await this.env.rpc({
+                model: this.model,
+                method: 'read',
+                args: [this.id, ['message_follower_ids']],
+            });
+            if (followerIds && followerIds.length > 0) {
+                const { followers } = await this.env.rpc({
+                    route: '/mail/read_followers',
+                    params: {
+                        follower_ids: followerIds,
+                        context: {}, // FIXME empty context to be overridden in session.js with 'allowed_company_ids' task-2243187
+                    }
+                });
+                this.unlink({ followers: null });
+                for (const data of followers) {
+                    const follower = this.env.entities.Follower.insert(data);
+                    this.link({ followers: follower });
+                }
+            } else {
+                this.unlink({ followers: null });
+            }
+        }
+
+        /**
          * Rename the given thread with provided new name.
          *
          * @param {string} newName
@@ -435,6 +502,16 @@ function ThreadFactory({ Entity }) {
                 });
             }
             this.update({ custom_channel_name: newName });
+        }
+
+        /**
+         * Unfollow current partner from this thread.
+         */
+        async unfollow() {
+            const currentPartnerFollower = this.followers.find(
+                follower => follower.partner === this.env.messaging.currentPartner
+            );
+            await currentPartnerFollower.remove();
         }
 
         /**
@@ -482,6 +559,30 @@ function ThreadFactory({ Entity }) {
                 return `${this.constructor.name}_${id}`;
             }
             return `${this.constructor.name}_${threadModel}_${id}`;
+        }
+
+        /**
+         * @private
+         * @param {Object} [param0={}]
+         * @param {boolean} [param0.mail_invite_follower_channel_only=false]
+         */
+        _promptAddFollower({ mail_invite_follower_channel_only = false } = {}) {
+            const action = {
+                type: 'ir.actions.act_window',
+                res_model: 'mail.wizard.invite',
+                view_mode: 'form',
+                views: [[false, 'form']],
+                name: this.env._t("Invite Follower"),
+                target: 'new',
+                context: {
+                    default_res_model: this.model,
+                    default_res_id: this.id,
+                    mail_invite_follower_channel_only,
+                },
+            };
+            this.env.do_action(action, {
+                on_close: () => this.refreshFollowers(),
+            });
         }
 
         /**
@@ -626,6 +727,9 @@ function ThreadFactory({ Entity }) {
         }),
         directPartner: one2one('Partner', {
             inverse: 'directPartnerThread',
+        }),
+        followers: one2many('Follower', {
+            inverse: 'followedThread',
         }),
         members: many2many('Partner', {
             inverse: 'memberThreads',

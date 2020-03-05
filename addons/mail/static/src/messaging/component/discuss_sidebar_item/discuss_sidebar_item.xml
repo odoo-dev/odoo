@@ -33,17 +33,17 @@
                 <t t-if="thread.model !== 'mail.box'">
                     <div class="o_DiscussSidebarItem_commands o_DiscussSidebarItem_item">
                         <t t-if="thread.channel_type === 'channel'">
-                            <div class="fa fa-cog o_DiscussSidebarItem_command o_DiscussSidebarItem_commandSettings" t-on-click="_onClickSettings" title="Channel settings" role="img" aria-label="Channel settings"/>
+                            <div class="fa fa-cog o_DiscussSidebarItem_command o_DiscussSidebarItem_commandSettings" t-on-click="_onClickSettings" title="Channel settings" role="img"/>
                             <t t-if="!thread.message_needaction_counter and !thread.group_based_subscription">
-                                <div class="o_DiscussSidebarItem_command o_DiscussSidebarItem_commandLeave fa fa-times" t-on-click="_onClickLeave" title="Leave this channel" role="img" aria-label="Leave this channel"/>
+                                <div class="o_DiscussSidebarItem_command o_DiscussSidebarItem_commandLeave fa fa-times" t-on-click="_onClickLeave" title="Leave this channel" role="img"/>
                             </t>
                         </t>
                         <t t-if="thread.channel_type === 'chat'">
-                            <div class="o_DiscussSidebarItem_command o_DiscussSidebarItem_commandRename fa fa-cog" t-on-click="_onClickRename" title="Rename conversation" role="img" aria-label="Rename conversation"/>
+                            <div class="o_DiscussSidebarItem_command o_DiscussSidebarItem_commandRename fa fa-cog" t-on-click="_onClickRename" title="Rename conversation" role="img"/>
                         </t>
                         <t t-if="hasUnpin()">
                             <t t-if="!thread.message_unread_counter">
-                                <div class="fa fa-times o_DiscussSidebarItem_command o_DiscussSidebarItem_commandUnpin" t-on-click="_onClickUnpin" title="Unpin conversation" role="img" aria-label="Unpin conversation"/>
+                                <div class="fa fa-times o_DiscussSidebarItem_command o_DiscussSidebarItem_commandUnpin" t-on-click="_onClickUnpin" title="Unpin conversation" role="img"/>
                             </t>
                         </t>
                     </div>

@@ -94,7 +94,7 @@
                                             'o-message-selected': props.isSelected,
                                             'o-message-starred': isStarred,
                                             'o-mobile': env.messaging.device.isMobile,
-                                        }" t-on-click="_onClickStar" title="Mark as Todo" aria-label="Mark as Todo"
+                                        }" t-on-click="_onClickStar" title="Mark as Todo"
                                     />
                                 </t>
                                 <t t-if="props.hasReplyIcon">
@@ -102,7 +102,7 @@
                                         t-att-class="{
                                             'o-message-selected': props.isSelected,
                                             'o-mobile': env.messaging.device.isMobile,
-                                        }" t-on-click="_onClickReply" title="Reply" aria-label="Reply"
+                                        }" t-on-click="_onClickReply" title="Reply"
                                     />
                                 </t>
                                 <t t-if="props.hasMarkAsReadIcon">
@@ -110,7 +110,7 @@
                                         t-att-class="{
                                             'o-message-selected': props.isSelected,
                                             'o-mobile': env.messaging.device.isMobile,
-                                        }" t-on-click="_onClickMarkAsRead" title="Mark as Read" aria-label="Mark as Read"
+                                        }" t-on-click="_onClickMarkAsRead" title="Mark as Read"
                                     />
                                 </t>
                             </div>
@@ -143,7 +143,7 @@
                                             <t t-if="value.old_value">
                                                 <div class="o_Message_trackingValueItem" t-esc="value.old_value || ((value.field_type !== 'boolean') and '')"/>
                                                 <t t-if="value.old_value !== value.new_value">
-                                                    <div class="o_Message_trackingValueItem fa fa-long-arrow-right" title="Changed" role="img" aria-label="Changed"/>
+                                                    <div class="o_Message_trackingValueItem fa fa-long-arrow-right" title="Changed" role="img"/>
                                                 </t>
                                             </t>
                                             <t t-if="value.old_value !== value.new_value">

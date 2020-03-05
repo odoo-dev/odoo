@@ -1,6 +1,10 @@
 odoo.define('mail.messaging.component.ChatterTopbar', function (require) {
 'use strict';
 
+const components = {
+    FollowButton: require('mail.messaging.component.FollowButton'),
+    FollowerListMenu: require('mail.messaging.component.FollowerListMenu'),
+};
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
@@ -61,22 +65,6 @@ class ChatterTopbar extends Component {
      * @private
      * @param {MouseEvent} ev
      */
-    _onClickFollow(ev) {
-        // TODO
-    }
-
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickFollowers(ev) {
-        // TODO
-    }
-
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
     _onClickLogNote(ev) {
         if (this.chatter.isComposerVisible && this.chatter.isComposerLog) {
             this.chatter.update({ isComposerVisible: false });
@@ -125,6 +113,7 @@ class ChatterTopbar extends Component {
 }
 
 Object.assign(ChatterTopbar, {
+    components,
     defaultProps: {
         hasCloseButton: false,
     },

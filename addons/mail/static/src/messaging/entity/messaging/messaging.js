@@ -59,17 +59,25 @@ function MessagingFactory({ Entity }) {
          * @param {Object} param0
          * @param {integer} param0.id
          * @param {string} param0.model
+         * @param {Object} [param2={}]
+         * @param {boolean} [param2.forceOpenDocument=false]
+         * FIXME needs to be tested and maybe refactored (see task-2244279)
          */
-        async redirect({ id, model }) {
-            if (model === 'mail.channel') {
+        async redirect({ id, model }, { forceOpenDocument = false } = {}) {
+            if (forceOpenDocument) {
+                this._openDocument({
+                    model: model,
+                    id,
+                });
+            } else if (model === 'mail.channel') {
                 const channel = this.env.entities.Thread.channelFromId(id);
-                if (!channel) {
+                if (!channel || !channel.isPinned) {
                     this.env.entities.Thread.joinChannel(id, { autoselect: true });
                     return;
                 }
                 channel.open();
             } else if (model === 'res.partner') {
-                if (id === this.currentPartner) {
+                if (id === this.currentPartner.id) {
                     this._openDocument({
                         model: 'res.partner',
                         id,
@@ -77,10 +85,10 @@ function MessagingFactory({ Entity }) {
                     return;
                 }
                 const partner = this.env.entities.Partner.insert({ id });
-                if (partner.userId === undefined) {
+                if (!partner.user) {
                     await partner.checkIsUser();
                 }
-                if (partner.userId === null) {
+                if (!partner.user) {
                     // partner is not a user, open document instead
                     this._openDocument({
                         model: 'res.partner',

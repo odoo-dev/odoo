@@ -6,8 +6,9 @@
             <t t-if="dialog">
                 <t t-if="dialog.entity">
                     <t
-                        t-component="{{ dialog.entity.name }}"
+                        t-component="{{ dialog.entity['constructor'].name }}"
                         class="o_Dialog_component"
+                        t-props="{ localId: dialog.entity.localId }"
                         t-ref="component"
                     />
                 </t>

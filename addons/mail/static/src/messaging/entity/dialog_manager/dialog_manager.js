@@ -24,6 +24,14 @@ function DialogManagerFactory({ Entity }) {
         }
 
         /**
+         * @param {mail.messaging.entity.Dialog} dialog
+         */
+        close(dialog) {
+            this.unregister(dialog);
+            dialog.delete();
+        }
+
+        /**
          * @param {string} entityName
          * @param {Object} [entityData]
          */
@@ -43,6 +51,7 @@ function DialogManagerFactory({ Entity }) {
             if (this.allOrdered.includes(dialog)) {
                 return;
             }
+            this.link({ dialogs: dialog });
             this.update({
                 _ordered: this._ordered.concat([dialog.localId]),
             });
@@ -55,9 +64,10 @@ function DialogManagerFactory({ Entity }) {
             if (!this.allOrdered.includes(dialog)) {
                 return;
             }
+            this.unlink({ dialogs: dialog });
             this.update({
                 _ordered: this._ordered.filter(
-                    _dialog => _dialog === dialog.localId
+                    _dialog => _dialog !== dialog.localId
                 ),
             });
         }

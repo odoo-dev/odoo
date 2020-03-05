@@ -63,7 +63,7 @@ function DialogFactory({ Entity }) {
                 if (!Entity) {
                     throw new Error(`No entity exists with name ${entityName}`);
                 }
-                Entity.create(Object.assign({ dialog: this }, entityData));
+                this.link({ entity: Entity.create(entityData) });
             }
         }
 

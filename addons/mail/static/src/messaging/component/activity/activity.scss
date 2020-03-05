@@ -21,12 +21,11 @@
 
 .o_Activity_icon {
     @include o-position-absolute($top: auto, $left: auto, $bottom: -5px, $right: -5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 25px;
     height: 25px;
-    object-fit: cover;
-    padding: map-get($spacers, 2) map-get($spacers, 2);
-    text-align: center;
-    line-height: 1.2;
     border-width: 2px;
 }
 

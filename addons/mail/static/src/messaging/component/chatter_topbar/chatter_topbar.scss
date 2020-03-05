@@ -23,11 +23,6 @@
     padding-left: 0.25rem;
 }
 
-.o_ChatterTopbar_buttonFollowers {
-    display: flex;
-    align-items: center;
-}
-
 .o_ChatterTopbar_buttonSendMessage {
     padding: 0 16px;
     border-left: none;
@@ -42,13 +37,13 @@
     height: 34px;
 }
 
-.o_ChatterTopbar_followers {
+.o_ChatterTopbar_followerListMenu {
     display: flex;
 }
 
 .o_ChatterTopbar_rightSection {
     display: flex;
-    flex: 1;
+    flex: 1 0 auto;
     justify-content: flex-end;
 }
 
@@ -56,7 +51,7 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_ChatterTopbar.o-active {
+.o_ChatterTopbar .o-active {
     color: $o-brand-odoo;
     background-color: lighten(gray('300'), 7%);
     border-color: gray('300');
