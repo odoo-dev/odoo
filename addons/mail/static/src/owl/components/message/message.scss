@@ -147,6 +147,19 @@
     }
 }
 
+.o_Message_trackingValues {
+    margin-top: map-get($spacers, 3);
+}
+
+.o_Message_trackingValue {
+    display: flex;
+    align-items: center;
+}
+
+.o_Message_trackingValueItem {
+    margin-inline-end: map-get($spacers, 1);
+}
+
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------

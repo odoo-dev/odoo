@@ -35,8 +35,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {string} [data.record_name]
      * @param {integer} [data.res_id]
      * @param {string} [data.subject]
-     * @param {string} [data.subtype_description]
-     * @param {Object[]} [data.tracking_value_ids]
      * @param {Object[]} emojis
      */
     init: function (parent, data, emojis) {
@@ -50,7 +48,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         this._processBody(emojis);
         this._processMailboxes();
         this._processDocumentThread();
-        this._processTrackingValues();
     },
 
     //--------------------------------------------------------------------------
@@ -275,13 +272,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         return this._subject;
     },
     /**
-     * @override
-     * @return {string}
-     */
-    getSubtypeDescription: function () {
-        return this._subtypeDescription;
-    },
-    /**
      * Get the list of thread IDs that this message is linked to
      * If this message is not linked to a thread, returns 'undefined'
      *
@@ -289,19 +279,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      */
     getThreadIDs: function () {
         return this._threadIDs;
-    },
-    /**
-     * Get the tracking values of this message
-     * If this message has no tracking values, returns 'undefined'
-     *
-     * @override
-     * @return {Object[]|undefined}
-     */
-    getTrackingValues: function () {
-        if (!this.hasTrackingValues()) {
-            return undefined;
-        }
-        return this._trackingValueIDs;
     },
     /**
      * @override
@@ -335,22 +312,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      */
     hasSubject: function () {
         return !!(this._subject);
-    },
-    /**
-     * @override
-     * @return {boolean}
-     */
-    hasSubtypeDescription: function () {
-        return !!(this._subtypeDescription);
-    },
-    /**
-     * State whether this message contains some tracking values
-     *
-     * @override
-     * @return {boolean}
-     */
-    hasTrackingValues: function () {
-        return !!(this._trackingValueIDs && (this._trackingValueIDs.length > 0));
     },
     /**
      * State whether this message is linked to a document thread (not channel)
@@ -564,49 +525,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         }
     },
     /**
-     * Process the tracking values on message creation, which
-     * basically format date to the local only once by message
-     *
-     * Cannot be done in preprocess, since it alter the original value
-     *
-     * @private
-     */
-    _processTrackingValues: function () {
-        if (this.hasTrackingValues()) {
-            _.each(this.getTrackingValues(), function (trackingValue) {
-                if (trackingValue.field_type === 'datetime') {
-                    if (trackingValue.old_value) {
-                        trackingValue.old_value =
-                            moment
-                                .utc(trackingValue.old_value)
-                                .local()
-                                .format('LLL');
-                    }
-                    if (trackingValue.new_value) {
-                        trackingValue.new_value =
-                            moment
-                                .utc(trackingValue.new_value)
-                                .local()
-                                .format('LLL');
-                    }
-                } else if (trackingValue.field_type === 'date') {
-                    if (trackingValue.old_value) {
-                        trackingValue.old_value =
-                            moment(trackingValue.old_value)
-                                .local()
-                                .format('LL');
-                    }
-                    if (trackingValue.new_value) {
-                        trackingValue.new_value =
-                            moment(trackingValue.new_value)
-                                .local()
-                                .format('LL');
-                    }
-                }
-            });
-        }
-    },
-    /**
      * @private
      * @param {Object} data
      * @param {string} [data.body = ""]
@@ -622,8 +540,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {string} [data.record_name]
      * @param {integer} [data.res_id]
      * @param {string} [data.subject]
-     * @param {string} [data.subtype_description]
-     * @param {Object[]} [data.tracking_value_ids]
      */
     _setInitialData: function (data) {
         this._customerEmailData = data.customer_email_data || [];
@@ -638,9 +554,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         this._needactionPartnerIDs = data.needaction_partner_ids || [];
         this._historyPartnerIDs = data.history_partner_ids || [];
         this._subject = data.subject;
-        this._subtypeDescription = data.subtype_description;
         this._threadIDs = data.channel_ids || [];
-        this._trackingValueIDs = data.tracking_value_ids;
     },
     /*
      * Set whether the message is history or not.

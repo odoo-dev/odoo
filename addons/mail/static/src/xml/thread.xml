@@ -329,12 +329,6 @@
                 </p>
                 <div class="o_thread_message_content">
                     <t t-raw="message.getBody()"/>
-                    <t t-if="message.hasTrackingValues()">
-                        <t t-if="message.hasSubtypeDescription()">
-                            <p><t t-esc="message.getSubtypeDescription()"/></p>
-                        </t>
-                        <t t-call="mail.widget.Thread.MessageTracking"/>
-                    </t>
                     <p t-if="options.displaySubjectOnMessages and message.shouldDisplaySubject()" class="o_mail_subject">Subject: <t t-esc="message.getSubject()"/></p>
                     <t t-if="message.hasAttachments()">
                         <div t-if="message.hasImageAttachments()" class="o_attachments_previews">
@@ -446,26 +440,6 @@
         <div class="o_thread_new_messages_separator">
             <span class="o_thread_separator_label">New messages</span>
         </div>
-    </t>
-
-    <!--
-        @param {mail.model.Message} message
-    -->
-    <t t-name="mail.widget.Thread.MessageTracking">
-        <ul class="o_mail_thread_message_tracking">
-            <t t-foreach='message.getTrackingValues()' t-as='value'>
-                <li>
-                    <t t-esc="value.changed_field"/>:
-                    <t t-if="value.old_value">
-                        <span> <t t-esc="value.old_value || ((value.field_type !== 'boolean') and '')"/> </span>
-                        <span t-if="value.old_value !== value.new_value" class="fa fa-long-arrow-right" role="img" aria-label="Changed" title="Changed"/>
-                    </t>
-                    <span t-if="value.old_value !== value.new_value">
-                        <t t-esc="value.new_value || ((value.field_type !== 'boolean') and '')"/>
-                    </span>
-                </li>
-            </t>
-        </ul>
     </t>
 
     <!--

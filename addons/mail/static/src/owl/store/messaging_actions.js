@@ -2031,7 +2031,7 @@ const actions = {
      * @param {Array} param1.subtype_id
      * @param {integer} param1.subtype_id[0]
      * @param {string} param1.subtype_id[1]
-     * @param {Object[]} param1.tracking_value_ids
+     * @param {Object[]} [param1.tracking_value_ids = []]
      * @param {*} param1.tracking_value_ids[i].changed_field
      * @param {integer} param1.tracking_value_ids[i].id
      * @param {string} param1.tracking_value_ids[i].field_type
@@ -2073,7 +2073,7 @@ const actions = {
             subject,
             subtype_description,
             subtype_id,
-            tracking_value_ids,
+            tracking_value_ids = [],
         },
     ) {
         const messageLocalId = `mail.message_${id}`;
@@ -4624,7 +4624,7 @@ const actions = {
      * @param {Array} param2.subtype_id
      * @param {integer} param2.subtype_id[0]
      * @param {string} param2.subtype_id[1]
-     * @param {Object[]} param2.tracking_value_ids
+     * @param {Object[]} [param2.tracking_value_ids = []]
      * @param {*} param2.tracking_value_ids[i].changed_field
      * @param {integer} param2.tracking_value_ids[i].id
      * @param {string} param2.tracking_value_ids[i].field_type
@@ -4661,7 +4661,7 @@ const actions = {
         subject,
         subtype_description,
         subtype_id,
-        tracking_value_ids,
+        tracking_value_ids = [],
     }) {
         const message = state.messages[messageLocalId];
         // 1. update message data

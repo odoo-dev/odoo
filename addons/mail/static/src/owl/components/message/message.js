@@ -225,17 +225,9 @@ class Message extends Component {
      * @return {Object}
      */
     get trackingValues() {
-        if (!this.props.tracking_value_ids) {
-            // might happen in tests
-            return [];
-        }
         return this.storeProps.message.tracking_value_ids.map(trackingValue => {
-            let value = {
-                changed_field: trackingValue.changed_field,
-                old_value: trackingValue.old_value,
-                new_value: trackingValue.new_value,
-                field_type: trackingValue.field_type,
-            };
+            const value = Object.assign({}, trackingValue);
+            value.changed_field = _.str.sprintf(this.env._t("%s:"), value.changed_field);
             if (value.field_type === 'datetime') {
                 if (value.old_value) {
                     value.old_value =
