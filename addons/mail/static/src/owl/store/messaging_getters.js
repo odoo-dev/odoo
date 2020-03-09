@@ -282,6 +282,9 @@ const getters = {
      */
     isMessageModeratedByUser({ getters, state }, messageLocalId) {
         const message = state.messages[messageLocalId];
+        if (!message) {
+            return false;
+        }
         return message.moderation_status === 'pending_moderation' &&
             getters.isThreadModeratedByUser(message.originThreadLocalId);
     },
@@ -437,6 +440,9 @@ const getters = {
      */
     messagePrettyBody({ state }, messageLocalId) {
         const message = state.messages[messageLocalId];
+        if (!message) {
+            return '';
+        }
         let prettyBody;
         for (const emoji of emojis) {
             const { unicode } = emoji;

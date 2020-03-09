@@ -4261,11 +4261,10 @@ QUnit.test('auto-focus composer on opening thread', async function (assert) {
 QUnit.test('moderation: moderated channel with pending moderation message', async function (assert) {
     assert.expect(38);
 
-    const moderatedChannelId = 20;
     Object.assign(this.data.initMessaging, {
         channel_slots: {
             channel_channel: [{
-                id: moderatedChannelId,
+                id: 20,
                 channel_type: "channel",
                 name: "general",
                 moderation: true,
@@ -4273,7 +4272,7 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
         },
         is_moderator: true,
         moderation_counter: 1,
-        moderation_channel_ids: [moderatedChannelId],
+        moderation_channel_ids: [20],
     });
     this.data['mail.message'].records = [{
         author_id: [2, "Someone"],
@@ -4282,7 +4281,7 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
         model: 'mail.channel',
         moderation_status: 'pending_moderation',
         need_moderation: true,
-        res_id: moderatedChannelId,
+        res_id: 20,
     }];
 
     await this.start();
@@ -4397,7 +4396,7 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
 
     // 2. go to channel 'general'
     const generalChannel = document.querySelector(
-        '.o_DiscussSidebar_item[data-thread-local-id="mail.channel_' + moderatedChannelId + '"]'
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.channel_20"]'
     );
     assert.ok(generalChannel, "should display the general channel");
 
@@ -4453,15 +4452,13 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
     );
 });
 
-QUnit.skip('moderation: accept pending moderation message', function (assert) {
-    // TODO FIXME converting this test is a waste of time, there are bigger priorities, task-2199306
+QUnit.test('moderation: accept pending moderation message', async function (assert) {
     assert.expect(12);
-    var done = assert.async();
 
-    this.data.initMessaging = {
+    Object.assign(this.data.initMessaging, {
         channel_slots: {
             channel_channel: [{
-                id: 1,
+                id: 20,
                 channel_type: "channel",
                 name: "general",
                 moderation: true,
@@ -4469,86 +4466,75 @@ QUnit.skip('moderation: accept pending moderation message', function (assert) {
         },
         is_moderator: true,
         moderation_counter: 1,
-        moderation_channel_ids: [1],
-    };
+        moderation_channel_ids: [20],
+    });
     this.data['mail.message'].records = [{
         author_id: [2, "Someone"],
         body: "<p>test</p>",
-        channel_ids: [],
         id: 100,
         model: 'mail.channel',
         moderation_status: 'pending_moderation',
         need_moderation: true,
-        res_id: 1,
-        starred_partner_ids: [],
+        res_id: 20,
     }];
 
-    createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
+    await this.start({
         mockRPC: function (route, args) {
             if (args.method === 'moderate') {
                 assert.step('moderate');
-                var messageIDs = args.args[0];
-                var decision = args.args[1];
+                const messageIDs = args.args[0];
+                const decision = args.args[1];
                 assert.strictEqual(messageIDs.length, 1, "should moderate one message");
                 assert.strictEqual(messageIDs[0], 100, "should moderate message with ID 100");
                 assert.strictEqual(decision, 'accept', "should accept the message");
             }
             return this._super.apply(this, arguments);
         },
-    })
-    .then(async function (discuss) {
-        // 1. go to moderation box
-        var $moderationBox = discuss.$(
-            '.o_DiscussSidebar_item[data-thread-local-id="mail.box_moderation"]'
-        );
-        await testUtils.dom.click($moderationBox);
-        // check there is a message to moderate
-        var $message = discuss.$('.o_Message');
-        assert.strictEqual($message.length, 1,
-            "there should be one message in the moderation box");
-        assert.strictEqual($message.data('message-id'), 100,
-            "this message should have correct ID");
-        assert.strictEqual($message.find('.o_Message_checkbox').length, 1,
-            "the message should have a moderation checkbox");
-        // accept the message pending moderation
-        await testUtils.dom.click(discuss.$('.o_Message_moderationAction.o-accept'));
-        assert.verifySteps(['moderate']);
-
-        // stop the fadeout animation and immediately remove the element
-        discuss.$('.o_Message').stop(false, true);
-        assert.containsNone(discuss, '.o_Message',
-            "should now have no message displayed in moderation box");
-
-        // 2. go to channel 'general'
-        await testUtils.dom.click(discuss.$('.o_DiscussSidebar_item[data-thread-local-id="1"]'));
-        $message = discuss.$('.o_Message');
-        // check message is there and has no moderate checkbox
-        assert.strictEqual($message.length, 1,
-            "there should be one message in the general channel");
-        assert.strictEqual($message.data('message-id'), 100,
-            "this message should have correct ID");
-        assert.strictEqual($message.find('.o_Message_checkbox').length, 0,
-            "the message should not have any moderation checkbox");
-
-        discuss.destroy();
-        done();
     });
+
+    // 1. go to moderation box
+    const moderationBox = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.box_moderation"]'
+    );
+    assert.ok(moderationBox, "should display the moderation box");
+
+    moderationBox.click();
+    await afterNextRender();
+    const pendingMessage = document.querySelector('.o_Message[data-message-local-id="mail.message_100"]');
+    assert.ok(pendingMessage, "should display the message to moderate");
+    const acceptButton = pendingMessage.querySelector('.o_Message_moderationAction.o-accept');
+    assert.ok(acceptButton, "should display the accept button");
+
+    acceptButton.click();
+    await afterNextRender();
+    assert.verifySteps(['moderate']);
+    assert.containsOnce(document.body, '.o_MessageList_emptyTitle',
+        "should now have no message displayed in moderation box"
+    );
+
+    // 2. go to channel 'general'
+    const channel = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.channel_20"]'
+    );
+    assert.ok(channel, 'should display the general channel');
+
+    channel.click();
+    await afterNextRender();
+    const message = document.querySelector('.o_Message[data-message-local-id="mail.message_100"]');
+    assert.ok(message, "should display the accepted message");
+    assert.containsNone(message,
+        '.o_Message_moderationPending',
+        "the message should not be pending moderation"
+    );
 });
 
-QUnit.skip('moderation: reject pending moderation message (reject with explanation)', function (assert) {
-    // TODO FIXME converting this test is a waste of time, there are bigger priorities, task-2199306
-    assert.expect(21);
-    var done = assert.async();
+QUnit.test('moderation: reject pending moderation message (reject with explanation)', async function (assert) {
+    assert.expect(23);
 
-    this.data.initMessaging = {
+    Object.assign(this.data.initMessaging, {
         channel_slots: {
             channel_channel: [{
-                id: 1,
+                id: 20,
                 channel_type: "channel",
                 name: "general",
                 moderation: true,
@@ -4556,31 +4542,25 @@ QUnit.skip('moderation: reject pending moderation message (reject with explanati
         },
         is_moderator: true,
         moderation_counter: 1,
-        moderation_channel_ids: [1],
-    };
+        moderation_channel_ids: [20],
+    });
     this.data['mail.message'].records = [{
         author_id: [2, "Someone"],
         body: "<p>test</p>",
-        channel_ids: [],
         id: 100,
         model: 'mail.channel',
         moderation_status: 'pending_moderation',
         need_moderation: true,
-        res_id: 1,
+        res_id: 20,
     }];
 
-    createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
+    await this.start({
         mockRPC: function (route, args) {
             if (args.method === 'moderate') {
                 assert.step('moderate');
-                var messageIDs = args.args[0];
-                var decision = args.args[1];
-                var kwargs = args.kwargs;
+                const messageIDs = args.args[0];
+                const decision = args.args[1];
+                const kwargs = args.kwargs;
                 assert.strictEqual(messageIDs.length, 1, "should moderate one message");
                 assert.strictEqual(messageIDs[0], 100, "should moderate message with ID 100");
                 assert.strictEqual(decision, 'reject', "should reject the message");
@@ -4591,73 +4571,81 @@ QUnit.skip('moderation: reject pending moderation message (reject with explanati
             }
             return this._super.apply(this, arguments);
         },
-    })
-    .then(async function (discuss) {
-        // 1. go to moderation box
-        var $moderationBox = discuss.$(
-            '.o_DiscussSidebar_item[data-thread-local-id="mail.box_moderation"]'
-        );
-        await testUtils.dom.click($moderationBox);
-        // check there is a message to moderate
-        var $message = discuss.$('.o_Message');
-        assert.strictEqual($message.length, 1,
-            "there should be one message in the moderation box");
-        assert.strictEqual($message.data('message-id'), 100,
-            "this message should have correct ID");
-        assert.strictEqual($message.find('.o_Message_checkbox').length, 1,
-            "the message should have a moderation checkbox");
-        // reject the message pending moderation
-        await testUtils.dom.click(discuss.$('.o_Message_moderationAction.o-reject'));
-
-        // check reject dialog prompt
-        assert.strictEqual($('.modal-dialog').length, 1,
-            "a dialog should be prompt to the moderator on click reject");
-        assert.strictEqual($('.modal-title').text(), "Send explanation to author",
-            "dialog should have correct title");
-        var $messageTitle = $('.modal-body input[id="message_title"]');
-        assert.strictEqual($messageTitle.length, 1,
-            "should have a title of message for rejecting the message");
-        assert.hasAttrValue($messageTitle, 'placeholder', "Subject",
-            "message title for reject reason should have correct placeholder");
-        assert.strictEqual($messageTitle.val(), "Message Rejected",
-            "message title for reject reason should have correct default value");
-        var $messageBody = $('.modal-body textarea[id="reject_message"]');
-        assert.strictEqual($messageBody.length, 1,
-            "should have a body of message for rejecting the message");
-        assert.hasAttrValue($messageBody, 'placeholder', "Mail Body",
-            "message body for reject reason should have correct placeholder");
-        assert.strictEqual($messageBody.text(), "Your message was rejected by moderator.",
-            "message body for reject reason should have correct default text content");
-        assert.strictEqual($('.modal-footer button').text(), "Send",
-            "should have a send button on the reject dialog");
-
-        // send mesage
-        await testUtils.dom.click($('.modal-footer button'));
-        assert.verifySteps(['moderate']);
-
-        // // stop the fadeout animation and immediately remove the element
-        discuss.$('.o_Message').stop(false, true);
-        assert.containsNone(discuss, '.o_Message',
-            "should now have no message displayed in moderation box");
-
-        // 2. go to channel 'general'
-        await testUtils.dom.click(discuss.$('.o_DiscussSidebar_item[data-thread-local-id="1"]'));
-        assert.containsNone(discuss, '.o_Message');
-
-        discuss.destroy();
-        done();
     });
+
+    // 1. go to moderation box
+    const moderationBox = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.box_moderation"]'
+    );
+    assert.ok(moderationBox, "should display the moderation box");
+
+    moderationBox.click();
+    await afterNextRender();
+    const pendingMessage = document.querySelector('.o_Message[data-message-local-id="mail.message_100"]');
+    assert.ok(pendingMessage, "should display the message to moderate");
+    const rejectButton = pendingMessage.querySelector('.o_Message_moderationAction.o-reject');
+    assert.ok(rejectButton, "should display the reject button");
+
+    rejectButton.click();
+    await afterNextRender();
+    const dialog = document.querySelector('.o_ModerationRejectDialog');
+    assert.ok(dialog, "a dialog should be prompt to the moderator on click reject");
+    assert.strictEqual(dialog.querySelector('.modal-title').textContent,
+        // TODO FIXME, this should be a proper title "Send explanation to author"
+        // see https://github.com/odoo/owl/issues/670
+        "[object Object]",
+        "dialog should have correct title"
+    );
+
+    const messageTitle = dialog.querySelector('.o_ModerationRejectDialog_title');
+    assert.ok(messageTitle, "should have a title for rejecting");
+    assert.hasAttrValue(messageTitle, 'placeholder', "Subject",
+        "title for reject reason should have correct placeholder"
+    );
+    assert.strictEqual(messageTitle.value, "Message Rejected",
+        "title for reject reason should have correct default value"
+    );
+
+    const messageComment = dialog.querySelector('.o_ModerationRejectDialog_comment');
+    assert.ok(messageComment, "should have a comment for rejecting");
+    assert.hasAttrValue(messageComment, 'placeholder', "Mail Body",
+        "comment for reject reason should have correct placeholder"
+    );
+    assert.strictEqual(messageComment.value, "Your message was rejected by moderator.",
+        "comment for reject reason should have correct default text content");
+
+    const confirmReject = dialog.querySelector('.o-reject');
+    assert.ok(confirmReject, 'should have reject button');
+    assert.strictEqual(confirmReject.textContent, "Reject");
+
+    confirmReject.click();
+    await afterNextRender();
+    assert.verifySteps(['moderate']);
+    assert.containsOnce(document.body, '.o_MessageList_emptyTitle',
+        "should now have no message displayed in moderation box"
+    );
+
+    // 2. go to channel 'general'
+    const channel = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.channel_20"]'
+    );
+    assert.ok(channel, 'should display the general channel');
+
+    channel.click();
+    await afterNextRender();
+    assert.containsNone(document.body,
+        '.o_Message',
+        "should now have no message in channel"
+    );
 });
 
-QUnit.skip('moderation: discard pending moderation message (reject without explanation)', function (assert) {
-    // TODO FIXME converting this test is a waste of time, there are bigger priorities, task-2199306
-    assert.expect(15);
-    var done = assert.async();
+QUnit.test('moderation: discard pending moderation message (reject without explanation)', async function (assert) {
+    assert.expect(16);
 
-    this.data.initMessaging = {
+    Object.assign(this.data.initMessaging, {
         channel_slots: {
             channel_channel: [{
-                id: 1,
+                id: 20,
                 channel_type: "channel",
                 name: "general",
                 moderation: true,
@@ -4665,319 +4653,286 @@ QUnit.skip('moderation: discard pending moderation message (reject without expla
         },
         is_moderator: true,
         moderation_counter: 1,
-        moderation_channel_ids: [1],
-    };
+        moderation_channel_ids: [20],
+    });
     this.data['mail.message'].records = [{
         author_id: [2, "Someone"],
         body: "<p>test</p>",
-        channel_ids: [],
         id: 100,
         model: 'mail.channel',
         moderation_status: 'pending_moderation',
         need_moderation: true,
-        res_id: 1,
+        res_id: 20,
     }];
 
-    createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
+    await this.start({
         mockRPC: function (route, args) {
             if (args.method === 'moderate') {
                 assert.step('moderate');
-                var messageIDs = args.args[0];
-                var decision = args.args[1];
+                const messageIDs = args.args[0];
+                const decision = args.args[1];
                 assert.strictEqual(messageIDs.length, 1, "should moderate one message");
                 assert.strictEqual(messageIDs[0], 100, "should moderate message with ID 100");
                 assert.strictEqual(decision, 'discard', "should discard the message");
             }
             return this._super.apply(this, arguments);
         },
-    })
-    .then(async function (discuss) {
-        // 1. go to moderation box
-        var $moderationBox = discuss.$(
-            '.o_DiscussSidebar_item[data-thread-local-id="mail.box_moderation"]'
-        );
-        await testUtils.dom.click($moderationBox);
-        // check there is a message to moderate
-        var $message = discuss.$('.o_Message');
-        assert.strictEqual($message.length, 1,
-            "there should be one message in the moderation box");
-        assert.strictEqual($message.data('message-id'), 100,
-            "this message should have correct ID");
-        assert.strictEqual($message.find('.o_Message_checkbox').length, 1,
-            "the message should have a moderation checkbox");
-        // discard the message pending moderation
-        await testUtils.dom.click(discuss.$('.o_Message_moderationAction.o-discard'));
-
-        // check discard dialog prompt
-        assert.strictEqual($('.modal-dialog').length, 1,
-            "a dialog should be prompt to the moderator on click discard");
-        assert.strictEqual($('.modal-body:first').text(),
-            "You are going to discard 1 message. Do you confirm the action?",
-            "should warn the user on discard action");
-        assert.strictEqual($('.modal-footer button').length, 2,
-            "should have two buttons in the footer of the dialog");
-        assert.strictEqual($('.modal-footer button.btn-primary').text(), "Ok",
-            "should have a confirm button in the dialog for discard");
-        assert.strictEqual($('.modal-footer button.btn-secondary').text(), "Cancel",
-            "should have a cancel button in the dialog for discard");
-
-        // discard mesage
-        await testUtils.dom.click($('.modal-footer button.btn-primary'));
-        assert.verifySteps(['moderate']);
-
-        // stop the fadeout animation and immediately remove the element
-        discuss.$('.o_Message').stop(false, true);
-        assert.containsNone(discuss, '.o_Message',
-            "should now have no message displayed in moderation box");
-
-        // 2. go to channel 'general'
-        await testUtils.dom.click(discuss.$('.o_DiscussSidebar_item[data-thread-local-id="1"]'));
-        assert.containsNone(discuss, '.o_Message');
-
-        discuss.destroy();
-        done();
     });
+
+    // 1. go to moderation box
+    const moderationBox = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.box_moderation"]'
+    );
+    assert.ok(moderationBox, "should display the moderation box");
+
+    moderationBox.click();
+    await afterNextRender();
+    const pendingMessage = document.querySelector('.o_Message[data-message-local-id="mail.message_100"]');
+    assert.ok(pendingMessage, "should display the message to moderate");
+
+    const discardButton = pendingMessage.querySelector('.o_Message_moderationAction.o-discard');
+    assert.ok(discardButton, "should display the discard button");
+
+    discardButton.click();
+    await afterNextRender();
+    const dialog = document.querySelector('.o_ModerationDiscardDialog');
+    assert.ok(dialog, "a dialog should be prompt to the moderator on click discard");
+    assert.strictEqual(dialog.querySelector('.modal-title').textContent,
+        // TODO FIXME, this should be a proper title "Confirmation"
+        // see https://github.com/odoo/owl/issues/670
+        "[object Object]",
+        "dialog should have correct title"
+    );
+    assert.strictEqual(dialog.textContent,
+        "[object Object]×You are going to discard 1 message.Do you confirm the action?DiscardCancel",
+        "should warn the user on discard action"
+    );
+
+    const confirmDiscard = dialog.querySelector('.o-discard');
+    assert.ok(confirmDiscard, 'should have discard button');
+    assert.strictEqual(confirmDiscard.textContent, "Discard");
+
+    confirmDiscard.click();
+    await afterNextRender();
+    assert.verifySteps(['moderate']);
+    assert.containsOnce(document.body, '.o_MessageList_emptyTitle',
+        "should now have no message displayed in moderation box"
+    );
+
+    // 2. go to channel 'general'
+    const channel = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.channel_20"]'
+    );
+    assert.ok(channel, 'should display the general channel');
+
+    channel.click();
+    await afterNextRender();
+    assert.containsNone(document.body,
+        '.o_Message',
+        "should now have no message in channel"
+    );
 });
 
-QUnit.skip('moderation: send message in moderated channel', function (assert) {
-    // TODO FIXME converting this test is a waste of time, there are bigger priorities, task-2199306
+QUnit.test('moderation: send message in moderated channel', async function (assert) {
     assert.expect(4);
-    var done = assert.async();
 
-    var messagePostDef = testUtils.makeTestPromise();
-
-    this.data.initMessaging = {
+    const self = this;
+    Object.assign(this.data.initMessaging, {
         channel_slots: {
             channel_channel: [{
-                id: 1,
+                id: 20,
                 channel_type: "channel",
                 name: "general",
                 moderation: true,
             }],
         },
-    };
+    });
 
-    var objectDiscuss;
-    createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
+    await this.start({
         mockRPC: async function (route, args) {
             if (args.method === 'message_post') {
-                var message = {
+                const message = {
                     id: 100,
-                    author_id: [2, 'Someone'],
+                    author_id: [13, 'Someone'],
                     body: args.kwargs.body,
                     message_type: args.kwargs.message_type,
                     model: 'mail.channel',
                     moderation_status: 'pending_moderation',
-                    res_id: 1,
+                    res_id: 20,
                 };
-                var metaData = [undefined, 'res.partner'];
-                var notifData = {
+                const notificationData = {
                     type: 'author',
                     message: message,
                 };
-                var notification = [metaData, notifData];
-                objectDiscuss.call('bus_service', 'trigger', 'notification', [notification]);
-                await testUtils.nextTick();
+                const notification = [[false, 'res.partner', 13], notificationData];
+                self.widget.call('bus_service', 'trigger', 'notification', [notification]);
 
-                messagePostDef.resolve();
-                return Promise.resolve(message.id);
+                return message.id;
             }
             return this._super.apply(this, arguments);
         },
         session: {
-            partner_id: 2,
+            partner_id: 13,
         },
-    })
-    .then(async function (discuss) {
-        objectDiscuss = discuss;
-
-        // go to channel 'general'
-        await testUtils.dom.click(discuss.$('.o_DiscussSidebar_item[data-thread-local-id="1"]'));
-        // post a message
-        discuss.$('.o_composer_input textarea').first().val("some text");
-        await testUtils.dom.click(discuss.$('.o_composer_send button'));
-
-        messagePostDef
-            .then(function () {
-
-                var $message = discuss.$('.o_Message');
-                assert.strictEqual($message.length, 1,
-                    "should have a message in the thread");
-                assert.strictEqual($message.data('message-id'), 100,
-                    "message should have ID returned from 'message_post'");
-                assert.strictEqual($message.find('.o_thread_author').text().trim(),
-                    "Someone", "message should have correct author displayed name");
-                assert.strictEqual(discuss.$('.o_thread_icons i.text-danger').text(),
-                    "Pending moderation", "the message should be pending moderation");
-
-                discuss.destroy();
-                done();
-            });
     });
+
+    // go to channel 'general'
+    const channel = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.channel_20"]'
+    );
+    assert.ok(channel, 'should display the general channel');
+
+    channel.click();
+    await afterNextRender();
+    assert.containsNone(document.body,
+        '.o_Message',
+        "should have no message in channel"
+    );
+
+    // post a message
+    const textInput = document.querySelector('.o_ComposerTextInput_textarea');
+    textInput.focus();
+    document.execCommand('insertText', false, "Some Text");
+    await afterNextRender();
+    document.querySelector('.o_Composer_buttonSend').click();
+    await afterNextRender();
+    const messagePending = document.querySelector(
+        '.o_Message[data-message-local-id="mail.message_100"] .o_Message_moderationPending'
+    );
+    assert.ok(messagePending, "should display the pending message with pending info");
+    assert.hasClass(messagePending,
+        'o-author',
+        "the message should be pending moderation as author"
+    );
 });
 
-QUnit.skip('moderation: sent message accepted in moderated channel', function (assert) {
-    // TODO FIXME converting this test is a waste of time, there are bigger priorities, task-2199306
-    assert.expect(8);
-    var done = assert.async();
-
-    this.data.initMessaging = {
-        channel_slots: {
-            channel_channel: [{
-                id: 1,
-                channel_type: "channel",
-                name: "general",
-                moderation: true,
-            }],
-        },
-    };
-
-    this.data['mail.message'].records = [{
-        author_id: [2, "Someone"],
-        body: "<p>test</p>",
-        channel_ids: [],
-        id: 100,
-        model: 'mail.channel',
-        moderation_status: 'pending_moderation',
-        need_moderation: true,
-        res_id: 1,
-    }];
-
-    createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
-        session: {
-            partner_id: 2,
-        },
-    })
-    .then(async function (discuss) {
-
-        // go to channel 'general'
-        await testUtils.dom.click(discuss.$('.o_DiscussSidebar_item[data-thread-local-id="1"]'));
-        // check message is pending
-        var $message = discuss.$('.o_Message');
-        assert.strictEqual($message.length, 1,
-            "should have a message in the thread");
-        assert.strictEqual($message.data('message-id'), 100,
-            "message should have ID returned from 'message_post'");
-        assert.strictEqual($message.find('.o_thread_author').text().trim(),
-            "Someone", "message should have correct author displayed name");
-        assert.strictEqual(discuss.$('.o_thread_icons i.text-danger').text(),
-            "Pending moderation", "the message should be pending moderation");
-
-        // simulate accepted message
-        var dbName = undefined; // useless for tests
-        var messageData = {
-            author_id: [2, "Someone"],
-            body: "<p>test</p>",
-            channel_ids: [],
-            id: 100,
-            model: 'mail.channel',
-            moderation_status: 'accepted',
-            res_id: 1,
-        };
-        var metaData = [dbName, 'mail.channel', 1];
-        var notification = [metaData, messageData];
-        discuss.call('bus_service', 'trigger', 'notification', [notification]);
-        await testUtils.nextTick();
-        // check message is accepted
-        $message = discuss.$('.o_Message');
-        assert.strictEqual($message.length, 1,
-            "should still have a message in the thread");
-        assert.strictEqual($message.data('message-id'), 100,
-            "message should still have ID returned from 'message_post'");
-        assert.strictEqual($message.find('.o_thread_author').text().trim(),
-            "Someone", "message should still have correct author displayed name");
-        assert.containsNone(discuss, '.o_thread_icons i.text-danger',
-            "the message should not be in pending moderation anymore");
-
-        discuss.destroy();
-        done();
-    });
-});
-
-QUnit.skip('moderation: sent message rejected in moderated channel', function (assert) {
-    // TODO FIXME converting this test is a waste of time, there are bigger priorities, task-2199306
+QUnit.test('moderation: sent message accepted in moderated channel', async function (assert) {
     assert.expect(5);
-    var done = assert.async();
 
-    this.data.initMessaging = {
+    Object.assign(this.data.initMessaging, {
         channel_slots: {
             channel_channel: [{
-                id: 1,
+                id: 20,
                 channel_type: "channel",
                 name: "general",
                 moderation: true,
             }],
         },
-    };
-
+    });
     this.data['mail.message'].records = [{
-        author_id: [2, "Someone"],
+        author_id: [13, "Someone"],
         body: "<p>test</p>",
-        channel_ids: [],
         id: 100,
         model: 'mail.channel',
         moderation_status: 'pending_moderation',
         need_moderation: true,
-        res_id: 1,
+        res_id: 20,
     }];
 
-    createDiscuss({
-        id: 1,
-        context: {},
-        params: {},
-        data: this.data,
-        services: this.services,
+    await this.start({
         session: {
-            partner_id: 2,
+            partner_id: 13,
         },
-    })
-    .then(async function (discuss) {
-
-        // go to channel 'general'
-        await testUtils.dom.click(discuss.$('.o_DiscussSidebar_item[data-thread-local-id="1"]'));
-        // check message is pending
-        var $message = discuss.$('.o_Message');
-        assert.strictEqual($message.length, 1,
-            "should have a message in the thread");
-        assert.strictEqual($message.data('message-id'), 100,
-            "message should have ID returned from 'message_post'");
-        assert.strictEqual($message.find('.o_thread_author').text().trim(),
-            "Someone", "message should have correct author displayed name");
-        assert.strictEqual(discuss.$('.o_thread_icons i.text-danger').text(),
-            "Pending moderation", "the message should be pending moderation");
-
-        // simulate reject from moderator
-        var dbName = undefined; // useless for tests
-        var notifData = {
-            type: 'deletion',
-            message_ids: [100],
-        };
-        var metaData = [dbName, 'res.partner'];
-        var notification = [metaData, notifData];
-        discuss.call('bus_service', 'trigger', 'notification', [notification]);
-        await testUtils.nextTick();
-        // // check no message
-        assert.containsNone(discuss, '.o_Message',
-            "message should be removed from channel after reject");
-
-        discuss.destroy();
-        done();
     });
+
+    const channel = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.channel_20"]'
+    );
+    assert.ok(channel, 'should display the general channel');
+
+    channel.click();
+    await afterNextRender();
+    const messagePending = document.querySelector(
+        '.o_Message[data-message-local-id="mail.message_100"] .o_Message_moderationPending'
+    );
+    assert.ok(messagePending, "should display the pending message with pending info");
+    assert.hasClass(messagePending,
+        'o-author',
+        "the message should be pending moderation as author"
+    );
+
+    // simulate accepted message
+    const messageData = {
+        author_id: [13, "Someone"],
+        body: "<p>test</p>",
+        channel_ids: [20],
+        id: 100,
+        model: 'mail.channel',
+        moderation_status: 'accepted',
+        res_id: 20,
+    };
+    const notification = [[false, 'mail.channel', 20], messageData];
+    this.widget.call('bus_service', 'trigger', 'notification', [notification]);
+    await afterNextRender();
+
+    // check message is accepted
+    const message = document.querySelector(
+        '.o_Message[data-message-local-id="mail.message_100"]'
+    );
+    assert.ok(message, "should still display the message");
+    assert.containsNone(message, '.o_Message_moderationPending',
+        "the message should not be in pending moderation anymore"
+    );
+});
+
+QUnit.test('moderation: sent message rejected in moderated channel', async function (assert) {
+    assert.expect(4);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                id: 20,
+                channel_type: "channel",
+                name: "general",
+                moderation: true,
+            }],
+        },
+    });
+    this.data['mail.message'].records = [{
+        author_id: [13, "Someone"],
+        body: "<p>test</p>",
+        id: 100,
+        model: 'mail.channel',
+        moderation_status: 'pending_moderation',
+        need_moderation: true,
+        res_id: 20,
+    }];
+
+    await this.start({
+        session: {
+            partner_id: 13,
+        },
+    });
+
+    const channel = document.querySelector(
+        '.o_DiscussSidebar_item[data-thread-local-id="mail.channel_20"]'
+    );
+    assert.ok(channel, 'should display the general channel');
+
+    channel.click();
+    await afterNextRender();
+    const messagePending = document.querySelector(
+        '.o_Message[data-message-local-id="mail.message_100"] .o_Message_moderationPending'
+    );
+    assert.ok(messagePending, "should display the pending message with pending info");
+    assert.hasClass(messagePending,
+        'o-author',
+        "the message should be pending moderation as author"
+    );
+
+    // simulate reject from moderator
+    const notifData = {
+        type: 'deletion',
+        message_ids: [100],
+    };
+    const notification = [[false, 'res.partner', 13], notifData];
+    this.widget.call('bus_service', 'trigger', 'notification', [notification]);
+    await afterNextRender();
+
+    // check no message
+    assert.containsNone(document.body, '.o_Message',
+        "message should be removed from channel after reject"
+    );
 });
 
 });
