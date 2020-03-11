@@ -6,3 +6,4 @@ from . import wizard
 from . import controllers
 
 # coucou
+# coucou
