@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+# this is a test
 {
     'name': 'Discuss',
     'version': '1.0',
