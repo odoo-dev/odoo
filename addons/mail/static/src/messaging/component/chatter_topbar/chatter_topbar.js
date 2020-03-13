@@ -53,6 +53,14 @@ class ChatterTopbar extends Component {
      * @private
      * @param {MouseEvent} ev
      */
+    _onClickClose(ev) {
+        this.trigger('o-close-chatter');
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onClickFollow(ev) {
         // TODO
     }
@@ -117,8 +125,12 @@ class ChatterTopbar extends Component {
 }
 
 Object.assign(ChatterTopbar, {
+    defaultProps: {
+        hasCloseButton: false,
+    },
     props: {
         chatterLocalId: String,
+        hasCloseButton: Boolean,
     },
     template: 'mail.messaging.component.ChatterTopbar',
 });

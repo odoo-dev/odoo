@@ -76,6 +76,9 @@ function ThreadCacheFactory({ Entity }) {
         }
 
         async loadNewMessages() {
+            if (this.isLoading) {
+                return;
+            }
             const messageIds = this.messages.map(message => message.id);
             const searchDomain = JSON.parse(this.stringifiedDomain);
             let domain = searchDomain.length ? searchDomain : [];

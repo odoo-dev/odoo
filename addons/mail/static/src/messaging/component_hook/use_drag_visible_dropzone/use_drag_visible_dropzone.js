@@ -75,7 +75,7 @@ function useDragVisibleDropZone() {
      */
     function _onDropListener(ev) {
         dragCount = 0;
-        if (!dropzoneRef.comp.contains(ev.target)) {
+        if (dropzoneRef.comp && !dropzoneRef.comp.contains(ev.target)) {
             isVisible.value = false;
         }
     }

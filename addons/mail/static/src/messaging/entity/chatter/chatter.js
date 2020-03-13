@@ -138,7 +138,7 @@ function ChatterFactory({ Entity }) {
                 hasActivities = this.hasActivities || true,
                 hasFollowers = this.hasFollowers || true,
                 hasThread = this.hasThread || true,
-                isActivityBoxVisible = this.isActivityBoxVisible || false,
+                isActivityBoxVisible = this.isActivityBoxVisible || true,
                 isAttachmentBoxVisible = this.isAttachmentBoxVisible || false,
                 isComposerLog = this.isComposerLog || true,
                 isComposerVisible = this.isComposerVisible || false,

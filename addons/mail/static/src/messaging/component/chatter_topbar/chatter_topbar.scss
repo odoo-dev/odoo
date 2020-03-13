@@ -5,6 +5,13 @@
 .o_ChatterTopbar {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+}
+
+.o_ChatterTopbar_actions {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
     flex-wrap: wrap;
 }
 
@@ -26,6 +33,15 @@
     border-left: none;
 }
 
+.o_ChatterTopbar_buttonClose {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    width: 34px;
+    height: 34px;
+}
+
 .o_ChatterTopbar_followers {
     display: flex;
 }
@@ -40,13 +56,23 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_ChatterTopbar {
+.o_ChatterTopbar.o-active {
+    color: $o-brand-odoo;
+    background-color: lighten(gray('300'), 7%);
+    border-color: gray('300');
+    border-bottom-color: transparent;
+    border-top-color: transparent;
+}
 
-    .o-active {
-        color: $o-brand-odoo;
-        background-color: lighten(gray('300'), 7%);
-        border-color: gray('300');
-        border-bottom-color: transparent;
-        border-top-color: transparent;
+.o_ChatterTopbar_buttonClose {
+    border-radius: 0 0 10px 10px;
+    font-size: $font-size-lg;
+    background-color: gray('700');
+    color: gray('100');
+    cursor: pointer;
+
+    &:hover {
+        background-color: gray('600');
+        color: $white;
     }
 }

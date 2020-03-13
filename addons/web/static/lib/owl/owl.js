@@ -3191,6 +3191,10 @@
                     task.callback();
                     return false;
                 }
+                // Do not wait for a task linked to a destroyed component https://github.com/odoo/owl/issues/685
+                if (task.fiber.component && task.fiber.component.__owl__.isDestroyed) {
+                    return false;
+                }
                 if (task.fiber.counter === 0) {
                     if (!task.fiber.error) {
                         try {

@@ -146,7 +146,7 @@ function ComposerFactory({ Entity }) {
                     model: thread.model,
                     res_id: thread.id
                 }));
-                thread.mainCache.loadNewMessages();
+                thread.loadNewMessages();
             }
             for (const threadViewer of this.thread.viewers) {
                 threadViewer.addComponentHint('current-partner-just-posted-message', messageId);

@@ -58,9 +58,9 @@ QUnit.test('base rendering when chatter has no attachment', async function (asse
     const messages = [...Array(60).keys()].map(id => {
         return {
             author_id: [10, "Demo User"],
-            body: `<p>Message ${id}</p>`,
+            body: `<p>Message ${id + 1}</p>`,
             date: "2019-04-20 10:00:00",
-            id,
+            id: id + 1,
             message_type: 'comment',
             model: 'res.partner',
             record_name: 'General',

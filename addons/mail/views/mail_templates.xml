@@ -228,6 +228,7 @@
 
         <template id="tests_assets" name="mail_tests_assets" inherit_id="web.tests_assets">
             <xpath expr="." position="inside">
+                <script type="text/javascript" src="/mail/static/src/messaging/test_utils.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/helpers/mock_server.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/helpers/test_utils.js"></script>
             </xpath>
@@ -280,7 +281,6 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/message/message_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/messaging/messaging_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/thread/thread_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/test_utils.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/widget/form_renderer/form_renderer_tests.js"></script>
             </xpath>
         </template>

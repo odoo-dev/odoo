@@ -88,8 +88,12 @@ class Chatter extends Component {
 
 Object.assign(Chatter, {
     components,
+    defaultProps: {
+        hasTopbarCloseButton: false,
+    },
     props: {
         chatterLocalId: String,
+        hasTopbarCloseButton: Boolean,
     },
     template: 'mail.messaging.component.Chatter',
 });

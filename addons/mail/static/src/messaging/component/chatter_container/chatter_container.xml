@@ -4,7 +4,7 @@
     <t t-name="mail.messaging.component.ChatterContainer" owl="1">
         <div class="o_ChatterContainer" t-att-class="{ 'o-messaging-not-initialized': env.isMessagingInitialized() }">
             <t t-if="chatter">
-                <Chatter chatterLocalId="chatter.localId"/>
+                <Chatter chatterLocalId="chatter.localId" hasTopbarCloseButton="props.hasTopbarCloseButton"/>
             </t>
             <t t-else="">
                 Please wait...

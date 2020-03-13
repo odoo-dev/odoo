@@ -167,7 +167,10 @@ MockServer.include({
             return m1.id < m2.id ? 1 : -1;
         });
         // pick at most 'limit' messages
-        return messages.slice(0, args.kwargs.limit);
+        if (args.kwargs.limit) {
+            return messages.slice(0, args.kwargs.limit);
+        }
+        return messages;
     },
     /**
      * Simulate the 'message_format' Python method
@@ -185,6 +188,29 @@ MockServer.include({
             return m1.id < m2.id ? 1 : -1;
         });
         return messages;
+    },
+    /**
+     * Simulate the 'message_post' Python method
+     *
+     * @private
+     * @return {integer}
+     */
+    _mockMessagePost(args) {
+        const {
+            args: [res_id],
+            model: res_model,
+            kwargs: postData,
+        } = args;
+        const records = this.data['mail.message'].records;
+        const messageIds = records.map(message => message.id);
+        const id = Math.max(...messageIds, 0) + 1;
+        const record = Object.assign({
+            id,
+            res_id,
+            model: res_model,
+        }, postData);
+        records.push(record);
+        return id;
     },
     /**
      * Simulate the 'moderate' Python method
@@ -285,6 +311,9 @@ MockServer.include({
         }
         if (args.method === 'message_format') {
             return Promise.resolve(this._mockMessageFormat(args));
+        }
+        if (args.method === 'message_post') {
+            return Promise.resolve(this._mockMessagePost(args));
         }
         if (args.method === 'activity_format') {
             var res = this._mockRead(args.model, args.args, args.kwargs);

@@ -681,9 +681,10 @@ async function start(param0 = {}) {
         await testEnv.messagingInitializedPromise;
     }
 
-    await Promise.all(mountCallbacks.map(callback => callback({ selector, widget })));
-    if (hasChatWindow || hasDiscuss || hasMessagingMenu) {
-        await afterNextRender();
+    if (mountCallbacks.length > 0) {
+        await afterNextRender(async () => {
+            await Promise.all(mountCallbacks.map(callback => callback({ selector, widget })));
+        });
     }
     returnCallbacks.forEach(callback => callback(result));
     return result;
