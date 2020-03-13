@@ -140,6 +140,7 @@ const getters = {
             .sort((channel1, channel2) => {
                 const channel1Name = getters.threadName(channel1.localId);
                 const channel2Name = getters.threadName(channel2.localId);
+                // TODO FIXME they are sorted by date of last message on master (for messaging menu): task-2223284
                 return channel1Name < channel2Name ? -1 : 1;
             });
     },
@@ -174,6 +175,7 @@ const getters = {
             .sort((chat1, chat2) => {
                 const chat1Name = getters.threadName(chat1.localId);
                 const chat2Name = getters.threadName(chat2.localId);
+                // TODO FIXME they are sorted by date of last message on master (for messaging menu): task-2223284
                 return chat1Name < chat2Name ? -1 : 1;
             });
     },
@@ -332,7 +334,7 @@ const getters = {
             .sort((livechat1, livechat2) => {
                 const livechat1Name = getters.threadName(livechat1.localId);
                 const livechat2Name = getters.threadName(livechat2.localId);
-                // TODO FIXME, should be sorted by create date for consistency maybe?
+                // TODO FIXME, should be sorted by create date for consistency maybe? task-2223284
                 // but in master it is sorted by last message date (in discuss)
                 // (and should always be by counter (yes/no) and then last message date in messaging menu)
                 return livechat1Name < livechat2Name ? -1 : 1;
@@ -397,7 +399,7 @@ const getters = {
                 ) {
                     return 1;
                 }
-                // TODO FIXME they are sorted by date of last message on master (for messaging menu)
+                // TODO FIXME they are sorted by date of last message on master (for messaging menu): task-2223284
                 if (
                     mailChannel1.message_unread_counter &&
                     mailChannel2.message_unread_counter &&
@@ -473,6 +475,16 @@ const getters = {
         return getters
             .attachments({ resId, resModel })
             .filter(attachment => getters.attachmentMediaType(attachment.localId) !== 'image');
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @param {string} partnerLocalId
+     * @return {string}
+     */
+    partnerDisplayName({ state }, partnerLocalId) {
+        const partner = state.partners[partnerLocalId];
+        return partner.display_name || partner.name;
     },
     /**
      * @param {Object} param0
@@ -587,6 +599,20 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.state
+     * @param {string} uuid
+     * @return {mail.store.model.Thread|undefined}
+     */
+    threadFromUuid({ state }, uuid) {
+        for (const threadLocalId in state.threads) {
+            const thread = state.threads[threadLocalId];
+            if (thread.uuid === uuid) {
+                return thread;
+            }
+        }
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
      * @param {string} threadLocalId
      * @return {string}
      */
@@ -597,7 +623,14 @@ const getters = {
             return thread.custom_channel_name || directPartner.name;
         }
         // TODO FIXME move this into im_livechat when we have entities
-        if (thread.channel_type === 'livechat' && thread.correspondent_name) {
+        const currentPartner = state.partners[state.currentPartnerLocalId];
+        if (
+            thread.channel_type === 'livechat' &&
+            thread.correspondent_name &&
+            currentPartner &&
+            thread.operator_pid &&
+            currentPartner.id === thread.operator_pid[0]
+        ) {
             return thread.correspondent_name;
         }
         return thread.name;

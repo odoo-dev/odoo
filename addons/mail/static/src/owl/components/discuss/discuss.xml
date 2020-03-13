@@ -66,7 +66,7 @@
                     t-on-o-hide.stop="_onHideMobileAddItemHeader"/>
             </div>
         </t>
-        <t t-if="(storeProps.isMobile and storeProps.activeMobileNavbarTabId === 'mailbox' and storeProps.activeThreadLocalId and storeProps.activeThread._model === 'mail.box') or (!storeProps.isMobile and storeProps.activeThreadLocalId)">
+        <t t-if="(storeProps.isMobile and storeProps.activeMobileNavbarTabId === 'mailbox' and storeProps.activeThread and storeProps.activeThread._model === 'mail.box') or (!storeProps.isMobile and storeProps.activeThread)">
             <Thread
                 class="o_Discuss_thread"
                 t-att-class="{ 'o-mobile': storeProps.isMobile }"
@@ -90,7 +90,7 @@
                 t-ref="thread"
             />
         </t>
-        <t t-if="!storeProps.activeThreadLocalId and (!storeProps.isMobile or storeProps.activeMobileNavbarTabId === 'mailbox')">
+        <t t-if="!storeProps.activeThread and (!storeProps.isMobile or storeProps.activeMobileNavbarTabId === 'mailbox')">
             <div class="o_Discuss_noThread">
                 No conversation selected.
             </div>

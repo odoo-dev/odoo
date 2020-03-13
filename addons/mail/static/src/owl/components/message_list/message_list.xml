@@ -49,6 +49,7 @@
             </t>
             <t t-foreach="messages" t-as="message" t-key="message.localId">
                 <t t-set="message_day" t-value="getDateDay(message)"/>
+                <!-- TODO FIXME correct order for DESC: task-2223181 -->
                 <t t-if="current_day !== message_day">
                     <div class="o_MessageList_separator o_MessageList_separatorDate o_MessageList_item">
                         <hr class="o_MessageList_separatorLine"/><span class="o_MessageList_separatorLabel o_MessageList_separatorLabelDate"><t t-esc="message_day"/></span><hr class="o_MessageList_separatorLine"/>

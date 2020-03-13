@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="im_livechat.component.LivechatManager" owl="1">
+        <div class="o_LivechatManager">
+            <ChatWindowManager hasChatWindowExpand="false"/>
+            <t t-if="storeProps.publicLivechat.result.available_for_me and !storeProps.hasChatWindow">
+                <LivechatButton/>
+            </t>
+        </div>
+    </t>
+
+</templates>

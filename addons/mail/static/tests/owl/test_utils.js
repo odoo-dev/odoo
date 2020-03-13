@@ -705,6 +705,7 @@ function patchMessagingService(messaging_service, session = {}) {
     };
     patch(messaging_service, {
         registry: {
+            envName: 'test',
             initialEnv: makeTestEnvironment({
                 _t,
                 session: Object.assign({

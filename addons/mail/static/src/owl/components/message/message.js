@@ -106,10 +106,10 @@ class Message extends Component {
         ) {
             return '/mail/static/src/img/odoobot.png';
         } else if (this.storeProps.author) {
-            // TODO FIXME for public user this might not be accessible
+            // TODO FIXME for public user this might not be accessible: task-2223236
             // we should probably use the correspondig attachment id + access token
             // or create a dedicated route to get message image, checking the access right of the message
-            return `/web/image/res.partner/${this.storeProps.author.id}/image_128`;
+            return `/web/partner_image/${this.storeProps.author.id}/image_128`;
         } else if (this.storeProps.message.message_type === 'email') {
             return '/mail/static/src/img/email_icon.png';
         }
@@ -132,6 +132,9 @@ class Message extends Component {
      */
     get displayedAuthorName() {
         if (this.storeProps.author) {
+            if (this.env.isMessagePartnerDisplayNamePreferred) {
+                return this.storeGetters.partnerDisplayName(this.storeProps.author.localId);
+            }
             return this.storeGetters.partnerName(this.storeProps.author.localId);
         }
         return this.storeProps.message.email_from || this.env._t("Anonymous");

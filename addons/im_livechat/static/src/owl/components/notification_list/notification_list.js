@@ -22,7 +22,12 @@ patch(NotificationList, 'im_livechat_notification_list', {
         if (props.filter === 'livechat') {
             return this.storeGetters.livechatList();
         }
-        return this._super(...arguments);
+        let res = this._super(...arguments);
+        if (props.filter === 'chat' && !state.isMobile) {
+            // TODO FIXME these need to be sorted correctly together: task-2223284
+            res = res.concat(this.storeGetters.livechatList());
+        }
+        return res;
     },
 
 });

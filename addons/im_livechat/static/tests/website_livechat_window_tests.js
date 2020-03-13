@@ -91,6 +91,7 @@ QUnit.test('define several livechat colors', async function (assert) {
             serverUrl: "serverUrl",
         }),
     ]);
+    // TODO SEB move this test in chatwindow from owl
     const chatWindow = new ChatWindow(parent, livechat, {
         headerBackgroundColor: 'yellow',
         titleColor: 'green',

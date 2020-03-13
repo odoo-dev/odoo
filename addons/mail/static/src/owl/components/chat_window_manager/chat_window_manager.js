@@ -313,6 +313,8 @@ class ChatWindowManager extends Component {
 
 Object.assign(ChatWindowManager, {
     components: { ChatWindow, HiddenMenu },
+    defaultProps: { hasChatWindowExpand: true },
+    props: { hasChatWindowExpand: Boolean },
     template: 'mail.component.ChatWindowManager',
 });
 

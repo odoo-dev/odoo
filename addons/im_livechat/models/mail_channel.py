@@ -99,20 +99,26 @@ class MailChannel(models.Model):
         return values
 
     def _channel_get_livechat_partner_name(self):
-        if self.livechat_operator_id in self.channel_partner_ids:
-            partners = self.channel_partner_ids - self.livechat_operator_id
-            if partners:
-                partner_name = False
-                for partner in partners:
-                    if not partner_name:
-                        partner_name = partner.name
-                    else:
-                        partner_name += ', %s' % partner.name
-                    if partner.country_id:
-                        partner_name += ' (%s)' % partner.country_id.name
-                return partner_name
+        self.ensure_one()
+        # 1. if there is at least one partner that is not the operator
+        partners = self.channel_partner_ids - self.livechat_operator_id
+        if partners:
+            partner_names = ''
+            for partner in partners:
+                partner_name_country = partner._format_name_contry()
+                # join partners
+                if not partner_names:
+                    partner_names = partner_name_country
+                else:
+                    partner_names = _('%s, %s') % (partner_names, partner_name_country)
+            return partner_names
+        # 2. if there is an anonymous name
         if self.anonymous_name:
             return self.anonymous_name
+        # 3. if the operator is talking to himself (probably doing a test)
+        if self.livechat_operator_id:
+            return self.livechat_operator_id._format_name_contry()
+        # 4. default
         return _("Visitor")
 
     @api.model

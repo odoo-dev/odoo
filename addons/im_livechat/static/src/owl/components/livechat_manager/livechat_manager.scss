@@ -1,0 +1,12 @@
+.o_LivechatManager {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    p {
+        margin-top: map-get($spacers, 0);
+        margin-bottom: map-get($spacers, 3);
+    }
+}

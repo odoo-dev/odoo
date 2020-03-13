@@ -18,16 +18,38 @@ class ChatWindowHeader extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
+            const headerBackgroundColor = state.chatWindowManager.header_background_color;
+            const titleColor = state.chatWindowManager.title_color;
             const thread = state.threads[props.chatWindowLocalId];
             const threadName = thread
                 ? this.storeGetters.threadName(thread.localId)
                 : undefined;
             return {
+                headerBackgroundColor,
                 isMobile: state.isMobile,
                 thread,
                 threadName,
+                titleColor,
             };
         });
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {string}
+     */
+    getStyle() {
+        const styles = {};
+        if (this.storeProps.headerBackgroundColor) {
+            styles['background-color'] = this.storeProps.headerBackgroundColor;
+        }
+        if (this.storeProps.titleColor) {
+            styles['color'] = this.storeProps.titleColor;
+        }
+        return this.env.getStyleString(styles);
     }
 
     //--------------------------------------------------------------------------

@@ -202,6 +202,7 @@ class Discuss extends Component {
             activeThreadLocalId: this.storeProps.activeThreadLocalId,
         });
         if (
+            this.storeProps.activeThread &&
             this.storeProps.activeThread.localId === 'mail.box_inbox' &&
             this._lastActiveThreadCacheLocalId === this.storeProps.activeThreadCacheLocalId &&
             this._lastActiveThreadCounter > 0 && this.storeProps.activeThreadCounter === 0

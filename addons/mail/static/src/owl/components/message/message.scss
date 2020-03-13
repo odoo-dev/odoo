@@ -5,7 +5,7 @@
 .o_Message {
     display: flex;
     flex: 0 0 auto;
-    padding: map-get($spacers, 2);
+    padding: map-get($spacers, 1);
 }
 
 .o_Message_authorAvatar {
@@ -188,7 +188,9 @@
 
     &.o-not-discussion {
         background-color: lighten(gray('300'), 5%);
-        border-bottom: 1px solid darken(gray('300'), 5%);
+        border-color: darken(gray('300'), 5%);
+        border-style: solid;
+        border-width: $border-width 0;
 
         .o_Message_partnerImStatusIcon {
             color: lighten(gray('300'), 5%);
@@ -273,6 +275,7 @@
 }
 
 .o_Message_date {
+    // TODO FIXME I think this is too light on top of white background.
     color: gray('500');
 
     &.o-message-selected {

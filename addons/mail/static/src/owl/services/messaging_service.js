@@ -1,15 +1,11 @@
 odoo.define('mail.service.Messaging', function (require) {
 'use strict';
 
-const actions = require('mail.store.actions');
-const getters = require('mail.store.getters');
-const initializeState = require('mail.store.state');
-
 const AbstractService = require('web.AbstractService');
 const { serviceRegistry } = require('web.core');
 const env = require('web.env');
 
-const { Store } = owl;
+const { clearMessagingEnv, getMessagingEnv } = require('mail.messaging.env');
 
 const MessagingService = AbstractService.extend({
     /**
@@ -17,6 +13,7 @@ const MessagingService = AbstractService.extend({
      * Useful to make changes to store in tests.
      */
     registry: {
+        envName: 'main',
         initialEnv: env,
         onMessagingEnvCreated: messagingEnv => {},
     },
@@ -27,15 +24,14 @@ const MessagingService = AbstractService.extend({
         this._super(...arguments);
 
         const {
+            envName,
             initialEnv,
             onMessagingEnvCreated,
         } = this.registry;
 
-        /**
-         * Environment of the messaging store (messaging env. without store)
-         */
-        let messagingStoreEnv = Object.create(initialEnv);
-        Object.assign(messagingStoreEnv, {
+        this.messagingEnv = getMessagingEnv(envName, initialEnv);
+
+        Object.assign(this.messagingEnv, {
             disableAnimation: false,
             call: (...args) => this.call(...args),
             do_action: (...args) => this.do_action(...args),
@@ -45,25 +41,15 @@ const MessagingService = AbstractService.extend({
             trigger_up: (...args) => this.trigger_up(...args)
         });
 
-        /**
-         * Messaging store
-         */
-        const store = new Store({
-            actions,
-            env: messagingStoreEnv,
-            getters,
-            state: initializeState(),
-        });
-
-        /**
-         * Environment of messaging components (messaging env. with store)
-         */
-        let messagingEnv = Object.create(messagingStoreEnv);
-        Object.assign(messagingEnv, { store });
-        onMessagingEnvCreated(messagingEnv);
-        store.dispatch('initMessaging');
-
-        this.messagingEnv = messagingEnv;
+        this.messagingEnv.store.dispatch('initMessaging');
+        onMessagingEnvCreated(this.messagingEnv);
+    },
+    /**
+     * @override
+     */
+    destroy() {
+        clearMessagingEnv(this.messagingEnv.envName);
+        this._super();
     },
 
     //--------------------------------------------------------------------------

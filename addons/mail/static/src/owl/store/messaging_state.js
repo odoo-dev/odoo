@@ -89,12 +89,16 @@ function initState() {
                  */
                 visible: [],
             },
+            // background-color of ChatWindowHeader
+            header_background_color: undefined,
             /**
              * Tracked internal autofocus counter of chat window manager.
              * This is used to dismiss autofocus on chat window manager in
              * case it is mounted and the autofocus counter has not changed.
              */
             notifiedAutofocusCounter: 0,
+            // color of ChatWindowHeader
+            title_color: undefined,
         },
         commands: {},
         composers: {},

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, api
+from odoo import models, api, _
 
 
 class Partners(models.Model):
@@ -33,3 +33,9 @@ class Partners(models.Model):
         else:
             result = super(Partners, self).name_get()
         return result
+
+    def _format_name_contry(self):
+        self.ensure_one()
+        if self.country_id:
+            return _('%s (%s)') % (self.name, self.country_id.name)
+        return self.name

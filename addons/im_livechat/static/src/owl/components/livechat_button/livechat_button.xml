@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="im_livechat.component.LivechatButton" owl="1">
+        <div class="o_LivechatButton" t-att-style="getButtonStyle()" t-on-click="_onClick">
+            <t t-esc="storeProps.publicLivechat.button_text"/>
+        </div>
+    </t>
+
+</templates>

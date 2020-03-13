@@ -2,13 +2,13 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.component.ChatWindowHeader" owl="1">
-        <div class="o_ChatWindowHeader" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click="_onClick" t-att-data-chat-window-local-id="props.chatWindowLocalId">
+        <div class="o_ChatWindowHeader" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-att-style="getStyle()" t-on-click="_onClick" t-att-data-chat-window-local-id="props.chatWindowLocalId">
             <t t-if="props.hasCloseAsBackButton">
                 <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandBack o_ChatWindowHeader_commandClose" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click.stop="_onClickClose" title="Close conversation" aria-label="Close conversation">
                     <i class="fa fa-arrow-left"/>
                 </div>
             </t>
-            <t t-if="storeProps.thread">
+            <t t-if="storeProps.thread and env.hasFontAwesome">
                 <Icon
                     class="o_ChatWindowHeader_icon o_ChatWindowHeader_item"
                     threadLocalId="props.chatWindowLocalId"
@@ -44,7 +44,12 @@
                 </t>
                 <t t-if="!props.hasCloseAsBackButton">
                     <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandClose" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click.stop="_onClickClose" title="Close chat window" aria-label="Close chat window">
-                        <i class="fa fa-close"/>
+                        <t t-if="env.hasFontAwesome">
+                            <i class="fa fa-close"/>
+                        </t>
+                        <t t-else="">
+                            X
+                        </t>
                     </div>
                 </t>
             </div>

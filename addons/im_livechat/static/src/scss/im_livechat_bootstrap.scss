@@ -1,4 +1,6 @@
 
+// TODO SEB move this into LivechatManager?
+
 .text-muted {
   color: gray('600');
 }
@@ -24,4 +26,8 @@
       margin: auto 0;
     }
   }
+}
+
+.o-autogrow {
+    flex: 1 1 auto;
 }

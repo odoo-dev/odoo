@@ -24,7 +24,7 @@
                     hasShiftLeft="!storeProps.isMobile and data_index !== 0"
                     hasShiftRight="!storeProps.isMobile and chatWindowShiftRight(data_index)"
                     isDocked="!storeProps.isMobile"
-                    isExpandable="!storeProps.isMobile and data.chatWindowLocalId !== 'new_message'"
+                    isExpandable="!storeProps.isMobile and data.chatWindowLocalId !== 'new_message' and props.hasChatWindowExpand"
                     isFullscreen="storeProps.isMobile"
                     threadInitialScrollTop="storeProps.chatWindowInitialScrollTops[data.chatWindowLocalId]"
                     t-on-o-focus-next-chat-window="_onFocusNextChatWindow"

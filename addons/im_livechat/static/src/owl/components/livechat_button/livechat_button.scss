@@ -1,0 +1,29 @@
+// -----------------------------------------------------------------------------
+// Layout
+// -----------------------------------------------------------------------------
+
+.o_LivechatButton {
+    // TODO SEB this should be right and work also in rtl
+    @include o-position-absolute($bottom: 0, $left: map-get($spacers, 3));
+    position: fixed;
+    padding: map-get($spacers, 2);
+    border: $border-width solid rgb(80, 80, 80);
+    border-bottom: 0;
+    border-top-left-radius: $border-radius-lg;
+    border-top-right-radius: $border-radius-lg;
+    z-index: 5;
+}
+
+// -----------------------------------------------------------------------------
+// Style
+// -----------------------------------------------------------------------------
+
+.o_LivechatButton {
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: rgba(60, 60, 60, 0.6);
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Arial, Verdana, sans-serif;
+    font-weight: $font-weight-bold;
+    color: $white;
+    text-shadow: rgb(59, 76, 88) 1px 1px 0px;
+}

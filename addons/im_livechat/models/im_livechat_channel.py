@@ -4,7 +4,7 @@ import base64
 import random
 import re
 
-from odoo import api, fields, models, modules
+from odoo import api, fields, models, modules, _
 
 
 class ImLivechatChannel(models.Model):
@@ -113,14 +113,19 @@ class ImLivechatChannel(models.Model):
         return self.user_ids.filtered(lambda user: user.im_status == 'online')
 
     def _get_livechat_mail_channel_vals(self, anonymous_name, operator, user_id=None, country_id=None):
-        # partner to add to the mail.channel
         operator_partner_id = operator.partner_id.id
         channel_partner_to_add = [(4, operator_partner_id)]
-        visitor_user = False
+        visitor_user = self.env['res.users']
+        channel_name = anonymous_name
         if user_id:
-            visitor_user = self.env['res.users'].browse(user_id)
-            if visitor_user and visitor_user.active:  # valid session user (not public)
+            # valid session user (not public: filter only active)
+            visitor_user = visitor_user.with_context(active_test=True).search([('id', '=', user_id)], limit=1)
+            if visitor_user:
+                channel_name = visitor_user.display_name
                 channel_partner_to_add.append((4, visitor_user.partner_id.id))
+        # avoid duplicating operator name if he's testing with himself
+        if visitor_user != operator:
+            channel_name = _('%s, %s') % (channel_name, operator.livechat_username or operator.name)
         return {
             'channel_partner_ids': channel_partner_to_add,
             'livechat_active': True,
@@ -129,7 +134,7 @@ class ImLivechatChannel(models.Model):
             'anonymous_name': False if user_id else anonymous_name,
             'country_id': country_id,
             'channel_type': 'livechat',
-            'name': ', '.join([visitor_user.display_name if visitor_user else anonymous_name, operator.livechat_username if operator.livechat_username else operator.name]),
+            'name': channel_name,
             'public': 'private',
             'email_send': False,
         }

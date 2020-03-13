@@ -11,7 +11,7 @@ const useStore = require('mail.hooks.useStore');
 const mailUtils = require('mail.utils');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useRef, useState } = owl.hooks;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 class Composer extends Component {
 
