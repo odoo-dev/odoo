@@ -98,6 +98,33 @@ FormRenderer.include({
         return !!this._chatterContainerTarget;
     },
     /**
+     * Determine whether the chatter of the form renderer should display activities
+     *
+     * @private
+     * @return {boolean}
+     */
+    _hasChatterActivities() {
+        return !!this.mailFields.mail_activity;
+    },
+    /**
+     * Determine whether the chatter of the form renderer should display followers
+     *
+     * @private
+     * @return {boolean}
+     */
+    _hasChatterFollowers() {
+        return !!this.mailFields.mail_followers;
+    },
+    /**
+     * Determine whether the chatter of the form renderer should display thread
+     *
+     * @private
+     * @return {boolean}
+     */
+    _hasChatterThread() {
+        return !!this.mailFields.mail_thread;
+    },
+    /**
      * @private
      */
     _makeChatterComponent() {
@@ -151,10 +178,16 @@ FormRenderer.include({
             const activityIds = this.state.data.activity_ids
                 ? this.state.data.activity_ids.res_ids
                 : [];
+            const hasActivities = this._hasChatterActivities();
+            const hasFollowers = this._hasChatterFollowers();
+            const hasThread = this._hasChatterThread();
             if (!this._chatterLocalId) {
                 this._chatterLocalId = this.env.store.dispatch('createChatter', {
                     activityIds,
                     context,
+                    hasActivities,
+                    hasFollowers,
+                    hasThread,
                     initialThreadId: this.state.res_id,
                     initialThreadModel: this.state.model,
                 });
@@ -162,6 +195,9 @@ FormRenderer.include({
                 this.env.store.dispatch('updateChatter', this._chatterLocalId, {
                     activityIds,
                     context,
+                    hasActivities,
+                    hasFollowers,
+                    hasThread,
                     threadId: this.state.res_id,
                     threadModel: this.state.model
                 });

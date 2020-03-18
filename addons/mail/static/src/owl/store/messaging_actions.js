@@ -261,18 +261,32 @@ const actions = {
      * @param {Object} param1
      * @param {Array} param1.activityIds
      * @param {Array} param1.context
+     * @param {boolean} param1.hasActivities
+     * @param {boolean} param1.hasFollowers
+     * @param {boolean} param1.hasThread
      * @param {string} [param1.initialThreadId]
      * @param {string} param1.initialThreadModel
      * @return {string}
      */
     createChatter(
         { dispatch, state },
-        { activityIds, context, initialThreadId, initialThreadModel }
+        {
+            activityIds,
+            context,
+            hasActivities,
+            hasFollowers,
+            hasThread,
+            initialThreadId,
+            initialThreadModel
+        }
     ) {
         const chatterLocalId = _.uniqueId('o_Chatter');
         const chatter = {
             activityIds,
             context,
+            hasActivities,
+            hasFollowers,
+            hasThread,
             isActivityBoxVisible: true,
             isAttachmentBoxVisible: false,
             isComposerLog: true,
@@ -1592,13 +1606,24 @@ const actions = {
      * @param {Object} param2
      * @param {Array} param2.activityIds
      * @param {Object} param2.context
+     * @param {boolean} param2.hasActivities
+     * @param {boolean} param2.hasFollowers
+     * @param {boolean} param2.hasThread
      * @param {string} param2.threadId
      * @param {string} param2.threadModel
      */
     updateChatter(
         { dispatch, state },
         chatterLocalId,
-        { activityIds, context, threadId, threadModel }
+        {
+            activityIds,
+            context,
+            hasActivities,
+            hasFollowers,
+            hasThread,
+            threadId,
+            threadModel
+        }
     ) {
         const chatter = state.chatters[chatterLocalId];
         const thread = state.threads[chatter.threadLocalId];
@@ -1607,6 +1632,9 @@ const actions = {
         Object.assign(chatter, {
             activityIds,
             context,
+            hasActivities,
+            hasFollowers,
+            hasThread,
             isDisabled: !threadId,
             threadId,
             threadModel,
