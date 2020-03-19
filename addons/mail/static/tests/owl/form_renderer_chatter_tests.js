@@ -78,7 +78,8 @@ QUnit.test('basic chatter rendering', async function (assert) {
                     <field name="name"/>
                 </sheet>
                 <div class="oe_chatter"></div>
-            </form>`,
+            </form>
+        `,
         res_id: 2,
     });
 
@@ -113,7 +114,8 @@ QUnit.test('basic chatter rendering without followers', async function (assert) 
                     <field name="activity_ids" widget="mail_activity"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
-            </form>`,
+            </form>
+        `,
         res_id: 2,
     });
 
@@ -164,7 +166,8 @@ QUnit.test('basic chatter rendering without activities', async function (assert)
                     <field name="message_follower_ids" widget="mail_followers"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
-            </form>`,
+            </form>
+        `,
         res_id: 2,
     });
 
@@ -216,7 +219,8 @@ QUnit.test('basic chatter rendering without messages', async function (assert) {
                     <field name="message_follower_ids" widget="mail_followers"/>
                     <field name="activity_ids" widget="mail_activity"/>
                 </div>
-            </form>`,
+            </form>
+        `,
         res_id: 2,
     });
 
@@ -305,7 +309,8 @@ QUnit.test('chatter updating', async function (assert) {
                 <div class="oe_chatter">
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
-            </form>`,
+            </form>
+        `,
     });
     assert.strictEqual(
         document.querySelectorAll(`.o_Chatter`).length,
