@@ -98,28 +98,30 @@ FormRenderer.include({
         return !!this._chatterContainerTarget;
     },
     /**
-     * Determine whether the chatter of the form renderer should display activities
+     * Determine whether the chatter of the form renderer should display
+     * activities.
      *
      * @private
-     * @return {boolean}
+     * @returns {boolean}
      */
     _hasChatterActivities() {
         return !!this.mailFields.mail_activity;
     },
     /**
-     * Determine whether the chatter of the form renderer should display followers
+     * Determine whether the chatter of the form renderer should display
+     * followers.
      *
      * @private
-     * @return {boolean}
+     * @returns {boolean}
      */
     _hasChatterFollowers() {
         return !!this.mailFields.mail_followers;
     },
     /**
-     * Determine whether the chatter of the form renderer should display thread
+     * Determine whether the chatter of the form renderer should display thread.
      *
      * @private
-     * @return {boolean}
+     * @returns {boolean}
      */
     _hasChatterThread() {
         return !!this.mailFields.mail_thread;

@@ -261,9 +261,9 @@ const actions = {
      * @param {Object} param1
      * @param {Array} param1.activityIds
      * @param {Array} param1.context
-     * @param {boolean} param1.hasActivities
-     * @param {boolean} param1.hasFollowers
-     * @param {boolean} param1.hasThread
+     * @param {boolean} [param1.hasActivities=true]
+     * @param {boolean} [param1.hasFollowers=true]
+     * @param {boolean} [param1.hasThread=true]
      * @param {string} [param1.initialThreadId]
      * @param {string} param1.initialThreadModel
      * @return {string}
@@ -273,11 +273,11 @@ const actions = {
         {
             activityIds,
             context,
-            hasActivities,
-            hasFollowers,
-            hasThread,
+            hasActivities=true,
+            hasFollowers=true,
+            hasThread=true,
             initialThreadId,
-            initialThreadModel
+            initialThreadModel,
         }
     ) {
         const chatterLocalId = _.uniqueId('o_Chatter');
@@ -1606,9 +1606,9 @@ const actions = {
      * @param {Object} param2
      * @param {Array} param2.activityIds
      * @param {Object} param2.context
-     * @param {boolean} param2.hasActivities
-     * @param {boolean} param2.hasFollowers
-     * @param {boolean} param2.hasThread
+     * @param {boolean} [param2.hasActivities=true]
+     * @param {boolean} [param2.hasFollowers=true]
+     * @param {boolean} [param2.hasThread=true]
      * @param {string} param2.threadId
      * @param {string} param2.threadModel
      */
@@ -1618,11 +1618,11 @@ const actions = {
         {
             activityIds,
             context,
-            hasActivities,
-            hasFollowers,
-            hasThread,
+            hasActivities=true,
+            hasFollowers=true,
+            hasThread=true,
             threadId,
-            threadModel
+            threadModel,
         }
     ) {
         const chatter = state.chatters[chatterLocalId];

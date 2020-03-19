@@ -75,13 +75,22 @@ QUnit.test('chatter updating', async function (assert) {
         id: 3, type: 'binary', mimetype: "application/x-msdos-program",
         name: "file3.txt", res_id: 5, res_model: 'partner'
     }];
-    this.data['res.partner'].records = [{
-        id: 1,
-        display_name: "first partner",
-    }, {
-        id: 2,
-        display_name: "second partner",
-    }];
+    this.data['res.partner'] = {
+        fields: {
+            message_attachment_count: { string: 'Attachment count', type: 'integer' },
+            message_ids: {string: "Messages", type: 'one2many', relation: 'mail.message'},
+            name: {string: "Name", type: 'char', default: ' '},
+        },
+        records: [{
+            id: 1,
+            display_name: "first partner",
+            message_ids: [],
+        }, {
+            id: 2,
+            display_name: "second partner",
+            message_ids: [],
+        }]
+    };
     let callCount = 0;
     await this.createView({
         data: this.data,
@@ -119,7 +128,9 @@ QUnit.test('chatter updating', async function (assert) {
             <sheet>
                 <field name="name"/>
             </sheet>
-            <div class="oe_chatter"></div>
+            <div class="oe_chatter">
+                <field name="message_ids" widget="mail_thread"/>
+            </div>
         </form>`,
     });
     assert.strictEqual(
