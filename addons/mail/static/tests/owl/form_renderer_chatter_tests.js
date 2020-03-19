@@ -120,25 +120,25 @@ QUnit.test('basic chatter rendering without followers', async function (assert) 
     });
 
     assert.containsOnce(document.body, `.o_Chatter`,
-        "there should still be a chatter"
+        "there should be a chatter"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar`,
-        "there should still be a chatter topbar"
+        "there should be a chatter topbar"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonAttachments`,
-        "there should still be an attachment button"
+        "there should be an attachment button"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonScheduleActivity`,
-        "there should still be a schedule activity button"
+        "there should be a schedule activity button"
     );
     assert.containsNone(document.body, `.o_ChatterTopbar_buttonFollow`,
         "there should be no follow button"
     );
     assert.containsNone(document.body, `.o_ChatterTopbar_buttonFollowers`,
-        "there should still be no followers button"
+        "there should be no followers button"
     );
     assert.containsOnce(document.body, `.o_Chatter_thread`,
-        "there should still be a thread"
+        "there should be a thread"
     );
 });
 
@@ -172,25 +172,25 @@ QUnit.test('basic chatter rendering without activities', async function (assert)
     });
 
     assert.containsOnce(document.body, `.o_Chatter`,
-        "there should still be a chatter"
+        "there should be a chatter"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar`,
-        "there should still be a chatter topbar"
+        "there should be a chatter topbar"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonAttachments`,
-        "there should still be an attachment button"
+        "there should be an attachment button"
     );
     assert.containsNone(document.body, `.o_ChatterTopbar_buttonScheduleActivity`,
-        "there should still be a schedule activity button"
+        "there should be a schedule activity button"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonFollow`,
         "there should be no follow button"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonFollowers`,
-        "there should still be no followers button"
+        "there should be no followers button"
     );
     assert.containsOnce(document.body, `.o_Chatter_thread`,
-        "there should still be a thread"
+        "there should be a thread"
     );
 });
 
@@ -225,25 +225,25 @@ QUnit.test('basic chatter rendering without messages', async function (assert) {
     });
 
     assert.containsOnce(document.body, `.o_Chatter`,
-        "there should still be a chatter"
+        "there should be a chatter"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar`,
-        "there should still be a chatter topbar"
+        "there should be a chatter topbar"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonAttachments`,
-        "there should still be an attachment button"
+        "there should be an attachment button"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonScheduleActivity`,
-        "there should still be a schedule activity button"
+        "there should be a schedule activity button"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonFollow`,
         "there should be no follow button"
     );
     assert.containsOnce(document.body, `.o_ChatterTopbar_buttonFollowers`,
-        "there should still be no followers button"
+        "there should be no followers button"
     );
     assert.containsNone(document.body, `.o_Chatter_thread`,
-        "there should still be a thread"
+        "there should be a thread"
     );
 });
 
