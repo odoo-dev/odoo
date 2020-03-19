@@ -88,7 +88,7 @@ FormRenderer.include({
         }
     },
     /**
-     * Determine whether the form renderer has a chatter to display or not.
+     * Returns whether the form renderer has a chatter to display or not.
      * This is based on arch, which should have `div.oe_chatter`.
      *
      * @private
@@ -98,7 +98,7 @@ FormRenderer.include({
         return !!this._chatterContainerTarget;
     },
     /**
-     * Determine whether the chatter of the form renderer should display
+     * Returns whether the chatter of the form renderer should display
      * activities.
      *
      * @private
@@ -108,7 +108,7 @@ FormRenderer.include({
         return !!this.mailFields.mail_activity;
     },
     /**
-     * Determine whether the chatter of the form renderer should display
+     * Returns whether the chatter of the form renderer should display
      * followers.
      *
      * @private

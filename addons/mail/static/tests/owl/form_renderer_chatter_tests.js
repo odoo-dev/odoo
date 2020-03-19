@@ -63,6 +63,276 @@ QUnit.test('basic chatter rendering', async function (assert) {
     );
 });
 
+QUnit.test('basic chatter rendering without followers', async function (assert) {
+    assert.expect(7);
+    this.data['res.partner'] = {
+        fields: {
+            message_attachment_count: {
+                string: 'Attachment count',
+                type: 'integer'
+            },
+            activity_ids: {
+                string: "Activities",
+                type: 'one2many',
+                relation: 'mail.activity'
+            },
+            message_ids: {
+                string: "Messages",
+                type: 'one2many',
+                relation: 'mail.message'
+            },
+            message_follower_ids: {
+                string: "Followers",
+                type: 'one2many',
+                relation: 'mail.followers'
+            },
+            name: {string: "Name", type: 'char'},
+        },
+        records: [{
+            activity_ids: [],
+            id: 2,
+            display_name: "second partner",
+            message_ids: [],
+            message_follower_ids: [],
+        }],
+    };
+    await this.createView({
+        data: this.data,
+        hasView: true,
+        // View params
+        View: FormView,
+        model: 'res.partner',
+        arch: `<form string="Partners">
+                <sheet>
+                    <field name="name"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>`,
+        res_id: 2,
+    });
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Chatter`).length,
+        1,
+        "there should still be a chatter"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar`).length,
+        1,
+        "there should still be a chatter topbar"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
+        1,
+        "there should still be an attachment button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonScheduleActivity`).length,
+        1,
+        "there should still be a schedule activity button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonFollow`).length,
+        0,
+        "there should be no follow button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonFollowers`).length,
+        0,
+        "there should still be no followers button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Chatter_thread`).length,
+        1,
+        "there should still be a thread"
+    );
+});
+
+QUnit.test('basic chatter rendering without activities', async function (assert) {
+    assert.expect(7);
+    this.data['res.partner'] = {
+        fields: {
+            message_attachment_count: {
+                string: 'Attachment count',
+                type: 'integer'
+            },
+            activity_ids: {
+                string: "Activities",
+                type: 'one2many',
+                relation: 'mail.activity'
+            },
+            message_ids: {
+                string: "Messages",
+                type: 'one2many',
+                relation: 'mail.message'
+            },
+            message_follower_ids: {
+                string: "Followers",
+                type: 'one2many',
+                relation: 'mail.followers'
+            },
+            name: {string: "Name", type: 'char'},
+        },
+        records: [{
+            activity_ids: [],
+            id: 2,
+            display_name: "second partner",
+            message_ids: [],
+            message_follower_ids: [],
+        }],
+    };
+    await this.createView({
+        data: this.data,
+        hasView: true,
+        // View params
+        View: FormView,
+        model: 'res.partner',
+        arch: `<form string="Partners">
+                <sheet>
+                    <field name="name"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>`,
+        res_id: 2,
+    });
+
+assert.strictEqual(
+        document.querySelectorAll(`.o_Chatter`).length,
+        1,
+        "there should still be a chatter"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar`).length,
+        1,
+        "there should still be a chatter topbar"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
+        1,
+        "there should still be an attachment button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonScheduleActivity`).length,
+        0,
+        "there should be no schedule activity button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonFollow`).length,
+        1,
+        "there should still be a follow button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonFollowers`).length,
+        1,
+        "there should still be a followers button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Chatter_thread`).length,
+        1,
+        "there should still be a thread"
+    );
+});
+
+QUnit.test('basic chatter rendering without messages', async function (assert) {
+    assert.expect(7);
+
+    this.data['res.partner'] = {
+        fields: {
+            message_attachment_count: {
+                string: 'Attachment count',
+                type: 'integer'
+            },
+            activity_ids: {
+                string: "Activities",
+                type: 'one2many',
+                relation: 'mail.activity'
+            },
+            message_ids: {
+                string: "Messages",
+                type: 'one2many',
+                relation: 'mail.message'
+            },
+            message_follower_ids: {
+                string: "Followers",
+                type: 'one2many',
+                relation: 'mail.followers'
+            },
+            name: {string: "Name", type: 'char'},
+        },
+        records: [{
+            activity_ids: [],
+            id: 2,
+            display_name: "second partner",
+            message_ids: [],
+            message_follower_ids: [],
+        }],
+    };
+
+    this.data['res.partner'].records = [{
+        id: 2,
+        display_name: "second partner",
+    }];
+    await this.createView({
+        data: this.data,
+        hasView: true,
+        // View params
+        View: FormView,
+        model: 'res.partner',
+        arch: `<form string="Partners">
+                <sheet>
+                    <field name="name"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                </div>
+            </form>`,
+        res_id: 2,
+    });
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Chatter`).length,
+        1,
+        "there should still be a chatter"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar`).length,
+        1,
+        "there should still be a chatter topbar"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
+        1,
+        "there should still be an attachment button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonScheduleActivity`).length,
+        1,
+        "there should still be a schedule activity button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonFollow`).length,
+        1,
+        "there should still be a follow button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonFollowers`).length,
+        1,
+        "there should still be a followers button"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_Chatter_thread`).length,
+        0,
+        "there should be no thread"
+    );
+});
+
 QUnit.test('chatter updating', async function (assert) {
     assert.expect(7);
     this.data['ir.attachment'].records = [{
@@ -78,8 +348,8 @@ QUnit.test('chatter updating', async function (assert) {
     this.data['res.partner'] = {
         fields: {
             message_attachment_count: { string: 'Attachment count', type: 'integer' },
-            message_ids: {string: "Messages", type: 'one2many', relation: 'mail.message'},
-            name: {string: "Name", type: 'char', default: ' '},
+            message_ids: { string: "Messages", type: 'one2many', relation: 'mail.message' },
+            name: {string: "Name", type: 'char'},
         },
         records: [{
             id: 1,
@@ -89,7 +359,7 @@ QUnit.test('chatter updating', async function (assert) {
             id: 2,
             display_name: "second partner",
             message_ids: [],
-        }]
+        }],
     };
     let callCount = 0;
     await this.createView({
