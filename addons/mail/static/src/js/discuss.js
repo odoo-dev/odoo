@@ -54,13 +54,6 @@ var PartnerInviteDialog = Dialog.extend({
             width: '100%',
             allowClear: true,
             multiple: true,
-            formatResult: function (item) {
-                var status = QWeb.render('mail.UserStatus', {
-                    status: self.call('mail_service', 'getImStatus', { partnerID: item.id }),
-                    partnerID: item.id,
-                });
-                return $('<span>').text(item.text).prepend(status);
-            },
             query: function (query) {
                 self.call('mail_service', 'searchPartner', query.term, 20)
                     .then(function (partners) {
@@ -804,7 +797,6 @@ var Discuss = AbstractAction.extend({
             .on('new_channel', this, this._onNewChannel)
             .on('is_thread_bottom_visible', this, this._onIsThreadBottomVisible)
             .on('unsubscribe_from_channel', this, this._onChannelLeft)
-            .on('updated_im_status', this, this._onUpdatedImStatus)
             .on('update_needaction', this, this._onUpdateNeedaction)
             .on('update_thread_unread_counter', this, this._onUpdateThreadUnreadCounter)
             .on('activity_updated', this, this._onActivityUpdated)
@@ -1212,12 +1204,6 @@ var Discuss = AbstractAction.extend({
             return;
         }
         this._fetchAndRenderThread();
-    },
-    /**
-     * @private
-     */
-    _onUpdatedImStatus: function () {
-        this._throttledUpdateThreads();
     },
     /**
      * @private

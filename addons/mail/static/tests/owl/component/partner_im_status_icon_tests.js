@@ -21,9 +21,6 @@ QUnit.module('PartnerImStatusIcon', {
             await this.partnerImStatusIcon.mount(this.widget.$el[0]);
         };
         this.start = async params => {
-            if (this.wiget) {
-                this.widget.destroy();
-            }
             let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,
             }));
