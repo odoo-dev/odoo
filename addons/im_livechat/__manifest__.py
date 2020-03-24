@@ -40,8 +40,8 @@ Help your customers with this chat, and analyse their feedback.
     ],
     'depends': ["mail", "rating", "digest"],
     'qweb': [
-        'static/src/owl/components/discuss_sidebar/discuss_sidebar.xml',
-        'static/src/owl/components/thread_icon/thread_icon.xml',
+        'static/src/messaging/component/discuss_sidebar/discuss_sidebar.xml',
+        'static/src/messaging/component/thread_icon/thread_icon.xml',
     ],
     'installable': True,
     'auto_install': False,
