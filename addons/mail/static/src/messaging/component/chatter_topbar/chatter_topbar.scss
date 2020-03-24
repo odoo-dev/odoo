@@ -5,7 +5,7 @@
 .o_ChatterTopbar {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 .o_ChatterTopbar_buttonAttachmentsCountLoader {
@@ -16,13 +16,24 @@
     padding-left: 0.25rem;
 }
 
+.o_ChatterTopbar_buttonFollowers {
+    display: flex;
+    align-items: center;
+}
+
 .o_ChatterTopbar_buttonSendMessage {
     padding: 0 16px;
     border-left: none;
 }
 
-.o_ChatterTopbar_leftSection {
+.o_ChatterTopbar_followers {
     display: flex;
+}
+
+.o_ChatterTopbar_rightSection {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
 }
 
 // ------------------------------------------------------------------
@@ -39,7 +50,3 @@
         border-top-color: transparent;
     }
 }
-
-// ------------------------------------------------------------------
-// Animation
-// ------------------------------------------------------------------
