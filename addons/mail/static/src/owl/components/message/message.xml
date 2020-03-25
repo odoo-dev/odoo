@@ -57,9 +57,21 @@
             <div class="o_Message_core">
                 <t t-if="!props.isSquashed">
                     <div class="o_Message_header">
-                        <div class="o_Message_authorName" t-att-class="hasAuthorRedirect ? 'o_Message_authorRedirect o_redirect' : ''" t-on-click="_onClickAuthor" t-att-title="hasAuthorRedirect ? 'Open chat' : ''">
-                            <t t-esc="displayedAuthorName"/>
-                        </div>
+                        <t t-if="storeProps.author">
+                            <div class="o_Message_authorName" t-att-class="hasAuthorRedirect ? 'o_Message_authorRedirect o_redirect' : ''" t-on-click="_onClickAuthor" t-att-title="hasAuthorRedirect ? 'Open chat' : ''">
+                                <t t-esc="storeGetters.partnerName(storeProps.author.localId)"/>
+                            </div>
+                        </t>
+                        <t t-elif="storeProps.message.email_from">
+                            <a class="o_Message_authorName" t-attf-href="mailto:{{ storeProps.message.email_from }}?subject=Re: {{ storeProps.message.subject ? storeProps.message.subject : '' }}">
+                                <t t-esc="storeProps.message.email_from"/>
+                            </a>
+                        </t>
+                        <t t-else="">
+                            <div class="o_Message_authorName">
+                                Anonymous
+                            </div>
+                        </t>
                         <div class="o_Message_date o_Message_headerDate" t-att-class="{ 'o-message-selected': props.isSelected }" t-att-title="datetime">
                             - <t t-esc="timeElapsed"/>
                         </div>

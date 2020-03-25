@@ -517,24 +517,6 @@ class Discuss extends Component {
     }
 
     /**
-     * TODO: almost duplicate code with
-     *
-     *  - ChatWindowManager._onRedirect()
-     *
-     * @private
-     * @param {Event} ev
-     * @param {Object} ev.detail
-     * @param {integer} ev.detail.id
-     * @param {string} ev.detail.model
-     */
-    _onRedirect(ev) {
-        this.storeDispatch('redirect', {
-            id: ev.detail.id,
-            model: ev.detail.model,
-        });
-    }
-
-    /**
      * @private
      */
     _onReplyingToMessageComposerDiscarded() {

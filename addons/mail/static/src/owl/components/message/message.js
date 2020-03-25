@@ -126,18 +126,6 @@ class Message extends Component {
     }
 
     /**
-     * Get the displayed author name of this message.
-     *
-     * @return {string}
-     */
-    get displayedAuthorName() {
-        if (this.storeProps.author) {
-            return this.storeGetters.partnerName(this.storeProps.author.localId);
-        }
-        return this.storeProps.message.email_from || this.env._t("Anonymous");
-    }
-
-    /**
      * Determine whether author redirect feature is enabled on message.
      * Click on message author should redirect to author.
      *
@@ -408,7 +396,7 @@ class Message extends Component {
      * @param {string} param0.model
      */
     _redirect({ id, model }) {
-        this.trigger('o-redirect', { id, model });
+        this.storeDispatch('redirect', { id, model });
     }
 
     //--------------------------------------------------------------------------
@@ -421,7 +409,7 @@ class Message extends Component {
      */
     _onClick(ev) {
         if (ev.target.closest('.o_mention')) {
-            this.trigger('o-redirect', {
+            this._redirect({
                 id: Number(ev.target.dataset.oeId),
                 model: ev.target.dataset.oeModel,
             });
@@ -429,7 +417,7 @@ class Message extends Component {
             return;
         }
         if (ev.target.closest('.o_mail_redirect')) {
-            this.trigger('o-redirect', {
+            this._redirect({
                 id: Number(ev.target.dataset.oeId),
                 model: ev.target.dataset.oeModel,
             });
@@ -502,7 +490,7 @@ class Message extends Component {
      */
     _onClickOriginThread(ev) {
         ev.preventDefault();
-        this.trigger('o-redirect', {
+        this._redirect({
             id: this.storeProps.originThread.id,
             model: this.storeProps.originThread._model,
         });

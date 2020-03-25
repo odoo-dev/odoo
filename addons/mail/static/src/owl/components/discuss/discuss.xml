@@ -84,7 +84,6 @@
                     state.threadCachesStoredScrollTop[storeProps.activeThreadCacheLocalId].value"
                 selectedMessageLocalId="state.replyingToMessageMessageLocalId"
                 threadLocalId="storeProps.activeThreadLocalId"
-                t-on-o-redirect="_onRedirect"
                 t-on-o-rendered="_onThreadRendered"
                 t-on-o-reply-message.stop="_onReplyMessage"
                 t-ref="thread"

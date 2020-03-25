@@ -262,24 +262,6 @@ class ChatWindowManager extends Component {
     }
 
     /**
-     * TODO: almost duplicate code with
-     *
-     *  - Discuss._onRedirect()
-     *
-     * @private
-     * @param {CustomEvent} ev
-     * @param {Object} ev.detail
-     * @param {integer} ev.detail.id
-     * @param {string} ev.detail.model
-     */
-    _onRedirect(ev) {
-        this.storeDispatch('redirect', {
-            id: ev.detail.id,
-            model: ev.detail.model,
-        });
-    }
-
-    /**
      * Called when hidden menu asks to select a chat window, i.e. make it
      * visible.
      *
