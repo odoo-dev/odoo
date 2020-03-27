@@ -1,11 +1,13 @@
-odoo.define('im_livechat.component.DiscussSidebarItem', function (require) {
+odoo.define('im_livechat.messaging.component.DiscussSidebarItem', function (require) {
 'use strict';
 
-const DiscussSidebarItem = require('mail.component.DiscussSidebarItem');
+const components = {
+    DiscussSidebarItem: require('mail.messaging.component.DiscussSidebarItem'),
+};
 
 const { patch } = require('web.utils');
 
-patch(DiscussSidebarItem, 'im_livechat_discuss_sidebar_item', {
+patch(components.DiscussSidebarItem, 'im_livechat.messaging.component.DiscussSidebarItem', {
 
     //--------------------------------------------------------------------------
     // Public
@@ -16,7 +18,7 @@ patch(DiscussSidebarItem, 'im_livechat_discuss_sidebar_item', {
      */
     hasUnpin(...args) {
         const res = this._super(...args);
-        return res || this.storeProps.thread.channel_type === 'livechat';
+        return res || this.thread.channel_type === 'livechat';
     }
 
 });

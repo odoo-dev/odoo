@@ -1,14 +1,16 @@
-odoo.define('mail.component.Thread', function (require) {
+odoo.define('mail.messaging.component.ThreadViewer', function (require) {
 'use strict';
 
-const Composer = require('mail.component.Composer');
-const MessageList = require('mail.component.MessageList');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    Composer: require('mail.messaging.component.Composer'),
+    MessageList: require('mail.messaging.component.MessageList'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch, useRef } = owl.hooks;
 
-class Thread extends Component {
+class ThreadViewer extends Component {
 
     /**
      * @param {...any} args
@@ -23,7 +25,7 @@ class Thread extends Component {
          */
         this.id = _.uniqueId('o_thread_');
         this.storeDispatch = useDispatch();
-        this.storeProps = useStore((...args) => this._useStore(...args));
+        this.storeProps = useStore((...args) => this._useStoreSelector(...args));
         /**
          * Reference of the composer. Useful to set focus on composer when
          * thread has the focus.
@@ -85,7 +87,7 @@ class Thread extends Component {
     /**
      * Get the scroll position in the message list.
      *
-     * @return {integer|undefined}
+     * @returns {integer|undefined}
      */
     getScrollTop() {
         if (!this._messageListRef.comp) {
@@ -154,7 +156,7 @@ class Thread extends Component {
      * @param {Object} props
      * @returns {Object}
      */
-    _useStore(state, props) {
+    _useStoreSelector(state, props) {
         const thread = state.threads[props.threadLocalId];
         const threadCacheLocalId = thread
             ? thread.cacheLocalIds[JSON.stringify(props.domain || [])]
@@ -169,88 +171,71 @@ class Thread extends Component {
             threadCacheLocalId,
         };
     }
+
 }
 
-Thread.components = {
-    Composer,
-    MessageList,
-};
+Object.assign(ThreadViewer, {
+    components,
+    defaultProps: {
+        composerAttachmentsDetailsMode: 'auto',
+        domain: [],
+        hasComposer: false,
+        hasMessageCheckbox: false,
+        hasSquashCloseMessages: false,
+        haveMessagesAuthorRedirect: false,
+        haveMessagesMarkAsReadIcon: false,
+        haveMessagesReplyIcon: false,
+        order: 'asc',
+        showComposerAttachmentsExtensions: true,
+        showComposerAttachmentsFilenames: true,
+    },
+    props: {
+        composerAttachmentsDetailsMode: {
+            type: String,
+            validate: prop => ['auto', 'card', 'hover', 'none'].includes(prop),
+        },
+        domain: Array,
+        hasComposer: Boolean,
+        hasComposerCurrentPartnerAvatar: {
+            type: Boolean,
+            optional: true,
+        },
+        hasComposerSendButton: {
+            type: Boolean,
+            optional: true,
+        },
+        hasMessageCheckbox: Boolean,
+        hasSquashCloseMessages: Boolean,
+        haveMessagesAuthorRedirect: Boolean,
+        haveMessagesMarkAsReadIcon: Boolean,
+        haveMessagesReplyIcon: Boolean,
+        /**
+         * Set the initial scroll position of message list on mount. Note that
+         * this prop is not directly passed to message list as props because
+         * it may compute scroll top without composer, and then composer may alter
+         * them on mount. To solve this issue, thread handles setting initial scroll
+         * positions, so that this is always done after composer has been mounted.
+         * (child `mounted()` are called before parent `mounted()`)
+         */
+        messageListInitialScrollTop: {
+            type: Number,
+            optional: true
+        },
+        order: {
+            type: String,
+            validate: prop => ['asc', 'desc'].includes(prop),
+        },
+        selectedMessageLocalId: {
+            type: String,
+            optional: true,
+        },
+        showComposerAttachmentsExtensions: Boolean,
+        showComposerAttachmentsFilenames: Boolean,
+        threadLocalId: String,
+    },
+    template: 'mail.messaging.component.ThreadViewer',
+});
 
-Thread.defaultProps = {
-    composerAttachmentsDetailsMode: 'auto',
-    domain: [],
-    hasComposer: false,
-    hasMessageCheckbox: false,
-    hasSquashCloseMessages: false,
-    haveMessagesAuthorRedirect: false,
-    haveMessagesMarkAsReadIcon: false,
-    haveMessagesReplyIcon: false,
-    order: 'asc',
-    showComposerAttachmentsExtensions: true,
-    showComposerAttachmentsFilenames: true,
-};
-
-Thread.props = {
-    composerAttachmentsDetailsMode: {
-        type: String, //['auto', 'card', 'hover', 'none']
-    },
-    domain: {
-        type: Array,
-    },
-    hasComposer: {
-        type: Boolean,
-    },
-    hasComposerCurrentPartnerAvatar: {
-        type: Boolean,
-        optional: true,
-    },
-    hasComposerSendButton: {
-        type: Boolean,
-        optional: true,
-    },
-    hasMessageCheckbox: Boolean,
-    hasSquashCloseMessages: {
-        type: Boolean,
-    },
-    haveMessagesAuthorRedirect: {
-        type: Boolean,
-    },
-    haveMessagesMarkAsReadIcon: {
-        type: Boolean,
-    },
-    haveMessagesReplyIcon: {
-        type: Boolean,
-    },
-    /**
-     * Set the initial scroll position of message list on mount. Note that
-     * this prop is not directly passed to message list as props because
-     * it may compute scroll top without composer, and then composer may alter
-     * them on mount. To solve this issue, thread handles setting initial scroll
-     * positions, so that this is always done after composer has been mounted.
-     * (child `mounted()` are called before parent `mounted()`)
-     */
-    messageListInitialScrollTop: {
-        type: Number,
-        optional: true
-    },
-    order: {
-        type: String, // ['asc', 'desc']
-    },
-    selectedMessageLocalId: {
-        type: String,
-        optional: true,
-    },
-    showComposerAttachmentsExtensions: {
-        type: Boolean,
-    },
-    showComposerAttachmentsFilenames: {
-        type: Boolean,
-    },
-    threadLocalId: String,
-};
-
-Thread.template = 'mail.component.Thread';
-
-return Thread;
+return ThreadViewer;
 
 });

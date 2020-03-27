@@ -1,18 +1,23 @@
-odoo.define('mail_bot.component.NotificationList', function (require) {
+odoo.define('mail_bot.messaging.component.NotificationList', function (require) {
 'use strict';
 
-const NotificationList = require('mail.component.NotificationList');
-
-const NotificationRequest = require('mail_bot.component.NotificationRequest');
+const components = {
+    mail: {
+        NotificationList: require('mail.messaging.component.NotificationList'),
+    },
+    mail_bot: {
+        NotificationRequest: require('mail_bot.messaging.component.NotificationRequest'),
+    },
+};
 
 // ensure the store is patched before patching the component
 require('mail_bot.MailBotService');
 
 const { patch } = require('web.utils');
 
-NotificationList.components.NotificationRequest = NotificationRequest;
+Object.assign(components.mail.NotificationList.components, components.mail_bot);
 
-patch(NotificationList, 'mail_bot_notification_list', {
+patch(components.mail.NotificationList, 'mail_bot.messaging.component.NotificationList', {
     /**
      * @override
      */
@@ -44,7 +49,7 @@ patch(NotificationList, 'mail_bot_notification_list', {
      *
      * @override
      */
-    _useStore(state, props) {
+    _useStoreSelector(state, props) {
         const res = this._super(...arguments);
         if (props.filter === 'all' && state.mailbotHasRequest) {
             res.notifications.unshift({

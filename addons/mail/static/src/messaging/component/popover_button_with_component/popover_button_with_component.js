@@ -1,15 +1,17 @@
-odoo.define('mail.component.PopoverButtonWithComponent', function (require) {
+odoo.define('mail.messaging.component.PopoverButtonWithComponent', function (require) {
 'use strict';
 
-const PopoverButton = require('mail.component.PopoverButton');
+const components = {
+    PopoverButton: require('mail.messaging.component.PopoverButton'),
+};
 
 /**
  * Popover button variant which (un)mount a given component as popover content.
  */
-class PopoverButtonWithComponent extends PopoverButton {
+class PopoverButtonWithComponent extends components.PopoverButton {
 
     /**
-     * @param {...any} args
+     * @override
      */
     constructor(...args) {
         super(...args);
@@ -66,6 +68,7 @@ class PopoverButtonWithComponent extends PopoverButton {
         this._popoverComponent.__owl__.isMounted = true;
         return this._popoverComponent.el;
     }
+
 }
 
 return PopoverButtonWithComponent;

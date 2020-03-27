@@ -1,7 +1,7 @@
-odoo.define('mail.component.ModerationDiscardDialog', function (require) {
+odoo.define('mail.messaging.component.ModerationDiscardDialog', function (require) {
 'use strict';
 
-const useStore = require('mail.hooks.useStore');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const Dialog = require('web.OwlDialog');
 
@@ -37,12 +37,20 @@ class ModerationDiscardDialog extends Component {
      * @returns {string}
      */
     getText() {
-        if (this.storeProps.messages.length === 1) {
+        if (this.messages.length === 1) {
             return this.env._t("You are going to discard 1 message.");
         }
-        return _.str.sprintf(this.env._t("You are going to discard %s messages."),
-            this.storeProps.messages.length
+        return _.str.sprintf(
+            this.env._t("You are going to discard %s messages."),
+            this.messages.length
         );
+    }
+
+    /**
+     * @returns {mail.messaging.entity.Message[]}
+     */
+    get messages() {
+        return this.storeProps.messages;
     }
 
     //--------------------------------------------------------------------------
@@ -61,10 +69,11 @@ class ModerationDiscardDialog extends Component {
     _onClickDiscard() {
         this._dialogRef.comp._close();
         this.storeDispatch('moderateMessages',
-            this.storeProps.messages.map(message => message.localId),
+            this.messages.map(message => message.localId),
             'discard'
         );
     }
+
 }
 
 Object.assign(ModerationDiscardDialog, {
@@ -75,7 +84,7 @@ Object.assign(ModerationDiscardDialog, {
             element: String,
         },
     },
-    template: 'mail.component.ModerationDiscardDialog',
+    template: 'mail.messaging.component.ModerationDiscardDialog',
 });
 
 return ModerationDiscardDialog;

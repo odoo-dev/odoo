@@ -1,4 +1,4 @@
-odoo.define('mail.component.MessagingMenuTests', function (require) {
+odoo.define('mail.messaging.component.MessagingMenuTests', function (require) {
 'use strict';
 
 const {
@@ -7,11 +7,12 @@ const {
     beforeEach: utilsBeforeEach,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
 const { makeTestPromise } = require('web.test_utils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('MessagingMenu', {
     beforeEach() {
@@ -33,25 +34,25 @@ QUnit.module('MessagingMenu', {
         if (this.widget) {
             this.widget.destroy();
         }
-    }
+    },
 });
 
-QUnit.test('messaging not ready', async function (assert) {
+QUnit.test('messaging not initialized', async function (assert) {
     assert.expect(2);
 
     await this.start({
         async mockRPC(route) {
             if (route === '/mail/init_messaging') {
-                // simulate messaging never ready
+                // simulate messaging never initialized
                 return new Promise(resolve => {});
             }
             return this._super(...arguments);
-        }
+        },
     });
     assert.strictEqual(
         document.querySelectorAll('.o_MessagingMenu_loading').length,
         1,
-        "should display loading icon on messaging menu when messaging not yet ready"
+        "should display loading icon on messaging menu when messaging not yet initialized"
     );
 
     document.querySelector(`.o_MessagingMenu_toggler`).click();
@@ -63,34 +64,34 @@ QUnit.test('messaging not ready', async function (assert) {
     );
 });
 
-QUnit.test('messaging becomes ready', async function (assert) {
+QUnit.test('messaging becomes initialized', async function (assert) {
     assert.expect(2);
 
-    const messagingReadyProm = makeTestPromise();
+    const messagingInitializedProm = makeTestPromise();
 
     await this.start({
         async mockRPC(route) {
             const _super = this._super.bind(this, ...arguments); // limitation of class.js
             if (route === '/mail/init_messaging') {
-                await messagingReadyProm;
+                await messagingInitializedProm;
             }
             return _super();
-        }
+        },
     });
     document.querySelector(`.o_MessagingMenu_toggler`).click();
     await afterNextRender();
 
-    // simulate messaging becomes ready
-    messagingReadyProm.resolve();
+    // simulate messaging becomes initialized
+    messagingInitializedProm.resolve();
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll('.o_MessagingMenu_loading').length,
         0,
-        "should no longer display loading icon on messaging menu when messaging becomes ready"
+        "should no longer display loading icon on messaging menu when messaging becomes initialized"
     );
     assert.notOk(
         document.querySelector('.o_MessagingMenu_dropdownMenu').textContent.includes("Please wait..."),
-        "should no longer prompt loading when opening messaging menu when messaging becomes ready"
+        "should no longer prompt loading when opening messaging menu when messaging becomes initialized"
     );
 });
 
@@ -161,8 +162,8 @@ QUnit.test('basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenuHeader
-            .o_MessagingMenu_tabButton`
-        ).length,
+            .o_MessagingMenu_tabButton
+        `).length,
         3,
         "should have 3 tab buttons to filter items in the header"
     );
@@ -182,21 +183,21 @@ QUnit.test('basic rendering', async function (assert) {
         "1 tab button should be 'Channels'"
     );
     assert.ok(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="all"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="all"]
+        `).classList.contains('o-active'),
         "'all' tab button should be active"
     );
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="chat"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="chat"]
+        `).classList.contains('o-active'),
         "'chat' tab button should not be active"
     );
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="channel"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="channel"]
+        `).classList.contains('o-active'),
         "'channel' tab button should not be active"
     );
     assert.strictEqual(
@@ -207,16 +208,16 @@ QUnit.test('basic rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_NotificationList`
-        ).length,
+            .o_NotificationList
+        `).length,
         1,
         "should display thread preview list"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_NotificationList_noConversation`
-        ).length,
+            .o_NotificationList_noConversation
+        `).length,
         1,
         "should display no conversation in thread preview list"
     );
@@ -252,84 +253,84 @@ QUnit.test('switch tab', async function (assert) {
         "1 tab button should be 'Channels'"
     );
     assert.ok(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="all"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="all"]
+        `).classList.contains('o-active'),
         "'all' tab button should be active"
     );
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="chat"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="chat"]
+        `).classList.contains('o-active'),
         "'chat' tab button should not be active"
     );
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="channel"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="channel"]
+        `).classList.contains('o-active'),
         "'channel' tab button should not be active"
     );
 
     document.querySelector(`.o_MessagingMenu_tabButton[data-tab-id="chat"]`).click();
     await afterNextRender();
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="all"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="all"]
+        `).classList.contains('o-active'),
         "'all' tab button should become inactive"
     );
     assert.ok(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="chat"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="chat"]
+        `).classList.contains('o-active'),
         "'chat' tab button should not become active"
     );
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="channel"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="channel"]
+        `).classList.contains('o-active'),
         "'channel' tab button should stay inactive"
     );
 
     document.querySelector(`.o_MessagingMenu_tabButton[data-tab-id="channel"]`).click();
     await afterNextRender();
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="all"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="all"]
+        `).classList.contains('o-active'),
         "'all' tab button should stay active"
     );
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="chat"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="chat"]
+        `).classList.contains('o-active'),
         "'chat' tab button should become inactive"
     );
     assert.ok(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="channel"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="channel"]
+        `).classList.contains('o-active'),
         "'channel' tab button should become active"
     );
 
     document.querySelector(`.o_MessagingMenu_tabButton[data-tab-id="all"]`).click();
     await afterNextRender();
     assert.ok(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="all"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="all"]
+        `).classList.contains('o-active'),
         "'all' tab button should become active"
     );
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="chat"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="chat"]
+        `).classList.contains('o-active'),
         "'chat' tab button should stay inactive"
     );
     assert.notOk(
-        document.querySelector(
-            `.o_MessagingMenu_tabButton[data-tab-id="channel"]`
-        ).classList.contains('o-active'),
+        document.querySelector(`
+            .o_MessagingMenu_tabButton[data-tab-id="channel"]
+        `).classList.contains('o-active'),
         "'channel' tab button should become inactive"
     );
 });
@@ -444,33 +445,33 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
     document.querySelector(`.o_MessagingMenu_toggler`).click();
     await afterNextRender();
     assert.strictEqual(
-        document.querySelectorAll(
-            `.o_MessagingMenu_dropdownMenu .o_ThreadPreview`
-        ).length,
+        document.querySelectorAll(`
+            .o_MessagingMenu_dropdownMenu .o_ThreadPreview
+        `).length,
         1,
         "should have one preview"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_sidebar`
-        ).length,
+            .o_ThreadPreview_sidebar
+        `).length,
         1,
         "preview should have a sidebar"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_content`
-        ).length,
+            .o_ThreadPreview_content
+        `).length,
         1,
         "preview should have some content"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_header`
-        ).length,
+            .o_ThreadPreview_header
+        `).length,
         1,
         "preview should have header in content"
     );
@@ -478,24 +479,24 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview_header
-            .o_ThreadPreview_name`
-        ).length,
+            .o_ThreadPreview_name
+        `).length,
         1,
         "preview should have name in header of content"
     );
     assert.strictEqual(
         document.querySelector(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview_name`
-        ).textContent,
+            .o_ThreadPreview_name
+        `).textContent,
         "General", "preview should have name of channel"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview_content
-            .o_ThreadPreview_core`
-        ).length,
+            .o_ThreadPreview_core
+        `).length,
         1,
         "preview should have core in content"
     );
@@ -503,8 +504,8 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview_core
-            .o_ThreadPreview_inlineText`
-        ).length,
+            .o_ThreadPreview_inlineText
+        `).length,
         1,
         "preview should have inline text in core of content"
     );
@@ -512,8 +513,8 @@ QUnit.test('channel preview: basic rendering', async function (assert) {
         document.querySelector(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview_core
-            .o_ThreadPreview_inlineText`
-        ).textContent.trim(),
+            .o_ThreadPreview_inlineText
+        `).textContent.trim(),
         "Demo: test",
         "preview should have message content as inline text of core content"
     );
@@ -580,21 +581,25 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_10"]`
-        ).length,
+            .o_ThreadPreview[data-thread-local-id="${
+                'mail.channel_10'
+            }"]
+        `).length,
         1,
         "should have preview of chat"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_20"]`
-        ).length,
+            .o_ThreadPreview[data-thread-local-id="${
+                'mail.channel_20'
+            }"]
+        `).length,
         1,
         "should have preview of channel"
     );
 
-    document.querySelector(`.o_MessagingMenu_tabButton[data-tab-id="chat"]`).click();
+    document.querySelector('.o_MessagingMenu_tabButton[data-tab-id="chat"]').click();
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`.o_MessagingMenu_dropdownMenu .o_ThreadPreview`).length,
@@ -604,48 +609,56 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_10"]`
-        ).length,
+            .o_ThreadPreview[data-thread-local-id="${
+                'mail.channel_10'
+            }"]
+        `).length,
         1,
         "should have preview of chat"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_20"]`
-        ).length,
+            .o_ThreadPreview[data-thread-local-id="${
+                'mail.channel_20'
+            }"]
+        `).length,
         0,
         "should not have preview of channel"
     );
 
-    document.querySelector(`.o_MessagingMenu_tabButton[data-tab-id="channel"]`).click();
+    document.querySelector('.o_MessagingMenu_tabButton[data-tab-id="channel"]').click();
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview`
-        ).length,
+            .o_ThreadPreview
+        `).length,
         1,
         "should have one preview"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_10"]`
-        ).length,
+            .o_ThreadPreview[data-thread-local-id="${
+                'mail.channel_10'
+            }"]
+        `).length,
         0,
         "should not have preview of chat"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_20"]`
-        ).length,
+            .o_ThreadPreview[data-thread-local-id="${
+                'mail.channel_20'
+            }"]
+        `).length,
         1,
         "should have preview of channel"
     );
 
-    document.querySelector(`.o_MessagingMenu_tabButton[data-tab-id="all"]`).click();
+    document.querySelector('.o_MessagingMenu_tabButton[data-tab-id="all"]').click();
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`.o_MessagingMenu_dropdownMenu .o_ThreadPreview`).length,
@@ -655,16 +668,20 @@ QUnit.test('filtered previews', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_10"]`
-        ).length,
+            .o_ThreadPreview[data-thread-local-id="${
+                'mail.channel_10'
+            }"]
+        `).length,
         1,
         "should have preview of chat"
     );
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="mail.channel_20"]`
-        ).length,
+            .o_ThreadPreview[data-thread-local-id="${
+                'mail.channel_20'
+            }"]
+        `).length,
         1,
         "should have preview of channel"
     );
@@ -705,4 +722,6 @@ QUnit.test('open chat window from preview', async function (assert) {
 
 });
 });
+});
+
 });

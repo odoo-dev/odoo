@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="mail.component.ChatWindow" owl="1">
+    <t t-name="mail.messaging.component.ChatWindow" owl="1">
         <div class="o_ChatWindow" tabindex="0"
             t-att-class="{
                 'o-focused': state.isFocused,
@@ -9,30 +9,30 @@
                 'o-fullscreen': props.isFullscreen,
                 'o-mobile': storeProps.isMobile,
                 'o-new-message': props.chatWindowLocalId === 'new_message',
-            }" t-on-click.stop="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window-local-id="props.chatWindowLocalId" t-att-data-thread-local-id="storeProps.thread ? storeProps.thread.localId : ''"
+            }" t-on-click="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window-local-id="props.chatWindowLocalId" t-att-data-thread-local-id="thread ? thread.localId : ''"
         >
-            <Header
+            <ChatWindowHeader
                 class="o_ChatWindow_header"
                 chatWindowLocalId="props.chatWindowLocalId"
                 hasCloseAsBackButton="props.hasCloseAsBackButton"
                 hasShiftLeft="props.hasShiftLeft"
                 hasShiftRight="props.hasShiftRight"
                 isExpandable="props.isExpandable"
-                t-on-o-clicked.stop="_onClickedHeader"
+                t-on-o-clicked="_onClickedHeader"
             />
             <t t-if="storeProps.thread">
-                <Thread
+                <ThreadViewer
                     class="o_ChatWindow_thread"
                     composerAttachmentsDetailsMode="'card'"
                     domain="[]"
-                    hasComposer="storeProps.thread._model !== 'mail.box'"
+                    hasComposer="thread._model !== 'mail.box'"
                     hasComposerCurrentPartnerAvatar="false"
                     hasComposerSendButton="storeProps.isMobile"
-                    hasSquashCloseMessages="storeProps.thread._model !== 'mail.box'"
-                    haveMessagesAuthorRedirect="storeProps.thread.channel_type !== 'chat'"
+                    hasSquashCloseMessages="thread._model !== 'mail.box'"
+                    haveMessagesAuthorRedirect="thread.channel_type !== 'chat'"
                     messageListInitialScrollTop="props.threadInitialScrollTop"
                     threadLocalId="props.chatWindowLocalId"
-                    t-on-focusin.stop="_onFocusinThread"
+                    t-on-focusin="_onFocusinThread"
                     t-ref="thread"
                 />
             </t>

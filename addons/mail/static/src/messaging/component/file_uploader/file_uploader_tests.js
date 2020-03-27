@@ -1,7 +1,9 @@
-odoo.define('mail.component.FileUploaderTests', function (require) {
+odoo.define('mail.messaging.component.FileUploaderTests', function (require) {
 "use strict";
 
-const FileUploader = require('mail.component.FileUploader');
+const components = {
+    FileUploader: require('mail.messaging.component.FileUploader'),
+};
 const {
     afterEach: utilsAfterEach,
     beforeEach: utilsBeforeEach,
@@ -9,18 +11,20 @@ const {
     nextAnimationFrame,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
 const { file: { createFile } } = require('web.test_utils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('FileUploader', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createFileUploaderComponent = async (props) => {
-            FileUploader.env = this.env;
-            const fileUploader = new FileUploader(
+        this.createFileUploaderComponent = async (props) => {
+            const FileUploaderComponent = components.FileUploader;
+            FileUploaderComponent.env = this.env;
+            const fileUploader = new FileUploaderComponent(
                 null,
                 Object.assign({ attachmentLocalIds: [] }, props)
             );
@@ -46,9 +50,9 @@ QUnit.module('FileUploader', {
         if (this.widget) {
             this.widget.destroy();
         }
-        delete FileUploader.env;
+        delete components.FileUploader.env;
         this.env = undefined;
-    }
+    },
 });
 
 QUnit.test('no conflicts between file uploaders', async function (assert) {
@@ -92,4 +96,6 @@ QUnit.test('no conflicts between file uploaders', async function (assert) {
 
 });
 });
+});
+
 });

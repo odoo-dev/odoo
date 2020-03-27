@@ -1,4 +1,4 @@
-odoo.define('mail.component.DropZone', function (require) {
+odoo.define('mail.messaging.component.DropZone', function (require) {
 'use strict';
 
 const { Component, useState } = owl;
@@ -7,7 +7,6 @@ class DropZone extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -33,7 +32,7 @@ class DropZone extends Component {
      * Returns whether the given node is self or a children of self.
      *
      * @param {Node} node
-     * @return {boolean}
+     * @returns {boolean}
      */
     contains(node) {
         return this.el.contains(node);
@@ -49,7 +48,7 @@ class DropZone extends Component {
      *
      * @private
      * @param {DataTransfer} dataTransfer
-     * @return {boolean}
+     * @returns {boolean}
      */
     _isDragSourceExternalFile(dataTransfer) {
         const dragDataType = dataTransfer.types;
@@ -73,6 +72,7 @@ class DropZone extends Component {
      * @param {DragEvent} ev
      */
     _onDragenter(ev) {
+        ev.preventDefault();
         if (this._dragCount === 0) {
             this.state.isDraggingInside = true;
         }
@@ -97,8 +97,10 @@ class DropZone extends Component {
      * The drop effect cursor works only when set on dragover.
      *
      * @private
+     * @param {DragEvent} ev
      */
     _onDragover(ev) {
+        ev.preventDefault();
         ev.dataTransfer.dropEffect = 'copy';
     }
 
@@ -113,6 +115,7 @@ class DropZone extends Component {
      * @param {DragEvent} ev
      */
     _onDrop(ev) {
+        ev.preventDefault();
         if (this._isDragSourceExternalFile(ev.dataTransfer)) {
             this.trigger('o-dropzone-files-dropped', {
                 files: ev.dataTransfer.files,
@@ -123,7 +126,10 @@ class DropZone extends Component {
 
 }
 
-DropZone.template = 'mail.component.DropZone';
+Object.assign(DropZone, {
+    props: {},
+    template: 'mail.messaging.component.DropZone',
+});
 
 return DropZone;
 

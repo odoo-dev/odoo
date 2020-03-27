@@ -1,4 +1,4 @@
-odoo.define('mail.hooks.useDragVisibleDropZone', function (require) {
+odoo.define('mail.messaging.component_hook.useDragVisibleDropZone', function (require) {
 'use strict';
 
 const { useRef, useState, onMounted, onWillUnmount } = owl.hooks;
@@ -8,7 +8,7 @@ const { useRef, useState, onMounted, onWillUnmount } = owl.hooks;
  * It needs a ref to a dropzone, so you need to specify a t-ref="dropzone" in
  * the template of your component.
  *
- * @return {Object}
+ * @returns {Object}
  */
 function useDragVisibleDropZone() {
     /**

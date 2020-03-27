@@ -1,8 +1,10 @@
-odoo.define('mail.component.ChatWindowHeader', function (require) {
+odoo.define('mail.messaging.component.ChatWindowHeader', function (require) {
 'use strict';
 
-const Icon = require('mail.component.ThreadIcon');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    ThreadIcon: require('mail.messaging.component.ThreadIcon'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch, useGetters } = owl.hooks;
@@ -11,7 +13,6 @@ class ChatWindowHeader extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -28,6 +29,17 @@ class ChatWindowHeader extends Component {
                 threadName,
             };
         });
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Thread}
+     */
+    get thread() {
+        return this.storeProps.thread;
     }
 
     //--------------------------------------------------------------------------
@@ -49,6 +61,7 @@ class ChatWindowHeader extends Component {
      * @param {MouseEvent} ev
      */
     _onClickClose(ev) {
+        ev.stopPropagation();
         this.storeDispatch('closeChatWindow', this.props.chatWindowLocalId);
     }
 
@@ -57,21 +70,22 @@ class ChatWindowHeader extends Component {
      * @param {MouseEvent} ev
      */
     _onClickExpand(ev) {
-        if (!this.storeProps.thread) {
+        ev.stopPropagation();
+        if (!this.thread) {
             return;
         }
-        if (['mail.channel', 'mail.box'].includes(this.storeProps.thread._model)) {
-            this.env.do_action('mail.action_owl_discuss', {
+        if (['mail.channel', 'mail.box'].includes(this.thread._model)) {
+            this.env.do_action('mail.action_new_discuss', {
                 clear_breadcrumbs: false,
-                active_id: this.storeProps.thread.localId,
+                active_id: this.thread.localId,
                 on_reverse_breadcrumb: () =>
                     // ideally discuss should do it itself...
                     this.storeDispatch('closeDiscuss'),
             });
         } else {
             this.storeDispatch('openDocument', {
-                id: this.storeProps.thread.id,
-                model: this.storeProps.thread._model,
+                id: this.thread.id,
+                model: this.thread._model,
             });
         }
     }
@@ -81,6 +95,7 @@ class ChatWindowHeader extends Component {
      * @param {MouseEvent} ev
      */
     _onClickShiftLeft(ev) {
+        ev.stopPropagation();
         this.storeDispatch('shiftLeftChatWindow', this.props.chatWindowLocalId);
     }
 
@@ -89,38 +104,29 @@ class ChatWindowHeader extends Component {
      * @param {MouseEvent} ev
      */
     _onClickShiftRight(ev) {
+        ev.stopPropagation();
         this.storeDispatch('shiftRightChatWindow', this.props.chatWindowLocalId);
     }
+
 }
 
-ChatWindowHeader.components = {
-    Icon,
-};
-
-ChatWindowHeader.defaultProps = {
-    hasCloseAsBackButton: false,
-    hasShiftLeft: false,
-    hasShiftRight: false,
-    isExpandable: false,
-};
-
-ChatWindowHeader.props = {
-    chatWindowLocalId: String,
-    hasCloseAsBackButton: {
-        type: Boolean,
+Object.assign(ChatWindowHeader, {
+    components,
+    defaultProps: {
+        hasCloseAsBackButton: false,
+        hasShiftLeft: false,
+        hasShiftRight: false,
+        isExpandable: false,
     },
-    hasShiftLeft: {
-        type: Boolean,
+    props: {
+        chatWindowLocalId: String,
+        hasCloseAsBackButton: Boolean,
+        hasShiftLeft: Boolean,
+        hasShiftRight: Boolean,
+        isExpandable: Boolean,
     },
-    hasShiftRight: {
-        type: Boolean,
-    },
-    isExpandable: {
-        type: Boolean,
-    },
-};
-
-ChatWindowHeader.template = 'mail.component.ChatWindowHeader';
+    template: 'mail.messaging.component.ChatWindowHeader',
+});
 
 return ChatWindowHeader;
 

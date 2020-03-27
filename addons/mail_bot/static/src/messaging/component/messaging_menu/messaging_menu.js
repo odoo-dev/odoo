@@ -1,14 +1,16 @@
-odoo.define('mail_bot.component.MessagingMenu', function (require) {
+odoo.define('mail_bot.messaging.component.MessagingMenu', function (require) {
 'use strict';
 
-const MessagingMenu = require('mail.component.MessagingMenu');
+const components = {
+    MessagingMenu: require('mail.messaging.component.MessagingMenu'),
+};
 
 // ensure the store is patched before patching the component
 require('mail_bot.MailBotService');
 
 const { patch } = require('web.utils');
 
-patch(MessagingMenu, 'mail_bot_messaging_menu', {
+patch(components.MessagingMenu, 'mail_bot.messaging.component.MessagingMenu', {
 
     //--------------------------------------------------------------------------
     // Private
@@ -20,7 +22,7 @@ patch(MessagingMenu, 'mail_bot_messaging_menu', {
      *
      * @override
      */
-    _useStore(state, props) {
+    _useStoreSelector(state, props) {
         const res = this._super(...arguments);
         if (state.mailbotHasRequest) {
             res.counter += 1;

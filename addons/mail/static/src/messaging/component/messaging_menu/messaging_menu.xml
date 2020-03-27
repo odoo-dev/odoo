@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="mail.component.MessagingMenu" owl="1">
-        <li class="o_MessagingMenu" t-att-class="{ show: storeProps.isOpen, 'o-mobile': storeProps.isMobile }">
+    <t t-name="mail.messaging.component.MessagingMenu" owl="1">
+        <li class="o_MessagingMenu" t-att-class="{ show: messagingMenu.isOpen, 'o-mobile': storeProps.isMobile }">
             <!-- TODO FIXME restore mobile stuff here (activeMobileThread) -->
             <t t-if="!storeProps.isMobile or true">
-                <a class="o_MessagingMenu_toggler o-no-caret" t-att-class="{ show: storeProps.isOpen }" href="#" t-on-click.stop.prevent="_onClickToggler" data-toggle="dropdown" data-display="static" title="Conversations" role="button" aria-expanded="false">
+                <a class="o_MessagingMenu_toggler o-no-caret" t-att-class="{ show: messagingMenu.isOpen }" href="#" t-on-click="_onClickToggler" data-toggle="dropdown" data-display="static" title="Conversations" role="button" aria-expanded="false">
                     <i class="o_MessagingMenu_icon fa fa-comments-o" role="img" aria-label="Messages"/>
-                    <t t-if="!storeProps.isMessagingReady">
+                    <t t-if="!storeProps.isMessagingInitialized">
                         <i class="o_MessagingMenu_loading fa fa-spinner fa-spin"/>
                     </t>
                     <t t-elif="storeProps.counter > 0">
@@ -18,16 +18,16 @@
                 </a>
             </t>
             <!-- TODO FIXME restore mobile stuff here (activeMobileThread) -->
-            <t t-if="storeProps.isOpen and (!storeProps.isMobile or true)">
-                <div class="o_MessagingMenu_dropdownMenu dropdown-menu dropdown-menu-right" t-att-class="{ 'o-mobile': storeProps.isMobile, 'o-messaging-not-ready': !storeProps.isMessagingReady }" role="menu">
-                    <t t-if="!storeProps.isMessagingReady">
+            <t t-if="messagingMenu.isOpen and (!storeProps.isMobile or true)">
+                <div class="o_MessagingMenu_dropdownMenu dropdown-menu dropdown-menu-right" t-att-class="{ 'o-mobile': storeProps.isMobile, 'o-messaging-not-initialized': !storeProps.isMessagingInitialized }" role="menu">
+                    <t t-if="!storeProps.isMessagingInitialized">
                         <span><i class="o_MessagingMenu_dropdownLoadingIcon fa fa-spinner fa-spin"/>Please wait...</span>
                     </t>
                     <t t-else="">
                         <div class="o_MessagingMenu_dropdownMenuHeader" t-att-class="{ 'o-mobile': storeProps.isMobile }">
                             <t t-if="!storeProps.isMobile">
                                 <t t-foreach="['all', 'chat', 'channel']" t-as="tabId" t-key="tabId">
-                                    <button class="o_MessagingMenu_tabButton o-desktop btn btn-link" t-att-class="{ 'o-active': storeProps.activeTabId === tabId, }" t-on-click.stop="_onClickDesktopTabButton" type="button" role="tab" t-att-data-tab-id="tabId">
+                                    <button class="o_MessagingMenu_tabButton o-desktop btn btn-link" t-att-class="{ 'o-active': messagingMenu.activeTabId === tabId, }" t-on-click="_onClickDesktopTabButton" type="button" role="tab" t-att-data-tab-id="tabId">
                                         <t t-if="tabId === 'all'">All</t>
                                         <t t-elif="tabId === 'chat'">Chat</t>
                                         <t t-elif="tabId === 'channel'">Channels</t>
@@ -35,13 +35,13 @@
                                 </t>
                             </t>
                             <t t-if="storeProps.isMobile">
-                                <t t-call="mail.component.MessagingMenu.NewMessageButton"/>
+                                <t t-call="mail.messaging.component.MessagingMenu.NewMessageButton"/>
                             </t>
                             <div class="o-autogrow"/>
                             <t t-if="!storeProps.isMobile and !storeProps.isDiscussOpen">
-                                <t t-call="mail.component.MessagingMenu.NewMessageButton"/>
+                                <t t-call="mail.messaging.component.MessagingMenu.NewMessageButton"/>
                             </t>
-                            <t t-if="storeProps.isMobile and storeProps.isMobileNewMessageToggled">
+                            <t t-if="storeProps.isMobile and messagingMenu.isMobileNewMessageToggled">
                                 <AutocompleteInput
                                     class="o_MessagingMenu_mobileNewMessageInput"
                                     customClass="id + '_mobileNewMessageInputAutocomplete'"
@@ -49,7 +49,7 @@
                                     placeholder="mobileNewMessageInputPlaceholder"
                                     select="_onMobileNewMessageInputSelect"
                                     source="_onMobileNewMessageInputSource"
-                                    t-on-o-hide.stop="_onHideMobileNewMessage"
+                                    t-on-o-hide="_onHideMobileNewMessage"
                                     t-ref="mobileNewMessageInput"
                                 />
                             </t>
@@ -57,15 +57,15 @@
                         <NotificationList
                             class="o_MessagingMenu_notificationList"
                             t-att-class="{ 'o-mobile': storeProps.isMobile }"
-                            filter="storeProps.activeTabId"
-                            t-on-o-select-thread.stop="_onSelectThread"
+                            filter="messagingMenu.activeTabId"
+                            t-on-o-select-thread="_onSelectThread"
                         />
                         <t t-if="storeProps.isMobile">
                             <MobileMessagingNavbar
                                 class="o_MessagingMenu_mobileMessagingNavbar"
-                                activeTabId="storeProps.activeTabId"
+                                activeTabId="messagingMenu.activeTabId"
                                 tabs="tabs"
-                                t-on-o-select-mobile-messaging-navbar-tab.stop="_onSelectMobileNavbarTab"
+                                t-on-o-select-mobile-messaging-navbar-tab="_onSelectMobileNavbarTab"
                             />
                         </t>
                     </t>
@@ -74,13 +74,13 @@
         </li>
     </t>
 
-    <t t-name="mail.component.MessagingMenu.NewMessageButton" owl="1">
+    <t t-name="mail.messaging.component.MessagingMenu.NewMessageButton" owl="1">
         <button class="o_MessagingMenu_newMessageButton btn"
             t-att-class="{
                 'btn-link': !storeProps.isMobile,
                 'btn-secondary': storeProps.isMobile,
                 'o-mobile': storeProps.isMobile,
-            }" t-on-click.stop="_onClickNewMessage" type="button"
+            }" t-on-click="_onClickNewMessage" type="button"
         >
             New message
         </button>

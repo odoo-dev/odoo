@@ -4,9 +4,9 @@ odoo.define('mail.testUtils', function (require) {
 var BusService = require('bus.BusService');
 
 var Discuss = require('mail.Discuss');
-const { patchMessagingService } = require('mail.messagingTestUtils');
+const { patchMessagingService } = require('mail.messaging.testUtils');
 var MailService = require('mail.Service');
-const MessagingService = require('mail.service.Messaging');
+const MessagingService = require('mail.messaging.service.Messaging');
 
 var AbstractStorageService = require('web.AbstractStorageService');
 var Class = require('web.Class');

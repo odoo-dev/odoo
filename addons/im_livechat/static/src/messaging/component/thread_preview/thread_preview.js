@@ -1,11 +1,13 @@
-odoo.define('im_livechat.component.ThreadPreview', function (require) {
+odoo.define('im_livechat.messaging.component.ThreadPreview', function (require) {
 'use strict';
 
-const ThreadPreview = require('mail.component.ThreadPreview');
+const components = {
+    ThreadPreview: require('mail.messaging.component.ThreadPreview'),
+};
 
 const { patch } = require('web.utils');
 
-patch(ThreadPreview, 'im_livechat_thread_preview', {
+patch(components.ThreadPreview, 'im_livechat.messaging.component.ThreadPreview', {
 
     //--------------------------------------------------------------------------
     // Public
@@ -14,8 +16,8 @@ patch(ThreadPreview, 'im_livechat_thread_preview', {
     /**
      * @override
      */
-    getImage(...args) {
-        if (this.storeProps.thread.channel_type === 'livechat') {
+    image(...args) {
+        if (this.thread.channel_type === 'livechat') {
             return '/mail/static/src/img/smiley/avatar.jpg';
         }
         return this._super(...args);

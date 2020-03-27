@@ -1,12 +1,13 @@
-odoo.define('hr_holidays.component.Thread', function (require) {
+odoo.define('hr_holidays.messaging.component.ThreadViewer', function (require) {
 'use strict';
 
-const Thread = require('mail.component.Thread');
+const components = {
+    ThreadViewer: require('mail.messaging.component.ThreadViewer'),
+};
 
-const { _t } = require('web.core');
 const { patch } = require('web.utils');
 
-patch(Thread, 'hr_holidays_thread', {
+patch(components.ThreadViewer, 'hr_holidays.messaging.component.ThreadViewer', {
 
     //--------------------------------------------------------------------------
     // Public
@@ -32,7 +33,7 @@ patch(Thread, 'hr_holidays_thread', {
             options.year = 'numeric';
         }
         const formattedDate = date.toLocaleDateString(window.navigator.language, options);
-        return _.str.sprintf(_t("Out of office until %s."), formattedDate);
+        return _.str.sprintf(this.env._t("Out of office until %s."), formattedDate);
     },
 
     //--------------------------------------------------------------------------
@@ -42,7 +43,7 @@ patch(Thread, 'hr_holidays_thread', {
     /**
      * @override
      */
-    _useStore(state, props) {
+    _useStoreSelector(state, props) {
         const res = this._super(...arguments);
         const directPartnerLocalId = res.thread
             ? res.thread.directPartnerLocalId

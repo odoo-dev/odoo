@@ -5,7 +5,7 @@ const config = require('web.config');
 
 function initState() {
     const state = {
-        isMessagingReady: false,
+        isMessagingInitialized: false,
         activities: {},
         attachments: {},
         cannedResponses: {},

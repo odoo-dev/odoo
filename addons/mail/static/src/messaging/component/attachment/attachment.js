@@ -1,7 +1,7 @@
-odoo.define('mail.component.Attachment', function (require) {
+odoo.define('mail.messaging.component.Attachment', function (require) {
 'use strict';
 
-const useStore = require('mail.hooks.useStore');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch, useGetters } = owl.hooks;
@@ -10,7 +10,6 @@ class Attachment extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -28,17 +27,24 @@ class Attachment extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * @returns {mail.messaging.entity.Attachment}
+     */
+    get attachment() {
+        return this.storeProps.attachment;
+    }
+
+    /**
      * Return the url of the attachment. Temporary attachments, a.k.a. uploading
      * attachments, do not have an url.
      *
-     * @return {string}
+     * @returns {string}
      */
     get attachmentUrl() {
-        if (this.storeProps.attachment.isTemporary) {
+        if (this.attachment.isTemporary) {
             return '';
         }
         return this.env.session.url('/web/content', {
-            id: this.storeProps.attachment.id,
+            id: this.attachment.id,
             download: true,
         });
     }
@@ -46,7 +52,7 @@ class Attachment extends Component {
     /**
      * Get the details mode after auto mode is computed
      *
-     * @return {string} 'card', 'hover' or 'none'
+     * @returns {string} 'card', 'hover' or 'none'
      */
     get detailsMode() {
         if (this.props.detailsMode !== 'auto') {
@@ -63,7 +69,7 @@ class Attachment extends Component {
     /**
      * Get the attachment representation style to be applied
      *
-     * @return {string}
+     * @returns {string}
      */
     get imageStyle() {
         const fileType =
@@ -77,8 +83,7 @@ class Attachment extends Component {
         } else {
             size = '160x160';
         }
-        const attachmentId = this.storeProps.attachment.id;
-        return `background-image:url(/web/image/${attachmentId}/${size}/?crop=true);`;
+        return `background-image:url(/web/image/${this.attachment.id}/${size}/?crop=true);`;
     }
 
     //--------------------------------------------------------------------------
@@ -92,8 +97,8 @@ class Attachment extends Component {
      * @param {MouseEvent} ev
      */
     _onClickDownload(ev) {
-        const attachmentId = this.storeProps.attachment.id;
-        window.location = `/web/content/ir.attachment/${attachmentId}/datas?download=true`;
+        ev.stopPropagation();
+        window.location = `/web/content/ir.attachment/${this.attachment.id}/datas?download=true`;
     }
 
     /**
@@ -117,45 +122,37 @@ class Attachment extends Component {
      * @param {MouseEvent} ev
      */
     _onClickUnlink(ev) {
+        ev.stopPropagation();
         this.storeDispatch('unlinkAttachment', this.props.attachmentLocalId);
     }
+
 }
 
-Attachment.defaultProps = {
-    attachmentLocalIds: [],
-    detailsMode: 'auto',
-    imageSize: 'medium',
-    isDownloadable: false,
-    isEditable: true,
-    showExtension: true,
-    showFilename: true,
-};
-
-Attachment.props = {
-    attachmentLocalId: {
-        type: String,
+Object.assign(Attachment, {
+    defaultProps: {
+        attachmentLocalIds: [],
+        detailsMode: 'auto',
+        imageSize: 'medium',
+        isDownloadable: false,
+        isEditable: true,
+        showExtension: true,
+        showFilename: true,
     },
-    attachmentLocalIds: {
-        type: Array,
-        element: String,
+    props: {
+        attachmentLocalId: String,
+        attachmentLocalIds: {
+            type: Array,
+            element: String,
+        },
+        detailsMode: String, //['auto', 'card', 'hover', 'none']
+        imageSize: String, //['small', 'medium', 'large']
+        isDownloadable: Boolean,
+        isEditable: Boolean,
+        showExtension: Boolean,
+        showFilename: Boolean,
     },
-    detailsMode: String, //['auto', 'card', 'hover', 'none']
-    imageSize: String, //['small', 'medium', 'large']
-    isDownloadable: {
-        type: Boolean,
-    },
-    isEditable: {
-        type: Boolean,
-    },
-    showExtension: {
-        type: Boolean,
-    },
-    showFilename: {
-        type: Boolean,
-    },
-};
-
-Attachment.template = 'mail.component.Attachment';
+    template: 'mail.messaging.component.Attachment',
+});
 
 return Attachment;
 

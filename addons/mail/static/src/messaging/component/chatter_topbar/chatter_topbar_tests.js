@@ -1,33 +1,37 @@
-odoo.define('mail.component.ChatterTopBarTests', function (require) {
+odoo.define('mail.messaging.component.ChatterTopBarTests', function (require) {
 'use strict';
 
-const ChatterTopBar = require('mail.component.ChatterTopbar');
+const components = {
+    ChatterTopBar: require('mail.messaging.component.ChatterTopbar'),
+};
 const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
 const { makeTestPromise } = require('web.test_utils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('ChatterTopbar', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createChatterTopbar = async (chatterLocalId, otherProps) => {
-            ChatterTopBar.env = this.env;
+        this.createChatterTopbarComponent = async (chatterLocalId, otherProps) => {
+            const ChatterTopBarComponent = components.ChatterTopBar;
+            ChatterTopBarComponent.env = this.env;
             const defaultProps = {
                 isComposerLog: false,
                 isComposerVisible: false
             };
-            this.chatterTopbar = new ChatterTopBar(
+            this.component = new ChatterTopBarComponent(
                 null,
                 Object.assign({ chatterLocalId }, defaultProps, otherProps)
             );
-            await this.chatterTopbar.mount(this.widget.el);
+            await this.component.mount(this.widget.el);
         };
         this.start = async params => {
             if (this.widget) {
@@ -42,15 +46,15 @@ QUnit.module('ChatterTopbar', {
     },
     afterEach() {
         utilsAfterEach(this);
-        if (this.chatterTopbar) {
-            this.chatterTopbar.destroy();
+        if (this.component) {
+            this.component.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
         }
-        delete ChatterTopBar.env;
+        delete components.ChatterTopBar.env;
         this.env = undefined;
-    }
+    },
 });
 
 QUnit.test('base rendering', async function (assert) {
@@ -68,7 +72,7 @@ QUnit.test('base rendering', async function (assert) {
         initialThreadId: 100,
         initialThreadModel: 'res.partner',
     });
-    await this.createChatterTopbar(chatterLocalId);
+    await this.createChatterTopbarComponent(chatterLocalId);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -137,7 +141,7 @@ QUnit.test('base disabled rendering', async function (assert) {
     const chatterLocalId = this.env.store.dispatch('createChatter', {
         initialThreadModel: 'res.partner'
     });
-    await this.createChatterTopbar(chatterLocalId);
+    await this.createChatterTopbarComponent(chatterLocalId);
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -204,7 +208,7 @@ QUnit.test('attachment counter while loading attachments', async function (asser
         initialThreadId: 100,
         initialThreadModel: 'res.partner',
     });
-    await this.createChatterTopbar(chatterLocalId);
+    await this.createChatterTopbarComponent(chatterLocalId);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -245,7 +249,7 @@ QUnit.test('attachment counter transition when attachments become loaded)', asyn
         initialThreadId: 100,
         initialThreadModel: 'res.partner',
     });
-    await this.createChatterTopbar(chatterLocalId);
+    await this.createChatterTopbarComponent(chatterLocalId);
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -301,7 +305,7 @@ QUnit.test('attachment counter without attachments', async function (assert) {
         initialThreadId: 100,
         initialThreadModel: 'res.partner',
     });
-    await this.createChatterTopbar(chatterLocalId);
+    await this.createChatterTopbarComponent(chatterLocalId);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -351,7 +355,7 @@ QUnit.test('attachment counter with attachments', async function (assert) {
         initialThreadId: 100,
         initialThreadModel: 'res.partner',
     });
-    await this.createChatterTopbar(chatterLocalId);
+    await this.createChatterTopbarComponent(chatterLocalId);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -378,4 +382,6 @@ QUnit.test('attachment counter with attachments', async function (assert) {
 
 });
 });
+});
+
 });

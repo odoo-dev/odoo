@@ -6,9 +6,10 @@ const {
     beforeEach: utilsBeforeEach,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('store', {}, function () {
 QUnit.module('Getters', {
     beforeEach() {
@@ -121,4 +122,6 @@ QUnit.test('isAttachmentViewable', async function (assert) {
 
 });
 });
+});
+
 });

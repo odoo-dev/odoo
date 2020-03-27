@@ -1,19 +1,19 @@
-odoo.define('mail.hooks.useStoreTests', function (require) {
+odoo.define('mail.messaging.component_hook.useStoreTests', function (require) {
 'use strict';
 
-const useStore = require('mail.hooks.useStore');
+const useStore = require('mail.messaging.component_hook.useStore');
+const {
+    afterNextRender,
+    nextAnimationFrame,
+} = require('mail.messaging.testUtils');
 
 const { Component, QWeb, Store } = owl;
 const { xml } = owl.tags;
 
-const {
-    afterNextRender,
-    nextAnimationFrame,
-} = require('mail.messagingTestUtils');
-
-QUnit.module('mail.messaging', {}, function () {
-QUnit.module('hooks', {}, function () {
-QUnit.module('useStoreTests', {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
+QUnit.module('component_hook', {}, function () {
+QUnit.module('useStore', {
     beforeEach() {
         const qweb = new QWeb();
         this.env = { qweb };
@@ -21,7 +21,7 @@ QUnit.module('useStoreTests', {
     afterEach() {
         this.env = undefined;
         this.store = undefined;
-    }
+    },
 });
 
 
@@ -29,11 +29,13 @@ QUnit.test("compare keys, no depth, primitives", async function (assert) {
     assert.expect(8);
     this.store = new Store({
         env: this.env,
-        state: { obj: {
-            subObj1: 'a',
-            subObj2: 'b',
-            use1: true,
-        } },
+        state: {
+            obj: {
+                subObj1: 'a',
+                subObj2: 'b',
+                use1: true,
+            },
+        },
     });
     this.env.store = this.store;
     let count = 0;
@@ -41,8 +43,9 @@ QUnit.test("compare keys, no depth, primitives", async function (assert) {
         constructor() {
             super(...arguments);
             this.storeProps = useStore((state, props) => {
+                const obj = state.obj;
                 return {
-                    res: state.obj.use1 ? state.obj.subObj1 : state.obj.subObj2,
+                    res: obj.use1 ? obj.subObj1 : obj.subObj2,
                 };
             }, {
                 onUpdate: () => {
@@ -51,8 +54,11 @@ QUnit.test("compare keys, no depth, primitives", async function (assert) {
             });
         }
     }
-    MyComponent.env = this.env;
-    MyComponent.template = xml`<div t-esc="storeProps.res"/>`;
+    Object.assign(MyComponent, {
+        env: this.env,
+        props: {},
+        template: xml`<div t-esc="storeProps.res"/>`,
+    });
 
     const fixture = document.querySelector('#qunit-fixture');
 
@@ -92,11 +98,13 @@ QUnit.test("compare keys, depth 1, proxy", async function (assert) {
     assert.expect(8);
     this.store = new Store({
         env: this.env,
-        state: { obj: {
-            subObj1: { a: 'a' },
-            subObj2: { a: 'b' },
-            use1: true,
-        } },
+        state: {
+            obj: {
+                subObj1: { a: 'a' },
+                subObj2: { a: 'b' },
+                use1: true,
+            },
+        },
     });
     this.env.store = this.store;
     let count = 0;
@@ -104,8 +112,9 @@ QUnit.test("compare keys, depth 1, proxy", async function (assert) {
         constructor() {
             super(...arguments);
             this.storeProps = useStore((state, props) => {
+                const obj = state.obj;
                 return {
-                    array: [state.obj.use1 ? state.obj.subObj1 : state.obj.subObj2],
+                    array: [obj.use1 ? obj.subObj1 : obj.subObj2],
                 };
             }, {
                 compareDepth: {
@@ -117,8 +126,11 @@ QUnit.test("compare keys, depth 1, proxy", async function (assert) {
             });
         }
     }
-    MyComponent.env = this.env;
-    MyComponent.template = xml`<div t-esc="storeProps.array[0].a"/>`;
+    Object.assign(MyComponent, {
+        env: this.env,
+        props: {},
+        template: xml`<div t-esc="storeProps.array[0].a"/>`,
+    });
 
     const fixture = document.querySelector('#qunit-fixture');
 
@@ -156,4 +168,6 @@ QUnit.test("compare keys, depth 1, proxy", async function (assert) {
 
 });
 });
+});
+
 });

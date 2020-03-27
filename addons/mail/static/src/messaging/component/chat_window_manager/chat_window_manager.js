@@ -1,10 +1,12 @@
-odoo.define('mail.component.ChatWindowManager', function (require) {
+odoo.define('mail.messaging.component.ChatWindowManager', function (require) {
 'use strict';
 
-const ChatWindow = require('mail.component.ChatWindow');
-const HiddenMenu = require('mail.component.ChatWindowHiddenMenu');
-const useRefs = require('mail.hooks.useRefs');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    ChatWindow: require('mail.messaging.component.ChatWindow'),
+    ChatWindowHiddenMenu: require('mail.messaging.component.ChatWindowHiddenMenu'),
+};
+const useRefs = require('mail.messaging.component_hook.useRefs');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch } = owl.hooks;
@@ -13,7 +15,6 @@ class ChatWindowManager extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -60,13 +61,13 @@ class ChatWindowManager extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Getter / Setter
+    // Public
     //--------------------------------------------------------------------------
 
     /**
      * Determine the direction of chat windows positions.
      *
-     * @return {string} either 'rtl' or 'ltr'
+     * @returns {string} either 'rtl' or 'ltr'
      */
     get direction() {
         if (this.TEXT_DIRECTION === 'rtl') {
@@ -75,27 +76,21 @@ class ChatWindowManager extends Component {
             return 'rtl';
         }
     }
-
     /**
      * Return list of chat ids ordered by DOM position,
      * i.e. from left to right with this.TEXT_DIRECTION = 'rtl'.
      *
-     * @return {Array}
+     * @returns {Array}
      */
     get orderedVisible() {
         return [...this.storeProps.computed.visible].reverse();
     }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
     /**
      * Determine whether the chat window at given index should have shift right
      * command. Right-most chat window should not have this command.
      *
      * @param {integer} index
-     * @return {boolean}
+     * @returns {boolean}
      */
     chatWindowShiftRight(index) {
         return index < this.storeProps.computed.visible.length - 1;
@@ -142,7 +137,7 @@ class ChatWindowManager extends Component {
          * `reverse` option.
          *
          * @param {integer} index
-         * @return {integer}
+         * @returns {integer}
          */
         const _getNextIndex = index => {
             const directionOffset = reverse ? -1 : 1;
@@ -174,7 +169,7 @@ class ChatWindowManager extends Component {
      * necessary.
      *
      * @private
-     * @return {mail.component.ChatWindow}
+     * @returns {mail.messaging.component.ChatWindow}
      */
     _getChatWindowRef(chatWindowLocalId) {
         return this._getRefs()[`chatWindow_${chatWindowLocalId}`];
@@ -271,6 +266,7 @@ class ChatWindowManager extends Component {
      * @param {string} ev.detail.chatWindowLocalId
      */
     _onSelectChatWindow(ev) {
+        ev.stopPropagation();
         this.storeDispatch('makeChatWindowVisible', ev.detail.chatWindowLocalId);
     }
 
@@ -285,6 +281,7 @@ class ChatWindowManager extends Component {
      * @param {string} ev.detail.threadLocalId
      */
     _onSelectThreadChatWindow(ev) {
+        ev.stopPropagation();
         const { chatWindowLocalId, threadLocalId } = ev.detail;
         if (!this.env.store.state.threads[threadLocalId].is_minimized) {
             this.storeDispatch('openThread', threadLocalId, { chatWindowMode: 'last' });
@@ -294,8 +291,9 @@ class ChatWindowManager extends Component {
 }
 
 Object.assign(ChatWindowManager, {
-    components: { ChatWindow, HiddenMenu },
-    template: 'mail.component.ChatWindowManager',
+    components,
+    props: {},
+    template: 'mail.messaging.component.ChatWindowManager',
 });
 
 return ChatWindowManager;

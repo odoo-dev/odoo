@@ -1,4 +1,4 @@
-odoo.define('mail.component.PopoverButton', function (require) {
+odoo.define('mail.messaging.component.PopoverButton', function (require) {
 'use strict';
 
 const { Component, useState } = owl;
@@ -6,7 +6,7 @@ const { Component, useState } = owl;
 class PopoverButton extends Component {
 
     /**
-     * @param {...any} args
+     * @override
      */
     constructor(...args) {
         super(...args);
@@ -29,10 +29,7 @@ class PopoverButton extends Component {
         this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);
     }
 
-    /**
-     * @override
-     */
-    async mounted() {
+    mounted() {
         const self = this;
         const popoverParams = {
             boundary: this.props.boundary,
@@ -53,9 +50,6 @@ class PopoverButton extends Component {
         document.addEventListener('click', this._onClickCaptureGlobal, true);
     }
 
-    /**
-     * @override
-     */
     willUnmount() {
         this._hidePopover();
         document.removeEventListener('click', this._onClickCaptureGlobal, true);
@@ -67,7 +61,7 @@ class PopoverButton extends Component {
 
     /**
      * @param {EventTarget} target
-     * @return {boolean}
+     * @returns {boolean}
      */
     isInsideEventTarget(target) {
         return target === this.el || target.closest(`#${this._popoverId}`);
@@ -118,6 +112,7 @@ class PopoverButton extends Component {
         }
         this._hidePopover();
     }
+
 }
 
 Object.assign(PopoverButton, {
@@ -143,7 +138,7 @@ Object.assign(PopoverButton, {
         },
         trigger: String,
     },
-    template: 'mail.component.PopoverButton',
+    template: 'mail.messaging.component.PopoverButton',
 });
 
 return PopoverButton;

@@ -142,7 +142,7 @@ QUnit.module('Discuss (Typing Notifications)', {
         // unpatch Timer and CCThrottleFunction to re-enable timers
         // with the Thread Typing Mixin
         this.unpatch();
-    }
+    },
 });
 
 QUnit.test('notify is typing', async function (assert) {

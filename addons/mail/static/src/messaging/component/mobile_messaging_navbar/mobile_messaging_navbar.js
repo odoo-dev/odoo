@@ -1,4 +1,4 @@
-odoo.define('mail.component.MobileMessagingNavbar', function (require) {
+odoo.define('mail.messaging.component.MobileMessagingNavbar', function (require) {
 'use strict';
 
 const { Component } = owl;
@@ -21,29 +21,29 @@ class MobileMessagingNavbar extends Component {
 
 }
 
-MobileMessagingNavbar.defaultProps = {
-    tabs: [],
-};
-
-MobileMessagingNavbar.props = {
-    activeTabId: String,
-    tabs: {
-        type: Array,
-        element: {
-            type: Object,
-            shape: {
-                icon: {
-                    type: String,
-                    optional: true,
+Object.assign(MobileMessagingNavbar, {
+    defaultProps: {
+        tabs: [],
+    },
+    props: {
+        activeTabId: String,
+        tabs: {
+            type: Array,
+            element: {
+                type: Object,
+                shape: {
+                    icon: {
+                        type: String,
+                        optional: true,
+                    },
+                    id: String,
+                    label: String,
                 },
-                id: String,
-                label: String,
             },
         },
     },
-};
-
-MobileMessagingNavbar.template = 'mail.component.MobileMessagingNavbar';
+    template: 'mail.messaging.component.MobileMessagingNavbar',
+});
 
 return MobileMessagingNavbar;
 

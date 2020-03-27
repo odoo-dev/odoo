@@ -1,7 +1,9 @@
-odoo.define('mail.service.Dialog', function (require) {
+odoo.define('mail.messaging.service.Dialog', function (require) {
 'use strict';
 
-const DialogManager = require('mail.component.DialogManager');
+const components = {
+    DialogManager: require('mail.messaging.component.DialogManager'),
+};
 
 const AbstractService = require('web.AbstractService');
 const { bus, serviceRegistry } = require('web.core');
@@ -13,8 +15,8 @@ const DialogService = AbstractService.extend({
      */
     start() {
         this._super(...arguments);
-        this.env = this.call('messaging', 'getMessagingEnv');
         this._webClientReady = false;
+        this.env = this.call('messaging', 'getEnv');
         this._listenHomeMenu();
     },
     /**
@@ -33,7 +35,7 @@ const DialogService = AbstractService.extend({
 
     /**
      * @private
-     * @return {Node}
+     * @returns {Node}
      */
     _getParentNode() {
         return document.querySelector('body');
@@ -54,8 +56,9 @@ const DialogService = AbstractService.extend({
             this.component.destroy();
             this.component = undefined;
         }
-        DialogManager.env = this.env;
-        this.component = new DialogManager(null);
+        const DialogManagerComponent = components.DialogManager;
+        DialogManagerComponent.env = this.env;
+        this.component = new DialogManagerComponent(null);
         const parentNode = this._getParentNode();
         await this.component.mount(parentNode);
     },

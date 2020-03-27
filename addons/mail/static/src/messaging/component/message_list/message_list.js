@@ -1,9 +1,11 @@
-odoo.define('mail.component.MessageList', function (require) {
+odoo.define('mail.messaging.component.MessageList', function (require) {
 'use strict';
 
-const Message = require('mail.component.Message');
-const useRefs = require('mail.hooks.useRefs');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    Message: require('mail.messaging.component.Message'),
+};
+const useRefs = require('mail.messaging.component_hook.useRefs');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch, useRef } = owl.hooks;
@@ -12,7 +14,6 @@ class MessageList extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -133,18 +134,18 @@ class MessageList extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Getters / Setters
+    // Public
     //--------------------------------------------------------------------------
 
     /**
-     * @return {mail.component.Message|undefined}
+     * @returns {mail.messaging.component.Message|undefined}
      */
     get firstMessageRef() {
         return this.messageRefs[0];
     }
 
     /**
-     * @return {mail.component.Message|undefined}
+     * @returns {mail.messaging.component.Message|undefined}
      */
     get lastCurrentPartnerMessageRef() {
         const currentPartnerMessageRefs = this.messageRefs.filter(messageRef =>
@@ -155,7 +156,7 @@ class MessageList extends Component {
     }
 
     /**
-     * @return {mail.component.Message|undefined}
+     * @returns {mail.messaging.component.Message|undefined}
      */
     get lastMessageRef() {
         let { length: l, [l - 1]: lastMessageRef } = this.messageRefs;
@@ -163,7 +164,7 @@ class MessageList extends Component {
     }
 
     /**
-     * @return {mail.component.Message[]}
+     * @returns {mail.messaging.component.Message[]}
      */
     get messageRefs() {
         return Object.entries(this._getRefs())
@@ -172,7 +173,7 @@ class MessageList extends Component {
             .sort((ref1, ref2) => (ref1.storeProps.message.id < ref2.storeProps.message.id ? -1 : 1));
     }
     /**
-     * @return {mail.model.Message[]}
+     * @returns {mail.model.Message[]}
      */
     get messages() {
         if (this.props.order === 'desc') {
@@ -180,14 +181,9 @@ class MessageList extends Component {
         }
         return this.storeProps.messages;
     }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
     /**
      * @param {mail.store.model.Message} message
-     * @return {string}
+     * @returns {string}
      */
     getDateDay(message) {
         const date = message.date.format('YYYY-MM-DD');
@@ -204,21 +200,21 @@ class MessageList extends Component {
     }
 
     /**
-     * @return {integer}
+     * @returns {integer}
      */
     getScrollTop() {
         return this.el.scrollTop;
     }
 
     /**
-     * @return {boolean}
+     * @returns {boolean}
      */
     hasMessages() {
         return this.storeProps.messages && this.storeProps.messages.length > 0;
     }
 
     /**
-     * @return {Promise}
+     * @returns {Promise}
      */
     async scrollToLastMessage() {
         this._isAutoLoadOnScrollActive = false;
@@ -243,15 +239,13 @@ class MessageList extends Component {
     /**
      * @param {mail.store.model.Message} prevMessage
      * @param {mail.store.model.Message} message
-     * @return {boolean}
+     * @returns {boolean}
      */
     shouldMessageBeSquashed(prevMessage, message) {
         if (!this.props.hasSquashCloseMessages) {
             return false;
         }
-        const prevDate = prevMessage.date;
-        const date = message.date;
-        if (Math.abs(date.diff(prevDate)) > 60000) {
+        if (Math.abs(message.date.diff(prevMessage.date)) > 60000) {
             // more than 1 min. elasped
             return false;
         }
@@ -371,7 +365,7 @@ class MessageList extends Component {
 
     /**
      * @private
-     * @return {boolean}
+     * @returns {boolean}
      */
     _isLoadMoreVisible() {
         const loadMore = this._loadMoreRef.el;
@@ -470,49 +464,43 @@ class MessageList extends Component {
         }
         this._checkThreadMarkAsRead();
     }
+
 }
 
-MessageList.components = { Message };
-
-MessageList.defaultProps = {
-    domain: [],
-    hasMessageCheckbox: false,
-    hasSquashCloseMessages: false,
-    haveMessagesAuthorRedirect: false,
-    haveMessagesMarkAsReadIcon: false,
-    haveMessagesReplyIcon: false,
-    order: 'asc',
-};
-
-MessageList.props = {
-    domain: {
-        type: Array,
+Object.assign(MessageList, {
+    components,
+    defaultProps: {
+        domain: [],
+        hasMessageCheckbox: false,
+        hasSquashCloseMessages: false,
+        haveMessagesAuthorRedirect: false,
+        haveMessagesMarkAsReadIcon: false,
+        haveMessagesReplyIcon: false,
+        order: 'asc',
     },
-    hasMessageCheckbox: Boolean,
-    hasSquashCloseMessages: {
-        type: Boolean,
+    props: {
+        domain: {
+            // TODO FIXME add elements type
+            type: Array,
+        },
+        hasMessageCheckbox: Boolean,
+        hasSquashCloseMessages: Boolean,
+        haveMessagesAuthorRedirect: Boolean,
+        haveMessagesMarkAsReadIcon: Boolean,
+        haveMessagesReplyIcon: Boolean,
+        order: {
+            // TODO FIXME add validation
+            type: String, // ['asc', 'desc']
+        },
+        selectedMessageLocalId: {
+            type: String,
+            optional: true,
+        },
+        threadCacheLocalId: String,
+        threadLocalId: String,
     },
-    haveMessagesAuthorRedirect: {
-        type: Boolean,
-    },
-    haveMessagesMarkAsReadIcon: {
-        type: Boolean,
-    },
-    haveMessagesReplyIcon: {
-        type: Boolean,
-    },
-    order: {
-        type: String, // ['asc', 'desc']
-    },
-    selectedMessageLocalId: {
-        type: String,
-        optional: true,
-    },
-    threadCacheLocalId: String,
-    threadLocalId: String,
-};
-
-MessageList.template = 'mail.component.MessageList';
+    template: 'mail.messaging.component.MessageList',
+});
 
 return MessageList;
 

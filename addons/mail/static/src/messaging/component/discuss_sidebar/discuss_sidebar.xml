@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="mail.component.DiscussSidebar" owl="1">
+    <t t-name="mail.messaging.component.DiscussSidebar" owl="1">
         <div name="root" class="o_DiscussSidebar">
             <div class="o_DiscussSidebar_group o_DiscussSidebar_groupMailbox">
-                <t t-foreach="storeProps.pinnedMailboxList" t-as="mailbox" t-key="mailbox.localId">
-                    <SidebarItem
+                <t t-foreach="storeProps.allOrderedAndPinnedMailboxes" t-as="mailbox" t-key="mailbox.localId">
+                    <DiscussSidebarItem
                         class="o_DiscussSidebar_item"
                         isActive="props.activeThreadLocalId === mailbox.localId"
                         threadLocalId="mailbox.localId"
@@ -15,16 +15,16 @@
                 </t>
             </div>
             <hr class="o_DiscussSidebar_separator"/>
-            <t t-if="storeProps.pinnedMailChannelAmount > 19">
-                <input class="o_DiscussSidebar_quickSearch" t-on-input.stop="_onInputQuickSearch" placeholder="Quick search..." t-ref="quickSearch"/>
+            <t t-if="storeProps.allPinnedChannelAmount > 19">
+                <input class="o_DiscussSidebar_quickSearch" t-on-input="_onInputQuickSearch" placeholder="Quick search..." t-ref="quickSearchInput"/>
             </t>
             <div class="o_DiscussSidebar_group o_DiscussSidebar_groupChannel">
                 <div class="o_DiscussSidebar_groupHeader">
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle o_clickable" t-on-click.stop="_onClickChannelTitle">
+                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle o-clickable" t-on-click="_onClickChannelTitle">
                         Channels
                     </div>
                     <div class="o-autogrow"/>
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus" t-on-click.stop="_onClickChannelAdd" title="Add or join a channel"/>
+                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus" t-on-click="_onClickChannelAdd" title="Add or join a channel"/>
                 </div>
                 <div class="o_DiscussSidebar_list">
                     <t t-if="props.isAddingChannel">
@@ -36,12 +36,12 @@
                                 placeholder="'Find or create a channel...'"
                                 select="props.onAddChannelAutocompleteSelect"
                                 source="props.onAddChannelAutocompleteSource"
-                                t-on-o-hide.stop="_onHideAddingItem"
+                                t-on-o-hide="_onHideAddingItem"
                             />
                         </div>
                     </t>
-                    <t t-foreach="quickSearchChannelList" t-as="channel" t-key="channel.localId">
-                        <SidebarItem
+                    <t t-foreach="quickSearchOrderedAndPinnedMultiUserChannels" t-as="channel" t-key="channel.localId">
+                        <DiscussSidebarItem
                             class="o_DiscussSidebar_item"
                             isActive="props.activeThreadLocalId === channel.localId"
                             threadLocalId="channel.localId"
@@ -57,7 +57,7 @@
                         Direct Messages
                     </div>
                     <div class="o-autogrow"/>
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus" t-on-click.stop="_onClickChatAdd" title="Start a conversation"/>
+                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus" t-on-click="_onClickChatAdd" title="Start a conversation"/>
                 </div>
                 <div class="o_DiscussSidebar_list">
                     <t t-if="props.isAddingChat">
@@ -68,12 +68,12 @@
                                 placeholder="'Find or start a conversation...'"
                                 select="props.onAddChatAutocompleteSelect"
                                 source="props.onAddChatAutocompleteSource"
-                                t-on-o-hide.stop="_onHideAddingItem"
+                                t-on-o-hide="_onHideAddingItem"
                             />
                         </div>
                     </t>
-                    <t t-foreach="quickSearchChatList" t-as="chat" t-key="chat.localId">
-                        <SidebarItem
+                    <t t-foreach="quickSearchPinnedAndOrderedChats" t-as="chat" t-key="chat.localId">
+                        <DiscussSidebarItem
                             class="o_DiscussSidebar_item"
                             isActive="props.activeThreadLocalId === chat.localId"
                             threadLocalId="chat.localId"

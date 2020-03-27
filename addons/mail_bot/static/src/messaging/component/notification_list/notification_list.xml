@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-inherit="mail.component.NotificationList" t-inherit-mode="extension">
+    <t t-inherit="mail.messaging.component.NotificationList" t-inherit-mode="extension">
         <xpath expr="//*[@name='separatorCondition']" position="before">
             <t t-if="notification.type === 'odoobotRequest'">
                 <NotificationRequest

@@ -16,17 +16,105 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {integer} id
-     * @return {Object|undefined}
+     * @returns {Object|undefined}
      */
     activity({ state }, id) {
         return Object.values(state.activities).find(activity => activity.id === id);
     },
     /**
      * @param {Object} param0
+     * @param {Object} param0.state
+     * @returns {mail.store.model.Thread[]} filtered threads that are mail.channels
+     */
+    allOrderedAndPinnedChannels({ getters }) {
+        const mailChannels = getters.mailChannels();
+        return Object
+            .values(mailChannels)
+            .sort((mailChannel1, mailChannel2) => {
+                if (
+                    mailChannel1.message_unread_counter &&
+                    !mailChannel2.message_unread_counter
+                ) {
+                    return -1;
+                }
+                if (
+                    mailChannel2.message_unread_counter &&
+                    !mailChannel1.message_unread_counter
+                ) {
+                    return 1;
+                }
+                // TODO FIXME they are sorted by date of last message on master (for messaging menu)
+                if (
+                    mailChannel1.message_unread_counter &&
+                    mailChannel2.message_unread_counter &&
+                    mailChannel1.message_unread_counter !== mailChannel2.message_unread_counter
+                ) {
+                    return mailChannel1.message_unread_counter > mailChannel2.message_unread_counter ? -1 : 1;
+                }
+                const mailChannel1Name = getters.threadName(mailChannel1.localId);
+                const mailChannel2Name = getters.threadName(mailChannel2.localId);
+                return mailChannel1Name < mailChannel2Name ? -1 : 1;
+            });
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @returns {mail.store.model.Thread[]} ordered list of pinned chats
+     */
+    allOrderedAndPinnedChats({ getters }) {
+        return getters.chatList().filter(chat => chat.isPinned);
+    },
+    /**
+     * TODO FIXME move this into im_livechat when we have entities
+     *
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @returns {Object} filtered livechats that are pinned
+     */
+    allOrderedAndPinnedLivechats({ getters }) {
+        return getters.livechatList().filter(livechat => livechat.isPinned);
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @returns {mail.store.model.Thread[]} ordered list of pinned mailboxes
+     */
+    allOrderedAndPinnedMailboxes({ getters }) {
+        return getters.mailboxList().filter(mailbox => mailbox.isPinned);
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.getters
+     * @returns {mail.store.model.Thread[]} ordered list of pinned channels
+     */
+    allOrderedAndPinnedMultiUserChannels({ getters }) {
+        return getters.channelList().filter(channel => channel.isPinned);
+    },
+    /**
+     * @param {Object} param0
+     * @param {Object} param0.state
+     * @returns {integer}
+     */
+    allPinnedChannelAmount({ getters }) {
+        const allOrderedAndPinnedMultiUserChannelsAmount =
+            getters.allOrderedAndPinnedMultiUserChannels().length;
+        const allOrderedAndPinnedChats =
+            getters.allOrderedAndPinnedChats().length;
+        // TODO FIXME move this into im_livechat when we have entities
+        const allOrderedAndPinnedLivechatsAmount =
+            getters.allOrderedAndPinnedLivechats().length;
+        return (
+            allOrderedAndPinnedMultiUserChannelsAmount +
+            allOrderedAndPinnedChats +
+            allOrderedAndPinnedLivechatsAmount
+        );
+    },
+    /**
+     * @param {Object} param0
      * @param {Object} param0.getters
      * @param {Object} param0.state
      * @param {string} attachmentLocalId
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     attachmentDefaultSource({ getters, state }, attachmentLocalId) {
         const attachment = state.attachments[attachmentLocalId];
@@ -64,7 +152,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} attachmentLocalId
-     * @return {string}
+     * @returns {string}
      */
     attachmentDisplayName({ state }, attachmentLocalId) {
         const attachment = state.attachments[attachmentLocalId];
@@ -74,7 +162,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} attachmentLocalId
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     attachmentExtension({ state }, attachmentLocalId) {
         const attachment = state.attachments[attachmentLocalId];
@@ -84,7 +172,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} attachmentLocalId
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     attachmentFileType({ state }, attachmentLocalId) {
         const attachment = state.attachments[attachmentLocalId];
@@ -120,7 +208,7 @@ const getters = {
      * @param {Object} param1
      * @param {integer} param1.resId
      * @param {string} param1.resModel
-     * @return {mail.store.model.Attachment[]}
+     * @returns {mail.store.model.Attachment[]}
      */
     attachments({ state }, { resId, resModel }) {
         return Object
@@ -131,7 +219,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.getters
-     * @return {mail.store.model.Thread[]} ordered list of channels
+     * @returns {mail.store.model.Thread[]} ordered list of channels
      */
     channelList({ getters }) {
         const channels = getters.channels();
@@ -146,7 +234,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.state
-     * @return {Object} filtered threads that are channels
+     * @returns {Object} filtered threads that are channels
      */
     channels({ state }) {
         return filterObject(state.threads, thread =>
@@ -157,7 +245,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.getters
      * @param {string} partnerLocalId
-     * @return {mail.store.model.Thread|undefined}
+     * @returns {mail.store.model.Thread|undefined}
      */
     chatFromPartner({ getters }, partnerLocalId) {
         return getters.chatList().find(chat => chat.directPartnerLocalId === partnerLocalId);
@@ -165,7 +253,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.getters
-     * @return {mail.store.model.Thread[]} ordered list of chats
+     * @returns {mail.store.model.Thread[]} ordered list of chats
      */
     chatList({ getters }) {
         const chats = getters.chats();
@@ -181,7 +269,7 @@ const getters = {
      * @private
      * @param {Object} param0
      * @param {Object} param0.state
-     * @return {Object} filtered threads that are chats
+     * @returns {Object} filtered threads that are chats
      */
     chats({ state }) {
         return filterObject(state.threads, thread =>
@@ -196,13 +284,13 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.getters
      * @param {string} messageLocalId
-     * @return {boolean}
+     * @returns {boolean}
      */
     hasMessageCheckbox({ getters }, messageLocalId) {
         return getters.isMessageModeratedByUser(messageLocalId);
     },
     /**
-     * @return {boolean}
+     * @returns {boolean}
      */
     haveVisibleChatWindows({ state }) {
         return state.chatWindowManager.computed.visible.length > 0;
@@ -210,7 +298,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param1
-     * @return {mail.store.model.Attachment[]} image attachments of the record
+     * @returns {mail.store.model.Attachment[]} image attachments of the record
      */
     imageAttachments({ getters }, { resId, resModel }) {
         return getters
@@ -221,7 +309,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} attachmentLocalId
-     * @return {boolean}
+     * @returns {boolean}
      */
     isAttachmentLinkedToComposer({ state }, attachmentLocalId) {
         const attachment = state.attachments[attachmentLocalId];
@@ -231,7 +319,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.getters
      * @param {string} attachmentLocalId
-     * @return {boolean}
+     * @returns {boolean}
      */
     isAttachmentTextFile({ getters }, attachmentLocalId) {
         const fileType = getters.attachmentFileType(attachmentLocalId);
@@ -242,7 +330,7 @@ const getters = {
      * @param {Object} param0.getters
      * @param {Object} param0.state
      * @param {string} attachmentLocalId
-     * @return {boolean}
+     * @returns {boolean}
      */
     isAttachmentViewable({ getters, state }, attachmentLocalId) {
         const attachment = state.attachments[attachmentLocalId];
@@ -263,7 +351,7 @@ const getters = {
      * @param {string} messageLocalId
      * @param {string} threadLocalId
      * @param {string} stringifiedDomain
-     * @return {boolean}
+     * @returns {boolean}
      */
     isMessageChecked({ state }, messageLocalId, threadLocalId, stringifiedDomain) {
         const thread = state.threads[threadLocalId];
@@ -278,7 +366,7 @@ const getters = {
      * @param {Object} param0.getters
      * @param {Object} param0.state
      * @param {string} messageLocalId
-     * @return {boolean}
+     * @returns {boolean}
      */
     isMessageModeratedByUser({ getters, state }, messageLocalId) {
         const message = state.messages[messageLocalId];
@@ -294,7 +382,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} threadLocalId
-     * @return {boolean}
+     * @returns {boolean}
      */
     isThreadModeratedByUser({ state }, threadLocalId) {
         return state.moderatedChannelLocalIds.filter(localId => localId === threadLocalId).length;
@@ -303,7 +391,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} partnerLocalId
-     * @return {boolean}
+     * @returns {boolean}
      */
     isPartnerRoot({ state }, partnerLocalId) {
         return state.partnerRootLocalId === partnerLocalId;
@@ -314,7 +402,7 @@ const getters = {
      * @private
      * @param {Object} param0
      * @param {Object} param0.state
-     * @return {Object} filtered threads that are livechats
+     * @returns {Object} filtered threads that are livechats
      */
     livechats({ state }) {
         return filterObject(state.threads, thread =>
@@ -326,7 +414,7 @@ const getters = {
      *
      * @param {Object} param0
      * @param {Object} param0.getters
-     * @return {mail.store.model.Thread[]} ordered list of livechats
+     * @returns {mail.store.model.Thread[]} ordered list of livechats
      */
     livechatList({ getters }) {
         const livechats = getters.livechats();
@@ -344,7 +432,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.getters
-     * @return {mail.store.model.Thread[]} ordered list of mailboxes
+     * @returns {mail.store.model.Thread[]} ordered list of mailboxes
      */
     mailboxList({ getters }) {
         const mailboxes = getters.mailboxes();
@@ -371,7 +459,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.state
-     * @return {Object} filtered threads that are mailboxes
+     * @returns {Object} filtered threads that are mailboxes
      */
     mailboxes({ state }) {
         return filterObject(state.threads, thread =>
@@ -381,42 +469,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.state
-     * @return {mail.store.model.Thread[]} filtered threads that are mail.channels
-     */
-    mailChannelList({ getters }) {
-        const mailChannels = getters.mailChannels();
-        return Object
-            .values(mailChannels)
-            .sort((mailChannel1, mailChannel2) => {
-                if (
-                    mailChannel1.message_unread_counter &&
-                    !mailChannel2.message_unread_counter
-                ) {
-                    return -1;
-                }
-                if (
-                    mailChannel2.message_unread_counter &&
-                    !mailChannel1.message_unread_counter
-                ) {
-                    return 1;
-                }
-                // TODO FIXME they are sorted by date of last message on master (for messaging menu)
-                if (
-                    mailChannel1.message_unread_counter &&
-                    mailChannel2.message_unread_counter &&
-                    mailChannel1.message_unread_counter !== mailChannel2.message_unread_counter
-                ) {
-                    return mailChannel1.message_unread_counter > mailChannel2.message_unread_counter ? -1 : 1;
-                }
-                const mailChannel1Name = getters.threadName(mailChannel1.localId);
-                const mailChannel2Name = getters.threadName(mailChannel2.localId);
-                return mailChannel1Name < mailChannel2Name ? -1 : 1;
-            });
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.state
-     * @return {Object} filtered threads that are mail.channels
+     * @returns {Object} filtered threads that are mail.channels
      */
     mailChannels({ state }) {
         return filterObject(state.threads, thread =>
@@ -427,7 +480,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {integer} id
-     * @return {Object|undefined}
+     * @returns {Object|undefined}
      */
     mailTemplate({ state }, id) {
         return Object.values(state.mailTemplates).find(activity => activity.id === id);
@@ -436,7 +489,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} messageLocalId
-     * @return {string}
+     * @returns {string}
      */
     messagePrettyBody({ state }, messageLocalId) {
         const message = state.messages[messageLocalId];
@@ -473,7 +526,7 @@ const getters = {
      * @param {Object} param1
      * @param {integer} param1.resId
      * @param {string} param1.resModel
-     * @return {mail.store.model.Attachment[]} non-image attachments of the record
+     * @returns {mail.store.model.Attachment[]} non-image attachments of the record
      */
     nonImageAttachments({ getters }, { resId, resModel }) {
         return getters
@@ -484,7 +537,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} partnerLocalId
-     * @return {string}
+     * @returns {string}
      */
     partnerName({ state }, partnerLocalId) {
         const partner = state.partners[partnerLocalId];
@@ -493,15 +546,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.getters
-     * @return {mail.store.model.Thread[]} ordered list of pinned channels
-     */
-    pinnedChannelList({ getters }) {
-        return getters.channelList().filter(channel => channel.isPinned);
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.getters
-     * @return {Object} filtered channels that are pinned
+     * @returns {Object} filtered channels that are pinned
      */
     pinnedChannels({ getters }) {
         const channels = getters.channels();
@@ -512,15 +557,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.getters
-     * @return {mail.store.model.Thread[]} ordered list of pinned chats
-     */
-    pinnedChatList({ getters }) {
-        return getters.chatList().filter(chat => chat.isPinned);
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.getters
-     * @return {Object} filtered chats that are pinned
+     * @returns {Object} filtered chats that are pinned
      */
     pinnedChats({ getters }) {
         const chats = getters.chats();
@@ -529,27 +566,9 @@ const getters = {
         );
     },
     /**
-     * TODO FIXME move this into im_livechat when we have entities
-     *
      * @param {Object} param0
      * @param {Object} param0.getters
-     * @return {Object} filtered livechats that are pinned
-     */
-    pinnedLivechatList({ getters }) {
-        return getters.livechatList().filter(livechat => livechat.isPinned);
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.getters
-     * @return {mail.store.model.Thread[]} ordered list of pinned mailboxes
-     */
-    pinnedMailboxList({ getters }) {
-        return getters.mailboxList().filter(mailbox => mailbox.isPinned);
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.getters
-     * @return {Object} filtered mailboxes that are pinned
+     * @returns {Object} filtered mailboxes that are pinned
      */
     pinnedMailboxes({ getters }) {
         const mailboxes = getters.mailboxes();
@@ -560,19 +579,7 @@ const getters = {
     /**
      * @param {Object} param0
      * @param {Object} param0.state
-     * @return {integer}
-     */
-    pinnedMailChannelAmount({ getters }) {
-        const pinnedChannelAmount = getters.pinnedChannelList().length;
-        const pinnedChatAmount = getters.pinnedChatList().length;
-        // TODO FIXME move this into im_livechat when we have entities
-        const pinnedLivechatAmount = getters.pinnedLivechatList().length;
-        return pinnedChannelAmount + pinnedChatAmount + pinnedLivechatAmount;
-    },
-    /**
-     * @param {Object} param0
-     * @param {Object} param0.state
-     * @return {Object} filtered threads that are pinned
+     * @returns {Object} filtered threads that are pinned
      */
     pinnedThreads({ state }) {
         return filterObject(state.threads, thread =>
@@ -585,7 +592,7 @@ const getters = {
      * @param {Object} param1
      * @param {string} param1._model
      * @param {integer} param1.id
-     * @return {mail.store.Thread|undefined}
+     * @returns {mail.store.Thread|undefined}
      */
     thread({ state }, { _model, id }) {
         return state.threads[`${_model}_${id}`];
@@ -594,7 +601,7 @@ const getters = {
      * @param {Object} param0
      * @param {Object} param0.state
      * @param {string} threadLocalId
-     * @return {string}
+     * @returns {string}
      */
     threadName({ state }, threadLocalId) {
         const thread = state.threads[threadLocalId];

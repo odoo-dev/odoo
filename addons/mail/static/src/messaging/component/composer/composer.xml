@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="mail.component.Composer" owl="1">
+    <t t-name="mail.messaging.component.Composer" owl="1">
         <div class="o_Composer"
             t-att-class="{
                 'o-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
@@ -13,12 +13,12 @@
             <t t-if="isDropZoneVisible.value">
                 <DropZone
                     class="o_Composer_dropZone"
-                    t-on-o-dropzone-files-dropped.stop="_onDropZoneFilesDropped"
+                    t-on-o-dropzone-files-dropped="_onDropZoneFilesDropped"
                     t-ref="dropzone"
                 />
             </t>
             <FileUploader
-                attachmentLocalIds="storeProps.composer.attachmentLocalIds"
+                attachmentLocalIds="composer.attachmentLocalIds"
                 newAttachmentExtraData="newAttachmentExtraData"
                 t-ref="fileUploader"
             />
@@ -60,9 +60,9 @@
                     }"
                     composerLocalId="props.composerLocalId"
                     hasSendOnEnterEnabled="props.hasTextInputSendOnEnterEnabled"
-                    t-on-o-discard.stop="_onDiscardInput"
+                    t-on-o-discard="_onDiscardInput"
                     t-on-o-input-composer-text-input="_onInputTextInput"
-                    t-on-o-keydown-enter.stop="_onTextInputKeydownEnter"
+                    t-on-o-keydown-enter="_onTextInputKeydownEnter"
                     t-on-paste="_onPasteTextInput"
                     t-ref="textInput"
                 />
@@ -80,7 +80,7 @@
                                 class="o_Composer_button o_Composer_buttonEmojis o_Composer_toolButton btn-secondary"
                                 placement="'top'"
                                 t-att-class="{ 'o-mobile': storeProps.isMobile }"
-                                t-on-o-emoji-selection.stop="_onEmojiSelection"
+                                t-on-o-emoji-selection="_onEmojiSelection"
                                 t-ref="emojisButton"
                             >
                                 <t t-set="buttonHtml">
@@ -96,31 +96,31 @@
                         </t>
                     </div>
                     <t t-if="props.isCompact">
-                        <t t-call="mail.component.composer.actionButtons"/>
+                        <t t-call="mail.messaging.component.composer.actionButtons"/>
                     </t>
                 </div>
             </div>
             <t t-if="hasFooter">
                 <div class="o_Composer_coreFooter" t-att-class="{ 'o-composer-is-compact': props.isCompact }">
-                    <t t-if="storeProps.composer.attachmentLocalIds.length > 0">
+                    <t t-if="composer.attachmentLocalIds.length > 0">
                         <AttachmentList
                             class="o_Composer_attachmentList"
                             areAttachmentsEditable="true"
                             attachmentsDetailsMode="props.attachmentsDetailsMode"
-                            attachmentLocalIds="storeProps.composer.attachmentLocalIds"
+                            attachmentLocalIds="composer.attachmentLocalIds"
                             showAttachmentsExtensions="props.showAttachmentsExtensions"
                             showAttachmentsFilenames="props.showAttachmentsFilenames"
                         />
                     </t>
                     <t t-if="!props.isCompact">
-                        <t t-call="mail.component.composer.actionButtons"/>
+                        <t t-call="mail.messaging.component.composer.actionButtons"/>
                     </t>
                 </div>
             </t>
         </div>
     </t>
 
-    <t t-name="mail.component.composer.actionButtons" owl="1">
+    <t t-name="mail.messaging.component.composer.actionButtons" owl="1">
         <div class="o_Composer_actionButtons" t-att-class="{ 'o-composer-is-compact': props.isCompact }">
             <t t-if="props.hasSendButton">
                 <button class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary"
@@ -130,7 +130,7 @@
                             'o-composer-is-compact': props.isCompact,
                         }"
                         t-on-click="_onClickSend"
-                        t-att-disabled="(!storeProps.composer.textInputContent and storeProps.composer.attachmentLocalIds.length === 0) ? 'disabled' : ''"
+                        t-att-disabled="(!composer.textInputContent and composer.attachmentLocalIds.length === 0) ? 'disabled' : ''"
                         type="button">
                     <t t-if="!storeProps.isMobile"><t t-if="props.isLog">Log</t><t t-else="">Send</t></t>
                 </button>

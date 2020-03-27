@@ -1,4 +1,4 @@
-odoo.define('mail.FormRendererChatterTests', function (require) {
+odoo.define('mail.messaging.widget.FormRendererTests', function (require) {
 "use strict";
 
 const {
@@ -7,12 +7,14 @@ const {
     beforeEach: utilsBeforeEach,
     pause,
     start,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
 const FormView = require('web.FormView');
 
-QUnit.module('mail.messaging', {}, function () {
-QUnit.module('Chatter', {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
+QUnit.module('widget', {}, function () {
+QUnit.module('FormRenderer', {
     beforeEach() {
         utilsBeforeEach(this);
         this.data['res.partner'].fields = {
@@ -57,11 +59,12 @@ QUnit.module('Chatter', {
             this.view.destroy();
         }
         utilsAfterEach(this);
-    }
+    },
 });
 
 QUnit.test('basic chatter rendering', async function (assert) {
     assert.expect(1);
+
     this.data['res.partner'].records = [{
         id: 2,
         display_name: "second partner",
@@ -92,6 +95,7 @@ QUnit.test('basic chatter rendering', async function (assert) {
 
 QUnit.test('basic chatter rendering without followers', async function (assert) {
     assert.expect(7);
+
     this.data['res.partner'].records = [{
         activity_ids: [],
         id: 2,
@@ -144,6 +148,7 @@ QUnit.test('basic chatter rendering without followers', async function (assert) 
 
 QUnit.test('basic chatter rendering without activities', async function (assert) {
     assert.expect(7);
+
     this.data['res.partner'].records = [{
         activity_ids: [],
         id: 2,
@@ -249,15 +254,28 @@ QUnit.test('basic chatter rendering without messages', async function (assert) {
 
 QUnit.test('chatter updating', async function (assert) {
     assert.expect(7);
+
     this.data['ir.attachment'].records = [{
-        id: 1, type: 'url', mimetype: 'image/png', name: 'filename.jpg',
-        res_id: 7, res_model: 'partner',
+        id: 1,
+        mimetype: 'image/png',
+        name: 'filename.jpg',
+        res_id: 7,
+        res_model: 'partner',
+        type: 'url',
     }, {
-        id: 2, type: 'binary', mimetype: "application/x-msdos-program",
-        name: "file2.txt", res_id: 7, res_model: 'partner',
+        id: 2,
+        mimetype: "application/x-msdos-program",
+        name: "file2.txt",
+        res_id: 7,
+        res_model: 'partner',
+        type: 'binary',
     }, {
-        id: 3, type: 'binary', mimetype: "application/x-msdos-program",
-        name: "file3.txt", res_id: 5, res_model: 'partner',
+        id: 3,
+        mimetype: "application/x-msdos-program",
+        name: "file3.txt",
+        res_id: 5,
+        res_model: 'partner',
+        type: 'binary',
     }];
     this.data['res.partner'].records = [{
         id: 1,
@@ -335,4 +353,7 @@ QUnit.test('chatter updating', async function (assert) {
 });
 
 });
+});
+});
+
 });

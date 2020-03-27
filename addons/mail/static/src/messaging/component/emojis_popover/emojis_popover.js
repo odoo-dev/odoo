@@ -1,4 +1,4 @@
-odoo.define('mail.component.EmojisPopover', function (require) {
+odoo.define('mail.messaging.component.EmojisPopover', function (require) {
 'use strict';
 
 const emojis = require('mail.emojis');
@@ -28,9 +28,13 @@ class EmojisPopover extends Component {
             unicode: ev.currentTarget.dataset.unicode,
         });
     }
+
 }
 
-EmojisPopover.template = 'mail.component.EmojisPopover';
+Object.assign(EmojisPopover, {
+    props: {},
+    template: 'mail.messaging.component.EmojisPopover',
+});
 
 return EmojisPopover;
 

@@ -1,14 +1,13 @@
-odoo.define('mail.messagingTestUtils', function (require) {
+odoo.define('mail.messaging.testUtils', function (require) {
 'use strict';
 
 const BusService = require('bus.BusService');
 
-const ComposerTextInput = require('mail.component.ComposerTextInput');
-const ChatWindowService = require('mail.service.ChatWindow');
-const DialogService = require('mail.service.Dialog');
-const MessagingService = require('mail.service.Messaging');
-const DiscussWidget = require('mail.widget.Discuss');
-const MessagingMenuWidget = require('mail.widget.MessagingMenu');
+const ChatWindowService = require('mail.messaging.service.ChatWindow');
+const DialogService = require('mail.messaging.service.Dialog');
+const MessagingService = require('mail.messaging.service.Messaging');
+const DiscussWidget = require('mail.messaging.widget.Discuss');
+const MessagingMenuWidget = require('mail.messaging.widget.MessagingMenu');
 
 const AbstractStorageService = require('web.AbstractStorageService');
 const Class = require('web.Class');
@@ -20,14 +19,11 @@ const {
     makeTestPromise,
     mock: {
         addMockEnvironment,
-        patch,
-        unpatch,
+        patch: legacyPatch,
+        unpatch: legacyUnpatch,
     },
 } = require('web.test_utils');
 const Widget = require('web.Widget');
-
-const { Component, tags: { xml } } = owl;
-const useStore = require('mail.hooks.useStore');
 
 //------------------------------------------------------------------------------
 // Private
@@ -94,7 +90,7 @@ const MockMailService = Class.extend({
  * which is passed to drag and drop events.
  *
  * @param {Object[]} files
- * @return {Object}
+ * @returns {Object}
  */
 function _createFakeDataTransfer(files) {
     return {
@@ -113,7 +109,7 @@ function _createFakeDataTransfer(files) {
  * @param {function[]} callbacks.mount
  * @param {function[]} callbacks.destroy
  * @param {function[]} callbacks.return
- * @return {Object} update callbacks
+ * @returns {Object} update callbacks
  */
 function _useChatWindow(callbacks) {
     const {
@@ -138,7 +134,7 @@ function _useChatWindow(callbacks) {
  * @param {function[]} callbacks.mount
  * @param {function[]} callbacks.destroy
  * @param {function[]} callbacks.return
- * @return {Object} update callbacks
+ * @returns {Object} update callbacks
  */
 function _useDiscuss(callbacks) {
     const {
@@ -187,7 +183,7 @@ function _useDiscuss(callbacks) {
  * @param {function[]} callbacks.mount
  * @param {function[]} callbacks.destroy
  * @param {function[]} callbacks.return
- * @return {Object} update callbacks
+ * @returns {Object} update callbacks
  */
 function _useMessagingMenu(callbacks) {
     const {
@@ -219,7 +215,7 @@ function _useMessagingMenu(callbacks) {
  * @param {Object} [param0={}]
  * @param {boolean} [hasChatWindow]
  * @param {boolean} [isDebug]
- * @return {Object}
+ * @returns {Object}
  */
 function getServices({ hasChatWindow, isDebug } = {}) {
     return new MockMailService().getServices({ hasChatWindow, isDebug });
@@ -432,7 +428,6 @@ function beforeEach(self) {
     const originals = {
         '_.debounce': _.debounce,
         '_.throttle': _.throttle,
-        'ComposerTestInput._loadSummernote': ComposerTextInput.prototype._loadSummernote,
         'window.fetch': window.fetch,
         'window.Notification': window.Notification,
     };
@@ -441,7 +436,6 @@ function beforeEach(self) {
         // patch _.debounce and _.throttle to be fast and synchronous
         _.debounce = _.identity;
         _.throttle = _.identity;
-        ComposerTextInput.prototype._loadSummernote = () => {};
         let uploadedAttachmentsCount = 1;
         window.fetch = async function (route, form) {
             const formData = form.body;
@@ -473,7 +467,6 @@ function beforeEach(self) {
         _.debounce = originals['_.debounce'];
         _.throttle = originals['_.throttle'];
         window.fetch = originals['window.fetch'];
-        ComposerTextInput.prototype._loadSummernote = originals['ComposerTestInput._loadSummernote'];
         window.Notification = originals['window.Notification'];
     }
 
@@ -532,7 +525,7 @@ async function pause() {
  * @param {Object} [param0.viewOptions] makes only sense when `param0.hasView`
  *   is set: the view options to use in createView.
  * @param {...Object} [param0.kwargs]
- * @return {Object}
+ * @returns {Object}
  */
 async function start(param0) {
     let callbacks = {
@@ -578,7 +571,7 @@ async function start(param0) {
         services,
         session,
     }, param0);
-        _.defaults(session, {
+    _.defaults(session, {
         name: "Admin",
         partner_id: 3,
         partner_display_name: "Your Company, Admin",
@@ -590,12 +583,12 @@ async function start(param0) {
     const selector = debug ? 'body' : '#qunit-fixture';
     if (hasView) {
         widget = await createView(kwargs);
-        patch(widget, {
+        legacyPatch(widget, {
             destroy() {
                 this._super(...arguments);
                 destroyCallbacks.forEach(callback => callback({ widget }));
-                unpatch(services.messaging);
-                unpatch(widget);
+                legacyUnpatch(services.messaging);
+                legacyUnpatch(widget);
             }
         });
     } else {
@@ -609,7 +602,7 @@ async function start(param0) {
                 delete widget.destroy;
                 destroyCallbacks.forEach(callback => callback({ widget }));
                 parent.destroy();
-                unpatch(services.messaging);
+                legacyUnpatch(services.messaging);
             },
         });
     }
@@ -617,7 +610,7 @@ async function start(param0) {
     if (hasChatWindow || hasDiscuss || hasMessagingMenu) {
         await afterNextRender();
     }
-    const env = widget.call('messaging', 'getMessagingEnv');
+    const env = widget.call('messaging', 'getEnv');
     const result = { env, widget };
     returnCallbacks.forEach(callback => callback(result));
     return result;
@@ -698,12 +691,17 @@ function pasteFiles(el, files) {
     el.dispatchEvent(ev);
 }
 
+/**
+ * @param {mail.messaging.service.Messaging} messaging_service
+ * @param {Object} [param1={}]
+ * @param {Object} [param1.session={}]
+ */
 function patchMessagingService(messaging_service, session = {}) {
     const _t = s => s;
     _t.database = {
         parameters: { direction: 'ltr' },
     };
-    patch(messaging_service, {
+    legacyPatch(messaging_service, {
         registry: {
             initialEnv: makeTestEnvironment({
                 _t,

@@ -2,14 +2,14 @@
 <templates xml:space="preserve">
 
     <!--
-        @param {mail.widget.Discuss} widget
+        @param {mail.messaging.widget.Discuss} widget
     -->
-    <t t-name="mail.widget.Discuss">
+    <t t-name="mail.messaging.widget.Discuss">
         <div class="o_widget_Discuss"/>
     </t>
 
     <!-- @param {boolean} isMobile -->
-    <t t-name="mail.widget.DiscussControlButtons">
+    <t t-name="mail.messaging.widget.DiscussControlButtons">
         <div>
             <button class="o_widget_Discuss_controlPanelButtonInvite o_invite o_hidden btn btn-primary" type="button" title="Invite people">Invite</button>
             <button class="o_widget_Discuss_controlPanelButtonMarkAllRead o_hidden btn btn-secondary" type="button" title="Mark all as read">Mark all read</button>

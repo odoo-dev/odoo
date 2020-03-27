@@ -1,11 +1,13 @@
-odoo.define('mail.component.AttachmentBox', function (require) {
+odoo.define('mail.messaging.component.AttachmentBox', function (require) {
 'use strict';
 
-const AttachmentList = require('mail.component.AttachmentList');
-const DropZone = require('mail.component.DropZone');
-const FileUploader = require('mail.component.FileUploader');
-const useDragVisibleDropZone = require('mail.hooks.useDragVisibleDropZone');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    AttachmentList: require('mail.messaging.component.AttachmentList'),
+    DropZone: require('mail.messaging.component.DropZone'),
+    FileUploader: require('mail.messaging.component.FileUploader'),
+};
+const useDragVisibleDropZone = require('mail.messaging.component_hook.useDragVisibleDropZone');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch, useRef } = owl.hooks;
@@ -43,7 +45,7 @@ class AttachmentBox extends Component {
      * Get an object which is passed to FileUploader component to be used when
      * creating attachment.
      *
-     * @return {Object}
+     * @returns {Object}
      */
     get newAttachmentExtraData() {
         return {
@@ -60,6 +62,8 @@ class AttachmentBox extends Component {
      * @param {Event} ev
      */
     _onClickAdd(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
         this._fileUploaderRef.comp.openBrowserFileUploader();
     }
 
@@ -70,18 +74,20 @@ class AttachmentBox extends Component {
      * @param {FileList} ev.detail.files
      */
     async _onDropZoneFilesDropped(ev) {
+        ev.stopPropagation();
         await this._fileUploaderRef.comp.uploadFiles(ev.detail.files);
         this.isDropZoneVisible.value = false;
     }
+
 }
 
-AttachmentBox.components = { AttachmentList, DropZone, FileUploader };
-
-AttachmentBox.props = {
-    threadLocalId: String,
-};
-
-AttachmentBox.template = 'mail.component.AttachmentBox';
+Object.assign(AttachmentBox, {
+    components,
+    props: {
+        threadLocalId: String,
+    },
+    template: 'mail.messaging.component.AttachmentBox',
+});
 
 return AttachmentBox;
 

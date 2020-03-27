@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="mail.component.NotificationList" owl="1">
-        <div class="o_NotificationList" t-att-class="{ 'o-empty': storeProps.notifications.length === 0 }">
-            <t t-if="storeProps.notifications.length === 0">
+    <t t-name="mail.messaging.component.NotificationList" owl="1">
+        <div class="o_NotificationList" t-att-class="{ 'o-empty': notifications.length === 0 }">
+            <t t-if="notifications.length === 0">
                 <div class="o_NotificationList_noConversation">
                     No conversation yet...
                 </div>
             </t>
             <t t-else="">
-                <t t-foreach="storeProps.notifications" t-as="notification" t-key="notification.uniqueId">
+                <t t-foreach="notifications" t-as="notification" t-key="notification.uniqueId">
                     <t t-if="notification.type === 'thread'">
                         <ThreadPreview
                             class="o_NotificationList_preview"

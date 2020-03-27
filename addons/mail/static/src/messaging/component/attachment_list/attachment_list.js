@@ -1,50 +1,51 @@
-odoo.define('mail.component.AttachmentList', function (require) {
+odoo.define('mail.messaging.component.AttachmentList', function (require) {
 'use strict';
 
-const Attachment = require('mail.component.Attachment');
+const components = {
+    Attachment: require('mail.messaging.component.Attachment'),
+};
 
 const { Component } = owl;
 
 class AttachmentList extends Component {}
 
-AttachmentList.components = { Attachment };
-
-AttachmentList.defaultProps = {
-    attachmentLocalIds: [],
-};
-
-AttachmentList.props = {
-    areAttachmentsDownloadable: {
-        type: Boolean,
-        optional: true,
+Object.assign(AttachmentList, {
+    components,
+    defaultProps: {
+        attachmentLocalIds: [],
     },
-    areAttachmentsEditable: {
-        type: Boolean,
-        optional: true,
+    props: {
+        areAttachmentsDownloadable: {
+            type: Boolean,
+            optional: true,
+        },
+        areAttachmentsEditable: {
+            type: Boolean,
+            optional: true,
+        },
+        attachmentLocalIds: {
+            type: Array,
+            element: String,
+        },
+        attachmentsDetailsMode: {
+            type: String, //['auto', 'card', 'hover', 'none']
+            optional: true,
+        },
+        attachmentsImageSize: {
+            type: String, //['small', 'medium', 'large']
+            optional: true,
+        },
+        showAttachmentsExtensions: {
+            type: Boolean,
+            optional: true,
+        },
+        showAttachmentsFilenames: {
+            type: Boolean,
+            optional: true,
+        },
     },
-    attachmentLocalIds: {
-        type: Array,
-        element: String,
-    },
-    attachmentsDetailsMode: {
-        type: String, //['auto', 'card', 'hover', 'none']
-        optional: true,
-    },
-    attachmentsImageSize: {
-        type: String, //['small', 'medium', 'large']
-        optional: true,
-    },
-    showAttachmentsExtensions: {
-        type: Boolean,
-        optional: true,
-    },
-    showAttachmentsFilenames: {
-        type: Boolean,
-        optional: true,
-    },
-};
-
-AttachmentList.template = 'mail.component.AttachmentList';
+    template: 'mail.messaging.component.AttachmentList',
+});
 
 return AttachmentList;
 

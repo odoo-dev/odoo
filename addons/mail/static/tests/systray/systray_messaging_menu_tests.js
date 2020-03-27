@@ -90,7 +90,7 @@ QUnit.module('MessagingMenu', {
         // unpatch _.debounce and _.throttle
         _.debounce = this.underscoreDebounce;
         _.throttle = this.underscoreThrottle;
-    }
+    },
 });
 
 QUnit.test('messaging menu widget: menu with no records', async function (assert) {

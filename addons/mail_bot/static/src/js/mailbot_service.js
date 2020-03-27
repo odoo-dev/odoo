@@ -12,7 +12,7 @@ const MailBotService = AbstractService.extend({
      * @override
      */
     start() {
-        this.messagingEnv = this.call('messaging', 'getMessagingEnv');
+        this.messagingEnv = this.call('messaging', 'getEnv');
         /**
          * Checks whether the OdooBot Notification Request has to be shown.
          *

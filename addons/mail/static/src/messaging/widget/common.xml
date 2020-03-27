@@ -2,10 +2,10 @@
 <templates xml:space="preserve">
 
     <!--
-        AKU FIXME: use mail.component.PartnerImStatusIcon component instead
+        AKU FIXME: use mail.messaging.component.PartnerImStatusIcon component instead
         @param {string} status
     -->
-    <t t-name="mail.widget.UserStatus">
+    <t t-name="mail.messaging.widget.UserStatus">
         <span>
             <t t-if="status == 'online'">
                 <i class="o_mail_user_status o_user_online fa fa-circle" title="Online" role="img" aria-label="User is online"/>

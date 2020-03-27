@@ -1,7 +1,9 @@
-odoo.define('mail.component.AttachmentBoxTests', function (require) {
+odoo.define('mail.messaging.component.AttachmentBoxTests', function (require) {
 "use strict";
 
-const AttachmentBox = require('mail.component.AttachmentBox');
+const components = {
+    AttachmentBox: require('mail.messaging.component.AttachmentBox'),
+};
 const {
     afterEach: utilsAfterEach,
     afterNextRender,
@@ -10,26 +12,30 @@ const {
     dropFiles,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
 const { file: { createFile } } = require('web.test_utils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('AttachmentBox', {
     beforeEach() {
         utilsBeforeEach(this);
+        this.createAttachmentBoxComponent = async (threadLocalId, otherProps) => {
+            const AttachmentBoxComponent = components.AttachmentBox;
+            AttachmentBoxComponent.env = this.env;
+            this.component = new AttachmentBoxComponent(null, Object.assign({
+                threadLocalId
+            }, otherProps));
+            await this.component.mount(this.widget.el);
+        };
         this.createThread = async ({ model, id }, { fetchAttachments = false } = {}) => {
             const threadLocalId = this.env.store.dispatch('_createThread', { _model: model, id });
             if (fetchAttachments) {
                 await this.env.store.dispatch('_fetchThreadAttachments', threadLocalId);
             }
             return threadLocalId;
-        };
-        this.createAttachmentBox = async (threadLocalId, otherProps) => {
-            AttachmentBox.env = this.env;
-            this.attachmentBox = new AttachmentBox(null, Object.assign({ threadLocalId }, otherProps));
-            await this.attachmentBox.mount(this.widget.el);
         };
         this.start = async params => {
             if (this.widget) {
@@ -44,15 +50,15 @@ QUnit.module('AttachmentBox', {
     },
     afterEach() {
         utilsAfterEach(this);
-        if (this.attachmentBox) {
-            this.attachmentBox.destroy();
+        if (this.component) {
+            this.component.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
         }
-        delete AttachmentBox.env;
+        delete components.AttachmentBox.env;
         this.env = undefined;
-    }
+    },
 });
 
 QUnit.test('base empty rendering', async function (assert) {
@@ -67,8 +73,11 @@ QUnit.test('base empty rendering', async function (assert) {
         }
     });
     // attachmentBox needs an existing thread to work
-    const threadLocalId = await this.createThread({ model: 'res.partner', id: 100 });
-    await this.createAttachmentBox(threadLocalId);
+    const threadLocalId = await this.createThread({
+        id: 100,
+        model: 'res.partner',
+    });
+    await this.createAttachmentBoxComponent(threadLocalId);
     assert.strictEqual(
         document.querySelectorAll(`.o_AttachmentBox`).length,
         1,
@@ -92,11 +101,12 @@ QUnit.test('base empty rendering', async function (assert) {
 });
 
 QUnit.test('base non-empty rendering', async function (assert) {
-    assert.expect(4);
+    assert.expect(6);
 
     await this.start({
         async mockRPC(route, args) {
             if (route.includes('ir.attachment/search_read')) {
+                assert.step('ir.attachment/search_read');
                 return [{
                     id: 143,
                     filename: 'Blah.txt',
@@ -113,8 +123,15 @@ QUnit.test('base non-empty rendering', async function (assert) {
         }
     });
     // attachmentBox needs an existing thread to work
-    const threadLocalId = await this.createThread({ model: 'res.partner', id: 100 }, { fetchAttachments: true });
-    await this.createAttachmentBox(threadLocalId);
+    const threadLocalId = await this.createThread({
+        id: 100,
+        model: 'res.partner',
+    }, { fetchAttachments: true });
+    await this.createAttachmentBoxComponent(threadLocalId);
+    assert.verifySteps(
+        ['ir.attachment/search_read'],
+        "should have fetched attachments"
+    );
     assert.strictEqual(
         document.querySelectorAll(`.o_AttachmentBox`).length,
         1,
@@ -149,8 +166,11 @@ QUnit.test('attachment box: drop attachments', async function (assert) {
         }
     });
     // attachmentBox needs an existing thread to work
-    const threadLocalId = await this.createThread({ model: 'res.partner', id: 100 }, { fetchAttachments: true });
-    await this.createAttachmentBox(threadLocalId);
+    const threadLocalId = await this.createThread({
+        id: 100,
+        model: 'res.partner',
+    }, { fetchAttachments: true });
+    await this.createAttachmentBoxComponent(threadLocalId);
     const files = [
         await createFile({
             content: 'hello, world',
@@ -158,7 +178,7 @@ QUnit.test('attachment box: drop attachments', async function (assert) {
             name: 'text.txt',
         }),
     ];
-    assert.ok(
+    assert.strictEqual(
         document.querySelectorAll('.o_AttachmentBox').length,
         1,
         "should have an attachment box"
@@ -214,4 +234,6 @@ QUnit.test('attachment box: drop attachments', async function (assert) {
 
 });
 });
+});
+
 });

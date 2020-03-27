@@ -1,4 +1,4 @@
-odoo.define('mail.component.EditableText', function (require) {
+odoo.define('mail.messaging.component.EditableText', function (require) {
 'use strict';
 
 const { Component } = owl;
@@ -62,23 +62,20 @@ class EditableText extends Component {
             this.trigger('o-cancel');
         }
     }
+
 }
 
-EditableText.defaultProps = {
-    placeholder: "",
-    value: "",
-};
-
-EditableText.props = {
-    placeholder: {
-        type: String,
+Object.assign(EditableText, {
+    defaultProps: {
+        placeholder: "",
+        value: "",
     },
-    value: {
-        type: String,
+    props: {
+        placeholder: String,
+        value: String,
     },
-};
-
-EditableText.template = 'mail.component.EditableText';
+    template: 'mail.messaging.component.EditableText',
+});
 
 return EditableText;
 

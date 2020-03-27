@@ -45,7 +45,7 @@ odoo.define('hr.employee_chat', function (require) {
         }),
 
         _onOpenChat: function (ev) {
-            const messagingEnv = this.call('messaging', 'getMessagingEnv');
+            const messagingEnv = this.call('messaging', 'getEnv');
             messagingEnv.store.dispatch('openChatWithPartner', ev.data.partner_id);
         },
     });

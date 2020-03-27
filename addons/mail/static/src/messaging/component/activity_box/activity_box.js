@@ -1,8 +1,10 @@
-odoo.define('mail.component.ActivityBox', function (require) {
+odoo.define('mail.messaging.component.ActivityBox', function (require) {
 'use strict';
 
-const Activity = require('mail.component.Activity');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    Activity: require('mail.messaging.component.Activity'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch, useGetters } = owl.hooks;
@@ -11,7 +13,6 @@ class ActivityBox extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -43,6 +44,17 @@ class ActivityBox extends Component {
     }
 
     //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Chatter}
+     */
+    get chatter() {
+        return this.storeProps.chatter;
+    }
+
+    //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
@@ -56,14 +68,15 @@ class ActivityBox extends Component {
             this.storeDispatch('showChatterActivityBox', this.props.chatterLocalId);
         }
     }
+
 }
 
 Object.assign(ActivityBox, {
-    components: { Activity },
+    components,
     props: {
         chatterLocalId: String,
     },
-    template: 'mail.component.ActivityBox',
+    template: 'mail.messaging.component.ActivityBox',
 });
 
 return ActivityBox;

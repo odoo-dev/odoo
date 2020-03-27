@@ -1,4 +1,4 @@
-odoo.define('mail.hooks.useStore', function (require) {
+odoo.define('mail.messaging.component_hook.useStore', function (require) {
 'use strict';
 
 /**
@@ -114,7 +114,8 @@ function useStore(selector, options = {}) {
         return compare;
     }
 
-    return owl.hooks.useStore(selector, Object.assign({}, options, {
+    const extendedSelector = (state, props) => selector(state, props);
+    return owl.hooks.useStore(extendedSelector, Object.assign({}, options, {
         isEqual: proxyComparatorDeep(options.compareDepth),
     }));
 }

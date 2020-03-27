@@ -1,4 +1,4 @@
-odoo.define('mail_bot.NotificationAlertTests', function (require) {
+odoo.define('mail_bot.messaging.widget.NotificationAlertTests', function (require) {
 'use strict';
 
 const {
@@ -7,7 +7,7 @@ const {
     getServices,
     patchMessagingService,
     pause,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
 const MailbotService = require('mail_bot.MailBotService');
 
@@ -15,6 +15,8 @@ const FormView = require('web.FormView');
 const { createView, mock: { unpatch } } = require('web.test_utils');
 
 QUnit.module('mail_bot', {}, function () {
+QUnit.module('messaging', {}, function () {
+QUnit.module('widget', {}, function () {
 QUnit.module('NotificationAlert', {
     beforeEach() {
         utilsBeforeEach(this);
@@ -55,4 +57,7 @@ QUnit.test('notification_alert widget: display blocked notification alert', asyn
 });
 
 });
+});
+});
+
 });

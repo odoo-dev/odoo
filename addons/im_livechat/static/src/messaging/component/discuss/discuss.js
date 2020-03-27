@@ -1,11 +1,13 @@
-odoo.define('im_livechat.component.Discuss', function (require) {
+odoo.define('im_livechat.messaging.component.Discuss', function (require) {
 'use strict';
 
-const Discuss = require('mail.component.Discuss');
+const components = {
+    Discuss: require('mail.messaging.component.Discuss'),
+};
 
 const { patch } = require('web.utils');
 
-patch(Discuss, 'im_livechat_discuss', {
+patch(components.Discuss, 'im_livechat.messaging.component.Discuss', {
 
     //--------------------------------------------------------------------------
     // Public
@@ -14,14 +16,12 @@ patch(Discuss, 'im_livechat_discuss', {
     /**
      * @override
      */
-    getMobileMessagingNavbarTabs(...args) {
-        const res = this._super(...args);
-        res.push({
+    mobileNavbarTabs(...args) {
+        return [...this._super(...args), {
             icon: 'fa fa-comments',
             id: 'livechat',
             label: this.env._t("Livechat"),
-        });
-        return res;
+        }];
     }
 
 });

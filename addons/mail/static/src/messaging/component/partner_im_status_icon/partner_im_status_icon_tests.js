@@ -1,24 +1,28 @@
-odoo.define('mail.component.PartnerImStatusIconTests', function (require) {
+odoo.define('mail.messaging.component.PartnerImStatusIconTests', function (require) {
 'use strict';
 
-const PartnerImStatusIcon = require('mail.component.PartnerImStatusIcon');
+const components = {
+    PartnerImStatusIcon: require('mail.messaging.component.PartnerImStatusIcon'),
+};
 const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('PartnerImStatusIcon', {
     beforeEach() {
         utilsBeforeEach(this);
         this.createPartnerImStatusIcon = async partnerLocalId => {
-            PartnerImStatusIcon.env = this.env;
-            this.partnerImStatusIcon = new PartnerImStatusIcon(null, { partnerLocalId });
-            await this.partnerImStatusIcon.mount(this.widget.$el[0]);
+            const PartnerImStatusIconComponent = components.PartnerImStatusIcon;
+            PartnerImStatusIconComponent.env = this.env;
+            this.component = new PartnerImStatusIconComponent(null, { partnerLocalId });
+            await this.component.mount(this.widget.el);
         };
         this.start = async params => {
             let { env, widget } = await utilsStart(Object.assign({}, params, {
@@ -30,15 +34,15 @@ QUnit.module('PartnerImStatusIcon', {
     },
     afterEach() {
         utilsAfterEach(this);
-        if (this.partnerImStatusIcon) {
-            this.partnerImStatusIcon.destroy();
+        if (this.component) {
+            this.component.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
         }
         this.env = undefined;
-        delete PartnerImStatusIcon.env;
-    }
+        delete components.PartnerImStatusIcon.env;
+    },
 });
 
 QUnit.test('initially online', async function (assert) {
@@ -106,7 +110,6 @@ QUnit.test('change icon on change partner im_status', async function (assert) {
     assert.expect(4);
 
     await this.start();
-
     const partnerLocalId = this.env.store.dispatch('_createPartner', {
         id: 7,
         name: "Demo User",
@@ -146,4 +149,6 @@ QUnit.test('change icon on change partner im_status', async function (assert) {
 
 });
 });
+});
+
 });

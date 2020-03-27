@@ -1,7 +1,9 @@
-odoo.define('mail.component.ThreadTests', function (require) {
+odoo.define('mail.messaging.component.ThreadViewerTests', function (require) {
 'use strict';
 
-const Thread = require('mail.component.Thread');
+const components = {
+    ThreadViewer: require('mail.messaging.component.ThreadViewer'),
+};
 const {
     afterEach: utilsAfterEach,
     afterNextRender,
@@ -10,11 +12,12 @@ const {
     nextAnimationFrame,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
-QUnit.module('Thread', {
+QUnit.module('ThreadViewer', {
     beforeEach() {
         utilsBeforeEach(this);
 
@@ -22,13 +25,17 @@ QUnit.module('Thread', {
          * @param {string} threadLocalId
          * @param {Object} [otherProps]
          */
-        this.createThread = async (threadLocalId, otherProps, { isFixedSize=false }={}) => {
-            Thread.env = this.env;
-            this.thread = new Thread(null, Object.assign({ threadLocalId }, otherProps));
-            await this.thread.mount(this.widget.el);
+        this.createThreadViewerComponent = async (threadLocalId, otherProps, { isFixedSize = false } = {}) => {
+            const ThreadViewerComponent = components.ThreadViewer;
+            ThreadViewerComponent.env = this.env;
+            this.component = new ThreadViewerComponent(
+                null,
+                Object.assign({ threadLocalId }, otherProps)
+            );
+            await this.component.mount(this.widget.el);
             if (isFixedSize) {
                 // needed to allow scrolling in some tests
-                this.thread.el.style.height = '300px';
+                this.component.el.style.height = '300px';
             }
             await afterNextRender();
         };
@@ -46,15 +53,15 @@ QUnit.module('Thread', {
     },
     afterEach() {
         utilsAfterEach(this);
-        if (this.thread) {
-            this.thread.destroy();
+        if (this.component) {
+            this.component.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
         }
         this.env = undefined;
-        delete Thread.env;
-    }
+        delete components.ThreadViewer.env;
+    },
 });
 
 QUnit.test('dragover files on thread with composer', async function (assert) {
@@ -74,13 +81,13 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
                 email: "fred@example.com",
                 id: 10,
                 name: "Fred",
-            }
+            },
         ],
         name: "General",
         public: 'public',
     });
-    await this.createThread(threadLocalId, { hasComposer: true });
-    dragenterFiles(document.querySelector('.o_Thread'));
+    await this.createThreadViewerComponent(threadLocalId, { hasComposer: true });
+    dragenterFiles(document.querySelector('.o_ThreadViewer'));
     await afterNextRender();
     assert.ok(
         document.querySelector('.o_Composer_dropZone'),
@@ -90,6 +97,7 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
 
 QUnit.test('message list desc order', async function (assert) {
     assert.expect(8);
+
     let lastId = 10000;
     let amountOfCalls = 0;
     await this.start({
@@ -116,7 +124,7 @@ QUnit.test('message list desc order', async function (assert) {
                 return messagesData;
             }
             return this._super(...arguments);
-        }
+        },
     });
     const threadLocalId = this.env.store.dispatch('_createThread', {
         channel_type: 'channel',
@@ -136,7 +144,7 @@ QUnit.test('message list desc order', async function (assert) {
         name: "General",
         public: 'public',
     });
-    await this.createThread(threadLocalId, { order: 'desc' }, { isFixedSize: true });
+    await this.createThreadViewerComponent(threadLocalId, { order: 'desc' }, { isFixedSize: true });
     const messageItems = document.querySelectorAll(`.o_MessageList_item`);
     assert.notOk(
         messageItems[0].classList.contains("o_MessageList_loadMore"),
@@ -153,8 +161,8 @@ QUnit.test('message list desc order', async function (assert) {
     );
 
     // scroll to bottom
-    document.querySelector(`.o_Thread_messageList`).scrollTop =
-        document.querySelector(`.o_Thread_messageList`).scrollHeight;
+    document.querySelector(`.o_ThreadViewer_messageList`).scrollTop =
+        document.querySelector(`.o_ThreadViewer_messageList`).scrollHeight;
     // The following awaits should be afterNextRender but use multiple nextAnimationFrame
     // instead to know exactly how much time has to be waited for new messages
     // to appear (used below).
@@ -166,7 +174,7 @@ QUnit.test('message list desc order', async function (assert) {
         "should have 60 messages after scrolled to bottom"
     );
 
-    document.querySelector(`.o_Thread_messageList`).scrollTop = 0;
+    document.querySelector(`.o_ThreadViewer_messageList`).scrollTop = 0;
     // This amount of time should be enough before assuming no messages will
     // appear (see above).
     await nextAnimationFrame();
@@ -181,6 +189,7 @@ QUnit.test('message list desc order', async function (assert) {
 
 QUnit.test('message list asc order', async function (assert) {
     assert.expect(8);
+
     let lastId = 10000;
     let amountOfCalls = 0;
     await this.start({
@@ -207,7 +216,7 @@ QUnit.test('message list asc order', async function (assert) {
                 return messagesData;
             }
             return this._super(...arguments);
-        }
+        },
     });
     const threadLocalId = this.env.store.dispatch('_createThread', {
         channel_type: 'channel',
@@ -222,12 +231,12 @@ QUnit.test('message list asc order', async function (assert) {
                 email: "fred@example.com",
                 id: 10,
                 name: "Fred",
-            }
+            },
         ],
         name: "General",
         public: 'public',
     });
-    await this.createThread(threadLocalId, { order: 'asc' }, { isFixedSize: true });
+    await this.createThreadViewerComponent(threadLocalId, { order: 'asc' }, { isFixedSize: true });
     const messageItems = document.querySelectorAll(`.o_MessageList_item`);
     assert.notOk(
         messageItems[messageItems.length - 1].classList.contains("o_MessageList_loadMore"),
@@ -244,7 +253,7 @@ QUnit.test('message list asc order', async function (assert) {
     );
 
     // scroll to top
-    document.querySelector(`.o_Thread_messageList`).scrollTop = 0;
+    document.querySelector(`.o_ThreadViewer_messageList`).scrollTop = 0;
     // The following awaits should be afterNextRender but use multiple nextAnimationFrame
     // instead to know exactly how much time has to be waited for new messages
     // to appear (used below).
@@ -253,12 +262,12 @@ QUnit.test('message list asc order', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`.o_Message`).length,
         60,
-        "should have 60 messages after scrolled to bottom"
+        "should have 60 messages after scrolled to top"
     );
 
     // scroll to bottom
-    document.querySelector(`.o_Thread_messageList`).scrollTop =
-        document.querySelector(`.o_Thread_messageList`).scrollHeight;
+    document.querySelector(`.o_ThreadViewer_messageList`).scrollTop =
+        document.querySelector(`.o_ThreadViewer_messageList`).scrollHeight;
     // This amount of time should be enough before assuming no messages will
     // appear (see above).
     await nextAnimationFrame();
@@ -273,4 +282,6 @@ QUnit.test('message list asc order', async function (assert) {
 
 });
 });
+});
+
 });

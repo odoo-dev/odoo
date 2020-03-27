@@ -1,10 +1,10 @@
-odoo.define('mail.widget.DiscussInvitePartnerDialog', function (require) {
+odoo.define('mail.messaging.widget.DiscussInvitePartnerDialog', function (require) {
 'use strict';
 
 const core = require('web.core');
 const Dialog = require('web.Dialog');
 
-const _t = core._t;
+const _lt = core._lt;
 const QWeb = core.qweb;
 
 /**
@@ -15,26 +15,26 @@ const QWeb = core.qweb;
  * validated.
  */
 const PartnerInviteDialog = Dialog.extend({
-    dialog_title: _t("Invite people"),
-    template: 'mail.widget.DiscussInvitePartnerDialog',
+    dialog_title: _lt("Invite people"),
+    template: 'mail.messaging.widget.DiscussInvitePartnerDialog',
     /**
      * @override {web.Dialog}
-     * @param {mail.widget.Discuss} parent
+     * @param {mail.messaging.widget.Discuss} parent
      * @param {Object} param1
      * @param {string} param1.activeThreadLocalId
      * @param {Object} param1.messagingEnv
      * @param {Object} param1.messagingEnv.store
      */
-    init: function (parent, { activeThreadLocalId, messagingEnv }) {
+    init(parent, { activeThreadLocalId, messagingEnv }) {
         const store = messagingEnv.store;
         const channelName = store.getters.threadName(activeThreadLocalId);
         this.channelId = store.state.threads[activeThreadLocalId].id;
         this.store = store;
         this._super(parent, {
-            title: _.str.sprintf(_t("Invite people to #%s"), channelName),
+            title: _.str.sprintf(this.env._t("Invite people to #%s"), channelName),
             size: 'medium',
             buttons: [{
-                text: _t("Invite"),
+                text: this.env._t("Invite"),
                 close: true,
                 classes: 'btn-primary',
                 click: ev => this._invite(ev),
@@ -43,9 +43,9 @@ const PartnerInviteDialog = Dialog.extend({
     },
     /**
      * @override {web.Dialog}
-     * @return {Promise}
+     * @returns {Promise}
      */
-    start: function () {
+    start() {
         this.$input = this.$('.o_input');
         this.$input.select2({
             width: '100%',
@@ -61,7 +61,7 @@ const PartnerInviteDialog = Dialog.extend({
                     const partner = this.store.state.partners[partnerLocalId];
                     status = partner.im_status;
                 }
-                const $status = QWeb.render('mail.widget.UserStatus', { status });
+                const $status = QWeb.render('mail.messaging.widget.UserStatus', { status });
                 return $('<span>').text(item.text).prepend($status);
             },
             query: query => {
@@ -83,7 +83,7 @@ const PartnerInviteDialog = Dialog.extend({
                 });
             }
         });
-        return this._super.apply(this, arguments);
+        return this._super(...arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -108,10 +108,10 @@ const PartnerInviteDialog = Dialog.extend({
         });
         const names = _.escape(_.pluck(data, 'text').join(', '));
         const notification = _.str.sprintf(
-            _t("You added <b>%s</b> to the conversation."),
+            this.env._t("You added <b>%s</b> to the conversation."),
             names
         );
-        this.do_notify(_t("New people"), notification);
+        this.do_notify(this.env._t("New people"), notification);
     },
 });
 

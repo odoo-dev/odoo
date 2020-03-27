@@ -1,27 +1,29 @@
-odoo.define('im_livechat.component.DiscussSidebar', function (require) {
+odoo.define('im_livechat.messaging.component.DiscussSidebar', function (require) {
 'use strict';
 
-const DiscussSidebar = require('mail.component.DiscussSidebar');
+const components = {
+    DiscussSidebar: require('mail.messaging.component.DiscussSidebar'),
+};
 
 const { patch } = require('web.utils');
 
-patch(DiscussSidebar, 'im_livechat_discuss_sidebar', {
+patch(components.DiscussSidebar, 'im_livechat.messaging.component.DiscussSidebar', {
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
     /**
-     * Return the list of chats that match the quick search value input.
+     * Return the list of livechats that match the quick search value input.
      *
-     * @return {mail.store.model.Thread[]}
+     * @returns {mail.store.model.Thread[]}
      */
-    quickSearchLivechatList() {
-        if (!this.state.quickSearchValue) {
-            return this.storeProps.pinnedLivechatList;
+    quickSearchOrderedAndPinnedLivechatList() {
+        if (!this.state.sidebarQuickSearchValue) {
+            return this.storeProps.allOrderedAndPinnedLivechats;
         }
-        const qsVal = this.state.quickSearchValue.toLowerCase();
-        return this.storeProps.pinnedLivechatList.filter(livechat => {
+        const qsVal = this.state.sidebarQuickSearchValue.toLowerCase();
+        return this.storeProps.allOrderedAndPinnedLivechats.filter(livechat => {
             const nameVal = this.storeGetters.threadName(livechat.localId).toLowerCase();
             return nameVal.includes(qsVal);
         });
@@ -34,20 +36,20 @@ patch(DiscussSidebar, 'im_livechat_discuss_sidebar', {
     /**
      * @override
      */
-    _compareDepth(state, props) {
-        const res = this._super(...arguments);
-        res.pinnedLivechatList = 1;
-        return res;
+    _useStoreCompareDepth(state, props) {
+        return Object.assign(this._super(...arguments), {
+            allOrderedAndPinnedLivechats: 1,
+        });
     },
     /**
      * Override to include livechat channels on the sidebar.
      *
      * @override
      */
-    _useStore(state, props) {
-        const res = this._super(...arguments);
-        res.pinnedLivechatList = this.storeGetters.pinnedLivechatList();
-        return res;
+    _useStoreSelector(state, props) {
+        return Object.assign(this._super(...arguments), {
+            allOrderedAndPinnedLivechats: this.storeGetters.allOrderedAndPinnedLivechats(),
+        });
     },
 
 });

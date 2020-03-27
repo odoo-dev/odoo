@@ -1,7 +1,7 @@
-odoo.define('mail.component.ModerationRejectDialog', function (require) {
+odoo.define('mail.messaging.component.ModerationRejectDialog', function (require) {
 'use strict';
 
-const useStore = require('mail.hooks.useStore');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const Dialog = require('web.OwlDialog');
 
@@ -15,10 +15,9 @@ class ModerationRejectDialog extends Component {
      */
     constructor(...args) {
         super(...args);
-        const { _t } = this.env;
         this.state = useState({
-            title: _t("Message Rejected"),
-            comment: _t("Your message was rejected by moderator."),
+            title: this.env._t("Message Rejected"),
+            comment: this.env._t("Your message was rejected by moderator."),
         });
         this.storeDispatch = useDispatch();
         this.storeProps = useStore((state, props) => {
@@ -32,6 +31,17 @@ class ModerationRejectDialog extends Component {
         });
         // to manually trigger the dialog close event
         this._dialogRef = useRef('dialog');
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Message[]}
+     */
+    get messages() {
+        return this.storeProps.messages;
     }
 
     //--------------------------------------------------------------------------
@@ -54,7 +64,7 @@ class ModerationRejectDialog extends Component {
             comment: this.state.comment,
         };
         this.storeDispatch('moderateMessages',
-            this.storeProps.messages.map(message => message.localId),
+            this.messages.map(message => message.localId),
             'reject',
             kwargs
         );
@@ -69,7 +79,7 @@ Object.assign(ModerationRejectDialog, {
             element: String,
         },
     },
-    template: 'mail.component.ModerationRejectDialog',
+    template: 'mail.messaging.component.ModerationRejectDialog',
 });
 
 return ModerationRejectDialog;

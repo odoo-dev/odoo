@@ -83,11 +83,11 @@
 
 .o_DiscussSidebar_groupTitle {
 
-    &:not(.o_clickable) {
+    &:not(.o-clickable) {
         color: gray('600');
     }
 
-    &.o_clickable {
+    &.o-clickable {
         cursor: pointer;
 
         &:not(:hover) {

@@ -1,17 +1,20 @@
-odoo.define('mail.component.Chatter', function (require) {
+odoo.define('mail.messaging.component.Chatter', function (require) {
 'use strict';
 
-const ActivityBox = require('mail.component.ActivityBox');
-const AttachmentBox = require('mail.component.AttachmentBox');
-const ChatterTopbar = require('mail.component.ChatterTopbar');
-const Composer = require('mail.component.Composer');
-const Thread = require('mail.component.Thread');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    ActivityBox: require('mail.messaging.component.ActivityBox'),
+    AttachmentBox: require('mail.messaging.component.AttachmentBox'),
+    ChatterTopbar: require('mail.messaging.component.ChatterTopbar'),
+    Composer: require('mail.messaging.component.Composer'),
+    ThreadViewer: require('mail.messaging.component.ThreadViewer'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch, useGetters, useRef } = owl.hooks;
 
 class Chatter extends Component {
+
     /**
      * @override
      */
@@ -38,7 +41,7 @@ class Chatter extends Component {
         this._threadRef = useRef('thread');
     }
 
-    mounted() {
+    mounted() {
         if (this.props.formRendererBus && this.storeProps.thread) {
             this._notifyRendered();
         }
@@ -51,13 +54,24 @@ class Chatter extends Component {
     }
 
     //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Chatter}
+     */
+    get chatter() {
+        return this.storeProps.chatter;
+    }
+
+    //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
     /**
      * @private
      */
-    _notifyRendered() {
+    _notifyRendered() {
         this.props.formRendererBus.trigger('o-chatter-rendered', {
             attachments: this.storeProps.attachments,
             threadLocalId: this.storeProps.thread.localId,
@@ -76,17 +90,17 @@ class Chatter extends Component {
     }
 }
 
-Chatter.components = { ActivityBox, AttachmentBox, ChatterTopbar, Composer, Thread };
-
-Chatter.props = {
-    chatterLocalId: String,
-    formRendererBus: {
-        type: Object,
-        optional: true,
+Object.assign(Chatter, {
+    components,
+    props: {
+        chatterLocalId: String,
+        formRendererBus: {
+            type: Object,
+            optional: true,
+        },
     },
-};
-
-Chatter.template = 'mail.component.Chatter';
+    template: 'mail.messaging.component.Chatter',
+});
 
 return Chatter;
 

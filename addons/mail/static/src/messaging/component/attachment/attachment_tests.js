@@ -1,23 +1,29 @@
-odoo.define('mail.component.AttachmentTests', function (require) {
+odoo.define('mail.messaging.component.AttachmentTests', function (require) {
 'use strict';
 
-const Attachment = require('mail.component.Attachment');
+const components = {
+    Attachment: require('mail.messaging.component.Attachment'),
+};
 const {
     afterEach: utilsAfterEach,
     beforeEach: utilsBeforeEach,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('Attachment', {
     beforeEach() {
         utilsBeforeEach(this);
         this.createAttachmentComponent = async (attachmentLocalId, otherProps) => {
-            Attachment.env = this.env;
-            this.attachment = new Attachment(null, Object.assign({ attachmentLocalId }, otherProps));
-            await this.attachment.mount(this.widget.el);
+            const AttachmentComponent = components.Attachment;
+            AttachmentComponent.env = this.env;
+            this.component = new AttachmentComponent(null, Object.assign({
+                attachmentLocalId,
+            }, otherProps));
+            await this.component.mount(this.widget.el);
         };
         this.start = async params => {
             if (this.widget) {
@@ -32,15 +38,15 @@ QUnit.module('Attachment', {
     },
     afterEach() {
         utilsAfterEach(this);
-        if (this.attachment) {
-            this.attachment.destroy();
+        if (this.component) {
+            this.component.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
         }
         this.env = undefined;
-        delete Attachment.env;
-    }
+        delete components.Attachment.env;
+    },
 });
 
 QUnit.test('simplest layout', async function (assert) {
@@ -65,23 +71,23 @@ QUnit.test('simplest layout', async function (assert) {
         1,
         "should have attachment component in DOM"
     );
-    const attachment = document.querySelector('.o_Attachment');
+    const attachmentEl = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachment.dataset.attachmentLocalId,
+        attachmentEl.dataset.attachmentLocalId,
         'ir.attachment_750',
         "attachment component should be linked to attachment store model"
     );
     assert.strictEqual(
-        attachment.title,
+        attachmentEl.title,
         "test.txt",
         "attachment should have filename as title attribute"
     );
     assert.strictEqual(
-        attachment.querySelectorAll(`.o_Attachment_image`).length,
+        attachmentEl.querySelectorAll(`:scope .o_Attachment_image`).length,
         1,
         "attachment should have an image part"
     );
-    const attachmentImage = attachment.querySelector(`.o_Attachment_image`);
+    const attachmentImage = document.querySelector(`.o_Attachment_image`);
     assert.ok(
         attachmentImage.classList.contains('o_image'),
         "attachment should have o_image classname (required for mimetype.scss style)"
@@ -424,9 +430,9 @@ QUnit.test('simplest layout with hover details and filename and extension', asyn
         showFilename: true
     });
     assert.strictEqual(
-        document.querySelectorAll(
-            `.o_Attachment_details:not(.o_Attachment_imageOverlayDetails)`
-        ).length,
+        document.querySelectorAll(`
+            .o_Attachment_details:not(.o_Attachment_imageOverlayDetails)
+        `).length,
         0,
         "attachment should not have a details part directly"
     );
@@ -493,9 +499,9 @@ QUnit.test('auto layout with image', async function (assert) {
         showFilename: true
     });
     assert.strictEqual(
-        document.querySelectorAll(
-            `.o_Attachment_details:not(.o_Attachment_imageOverlayDetails)`
-        ).length,
+        document.querySelectorAll(`
+            .o_Attachment_details:not(.o_Attachment_imageOverlayDetails)
+        `).length,
         0,
         "attachment should not have a details part directly"
     );
@@ -533,4 +539,6 @@ QUnit.test('auto layout with image', async function (assert) {
 
 });
 });
+});
+
 });

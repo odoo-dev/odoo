@@ -1,14 +1,15 @@
-odoo.define('mail.component.ActivityMarkDoneButton', function (require) {
+odoo.define('mail.messaging.component.ActivityMarkDoneButton', function (require) {
 'use strict';
 
-const ActivityMarkDonePopover = require('mail.component.ActivityMarkDonePopover');
-const PopoverButtonWithComponent = require('mail.component.PopoverButtonWithComponent');
+const components = {
+    ActivityMarkDonePopover: require('mail.messaging.component.ActivityMarkDonePopover'),
+    PopoverButtonWithComponent: require('mail.messaging.component.PopoverButtonWithComponent'),
+};
 
-class ActivityMarkDoneButton extends PopoverButtonWithComponent {
+class ActivityMarkDoneButton extends components.PopoverButtonWithComponent {
 
     /**
      * @override
-     * @param args
      */
     constructor(...args) {
         super(...args);
@@ -44,9 +45,10 @@ class ActivityMarkDoneButton extends PopoverButtonWithComponent {
      * @returns {ActivityMarkDonePopover}
      */
     _createPopoverComponent() {
-        ActivityMarkDonePopover.env = this.env;
-        return new ActivityMarkDonePopover(null, {
-            activityLocalId: this.props.activityLocalId
+        const ActivityMarkDonePopoverComponent = components.ActivityMarkDonePopover;
+        ActivityMarkDonePopoverComponent.env = this.env;
+        return new ActivityMarkDonePopoverComponent(null, {
+            activityLocalId: this.props.activityLocalId,
         });
     }
 
@@ -61,13 +63,14 @@ class ActivityMarkDoneButton extends PopoverButtonWithComponent {
     _onDiscardClicked(ev) {
         this._hidePopover();
     }
+
 }
 
-ActivityMarkDoneButton.props = Object.assign(
-    {},
-    PopoverButtonWithComponent.props,
-    { activityLocalId: String }
-);
+Object.assign(ActivityMarkDoneButton, {
+    props: Object.assign({}, components.PopoverButtonWithComponent.props, {
+        activityLocalId: String,
+    }),
+});
 
 return ActivityMarkDoneButton;
 

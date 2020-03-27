@@ -1,23 +1,24 @@
-odoo.define('mail.component.Composer', function (require) {
+odoo.define('mail.messaging.component.Composer', function (require) {
 'use strict';
 
-const AttachmentList = require('mail.component.AttachmentList');
-const DropZone = require('mail.component.DropZone');
-const EmojisButton = require('mail.component.EmojisButton');
-const FileUploader = require('mail.component.FileUploader');
-const TextInput = require('mail.component.ComposerTextInput');
-const useDragVisibleDropZone = require('mail.hooks.useDragVisibleDropZone');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    AttachmentList: require('mail.messaging.component.AttachmentList'),
+    DropZone: require('mail.messaging.component.DropZone'),
+    EmojisButton: require('mail.messaging.component.EmojisButton'),
+    FileUploader: require('mail.messaging.component.FileUploader'),
+    TextInput: require('mail.messaging.component.ComposerTextInput'),
+};
+const useDragVisibleDropZone = require('mail.messaging.component_hook.useDragVisibleDropZone');
+const useStore = require('mail.messaging.component_hook.useStore');
 const mailUtils = require('mail.utils');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useRef, useState } = owl.hooks;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 class Composer extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -84,13 +85,20 @@ class Composer extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Getters / Setters
+    // Public
     //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Composer}
+     */
+    get composer() {
+        return this.storeProps.composer;
+    }
 
     /**
      * Get the current partner image URL.
      *
-     * @return {string}
+     * @returns {string}
      */
     get currentPartnerAvatar() {
         const avatar = this.env.session.uid > 0
@@ -106,16 +114,16 @@ class Composer extends Component {
     /**
      * Determine whether composer should display a footer.
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     get hasFooter() {
-        return this.storeProps.composer.attachmentLocalIds.length > 0 || !this.props.isCompact;
+        return this.composer.attachmentLocalIds.length > 0 || !this.props.isCompact;
     }
 
     /**
      * Determine whether the composer should display a header.
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     get hasHeader() {
         return (
@@ -128,16 +136,11 @@ class Composer extends Component {
      * Get an object which is passed to FileUploader component to be used when
      * creating attachment.
      *
-     * @return {Object}
+     * @returns {Object}
      */
     get newAttachmentExtraData() {
         return { composerLocalId: this.props.composerLocalId };
     }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
     /**
      * Focus the composer.
      */
@@ -216,7 +219,7 @@ class Composer extends Component {
      * @private
      */
     async _onClickFullComposer() {
-        const attachmentIds = this.storeProps.composer.attachmentLocalIds
+        const attachmentIds = this.composer.attachmentLocalIds
             .map(localId => this.env.store.state.attachments[localId].res_id);
 
         const context = {
@@ -263,8 +266,8 @@ class Composer extends Component {
      */
     _onClickSend(ev) {
         if (
-            !this.storeProps.composer.textInputContent &&
-            this.storeProps.composer.attachmentLocalIds.length === 0
+            !this.composer.textInputContent &&
+            this.composer.attachmentLocalIds.length === 0
         ) {
             return;
         }
@@ -277,6 +280,7 @@ class Composer extends Component {
      * @param {CustomEvent} ev
      */
     _onDiscardInput(ev) {
+        ev.stopPropagation();
         this.trigger('o-discarded');
     }
 
@@ -289,6 +293,7 @@ class Composer extends Component {
      * @param {FileList} ev.detail.files
      */
     async _onDropZoneFilesDropped(ev) {
+        ev.stopPropagation();
         await this._fileUploaderRef.comp.uploadFiles(ev.detail.files);
         this.isDropZoneVisible.value = false;
     }
@@ -303,6 +308,7 @@ class Composer extends Component {
      * @param {string} ev.detail.unicode
      */
     _onEmojiSelection(ev) {
+        ev.stopPropagation();
         this._textInputRef.comp.saveStateInStore();
         this.storeDispatch(
             'insertEmojiInComposerTextInput',
@@ -335,99 +341,78 @@ class Composer extends Component {
      * @param {CustomEvent} ev
      */
     _onTextInputKeydownEnter(ev) {
+        ev.stopPropagation();
         // TODO SEB this is the same code as _onClickSend
         if (
-            !this.storeProps.composer.textInputContent &&
-            this.storeProps.composer.attachmentLocalIds.length === 0
+            !this.composer.textInputContent &&
+            this.composer.attachmentLocalIds.length === 0
         ) {
             return;
         }
         this._postMessage();
     }
+
 }
 
-Composer.components = { AttachmentList, DropZone, EmojisButton, FileUploader, TextInput };
-
-Composer.defaultProps = {
-    attachmentLocalIds: [],
-    focusCounter: 0,
-    hasCurrentPartnerAvatar: true,
-    hasDiscardButton: false,
-    hasFollowers: false,
-    hasSendButton: true,
-    hasTextInputSendOnEnterEnabled: true,
-    hasThreadName: false,
-    isCompact: true,
-    isDiscardOnClickAway: false,
-    isExpandable: false,
-    isFocusOnMount: false,
-    isLog: false,
-};
-
-Composer.props = {
-    attachmentLocalIds: {
-        type: Array,
-        element: String,
+Object.assign(Composer, {
+    components,
+    defaultProps: {
+        attachmentLocalIds: [],
+        focusCounter: 0,
+        hasCurrentPartnerAvatar: true,
+        hasDiscardButton: false,
+        hasFollowers: false,
+        hasSendButton: true,
+        hasTextInputSendOnEnterEnabled: true,
+        hasThreadName: false,
+        isCompact: true,
+        isDiscardOnClickAway: false,
+        isExpandable: false,
+        isFocusOnMount: false,
+        isLog: false,
     },
-    attachmentsDetailsMode: {
-        type: String,
-        optional: true,
+    props: {
+        attachmentLocalIds: {
+            type: Array,
+            element: String,
+        },
+        attachmentsDetailsMode: {
+            type: String,
+            optional: true,
+        },
+        composerLocalId: String,
+        focusCounter: Number,
+        hasCurrentPartnerAvatar: Boolean,
+        hasDiscardButton: Boolean,
+        hasFollowers: Boolean,
+        hasSendButton: Boolean,
+        hasTextInputSendOnEnterEnabled: Boolean,
+        hasThreadName: Boolean,
+        showAttachmentsExtensions: {
+            type: Boolean,
+            optional: true,
+        },
+        showAttachmentsFilenames: {
+            type: Boolean,
+            optional: true,
+        },
+        initialAttachmentLocalIds: {
+            type: Array,
+            element: String,
+            optional: true,
+        },
+        initialTextInputHtmlContent: {
+            type: String,
+            optional: true,
+        },
+        isCompact: Boolean,
+        isDiscardOnClickAway: Boolean,
+        isExpandable: Boolean,
+        isFocusOnMount: Boolean,
+        isLog: Boolean,
     },
-    composerLocalId: String,
-    focusCounter: {
-        type: Number,
-    },
-    hasCurrentPartnerAvatar: {
-        type: Boolean,
-    },
-    hasDiscardButton: {
-        type: Boolean,
-    },
-    hasFollowers: {
-        type: Boolean,
-    },
-    hasSendButton: {
-        type: Boolean,
-    },
-    hasTextInputSendOnEnterEnabled: Boolean,
-    hasThreadName: {
-        type: Boolean,
-    },
-    showAttachmentsExtensions: {
-        type: Boolean,
-        optional: true,
-    },
-    showAttachmentsFilenames: {
-        type: Boolean,
-        optional: true,
-    },
-    initialAttachmentLocalIds: {
-        type: Array,
-        element: String,
-        optional: true,
-    },
-    initialTextInputHtmlContent: {
-        type: String,
-        optional: true,
-    },
-    isCompact: {
-        type: Boolean,
-    },
-    isDiscardOnClickAway: {
-        type: Boolean,
-    },
-    isExpandable: {
-        type: Boolean,
-    },
-    isFocusOnMount: {
-        type: Boolean,
-    },
-    isLog: {
-        type: Boolean,
-    },
-};
-
-Composer.template = 'mail.component.Composer';
+    template: 'mail.messaging.component.Composer',
+});
 
 return Composer;
 

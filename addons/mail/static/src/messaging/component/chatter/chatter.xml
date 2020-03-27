@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="mail.component.Chatter" owl="1">
+    <t t-name="mail.messaging.component.Chatter" owl="1">
         <div class="o_Chatter">
             <ChatterTopbar
                 class="o_Chatter_topbar"
                 chatterLocalId="props.chatterLocalId"
             />
-            <t t-if="storeProps.chatter.hasThread and storeProps.thread and storeProps.thread.composerLocalId and storeProps.chatter.isComposerVisible">
+            <t t-if="chatter.hasThread and storeProps.thread and storeProps.thread.composerLocalId and chatter.isComposerVisible">
                 <Composer
                     class="o_Chatter_composer"
                     composerLocalId="storeProps.thread.composerLocalId"
                     hasTextInputSendOnEnterEnabled="false"
                     isCompact="false"
                     isExpandable="true"
-                    isLog="storeProps.chatter.isComposerLog"
+                    isLog="chatter.isComposerLog"
                     t-on-o-message-posted="_onComposerMessagePosted"
                     t-ref="composer"
                 />
             </t>
-            <t t-if="storeProps.chatter.isAttachmentBoxVisible">
+            <t t-if="chatter.isAttachmentBoxVisible">
                 <AttachmentBox
                     class="o_Chatter_attachmentBox"
-                    threadLocalId="storeProps.chatter.threadLocalId"
+                    threadLocalId="chatter.threadLocalId"
                 />
             </t>
             <t t-if="storeProps.thread">
-                <t t-if="storeProps.chatter.hasActivities and storeProps.chatter.activityLocalIds and storeProps.chatter.activityLocalIds.length > 0">
+                <t t-if="chatter.hasActivities and chatter.activityLocalIds and chatter.activityLocalIds.length > 0">
                     <ActivityBox
                         class="o_Chatter_activityBox"
-                        chatterLocalId="storeProps.chatter.localId"
+                        chatterLocalId="chatter.localId"
                     />
                 </t>
-                <t t-if="storeProps.chatter.hasThread">
-                    <Thread
+                <t t-if="chatter.hasThread">
+                    <ThreadViewer
                         class="o_Chatter_thread"
                         hasComposer="false"
                         haveMessagesAuthorRedirect="true"

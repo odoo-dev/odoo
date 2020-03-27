@@ -1,16 +1,22 @@
-odoo.define('mail.form_renderer', function (require) {
+odoo.define('mail.messaging.widget.FormRenderer', function (require) {
 "use strict";
 
-const Chatter = require('mail.component.Chatter');
+const components = {
+    Chatter: require('mail.messaging.component.Chatter'),
+};
+
 const FormRenderer = require('web.FormRenderer');
 
 const { EventBus } = owl.core;
 
 /**
- * Include the FormRenderer to instanciate the chatter area containing (a
+ * Include the FormRenderer to instantiate the chatter area containing (a
  * subset of) the mail widgets (mail_thread, mail_followers and mail_activity).
  */
 FormRenderer.include({
+    /**
+     * @override
+     */
     async on_attach_callback() {
         this._super(...arguments);
         // Useful when (re)loading view
@@ -27,6 +33,9 @@ FormRenderer.include({
             await this._mountChatterComponent();
         }
     },
+    /**
+     * @override
+     */
     on_detach_callback() {
         this._super(...arguments);
         // When the view is detached, we totally delete chatter state from store
@@ -41,7 +50,7 @@ FormRenderer.include({
      */
     init(parent, state, params) {
         this._super(...arguments);
-        this.env = this.call('messaging', 'getMessagingEnv');
+        this.env = this.call('messaging', 'getEnv');
         this.mailFields = params.mailFields;
         this._chatterBus = new EventBus();
         this._chatterComponent = undefined;
@@ -92,7 +101,7 @@ FormRenderer.include({
      * This is based on arch, which should have `div.oe_chatter`.
      *
      * @private
-     * @return {boolean}
+     * @returns {boolean}
      */
     _hasChatter() {
         return !!this._chatterContainerTarget;
@@ -130,17 +139,14 @@ FormRenderer.include({
      * @private
      */
     _makeChatterComponent() {
-        this._chatterComponent = new Chatter(null, {
+        const ChatterComponent = components.Chatter;
+        this._chatterComponent = new ChatterComponent(null, {
             chatterLocalId: this._chatterLocalId,
             formRendererBus: this._chatterBus,
         });
     },
     /**
      * Mount the chatter
-     *
-     * FIXME {xdu} could be better to mount in "replace" mode but the mount is
-     * failing with that mode.
-     * (just use { position: 'self' } as second parameter of mount)
      *
      * @private
      */
@@ -155,10 +161,13 @@ FormRenderer.include({
     },
     /**
      * @override
-     * @private
      */
     _renderNode(node) {
-        if (!this._isFromFormViewDialog && node.tag === 'div' && node.attrs.class === 'oe_chatter') {
+        if (
+            !this._isFromFormViewDialog &&
+            node.tag === 'div' &&
+            node.attrs.class === 'oe_chatter'
+        ) {
             const $el = $('<div class="o_FormRenderer_chatterContainer"/>');
             this._chatterContainerTarget = $el[0];
             return $el;
@@ -170,12 +179,12 @@ FormRenderer.include({
      * rendered.
      *
      * @override
-     * @private
      */
     async _renderView() {
         await this._super(...arguments);
         if (this._hasChatter()) {
-            Chatter.env = this.env;
+            const ChatterComponent = components.Chatter;
+            ChatterComponent.env = this.env;
             const context = this.record ? this.record.getContext() : {};
             const activityIds = this.state.data.activity_ids
                 ? this.state.data.activity_ids.res_ids

@@ -1,7 +1,9 @@
-odoo.define('mail.component.ComposerTests', function (require) {
+odoo.define('mail.messaging.component.ComposerTests', function (require) {
 'use strict';
 
-const Composer = require('mail.component.Composer');
+const components = {
+    Composer: require('mail.messaging.component.Composer'),
+};
 const {
     afterEach: utilsAfterEach,
     afterNextRender,
@@ -13,22 +15,24 @@ const {
     pasteFiles,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
 const { file: { createFile } } = require('web.test_utils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('Composer', {
     beforeEach() {
         utilsBeforeEach(this);
 
         this.createComposerComponent = async (composerLocalId, otherProps) => {
-            Composer.env = this.env;
-            this.composer = new Composer(null, Object.assign({
+            const ComposerComponent = components.Composer;
+            ComposerComponent.env = this.env;
+            this.component = new ComposerComponent(null, Object.assign({
                 composerLocalId,
             }, otherProps));
-            await this.composer.mount(this.widget.$el[0]);
+            await this.component.mount(this.widget.el);
             await afterNextRender();
         };
 
@@ -45,16 +49,16 @@ QUnit.module('Composer', {
     },
     async afterEach() {
         utilsAfterEach(this);
-        if (this.composer) {
-            this.composer.destroy();
+        if (this.component) {
+            this.component.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
         }
         this.env = undefined;
-        delete Composer.env;
+        delete components.Composer.env;
         await nextAnimationFrame(); // ensures tribute is detached on next frame
-    }
+    },
 });
 
 QUnit.test('composer text input: basic rendering', async function (assert) {
@@ -500,4 +504,6 @@ QUnit.test('composer text input cleared on message post', async function (assert
 
 });
 });
+});
+
 });

@@ -1,7 +1,7 @@
-odoo.define('mail.component.ModerationBanDialog', function (require) {
+odoo.define('mail.messaging.component.ModerationBanDialog', function (require) {
 'use strict';
 
-const useStore = require('mail.hooks.useStore');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const Dialog = require('web.OwlDialog');
 
@@ -30,6 +30,17 @@ class ModerationBanDialog extends Component {
     }
 
     //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Message[]}
+     */
+    get messages() {
+        return this.storeProps.messages;
+    }
+
+    //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
@@ -49,6 +60,7 @@ class ModerationBanDialog extends Component {
     _onClickCancel() {
         this._dialogRef.comp._close();
     }
+
 }
 
 Object.assign(ModerationBanDialog, {
@@ -59,7 +71,7 @@ Object.assign(ModerationBanDialog, {
             element: String,
         },
     },
-    template: 'mail.component.ModerationBanDialog',
+    template: 'mail.messaging.component.ModerationBanDialog',
 });
 
 return ModerationBanDialog;

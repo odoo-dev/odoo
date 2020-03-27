@@ -1,13 +1,15 @@
-odoo.define('im_livechat.component.NotificationList', function (require) {
+odoo.define('im_livechat.messaging.component.NotificationList', function (require) {
 'use strict';
 
-const NotificationList = require('mail.component.NotificationList');
+const components = {
+    NotificationList: require('mail.messaging.component.NotificationList'),
+};
 
 const { patch } = require('web.utils');
 
-NotificationList._allowedFilters.push('livechat');
+components.NotificationList._allowedFilters.push('livechat');
 
-patch(NotificationList, 'im_livechat_notification_list', {
+patch(components.NotificationList, 'im_livechat.messaging.component.NotificationList', {
 
     //--------------------------------------------------------------------------
     // Public
@@ -18,7 +20,7 @@ patch(NotificationList, 'im_livechat_notification_list', {
      *
      * @override
      */
-    _useStoreThreads(state, props) {
+    _useStoreSelectorThreads(state, props) {
         if (props.filter === 'livechat') {
             return this.storeGetters.livechatList();
         }

@@ -1,10 +1,11 @@
-odoo.define('mail.component.Dialog', function (require) {
+odoo.define('mail.messaging.component.Dialog', function (require) {
 'use strict';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
 class Dialog extends Component {
+
     /**
      * @param {...any} args
      */
@@ -64,17 +65,19 @@ class Dialog extends Component {
      * @param {CustomEvent} ev
      */
     _onClose(ev) {
+        ev.stopPropagation();
         this.trigger('o-close', { id: this.props.id });
     }
 }
 
-Dialog.props = {
-    componentName: String,
-    id: String,
-    info: Object,
-};
-
-Dialog.template = 'mail.component.Dialog';
+Object.assign(Dialog, {
+    props: {
+        componentName: String,
+        id: String,
+        info: Object,
+    },
+    template: 'mail.messaging.component.Dialog',
+});
 
 return Dialog;
 

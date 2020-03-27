@@ -134,7 +134,7 @@ const actions = {
      * @param {string} [data.name]
      * @param {integer} [data.size]
      * @param {Array} [data.threadLocalIds]
-     * @return {string} attachment local Id
+     * @returns {string} attachment local Id
      */
     createAttachment({ dispatch, state }, data) {
         let {
@@ -266,7 +266,7 @@ const actions = {
      * @param {boolean} [param1.hasThread=true]
      * @param {string} [param1.initialThreadId]
      * @param {string} param1.initialThreadModel
-     * @return {string}
+     * @returns {string}
      */
     createChatter(
         { dispatch, state },
@@ -530,7 +530,7 @@ const actions = {
         env.call('bus_service', 'on', 'window_focus', null, () =>
             dispatch('_handleGlobalWindowFocus')
         );
-        state.isMessagingReady = true;
+        state.isMessagingInitialized = true;
         env.call('bus_service', 'startPolling');
         dispatch('_startLoopFetchPartnerImStatus');
     },
@@ -567,7 +567,7 @@ const actions = {
      * @param {string} param1._model
      * @param {integer} param1.id
      * @param {...Object} param1.kwargs
-     * @return {string} thread local Id
+     * @returns {string} thread local Id
      */
     insertThread(
         { dispatch, getters, state },
@@ -1713,7 +1713,7 @@ const actions = {
      * @param {Object} param1
      * @param {string|undefined} [param1.attachmentLocalId]
      * @param {string[]} param1.attachmentLocalIds
-     * @return {string|undefined} unique id of open dialog, if open
+     * @returns {string|undefined} unique id of open dialog, if open
      */
     viewAttachments({ dispatch }, { attachmentLocalId, attachmentLocalIds }) {
         if (!attachmentLocalIds) {
@@ -1909,7 +1909,7 @@ const actions = {
      * @param {Object} param0.state
      * @param {Object} activityData
      * @param {String} chatterLocalId
-     * @return {string} activity local id
+     * @returns {string} activity local id
      */
     _createActivity({ dispatch, state }, activityData, chatterLocalId) {
         const activityLocalId = _.uniqueId('mail.activity_');
@@ -1980,7 +1980,7 @@ const actions = {
      * @param {Object} param0.state
      * @param {Object} [param1={}]
      * @param {string} [param1.threadLocalId]
-     * @return {string} composer local id
+     * @returns {string} composer local id
      */
     _createComposer({ state }, { threadLocalId }={}) {
         const composerLocalId = _.uniqueId('mail.composer_');
@@ -2005,7 +2005,7 @@ const actions = {
      * @param {Object} param0.state
      * @param {Object} mailTemplateData
      * @param {String} activityLocalId
-     * @return {string} mail template local id
+     * @returns {string} mail template local id
      */
     _createMailTemplate({ state }, mailTemplateData, activityLocalIds) {
         const mailTemplateLocalId = _.uniqueId('mail.mailTemplate_');
@@ -2067,7 +2067,7 @@ const actions = {
      * @param {string} param1.tracking_value_ids[i].field_type
      * @param {*} param1.tracking_value_ids[i].new_value
      * @param {*} param1.tracking_value_ids[i].old_value
-     * @return {string} message local Id
+     * @returns {string} message local Id
      */
     _createMessage(
         { dispatch, state },
@@ -2242,7 +2242,7 @@ const actions = {
      * @param {string} [param1.im_status]
      * @param {string} [param1.name]
      * @param {integer} [param1.userId]
-     * @return {string} partner local Id
+     * @returns {string} partner local Id
      */
     _createPartner(
         { state },
@@ -2346,7 +2346,7 @@ const actions = {
      * @param {string} [param1.state]
      * @param {string} [param1.uuid]
      * @param {string} [param1._model]
-     * @return {string} thread local Id
+     * @returns {string} thread local Id
      */
     _createThread(
         { dispatch, state },
@@ -2450,7 +2450,7 @@ const actions = {
      * @param {Object} param1
      * @param {string} [param1.stringifiedDomain='[]']
      * @param {string} param1.threadLocalId
-     * @return {string} thread cache local Id
+     * @returns {string} thread cache local Id
      */
     _createThreadCache(
         { state },
@@ -2532,7 +2532,7 @@ const actions = {
      * @param {Object} param0
      * @param {Array} param0.domain
      * @param {string} param0.threadLocalId
-     * @return {Array}
+     * @returns {Array}
      */
     _extendMessageDomainWithThreadDomain(
         { state },
@@ -2663,7 +2663,7 @@ const actions = {
      * @private
      * @param {Object} unused
      * @param {Object[]} notifications
-     * @return {Object[]}
+     * @returns {Object[]}
      */
     _filterNotificationsOnUnsubscribe(unused, notifications) {
         const unsubscribedNotif = notifications.find(notif =>
@@ -2679,7 +2679,7 @@ const actions = {
      * @private
      * @param {Object} unused
      * @param {string} htmlString
-     * @return {string}
+     * @returns {string}
      */
     _generateEmojisOnHtml(unused, htmlString) {
         for (const emoji of emojis) {
@@ -2699,7 +2699,7 @@ const actions = {
      * @private
      * @param {Object} unused
      * @param {string} content html content
-     * @return {String|undefined} command, if any in the content
+     * @returns {String|undefined} command, if any in the content
      */
     _getCommandFromText(unused, content) {
         if (content.startsWith('/')) {
@@ -2711,7 +2711,7 @@ const actions = {
      * @private
      * @param {Object} unused
      * @param {string} content html content
-     * @return {integer[]} list of mentioned partner Ids (not duplicate)
+     * @returns {integer[]} list of mentioned partner Ids (not duplicate)
      */
     _getMentionedPartnerIdsFromHtml(unused, content) {
         const parser = new window.DOMParser();
@@ -2732,7 +2732,7 @@ const actions = {
      * @param {Object} param0.env
      * @param {Object} param0.state
      * @param {string} threadLocalId
-     * @return {Object}
+     * @returns {Object}
      */
     _getThreadFetchMessagesKwargs({ env, state }, threadLocalId) {
         const thread = state.threads[threadLocalId];
@@ -3108,8 +3108,8 @@ const actions = {
                 });
             }
         }
-        const mailChannelList = getters.mailChannelList();
-        for (const mailChannel of mailChannelList) {
+        const allOrderedAndPinnedChannels = getters.allOrderedAndPinnedChannels();
+        for (const mailChannel of allOrderedAndPinnedChannels) {
             mailChannel.message_needaction_counter = 0;
         }
         inbox.counter -= message_ids.length;
@@ -3604,7 +3604,7 @@ const actions = {
      * @param {Object} activityData
      * @param {integer} activityData.id
      * @param {string} chatterLocalId
-     * @return {string} the existing or created activity local id
+     * @returns {string} the existing or created activity local id
      */
     _insertActivity({ dispatch, getters }, activityData, chatterLocalId) {
         const existingActivity = getters.activity(activityData.id);
@@ -3625,7 +3625,7 @@ const actions = {
      * @param {Object} param1
      * @param {integer} param1.id
      * @param {...Object} param1.kwargs
-     * @return {string} attachment local Id
+     * @returns {string} attachment local Id
      */
     _insertAttachment({ dispatch, state }, param1) {
         const id = param1.id;
@@ -3649,7 +3649,7 @@ const actions = {
      * @param {Object} mailTemplateData
      * @param {integer} mailTemplateData.id
      * @param {string} [activityLocalId]
-     * @return {string} the existing or created mail template local id
+     * @returns {string} the existing or created mail template local id
      */
     _insertMailTemplate({ dispatch, getters }, mailTemplateData, activityLocalId) {
         const existingMailTemplate = getters.mailTemplate(mailTemplateData.id);
@@ -3668,7 +3668,7 @@ const actions = {
      * @param {Object} param1
      * @param {integer} param1.id
      * @param {...Object} param1.kwargs
-     * @return {string} message local Id
+     * @returns {string} message local Id
      */
     _insertMessage({ dispatch, state }, param1) {
         const id = param1.id;
@@ -3691,7 +3691,7 @@ const actions = {
      * @param {Object} param1
      * @param {integer} param1.id
      * @param {...Object} param1.kwargs
-     * @return {string} partner local Id
+     * @returns {string} partner local Id
      */
     _insertPartner({ dispatch, state }, param1) {
         const id = param1.id;
@@ -3713,7 +3713,7 @@ const actions = {
      * @param {string} [param1.stringifiedDomain='[]']
      * @param {string} param1.threadLocalId
      * @param {...Object} param1.kwargs
-     * @return {string} thread cache local Id
+     * @returns {string} thread cache local Id
      */
     _insertThreadCache(
         { dispatch, state },
@@ -4104,10 +4104,8 @@ const actions = {
                 // hack: notification template does not support OWL components,
                 // so we simply use their template to make HTML as if it comes
                 // from component
-                const channelIcon = env.qweb.renderToString('mail.component.ThreadIcon', {
-                    storeProps: {
-                        thread: channel,
-                    },
+                const channelIcon = env.qweb.renderToString('mail.messaging.component.ThreadIcon', {
+                    thread: channel,
                 });
                 const channelName = _.escape(getters.threadName(channelLocalId));
                 const channelNameWithIcon = channelIcon + channelName;
@@ -4138,7 +4136,7 @@ const actions = {
      * @param {Object} param0.env
      * @param {Object} param0.state
      * @param {string} threadLocalId
-     * @return {Promise}
+     * @returns {Promise}
      */
     async _notifyServerThreadIsMinimized({ env, state }, threadLocalId) {
         const thread = state.threads[threadLocalId];
@@ -4156,7 +4154,7 @@ const actions = {
      * @param {Object} param0.env
      * @param {Object} param0.state
      * @param {string} threadLocalId
-     * @return {Promise}
+     * @returns {Promise}
      */
     async _notifyServerThreadState({ env, state }, threadLocalId) {
         const thread = state.threads[threadLocalId];
@@ -4231,7 +4229,7 @@ const actions = {
      * @param {Object} param0.state
      * @param {string} componentName
      * @param {any} info
-     * @return {string} unique id of the newly open dialog
+     * @returns {string} unique id of the newly open dialog
      */
     _openDialog({ state }, componentName, info) {
         const id = _.uniqueId('o_Dialog');

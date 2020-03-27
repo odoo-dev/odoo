@@ -1,16 +1,18 @@
-odoo.define('mail.component.Message', function (require) {
+odoo.define('mail.messaging.component.Message', function (require) {
 'use strict';
 
-const AttachmentList = require('mail.component.AttachmentList');
-const ModerationBanDialog = require('mail.component.ModerationBanDialog');
-const ModerationDiscardDialog = require('mail.component.ModerationDiscardDialog');
-const ModerationRejectDialog = require('mail.component.ModerationRejectDialog');
-const PartnerImStatusIcon = require('mail.component.PartnerImStatusIcon');
-const useStore = require('mail.hooks.useStore');
-const mailUtils = require('mail.utils');
+const components = {
+    AttachmentList: require('mail.messaging.component.AttachmentList'),
+    ModerationBanDialog: require('mail.messaging.component.ModerationBanDialog'),
+    ModerationDiscardDialog: require('mail.messaging.component.ModerationDiscardDialog'),
+    ModerationRejectDialog: require('mail.messaging.component.ModerationRejectDialog'),
+    PartnerImStatusIcon: require('mail.messaging.component.PartnerImStatusIcon'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
+const { timeFromNow } = require('mail.utils');
 
 const { _lt } = require('web.core');
-const time = require('web.time');
+const { getLangDatetimeFormat } = require('web.time');
 
 const { Component, useState } = owl;
 const { useDispatch, useGetters, useRef } = owl.hooks;
@@ -22,7 +24,6 @@ class Message extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -74,7 +75,9 @@ class Message extends Component {
          * Reference to the content of the message.
          */
         this._contentRef = useRef('content');
-        // To get checkbox state.
+        /**
+         * To get checkbox state.
+         */
         this._checkboxRef = useRef('checkbox');
         /**
          * Id of setInterval used to auto-update time elapsed of message at
@@ -84,7 +87,7 @@ class Message extends Component {
     }
 
     mounted() {
-        this.state.timeElapsed = mailUtils.timeFromNow(this.storeProps.message.date);
+        this.state.timeElapsed = timeFromNow(this.message.date);
         this._insertReadMoreLess($(this._contentRef.el));
     }
 
@@ -93,11 +96,11 @@ class Message extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Getters / Setters
+    // Public
     //--------------------------------------------------------------------------
 
     /**
-     * @return {string}
+     * @returns {string}
      */
     get avatar() {
         if (
@@ -110,7 +113,7 @@ class Message extends Component {
             // we should probably use the correspondig attachment id + access token
             // or create a dedicated route to get message image, checking the access right of the message
             return `/web/image/res.partner/${this.storeProps.author.id}/image_128`;
-        } else if (this.storeProps.message.message_type === 'email') {
+        } else if (this.message.message_type === 'email') {
             return '/mail/static/src/img/email_icon.png';
         }
         return '/mail/static/src/img/smiley/avatar.jpg';
@@ -119,17 +122,17 @@ class Message extends Component {
     /**
      * Get the date time of the message at current user locale time.
      *
-     * @return {string}
+     * @returns {string}
      */
     get datetime() {
-        return this.storeProps.message.date.format(time.getLangDatetimeFormat());
+        return this.message.date.format(getLangDatetimeFormat());
     }
 
     /**
      * Determine whether author redirect feature is enabled on message.
      * Click on message author should redirect to author.
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     get hasAuthorRedirect() {
         if (!this.props.hasAuthorRedirect) {
@@ -150,7 +153,7 @@ class Message extends Component {
      * component of this message component is linked to the origin thread of
      * this message, then the origin is the same.
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     get hasDifferentOriginThread() {
         return (
@@ -160,13 +163,13 @@ class Message extends Component {
     }
 
     /**
-     * @return {string[]}
+     * @returns {string[]}
      */
     get imageAttachmentLocalIds() {
-        if (!this.storeProps.message.attachmentLocalIds) {
+        if (!this.message.attachmentLocalIds) {
             return [];
         }
-        return this.storeProps.message.attachmentLocalIds.filter(attachmentLocalId =>
+        return this.message.attachmentLocalIds.filter(attachmentLocalId =>
             this.storeGetters.attachmentFileType(attachmentLocalId) === 'image'
         );
     }
@@ -174,20 +177,27 @@ class Message extends Component {
     /**
      * Determine whether the message is starred.
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     get isStarred() {
-        return this.storeProps.message.threadLocalIds.includes('mail.box_starred');
+        return this.message.threadLocalIds.includes('mail.box_starred');
     }
 
     /**
-     * @return {string[]}
+     * @returns {mail.messaging.entity.Message}
+     */
+    get message() {
+        return this.storeProps.message;
+    }
+
+    /**
+     * @returns {string[]}
      */
     get nonImageAttachmentLocalIds() {
-        if (!this.storeProps.message.attachmentLocalIds) {
+        if (!this.message.attachmentLocalIds) {
             return [];
         }
-        return this.storeProps.message.attachmentLocalIds.filter(attachmentLocalId =>
+        return this.message.attachmentLocalIds.filter(attachmentLocalId =>
             this.storeGetters.attachmentFileType(attachmentLocalId) !== 'image'
         );
     }
@@ -195,28 +205,28 @@ class Message extends Component {
     /**
      * Get the shorttime format of the message date.
      *
-     * @return {string}
+     * @returns {string}
      */
     get shortTime() {
-        return this.storeProps.message.date.format('hh:mm');
+        return this.message.date.format('hh:mm');
     }
 
     /**
-     * @return {string}
+     * @returns {string}
      */
     get timeElapsed() {
         clearInterval(this._intervalId);
         this._intervalId = setInterval(() => {
-            this.state.timeElapsed = mailUtils.timeFromNow(this.storeProps.message.date);
+            this.state.timeElapsed = timeFromNow(this.message.date);
         }, 60 * 1000);
         return this.state.timeElapsed;
     }
 
     /**
-     * @return {Object}
+     * @returns {Object}
      */
     get trackingValues() {
-        return this.storeProps.message.tracking_value_ids.map(trackingValue => {
+        return this.message.tracking_value_ids.map(trackingValue => {
             const value = Object.assign({}, trackingValue);
             value.changed_field = _.str.sprintf(this.env._t("%s:"), value.changed_field);
             if (value.field_type === 'datetime') {
@@ -242,16 +252,12 @@ class Message extends Component {
         });
     }
 
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
     /**
      * Tell whether the bottom of this message is visible or not.
      *
      * @param {Object} param0
      * @param {integer} [offset=0]
-     * @return {boolean}
+     * @returns {boolean}
      */
     isBottomVisible({ offset=0 }={}) {
         const elRect = this.el.getBoundingClientRect();
@@ -269,7 +275,7 @@ class Message extends Component {
     /**
      * Tell whether the message is partially visible on browser window or not.
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     isPartiallyVisible() {
         const elRect = this.el.getBoundingClientRect();
@@ -291,7 +297,7 @@ class Message extends Component {
      * @param {Object} [param0={}]
      * @param {string} [param0.behavior='auto']
      * @param {string} [param0.block='end']
-     * @return {Promise}
+     * @returns {Promise}
      */
     async scrollIntoView({ behavior='auto', block='end' }={}) {
         this.el.scrollIntoView({
@@ -309,7 +315,6 @@ class Message extends Component {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-
 
     /**
      * Modifies the message to add the 'read more/read less' functionality
@@ -389,6 +394,7 @@ class Message extends Component {
             });
         }
     }
+
     /**
      * @private
      * @param {Object} param0
@@ -444,6 +450,7 @@ class Message extends Component {
             model: this.storeProps.author._model,
         });
     }
+
     /**
      * @private
      * @param {MouseEvent} ev
@@ -452,6 +459,7 @@ class Message extends Component {
         ev.preventDefault();
         this.storeDispatch('moderateMessages', [this.props.messageLocalId], 'accept');
     }
+
     /**
      * @private
      * @param {MouseEvent} ev
@@ -460,6 +468,7 @@ class Message extends Component {
         ev.preventDefault();
         this.storeDispatch('moderateMessages', [this.props.messageLocalId], 'allow');
     }
+
     /**
      * @private
      * @param {MouseEvent} ev
@@ -468,6 +477,7 @@ class Message extends Component {
         ev.preventDefault();
         this.state.hasModerationBanDialog = true;
     }
+
     /**
      * @private
      * @param {MouseEvent} ev
@@ -476,6 +486,7 @@ class Message extends Component {
         ev.preventDefault();
         this.state.hasModerationDiscardDialog = true;
     }
+
     /**
      * @private
      * @param {MouseEvent} ev
@@ -484,6 +495,7 @@ class Message extends Component {
         ev.preventDefault();
         this.state.hasModerationRejectDialog = true;
     }
+
     /**
      * @private
      * @param {MouseEvent} ev
@@ -501,48 +513,57 @@ class Message extends Component {
      * @param {MouseEvent} ev
      */
     _onClickStar(ev) {
+        ev.stopPropagation();
         return this.storeDispatch('toggleStarMessage', this.props.messageLocalId);
     }
 
     /**
      * @private
+     * @param {MouseEvent} ev
      */
-    _onClickMarkAsRead() {
+    _onClickMarkAsRead(ev) {
+        ev.stopPropagation();
         return this.storeDispatch('markMessagesAsRead', [this.props.messageLocalId]);
     }
 
     /**
      * @private
+     * @param {MouseEvent} ev
      */
-    _onClickReply() {
+    _onClickReply(ev) {
+        ev.stopPropagation();
         this.trigger('o-reply-message', {
             messageLocalId: this.props.messageLocalId,
         });
     }
+
     /**
      * @private
      */
     _onDialogClosedModerationBan() {
         this.state.hasModerationBanDialog = false;
     }
+
     /**
      * @private
      */
     _onDialogClosedModerationDiscard() {
         this.state.hasModerationDiscardDialog = false;
     }
+
     /**
      * @private
      */
     _onDialogClosedModerationReject() {
         this.state.hasModerationRejectDialog = false;
     }
+
     /**
      * @private
      */
     _onChangeCheckbox() {
         this.env.store.dispatch('setMessagesCheck',
-            [this.storeProps.message.localId],
+            [this.message.localId],
             this.storeProps.thread.localId,
             this.props.threadStringifiedDomain,
             {
@@ -550,56 +571,40 @@ class Message extends Component {
             },
         );
     }
+
 }
 
-Message.components = {
-    AttachmentList,
-    ModerationBanDialog,
-    ModerationDiscardDialog,
-    ModerationRejectDialog,
-    PartnerImStatusIcon,
-};
-
-Message.defaultProps = {
-    hasAuthorRedirect: false,
-    hasCheckbox: false,
-    hasMarkAsReadIcon: false,
-    hasReplyIcon: false,
-    isSelected: false,
-    isSquashed: false,
-    threadStringifiedDomain: '[]',
-};
-
-Message.props = {
-    attachmentsDetailsMode: {
-        type: String, //['auto', 'card', 'hover', 'none']
-        optional: true
+Object.assign(Message, {
+    components,
+    defaultProps: {
+        hasAuthorRedirect: false,
+        hasCheckbox: false,
+        hasMarkAsReadIcon: false,
+        hasReplyIcon: false,
+        isSelected: false,
+        isSquashed: false,
+        threadStringifiedDomain: '[]',
     },
-    hasAuthorRedirect: {
-        type: Boolean,
+    props: {
+        attachmentsDetailsMode: {
+            type: String, //['auto', 'card', 'hover', 'none']
+            optional: true
+        },
+        hasAuthorRedirect: Boolean,
+        hasCheckbox: Boolean,
+        hasMarkAsReadIcon: Boolean,
+        hasReplyIcon: Boolean,
+        isSelected: Boolean,
+        isSquashed: Boolean,
+        messageLocalId: String,
+        threadLocalId: {
+            type: String,
+            optional: true,
+        },
+        threadStringifiedDomain: String,
     },
-    hasCheckbox: Boolean,
-    hasMarkAsReadIcon: {
-        type: Boolean,
-    },
-    hasReplyIcon: {
-        type: Boolean,
-    },
-    isSelected: {
-        type: Boolean,
-    },
-    isSquashed: {
-        type: Boolean,
-    },
-    messageLocalId: String,
-    threadLocalId: {
-        type: String,
-        optional: true,
-    },
-    threadStringifiedDomain: String,
-};
-
-Message.template = 'mail.component.Message';
+    template: 'mail.messaging.component.Message',
+});
 
 return Message;
 

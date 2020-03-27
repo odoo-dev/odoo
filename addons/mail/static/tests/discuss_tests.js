@@ -95,7 +95,7 @@ QUnit.module('Discuss', {
         // unpatch _.debounce and _.throttle
         _.debounce = this.underscoreDebounce;
         _.throttle = this.underscoreThrottle;
-    }
+    },
 });
 
 QUnit.test('basic rendering', async function (assert) {

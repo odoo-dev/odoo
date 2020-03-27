@@ -1,8 +1,10 @@
-odoo.define('mail_bot.component.NotificationRequest', function (require) {
+odoo.define('mail_bot.messaging.component.NotificationRequest', function (require) {
 'use strict';
 
-const PartnerImStatusIcon = require('mail.component.PartnerImStatusIcon');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    PartnerImStatusIcon: require('mail.messaging.component.PartnerImStatusIcon'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useDispatch, useGetters } = owl.hooks;
@@ -11,7 +13,6 @@ class NotificationRequest extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -33,7 +34,8 @@ class NotificationRequest extends Component {
      * @returns {string}
      */
     getHeaderText() {
-        return _.str.sprintf(this.env._t("%s has a request"),
+        return _.str.sprintf(
+            this.env._t("%s has a request"),
             this.storeGetters.partnerName(this.storeProps.partnerRoot.localId)
         );
     }
@@ -52,8 +54,7 @@ class NotificationRequest extends Component {
     _handleResponseNotificationPermission(value) {
         this.storeDispatch('removeOdoobotRequest');
         if (value !== 'granted') {
-            this.env.call('bus_service',
-                'sendNotification',
+            this.env.call('bus_service', 'sendNotification',
                 this.env._t("Permission denied"),
                 this.env._t("Odoo will not have the permission to send native notifications on this device.")
             );
@@ -74,14 +75,13 @@ class NotificationRequest extends Component {
         }
         this.trigger('o-odoobot-request-clicked');
     }
+
 }
 
 Object.assign(NotificationRequest, {
-    components: {
-        PartnerImStatusIcon,
-    },
+    components,
     props: {},
-    template: 'mail_bot.component.NotificationRequest',
+    template: 'mail_bot.messaging.component.NotificationRequest',
 });
 
 return NotificationRequest;

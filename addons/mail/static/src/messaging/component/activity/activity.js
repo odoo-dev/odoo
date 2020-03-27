@@ -1,21 +1,26 @@
-odoo.define('mail.component.Activity', function (require) {
+odoo.define('mail.messaging.component.Activity', function (require) {
 'use strict';
 
-const ActivityMarkDoneButton = require('mail.component.ActivityMarkDoneButton');
-const FileUploader = require('mail.component.FileUploader');
-const MailTemplate = require('mail.component.MailTemplate');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    ActivityMarkDoneButton: require('mail.messaging.component.ActivityMarkDoneButton'),
+    FileUploader: require('mail.messaging.component.FileUploader'),
+    MailTemplate: require('mail.messaging.component.MailTemplate'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
-const { auto_str_to_date, getLangDateFormat, getLangDatetimeFormat } = require('web.time');
+const {
+    auto_str_to_date,
+    getLangDateFormat,
+    getLangDatetimeFormat,
+} = require('web.time');
 
-const { Component } = owl;
-const { useDispatch, useGetters, useRef, useState } = owl.hooks;
+const { Component, useState } = owl;
+const { useDispatch, useGetters, useRef } = owl.hooks;
 
 class Activity extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -25,8 +30,9 @@ class Activity extends Component {
         this.storeDispatch = useDispatch();
         this.storeGetters = useGetters();
         this.storeProps = useStore((state, props) => {
-            const activity = state.activities[props.activityLocalId];
-            return { activity };
+            return {
+                activity: state.activities[props.activityLocalId],
+            };
         });
         /**
          * Reference of the file uploader.
@@ -36,22 +42,29 @@ class Activity extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Getters / Setters
+    // Public
     //--------------------------------------------------------------------------
 
     /**
-     * @return {string}
+     * @returns {mail.messaging.entity.Activity}
      */
-    get assignedUserText() {
-        return _.str.sprintf(this.env._t("for %s"), this.storeProps.activity.userDisplayName);
+    get activity() {
+        return this.storeProps.activity;
     }
 
     /**
-     * @return {string}
+     * @returns {string}
+     */
+    get assignedUserText() {
+        return _.str.sprintf(this.env._t("for %s"), this.activity.userDisplayName);
+    }
+
+    /**
+     * @returns {string}
      */
     get delayLabel() {
         const today = moment().startOf('day');
-        const momentDeadlineDate = moment(auto_str_to_date(this.storeProps.activity.dateDeadline));
+        const momentDeadlineDate = moment(auto_str_to_date(this.activity.dateDeadline));
         // true means no rounding
         const diff = momentDeadlineDate.diff(today, 'days', true);
         if (diff === 0) {
@@ -68,28 +81,28 @@ class Activity extends Component {
     }
 
     /**
-     * @return {string}
+     * @returns {string}
      */
     get formattedCreateDatetime() {
-        const momentCreateDate = moment(auto_str_to_date(this.storeProps.activity.dateCreate));
+        const momentCreateDate = moment(auto_str_to_date(this.activity.dateCreate));
         const datetimeFormat = getLangDatetimeFormat();
         return momentCreateDate.format(datetimeFormat);
     }
 
     /**
-     * @return {string}
+     * @returns {string}
      */
     get formattedDeadlineDate() {
-        const momentDeadlineDate = moment(auto_str_to_date(this.storeProps.activity.dateDeadline));
+        const momentDeadlineDate = moment(auto_str_to_date(this.activity.dateDeadline));
         const datetimeFormat = getLangDateFormat();
         return momentDeadlineDate.format(datetimeFormat);
     }
 
     /**
-     * @return {string}
+     * @returns {string}
      */
     get summary() {
-        return _.str.sprintf(this.env._t("“%s”"), this.storeProps.activity.summary);
+        return _.str.sprintf(this.env._t("“%s”"), this.activity.summary);
     }
 
     //--------------------------------------------------------------------------
@@ -100,6 +113,7 @@ class Activity extends Component {
      * @private
      * @param {CustomEvent} ev
      * @param {Object} ev.detail
+     * @param {string} ev.detail.attachmentLocalId
      */
     _onAttachmentCreated(ev) {
         const { attachmentLocalId } = ev.detail;
@@ -138,15 +152,13 @@ class Activity extends Component {
             views: [[false, 'form']],
             target: 'new',
             context: {
-                default_res_id: this.storeProps.activity.resId,
-                default_res_model: this.storeProps.activity.model,
+                default_res_id: this.activity.resId,
+                default_res_model: this.activity.model,
             },
-            res_id: this.storeProps.activity.id,
+            res_id: this.activity.id,
         };
         return this.env.do_action(action, {
-            on_close: () => {
-                this.storeDispatch('updateActivity', this.props.activityLocalId);
-            }
+            on_close: () => this.storeDispatch('updateActivity', this.props.activityLocalId),
         });
     }
 
@@ -161,11 +173,11 @@ class Activity extends Component {
 }
 
 Object.assign(Activity, {
-    components: { ActivityMarkDoneButton, FileUploader, MailTemplate },
+    components,
     props: {
         activityLocalId: String,
     },
-    template: 'mail.component.Activity',
+    template: 'mail.messaging.component.Activity',
 });
 
 return Activity;

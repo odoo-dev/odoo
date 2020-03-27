@@ -1,32 +1,36 @@
-odoo.define('mail.component.MessageTests', function (require) {
+odoo.define('mail.messaging.component.MessageTests', function (require) {
 'use strict';
 
-const Message = require('mail.component.Message');
+const components = {
+    Message: require('mail.messaging.component.Message'),
+};
 const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
-QUnit.module('mail.messaging', {}, function () {
+QUnit.module('mail', {}, function () {
+QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('Message', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createMessage = async (messageLocalId, otherProps) => {
-            Message.env = this.env;
+        this.createMessageComponent = async (messageLocalId, otherProps) => {
+            const MessageComponent = components.Message;
+            MessageComponent.env = this.env;
             // messages must be displayed in the context of a thread
             const threadLocalId = this.env.store.dispatch('_createThread', {
                 _model: 'mail.channel',
                 id: 20,
             });
-            this.message = new Message(null, Object.assign({
+            this.component = new MessageComponent(null, Object.assign({
                 messageLocalId,
                 threadLocalId,
             }, otherProps));
-            await this.message.mount(this.widget.$el[0]);
+            await this.component.mount(this.widget.el);
             await afterNextRender();
         };
         this.start = async params => {
@@ -42,18 +46,18 @@ QUnit.module('Message', {
     },
     afterEach() {
         utilsAfterEach(this);
-        if (this.message) {
-            this.message.destroy();
+        if (this.component) {
+            this.component.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
         }
         this.env = undefined;
-        delete Message.env;
-    }
+        delete components.Message.env;
+    },
 });
 
-QUnit.test('default', async function (assert) {
+QUnit.test('basic rendering', async function (assert) {
     assert.expect(12);
 
     await this.start();
@@ -62,70 +66,70 @@ QUnit.test('default', async function (assert) {
         body: "<p>Test</p>",
         id: 100,
     });
-    await this.createMessage(messageLocalId);
+    await this.createMessageComponent(messageLocalId);
     assert.strictEqual(
         document.querySelectorAll('.o_Message').length,
         1,
         "should display a message component"
     );
-    const message = document.querySelector('.o_Message');
+    const messageEl = document.querySelector('.o_Message');
     assert.strictEqual(
-        message.dataset.messageLocalId,
+        messageEl.dataset.messageLocalId,
         'mail.message_100',
         "message component should be linked to message store model"
     );
     assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_sidebar`).length,
+        messageEl.querySelectorAll(`:scope .o_Message_sidebar`).length,
         1,
         "message should have a sidebar"
     );
     assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_sidebar .o_Message_authorAvatar`).length,
+        messageEl.querySelectorAll(`:scope .o_Message_sidebar .o_Message_authorAvatar`).length,
         1,
         "message should have author avatar in the sidebar"
     );
     assert.strictEqual(
-        message.querySelector(`:scope .o_Message_authorAvatar`).tagName,
+        messageEl.querySelector(`:scope .o_Message_authorAvatar`).tagName,
         'IMG',
         "message author avatar should be an image"
     );
     assert.strictEqual(
-        message.querySelector(`:scope .o_Message_authorAvatar`).dataset.src,
+        messageEl.querySelector(`:scope .o_Message_authorAvatar`).dataset.src,
         '/web/image/res.partner/7/image_128',
         "message author avatar should GET image of the related partner"
     );
     assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_authorName`).length,
+        messageEl.querySelectorAll(`:scope .o_Message_authorName`).length,
         1,
         "message should display author name"
     );
     assert.strictEqual(
-        message.querySelector(`:scope .o_Message_authorName`).textContent,
+        messageEl.querySelector(`:scope .o_Message_authorName`).textContent,
         "Demo User",
         "message should display correct author name"
     );
     assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_date`).length,
+        messageEl.querySelectorAll(`:scope .o_Message_date`).length,
         1,
         "message should display date"
     );
     assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_commands`).length,
+        messageEl.querySelectorAll(`:scope .o_Message_commands`).length,
         1,
         "message should display list of commands"
     );
     assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_content`).length,
+        messageEl.querySelectorAll(`:scope .o_Message_content`).length,
         1,
         "message should display the content"
     );
-    assert.strictEqual(message.querySelector(`:scope .o_Message_content`).innerHTML,
+    assert.strictEqual(messageEl.querySelector(`:scope .o_Message_content`).innerHTML,
         "<p>Test</p>",
         "message should display the correct content"
     );
 });
 
-QUnit.test('deleteAttachment', async function (assert) {
+QUnit.test('delete attachment linked to message', async function (assert) {
     assert.expect(2);
 
     await this.start();
@@ -139,25 +143,27 @@ QUnit.test('deleteAttachment', async function (assert) {
         body: "<p>Test</p>",
         id: 100,
     });
-    await this.createMessage(messageLocalId);
+    await this.createMessageComponent(messageLocalId);
     document.querySelector('.o_Attachment_asideItemUnlink').click();
     await afterNextRender();
-    assert.ok(!this.env.store.state.attachments['ir.attachment_10']);
-    assert.ok(!this.env.store.state.messages[messageLocalId].attachmentLocalIds['ir.attachment_10']);
+    assert.notOk(this.env.store.state.attachments['ir.attachment_10']);
+    assert.notOk(this.env.store.state.messages[messageLocalId].attachmentLocalIds['ir.attachment_10']);
 });
 
 QUnit.test('moderation: moderated channel with pending moderation message (author)', async function (assert) {
     assert.expect(1);
+
     await this.start();
     const messageLocalId = this.env.store.dispatch('_createMessage', {
         author_id: [1, "Admin"],
         body: "<p>Test</p>",
+        channel_ids: [20],
         id: 100,
         model: 'mail.channel',
         moderation_status: 'pending_moderation',
         res_id: 20,
     });
-    await this.createMessage(messageLocalId);
+    await this.createMessageComponent(messageLocalId);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_Message_moderationPending.o-author`).length,
@@ -168,6 +174,7 @@ QUnit.test('moderation: moderated channel with pending moderation message (autho
 
 QUnit.test('moderation: moderated channel with pending moderation message (moderator)', async function (assert) {
     assert.expect(9);
+
     Object.assign(this.data.initMessaging, {
         moderation_channel_ids: [20],
     });
@@ -175,37 +182,37 @@ QUnit.test('moderation: moderated channel with pending moderation message (moder
     const messageLocalId = this.env.store.dispatch('_createMessage', {
         author_id: [7, "Demo User"],
         body: "<p>Test</p>",
+        channel_ids: [20],
         id: 100,
         model: 'mail.channel',
         moderation_status: 'pending_moderation',
         res_id: 20,
     });
-    await this.createMessage(messageLocalId);
-    const message = document.querySelector('.o_Message');
-    assert.ok(message, "should display a message");
-    assert.containsOnce(message, `.o_Message_moderationSubHeader`,
+    await this.createMessageComponent(messageLocalId);
+    const messageEl = document.querySelector('.o_Message');
+    assert.ok(messageEl, "should display a message");
+    assert.containsOnce(messageEl, `.o_Message_moderationSubHeader`,
         "should have the message pending moderation"
     );
-    assert.containsNone(message, `.o_Message_checkbox`,
+    assert.containsNone(messageEl, `.o_Message_checkbox`,
         "should not have the moderation checkbox by default"
     );
-    const moderationActionSelector = '.o_Message_moderationAction';
-    assert.containsN(message, moderationActionSelector, 5,
+    assert.containsN(messageEl, '.o_Message_moderationAction', 5,
         "there should be 5 contextual moderation decisions next to the message"
     );
-    assert.containsOnce(message, moderationActionSelector + '.o-accept',
+    assert.containsOnce(messageEl, '.o_Message_moderationAction.o-accept',
         "there should be a contextual moderation decision to accept the message"
     );
-    assert.containsOnce(message, moderationActionSelector + '.o-reject',
+    assert.containsOnce(messageEl, '.o_Message_moderationAction.o-reject',
         "there should be a contextual moderation decision to reject the message"
     );
-    assert.containsOnce(message, moderationActionSelector + '.o-discard',
+    assert.containsOnce(messageEl, '.o_Message_moderationAction.o-discard',
         "there should be a contextual moderation decision to discard the message"
     );
-    assert.containsOnce(message, moderationActionSelector + '.o-allow',
+    assert.containsOnce(messageEl, '.o_Message_moderationAction.o-allow',
         "there should be a contextual moderation decision to allow the user of the message)"
     );
-    assert.containsOnce(message, moderationActionSelector + '.o-ban',
+    assert.containsOnce(messageEl, '.o_Message_moderationAction.o-ban',
         "there should be a contextual moderation decision to ban the user of the message"
     );
     // The actions are tested as part of discuss tests.
@@ -213,4 +220,6 @@ QUnit.test('moderation: moderated channel with pending moderation message (moder
 
 });
 });
+});
+
 });

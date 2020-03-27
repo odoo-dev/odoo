@@ -1,4 +1,4 @@
-odoo.define('mail.component.AutocompleteInput', function (require) {
+odoo.define('mail.messaging.component.AutocompleteInput', function (require) {
 'use strict';
 
 const { Component } = owl;
@@ -37,7 +37,7 @@ class AutocompleteInput extends Component {
      * the suggestion menu.
      *
      * @param {Node} node
-     * @return {boolean}
+     * @returns {boolean}
      */
     contains(node) {
         if (this.el.contains(node)) {
@@ -123,43 +123,38 @@ class AutocompleteInput extends Component {
             this.trigger('o-hide');
         }
     }
+
 }
 
-AutocompleteInput.defaultProps = {
-    isFocusOnMount: false,
-    isHtml: false,
-    placeholder: '',
-};
-
-AutocompleteInput.props = {
-    customClass: {
-        type: String,
-        optional: true,
+Object.assign(AutocompleteInput, {
+    defaultProps: {
+        isFocusOnMount: false,
+        isHtml: false,
+        placeholder: '',
     },
-    focus: {
-        type: Function,
-        optional: true,
+    props: {
+        customClass: {
+            type: String,
+            optional: true,
+        },
+        focus: {
+            type: Function,
+            optional: true,
+        },
+        isFocusOnMount: Boolean,
+        isHtml: Boolean,
+        placeholder: String,
+        select: {
+            type: Function,
+            optional: true,
+        },
+        source: {
+            type: Function,
+            optional: true,
+        },
     },
-    isFocusOnMount: {
-        type: Boolean,
-    },
-    isHtml: {
-        type: Boolean,
-    },
-    placeholder: {
-        type: String,
-    },
-    select: {
-        type: Function,
-        optional: true,
-    },
-    source: {
-        type: Function,
-        optional: true,
-    },
-};
-
-AutocompleteInput.template = 'mail.component.AutocompleteInput';
+    template: 'mail.messaging.component.AutocompleteInput',
+});
 
 return AutocompleteInput;
 

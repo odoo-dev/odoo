@@ -2,25 +2,25 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_Thread {
+.o_ThreadViewer {
     display: flex;
     position: relative;
     flex-flow: column;
     overflow: auto;
 }
 
-.o_Thread_composer {
+.o_ThreadViewer_composer {
     flex: 0 0 auto;
 }
 
-.o_Thread_loading {
+.o_ThreadViewer_loading {
     display: flex;
     align-self: center;
     flex: 1 1 auto;
     align-items: center;
 }
 
-.o_Thread_messageList {
+.o_ThreadViewer_messageList {
     flex: 1 1 auto;
 }
 
@@ -28,11 +28,11 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_Thread {
+.o_ThreadViewer {
     background-color: gray('100');
 
 }
 
-.o_Thread_loadingIcon {
+.o_ThreadViewer_loadingIcon {
     margin-right: 3px;
 }

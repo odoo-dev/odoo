@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="mail.component.DiscussMobileMailboxSelection" owl="1">
+    <t t-name="mail.messaging.component.DiscussMobileMailboxSelection" owl="1">
         <div class="o_DiscussMobileMailboxSelection">
-            <t t-foreach="storeProps.pinnedMailboxList" t-as="mailbox" t-key="mailbox.localId">
+            <t t-foreach="storeProps.allOrderedAndPinnedMailboxes" t-as="mailbox" t-key="mailbox.localId">
                 <button class="o_DiscussMobileMailboxSelection_button btn"
                     t-att-class="{
                         'btn-primary': props.activeThreadLocalId === mailbox.localId,

@@ -1,7 +1,7 @@
-odoo.define('mail.component.PartnerImStatusIcon', function (require) {
+odoo.define('mail.messaging.component.PartnerImStatusIcon', function (require) {
 'use strict';
 
-const useStore = require('mail.hooks.useStore');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useGetters } = owl.hooks;
@@ -10,7 +10,6 @@ class PartnerImStatusIcon extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -23,9 +22,26 @@ class PartnerImStatusIcon extends Component {
             };
         });
     }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Partner}
+     */
+    get partner() {
+        return this.storeProps.partner;
+    }
+
 }
 
-PartnerImStatusIcon.template = 'mail.component.PartnerImStatusIcon';
+Object.assign(PartnerImStatusIcon, {
+    props: {
+        partnerLocalId: String,
+    },
+    template: 'mail.messaging.component.PartnerImStatusIcon',
+});
 
 return PartnerImStatusIcon;
 

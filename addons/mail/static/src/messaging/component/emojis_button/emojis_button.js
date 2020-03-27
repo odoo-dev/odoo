@@ -1,13 +1,14 @@
-odoo.define('mail.component.EmojisButton', function (require) {
+odoo.define('mail.messaging.component.EmojisButton', function (require) {
 'use strict';
 
-const EmojisPopover = require('mail.component.EmojisPopover');
-const PopoverButtonWithComponent = require('mail.component.PopoverButtonWithComponent');
+const components = {
+    EmojisPopover: require('mail.messaging.component.EmojisPopover'),
+    PopoverButtonWithComponent: require('mail.messaging.component.PopoverButtonWithComponent'),
+};
 
-class EmojisButton extends PopoverButtonWithComponent {
+class EmojisButton extends components.PopoverButtonWithComponent {
 
     /**
-     * @param args
      * @override
      */
     constructor(...args) {
@@ -42,8 +43,9 @@ class EmojisButton extends PopoverButtonWithComponent {
      * @returns {EmojisPopover}
      */
     _createPopoverComponent() {
-        EmojisPopover.env = this.env;
-        return new EmojisPopover(null);
+        const EmojisPopoverComponent = components.EmojisPopover;
+        EmojisPopoverComponent.env = this.env;
+        return new EmojisPopoverComponent(null);
     }
 
     //--------------------------------------------------------------------------

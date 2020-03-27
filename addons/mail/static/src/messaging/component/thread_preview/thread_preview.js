@@ -1,9 +1,11 @@
-odoo.define('mail.component.ThreadPreview', function (require) {
+odoo.define('mail.messaging.component.ThreadPreview', function (require) {
 'use strict';
 
-const MessageAuthorPrefix = require('mail.component.MessageAuthorPrefix');
-const PartnerImStatusIcon = require('mail.component.PartnerImStatusIcon');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    MessageAuthorPrefix: require('mail.messaging.component.MessageAuthorPrefix'),
+    PartnerImStatusIcon: require('mail.messaging.component.PartnerImStatusIcon'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 const mailUtils = require('mail.utils');
 
 const { Component } = owl;
@@ -13,7 +15,6 @@ class ThreadPreview extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -43,13 +44,27 @@ class ThreadPreview extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Getter / Setter
+    // Public
     //--------------------------------------------------------------------------
+
+    /**
+     * Get the image route of the thread.
+     *
+     * @returns {string}
+     */
+    image() {
+        const directPartnerLocalId = this.thread.directPartnerLocalId;
+        if (directPartnerLocalId) {
+            const directPartner = this.env.store.state.partners[directPartnerLocalId];
+            return `/web/image/res.partner/${directPartner.id}/image_128`;
+        }
+        return `/web/image/mail.channel/${this.thread.id}/image_128`;
+    }
 
     /**
      * Get inline content of the last message of this conversation.
      *
-     * @return {string}
+     * @returns {string}
      */
     get inlineLastMessageBody() {
         if (!this.storeProps.lastMessage) {
@@ -60,35 +75,24 @@ class ThreadPreview extends Component {
             mailUtils.inline);
     }
 
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * Get the image route of the thread.
-     *
-     * @return {string}
-     */
-    getImage() {
-        const directPartnerLocalId = this.storeProps.thread.directPartnerLocalId;
-        if (directPartnerLocalId) {
-            const directPartner = this.env.store.state.partners[directPartnerLocalId];
-            return `/web/image/res.partner/${directPartner.id}/image_128`;
-        }
-        return `/web/image/mail.channel/${this.storeProps.thread.id}/image_128`;
-    }
-
     /**
      * Determine whether the last message of this conversation comes from
      * current user or not.
      *
-     * @return {boolean}
+     * @returns {boolean}
      */
     get isMyselfLastMessageAuthor() {
         return (
             this.storeProps.lastMessageAuthor &&
             this.storeProps.lastMessageAuthor.id === this.env.session.partner_id
         ) || false;
+    }
+
+    /**
+     * @returns {mail.messaging.entity.Thread}
+     */
+    get thread() {
+        return this.storeProps.thread;
     }
 
     //--------------------------------------------------------------------------
@@ -101,28 +105,28 @@ class ThreadPreview extends Component {
      */
     _onClick(ev) {
         this.trigger('o-select-thread', {
-            threadLocalId: this.storeProps.thread.localId,
+            threadLocalId: this.thread.localId,
         });
     }
+
     /**
      * @private
      * @param {MouseEvent} ev
      */
     _onClickMarkAsRead(ev) {
+        ev.stopPropagation();
         this.storeDispatch('markThreadAsSeen', this.props.threadLocalId);
     }
+
 }
 
-ThreadPreview.components = {
-    MessageAuthorPrefix,
-    PartnerImStatusIcon,
-};
-
-ThreadPreview.props = {
-    threadLocalId: String,
-};
-
-ThreadPreview.template = 'mail.component.ThreadPreview';
+Object.assign(ThreadPreview, {
+    components,
+    props: {
+        threadLocalId: String,
+    },
+    template: 'mail.messaging.component.ThreadPreview',
+});
 
 return ThreadPreview;
 

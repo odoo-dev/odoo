@@ -1,16 +1,18 @@
-odoo.define('mail.component.Discuss', function (require) {
+odoo.define('mail.messaging.component.Discuss', function (require) {
 'use strict';
 
-const AutocompleteInput = require('mail.component.AutocompleteInput');
-const Composer = require('mail.component.Composer');
-const MobileMailboxSelection = require('mail.component.DiscussMobileMailboxSelection');
-const Sidebar = require('mail.component.DiscussSidebar');
-const MobileMessagingNavbar = require('mail.component.MobileMessagingNavbar');
-const ModerationDiscardDialog = require('mail.component.ModerationDiscardDialog');
-const ModerationRejectDialog = require('mail.component.ModerationRejectDialog');
-const NotificationList = require('mail.component.NotificationList');
-const Thread = require('mail.component.Thread');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    AutocompleteInput: require('mail.messaging.component.AutocompleteInput'),
+    Composer: require('mail.messaging.component.Composer'),
+    DiscussMobileMailboxSelection: require('mail.messaging.component.DiscussMobileMailboxSelection'),
+    DiscussSidebar: require('mail.messaging.component.DiscussSidebar'),
+    MobileMessagingNavbar: require('mail.messaging.component.MobileMessagingNavbar'),
+    ModerationDiscardDialog: require('mail.messaging.component.ModerationDiscardDialog'),
+    ModerationRejectDialog: require('mail.messaging.component.ModerationRejectDialog'),
+    NotificationList: require('mail.messaging.component.NotificationList'),
+    ThreadViewer: require('mail.messaging.component.ThreadViewer'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component, useState } = owl;
 const { useDispatch, useGetters, useRef } = owl.hooks;
@@ -19,7 +21,6 @@ class Discuss extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -87,7 +88,7 @@ class Discuss extends Component {
                 )
                 : [];
             // TODO SEB: transform into storeProps.discuss...
-            return Object.assign({}, state.discuss, {
+            return {
                 activeThread,
                 activeThreadCache,
                 activeThreadCacheLocalId,
@@ -95,11 +96,11 @@ class Discuss extends Component {
                 // useful in willUpdateProps to detect change of counter
                 activeThreadCounter: activeThread && activeThread.counter,
                 checkedMessageLocalIds,
-                isMessagingReady: state.isMessagingReady,
+                discuss: state.discuss,
+                isMessagingInitialized: state.isMessagingInitialized,
                 isMobile: state.isMobile,
-                stringifiedDomain,
                 uncheckedMessageLocalIds,
-            });
+            };
         }, {
             compareDepth: {
                 checkedMessageLocalIds: 1,
@@ -155,7 +156,7 @@ class Discuss extends Component {
             this.trigger('o-push-state-action-manager', {
                 activeThreadLocalId: this.props.initActiveThreadLocalId,
             });
-        } else if (this.storeProps.isMessagingReady) {
+        } else if (this.storeProps.isMessagingInitialized) {
             this.storeDispatch('openThread', this.props.initActiveThreadLocalId, {
                 resetDiscussDomain: true,
             });
@@ -171,9 +172,9 @@ class Discuss extends Component {
         if (!activeThread) {
             return;
         }
-        if (nextProps.activeThreadLocalId !== this.storeProps.activeThreadLocalId) {
+        if (nextProps.discuss.activeThreadLocalId !== this.discuss.activeThreadLocalId) {
             this.trigger('o-push-state-action-manager', {
-                activeThreadLocalId: nextProps.activeThreadLocalId,
+                activeThreadLocalId: nextProps.discuss.activeThreadLocalId,
             });
         }
     }
@@ -199,7 +200,7 @@ class Discuss extends Component {
         }
         this.trigger('o-update-control-panel');
         this.trigger('o-push-state-action-manager', {
-            activeThreadLocalId: this.storeProps.activeThreadLocalId,
+            activeThreadLocalId: this.discuss.activeThreadLocalId,
         });
         if (
             this.storeProps.activeThread.localId === 'mail.box_inbox' &&
@@ -208,7 +209,7 @@ class Discuss extends Component {
         ) {
             this.trigger('o-show-rainbow-man');
         }
-        if (!this._wasMessagingReady && this.storeProps.isMessagingReady) {
+        if (!this._wasMessagingReady && this.storeProps.isMessagingInitialized) {
             this.storeDispatch('openThread', this.props.initActiveThreadLocalId, {
                 resetDiscussDomain: true,
             });
@@ -222,26 +223,29 @@ class Discuss extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Getters / Setters
+    // Public
     //--------------------------------------------------------------------------
 
     /**
-     * @return {string}
+     * @returns {string}
      */
     get addChannelInputPlaceholder() {
         return this.env._t("Create or search channel...");
     }
 
     /**
-     * @return {string}
+     * @returns {string}
      */
     get addChatInputPlaceholder() {
         return this.env._t("Search user...");
     }
 
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
+    /**
+     * @returns {mail.messaging.entity.Discuss}
+     */
+    get discuss() {
+        return this.storeProps.discuss;
+    }
 
     doMobileNewChannel() {
         this.state.isAddingChannel = true;
@@ -250,10 +254,11 @@ class Discuss extends Component {
     doMobileNewMessage() {
         this.state.isAddingChat = true;
     }
+
     /**
-     * @return {Object[]}
+     * @returns {Object[]}
      */
-    getMobileMessagingNavbarTabs() {
+    mobileNavbarTabs() {
         return [{
             icon: 'fa fa-inbox',
             id: 'mailbox',
@@ -268,8 +273,9 @@ class Discuss extends Component {
             label: this.env._t("Channel"),
         }];
     }
+
     /**
-     * @return {boolean}
+     * @returns {boolean}
      */
     hasActiveThreadMessages() {
         if (!this.storeProps.activeThreadCache) {
@@ -334,6 +340,7 @@ class Discuss extends Component {
         });
         this.storeDispatch('openThread', threadLocalId);
     }
+
     /**
      * @private
      */
@@ -355,7 +362,7 @@ class Discuss extends Component {
          * ready. This is important because data on thread may require messaging
          * to be ready.
          */
-        this._wasMessagingReady = this.storeProps.isMessagingReady;
+        this._wasMessagingReady = this.storeProps.isMessagingInitialized;
     }
 
     //--------------------------------------------------------------------------
@@ -406,14 +413,14 @@ class Discuss extends Component {
         });
         items.push({
             label: this.env.qweb.renderToString(
-                'mail.component.Discuss.AutocompleteChannelPublicItem',
+                'mail.messaging.component.Discuss.AutocompleteChannelPublicItem',
                 { searchVal: value }
             ),
             value,
             special: 'public'
         }, {
             label: this.env.qweb.renderToString(
-                'mail.component.Discuss.AutocompleteChannelPrivateItem',
+                'mail.messaging.component.Discuss.AutocompleteChannelPrivateItem',
                 { searchVal: value }
             ),
             value,
@@ -444,18 +451,21 @@ class Discuss extends Component {
         }
         this._clearAddingItem();
     }
+
     /**
      * @private
      */
     _onDialogClosedModerationDiscard() {
         this.state.hasModerationDiscardDialog = false;
     }
+
     /**
      * @private
      */
     _onDialogClosedModerationReject() {
         this.state.hasModerationRejectDialog = false;
     }
+
     /**
      * @private
      * @param {Object} req
@@ -482,8 +492,10 @@ class Discuss extends Component {
 
     /**
      * @private
+     * @param {CustomEvent} ev
      */
-    _onHideMobileAddItemHeader() {
+    _onHideMobileAddItemHeader(ev) {
+        ev.stopPropagation();
         this._clearAddingItem();
     }
 
@@ -518,8 +530,10 @@ class Discuss extends Component {
 
     /**
      * @private
+     * @param {CustomEvent} ev
      */
-    _onReplyingToMessageComposerDiscarded() {
+    _onReplyingToMessageComposerDiscarded(ev) {
+        ev.stopPropagation();
         this._cancelReplyingToMessage();
     }
 
@@ -543,6 +557,7 @@ class Discuss extends Component {
      * @param {string} ev.detail.messageLocalId
      */
     _onReplyMessage(ev) {
+        ev.stopPropagation();
         const { messageLocalId } = ev.detail;
         if (this.state.replyingToMessageMessageLocalId === messageLocalId) {
             this._cancelReplyingToMessage();
@@ -562,8 +577,9 @@ class Discuss extends Component {
      * @param {string} ev.detail.tabId
      */
     _onSelectMobileNavbarTab(ev) {
+        ev.stopPropagation();
         const { tabId } = ev.detail;
-        if (this.storeProps.activeMobileNavbarTabId === tabId) {
+        if (this.discuss.activeMobileNavbarTabId === tabId) {
             return;
         }
         this._cancelReplyingToMessage();
@@ -584,22 +600,28 @@ class Discuss extends Component {
 
     /**
      * @private
+     * @param {CustomEvent} ev
      */
-    _onSidebarAddingChannel() {
+    _onSidebarAddingChannel(ev) {
+        ev.stopPropagation();
         this.state.isAddingChannel = true;
     }
 
     /**
      * @private
+     * @param {CustomEvent} ev
      */
-    _onSidebarAddingChat() {
+    _onSidebarAddingChat(ev) {
+        ev.stopPropagation();
         this.state.isAddingChat = true;
     }
 
     /**
      * @private
+     * @param {CustomEvent} ev
      */
-    _onSidebarCancelAddingItem() {
+    _onSidebarCancelAddingItem(ev) {
+        ev.stopPropagation();
         this._clearAddingItem();
     }
 
@@ -610,24 +632,15 @@ class Discuss extends Component {
     _onThreadRendered(ev) {
         this.trigger('o-update-control-panel');
     }
+
 }
 
 Object.assign(Discuss, {
-    components: {
-        AutocompleteInput,
-        Composer,
-        MobileMailboxSelection,
-        MobileMessagingNavbar,
-        ModerationDiscardDialog,
-        ModerationRejectDialog,
-        NotificationList,
-        Sidebar,
-        Thread,
-    },
+    components,
     props: {
         initActiveThreadLocalId: String,
     },
-    template: 'mail.component.Discuss',
+    template: 'mail.messaging.component.Discuss',
 });
 
 return Discuss;

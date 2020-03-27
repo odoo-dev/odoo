@@ -1,8 +1,10 @@
-odoo.define('mail.component.DialogManager', function (require) {
+odoo.define('mail.messaging.component.DialogManager', function (require) {
 'use strict';
 
-const Dialog = require('mail.component.Dialog');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    Dialog: require('mail.messaging.component.Dialog'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 
@@ -10,7 +12,6 @@ class DialogManager extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -45,8 +46,9 @@ class DialogManager extends Component {
 }
 
 Object.assign(DialogManager, {
-    components: { Dialog },
-    template: 'mail.component.DialogManager',
+    components,
+    props: {},
+    template: 'mail.messaging.component.DialogManager',
 });
 
 return DialogManager;

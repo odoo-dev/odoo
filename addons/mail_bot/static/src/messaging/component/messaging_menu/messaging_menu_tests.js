@@ -1,4 +1,4 @@
-odoo.define('mail_bot.components.MessagingMenuTests', function (require) {
+odoo.define('mail_bot.messaging.component.MessagingMenuTests', function (require) {
 "use strict";
 
 const {
@@ -8,14 +8,15 @@ const {
     getServices,
     pause,
     start: utilsStart,
-} = require('mail.messagingTestUtils');
+} = require('mail.messaging.testUtils');
 
 const MailBotService = require('mail_bot.MailBotService');
 
 const { makeTestPromise } = require('web.test_utils');
 
 QUnit.module('mail_bot', {}, function () {
-QUnit.module('components', {}, function () {
+QUnit.module('messaging', {}, function () {
+QUnit.module('component', {}, function () {
 QUnit.module('MessagingMenu', {
     beforeEach: function () {
         utilsBeforeEach(this);
@@ -41,10 +42,10 @@ QUnit.module('MessagingMenu', {
         if (this.widget) {
             this.widget.destroy();
         }
-    }
+    },
 });
 
-QUnit.test('mail_bot: MessagingMenu: rendering with OdooBot has a request (default)', async function (assert) {
+QUnit.test('rendering with OdooBot has a request (default)', async function (assert) {
     assert.expect(4);
 
     window.Notification.permission = 'default';
@@ -58,27 +59,31 @@ QUnit.test('mail_bot: MessagingMenu: rendering with OdooBot has a request (defau
         },
     });
 
-    const messagingMenu = document.querySelector('.o_MessagingMenu');
-    const counter = messagingMenu.querySelector('.o_MessagingMenu_counter');
-    assert.ok(counter,
+    assert.ok(
+        document.querySelector('.o_MessagingMenu_counter'),
         "should display a notification counter next to the messaging menu"
     );
-    assert.strictEqual(counter.textContent, '1',
+    assert.strictEqual(
+        document.querySelector('.o_MessagingMenu_counter').textContent,
+        "1",
         "should display a counter of '1' next to the messaging menu"
     );
 
-    messagingMenu.querySelector('.o_MessagingMenu_toggler').click();
+    document.querySelector('.o_MessagingMenu_toggler').click();
     await afterNextRender();
-    assert.containsOnce(messagingMenu, '.o_NotificationRequest',
+    assert.containsOnce(
+        document.body,
+        '.o_NotificationRequest',
         "should display a notification in the messaging menu"
     );
-    assert.strictEqual(messagingMenu.querySelector('.o_NotificationRequest_name').textContent.trim(),
+    assert.strictEqual(
+        document.querySelector('.o_NotificationRequest_name').textContent.trim(),
         'OdooBot has a request',
         "notification should display that OdooBot has a request"
     );
 });
 
-QUnit.test('mail_bot: MessagingMenu: rendering without OdooBot has a request (denied)', async function (assert) {
+QUnit.test('rendering without OdooBot has a request (denied)', async function (assert) {
     assert.expect(2);
 
     window.Notification.permission = 'denied';
@@ -92,20 +97,22 @@ QUnit.test('mail_bot: MessagingMenu: rendering without OdooBot has a request (de
         },
     });
 
-    const messagingMenu = document.querySelector('.o_MessagingMenu');
-
-    assert.containsNone(messagingMenu, '.o_MessagingMenu_counter',
+    assert.containsNone(
+        document.body,
+        '.o_MessagingMenu_counter',
         "should not display a notification counter next to the messaging menu"
     );
 
-    messagingMenu.querySelector('.o_MessagingMenu_toggler').click();
+    document.querySelector('.o_MessagingMenu_toggler').click();
     await afterNextRender();
-    assert.containsNone(messagingMenu, '.o_NotificationRequest',
+    assert.containsNone(
+        document.body,
+        '.o_NotificationRequest',
         "should display no notification in the messaging menu"
     );
 });
 
-QUnit.test('mail_bot: MessagingMenu: rendering without OdooBot has a request (accepted)', async function (assert) {
+QUnit.test('rendering without OdooBot has a request (accepted)', async function (assert) {
     assert.expect(2);
 
     window.Notification.permission = 'granted';
@@ -119,20 +126,22 @@ QUnit.test('mail_bot: MessagingMenu: rendering without OdooBot has a request (ac
         },
     });
 
-    const messagingMenu = document.querySelector('.o_MessagingMenu');
-
-    assert.containsNone(messagingMenu, '.o_MessagingMenu_counter',
+    assert.containsNone(
+        document.body,
+        '.o_MessagingMenu_counter',
         "should not display a notification counter next to the messaging menu"
     );
 
-    messagingMenu.querySelector('.o_MessagingMenu_toggler').click();
+    document.querySelector('.o_MessagingMenu_toggler').click();
     await afterNextRender();
-    assert.containsNone(messagingMenu, '.o_NotificationRequest',
+    assert.containsNone(
+        document.body,
+        '.o_NotificationRequest',
         "should display no notification in the messaging menu"
     );
 });
 
-QUnit.test('mail_bot: MessagingMenu: respond to notification prompt (denied)', async function (assert) {
+QUnit.test('respond to notification prompt (denied)', async function (assert) {
     assert.expect(3);
 
     window.Notification.permission = 'default';
@@ -150,29 +159,32 @@ QUnit.test('mail_bot: MessagingMenu: respond to notification prompt (denied)', a
         },
     });
 
-    const messagingMenu = document.querySelector('.o_MessagingMenu');
-
-    messagingMenu.querySelector('.o_MessagingMenu_toggler').click();
+    document.querySelector('.o_MessagingMenu_toggler').click();
     await afterNextRender();
-
-    messagingMenu.querySelector('.o_NotificationRequest').click();
+    document.querySelector('.o_NotificationRequest').click();
     await afterNextRender();
-
-    assert.containsOnce(document.body, '.toast .o_notification_content',
+    assert.containsOnce(
+        document.body,
+        '.toast .o_notification_content',
         "should display a toast notification with the deny confirmation"
     );
-    assert.containsNone(messagingMenu, '.o_MessagingMenu_counter',
+    assert.containsNone(
+        document.body,
+        '.o_MessagingMenu_counter',
         "should not display a notification counter next to the messaging menu"
     );
 
-    messagingMenu.querySelector('.o_MessagingMenu_toggler').click();
+    document.querySelector('.o_MessagingMenu_toggler').click();
     await afterNextRender();
-
-    assert.containsNone(messagingMenu, '.o_NotificationRequest',
+    assert.containsNone(
+        document.body,
+        '.o_NotificationRequest',
         "should display no notification in the messaging menu"
     );
 });
 
 });
 });
+});
+
 });

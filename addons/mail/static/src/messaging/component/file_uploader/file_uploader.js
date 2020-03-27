@@ -1,4 +1,4 @@
-odoo.define('mail.component.FileUploader', function (require) {
+odoo.define('mail.messaging.component.FileUploader', function (require) {
 'use strict';
 
 const core = require('web.core');
@@ -7,9 +7,9 @@ const { Component } = owl;
 const { useDispatch, useRef } = owl.hooks;
 
 class FileUploader extends Component {
+
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -33,7 +33,7 @@ class FileUploader extends Component {
 
     /**
      * @param {FileList|Array} files
-     * @return {Promise}
+     * @returns {Promise}
      */
     async uploadFiles(files) {
         await this._unlinkExistingAttachments(files);
@@ -53,10 +53,11 @@ class FileUploader extends Component {
     /**
      * @private
      * @param {Object} fileData
-     * @return {string}
+     * @returns {string}
      */
      _createAttachment(fileData) {
-        return this.storeDispatch('createAttachment', Object.assign({},
+        return this.storeDispatch('createAttachment', Object.assign(
+            {},
             fileData,
             this.props.newAttachmentExtraData
         ));
@@ -182,27 +183,28 @@ class FileUploader extends Component {
     async _onChangeAttachment(ev) {
         await this.uploadFiles(ev.target.files);
     }
+
 }
 
-FileUploader.defaultProps = {
-    uploadId: 0,
-    uploadModel: 'mail.compose.message'
-};
-
-FileUploader.props = {
-    attachmentLocalIds: {
-        type: Array,
-        element: String,
+Object.assign(FileUploader, {
+    defaultProps: {
+        uploadId: 0,
+        uploadModel: 'mail.compose.message'
     },
-    newAttachmentExtraData: {
-        type: Object,
-        optional: true,
+    props: {
+        attachmentLocalIds: {
+            type: Array,
+            element: String,
+        },
+        newAttachmentExtraData: {
+            type: Object,
+            optional: true,
+        },
+        uploadId: Number,
+        uploadModel: String,
     },
-    uploadId: Number,
-    uploadModel: String,
-};
-
-FileUploader.template = 'mail.component.FileUploader';
+    template: 'mail.messaging.component.FileUploader',
+});
 
 return FileUploader;
 

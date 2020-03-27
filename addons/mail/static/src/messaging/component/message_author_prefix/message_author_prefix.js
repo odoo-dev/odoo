@@ -1,7 +1,7 @@
-odoo.define('mail.component.MessageAuthorPrefix', function (require) {
+odoo.define('mail.messaging.component.MessageAuthorPrefix', function (require) {
 'use strict';
 
-const useStore = require('mail.hooks.useStore');
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
 const { useGetters } = owl.hooks;
@@ -10,7 +10,6 @@ class MessageAuthorPrefix extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -31,17 +30,30 @@ class MessageAuthorPrefix extends Component {
             };
         });
     }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Thread|undefined}
+     */
+    get thread() {
+        return this.storeProps.thread;
+    }
+
 }
 
-MessageAuthorPrefix.props = {
-    messageLocalId: String,
-    threadLocalId: {
-        type: String,
-        optional: true,
+Object.assign(MessageAuthorPrefix, {
+    props: {
+        messageLocalId: String,
+        threadLocalId: {
+            type: String,
+            optional: true,
+        },
     },
-};
-
-MessageAuthorPrefix.template = 'mail.component.MessageAuthorPrefix';
+    template: 'mail.messaging.component.MessageAuthorPrefix',
+});
 
 return MessageAuthorPrefix;
 

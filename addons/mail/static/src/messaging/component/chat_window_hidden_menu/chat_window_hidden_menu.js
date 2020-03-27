@@ -1,17 +1,18 @@
-odoo.define('mail.component.ChatWindowHiddenMenu', function (require) {
+odoo.define('mail.messaging.component.ChatWindowHiddenMenu', function (require) {
 'use strict';
 
-const ChatWindowHeader = require('mail.component.ChatWindowHeader');
-const useStore = require('mail.hooks.useStore');
+const components = {
+    ChatWindowHeader: require('mail.messaging.component.ChatWindowHeader'),
+};
+const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component, useState } = owl;
 const { useRef } = owl.hooks;
 
-class HiddenMenu extends Component {
+class ChatWindowHiddenMenu extends Component {
 
     /**
      * @override
-     * @param {...any} args
      */
     constructor(...args) {
         super(...args);
@@ -49,11 +50,11 @@ class HiddenMenu extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Getter / Setter
+    // Public
     //--------------------------------------------------------------------------
 
     /**
-     * @return {integer}
+     * @returns {integer}
      */
     get unreadCounter() {
         return this.storeProps.threads.reduce((count, thread) => {
@@ -114,6 +115,7 @@ class HiddenMenu extends Component {
      * @param {MouseEvent} ev
      */
     _onClickToggle(ev) {
+        ev.stopPropagation();
         this.state.isOpen = !this.state.isOpen;
     }
 
@@ -124,6 +126,7 @@ class HiddenMenu extends Component {
      * @param {string} ev.detail.chatWindowLocalId
      */
     _onCloseChatWindow(ev) {
+        ev.stopPropagation();
         this.trigger('o-close-chat-window', {
             chatWindowLocalId: ev.detail.chatWindowLocalId,
         });
@@ -141,29 +144,28 @@ class HiddenMenu extends Component {
         });
         this.state.isOpen = false;
     }
+
 }
 
-HiddenMenu.components = {
-    ChatWindowHeader,
-};
-
-HiddenMenu.defaultProps = {
-    direction: 'rtl',
-};
-
-HiddenMenu.props = {
-    chatWindowLocalIds: {
-        type: Array,
-        element: String,
+Object.assign(ChatWindowHiddenMenu, {
+    components,
+    defaultProps: {
+        direction: 'rtl',
     },
-    direction: {
-        type: String,
+    props: {
+        chatWindowLocalIds: {
+            type: Array,
+            element: String,
+        },
+        direction: {
+            // TODO FIXME add validation
+            type: String,
+        },
+        offset: Number,
     },
-    offset: Number,
-};
+    template: 'mail.messaging.component.ChatWindowHiddenMenu',
+});
 
-HiddenMenu.template = 'mail.component.ChatWindowHiddenMenu';
-
-return HiddenMenu;
+return ChatWindowHiddenMenu;
 
 });

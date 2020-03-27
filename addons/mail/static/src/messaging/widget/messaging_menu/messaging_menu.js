@@ -1,7 +1,9 @@
-odoo.define('mail.widget.MessagingMenu', function (require) {
+odoo.define('mail.messaging.widget.MessagingMenu', function (require) {
 'use strict';
 
-const MessagingMenuComponent = require('mail.component.MessagingMenu');
+const components = {
+    MessagingMenu: require('mail.messaging.component.MessagingMenu'),
+};
 
 const SystrayMenu = require('web.SystrayMenu');
 const Widget = require('web.Widget');
@@ -10,7 +12,7 @@ const Widget = require('web.Widget');
  * Odoo Widget, necessary to instantiate component.
  */
 const MessagingMenu = Widget.extend({
-    template: 'mail.widget.MessagingMenu',
+    template: 'mail.messaging.widget.MessagingMenu',
     /**
      * @override
      */
@@ -23,7 +25,7 @@ const MessagingMenu = Widget.extend({
      */
     async willStart() {
         this._super(...arguments);
-        this.env = this.call('messaging', 'getMessagingEnv');
+        this.env = this.call('messaging', 'getEnv');
     },
     /**
      * @override
@@ -35,8 +37,8 @@ const MessagingMenu = Widget.extend({
         this._super(...arguments);
     },
     async on_attach_callback() {
-        MessagingMenuComponent.env = this.env;
-        this.component = new MessagingMenuComponent(null);
+        components.MessagingMenu.env = this.env;
+        this.component = new components.MessagingMenu(null);
         await this.component.mount(this.$el[0]);
         // unwrap
         this.el.parentNode.insertBefore(this.component.el, this.el);
