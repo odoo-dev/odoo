@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-   <t t-name="mail.messaging.component.Dialog" owl="1">
-      <div class="o_Dialog">
-         <t
-            t-component="{{ props.componentName }}"
-            class="o_Dialog_component"
-            id="props.id"
-            info="props.info"
-            t-on-o-close="_onClose"
-            t-ref="component"
-         />
-      </div>
-   </t>
+    <t t-name="mail.messaging.component.Dialog" owl="1">
+        <div class="o_Dialog">
+            <t t-if="true">
+                <t t-if="true">
+                    <t
+                        t-component="{{ props.componentName }}"
+                        class="o_Dialog_component"
+                        id="props.id"
+                        info="props.info"
+                        t-on-o-close="_onClose"
+                        t-ref="component"
+                    />
+                </t>
+            </t>
+        </div>
+    </t>
 
 </templates>

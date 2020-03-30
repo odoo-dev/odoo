@@ -34,13 +34,15 @@
                     Add attachments
                 </button>
             </div>
-            <FileUploader
-                attachmentLocalIds="storeProps.attachmentLocalIds"
-                newAttachmentExtraData="newAttachmentExtraData"
-                uploadModel="storeProps.threadModel"
-                uploadId="storeProps.threadId"
-                t-ref="fileUploader"
-            />
+            <t t-if="true">
+                <FileUploader
+                    attachmentLocalIds="storeProps.attachmentLocalIds"
+                    newAttachmentExtraData="newAttachmentExtraData"
+                    uploadModel="storeProps.threadModel"
+                    uploadId="storeProps.threadId"
+                    t-ref="fileUploader"
+                />
+            </t>
         </div>
     </t>
 
