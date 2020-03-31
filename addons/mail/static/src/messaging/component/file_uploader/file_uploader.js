@@ -4,7 +4,7 @@ odoo.define('mail.messaging.component.FileUploader', function (require) {
 const core = require('web.core');
 
 const { Component } = owl;
-const { useDispatch, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class FileUploader extends Component {
 
@@ -13,7 +13,6 @@ class FileUploader extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
         this._fileInputRef = useRef('fileInput');
         this._fileUploadId = _.uniqueId('o_FileUploader_fileupload');
         this._onAttachmentUploaded = this._onAttachmentUploaded.bind(this);
@@ -53,10 +52,10 @@ class FileUploader extends Component {
     /**
      * @private
      * @param {Object} fileData
-     * @returns {string}
+     * @returns {mail.messaging.entity.Attachment}
      */
      _createAttachment(fileData) {
-        return this.storeDispatch('createAttachment', Object.assign(
+        return this.env.entities.Attachment.create(Object.assign(
             {},
             fileData,
             this.props.newAttachmentExtraData
@@ -91,18 +90,6 @@ class FileUploader extends Component {
             });
         }
     }
-
-    /**
-     * @private
-     * @param {string} filename
-     */
-     _deleteTemporaryAttachment(filename) {
-        const temporaryAttachmentLocalId = this.env.store.state.temporaryAttachmentLocalIds[filename];
-        if (temporaryAttachmentLocalId) {
-            this.storeDispatch('deleteAttachment', temporaryAttachmentLocalId);
-        }
-    }
-
     /**
      * @private
      * @param {FileList|Array} files
@@ -128,14 +115,12 @@ class FileUploader extends Component {
      */
     async _unlinkExistingAttachments(files) {
         for (const file of files) {
-            const attachment = this.props.attachmentLocalIds
-                .map(localId => this.env.store.state.attachments[localId])
-                .find(attachment =>
-                    attachment.name === file.name && attachment.size === file.size
-                );
+            const attachment = this.props.attachments
+                .map(attachment => this.env.entities.Attachment.get(attachment))
+                .find(attachment => attachment.name === file.name && attachment.size === file.size);
             // if the files already exits, delete the file before upload
             if (attachment) {
-                await this.storeDispatch('unlinkAttachment', attachment.localId);
+                attachment.remove();
             }
         }
     }
@@ -154,21 +139,24 @@ class FileUploader extends Component {
             const { error, filename, id, mimetype, name, size } = fileData;
             if (error || !id) {
                 this.env.do_warn(error);
-                this._deleteTemporaryAttachment(filename);
+                const relatedTemporaryAttachments = this.env.entities.Attachment.AllFromFilename(filename);
+                for (const attachment of relatedTemporaryAttachments) {
+                    attachment.delete();
+                }
                 return;
             }
             // FIXME : needed to avoid problems on uploading
             // Without this the useStore selector of component could be not called
             // E.g. in attachment_box_tests.js
             await new Promise(resolve => setTimeout(resolve));
-            const attachmentLocalId = this._createAttachment({
+            const attachment = this._createAttachment({
                 filename,
                 id,
                 mimetype,
                 name,
                 size,
             });
-            this.trigger('o-attachment-created', { attachmentLocalId });
+            this.trigger('o-attachment-created', { attachment });
         }
     }
 
@@ -192,7 +180,7 @@ Object.assign(FileUploader, {
         uploadModel: 'mail.compose.message'
     },
     props: {
-        attachmentLocalIds: {
+        attachments: {
             type: Array,
             element: String,
         },

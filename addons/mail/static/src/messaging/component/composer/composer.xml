@@ -8,9 +8,9 @@
                 'o-has-footer': hasFooter,
                 'o-has-header': hasHeader,
                 'o-is-compact': props.isCompact,
-            }" t-att-data-local-id="localId"
+            }" t-att-data-composer="composer ? composer.localId : undefined"
         >
-            <t t-if="true">
+            <t t-if="composer">
                 <t t-if="isDropZoneVisible.value">
                     <DropZone
                         class="o_Composer_dropZone"
@@ -19,15 +19,15 @@
                     />
                 </t>
                 <FileUploader
-                    attachmentLocalIds="composer.attachmentLocalIds"
+                    attachments="composer.attachments.map(attachment => attachment.localId)"
                     newAttachmentExtraData="newAttachmentExtraData"
                     t-ref="fileUploader"
                 />
                 <t t-if="hasHeader">
                     <div class="o_Composer_coreHeader">
-                        <t t-if="props.hasThreadName and storeProps.thread">
+                        <t t-if="props.hasThreadName and composer.thread">
                             <span class="o_Composer_threadName">
-                                on: <b><t t-esc="storeGetters.threadName(storeProps.thread.localId)"/></b>
+                                on: <b><t t-esc="composer.thread.displayName"/></b>
                             </span>
                         </t>
                         <t t-if="props.hasFollowers and !props.isLog">
@@ -36,8 +36,8 @@
                                 <b class="text-muted">To: </b>
                                 <em class="text-muted">Followers of </em>
                                 <b>
-                                    <t t-if="storeProps.thread">
-                                        &#32;&quot;<t t-esc="storeProps.thread.name"/>&quot;
+                                    <t t-if="composer.thread">
+                                        &#32;&quot;<t t-esc="composer.thread.name"/>&quot;
                                     </t>
                                     <t t-else="">
                                         this document
@@ -57,22 +57,21 @@
                         class="o_Composer_textInput"
                         t-att-class="{
                             'o-composer-is-compact': props.isCompact,
-                            'o_Composer_textInput-mobile': storeProps.isMobile,
+                            'o_Composer_textInput-mobile': env.entities.Device.instance.isMobile,
                         }"
-                        composerLocalId="props.composerLocalId"
+                        composer="props.composer"
                         hasSendOnEnterEnabled="props.hasTextInputSendOnEnterEnabled"
-                        t-on-o-discard="_onDiscardInput"
                         t-on-o-input-composer-text-input="_onInputTextInput"
                         t-on-o-keydown-enter="_onTextInputKeydownEnter"
                         t-on-paste="_onPasteTextInput"
                         t-ref="textInput"
                     />
-                    <div class="o_Composer_buttons" t-att-class="{ 'o-composer-is-compact': props.isCompact, 'o-mobile': storeProps.isMobile }">
+                    <div class="o_Composer_buttons" t-att-class="{ 'o-composer-is-compact': props.isCompact, 'o-mobile': env.entities.Device.instance.isMobile }">
                         <div class="o_Composer_toolButtons"
-                             t-att-class="{
-                                 'o-composer-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
-                                 'o-composer-is-compact': props.isCompact,
-                             }">
+                            t-att-class="{
+                                'o-composer-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
+                                'o-composer-is-compact': props.isCompact,
+                            }">
                             <t t-if="props.isCompact">
                                 <div class="o_Composer_toolButtonSeparator"/>
                             </t>
@@ -80,7 +79,7 @@
                                 <EmojisButton
                                     class="o_Composer_button o_Composer_buttonEmojis o_Composer_toolButton btn-secondary"
                                     placement="'top'"
-                                    t-att-class="{ 'o-mobile': storeProps.isMobile }"
+                                    t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }"
                                     t-on-o-emoji-selection="_onEmojiSelection"
                                     t-ref="emojisButton"
                                 >
@@ -88,11 +87,11 @@
                                         <i class="fa fa-smile-o"/>
                                     </t>
                                 </EmojisButton>
-                                <button class="o_Composer_button o_Composer_buttonAttachment o_Composer_toolButton btn btn-secondary fa fa-paperclip" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click="_onClickAddAttachment" title="Add attachment" type="button" aria-label="Add attachment"/>
+                                <button class="o_Composer_button o_Composer_buttonAttachment o_Composer_toolButton btn btn-secondary fa fa-paperclip" t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }" t-on-click="_onClickAddAttachment" title="Add attachment" type="button" aria-label="Add attachment"/>
                             </div>
                             <t t-if="props.isExpandable">
                                 <div class="o_Composer_secondaryToolButtons">
-                                    <button class="btn btn-secondary fa fa-expand o_Composer_button o_Composer_buttonFullComposer o_Composer_toolButton" t-att-class="{ 'o-mobile': storeProps.isMobile }" t-on-click="_onClickFullComposer" title="Full composer" type="button" aria-label="Full composer"/>
+                                    <button class="btn btn-secondary fa fa-expand o_Composer_button o_Composer_buttonFullComposer o_Composer_toolButton" t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }" t-on-click="_onClickFullComposer" title="Full composer" type="button" aria-label="Full composer"/>
                                 </div>
                             </t>
                         </div>
@@ -103,12 +102,12 @@
                 </div>
                 <t t-if="hasFooter">
                     <div class="o_Composer_coreFooter" t-att-class="{ 'o-composer-is-compact': props.isCompact }">
-                        <t t-if="composer.attachmentLocalIds.length > 0">
+                        <t t-if="composer.attachments.length > 0">
                             <AttachmentList
                                 class="o_Composer_attachmentList"
                                 areAttachmentsEditable="true"
                                 attachmentsDetailsMode="props.attachmentsDetailsMode"
-                                attachmentLocalIds="composer.attachmentLocalIds"
+                                attachments="composer.attachments.map(attachment => attachment.localId)"
                                 showAttachmentsExtensions="props.showAttachmentsExtensions"
                                 showAttachmentsFilenames="props.showAttachmentsFilenames"
                             />
@@ -127,17 +126,17 @@
             <t t-if="props.hasSendButton">
                 <button class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary"
                         t-att-class="{
-                            'fa': storeProps.isMobile,
-                            'fa-paper-plane-o': storeProps.isMobile,
+                            'fa': env.entities.Device.instance.isMobile,
+                            'fa-paper-plane-o': env.entities.Device.instance.isMobile,
                             'o-composer-is-compact': props.isCompact,
                         }"
                         t-on-click="_onClickSend"
-                        t-att-disabled="(!composer.textInputContent and composer.attachmentLocalIds.length === 0) ? 'disabled' : ''"
+                        t-att-disabled="(!composer.textInputContent and composer.attachments.length === 0) ? 'disabled' : ''"
                         type="button">
-                    <t t-if="!storeProps.isMobile"><t t-if="props.isLog">Log</t><t t-else="">Send</t></t>
+                    <t t-if="!env.entities.Device.instance.isMobile"><t t-if="props.isLog">Log</t><t t-else="">Send</t></t>
                 </button>
             </t>
-            <t t-if="!storeProps.isMobile and props.hasDiscardButton">
+            <t t-if="!env.entities.Device.instance.isMobile and props.hasDiscardButton">
                 <button class="o_Composer_actionButton o_Composer_button o_Composer_buttonDiscard btn btn-secondary" t-att-class="{ 'o-composer-is-compact': props.isCompact }" t-on-click="_onClickDiscard" type="button">
                     Discard
                 </button>

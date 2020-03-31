@@ -3,15 +3,17 @@
 
     <t t-name="mail.messaging.component.Activity" owl="1">
         <div class="o_Activity">
-            <t t-if="true">
+            <t t-if="activity">
                 <div class="o_Activity_sidebar">
                     <div class="o_Activity_user">
-                        <img class="o_Activity_userAvatar" t-attf-src="/web/image{{ activity.userId >= 0 ? ('/res.users/' + activity.userId + '/image_128') : '' }}" t-att-alt="activity.userDisplayName"/>
+                        <t t-if="activity.assignee">
+                            <img class="o_Activity_userAvatar" t-attf-src="/web/image/res.users/{{ activity.assignee.id }}/image_128" t-att-alt="activity.assignee.displayName"/>
+                        </t>
                         <i class="o_Activity_icon fa"
                             t-att-class="{
-                                'bg-success-full': activity.activityState === 'planned',
-                                'bg-warning-full': activity.activityState === 'today',
-                                'bg-danger-full': activity.activityState === 'overdue',
+                                'bg-success-full': activity.state === 'planned',
+                                'bg-warning-full': activity.state === 'today',
+                                'bg-danger-full': activity.state === 'overdue',
                             }"
                             t-attf-class="{{ activity.icon }}"
                         />
@@ -21,10 +23,10 @@
                     <div class="o_Activity_info">
                         <div class="o_Activity_dueDateText"
                             t-att-class="{
-                                'o-default': activity.activityState === 'default',
-                                'o-overdue': activity.activityState === 'overdue',
-                                'o-planned': activity.activityState === 'planned',
-                                'o-today': activity.activityState === 'today',
+                                'o-default': activity.state === 'default',
+                                'o-overdue': activity.state === 'overdue',
+                                'o-planned': activity.state === 'planned',
+                                'o-today': activity.state === 'today',
                             }"
                         >
                             <t t-esc="delayLabel"/>
@@ -34,12 +36,12 @@
                                 <t t-esc="summary"/>
                             </div>
                         </t>
-                        <t t-else="">
+                        <t t-elif="activity.type">
                             <div class="o_Activity_summary o_Activity_type">
-                                <t t-esc="activity.activityTypeDisplayName"/>
+                                <t t-esc="activity.type.displayName"/>
                             </div>
                         </t>
-                        <t t-if="true">
+                        <t t-if="activity.assignee">
                             <div class="o_Activity_userName">
                                 <t t-esc="assignedUserText"/>
                             </div>
@@ -51,37 +53,37 @@
 
                     <div class="o_Activity_details" t-if="state.areDetailsVisible">
                         <dl class="dl-horizontal">
-                            <t t-if="true">
+                            <t t-if="activity.type">
                                 <dt>Activity type</dt>
                                 <dd class="o_Activity_type">
-                                    <t t-esc="activity.activityTypeDisplayName"/>
+                                    <t t-esc="activity.type.displayName"/>
                                 </dd>
                             </t>
-                            <t t-if="true">
+                            <t t-if="activity.creator">
                                 <dt>Created</dt>
                                 <dd class="o_Activity_detailsCreation">
                                     <t t-esc="formattedCreateDatetime"/>
-                                    <img class="o_Activity_detailsUserAvatar o_Activity_detailsCreatorAvatar" t-attf-src="/web/image{{ activity.creatorId >= 0 ? ('/res.users/' + activity.creatorId + '/image_128') : '' }}" t-att-title="activity.creatorDisplayName" t-att-alt="activity.creatorDisplayName"/>
+                                    <img class="o_Activity_detailsUserAvatar o_Activity_detailsCreatorAvatar" t-attf-src="/web/image/res.users/{{ activity.creator.id }}/image_128" t-att-title="activity.creator.displayName" t-att-alt="activity.creator.displayName"/>
                                     <span class="o_Activity_detailsCreator">
-                                        <t t-esc="activity.creatorDisplayName"/>
+                                        <t t-esc="activity.creator.displayName"/>
                                     </span>
                                 </dd>
                             </t>
-                            <t t-if="true">
+                            <t t-if="activity.assignee">
                                 <dt>Assigned to</dt>
                                 <dd class="o_Activity_detailsAssignation">
-                                    <img class="o_Activity_detailsUserAvatar o_Activity_detailsAssignationUserAvatar" t-attf-src="/web/image{{ activity.userId >= 0 ? ('/res.users/' + activity.userId + '/image_128') : '' }}" t-att-title="activity.userDisplayName" t-att-alt="activity.userDisplayName"/>
-                                    <t t-esc="activity.userDisplayName"/>
+                                    <img class="o_Activity_detailsUserAvatar o_Activity_detailsAssignationUserAvatar" t-attf-src="/web/image/res.users/{{ activity.assignee.id }}/image_128" t-att-title="activity.assignee.displayName" t-att-alt="activity.assignee.displayName"/>
+                                    <t t-esc="activity.assignee.displayName"/>
                                 </dd>
                             </t>
                             <dt>Due on</dt>
                             <dd class="o_Activity_detailsDueDate">
                                 <span class="o_Activity_deadlineDateText"
                                     t-att-class="{
-                                        'o-default': activity.activityState === 'default',
-                                        'o-overdue': activity.activityState === 'overdue',
-                                        'o-planned': activity.activityState === 'planned',
-                                        'o-today': activity.activityState === 'today',
+                                        'o-default': activity.state === 'default',
+                                        'o-overdue': activity.state === 'overdue',
+                                        'o-planned': activity.state === 'planned',
+                                        'o-today': activity.state === 'today',
                                     }"
                                 >
                                     <t t-esc="formattedDeadlineDate"/>
@@ -94,13 +96,13 @@
                         <t t-raw="activity.note"/>
                     </div>
 
-                    <t t-if="activity.mailTemplateLocalIds.length > 0">
+                    <t t-if="activity.mailTemplates.length > 0">
                         <div class="o_Activity_mailTemplates">
-                            <t t-foreach="activity.mailTemplateLocalIds" t-as="mailTemplateLocalId" t-key="mailTemplateLocalId">
+                            <t t-foreach="activity.mailTemplates" t-as="mailTemplate" t-key="mailTemplate.localId">
                                 <MailTemplate
                                     class="o_Activity_mailTemplate"
-                                    activityLocalId="props.activityLocalId"
-                                    mailTemplateLocalId="mailTemplateLocalId"
+                                    activity="activity.localId"
+                                    mailTemplate="mailTemplate.localId"
                                 />
                             </t>
                         </div>
@@ -108,10 +110,10 @@
 
                     <t t-if="activity.canWrite">
                         <div class="o_Activity_tools">
-                            <t t-if="activity.activityCategory !== 'upload_file'">
+                            <t t-if="activity.category !== 'upload_file'">
                                 <ActivityMarkDoneButton
                                     class="o_Activity_toolButton o_Activity_markDoneButton btn-link"
-                                    activityLocalId="props.activityLocalId"
+                                    activity="activity.localId"
                                     popoverTitle="'Mark Done'"
                                 >
                                     <t t-set="buttonHtml">
@@ -124,9 +126,9 @@
                                     <i class="fa fa-upload"/> Upload Document
                                 </button>
                                 <FileUploader
-                                    attachmentLocalIds="activity.attachmentLocalIds"
-                                    uploadId="activity.resId"
-                                    uploadModel="activity.model"
+                                    attachments="activity.attachments.map(attachment => attachment.localId)"
+                                    uploadId="activity.res_id"
+                                    uploadModel="activity.res_model"
                                     t-on-o-attachment-created="_onAttachmentCreated"
                                     t-ref="fileUploader"
                                 />

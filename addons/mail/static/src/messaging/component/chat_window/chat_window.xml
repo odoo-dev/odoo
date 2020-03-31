@@ -4,35 +4,31 @@
     <t t-name="mail.messaging.component.ChatWindow" owl="1">
         <div class="o_ChatWindow" tabindex="0"
             t-att-class="{
-                'o-focused': state.isFocused,
-                'o-folded': isFolded(),
+                'o-focused': chatWindow and chatWindow.isFocused,
+                'o-folded': chatWindow and chatWindow.isFolded,
                 'o-fullscreen': props.isFullscreen,
-                'o-mobile': storeProps.isMobile,
-                'o-new-message': props.chatWindowLocalId === 'new_message',
-            }" t-on-click="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window-local-id="props.chatWindowLocalId" t-att-data-thread-local-id="thread ? thread.localId : ''"
+                'o-mobile': env.entities.Device.instance.isMobile,
+                'o-new-message': chatWindow and chatWindow === env.entities.ChatWindow.newMessage,
+            }" t-on-click="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window="chatWindow ? chatWindow.localId : undefined" t-att-data-thread="chatWindow ? (chatWindow.thread ? chatWindow.thread.localId : '') : undefined"
         >
-            <t t-if="true">
+            <t t-if="chatWindow">
                 <ChatWindowHeader
                     class="o_ChatWindow_header"
-                    chatWindowLocalId="props.chatWindowLocalId"
+                    chatWindow="chatWindow.localId"
                     hasCloseAsBackButton="props.hasCloseAsBackButton"
-                    hasShiftLeft="props.hasShiftLeft"
-                    hasShiftRight="props.hasShiftRight"
                     isExpandable="props.isExpandable"
                     t-on-o-clicked="_onClickedHeader"
                 />
-                <t t-if="storeProps.thread">
+                <t t-if="chatWindow.thread">
                     <ThreadViewer
                         class="o_ChatWindow_thread"
                         composerAttachmentsDetailsMode="'card'"
-                        domain="[]"
-                        hasComposer="thread._model !== 'mail.box'"
+                        hasComposer="chatWindow.thread.model !== 'mail.box'"
                         hasComposerCurrentPartnerAvatar="false"
-                        hasComposerSendButton="storeProps.isMobile"
-                        hasSquashCloseMessages="thread._model !== 'mail.box'"
-                        haveMessagesAuthorRedirect="thread.channel_type !== 'chat'"
-                        messageListInitialScrollTop="props.threadInitialScrollTop"
-                        threadLocalId="props.chatWindowLocalId"
+                        hasComposerSendButton="env.entities.Device.instance.isMobile"
+                        hasSquashCloseMessages="chatWindow.thread.model !== 'mail.box'"
+                        haveMessagesAuthorRedirect="chatWindow.thread.channel_type !== 'chat'"
+                        threadViewer="chatWindow.threadViewer.localId"
                         t-on-focusin="_onFocusinThread"
                         t-ref="thread"
                     />

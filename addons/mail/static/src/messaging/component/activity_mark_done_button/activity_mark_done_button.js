@@ -48,7 +48,7 @@ class ActivityMarkDoneButton extends components.PopoverButtonWithComponent {
         const ActivityMarkDonePopoverComponent = components.ActivityMarkDonePopover;
         ActivityMarkDonePopoverComponent.env = this.env;
         return new ActivityMarkDonePopoverComponent(null, {
-            activityLocalId: this.props.activityLocalId,
+            activity: this.props.activity,
         });
     }
 
@@ -68,7 +68,7 @@ class ActivityMarkDoneButton extends components.PopoverButtonWithComponent {
 
 Object.assign(ActivityMarkDoneButton, {
     props: Object.assign({}, components.PopoverButtonWithComponent.props, {
-        activityLocalId: String,
+        activity: String,
     }),
 });
 

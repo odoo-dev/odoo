@@ -4,7 +4,6 @@ odoo.define('mail.testUtils', function (require) {
 var BusService = require('bus.BusService');
 
 var Discuss = require('mail.Discuss');
-const { patchMessagingService } = require('mail.messaging.testUtils');
 const MessagingService = require('mail.messaging.service.Messaging');
 var MailService = require('mail.Service');
 
@@ -68,7 +67,6 @@ var MockMailService = Class.extend({
         return MailService;
     },
     messaging() {
-        patchMessagingService(MessagingService);
         return MessagingService;
     },
     local_storage: function () {

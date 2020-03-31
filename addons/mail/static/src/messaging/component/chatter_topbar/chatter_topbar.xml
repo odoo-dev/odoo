@@ -3,7 +3,7 @@
 
     <t t-name="mail.messaging.component.ChatterTopbar" owl="1">
         <div class="o_ChatterTopbar">
-            <t t-if="true">
+            <t t-if="chatter">
                 <div class="o_ChatterTopbar_leftSection">
                     <t t-if="chatter.hasThread">
                         <button class="btn btn-link o_ChatterTopbar_buttonSendMessage"
@@ -33,8 +33,8 @@
                     </t>
                     <button class="btn btn-link o_ChatterTopbar_buttonAttachments" type="button" t-att-disabled="chatter.isDisabled" t-on-click="_onClickAttachments">
                         <i class="fa fa-paperclip"/>
-                        <t t-if="chatter.isDisabled or storeProps.areAttachmentsLoaded">
-                            <span class="o_ChatterTopbar_buttonCount o_ChatterTopbar_buttonAttachmentsCount" t-esc="storeProps.attachmentsAmount"/>
+                        <t t-if="chatter.isDisabled or chatter.thread and chatter.thread.areAttachmentsLoaded">
+                            <span class="o_ChatterTopbar_buttonCount o_ChatterTopbar_buttonAttachmentsCount" t-esc="chatter.thread ? chatter.thread.allAttachments.length : 0"/>
                         </t>
                         <t t-else="">
                             <i class="o_ChatterTopbar_buttonAttachmentsCountLoader fa fa-spinner fa-spin"/>
@@ -48,7 +48,7 @@
                         </button>
                         <button class="btn btn-link o_ChatterTopbar_buttonFollowers" type="button" t-att-disabled="chatter.isDisabled" t-on-click="_onClickFollowers">
                             <i class="fa fa-user"/>
-                            <span class="o_ChatterTopbar_buttonCount o_ChatterTopbar_buttonFollowersCount pl-1" t-esc="storeProps.followersAmount"/>
+                            <span class="o_ChatterTopbar_buttonCount o_ChatterTopbar_buttonFollowersCount pl-1">0</span>
                         </button>
                     </div>
                 </t>

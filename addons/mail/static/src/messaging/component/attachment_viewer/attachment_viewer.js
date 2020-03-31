@@ -3,8 +3,8 @@ odoo.define('mail.messaging.component.AttachmentViewer', function (require) {
 
 const useStore = require('mail.messaging.component_hook.useStore');
 
-const { Component, QWeb, useState } = owl;
-const { useDispatch, useGetters, useRef } = owl.hooks;
+const { Component, QWeb } = owl;
+const { useRef } = owl.hooks;
 
 const MIN_SCALE = 0.5;
 const SCROLL_ZOOM_STEP = 0.1;
@@ -18,26 +18,12 @@ class AttachmentViewer extends Component {
     constructor(...args) {
         super(...args);
         this.MIN_SCALE = MIN_SCALE;
-        this.state = useState({
-            /**
-             * Angle of the image. Changes when the user rotates it.
-             */
-            angle: 0,
-            /**
-             * Determine whether the image is loading or not. Useful to diplay
-             * a spinner when loading image initially.
-             */
-            isImageLoading: false,
-            /**
-             * Scale size of the image. Changes when user zooms in/out.
-             */
-            scale: 1,
-        });
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
+            const attachmentViewer = this.env.entities.AttachmentViewer.instance;
             return {
-                attachment: state.attachments[props.info.attachmentLocalId],
+                attachment: attachmentViewer.attachment,
+                attachments: attachmentViewer.attachments,
+                attachmentViewer,
             };
         });
         /**
@@ -58,7 +44,7 @@ class AttachmentViewer extends Component {
         this._zoomerRef = useRef('zoomer');
         /**
          * Tracked translate transformations on image visualisation. This is
-         * not observed with `useState` because they are used to compute zoomer
+         * not observed with `useStore` because they are used to compute zoomer
          * style, and this is changed directly on zoomer for performance
          * reasons (overhead of making vdom is too significant for each mouse
          * position changes while dragging)
@@ -68,14 +54,14 @@ class AttachmentViewer extends Component {
          * Tracked last rendered attachment. Useful to detect a new image is
          * loading, in order to display spinner until it is fully loaded.
          */
-        this._renderedAttachmentLocalId = undefined;
+        this._renderedAttachment = undefined;
         this._onClickGlobal = this._onClickGlobal.bind(this);
     }
 
     mounted() {
         this.el.focus();
         this._handleImageLoad();
-        this._renderedAttachmentLocalId = this.props.info.attachmentLocalId;
+        this._renderedAttachment = this.attachmentViewer.attachment;
         document.addEventListener('click', this._onClickGlobal);
     }
 
@@ -84,7 +70,7 @@ class AttachmentViewer extends Component {
      */
     patched() {
         this._handleImageLoad();
-        this._renderedAttachmentLocalId = this.props.info.attachmentLocalId;
+        this._renderedAttachment = this.attachmentViewer.attachment;
     }
 
     willUnmount() {
@@ -96,16 +82,24 @@ class AttachmentViewer extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * @returns {mail.messaging.entity.AttachmentViewer}
+     */
+    get attachmentViewer() {
+        return this.env.entities.AttachmentViewer.instance;
+    }
+
+    /**
      * Compute the style of the image (scale + rotation).
      *
      * @returns {string}
      */
     get imageStyle() {
+        const attachmentViewer = this.attachmentViewer;
         let style = `transform: ` +
-            `scale3d(${this.state.scale}, ${this.state.scale}, 1) ` +
-            `rotate(${this.state.angle}deg);`;
+            `scale3d(${attachmentViewer.scale}, ${attachmentViewer.scale}, 1) ` +
+            `rotate(${attachmentViewer.angle}deg);`;
 
-        if (this.state.angle % 180 !== 0) {
+        if (attachmentViewer.angle % 180 !== 0) {
             style += `` +
                 `max-height: ${window.innerWidth}px; ` +
                 `max-width: ${window.innerHeight}px;`;
@@ -138,7 +132,7 @@ class AttachmentViewer extends Component {
      * @private
      */
     _close() {
-        this.storeDispatch('closeDialog', this.props.id);
+        this.attachmentViewer.delete();
     }
 
     /**
@@ -147,7 +141,7 @@ class AttachmentViewer extends Component {
      * @private
      */
     _download() {
-        const id = this.storeProps.attachment.id;
+        const id = this.attachmentViewer.attachment.id;
         window.location = `/web/content/ir.attachment/${id}/datas?download=true`;
     }
 
@@ -159,10 +153,10 @@ class AttachmentViewer extends Component {
      */
     _handleImageLoad() {
         if (
-            this.storeGetters.attachmentFileType(this.props.info.attachmentLocalId) === 'image' &&
-            this._renderedAttachmentLocalId !== this.props.info.attachmentLocalId
+            this.attachmentViewer.attachment.fileType === 'image' &&
+            this._renderedAttachment !== this.attachmentViewer.attachment
         ) {
-            this.state.isImageLoading = true;
+            this.attachmentViewer.update({ isImageLoading: true });
             this._imageRef.el.addEventListener('load', ev => this._onLoadImage(ev));
         }
     }
@@ -173,11 +167,13 @@ class AttachmentViewer extends Component {
      * @private
      */
     _next() {
-        const index = this.props.info.attachmentLocalIds.findIndex(localId =>
-            localId === this.props.info.attachmentLocalId);
-        const nextIndex = (index + 1) % this.props.info.attachmentLocalIds.length;
-        this.storeDispatch('updateDialogInfo', this.props.dialogId, {
-            attachmentLocalId: this.props.info.attachmentLocalIds[nextIndex],
+        const attachmentViewer = this.attachmentViewer;
+        const index = attachmentViewer.attachments.findIndex(attachment =>
+            attachment === attachmentViewer.attachment
+        );
+        const nextIndex = (index + 1) % attachmentViewer.attachments.length;
+        attachmentViewer.link({
+            attachment: attachmentViewer.attachments[nextIndex],
         });
     }
 
@@ -187,13 +183,15 @@ class AttachmentViewer extends Component {
      * @private
      */
     _previous() {
-        const index = this.props.info.attachmentLocalIds.findIndex(localId =>
-            localId === this.props.info.attachmentLocalId);
+        const attachmentViewer = this.attachmentViewer;
+        const index = attachmentViewer.attachments.findIndex(attachment =>
+            attachment === attachmentViewer.attachment
+        );
         const nextIndex = index === 0
-            ? this.props.info.attachmentLocalIds.length - 1
+            ? attachmentViewer.attachments.length - 1
             : index - 1;
-        this.storeDispatch('updateDialogInfo', this.props.dialogId, {
-            attachmentLocalId: this.props.info.attachmentLocalIds[nextIndex],
+        attachmentViewer.link({
+            attachment: attachmentViewer.attachments[nextIndex],
         });
     }
 
@@ -219,7 +217,7 @@ class AttachmentViewer extends Component {
                     </script>
                 </head>
                 <body onload='onloadImage()'>
-                    <img src="${this.src}" alt=""/>
+                    <img src="${this.attachmentViewer.attachment.defaultSource}" alt=""/>
                 </body>
             </html>`);
         printWindow.document.close();
@@ -231,7 +229,7 @@ class AttachmentViewer extends Component {
      * @private
      */
     _rotate() {
-        this.state.angle += 90;
+        this.attachmentViewer.update({ angle: this.attachmentViewer.angle + 90 });
     }
 
     /**
@@ -257,10 +255,11 @@ class AttachmentViewer extends Component {
      * @returns {string}
      */
     _updateZoomerStyle() {
-        const tx = this._imageRef.el.offsetWidth * this.state.scale > this._zoomerRef.el.offsetWidth
+        const attachmentViewer = this.attachmentViewer;
+        const tx = this._imageRef.el.offsetWidth * attachmentViewer.scale > this._zoomerRef.el.offsetWidth
             ? this._translate.x + this._translate.dx
             : 0;
-        const ty = this._imageRef.el.offsetHeight * this.state.scale > this._zoomerRef.el.offsetHeight
+        const ty = this._imageRef.el.offsetHeight * attachmentViewer.scale > this._zoomerRef.el.offsetHeight
             ? this._translate.y + this._translate.dy
             : 0;
         if (tx === 0) {
@@ -280,8 +279,10 @@ class AttachmentViewer extends Component {
      * @param {Object} [param0={}]
      * @param {boolean} [param0.scroll=false]
      */
-    _zoomIn({ scroll=false }={}) {
-        this.state.scale = this.state.scale + (scroll ? SCROLL_ZOOM_STEP : ZOOM_STEP);
+    _zoomIn({ scroll = false } = {}) {
+        this.attachmentViewer.update({
+            scale: this.attachmentViewer.scale + (scroll ? SCROLL_ZOOM_STEP : ZOOM_STEP),
+        });
         this._updateZoomerStyle();
     }
 
@@ -292,15 +293,17 @@ class AttachmentViewer extends Component {
      * @param {Object} [param0={}]
      * @param {boolean} [param0.scroll=false]
      */
-    _zoomOut({ scroll=false }={}) {
-        if (this.state.scale === MIN_SCALE) {
+    _zoomOut({ scroll = false } = {}) {
+        if (this.attachmentViewer.scale === MIN_SCALE) {
             return;
         }
         const unflooredAdaptedScale = (
             this.state.scale -
             (scroll ? SCROLL_ZOOM_STEP : ZOOM_STEP)
         );
-        this.state.scale = Math.max(MIN_SCALE, unflooredAdaptedScale);
+        this.attachmentViewer.update({
+            scale: Math.max(MIN_SCALE, unflooredAdaptedScale),
+        });
         this._updateZoomerStyle();
     }
 
@@ -310,7 +313,7 @@ class AttachmentViewer extends Component {
      * @private
      */
     _zoomReset() {
-        this.state.scale = 1;
+        this.attachmentViewer.update({ scale: 1 });
         this._updateZoomerStyle();
     }
 
@@ -522,7 +525,7 @@ class AttachmentViewer extends Component {
      */
     _onLoadImage(ev) {
         ev.stopPropagation();
-        this.state.isImageLoading = false;
+        this.attachmentViewer.update({ isImageLoading: false });
     }
 
     /**
@@ -574,19 +577,7 @@ class AttachmentViewer extends Component {
 }
 
 Object.assign(AttachmentViewer, {
-    props: {
-        id: String,
-        info: {
-            type: Object,
-            shape: {
-                attachmentLocalId: String,
-                attachmentLocalIds: {
-                    type: Array,
-                    element: String,
-                }
-            },
-        },
-    },
+    props: {},
     template: 'mail.messaging.component.AttachmentViewer',
 });
 

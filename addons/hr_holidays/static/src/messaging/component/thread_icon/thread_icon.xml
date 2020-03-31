@@ -2,10 +2,10 @@
 <templates xml:space="preserve">
     <t t-inherit="mail.messaging.component.ThreadIcon" t-inherit-mode="extension">
         <xpath expr="//*[@name='noImStatusCondition']" position="before">
-            <t t-elif="storeProps.directPartner.im_status === 'leave_online'">
+            <t t-elif="thread.directPartner.im_status === 'leave_online'">
                 <div class="o_ThreadIcon_leaveOnline fa fa-plane" title="Online"/>
             </t>
-            <t t-elif="storeProps.directPartner.im_status === 'leave_offline'">
+            <t t-elif="thread.directPartner.im_status === 'leave_offline'">
                 <div class="o_ThreadIcon_leaveOffline fa fa-plane" title="Out of office"/>
             </t>
         </xpath>

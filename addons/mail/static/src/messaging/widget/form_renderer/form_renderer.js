@@ -2,12 +2,13 @@ odoo.define('mail.messaging.widget.FormRenderer', function (require) {
 "use strict";
 
 const components = {
-    Chatter: require('mail.messaging.component.Chatter'),
+    ChatterContainer: require('mail.messaging.component.ChatterContainer'),
 };
 
 const FormRenderer = require('web.FormRenderer');
+const { ComponentWrapper, WidgetAdapterMixin } = require('web.OwlCompatibility');
 
-const { EventBus } = owl.core;
+class ChatterContainerWrapperComponent extends ComponentWrapper {}
 
 /**
  * Include the FormRenderer to instantiate the chatter area containing (a
@@ -19,31 +20,14 @@ FormRenderer.include({
      */
     async on_attach_callback() {
         this._super(...arguments);
-        // Useful when (re)loading view
-        if (this._hasChatter()) {
-            if (!this._chatterComponent) {
-                if (!this._chatterLocalId) {
-                    this._chatterLocalId = this.env.store.dispatch('createChatter', {
-                        initialThreadId: this.state.res_id,
-                        initialThreadModel: this.state.model,
-                    });
-                }
-                this._makeChatterComponent();
-            }
-            await this._mountChatterComponent();
-        }
+        WidgetAdapterMixin.on_attach_callback.call(this);
     },
     /**
      * @override
      */
     on_detach_callback() {
         this._super(...arguments);
-        // When the view is detached, we totally delete chatter state from store
-        // and chatter component to avoid any problem when view will be
-        // reattached
-        if (this._chatterComponent) {
-            this._destroyChatter();
-        }
+        WidgetAdapterMixin.on_detach_callback.call(this);
     },
     /**
      * @override
@@ -52,29 +36,21 @@ FormRenderer.include({
         this._super(...arguments);
         this.env = this.call('messaging', 'getEnv');
         this.mailFields = params.mailFields;
-        this._chatterBus = new EventBus();
-        this._chatterComponent = undefined;
+        this._chatterContainerComponent = undefined;
         /**
          * The target of chatter, if chatter has to be appended to the DOM.
          * This is set when arch contains `div.oe_chatter`.
          */
         this._chatterContainerTarget = undefined;
-        this._chatterLocalId = undefined;
         // Do not load chatter in form view dialogs
         this._isFromFormViewDialog = params.isFromFormViewDialog;
-
-        this._chatterBus.on('o-chatter-rendered', this, (...args) => {
-            this._onChatterUseStoreThreadAndAttachments(...args);
-        });
     },
     /**
      * @override
      */
     destroy() {
         this._super(...arguments);
-        if (this._hasChatter()) {
-            this._destroyChatter();
-        }
+        WidgetAdapterMixin.destroy.call(this);
     },
 
     //--------------------------------------------------------------------------
@@ -86,14 +62,11 @@ FormRenderer.include({
      *
      * @private
      */
-    _destroyChatter() {
-        if (this._chatterComponent) {
-            this._chatterComponent.destroy();
-            this._chatterComponent = undefined;
-        }
-        if (this._chatterLocalId) {
-            this.env.store.dispatch('deleteChatter', this._chatterLocalId);
-            this._chatterLocalId = undefined;
+    _destroyChatterContainer() {
+        if (this._chatterContainerComponent) {
+            this._chatterContainerComponent.destroy();
+            this._chatterContainerComponent.parentWidget.off('o_chatter_rendered', this);
+            this._chatterContainerComponent = undefined;
         }
     },
     /**
@@ -107,57 +80,59 @@ FormRenderer.include({
         return !!this._chatterContainerTarget;
     },
     /**
-     * Returns whether the chatter of the form renderer should display
-     * activities.
-     *
      * @private
-     * @returns {boolean}
      */
-    _hasChatterActivities() {
-        return !!this.mailFields.mail_activity;
-    },
-    /**
-     * Returns whether the chatter of the form renderer should display
-     * followers.
-     *
-     * @private
-     * @returns {boolean}
-     */
-    _hasChatterFollowers() {
-        return !!this.mailFields.mail_followers;
-    },
-    /**
-     * Determine whether the chatter of the form renderer should display thread.
-     *
-     * @private
-     * @returns {boolean}
-     */
-    _hasChatterThread() {
-        return !!this.mailFields.mail_thread;
+    _makeChatterContainerComponent() {
+        const props = this._makeChatterContainerProps();
+        this._chatterContainerComponent = new ChatterContainerWrapperComponent(
+            this,
+            components.ChatterContainer,
+            props
+        );
+        // Not in custom_events because other modules may remove this listener
+        // while attempting to extend them.
+        this._chatterContainerComponent.parentWidget.on('o_chatter_rendered', this, ev => this._onChatterRendered(ev));
     },
     /**
      * @private
+     * @returns {Object}
      */
-    _makeChatterComponent() {
-        const ChatterComponent = components.Chatter;
-        this._chatterComponent = new ChatterComponent(null, {
-            chatterLocalId: this._chatterLocalId,
-            formRendererBus: this._chatterBus,
-        });
+    _makeChatterContainerProps() {
+        const context = this.record ? this.record.getContext() : {};
+        const activityIds = this.state.data.activity_ids
+            ? this.state.data.activity_ids.res_ids
+            : [];
+        const followerIds = this.state.data.message_follower_ids
+            ? this.state.data.message_follower_ids.res_ids
+            : [];
+        const messageIds = this.state.data.message_ids
+            ? this.state.data.message_ids.res_ids
+            : [];
+        const threadAttachmentCount = this.state.data.message_attachment_count || 0;
+        return {
+            activityIds,
+            context,
+            followerIds,
+            hasActivities: !!this.mailFields.mail_activity,
+            hasFollowers: !!this.mailFields.mail_followers,
+            hasThread: !!this.mailFields.mail_thread,
+            messageIds,
+            threadAttachmentCount,
+            threadId: this.state.res_id,
+            threadModel: this.state.model,
+        };
     },
     /**
      * Mount the chatter
      *
+     * Force re-mounting chatter component in DOM. This is necessary
+     * because each time `_renderView` is called, it puts old content
+     * in a fragment.
+     *
      * @private
      */
-    async _mountChatterComponent() {
-        /**
-         * Force re-mounting chatter component in DOM. This is necessary
-         * because each time `_renderView` is called, it puts old content
-         * in a fragment.
-         */
-        this._chatterComponent.__owl__.isMounted = false;
-        await this._chatterComponent.mount(this._chatterContainerTarget);
+    async _mountChatterContainerComponent() {
+        await this._chatterContainerComponent.mount(this._chatterContainerTarget);
     },
     /**
      * @override
@@ -183,41 +158,21 @@ FormRenderer.include({
     async _renderView() {
         await this._super(...arguments);
         if (this._hasChatter()) {
-            const ChatterComponent = components.Chatter;
-            ChatterComponent.env = this.env;
-            const context = this.record ? this.record.getContext() : {};
-            const activityIds = this.state.data.activity_ids
-                ? this.state.data.activity_ids.res_ids
-                : [];
-            const hasActivities = this._hasChatterActivities();
-            const hasFollowers = this._hasChatterFollowers();
-            const hasThread = this._hasChatterThread();
-            if (!this._chatterLocalId) {
-                this._chatterLocalId = this.env.store.dispatch('createChatter', {
-                    activityIds,
-                    context,
-                    hasActivities,
-                    hasFollowers,
-                    hasThread,
-                    initialThreadId: this.state.res_id,
-                    initialThreadModel: this.state.model,
-                });
+            ChatterContainerWrapperComponent.env = this.env;
+            if (!this._chatterContainerComponent) {
+                this._makeChatterContainerComponent();
             } else {
-                this.env.store.dispatch('updateChatter', this._chatterLocalId, {
-                    activityIds,
-                    context,
-                    hasActivities,
-                    hasFollowers,
-                    hasThread,
-                    threadId: this.state.res_id,
-                    threadModel: this.state.model
-                });
+                this._updateChatterContainerComponent();
             }
-            if (!this._chatterComponent) {
-                this._makeChatterComponent();
-            }
-            await this._mountChatterComponent();
+            await this._mountChatterContainerComponent();
         }
+    },
+    /**
+     * @private
+     */
+    _updateChatterContainerComponent() {
+        const props = this._makeChatterContainerProps();
+        this._chatterContainerComponent.update(props);
     },
 
     //--------------------------------------------------------------------------
@@ -227,9 +182,12 @@ FormRenderer.include({
     /**
      * @abstract
      * @private
-     * @param {...any} args
+     * @param {OdooEvent} ev
+     * @param {Object} ev.data
+     * @param {mail.messaging.entity.Attachment[]} ev.data.attachments
+     * @param {mail.messaging.entity.Thread} ev.data.thread
      */
-    _onChatterUseStoreThreadAndAttachments(...args) {},
+    _onChatterRendered(ev) {},
 });
 
 });

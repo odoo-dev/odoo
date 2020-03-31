@@ -8,8 +8,8 @@ const components = {
 };
 const useStore = require('mail.messaging.component_hook.useStore');
 
-const { Component, useState } = owl;
-const { useDispatch, useGetters, useRef } = owl.hooks;
+const { Component } = owl;
+const { useRef } = owl.hooks;
 
 class ChatWindow extends Component {
 
@@ -18,25 +18,11 @@ class ChatWindow extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.state = useState({
-            /**
-             * Determine whether the chat window is focused or not. Useful for
-             * visual clue.
-             */
-            isFocused: false,
-            /**
-             * Only used for 'new_message': determine whether the chat window
-             * if folded or not. Chat window with a thread rely on fold state
-             * of the thread.
-             */
-            isFolded: false,
-        });
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
             return {
-                isMobile: state.isMobile,
-                thread: state.threads[props.chatWindowLocalId],
+                chatWindow: this.env.entities.ChatWindow.get(props.chatWindow),
+                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                localeTextDirection: this.env.entities.Locale.instance.textDirection,
             };
         });
         /**
@@ -59,20 +45,30 @@ class ChatWindow extends Component {
     }
 
     mounted() {
-        if (this.props.isDocked) {
-            this._applyDockOffset();
-        }
+        this.env.messagingBus.on('will_hide_home_menu', this, this._onWillHideHomeMenu.bind(this));
+        this.env.messagingBus.on('will_show_home_menu', this, this._onWillShowHomeMenu.bind(this));
+        this._update();
     }
 
     patched() {
-        if (this.props.isDocked) {
-            this._applyDockOffset();
-        }
+        this._update();
+    }
+
+    willUnmount() {
+        this.env.messagingBus.off('will_hide_home_menu', this, this._onWillHideHomeMenu.bind(this));
+        this.env.messagingBus.off('will_show_home_menu', this, this._onWillShowHomeMenu.bind(this));
     }
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.ChatWindow}
+     */
+    get chatWindow() {
+        return this.env.entities.ChatWindow.get(this.props.chatWindow);
+    }
 
     /**
      * Get the content of placeholder for the autocomplete input of
@@ -82,52 +78,6 @@ class ChatWindow extends Component {
      */
     get newMessageFormInputPlaceholder() {
         return this.env._t("Search user...");
-    }
-    /**
-     * Focus this chat window.
-     */
-    focus() {
-        this.state.isFocused = true;
-        if (!this.thread) {
-            this._inputRef.comp.focus();
-        } else {
-            this._threadRef.comp.focus();
-        }
-    }
-
-    /**
-     * Determine whether this chat window is folded or not.
-     *
-     * @returns {boolean}
-     */
-    isFolded() {
-        if (this.thread) {
-            return this.thread.state === 'folded';
-        }
-        return this.state.isFolded;
-    }
-
-    /**
-     * Save the scroll positions of the chat window in the store.
-     * This is useful in order to remount chat windows and keep previous
-     * scroll positions. This is necessary because when toggling on/off
-     * home menu, the chat windows have to be remade from scratch.
-     */
-    saveScrollTop() {
-        if (this.props.chatWindowLocalId === 'new_message') {
-            return;
-        }
-        this.storeDispatch('saveChatWindowScrollTop',
-            this.props.chatWindowLocalId,
-            this._threadRef.comp.getScrollTop()
-        );
-    }
-
-    /**
-     * @returns {mail.messaging.entity.Thread|undefined}
-     */
-    get thread() {
-        return this.storeProps.thread;
     }
 
     //--------------------------------------------------------------------------
@@ -139,11 +89,53 @@ class ChatWindow extends Component {
      *
      * @private
      */
-    _applyDockOffset() {
-        const offsetFrom = this.props.dockDirection === 'rtl' ? 'right' : 'left';
+    _applyVisibleOffset() {
+        const locale = this.env.entities.Locale.instance;
+        const offsetFrom = locale.textDirection === 'rtl' ? 'left' : 'right';
         const oppositeFrom = offsetFrom === 'right' ? 'left' : 'right';
-        this.el.style[offsetFrom] = this.props.dockOffset + 'px';
+        this.el.style[offsetFrom] = this.chatWindow.visibleOffset + 'px';
         this.el.style[oppositeFrom] = 'auto';
+    }
+
+    /**
+     * Focus this chat window.
+     *
+     * @private
+     */
+    _focus() {
+        this.chatWindow.update({ isFocused: true });
+        if (!this.chatWindow.thread) {
+            this._inputRef.comp.focus();
+        } else {
+            this._threadRef.comp.focus();
+        }
+    }
+
+    /**
+     * Save the scroll positions of the chat window in the store.
+     * This is useful in order to remount chat windows and keep previous
+     * scroll positions. This is necessary because when toggling on/off
+     * home menu, the chat windows have to be remade from scratch.
+     *
+     * @private
+     */
+    _saveThreadScrollTop() {
+        this.chatWindow.update({
+            threadInitialScrollTop: this._threadRef.comp.getScrollTop(),
+        });
+    }
+
+    /**
+     * @private
+     */
+    _update() {
+        if (this.chatWindow.doIsFocus) {
+            this._focus();
+            this.chatWindow.update({ doIsFocus: false });
+        }
+        if (this.props.isDocked) {
+            this._applyVisibleOffset();
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -162,17 +154,14 @@ class ChatWindow extends Component {
      */
     _onAutocompleteSelect(ev, ui) {
         const partnerId = ui.item.id;
-        const partnerLocalId = `res.partner_${partnerId}`;
-        const chat = this.storeGetters.chatFromPartner(partnerLocalId);
+        const partner = this.env.entities.Partner.fromId(partnerId);
+        const chat = partner.directPartnerThread;
         if (chat) {
-            this.trigger('o-select-thread', {
-                chatWindowLocalId: this.props.chatWindowLocalId,
-                threadLocalId: chat.localId,
-            });
+            chat.open({ chatWindowMode: 'from_new_message' });
         } else {
-            this.storeDispatch('closeChatWindow', this.props.chatWindowLocalId);
-            this.storeDispatch('createChannel', {
+            this.env.entities.Thread.createChannel({
                 autoselect: true,
+                autoselectChatWindowMode: 'from_new_message',
                 partnerId,
                 type: 'chat',
             });
@@ -189,13 +178,13 @@ class ChatWindow extends Component {
      * @param {function} res
      */
     _onAutocompleteSource(req, res) {
-        return this.storeDispatch('searchPartners', {
+        this.env.entities.Partner.imSearch({
             callback: (partners) => {
                 const suggestions = partners.map(partner => {
                     return {
                         id: partner.id,
-                        value: this.storeGetters.partnerName(partner.localId),
-                        label: this.storeGetters.partnerName(partner.localId),
+                        value: partner.nameOrDisplayName,
+                        label: partner.nameOrDisplayName,
                     };
                 });
                 res(_.sortBy(suggestions, 'label'));
@@ -214,13 +203,14 @@ class ChatWindow extends Component {
      */
     _onClick(ev) {
         ev.stopPropagation();
-        if (this.state.isFocused && !this.isFolded()) {
+        const chatWindow = this.chatWindow;
+        if (chatWindow.isFocused && !chatWindow.isFolded) {
             return;
         }
-        if (this.isFolded()) {
-            this.state.isFocused = true; // focus chat window but not input
+        if (chatWindow.isFolded) {
+            chatWindow.update({ isFocused: true });
         } else {
-            this.focus();
+            chatWindow.focus();
         }
     }
 
@@ -233,14 +223,10 @@ class ChatWindow extends Component {
      */
     _onClickedHeader(ev) {
         ev.stopPropagation();
-        if (this.storeProps.isMobile) {
+        if (this.env.entities.Device.instance.isMobile) {
             return;
         }
-        if (!this.thread) {
-            this.state.isFolded = !this.state.isFolded;
-        } else {
-            this.storeDispatch('toggleFoldThread', this.props.chatWindowLocalId);
-        }
+        this.chatWindow.toggleFold();
     }
 
     /**
@@ -251,7 +237,7 @@ class ChatWindow extends Component {
      */
     _onFocusinThread(ev) {
         ev.stopPropagation();
-        this.state.isFocused = true;
+        this.chatWindow.update({ isFocused: true });
     }
 
     /**
@@ -260,8 +246,8 @@ class ChatWindow extends Component {
      * @private
      */
     _onFocusout() {
-        this.state.isFocused = false;
-        if (!this.thread) {
+        this.chatWindow.update({ isFocused: false });
+        if (!this.chatWindow.thread) {
             this._inputRef.comp.focusout();
         } else {
             this._threadRef.comp.focusout();
@@ -283,20 +269,46 @@ class ChatWindow extends Component {
             case 'Tab':
                 ev.preventDefault();
                 if (ev.shiftKey) {
-                    this.trigger('o-focus-previous-chat-window', {
-                        currentChatWindowLocalId: this.props.chatWindowLocalId,
-                    });
+                    this.chatWindow.focusPreviousVisibleUnfoldedChatWindow();
                 } else {
-                    this.trigger('o-focus-next-chat-window', {
-                        currentChatWindowLocalId: this.props.chatWindowLocalId,
-                    });
+                    this.chatWindow.focusNextVisibleUnfoldedChatWindow();
                 }
                 break;
             case 'Escape':
                 ev.preventDefault();
-                this.storeDispatch('closeChatWindow', this.props.chatWindowLocalId);
+                this.chatWindow.close();
                 break;
         }
+    }
+
+    /**
+     * Save the scroll positions of the chat window in the store.
+     * This is useful in order to remount chat windows and keep previous
+     * scroll positions. This is necessary because when toggling on/off
+     * home menu, the chat windows have to be remade from scratch.
+     *
+     * @private
+     */
+    async _onWillHideHomeMenu() {
+        if (!this.chatWindow.thread) {
+            return;
+        }
+        this._saveThreadScrollTop();
+    }
+
+    /**
+     * Save the scroll positions of the chat window in the store.
+     * This is useful in order to remount chat windows and keep previous
+     * scroll positions. This is necessary because when toggling on/off
+     * home menu, the chat windows have to be remade from scratch.
+     *
+     * @private
+     */
+    async _onWillShowHomeMenu() {
+        if (!this.chatWindow.thread) {
+            return;
+        }
+        this._saveThreadScrollTop();
     }
 
 }
@@ -304,29 +316,17 @@ class ChatWindow extends Component {
 Object.assign(ChatWindow, {
     components,
     defaultProps: {
-        dockDirection: 'rtl',
-        dockOffset: 0,
         hasCloseAsBackButton: false,
-        hasShiftLeft: false,
-        hasShiftRight: false,
         isDocked: false,
         isExpandable: false,
         isFullscreen: false,
     },
     props: {
-        chatWindowLocalId: String,
-        dockDirection: String,
-        dockOffset: Number,
+        chatWindow: String,
         hasCloseAsBackButton: Boolean,
-        hasShiftLeft: Boolean,
-        hasShiftRight: Boolean,
         isDocked: Boolean,
         isExpandable: Boolean,
         isFullscreen: Boolean,
-        threadInitialScrollTop: {
-            type: Number,
-            optional: true,
-        },
     },
     template: 'mail.messaging.component.ChatWindow',
 });

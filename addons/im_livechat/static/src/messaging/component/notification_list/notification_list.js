@@ -20,9 +20,9 @@ patch(components.NotificationList, 'im_livechat.messaging.component.Notification
      *
      * @override
      */
-    _useStoreSelectorThreads(state, props) {
+    _useStoreSelectorThreads(props) {
         if (props.filter === 'livechat') {
-            return this.storeGetters.livechatList();
+            return this.env.entities.Thread.allOrderedAndPinnedLivechats();
         }
         return this._super(...arguments);
     },

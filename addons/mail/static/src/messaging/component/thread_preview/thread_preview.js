@@ -9,7 +9,6 @@ const useStore = require('mail.messaging.component_hook.useStore');
 const mailUtils = require('mail.utils');
 
 const { Component } = owl;
-const { useDispatch, useGetters } = owl.hooks;
 
 class ThreadPreview extends Component {
 
@@ -18,27 +17,21 @@ class ThreadPreview extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
-            const threadLocalId = props.threadLocalId;
-            const thread = state.threads[threadLocalId];
-            let lastMessage;
+        useStore(props => {
+            const thread = this.env.entities.Thread.get(props.thread);
+            const mainThreadCache = thread ? thread.mainCache : undefined;
             let lastMessageAuthor;
-            const { length: l, [l - 1]: lastMessageLocalId } = thread.messageLocalIds;
-            lastMessage = state.messages[lastMessageLocalId];
+            const { length: l, [l - 1]: lastMessage } = mainThreadCache.orderedMessages;
             if (lastMessage) {
-                lastMessageAuthor = state.partners[lastMessage.authorLocalId];
+                lastMessageAuthor = lastMessage.author;
             }
             return {
-                isMobile: state.isMobile,
+                isDeviceMobile: this.env.entities.Device.instance.isMobile,
                 lastMessage,
                 lastMessageAuthor,
                 thread,
-                threadDirectPartner: thread.directPartnerLocalId
-                    ? state.partners[thread.directPartnerLocalId]
-                    : undefined,
-                threadName: this.storeGetters.threadName(threadLocalId),
+                threadDirectPartner: thread ? thread.directPartner : undefined,
+                threadName: thread ? thread.displayName : undefined,
             };
         });
     }
@@ -53,10 +46,8 @@ class ThreadPreview extends Component {
      * @returns {string}
      */
     image() {
-        const directPartnerLocalId = this.thread.directPartnerLocalId;
-        if (directPartnerLocalId) {
-            const directPartner = this.env.store.state.partners[directPartnerLocalId];
-            return `/web/image/res.partner/${directPartner.id}/image_128`;
+        if (this.thread.directPartner) {
+            return `/web/image/res.partner/${this.thread.directPartner.id}/image_128`;
         }
         return `/web/image/mail.channel/${this.thread.id}/image_128`;
     }
@@ -67,12 +58,10 @@ class ThreadPreview extends Component {
      * @returns {string}
      */
     get inlineLastMessageBody() {
-        if (!this.storeProps.lastMessage) {
+        if (!this.thread.lastMessage) {
             return '';
         }
-        return mailUtils.parseAndTransform(
-            this.storeGetters.messagePrettyBody(this.storeProps.lastMessage.localId),
-            mailUtils.inline);
+        return mailUtils.parseAndTransform(this.thread.lastMessage.prettyBody, mailUtils.inline);
     }
 
     /**
@@ -82,9 +71,12 @@ class ThreadPreview extends Component {
      * @returns {boolean}
      */
     get isMyselfLastMessageAuthor() {
+        if (!this.thread.lastMessage) {
+            return false;
+        }
         return (
-            this.storeProps.lastMessageAuthor &&
-            this.storeProps.lastMessageAuthor.id === this.env.session.partner_id
+            this.thread.lastMessage.author &&
+            this.thread.lastMessage.author === this.env.entities.Partner.current
         ) || false;
     }
 
@@ -92,7 +84,7 @@ class ThreadPreview extends Component {
      * @returns {mail.messaging.entity.Thread}
      */
     get thread() {
-        return this.storeProps.thread;
+        return this.env.entities.Thread.get(this.props.thread);
     }
 
     //--------------------------------------------------------------------------
@@ -104,9 +96,7 @@ class ThreadPreview extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        this.trigger('o-select-thread', {
-            threadLocalId: this.thread.localId,
-        });
+        this.trigger('o-select-thread', { thread: this.thread.localId });
     }
 
     /**
@@ -114,8 +104,7 @@ class ThreadPreview extends Component {
      * @param {MouseEvent} ev
      */
     _onClickMarkAsRead(ev) {
-        ev.stopPropagation();
-        this.storeDispatch('markThreadAsSeen', this.props.threadLocalId);
+        this.thread.markAsSeen();
     }
 
 }
@@ -123,7 +112,7 @@ class ThreadPreview extends Component {
 Object.assign(ThreadPreview, {
     components,
     props: {
-        threadLocalId: String,
+        thread: String,
     },
     template: 'mail.messaging.component.ThreadPreview',
 });

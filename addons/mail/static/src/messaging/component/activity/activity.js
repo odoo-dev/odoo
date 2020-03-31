@@ -15,7 +15,7 @@ const {
 } = require('web.time');
 
 const { Component, useState } = owl;
-const { useDispatch, useGetters, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class Activity extends Component {
 
@@ -27,11 +27,9 @@ class Activity extends Component {
         this.state = useState({
             areDetailsVisible: false,
         });
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
             return {
-                activity: state.activities[props.activityLocalId],
+                activity: this.env.entities.Activity.get(props.activity),
             };
         });
         /**
@@ -49,14 +47,14 @@ class Activity extends Component {
      * @returns {mail.messaging.entity.Activity}
      */
     get activity() {
-        return this.storeProps.activity;
+        return this.env.entities.Activity.get(this.props.activity);
     }
 
     /**
      * @returns {string}
      */
     get assignedUserText() {
-        return _.str.sprintf(this.env._t("for %s"), this.activity.userDisplayName);
+        return _.str.sprintf(this.env._t("for %s"), this.activity.assignee.displayName);
     }
 
     /**
@@ -113,13 +111,10 @@ class Activity extends Component {
      * @private
      * @param {CustomEvent} ev
      * @param {Object} ev.detail
-     * @param {string} ev.detail.attachmentLocalId
+     * @param {mail.messaging.entity.Attachment} ev.detail.attachment
      */
     _onAttachmentCreated(ev) {
-        const { attachmentLocalId } = ev.detail;
-        this.storeDispatch('markActivityAsDone', this.props.activityLocalId, {
-            attachmentLocalIds: [attachmentLocalId],
-        });
+        this.activity.markAsDone({ attachments: [ev.detail.attachment] });
     }
 
     /**
@@ -128,7 +123,7 @@ class Activity extends Component {
      */
     _onClickCancel(ev) {
         ev.preventDefault();
-        this.storeDispatch('deleteActivity', this.props.activityLocalId);
+        this.activity.delete();
     }
 
     /**
@@ -152,13 +147,13 @@ class Activity extends Component {
             views: [[false, 'form']],
             target: 'new',
             context: {
-                default_res_id: this.activity.resId,
-                default_res_model: this.activity.model,
+                default_res_id: this.activity.res_id,
+                default_res_model: this.activity.res_model,
             },
             res_id: this.activity.id,
         };
         return this.env.do_action(action, {
-            on_close: () => this.storeDispatch('updateActivity', this.props.activityLocalId),
+            on_close: () => this.activity.fetchAndUpdate(),
         });
     }
 
@@ -175,7 +170,7 @@ class Activity extends Component {
 Object.assign(Activity, {
     components,
     props: {
-        activityLocalId: String,
+        activity: String,
     },
     template: 'mail.messaging.component.Activity',
 });

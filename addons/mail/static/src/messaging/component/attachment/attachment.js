@@ -4,7 +4,6 @@ odoo.define('mail.messaging.component.Attachment', function (require) {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters } = owl.hooks;
 
 class Attachment extends Component {
 
@@ -13,11 +12,9 @@ class Attachment extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
             return {
-                attachment: state.attachments[props.attachmentLocalId],
+                attachment: this.env.entities.Attachment.get(props.attachment),
             };
         });
     }
@@ -30,7 +27,7 @@ class Attachment extends Component {
      * @returns {mail.messaging.entity.Attachment}
      */
     get attachment() {
-        return this.storeProps.attachment;
+        return this.env.entities.Attachment.get(this.props.attachment);
     }
 
     /**
@@ -58,9 +55,7 @@ class Attachment extends Component {
         if (this.props.detailsMode !== 'auto') {
             return this.props.detailsMode;
         }
-        const fileType =
-            this.storeGetters.attachmentFileType(this.props.attachmentLocalId);
-        if (fileType !== 'image') {
+        if (this.attachment.fileType !== 'image') {
             return 'card';
         }
         return 'hover';
@@ -72,9 +67,7 @@ class Attachment extends Component {
      * @returns {string}
      */
     get imageStyle() {
-        const fileType =
-            this.storeGetters.attachmentFileType(this.props.attachmentLocalId);
-        if (fileType !== 'image') {
+        if (this.attachment.fileType !== 'image') {
             return '';
         }
         let size;
@@ -108,12 +101,14 @@ class Attachment extends Component {
      * @param {MouseEvent} ev
      */
     _onClickImage(ev) {
-        if (!this.storeGetters.isAttachmentViewable(this.props.attachmentLocalId)) {
+        if (!this.attachment.isViewable) {
             return;
         }
-        this.storeDispatch('viewAttachments', {
-            attachmentLocalId: this.props.attachmentLocalId,
-            attachmentLocalIds: this.props.attachmentLocalIds,
+        this.env.entities.Attachment.view({
+            attachment: this.attachment,
+            attachments: this.props.attachments.map(
+                attachment => this.env.entities.Attachment.get(attachment)
+            ),
         });
     }
 
@@ -123,14 +118,14 @@ class Attachment extends Component {
      */
     _onClickUnlink(ev) {
         ev.stopPropagation();
-        this.storeDispatch('unlinkAttachment', this.props.attachmentLocalId);
+        this.attachment.remove();
     }
 
 }
 
 Object.assign(Attachment, {
     defaultProps: {
-        attachmentLocalIds: [],
+        attachments: [],
         detailsMode: 'auto',
         imageSize: 'medium',
         isDownloadable: false,
@@ -139,8 +134,8 @@ Object.assign(Attachment, {
         showFilename: true,
     },
     props: {
-        attachmentLocalId: String,
-        attachmentLocalIds: {
+        attachment: String,
+        attachments: {
             type: Array,
             element: String,
         },

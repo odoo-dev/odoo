@@ -47,8 +47,6 @@ const ChatWindowService = AbstractService.extend({
         bus.on('hide_home_menu', this, this._onHideHomeMenu.bind(this));
         bus.on('show_home_menu', this, this._onShowHomeMenu.bind(this));
         bus.on('web_client_ready', this, this._onWebClientReady.bind(this));
-        bus.on('will_hide_home_menu', this, this._onWillHideHomeMenu.bind(this));
-        bus.on('will_show_home_menu', this, this._onWillShowHomeMenu.bind(this));
     },
     /**
      * @private
@@ -99,22 +97,6 @@ const ChatWindowService = AbstractService.extend({
     async _onWebClientReady() {
         await this._mount();
         this._webClientReady = true;
-    },
-    /**
-     * @private
-     */
-    async _onWillHideHomeMenu() {
-        if (this.component) {
-            this.component.saveChatWindowsScrollTops();
-        }
-    },
-    /**
-     * @private
-     */
-    async _onWillShowHomeMenu() {
-        if (this.component) {
-            this.component.saveChatWindowsScrollTops();
-        }
     },
 });
 

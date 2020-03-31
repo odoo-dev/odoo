@@ -8,7 +8,8 @@ odoo.define('mail.messaging.component_hook.useStore', function (require) {
  *
  * It assumes that the result of the selector is always an object (or array).
  *
- * @param {function} selector @see owl.hooks.useStore
+ * @param {function} selector function passed as selector of original `useStore`
+ *   with 1st parameter extended as store state. @see owl.hooks.useStore
  * @param {object} [options={}] @see owl.hooks.useStore
  * @param {number|object} [options.compareDepth=0] the comparison depth, either
  *  as number (applies to all keys) or as an object (depth for specific keys)
@@ -114,7 +115,7 @@ function useStore(selector, options = {}) {
         return compare;
     }
 
-    const extendedSelector = (state, props) => selector(state, props);
+    const extendedSelector = (state, props) => selector(props);
     return owl.hooks.useStore(extendedSelector, Object.assign({}, options, {
         isEqual: proxyComparatorDeep(options.compareDepth),
     }));

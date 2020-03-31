@@ -1,6 +1,7 @@
 odoo.define('mail.basicThreadWindowTests', function (require) {
 "use strict";
 
+const { patchMessagingService } = require('mail.messaging.testUtils');
 var mailTestUtils = require('mail.testUtils');
 
 var FormView = require('web.FormView');
@@ -54,6 +55,8 @@ QUnit.module('Basic', {
             },
         };
         this.services = mailTestUtils.getMailServices();
+        const { unpatch: unpatchMessagingService } = patchMessagingService(this.services.messaging);
+        this.unpatchMessagingService = unpatchMessagingService;
 
         this.ORIGINAL_THREAD_WINDOW_APPENDTO = this.services.mail_service.prototype.THREAD_WINDOW_APPENDTO;
 
@@ -76,6 +79,7 @@ QUnit.module('Basic', {
     afterEach: function () {
         // reset thread window append to body
         this.services.mail_service.prototype.THREAD_WINDOW_APPENDTO = 'body';
+        this.unpatchMessagingService();
     },
 });
 
@@ -456,7 +460,7 @@ QUnit.test('do not autofocus chat window on receiving new direct message', async
                     '<field name="display_name" />' +
                 '</form>',
         res_id: 1,
-        services: mailTestUtils.getMailServices(),
+        services: this.services,
         viewOptions: {
             mode: 'edit',
         },

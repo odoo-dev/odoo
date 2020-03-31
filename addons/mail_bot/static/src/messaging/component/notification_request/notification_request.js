@@ -7,7 +7,6 @@ const components = {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters } = owl.hooks;
 
 class NotificationRequest extends Component {
 
@@ -16,12 +15,10 @@ class NotificationRequest extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
             return {
-                isMobile: state.isMobile,
-                partnerRoot: state.partners[state.partnerRootLocalId],
+                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                partnerRoot: this.env.entities.Partner.root,
             };
         });
     }
@@ -36,7 +33,7 @@ class NotificationRequest extends Component {
     getHeaderText() {
         return _.str.sprintf(
             this.env._t("%s has a request"),
-            this.storeGetters.partnerName(this.storeProps.partnerRoot.localId)
+            this.env.entities.Partner.root.nameOrDisplayName
         );
     }
 
@@ -52,7 +49,7 @@ class NotificationRequest extends Component {
      * @param {string} value
      */
     _handleResponseNotificationPermission(value) {
-        this.storeDispatch('removeOdoobotRequest');
+        this.env.entities.Mailbot.instance.update();
         if (value !== 'granted') {
             this.env.call('bus_service', 'sendNotification',
                 this.env._t("Permission denied"),

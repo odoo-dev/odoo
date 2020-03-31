@@ -4,7 +4,6 @@ odoo.define('mail.messaging.component.ThreadIcon', function (require) {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useGetters } = owl.hooks;
 
 class ThreadIcon extends Component {
 
@@ -13,16 +12,12 @@ class ThreadIcon extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
-            const thread = state.threads[props.threadLocalId];
-            const directPartner = thread
-                ? state.partners[thread.directPartnerLocalId]
-                : undefined;
+        useStore(props => {
+            const thread = this.env.entities.Thread.get(props.thread);
+            const directPartner = thread ? thread.directPartner : undefined;
             return {
                 directPartner,
-                // used through isPartnerRoot getter
-                partnerRootLocalId: state.partnerRootLocalId,
+                partnerRoot: this.env.entities.Partner.root,
                 thread,
             };
         });
@@ -36,14 +31,14 @@ class ThreadIcon extends Component {
      * @returns {mail.messaging.entity.Thread}
      */
     get thread() {
-        return this.storeProps.thread;
+        return this.env.entities.Thread.get(this.props.thread);
     }
 
 }
 
 Object.assign(ThreadIcon, {
     props: {
-        threadLocalId: String,
+        thread: String,
     },
     template: 'mail.messaging.component.ThreadIcon',
 });

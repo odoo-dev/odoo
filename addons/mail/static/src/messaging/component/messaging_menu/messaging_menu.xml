@@ -2,30 +2,30 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.messaging.component.MessagingMenu" owl="1">
-        <li class="o_MessagingMenu" t-att-class="{ show: messagingMenu.isOpen, 'o-mobile': storeProps.isMobile }">
+        <li class="o_MessagingMenu" t-att-class="{ show: messagingMenu.isOpen, 'o-mobile': env.entities.Device.instance.isMobile }">
             <!-- TODO FIXME restore mobile stuff here (activeMobileThread) -->
-            <t t-if="!storeProps.isMobile or true">
+            <t t-if="!env.entities.Device.instance.isMobile or true">
                 <a class="o_MessagingMenu_toggler o-no-caret" t-att-class="{ show: messagingMenu.isOpen }" href="#" t-on-click="_onClickToggler" data-toggle="dropdown" data-display="static" title="Conversations" role="button" aria-expanded="false">
                     <i class="o_MessagingMenu_icon fa fa-comments-o" role="img" aria-label="Messages"/>
-                    <t t-if="!storeProps.isMessagingInitialized">
+                    <t t-if="!env.entities.Messaging.instance.isInitialized">
                         <i class="o_MessagingMenu_loading fa fa-spinner fa-spin"/>
                     </t>
-                    <t t-elif="storeProps.counter > 0">
+                    <t t-elif="messagingMenu.counter > 0">
                         <span class="o_MessagingMenu_counter badge badge-pill">
-                            <t t-esc="storeProps.counter"/>
+                            <t t-esc="messagingMenu.counter"/>
                         </span>
                     </t>
                 </a>
             </t>
             <!-- TODO FIXME restore mobile stuff here (activeMobileThread) -->
-            <t t-if="messagingMenu.isOpen and (!storeProps.isMobile or true)">
-                <div class="o_MessagingMenu_dropdownMenu dropdown-menu dropdown-menu-right" t-att-class="{ 'o-mobile': storeProps.isMobile, 'o-messaging-not-initialized': !storeProps.isMessagingInitialized }" role="menu">
-                    <t t-if="!storeProps.isMessagingInitialized">
+            <t t-if="messagingMenu.isOpen and (!env.entities.Device.instance.isMobile or true)">
+                <div class="o_MessagingMenu_dropdownMenu dropdown-menu dropdown-menu-right" t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile, 'o-messaging-not-initialized': !env.entities.Messaging.instance.isInitialized }" role="menu">
+                    <t t-if="!env.entities.Messaging.instance.isInitialized">
                         <span><i class="o_MessagingMenu_dropdownLoadingIcon fa fa-spinner fa-spin"/>Please wait...</span>
                     </t>
                     <t t-else="">
-                        <div class="o_MessagingMenu_dropdownMenuHeader" t-att-class="{ 'o-mobile': storeProps.isMobile }">
-                            <t t-if="!storeProps.isMobile">
+                        <div class="o_MessagingMenu_dropdownMenuHeader" t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }">
+                            <t t-if="!env.entities.Device.instance.isMobile">
                                 <t t-foreach="['all', 'chat', 'channel']" t-as="tabId" t-key="tabId">
                                     <button class="o_MessagingMenu_tabButton o-desktop btn btn-link" t-att-class="{ 'o-active': messagingMenu.activeTabId === tabId, }" t-on-click="_onClickDesktopTabButton" type="button" role="tab" t-att-data-tab-id="tabId">
                                         <t t-if="tabId === 'all'">All</t>
@@ -34,14 +34,14 @@
                                     </button>
                                 </t>
                             </t>
-                            <t t-if="storeProps.isMobile">
+                            <t t-if="env.entities.Device.instance.isMobile">
                                 <t t-call="mail.messaging.component.MessagingMenu.NewMessageButton"/>
                             </t>
                             <div class="o-autogrow"/>
-                            <t t-if="!storeProps.isMobile and !storeProps.isDiscussOpen">
+                            <t t-if="!env.entities.Device.instance.isMobile and !env.entities.Discuss.instance.isOpen">
                                 <t t-call="mail.messaging.component.MessagingMenu.NewMessageButton"/>
                             </t>
-                            <t t-if="storeProps.isMobile and messagingMenu.isMobileNewMessageToggled">
+                            <t t-if="env.entities.Device.instance.isMobile and messagingMenu.isMobileNewMessageToggled">
                                 <AutocompleteInput
                                     class="o_MessagingMenu_mobileNewMessageInput"
                                     customClass="id + '_mobileNewMessageInputAutocomplete'"
@@ -56,11 +56,11 @@
                         </div>
                         <NotificationList
                             class="o_MessagingMenu_notificationList"
-                            t-att-class="{ 'o-mobile': storeProps.isMobile }"
+                            t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }"
                             filter="messagingMenu.activeTabId"
                             t-on-o-select-thread="_onSelectThread"
                         />
-                        <t t-if="storeProps.isMobile">
+                        <t t-if="env.entities.Device.instance.isMobile">
                             <MobileMessagingNavbar
                                 class="o_MessagingMenu_mobileNavbar"
                                 activeTabId="messagingMenu.activeTabId"
@@ -77,9 +77,9 @@
     <t t-name="mail.messaging.component.MessagingMenu.NewMessageButton" owl="1">
         <button class="o_MessagingMenu_newMessageButton btn"
             t-att-class="{
-                'btn-link': !storeProps.isMobile,
-                'btn-secondary': storeProps.isMobile,
-                'o-mobile': storeProps.isMobile,
+                'btn-link': !env.entities.Device.instance.isMobile,
+                'btn-secondary': env.entities.Device.instance.isMobile,
+                'o-mobile': env.entities.Device.instance.isMobile,
             }" t-on-click="_onClickNewMessage" type="button"
         >
             New message

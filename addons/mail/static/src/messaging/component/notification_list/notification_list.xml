@@ -13,8 +13,8 @@
                     <t t-if="notification.type === 'thread'">
                         <ThreadPreview
                             class="o_NotificationList_preview"
-                            t-att-class="{ 'o-mobile': storeProps.isMobile }"
-                            threadLocalId="notification.threadLocalId"
+                            t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }"
+                            thread="notification.thread.localId"
                         />
                     </t>
                     <t name="separatorCondition" t-if="!notification_last">

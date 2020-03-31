@@ -3,7 +3,7 @@
 
     <t t-name="mail.messaging.component.ActivityMarkDonePopover" owl="1">
         <div class="o_ActivityMarkDonePopover">
-            <t t-if="true">
+            <t t-if="activity">
                 <textarea class="form-control o_ActivityMarkDonePopover_feedback" rows="3" placeholder="Write Feedback" t-ref="feedbackTextarea"/>
                 <div class="o_ActivityMarkDonePopover_buttons">
                     <t t-if="!activity.forceNext">

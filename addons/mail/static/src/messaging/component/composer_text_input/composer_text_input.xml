@@ -3,7 +3,7 @@
 
     <t t-name="mail.messaging.component.ComposerTextInput" owl="1">
         <div class="o_ComposerTextInput">
-            <t t-if="true">
+            <t t-if="composer">
                 <textarea class="o_ComposerTextInput_textarea" t-esc="composer.textInputContent" placeholder="Write something..." t-on-keydown="_onKeydownTextarea" t-on-input="_onInputTextarea" t-ref="textarea" />
             </t>
         </div>
@@ -68,7 +68,7 @@
         <div class="o_ComposerTextInput_mentionMenuItem" t-att-class="{ 'o-mobile': isMobile }" t-attf-title="{{ partnerName }}{{ item.original.email ? ('&lt;' + item.original.email + '&gt;') : ''}}">
             <t t-if="item.original.im_status">
                 <t t-call="mail.messaging.component.PartnerImStatusIcon">
-                    <t t-set="storeProps" t-value="{ partner: item.original }"/>
+                    <t t-set="partner" t-value="item.original"/>
                 </t>
             </t><t t-esc="partnerName"/><t t-if="item.original.email"> <t t-esc="item.original.email"/><span class="o_extra"><t t-esc="'&lt;' + item.original.email + '&gt;'"/></span></t>
         </div>
