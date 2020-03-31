@@ -4,7 +4,7 @@ odoo.define('mail.messaging.component.ComposerTextInput', function (require) {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 /**
  * ComposerInput relies on a minimal HTML editor in order to support mentions.
@@ -16,12 +16,10 @@ class ComposerTextInput extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
             return {
-                isMobile: state.isMobile,
-                composer: state.composers[props.composerLocalId],
+                composer: this.env.entities.Composer.get(props.composerLocalId),
+                isDeviceMobile: this.env.entities.Device.instance.isMobile,
             };
         });
         /**
@@ -54,7 +52,7 @@ class ComposerTextInput extends Component {
      * @returns {mail.messaging.entity.Composer}
      */
     get composer() {
-        return this.storeProps.composer;
+        return this.env.entities.Composer.get(this.props.composerLocalId);
     }
 
     focus() {
@@ -79,16 +77,11 @@ class ComposerTextInput extends Component {
      * Saves the composer text input state in store
      */
     saveStateInStore() {
-        const data = {
+        this.composer.saveTextInput({
             textInputContent: this.getContent(),
             textInputCursorStart: this._getSelectionStart(),
             textInputCursorEnd: this._getSelectionEnd(),
-        };
-        this.storeDispatch(
-            'saveComposerTextInput',
-            this.props.composerLocalId,
-            data,
-        );
+        });
     }
 
     //--------------------------------------------------------------------------
@@ -190,7 +183,7 @@ class ComposerTextInput extends Component {
         if (ev.shiftKey) {
             return;
         }
-        if (this.storeProps.isMobile) {
+        if (this.env.entities.Device.instance.isMobile) {
             return;
         }
         this.trigger('o-keydown-enter');
@@ -205,7 +198,7 @@ class ComposerTextInput extends Component {
         if (!this._isEmpty()) {
             return;
         }
-        this.trigger('o-discard');
+        this.composer.discard();
         ev.preventDefault();
     }
 

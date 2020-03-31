@@ -7,7 +7,6 @@ const components = {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters } = owl.hooks;
 
 class NotificationList extends Component {
 
@@ -16,8 +15,6 @@ class NotificationList extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
         this.storeProps = useStore((...args) => this._useStoreSelector(...args), {
             compareDepth: {
                 // list + notification object created in useStore
@@ -53,49 +50,47 @@ class NotificationList extends Component {
      * @private
      */
     async _loadPreviews() {
-        this.storeDispatch('loadThreadPreviews',
-            this.notifications
-                .filter(notification => notification.threadLocalId)
-                .map(notification => notification.threadLocalId)
-        );
+        const { notifications } = this.storeProps;
+        const threads = notifications
+            .filter(notification => notification.thread)
+            .map(notification => this.env.entities.Thread.get(notification.thread));
+        this.env.entities.Thread.loadPreviews(threads);
     }
 
     /**
      * @private
-     * @param {Object} state
      * @param {Object} props
      */
-    _useStoreSelector(state, props) {
-        const threads = this._useStoreSelectorThreads(state, props);
+    _useStoreSelector(props) {
+        const threads = this._useStoreSelectorThreads(props);
         const notifications = threads.map(thread => {
             return {
-                threadLocalId: thread.localId,
+                thread: thread,
                 type: 'thread',
                 uniqueId: thread.localId,
             };
         });
         return {
-            isMobile: state.isMobile,
+            isDeviceMobile: this.env.entities.Device.instance.isMobile,
             notifications,
         };
     }
 
     /**
      * @private
-     * @param {Object} state
      * @param {Object} props
-     * @returns {Object[]} threads
+     * @returns {mail.messaging.entity.Thread[]}
      */
-    _useStoreSelectorThreads(state, props) {
+    _useStoreSelectorThreads(props) {
         if (props.filter === 'mailbox') {
-            return this.storeGetters.allOrderedAndPinnedMailboxes();
+            return this.env.entities.Thread.allOrderedAndPinnedMailboxes;
         } else if (props.filter === 'channel') {
-            return this.storeGetters.allOrderedAndPinnedMultiUserChannels();
+            return this.env.entities.Thread.allOrderedAndPinnedMultiUserChannels;
         } else if (props.filter === 'chat') {
-            return this.storeGetters.allOrderedAndPinnedChats();
+            return this.env.entities.Thread.allOrderedAndPinnedChats;
         } else if (props.filter === 'all') {
             // "All" filter is for channels and chats
-            return this.storeGetters.allOrderedAndPinnedChannels();
+            return this.env.entities.Thread.allOrderedAndPinnedChannels;
         } else {
             throw new Error(`Unsupported filter ${props.filter}`);
         }

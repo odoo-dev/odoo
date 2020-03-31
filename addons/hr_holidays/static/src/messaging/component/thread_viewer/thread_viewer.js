@@ -20,14 +20,14 @@ patch(components.ThreadViewer, 'hr_holidays.messaging.component.ThreadViewer', {
      * @returns {string}
      */
     getOutOfOfficeText() {
-        if (!this.storeProps.directPartner) {
+        if (!this.threadViewer.thread.directPartner) {
             return "";
         }
-        if (!this.storeProps.directPartner.out_of_office_date_end) {
+        if (!this.threadViewer.thread.directPartner.out_of_office_date_end) {
             return "";
         }
         const currentDate = new Date();
-        const date = new Date(this.storeProps.directPartner.out_of_office_date_end);
+        const date = new Date(this.threadViewer.thread.directPartner.out_of_office_date_end);
         const options = { day: 'numeric', month: 'short' };
         if (currentDate.getFullYear() !== date.getFullYear()) {
             options.year = 'numeric';
@@ -43,14 +43,9 @@ patch(components.ThreadViewer, 'hr_holidays.messaging.component.ThreadViewer', {
     /**
      * @override
      */
-    _useStoreSelector(state, props) {
+    _useStoreSelector(props) {
         const res = this._super(...arguments);
-        const directPartnerLocalId = res.thread
-            ? res.thread.directPartnerLocalId
-            : undefined;
-        const directPartner = directPartnerLocalId
-            ? state.partners[directPartnerLocalId]
-            : undefined;
+        const directPartner = res.thread ? res.thread.directPartner : undefined;
         return Object.assign({}, res, {
             directPartner,
         });

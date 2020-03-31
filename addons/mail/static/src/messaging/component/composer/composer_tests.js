@@ -26,11 +26,11 @@ QUnit.module('Composer', {
     beforeEach() {
         utilsBeforeEach(this);
 
-        this.createComposerComponent = async (composerLocalId, otherProps) => {
+        this.createComposerComponent = async (composer, otherProps) => {
             const ComposerComponent = components.Composer;
             ComposerComponent.env = this.env;
             this.component = new ComposerComponent(null, Object.assign({
-                composerLocalId,
+                composerLocalId: composer.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
             await afterNextRender();
@@ -65,8 +65,8 @@ QUnit.test('composer text input: basic rendering', async function (assert) {
     assert.expect(5);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     assert.strictEqual(
         document.querySelectorAll('.o_Composer').length,
         1,
@@ -97,8 +97,8 @@ QUnit.test('add an emoji', async function (assert) {
     assert.expect(1);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     document.querySelector('.o_Composer_buttonEmojis').click();
     await afterNextRender();
     document.querySelector('.o_EmojisPopover_emoji[data-unicode="😊"]').click();
@@ -118,8 +118,8 @@ QUnit.test('add an emoji after some text', async function (assert) {
     assert.expect(2);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     document.querySelector(`.o_ComposerTextInput_textarea`).focus();
     document.execCommand('insertText', false, "Blabla");
     await afterNextRender();
@@ -148,8 +148,8 @@ QUnit.test('add emoji replaces (keyboard) text selection', async function (asser
     assert.expect(2);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     const composerTextInputTextArea = document.querySelector(`.o_ComposerTextInput_textarea`);
     composerTextInputTextArea.focus();
     document.execCommand('insertText', false, "Blabla");
@@ -184,8 +184,8 @@ QUnit.skip('display partner mention suggestions on typing "@"', async function (
     assert.expect(2);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     assert.strictEqual(
         document.querySelectorAll(`.tribute-container`).length,
         0,
@@ -211,8 +211,8 @@ QUnit.skip('mention a partner', async function (assert) {
     assert.expect(4);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     assert.strictEqual(
         document.querySelector(`.o_ComposerTextInput_textarea`).textContent,
         "",
@@ -250,8 +250,8 @@ QUnit.skip('mention a partner after some text', async function (assert) {
     assert.expect(4);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     document.querySelector(`.o_ComposerTextInput_textarea`).focus();
     document.execCommand('insertText', false, "bluhbluh");
     assert.strictEqual(
@@ -289,8 +289,8 @@ QUnit.skip('add an emoji after a partner mention', async function (assert) {
     assert.expect(4);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     document.querySelector(`.o_ComposerTextInput_textarea`).focus();
     document.execCommand('insertText', false, "@");
     document.querySelector(`.o_ComposerTextInput_textarea`)
@@ -336,8 +336,8 @@ QUnit.test('composer: add an attachment', async function (assert) {
     assert.expect(2);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId, { attachmentsDetailsMode: 'card' });
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer, { attachmentsDetailsMode: 'card' });
     const file = await createFile({
         content: 'hello, world',
         contentType: 'text/plain',
@@ -362,8 +362,8 @@ QUnit.test('composer: drop attachments', async function (assert) {
     assert.expect(4);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     const files = [
         await createFile({
             content: 'hello, world',
@@ -423,8 +423,8 @@ QUnit.test('composer: paste attachments', async function (assert) {
     assert.expect(2);
 
     await this.start();
-    const composerLocalId = this.env.store.dispatch('_createComposer');
-    await this.createComposerComponent(composerLocalId);
+    const composer = this.env.entities.Composer.create();
+    await this.createComposerComponent(composer);
     const files = [
         await createFile({
             content: 'hello, world',
@@ -476,11 +476,8 @@ QUnit.test('composer text input cleared on message post', async function (assert
             partner_id: 3,
         },
     });
-    const thread = this.env.store.getters.thread({
-        _model: 'mail.channel',
-        id: 20,
-    });
-    await this.createComposerComponent(thread.composerLocalId);
+    const thread = this.env.entities.Thread.channelFromId(20);
+    await this.createComposerComponent(thread.composer);
     // Type message
     document.querySelector(`.o_ComposerTextInput_textarea`).focus();
     document.execCommand('insertText', false, "test message");

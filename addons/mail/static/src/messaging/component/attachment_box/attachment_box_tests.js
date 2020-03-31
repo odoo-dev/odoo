@@ -22,20 +22,13 @@ QUnit.module('component', {}, function () {
 QUnit.module('AttachmentBox', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createAttachmentBoxComponent = async (threadLocalId, otherProps) => {
+        this.createAttachmentBoxComponent = async (thread, otherProps) => {
             const AttachmentBoxComponent = components.AttachmentBox;
             AttachmentBoxComponent.env = this.env;
             this.component = new AttachmentBoxComponent(null, Object.assign({
-                threadLocalId
+                threadLocalId: thread.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
-        };
-        this.createThread = async ({ model, id }, { fetchAttachments = false } = {}) => {
-            const threadLocalId = this.env.store.dispatch('_createThread', { _model: model, id });
-            if (fetchAttachments) {
-                await this.env.store.dispatch('_fetchThreadAttachments', threadLocalId);
-            }
-            return threadLocalId;
         };
         this.start = async params => {
             if (this.widget) {
@@ -64,20 +57,12 @@ QUnit.module('AttachmentBox', {
 QUnit.test('base empty rendering', async function (assert) {
     assert.expect(4);
 
-    await this.start({
-        async mockRPC(route, args) {
-            if (route.includes('ir.attachment/search_read')) {
-                return [];
-            }
-            return this._super(...arguments);
-        }
-    });
-    // attachmentBox needs an existing thread to work
-    const threadLocalId = await this.createThread({
+    await this.start();
+    const thread = this.env.entities.Thread.create({
         id: 100,
         model: 'res.partner',
     });
-    await this.createAttachmentBoxComponent(threadLocalId);
+    await this.createAttachmentBoxComponent(thread);
     assert.strictEqual(
         document.querySelectorAll(`.o_AttachmentBox`).length,
         1,
@@ -122,12 +107,12 @@ QUnit.test('base non-empty rendering', async function (assert) {
             return this._super(...arguments);
         }
     });
-    // attachmentBox needs an existing thread to work
-    const threadLocalId = await this.createThread({
+    const thread = this.env.entities.Thread.create({
         id: 100,
         model: 'res.partner',
-    }, { fetchAttachments: true });
-    await this.createAttachmentBoxComponent(threadLocalId);
+    });
+    await thread.fetchAttachments();
+    await this.createAttachmentBoxComponent(thread);
     assert.verifySteps(
         ['ir.attachment/search_read'],
         "should have fetched attachments"
@@ -165,12 +150,12 @@ QUnit.test('attachment box: drop attachments', async function (assert) {
             return this._super(...arguments);
         }
     });
-    // attachmentBox needs an existing thread to work
-    const threadLocalId = await this.createThread({
+    const thread = this.env.entities.Thread.create({
         id: 100,
         model: 'res.partner',
-    }, { fetchAttachments: true });
-    await this.createAttachmentBoxComponent(threadLocalId);
+    });
+    await thread.fetchAttachments();
+    await this.createAttachmentBoxComponent(thread);
     const files = [
         await createFile({
             content: 'hello, world',

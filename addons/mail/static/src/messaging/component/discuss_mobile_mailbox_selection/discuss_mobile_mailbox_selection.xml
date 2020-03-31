@@ -3,12 +3,12 @@
 
     <t t-name="mail.messaging.component.DiscussMobileMailboxSelection" owl="1">
         <div class="o_DiscussMobileMailboxSelection">
-            <t t-foreach="storeProps.allOrderedAndPinnedMailboxes" t-as="mailbox" t-key="mailbox.localId">
+            <t t-foreach="env.entities.Thread.allOrderedAndPinnedMailboxes" t-as="mailbox" t-key="mailbox.localId">
                 <button class="o_DiscussMobileMailboxSelection_button btn"
                     t-att-class="{
-                        'btn-primary': props.activeThreadLocalId === mailbox.localId,
-                        'btn-secondary': props.activeThreadLocalId !== mailbox.localId,
-                        'o-active': props.activeThreadLocalId === mailbox.localId,
+                        'btn-primary': discuss.thread === mailbox,
+                        'btn-secondary': discuss.thread !== mailbox,
+                        'o-active': discuss.thread === mailbox,
                     }" t-on-click="_onClick" t-att-data-mailbox-local-id="mailbox.localId" type="button"
                 >
                     <t t-esc="mailbox.name"/>

@@ -18,12 +18,12 @@ QUnit.module('component', {}, function () {
 QUnit.module('Chatter', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createChatterComponent = async ({ chatterLocalId }, otherProps) => {
+        this.createChatterComponent = async ({ chatter }, otherProps) => {
             const ChatterComponent = components.Chatter;
             ChatterComponent.env = this.env;
             this.component = new ChatterComponent(
                 null,
-                Object.assign({ chatterLocalId }, otherProps)
+                Object.assign({ chatterLocalId: chatter.localId }, otherProps)
             );
             await this.component.mount(this.widget.el);
             await afterNextRender();
@@ -55,44 +55,26 @@ QUnit.module('Chatter', {
 QUnit.test('base rendering when chatter has no attachment', async function (assert) {
     assert.expect(6);
 
-    let amountOfCalls = 0;
-    let lastId = 1000;
-    await this.start({
-        async mockRPC(route, args) {
-            if (route.includes('ir.attachment/search_read')) {
-                return [];
-            }
-            if (args.method === 'message_fetch') {
-                // multiple calls here to be able to test load more (up to (10000/30) calls)
-                let messagesData = [];
-                const amountOfMessages = 30;
-                const firstIValue = (lastId - amountOfCalls * amountOfMessages) - 1;
-                const lastIValue = firstIValue - amountOfMessages;
+    const messages = [...Array(60).keys()].map(id => {
+        return {
+            author_id: [10, "Demo User"],
+            body: `<p>Message ${id}</p>`,
+            date: "2019-04-20 10:00:00",
+            id,
+            message_type: 'comment',
+            model: 'res.partner',
+            record_name: 'General',
+            res_id: 100,
+        };
+    });
+    this.data['mail.message'].records = messages;
 
-                for (let i = firstIValue; i > lastIValue; i--) {
-                    messagesData.push({
-                        author_id: [10, "Demo User"],
-                        body: `<p>Message ${amountOfCalls + 1}</p>`,
-                        date: "2019-04-20 10:00:00",
-                        id: lastId + i,
-                        message_type: 'comment',
-                        model: 'res.partner',
-                        record_name: 'General',
-                        res_id: 100,
-                    });
-                }
-                lastId = lastIValue;
-                amountOfCalls++;
-                return messagesData;
-            }
-            return this._super(...arguments);
-        }
+    await this.start();
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
-    });
-    await this.createChatterComponent({ chatterLocalId });
+    await this.createChatterComponent({ chatter });
     assert.strictEqual(
         document.querySelectorAll(`.o_Chatter`).length,
         1,
@@ -115,7 +97,10 @@ QUnit.test('base rendering when chatter has no attachment', async function (asse
     );
     assert.strictEqual(
         document.querySelector(`.o_Chatter_thread`).dataset.threadLocalId,
-        'res.partner_100',
+        this.env.entities.Thread.fromModelAndId({
+            id: 100,
+            model: 'res.partner',
+        }).localId,
         "thread should have the right thread local id"
     );
     assert.strictEqual(
@@ -129,10 +114,10 @@ QUnit.test('base rendering when chatter has no record', async function (assert) 
     assert.expect(7);
 
     await this.start();
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadModel: 'res.partner',
     });
-    await this.createChatterComponent({ chatterLocalId });
+    await this.createChatterComponent({ chatter });
     assert.strictEqual(
         document.querySelectorAll(`.o_Chatter`).length,
         1,
@@ -153,10 +138,9 @@ QUnit.test('base rendering when chatter has no record', async function (assert) 
         1,
         "should have a thread in the chatter"
     );
-    const chatter = this.env.store.state.chatters[chatterLocalId];
     assert.ok(
-        this.env.store.state.threads[chatter.threadLocalId].isTemporary,
-        "thread should have a temporary thread local id"
+        chatter.thread.isTemporary,
+        "thread should have a temporary thread linked to chatter"
     );
     assert.strictEqual(
         document.querySelectorAll(`.o_Message`).length,
@@ -191,11 +175,11 @@ QUnit.test('base rendering when chatter has attachments', async function (assert
             return this._super(...arguments);
         }
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    await this.createChatterComponent({ chatterLocalId });
+    await this.createChatterComponent({ chatter });
     assert.strictEqual(
         document.querySelectorAll(`.o_Chatter`).length,
         1,
@@ -234,11 +218,11 @@ QUnit.test('show attachment box', async function (assert) {
             return this._super(...arguments);
         }
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    await this.createChatterComponent({ chatterLocalId });
+    await this.createChatterComponent({ chatter });
     assert.strictEqual(
         document.querySelectorAll(`.o_Chatter`).length,
         1,
@@ -278,11 +262,11 @@ QUnit.test('composer show/hide on log note/send message', async function (assert
     assert.expect(8);
 
     await this.start();
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    await this.createChatterComponent({ chatterLocalId });
+    await this.createChatterComponent({ chatter });
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonSendMessage`).length,
         1,

@@ -15,9 +15,10 @@ class DialogManager extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeProps = useStore(state => {
-            // TODO SEB transform into storeProps.dialogManager...
-            return Object.assign({}, state.dialogManager);
+        useStore(props => {
+            return {
+                Dialog: this.env.entities.Dialog.observable,
+            };
         });
     }
 
@@ -37,12 +38,13 @@ class DialogManager extends Component {
      * @private
      */
     _checkDialogOpen() {
-        if (this.storeProps.dialogs.length > 0) {
+        if (this.env.entities.Dialog.all.length > 0) {
             document.body.classList.add('modal-open');
         } else {
             document.body.classList.remove('modal-open');
         }
     }
+
 }
 
 Object.assign(DialogManager, {

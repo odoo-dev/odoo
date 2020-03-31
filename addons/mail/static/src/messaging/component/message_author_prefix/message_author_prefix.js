@@ -4,7 +4,6 @@ odoo.define('mail.messaging.component.MessageAuthorPrefix', function (require) {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useGetters } = owl.hooks;
 
 class MessageAuthorPrefix extends Component {
 
@@ -13,19 +12,17 @@ class MessageAuthorPrefix extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
-            const message = state.messages[props.messageLocalId];
-            const author = state.partners[message.authorLocalId];
+        useStore(props => {
+            const message = this.env.entities.Message.get(props.messageLocalId);
+            const author = message ? message.author : undefined;
             const thread = props.threadLocalId
-                ? state.threads[props.threadLocalId]
+                ? this.env.entities.Thread.get(props.threadLocalId)
                 : undefined;
             return {
                 author,
-                authorName: author
-                    ? this.storeGetters.partnerName(author.localId)
-                    : undefined,
-                currentPartnerLocalId: state.currentPartnerLocalId,
+                authorName: author ? author.nameOrDisplayName : undefined,
+                currentPartner: this.env.entities.Partner.current,
+                message,
                 thread,
             };
         });
@@ -36,10 +33,17 @@ class MessageAuthorPrefix extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * @returns {mail.messaging.entity.Message}
+     */
+    get message() {
+        return this.env.entities.Message.get(this.props.messageLocalId);
+    }
+
+    /**
      * @returns {mail.messaging.entity.Thread|undefined}
      */
     get thread() {
-        return this.storeProps.thread;
+        return this.env.entities.Thread.get(this.props.threadLocalId);
     }
 
 }

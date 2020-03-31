@@ -49,12 +49,22 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
      * Called each time the renderer is attached into the DOM.
      */
     on_attach_callback: function () {
+        for (const widget of this.widgets) {
+            if (widget.on_attach_callback) {
+                widget.on_attach_callback();
+            }
+        }
         WidgetAdapterMixin.on_attach_callback.call(this);
     },
     /**
      * Called each time the renderer is detached from the DOM.
      */
     on_detach_callback: function () {
+        for (const widget of this.widgets) {
+            if (widget.on_detach_callback) {
+                widget.on_detach_callback();
+            }
+        }
         WidgetAdapterMixin.on_detach_callback.call(this);
     },
 
@@ -782,6 +792,9 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
             self._registerModifiers(node, record, widget);
             widget.$el.addClass('o_widget');
             $el.replaceWith(widget.$el);
+            if (self._isInDom && widget.on_attach_callback) {
+                widget.on_attach_callback();
+            }
         });
 
         return $el;

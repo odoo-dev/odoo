@@ -24,11 +24,11 @@ QUnit.module('component', {}, function () {
 QUnit.module('Activity', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createActivityComponent = async function (activityLocalId) {
+        this.createActivityComponent = async function (activity) {
             const ActivityComponent = components.Activity;
             ActivityComponent.env = this.env;
             this.component = new ActivityComponent(null, {
-                activityLocalId,
+                activityLocalId: activity.localId,
             });
             await this.component.mount(this.widget.el);
         };
@@ -59,8 +59,8 @@ QUnit.test('activity simplest layout', async function (assert) {
     assert.expect(12);
 
     await this.start();
-    const activityLocalId = this.env.store.dispatch('_createActivity', {});
-    await this.createActivityComponent(activityLocalId);
+    const activity = this.env.entities.Activity.create();
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -127,10 +127,10 @@ QUnit.test('activity with note layout', async function (assert) {
     assert.expect(3);
 
     await this.start();
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         note: 'There is no good or bad note'
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -155,11 +155,11 @@ QUnit.test('activity info layout when planned after tomorrow', async function (a
     const today = new Date();
     const fiveDaysFromNow = new Date();
     fiveDaysFromNow.setDate(today.getDate() + 5);
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         date_deadline: date_to_str(fiveDaysFromNow),
         state: 'planned',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -188,11 +188,11 @@ QUnit.test('activity info layout when planned tomorrow', async function (assert)
     const today = new Date();
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         date_deadline: date_to_str(tomorrow),
         state: 'planned',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -219,11 +219,11 @@ QUnit.test('activity info layout when planned today', async function (assert) {
 
     await this.start();
     const today = new Date();
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         date_deadline: date_to_str(today),
         state: 'today',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -252,11 +252,11 @@ QUnit.test('activity info layout when planned yesterday', async function (assert
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         date_deadline: date_to_str(yesterday),
         state: 'overdue',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -285,11 +285,11 @@ QUnit.test('activity info layout when planned before yesterday', async function 
     const today = new Date();
     const fiveDaysBeforeNow = new Date();
     fiveDaysBeforeNow.setDate(today.getDate() - 5);
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         date_deadline: date_to_str(fiveDaysBeforeNow),
         state: 'overdue',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -315,10 +315,10 @@ QUnit.test('activity with a summary layout', async function (assert) {
     assert.expect(4);
 
     await this.start();
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         summary: 'test summary',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -345,10 +345,10 @@ QUnit.test('activity without summary layout', async function (assert) {
     assert.expect(5);
 
     await this.start();
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         activity_type_id: [1, 'Fake type'],
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -383,14 +383,14 @@ QUnit.test('activity details toggle', async function (assert) {
     const today = new Date();
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         activity_type_id: [1, 'Fake type'],
         create_date: date_to_str(today),
         create_uid: [1, 'Admin'],
         date_deadline: date_to_str(tomorrow),
         state: 'planned',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -431,7 +431,7 @@ QUnit.test('activity details layout', async function (assert) {
     const today = new Date();
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         activity_type_id: [1, 'Fake type'],
         create_date: date_to_str(today),
         create_uid: [1, 'Admin'],
@@ -439,7 +439,7 @@ QUnit.test('activity details layout', async function (assert) {
         state: 'planned',
         user_id: [10, 'Pauvre pomme'],
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -504,10 +504,10 @@ QUnit.test('activity with mail template layout', async function (assert) {
     assert.expect(8);
 
     await this.start();
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         mail_template_ids: [{ id: 1, name: "Dummy mail template" }]
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -583,7 +583,7 @@ QUnit.test('activity with mail template: preview mail', async function (assert) 
             },
         },
     });
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         mail_template_ids: [{
             id: 1,
             name: "Dummy mail template",
@@ -591,7 +591,7 @@ QUnit.test('activity with mail template: preview mail', async function (assert) 
         res_id: 42,
         res_model: 'res.partner',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -626,14 +626,14 @@ QUnit.test('activity with mail template: send mail', async function (assert) {
             }
         },
     });
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         res_id: 42,
         mail_template_ids: [{
             id: 1,
             name: "Dummy mail template",
         }],
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -659,11 +659,11 @@ QUnit.test('activity upload document is available', async function (assert) {
     const today = new Date();
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         activity_category: 'upload_file',
         can_write: true
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -688,11 +688,11 @@ QUnit.test('activity click on mark as done', async function (assert) {
     const today = new Date();
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         activity_category: 'not_upload_file',
         can_write: true
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
@@ -752,14 +752,14 @@ QUnit.test('activity click on edit', async function (assert) {
             },
         },
     });
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         id: 12,
         can_write: true,
         mail_template_ids: [{ id: 1, name: "Dummy mail template" }],
         res_id: 42,
         res_model: 'res.partner',
     });
-    await this.createActivityComponent(activityLocalId);
+    await this.createActivityComponent(activity);
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -772,6 +772,7 @@ QUnit.test('activity click on edit', async function (assert) {
     );
 
     document.querySelector('.o_Activity_editButton').click();
+    await afterNextRender();
     assert.verifySteps(
         ['do_action'],
         "should have call 'schedule activity' action correctly"
@@ -793,7 +794,7 @@ QUnit.test('activity click on cancel', async function (assert) {
             }
         },
     });
-    const activityLocalId = this.env.store.dispatch('_createActivity', {
+    const activity = this.env.entities.Activity.create({
         id: 12,
         can_write: true,
         mail_template_ids: [{
@@ -809,9 +810,9 @@ QUnit.test('activity click on cancel', async function (assert) {
     class ParentComponent extends Component {
         constructor(...args) {
             super(... args);
-            this.storeProps = useStore((state, props) => {
+            useStore(props => {
                 return {
-                    activity: state.activities && state.activities[props.activityLocalId],
+                    activity: this.env.entities.Activity.get(props.activityLocalId),
                 };
             });
         }
@@ -820,7 +821,7 @@ QUnit.test('activity click on cancel', async function (assert) {
          * @returns {mail.messaging.entity.Activity}
          */
         get activity() {
-            return this.storeProps.activity;
+            return this.env.entities.Activity.get(this.props.activityLocalId);
         }
     }
     ParentComponent.env = this.env;
@@ -836,7 +837,7 @@ QUnit.test('activity click on cancel', async function (assert) {
             </div>
         `,
     });
-    this.component = new ParentComponent(null, { activityLocalId });
+    this.component = new ParentComponent(null, { activityLocalId: activity.localId });
     await this.component.mount(this.widget.el);
 
     assert.strictEqual(

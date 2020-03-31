@@ -26,12 +26,12 @@ const PartnerInviteDialog = Dialog.extend({
      * @param {Object} param1.messagingEnv.store
      */
     init(parent, { activeThreadLocalId, messagingEnv }) {
-        const store = messagingEnv.store;
-        const channelName = store.getters.threadName(activeThreadLocalId);
-        this.channelId = store.state.threads[activeThreadLocalId].id;
-        this.store = store;
+        const env = messagingEnv;
+        const channel = env.entities.Thread.get(activeThreadLocalId);
+        this.channelId = channel.id;
+        this.env = env;
         this._super(parent, {
-            title: _.str.sprintf(this.env._t("Invite people to #%s"), channelName),
+            title: _.str.sprintf(this.env._t("Invite people to #%s"), channel.displayName),
             size: 'medium',
             buttons: [{
                 text: this.env._t("Invite"),
@@ -57,22 +57,21 @@ const PartnerInviteDialog = Dialog.extend({
                 if (item.id === 'odoobot') {
                     status = 'bot';
                 } else {
-                    const partnerLocalId = `res.partner_${item.id}`;
-                    const partner = this.store.state.partners[partnerLocalId];
+                    const partner = this.env.entities.Partner.fromId(item.id);
                     status = partner.im_status;
                 }
                 const $status = QWeb.render('mail.messaging.widget.UserStatus', { status });
                 return $('<span>').text(item.text).prepend($status);
             },
             query: query => {
-                this.store.dispatch('searchPartners', {
+                this.env.entities.Partner.imSearch({
                     callback: partners => {
                         let results = partners.map(partner => {
                             return {
                                 id: partner.id,
-                                label: this.store.getters.partnerName(partner.localId),
-                                text: this.store.getters.partnerName(partner.localId),
-                                value: this.store.getters.partnerName(partner.localId),
+                                label: partner.nameOrDisplayName,
+                                text: partner.nameOrDisplayName,
+                                value: partner.nameOrDisplayName,
                             };
                         });
                         results = _.sortBy(results, 'label');

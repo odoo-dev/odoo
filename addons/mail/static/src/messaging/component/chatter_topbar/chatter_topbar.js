@@ -4,7 +4,6 @@ odoo.define('mail.messaging.component.ChatterTopbar', function (require) {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch } = owl.hooks;
 
 class ChatterTopbar extends Component {
 
@@ -13,20 +12,14 @@ class ChatterTopbar extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeProps = useStore((state, props) => {
-            const chatter = state.chatters[props.chatterLocalId];
-            const thread = chatter.threadLocalId
-                ? state.threads[chatter.threadLocalId]
-                : undefined;
+        useStore(props => {
+            const chatter = this.env.entities.Chatter.get(props.chatterLocalId);
+            const thread = chatter ? chatter.thread : undefined;
+            const threadAttachments = thread ? thread.allAttachments : [];
             return {
-                areAttachmentsLoaded: thread && thread.areAttachmentsLoaded,
-                attachmentsAmount: thread && thread.attachmentLocalIds
-                    ? thread.attachmentLocalIds.length
-                    : 0,
+                areThreadAttachmentsLoaded: thread && thread.areAttachmentsLoaded,
                 chatter,
-                // TODO SEB this is currently always 0 (yes I know - XDU)
-                followersAmount: 0,
+                threadAttachmentsAmount: threadAttachments.length,
             };
         });
     }
@@ -39,7 +32,7 @@ class ChatterTopbar extends Component {
      * @returns {mail.messaging.entity.Chatter}
      */
     get chatter() {
-        return this.storeProps.chatter;
+        return this.env.entities.Chatter.get(this.props.chatterLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -52,9 +45,9 @@ class ChatterTopbar extends Component {
      */
     _onClickAttachments(ev) {
         if (this.chatter.isAttachmentBoxVisible) {
-            this.storeDispatch('hideChatterAttachmentBox', this.props.chatterLocalId);
+            this.chatter.update({ isAttachmentBoxVisible: false });
         } else {
-            this.storeDispatch('showChatterAttachmentBox', this.props.chatterLocalId);
+            this.chatter.update({ isAttachmentBoxVisible: true });
         }
     }
 
@@ -80,9 +73,9 @@ class ChatterTopbar extends Component {
      */
     _onClickLogNote(ev) {
         if (this.chatter.isComposerVisible && this.chatter.isComposerLog) {
-            this.storeDispatch('hideChatterComposer', this.props.chatterLocalId);
+            this.chatter.update({ isComposerVisible: false });
         } else {
-            this.storeDispatch('showChatterLogNote', this.props.chatterLocalId);
+            this.chatter.showLogNote();
         }
     }
 
@@ -107,7 +100,7 @@ class ChatterTopbar extends Component {
         return this.env.do_action(action, {
             // A bit "extreme", could be improved:
             // normally only an activity is created (no update nor delete)
-            on_close: () => this.storeDispatch('refreshChatterActivities', this.props.chatterLocalId),
+            on_close: () => this.chatter.refreshActivities(),
         });
     }
 
@@ -116,10 +109,10 @@ class ChatterTopbar extends Component {
      * @param {MouseEvent} ev
      */
     _onClickSendMessage(ev) {
-        if (this.storeProps.chatter.isComposerVisible && !this.chatter.isComposerLog) {
-            this.storeDispatch('hideChatterComposer', this.props.chatterLocalId);
+        if (this.chatter.isComposerVisible && !this.chatter.isComposerLog) {
+            this.chatter.update({ isComposerVisible: false });
         } else {
-            this.storeDispatch('showChatterSendMessage', this.props.chatterLocalId);
+            this.chatter.showSendMessage();
         }
     }
 

@@ -7,8 +7,8 @@ const components = {
 };
 const useStore = require('mail.messaging.component_hook.useStore');
 
-const { Component, useState } = owl;
-const { useGetters, useRef } = owl.hooks;
+const { Component } = owl;
+const { useRef } = owl.hooks;
 
 class DiscussSidebar extends Component {
 
@@ -17,16 +17,30 @@ class DiscussSidebar extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.state = useState({ sidebarQuickSearchValue: "" });
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((...args) => this._useStoreSelector(...args), {
-            compareDepth: () => this._useStoreCompareDepth(),
-        });
+        useStore(
+            (...args) => this._useStoreSelector(...args),
+            { compareDepth: () => this._useStoreCompareDepth() }
+        );
+
         /**
          * Reference of the quick search input. Useful to filter channels and
          * chats based on this input content.
          */
         this._quickSearchInputRef = useRef('quickSearchInput');
+
+        // bind since passed as props
+        this._onAddChannelAutocompleteSelect = this._onAddChannelAutocompleteSelect.bind(this);
+        this._onAddChannelAutocompleteSource = this._onAddChannelAutocompleteSource.bind(this);
+        this._onAddChatAutocompleteSelect = this._onAddChatAutocompleteSelect.bind(this);
+        this._onAddChatAutocompleteSource = this._onAddChatAutocompleteSource.bind(this);
+    }
+
+    mounted() {
+        this._update();
+    }
+
+    patched() {
+        this._update();
     }
 
     //--------------------------------------------------------------------------
@@ -34,19 +48,26 @@ class DiscussSidebar extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * @returns {mail.messaging.entity.Discuss}
+     */
+    get discuss() {
+        return this.env.entities.Discuss.instance;
+    }
+
+    /**
      * Return the list of chats that match the quick search value input.
      *
-     * @returns {mail.store.model.Thread[]}
+     * @returns {mail.messaging.entity.Thread[]}
      */
     get quickSearchPinnedAndOrderedChats() {
         const allOrderedAndPinnedChats =
-            this.storeProps.allOrderedAndPinnedChats;
-        if (!this.state.sidebarQuickSearchValue) {
+            this.env.entities.Thread.allOrderedAndPinnedChats;
+        if (!this.discuss.sidebarQuickSearchValue) {
             return allOrderedAndPinnedChats;
         }
-        const qsVal = this.state.sidebarQuickSearchValue.toLowerCase();
+        const qsVal = this.discuss.sidebarQuickSearchValue.toLowerCase();
         return allOrderedAndPinnedChats.filter(chat => {
-            const nameVal = this.storeGetters.threadName(chat.localId).toLowerCase();
+            const nameVal = chat.displayName.toLowerCase();
             return nameVal.includes(qsVal);
         });
     }
@@ -54,17 +75,17 @@ class DiscussSidebar extends Component {
     /**
      * Return the list of channels that match the quick search value input.
      *
-     * @returns {mail.store.model.Thread[]}
+     * @returns {mail.messaging.entity.Thread[]}
      */
     get quickSearchOrderedAndPinnedMultiUserChannels() {
         const allOrderedAndPinnedMultiUserChannels =
-            this.storeProps.allOrderedAndPinnedMultiUserChannels;
-        if (!this.state.sidebarQuickSearchValue) {
+            this.env.entities.Thread.allOrderedAndPinnedMultiUserChannels;
+        if (!this.discuss.sidebarQuickSearchValue) {
             return allOrderedAndPinnedMultiUserChannels;
         }
-        const qsVal = this.state.sidebarQuickSearchValue.toLowerCase();
+        const qsVal = this.discuss.sidebarQuickSearchValue.toLowerCase();
         return allOrderedAndPinnedMultiUserChannels.filter(channel => {
-            const nameVal = this.storeGetters.threadName(channel.localId).toLowerCase();
+            const nameVal = channel.displayName.toLowerCase();
             return nameVal.includes(qsVal);
         });
     }
@@ -72,6 +93,15 @@ class DiscussSidebar extends Component {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _update() {
+        if (this._quickSearchInputRef.el) {
+            this._quickSearchInputRef.el.value = this.discuss.sidebarQuickSearchValue;
+        }
+    }
 
     /**
      * @private
@@ -88,22 +118,65 @@ class DiscussSidebar extends Component {
 
     /**
      * @private
-     * @param {Object} state
      * @param {Object} props
      * @returns {Object}
      */
-    _useStoreSelector(state, props) {
+    _useStoreSelector(props) {
+        const Thread = this.env.entities.Thread;
         return {
-            allOrderedAndPinnedChats: this.storeGetters.allOrderedAndPinnedChats(),
-            allOrderedAndPinnedMailboxes: this.storeGetters.allOrderedAndPinnedMailboxes(),
-            allOrderedAndPinnedMultiUserChannels: this.storeGetters.allOrderedAndPinnedMultiUserChannels(),
-            allPinnedChannelAmount: this.storeGetters.allPinnedChannelAmount(),
+            allOrderedAndPinnedChats: Thread.allOrderedAndPinnedChats,
+            allOrderedAndPinnedMailboxes: Thread.allOrderedAndPinnedMailboxes,
+            allOrderedAndPinnedMultiUserChannels: Thread.allOrderedAndPinnedMultiUserChannels,
+            allPinnedChannelAmount: Thread.allPinnedChannels.length,
+            discuss: this.env.entities.Discuss.instance,
         };
     }
 
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {Event} ev
+     * @param {Object} ui
+     * @param {Object} ui.item
+     * @param {integer} ui.item.id
+     */
+    _onAddChannelAutocompleteSelect(ev, ui) {
+        this.discuss.handleAddChannelAutocompleteSelect(ev, ui);
+    }
+
+    /**
+     * @private
+     * @param {Object} req
+     * @param {string} req.term
+     * @param {function} res
+     */
+    _onAddChannelAutocompleteSource(req, res) {
+        this.discuss.handleAddChannelAutocompleteSource(req, res);
+    }
+
+    /**
+     * @private
+     * @param {Event} ev
+     * @param {Object} ui
+     * @param {Object} ui.item
+     * @param {integer} ui.item.id
+     */
+    _onAddChatAutocompleteSelect(ev, ui) {
+        this.discuss.handleAddChatAutocompleteSelect(ev, ui);
+    }
+
+    /**
+     * @private
+     * @param {Object} req
+     * @param {string} req.term
+     * @param {function} res
+     */
+    _onAddChatAutocompleteSource(req, res) {
+        this.discuss.handleAddChatAutocompleteSource(req, res);
+    }
 
     /**
      * Called when clicking on add channel icon.
@@ -113,7 +186,7 @@ class DiscussSidebar extends Component {
      */
     _onClickChannelAdd(ev) {
         ev.stopPropagation();
-        this.trigger('o-discuss-adding-channel');
+        this.discuss.update({ isAddingChannel: true });
     }
 
     /**
@@ -141,22 +214,7 @@ class DiscussSidebar extends Component {
      */
     _onClickChatAdd(ev) {
         ev.stopPropagation();
-        this.trigger('o-discuss-adding-chat');
-    }
-
-    /**
-     * Called when clicking on a item: select the thread of this item as
-     * discuss active thread. AKU TODO: maybe turn this into store dispatch?
-     *
-     * @private
-     * @param {CustomEvent} ev
-     * @param {Object} ev.detail
-     * @param {string} ev.detail.threadLocalId
-     */
-    _onClickedItem(ev) {
-        return this.trigger('o-select-thread', {
-            threadLocalId: ev.detail.threadLocalId,
-        });
+        this.discuss.update({ isAddingChat: true });
     }
 
     /**
@@ -165,7 +223,7 @@ class DiscussSidebar extends Component {
      */
     _onHideAddingItem(ev) {
         ev.stopPropagation();
-        this.trigger('o-discuss-cancel-adding-item');
+        this.discuss.clearIsAddingItem();
     }
 
     /**
@@ -174,25 +232,14 @@ class DiscussSidebar extends Component {
      */
     _onInputQuickSearch(ev) {
         ev.stopPropagation();
-        this.state.sidebarQuickSearchValue = this._quickSearchInputRef.el.value;
+        this.discuss.update({ sidebarQuickSearchValue: this._quickSearchInputRef.el.value });
     }
 
 }
 
 Object.assign(DiscussSidebar, {
     components,
-    props: {
-        activeThreadLocalId: {
-            type: String,
-            optional: true,
-        },
-        isAddingChannel: Boolean,
-        isAddingChat: Boolean,
-        onAddChannelAutocompleteSelect: Function,
-        onAddChannelAutocompleteSource: Function,
-        onAddChatAutocompleteSelect: Function,
-        onAddChatAutocompleteSource: Function,
-    },
+    props: {},
     template: 'mail.messaging.component.DiscussSidebar',
 });
 

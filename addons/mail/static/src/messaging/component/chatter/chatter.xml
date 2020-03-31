@@ -3,15 +3,15 @@
 
     <t t-name="mail.messaging.component.Chatter" owl="1">
         <div class="o_Chatter">
-            <t t-if="true">
+            <t t-if="chatter">
                 <ChatterTopbar
                     class="o_Chatter_topbar"
-                    chatterLocalId="props.chatterLocalId"
+                    chatterLocalId="chatter.localId"
                 />
-                <t t-if="chatter.hasThread and storeProps.thread and storeProps.thread.composerLocalId and chatter.isComposerVisible">
+                <t t-if="chatter.hasThread and chatter.thread and chatter.isComposerVisible">
                     <Composer
                         class="o_Chatter_composer"
-                        composerLocalId="storeProps.thread.composerLocalId"
+                        composerLocalId="chatter.thread.composer.localId"
                         hasTextInputSendOnEnterEnabled="false"
                         isCompact="false"
                         isExpandable="true"
@@ -23,11 +23,11 @@
                 <t t-if="chatter.isAttachmentBoxVisible">
                     <AttachmentBox
                         class="o_Chatter_attachmentBox"
-                        threadLocalId="chatter.threadLocalId"
+                        threadLocalId="chatter.thread.localId"
                     />
                 </t>
-                <t t-if="storeProps.thread">
-                    <t t-if="chatter.hasActivities and chatter.activityLocalIds and chatter.activityLocalIds.length > 0">
+                <t t-if="chatter.thread">
+                    <t t-if="chatter.hasActivities and chatter.activities.length > 0">
                         <ActivityBox
                             class="o_Chatter_activityBox"
                             chatterLocalId="chatter.localId"
@@ -39,7 +39,7 @@
                             hasComposer="false"
                             haveMessagesAuthorRedirect="true"
                             order="'desc'"
-                            threadLocalId="storeProps.thread.localId"
+                            threadViewerLocalId="chatter.threadViewer.localId"
                             t-ref="thread"
                         />
                     </t>

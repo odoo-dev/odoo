@@ -74,6 +74,7 @@
         'static/src/messaging/component/chat_window_hidden_menu/chat_window_hidden_menu.xml',
         'static/src/messaging/component/chat_window_manager/chat_window_manager.xml',
         'static/src/messaging/component/chatter/chatter.xml',
+        'static/src/messaging/component/chatter_container/chatter_container.xml',
         'static/src/messaging/component/chatter_topbar/chatter_topbar.xml',
         'static/src/messaging/component/composer/composer.xml',
         'static/src/messaging/component/composer_text_input/composer_text_input.xml',

@@ -18,17 +18,11 @@ QUnit.module('component', {}, function () {
 QUnit.module('Message', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createMessageComponent = async (messageLocalId, otherProps) => {
+        this.createMessageComponent = async (message, otherProps) => {
             const MessageComponent = components.Message;
             MessageComponent.env = this.env;
-            // messages must be displayed in the context of a thread
-            const threadLocalId = this.env.store.dispatch('_createThread', {
-                _model: 'mail.channel',
-                id: 20,
-            });
             this.component = new MessageComponent(null, Object.assign({
-                messageLocalId,
-                threadLocalId,
+                messageLocalId: message.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
             await afterNextRender();
@@ -61,12 +55,12 @@ QUnit.test('basic rendering', async function (assert) {
     assert.expect(12);
 
     await this.start();
-    const messageLocalId = this.env.store.dispatch('_createMessage', {
+    const message = this.env.entities.Message.create({
         author_id: [7, "Demo User"],
         body: "<p>Test</p>",
         id: 100,
     });
-    await this.createMessageComponent(messageLocalId);
+    await this.createMessageComponent(message);
     assert.strictEqual(
         document.querySelectorAll('.o_Message').length,
         1,
@@ -75,7 +69,7 @@ QUnit.test('basic rendering', async function (assert) {
     const messageEl = document.querySelector('.o_Message');
     assert.strictEqual(
         messageEl.dataset.messageLocalId,
-        'mail.message_100',
+        this.env.entities.Message.fromId(100).localId,
         "message component should be linked to message store model"
     );
     assert.strictEqual(
@@ -130,10 +124,10 @@ QUnit.test('basic rendering', async function (assert) {
 });
 
 QUnit.test('delete attachment linked to message', async function (assert) {
-    assert.expect(2);
+    assert.expect(1);
 
     await this.start();
-    const messageLocalId = this.env.store.dispatch('_createMessage', {
+    const message = this.env.entities.Message.create({
         attachment_ids: [{
             filename: "BLAH.jpg",
             id: 10,
@@ -143,18 +137,17 @@ QUnit.test('delete attachment linked to message', async function (assert) {
         body: "<p>Test</p>",
         id: 100,
     });
-    await this.createMessageComponent(messageLocalId);
+    await this.createMessageComponent(message);
     document.querySelector('.o_Attachment_asideItemUnlink').click();
     await afterNextRender();
-    assert.notOk(this.env.store.state.attachments['ir.attachment_10']);
-    assert.notOk(this.env.store.state.messages[messageLocalId].attachmentLocalIds['ir.attachment_10']);
+    assert.notOk(this.env.entities.Attachment.fromId(10));
 });
 
 QUnit.test('moderation: moderated channel with pending moderation message (author)', async function (assert) {
     assert.expect(1);
 
     await this.start();
-    const messageLocalId = this.env.store.dispatch('_createMessage', {
+    const message = this.env.entities.Message.create({
         author_id: [1, "Admin"],
         body: "<p>Test</p>",
         channel_ids: [20],
@@ -163,7 +156,7 @@ QUnit.test('moderation: moderated channel with pending moderation message (autho
         moderation_status: 'pending_moderation',
         res_id: 20,
     });
-    await this.createMessageComponent(messageLocalId);
+    await this.createMessageComponent(message);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_Message_moderationPending.o-author`).length,
@@ -179,7 +172,7 @@ QUnit.test('moderation: moderated channel with pending moderation message (moder
         moderation_channel_ids: [20],
     });
     await this.start();
-    const messageLocalId = this.env.store.dispatch('_createMessage', {
+    const message = this.env.entities.Message.create({
         author_id: [7, "Demo User"],
         body: "<p>Test</p>",
         channel_ids: [20],
@@ -188,7 +181,7 @@ QUnit.test('moderation: moderated channel with pending moderation message (moder
         moderation_status: 'pending_moderation',
         res_id: 20,
     });
-    await this.createMessageComponent(messageLocalId);
+    await this.createMessageComponent(message);
     const messageEl = document.querySelector('.o_Message');
     assert.ok(messageEl, "should display a message");
     assert.containsOnce(messageEl, `.o_Message_moderationSubHeader`,

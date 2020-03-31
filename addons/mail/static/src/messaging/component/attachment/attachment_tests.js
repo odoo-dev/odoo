@@ -17,11 +17,11 @@ QUnit.module('component', {}, function () {
 QUnit.module('Attachment', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createAttachmentComponent = async (attachmentLocalId, otherProps) => {
+        this.createAttachmentComponent = async (attachment, otherProps) => {
             const AttachmentComponent = components.Attachment;
             AttachmentComponent.env = this.env;
             this.component = new AttachmentComponent(null, Object.assign({
-                attachmentLocalId,
+                attachmentLocalId: attachment.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
         };
@@ -53,13 +53,13 @@ QUnit.test('simplest layout', async function (assert) {
     assert.expect(8);
 
     await this.start();
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'none',
         isDownloadable: false,
         isEditable: false,
@@ -74,7 +74,7 @@ QUnit.test('simplest layout', async function (assert) {
     const attachmentEl = document.querySelector('.o_Attachment');
     assert.strictEqual(
         attachmentEl.dataset.attachmentLocalId,
-        'ir.attachment_750',
+        this.env.entities.Attachment.fromId(750).localId,
         "attachment component should be linked to attachment store model"
     );
     assert.strictEqual(
@@ -124,13 +124,13 @@ QUnit.test('simplest layout + deletable', async function (assert) {
             return this._super(...arguments);
         },
     });
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'none',
         isDownloadable: false,
         isEditable: true,
@@ -173,13 +173,13 @@ QUnit.test('simplest layout + downloadable', async function (assert) {
     assert.expect(6);
 
     await this.start();
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'none',
         isDownloadable: true,
         isEditable: false,
@@ -222,13 +222,13 @@ QUnit.test('simplest layout + deletable + downloadable', async function (assert)
     assert.expect(8);
 
     await this.start();
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'none',
         isDownloadable: true,
         isEditable: true,
@@ -280,13 +280,13 @@ QUnit.test('layout with card details', async function (assert) {
     assert.expect(3);
 
     await this.start();
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'card',
         isDownloadable: false,
         isEditable: false,
@@ -314,13 +314,13 @@ QUnit.test('layout with card details and filename', async function (assert) {
     assert.expect(3);
 
     await this.start();
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'card',
         isDownloadable: false,
         isEditable: false,
@@ -348,13 +348,13 @@ QUnit.test('layout with card details and extension', async function (assert) {
     assert.expect(3);
 
     await this.start();
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'card',
         isDownloadable: false,
         isEditable: false,
@@ -382,13 +382,13 @@ QUnit.test('layout with card details and filename and extension', async function
     assert.expect(3);
 
     await this.start();
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'card',
         isDownloadable: false,
         isEditable: false,
@@ -416,13 +416,13 @@ QUnit.test('simplest layout with hover details and filename and extension', asyn
     assert.expect(8);
 
     await this.start();
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
         id: 750,
         mimetype: 'text/plain',
         name: "test.txt",
     });
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'hover',
         isDownloadable: true,
         isEditable: true,
@@ -484,14 +484,14 @@ QUnit.test('auto layout with image', async function (assert) {
             return this._super(...arguments);
         },
     });
-    const attachmentLocalId = this.env.store.dispatch('createAttachment', {
+    const attachment = this.env.entities.Attachment.create({
         filename: "test.png",
         id: 750,
         mimetype: 'image/png',
         name: "test.png",
     });
 
-    await this.createAttachmentComponent(attachmentLocalId, {
+    await this.createAttachmentComponent(attachment, {
         detailsMode: 'auto',
         isDownloadable: false,
         isEditable: false,

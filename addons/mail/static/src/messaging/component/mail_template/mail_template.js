@@ -4,7 +4,6 @@ odoo.define('mail.messaging.component.MailTemplate', function (require) {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch } = owl.hooks;
 
 class MailTemplate extends Component {
 
@@ -13,11 +12,11 @@ class MailTemplate extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeProps = useStore((state, props) => {
-            const mailTemplate = state.mailTemplates[props.mailTemplateLocalId];
-            const activity = state.activities[props.activityLocalId];
-            return { activity, mailTemplate };
+        useStore(props => {
+            return {
+                activity: this.env.entities.Activity.get(props.activityLocalId),
+                mailTemplate: this.env.entities.MailTemplate.get(props.mailTemplateLocalId),
+            };
         });
     }
 
@@ -26,10 +25,17 @@ class MailTemplate extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * @returns {mail.messaging.entity.Activity}
+     */
+    get activity() {
+        return this.env.entities.Activity.get(this.props.activityLocalId);
+    }
+
+    /**
      * @returns {mail.messaging.entity.MailTemplate}
      */
     get mailTemplate() {
-        return this.storeProps.mailTemplate;
+        return this.env.entities.MailTemplate.get(this.props.mailTemplateLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -43,7 +49,7 @@ class MailTemplate extends Component {
     _onClickPreview(ev) {
         ev.stopPropagation();
         ev.preventDefault();
-        this.storeDispatch('previewMailTemplate', this.props.mailTemplateLocalId, this.props.activityLocalId);
+        this.mailTemplate.preview(this.activity);
     }
 
     /**
@@ -53,7 +59,7 @@ class MailTemplate extends Component {
     _onClickSend(ev) {
         ev.stopPropagation();
         ev.preventDefault();
-        this.storeDispatch('sendMailTemplate', this.props.mailTemplateLocalId, this.props.activityLocalId);
+        this.mailTemplate.send(this.activity);
     }
 
 }

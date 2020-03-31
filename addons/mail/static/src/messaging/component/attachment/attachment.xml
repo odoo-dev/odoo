@@ -7,16 +7,16 @@
                 'o-downloadable': props.isDownloadable,
                 'o-editable': props.isEditable,
                 'o-has-card-details': detailsMode === 'card',
-                'o-temporary': attachment.isTemporary,
-                'o-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
-            }" t-att-title="env.store.getters.attachmentDisplayName(props.attachmentLocalId)" t-att-data-attachment-local-id="attachment.localId"
+                'o-temporary': attachment and attachment.isTemporary,
+                'o-viewable': attachment and attachment.isViewable,
+            }" t-att-title="attachment ? attachment.displayName : undefined" t-att-data-attachment-local-id="attachment ? attachment.localId : undefined"
         >
-            <t t-if="true">
+            <t t-if="attachment">
                 <!-- Image style-->
                 <!-- o_image from mimetype.scss -->
                 <div class="o_Attachment_image o_image" t-on-click="_onClickImage"
                     t-att-class="{
-                        'o-attachment-viewable': env.store.getters.isAttachmentViewable(props.attachmentLocalId),
+                        'o-attachment-viewable': attachment.isViewable,
                         'o-details-overlay': detailsMode !== 'card',
                         'o-large': props.imageSize === 'large',
                         'o-medium': props.imageSize === 'medium',
@@ -28,12 +28,12 @@
                             <div class="o_Attachment_details o_Attachment_imageOverlayDetails">
                                 <t t-if="props.showFilename">
                                     <div class="o_Attachment_filename">
-                                        <t t-esc="env.store.getters.attachmentDisplayName(props.attachmentLocalId)"/>
+                                        <t t-esc="attachment.displayName"/>
                                     </div>
                                 </t>
                                 <t t-if="props.showExtension">
                                     <div class="o_Attachment_extension">
-                                        <t t-esc="env.store.getters.attachmentExtension(props.attachmentLocalId)"/>
+                                        <t t-esc="attachment.extension"/>
                                     </div>
                                 </t>
                             </div>
@@ -42,7 +42,7 @@
                                 <t t-if="props.isEditable and !attachment.isTemporary" t-key="'unlink'">
                                     <div class="o_Attachment_action o_Attachment_actionUnlink"
                                         t-att-class="{
-                                            'o-pretty': env.store.getters.isAttachmentLinkedToComposer(props.attachmentLocalId),
+                                            'o-pretty': attachment.isLinkedToComposer,
                                         }" t-on-click="_onClickUnlink" aria-label="Remove" title="Remove"
                                     >
                                         <i class="fa fa-times"/>
@@ -63,12 +63,12 @@
                     <div class="o_Attachment_details">
                         <t t-if="props.showFilename">
                             <div class="o_Attachment_filename">
-                                <t t-esc="env.store.getters.attachmentDisplayName(props.attachmentLocalId)"/>
+                                <t t-esc="attachment.displayName"/>
                             </div>
                         </t>
                         <t t-if="props.showExtension">
                             <div class="o_Attachment_extension">
-                                <t t-esc="env.store.getters.attachmentExtension(props.attachmentLocalId)"/>
+                                <t t-esc="attachment.extension"/>
                             </div>
                         </t>
                     </div>
@@ -77,20 +77,20 @@
                 <t t-if="detailsMode !== 'hover' and (props.isDownloadable or props.isEditable)">
                     <div class="o_Attachment_aside" t-att-class="{ 'o-has-multiple-action': !attachment.isTemporary and props.isDownloadable and props.isEditable }">
                         <!-- Uploading icon -->
-                        <t t-if="attachment.isTemporary and env.store.getters.isAttachmentLinkedToComposer(props.attachmentLocalId)">
+                        <t t-if="attachment.isTemporary and attachment.isLinkedToComposer">
                             <div class="o_Attachment_asideItem o_Attachment_asideItemUploading" aria-label="Uploading" title="Uploading">
                                 <i class="fa fa-spin fa-spinner"/>
                             </div>
                         </t>
                         <!-- Uploaded icon -->
-                        <t t-if="!attachment.isTemporary and env.store.getters.isAttachmentLinkedToComposer(props.attachmentLocalId)">
+                        <t t-if="!attachment.isTemporary and attachment.isLinkedToComposer">
                             <div class="o_Attachment_asideItem o_Attachment_asideItemUploaded" title="Uploaded" aria-label="Uploaded">
                                 <i class="fa fa-check"/>
                             </div>
                         </t>
                         <!-- Remove button -->
                         <t t-if="props.isEditable and !attachment.isTemporary">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemUnlink" t-att-class="{ 'o-pretty': env.store.getters.isAttachmentLinkedToComposer(props.attachmentLocalId) }" t-on-click="_onClickUnlink" title="Remove" aria-label="Remove">
+                            <div class="o_Attachment_asideItem o_Attachment_asideItemUnlink" t-att-class="{ 'o-pretty': attachment.isLinkedToComposer }" t-on-click="_onClickUnlink" title="Remove" aria-label="Remove">
                                 <i class="fa fa-times"/>
                             </div>
                         </t>

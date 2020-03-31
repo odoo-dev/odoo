@@ -6,27 +6,27 @@
             The preview template is used by the discuss in mobile, and by the systray
             menu in order to show preview of threads.
         -->
-        <div class="o_ThreadPreview" t-att-class="{ 'o-muted': thread.message_unread_counter === 0 }" t-on-click="_onClick" t-att-data-thread-local-id="props.threadLocalId">
-            <t t-if="true">
+        <div class="o_ThreadPreview" t-att-class="{ 'o-muted': thread and thread.message_unread_counter === 0 }" t-on-click="_onClick" t-att-data-thread-local-id="thread ? thread.localId : undefined">
+            <t t-if="thread">
                 <div class="o_ThreadPreview_sidebar">
                     <div class="o_ThreadPreview_imageContainer o_ThreadPreview_sidebarItem">
                         <img class="o_ThreadPreview_image rounded-circle" t-att-src="image()" alt="Thread Image"/>
-                        <t t-if="storeProps.threadDirectPartner and storeProps.threadDirectPartner.im_status">
+                        <t t-if="thread.directPartner and thread.directPartner.im_status">
                             <PartnerImStatusIcon
                                 class="o_ThreadPreview_partnerImStatusIcon"
                                 t-att-class="{
-                                    'o-mobile': storeProps.isMobile,
+                                    'o-mobile': env.entities.Device.instance.isMobile,
                                     'o-muted': thread.message_unread_counter === 0,
                                 }"
-                                partnerLocalId="storeProps.threadDirectPartner.localId"
+                                partnerLocalId="thread.directPartner.localId"
                             />
                         </t>
                     </div>
                 </div>
                 <div class="o_ThreadPreview_content">
                     <div class="o_ThreadPreview_header">
-                        <span class="o_ThreadPreview_name" t-att-class="{ 'o-mobile': storeProps.isMobile, 'o-muted': thread.message_unread_counter === 0 }">
-                            <t t-esc="storeProps.threadName"/>
+                        <span class="o_ThreadPreview_name" t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile, 'o-muted': thread.message_unread_counter === 0 }">
+                            <t t-esc="thread.displayName"/>
                         </span>
                         <t t-if="thread.message_unread_counter > 0">
                             <span class="o_ThreadPreview_counter" t-att-class="{ 'o-muted': thread.message_unread_counter === 0 }">
@@ -34,18 +34,18 @@
                             </span>
                         </t>
                         <span class="o-autogrow"/>
-                        <t t-if="storeProps.lastMessage">
+                        <t t-if="thread.lastMessage">
                             <span class="o_ThreadPreview_date" t-att-class="{ 'o-muted': thread.message_unread_counter === 0 }">
-                                <t t-esc="storeProps.lastMessage.date.fromNow()"/>
+                                <t t-esc="thread.lastMessage.date.fromNow()"/>
                             </span>
                         </t>
                     </div>
                     <div class="o_ThreadPreview_core">
                         <span class="o_ThreadPreview_coreItem o_ThreadPreview_inlineText" t-att-class="{ 'o-empty': inlineLastMessageBody.length === 0 }">
-                            <t t-if="storeProps.lastMessageAuthor">
+                            <t t-if="thread.lastMessage and thread.lastMessage.author">
                                 <MessageAuthorPrefix
-                                    messageLocalId="storeProps.lastMessage.localId"
-                                    threadLocalId="props.threadLocalId"
+                                    messageLocalId="thread.lastMessage.localId"
+                                    threadLocalId="thread.localId"
                                 />
                             </t>
                             <t t-raw="inlineLastMessageBody"/>

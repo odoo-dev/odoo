@@ -3,12 +3,10 @@
 
     <t t-name="mail.messaging.component.DialogManager" owl="1">
         <div class="o_DialogManager">
-            <t t-foreach="storeProps.dialogs" t-as="dialog" t-key="dialog.id">
+            <t t-foreach="env.entities.Dialog.allOrdered" t-as="dialog" t-key="dialog.localId">
                 <Dialog
                     class="o_DialogManager_dialog"
-                    componentName="dialog.componentName"
-                    id="dialog.id"
-                    info="dialog.info"
+                    dialogLocalId="dialog.localId"
                 />
             </t>
         </div>

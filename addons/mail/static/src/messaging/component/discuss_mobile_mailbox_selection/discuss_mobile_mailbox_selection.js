@@ -4,7 +4,6 @@ odoo.define('mail.messaging.component.DiscussMobileMailboxSelection', function (
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useGetters } = owl.hooks;
 
 class DiscussMobileMailboxSelection extends Component {
 
@@ -13,17 +12,28 @@ class DiscussMobileMailboxSelection extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeGetters = useGetters();
-        this.storeProps = useStore(() => {
+        useStore(props => {
             return {
                 allOrderedAndPinnedMailboxes:
-                    this.storeGetters.allOrderedAndPinnedMailboxes(),
+                    this.env.entities.Thread.allOrderedAndPinnedMailboxes,
+                discussThread: this.env.entities.Discuss.instance.thread,
             };
         }, {
             compareDepth: {
                 allOrderedAndPinnedMailboxes: 1,
             },
         });
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Discuss}
+     */
+    get discuss() {
+        return this.env.entities.Discuss.instance;
     }
 
     //--------------------------------------------------------------------------
@@ -37,20 +47,14 @@ class DiscussMobileMailboxSelection extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        this.trigger('o-select-thread', {
-            threadLocalId: ev.currentTarget.dataset.mailboxLocalId,
-        });
+        const { mailbox } = ev.currentTarget.dataset;
+        this.discuss.update({ thread: mailbox });
     }
 
 }
 
 Object.assign(DiscussMobileMailboxSelection, {
-    props: {
-        activeThreadLocalId: {
-            type: String,
-            optional: true,
-        },
-    },
+    props: {},
     template: 'mail.messaging.component.DiscussMobileMailboxSelection',
 });
 

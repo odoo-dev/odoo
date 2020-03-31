@@ -21,7 +21,8 @@ QUnit.module('component', {}, function () {
 QUnit.module('FileUploader', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createFileUploaderComponent = async (props) => {
+        this.components = [];
+        this.createFileUploaderComponent = async props => {
             const FileUploaderComponent = components.FileUploader;
             FileUploaderComponent.env = this.env;
             const fileUploader = new FileUploaderComponent(
@@ -29,6 +30,7 @@ QUnit.module('FileUploader', {
                 Object.assign({ attachmentLocalIds: [] }, props)
             );
             await fileUploader.mount(this.widget.el);
+            this.components.push(fileUploader);
             return fileUploader;
         };
         this.start = async params => {
@@ -44,8 +46,8 @@ QUnit.module('FileUploader', {
     },
     afterEach() {
         utilsAfterEach(this);
-        if (this.attachmentBox) {
-            this.attachmentBox.destroy();
+        for (const fileUploader of this.components) {
+            fileUploader.destroy();
         }
         if (this.widget) {
             this.widget.destroy();
@@ -72,7 +74,7 @@ QUnit.test('no conflicts between file uploaders', async function (assert) {
     );
     await nextAnimationFrame(); // we can't use afterNextRender as fileInput are display:none
     assert.strictEqual(
-        Object.keys(this.env.store.state.attachments).length,
+        this.env.entities.Attachment.all.length,
         1,
         'Uploaded file should be the only attachment created'
     );
@@ -88,7 +90,7 @@ QUnit.test('no conflicts between file uploaders', async function (assert) {
     );
     await nextAnimationFrame();
     assert.strictEqual(
-        Object.keys(this.env.store.state.attachments).length,
+        this.env.entities.Attachment.all.length,
         2,
         'Uploaded file should be the only attachment added'
     );

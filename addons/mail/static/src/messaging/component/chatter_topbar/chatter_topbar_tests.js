@@ -20,7 +20,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('ChatterTopbar', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createChatterTopbarComponent = async (chatterLocalId, otherProps) => {
+        this.createChatterTopbarComponent = async (chatter, otherProps) => {
             const ChatterTopBarComponent = components.ChatterTopBar;
             ChatterTopBarComponent.env = this.env;
             const defaultProps = {
@@ -29,7 +29,7 @@ QUnit.module('ChatterTopbar', {
             };
             this.component = new ChatterTopBarComponent(
                 null,
-                Object.assign({ chatterLocalId }, defaultProps, otherProps)
+                Object.assign({ chatterLocalId: chatter.localId }, defaultProps, otherProps)
             );
             await this.component.mount(this.widget.el);
         };
@@ -68,11 +68,11 @@ QUnit.test('base rendering', async function (assert) {
             return this._super(...arguments);
         }
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    await this.createChatterTopbarComponent(chatterLocalId);
+    await this.createChatterTopbarComponent(chatter);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -99,7 +99,6 @@ QUnit.test('base rendering', async function (assert) {
         1,
         "should have an attachments button in chatter menu"
     );
-    await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
         0,
@@ -138,10 +137,10 @@ QUnit.test('base disabled rendering', async function (assert) {
             return this._super(...arguments);
         }
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadModel: 'res.partner'
+    const chatter = this.env.entities.Chatter.create({
+        threadModel: 'res.partner',
     });
-    await this.createChatterTopbarComponent(chatterLocalId);
+    await this.createChatterTopbarComponent(chatter);
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -204,11 +203,11 @@ QUnit.test('attachment counter while loading attachments', async function (asser
             return this._super(...arguments);
         }
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    await this.createChatterTopbarComponent(chatterLocalId);
+    await this.createChatterTopbarComponent(chatter);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -245,11 +244,11 @@ QUnit.test('attachment counter transition when attachments become loaded)', asyn
             return this._super(...arguments);
         }
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    await this.createChatterTopbarComponent(chatterLocalId);
+    await this.createChatterTopbarComponent(chatter);
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -301,11 +300,11 @@ QUnit.test('attachment counter without attachments', async function (assert) {
             return this._super(...arguments);
         }
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    await this.createChatterTopbarComponent(chatterLocalId);
+    await this.createChatterTopbarComponent(chatter);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -317,7 +316,6 @@ QUnit.test('attachment counter without attachments', async function (assert) {
         1,
         "should have an attachments button in chatter menu"
     );
-    await afterNextRender(); // wait the attachments to be fetched
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
         1,
@@ -351,11 +349,11 @@ QUnit.test('attachment counter with attachments', async function (assert) {
             return this._super(...arguments);
         }
     });
-    const chatterLocalId = this.env.store.dispatch('createChatter', {
-        initialThreadId: 100,
-        initialThreadModel: 'res.partner',
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
     });
-    await this.createChatterTopbarComponent(chatterLocalId);
+    await this.createChatterTopbarComponent(chatter);
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -367,7 +365,6 @@ QUnit.test('attachment counter with attachments', async function (assert) {
         1,
         "should have an attachments button in chatter menu"
     );
-    await afterNextRender(); // wait the attachments to be fetched
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
         1,

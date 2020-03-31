@@ -2,9 +2,9 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.messaging.component.ThreadViewer" owl="1">
-        <div class="o_ThreadViewer" t-att-data-thread-local-id="props.threadLocalId">
-            <t t-if="true">
-                <t t-if="!storeProps.threadCache or (storeProps.threadCache and (storeProps.threadCache.isLoading or !storeProps.threadCache.isLoaded))" name="loadingCondition">
+        <div class="o_ThreadViewer" t-att-data-thread-local-id="threadViewer and threadViewer.thread and threadViewer.thread.localId">
+            <t t-if="threadViewer">
+                <t t-if="!threadViewer.threadCache.isLoaded or threadViewer.threadCache.isLoading" name="loadingCondition">
                     <div class="o_ThreadViewer_loading">
                         <span><i class="o_ThreadViewer_loadingIcon fa fa-spinner fa-spin" title="Loading..." role="img" aria-label="Loading..."/>Loading...</span>
                     </div>
@@ -12,7 +12,6 @@
                 <t t-else="">
                     <MessageList
                         class="o_ThreadViewer_messageList"
-                        domain="props.domain"
                         hasMessageCheckbox="props.hasMessageCheckbox"
                         hasSquashCloseMessages="props.hasSquashCloseMessages"
                         haveMessagesAuthorRedirect="props.haveMessagesAuthorRedirect"
@@ -20,19 +19,18 @@
                         haveMessagesReplyIcon="props.haveMessagesReplyIcon"
                         order="props.order"
                         selectedMessageLocalId="props.selectedMessageLocalId"
-                        threadCacheLocalId="storeProps.threadCacheLocalId"
-                        threadLocalId="props.threadLocalId"
+                        threadViewerLocalId="threadViewer.localId"
                         t-ref="messageList"
                     />
                 </t>
-                <t t-if="props.hasComposer and storeProps.thread.composerLocalId">
+                <t t-if="props.hasComposer">
                     <Composer
                         class="o_ThreadViewer_composer"
                         attachmentsDetailsMode="props.composerAttachmentsDetailsMode"
-                        composerLocalId="storeProps.thread.composerLocalId"
+                        composerLocalId="threadViewer.thread.composer.localId"
                         hasCurrentPartnerAvatar="props.hasComposerCurrentPartnerAvatar"
                         hasSendButton="props.hasComposerSendButton"
-                        isFocusOnMount="!storeProps.isMobile"
+                        isFocusOnMount="!env.entities.Device.instance.isMobile"
                         showAttachmentsExtensions="props.showComposerAttachmentsExtensions"
                         showAttachmentsFilenames="props.showComposerAttachmentsFilenames"
                         t-ref="composer"

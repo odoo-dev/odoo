@@ -14,10 +14,7 @@
                         <t t-foreach="livechats" t-as="livechat" t-key="livechat.localId">
                             <DiscussSidebarItem
                                 class="o_DiscussSidebar_item"
-                                isActive="props.activeThreadLocalId === livechat.localId"
                                 threadLocalId="livechat.localId"
-                                t-on-o-clicked="_onClickedItem"
-                                t-ref="{{ livechat.localId }}"
                             />
                         </t>
                     </div>

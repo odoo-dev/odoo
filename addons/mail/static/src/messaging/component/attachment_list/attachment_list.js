@@ -12,7 +12,7 @@ class AttachmentList extends Component {}
 Object.assign(AttachmentList, {
     components,
     defaultProps: {
-        attachmentLocalIds: [],
+        attachments: [],
     },
     props: {
         areAttachmentsDownloadable: {

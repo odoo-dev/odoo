@@ -22,21 +22,31 @@ QUnit.module('ThreadViewer', {
         utilsBeforeEach(this);
 
         /**
-         * @param {string} threadLocalId
+         * @param {mail.messaging.entity.Thread} thread
          * @param {Object} [otherProps]
          */
-        this.createThreadViewerComponent = async (threadLocalId, otherProps, { isFixedSize = false } = {}) => {
+        this.createThreadViewerComponent = async (threadViewer, otherProps, { isFixedSize = false } = {}) => {
             const ThreadViewerComponent = components.ThreadViewer;
             ThreadViewerComponent.env = this.env;
             this.component = new ThreadViewerComponent(
                 null,
-                Object.assign({ threadLocalId }, otherProps)
+                Object.assign({ threadViewerLocalId: threadViewer.localId }, otherProps)
             );
-            await this.component.mount(this.widget.el);
+            let target;
             if (isFixedSize) {
                 // needed to allow scrolling in some tests
-                this.component.el.style.height = '300px';
+                const div = document.createElement('div');
+                Object.assign(div.style, {
+                    display: 'flex',
+                    'flex-flow': 'column',
+                    height: '300px',
+                });
+                this.widget.el.append(div);
+                target = div;
+            } else {
+                target = this.widget.el;
             }
+            await this.component.mount(target);
             await afterNextRender();
         };
 
@@ -68,7 +78,7 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
     assert.expect(1);
 
     await this.start();
-    const threadLocalId = this.env.store.dispatch('_createThread', {
+    const thread = this.env.entities.Thread.create({
         channel_type: 'channel',
         id: 100,
         members: [
@@ -86,7 +96,8 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
         name: "General",
         public: 'public',
     });
-    await this.createThreadViewerComponent(threadLocalId, { hasComposer: true });
+    const threadViewer = this.env.entities.ThreadViewer.create({ thread });
+    await this.createThreadViewerComponent(threadViewer, { hasComposer: true });
     dragenterFiles(document.querySelector('.o_ThreadViewer'));
     await afterNextRender();
     assert.ok(
@@ -126,7 +137,7 @@ QUnit.test('message list desc order', async function (assert) {
             return this._super(...arguments);
         },
     });
-    const threadLocalId = this.env.store.dispatch('_createThread', {
+    const thread = this.env.entities.Thread.create({
         channel_type: 'channel',
         id: 100,
         members: [
@@ -144,7 +155,8 @@ QUnit.test('message list desc order', async function (assert) {
         name: "General",
         public: 'public',
     });
-    await this.createThreadViewerComponent(threadLocalId, { order: 'desc' }, { isFixedSize: true });
+    const threadViewer = this.env.entities.ThreadViewer.create({ thread });
+    await this.createThreadViewerComponent(threadViewer, { order: 'desc' }, { isFixedSize: true });
     const messageItems = document.querySelectorAll(`.o_MessageList_item`);
     assert.notOk(
         messageItems[0].classList.contains("o_MessageList_loadMore"),
@@ -218,7 +230,7 @@ QUnit.test('message list asc order', async function (assert) {
             return this._super(...arguments);
         },
     });
-    const threadLocalId = this.env.store.dispatch('_createThread', {
+    const thread = this.env.entities.Thread.create({
         channel_type: 'channel',
         id: 100,
         members: [
@@ -236,7 +248,8 @@ QUnit.test('message list asc order', async function (assert) {
         name: "General",
         public: 'public',
     });
-    await this.createThreadViewerComponent(threadLocalId, { order: 'asc' }, { isFixedSize: true });
+    const threadViewer = this.env.entities.ThreadViewer.create({ thread });
+    await this.createThreadViewerComponent(threadViewer, { order: 'asc' }, { isFixedSize: true });
     const messageItems = document.querySelectorAll(`.o_MessageList_item`);
     assert.notOk(
         messageItems[messageItems.length - 1].classList.contains("o_MessageList_loadMore"),

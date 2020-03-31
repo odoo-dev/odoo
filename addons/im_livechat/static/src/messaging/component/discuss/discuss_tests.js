@@ -65,7 +65,7 @@ QUnit.test('livechat in the sidebar', async function (assert) {
     );
     const livechat = groupLivechat.querySelector(`
         .o_DiscussSidebarItem[data-thread-local-id="${
-            'mail.channel_1'
+            this.env.entities.Thread.channelFromId(1).localId
         }"]
     `);
     assert.ok(

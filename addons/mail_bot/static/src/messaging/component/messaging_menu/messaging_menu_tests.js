@@ -5,12 +5,9 @@ const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
-    getServices,
     pause,
     start: utilsStart,
 } = require('mail.messaging.testUtils');
-
-const MailBotService = require('mail_bot.MailBotService');
 
 const { makeTestPromise } = require('web.test_utils');
 
@@ -21,9 +18,6 @@ QUnit.module('MessagingMenu', {
     beforeEach: function () {
         utilsBeforeEach(this);
         this.start = async params => {
-            const services = Object.assign({}, getServices(), {
-                mailbot_service: MailBotService,
-            });
 
             if (this.widget) {
                 this.widget.destroy();
@@ -31,7 +25,6 @@ QUnit.module('MessagingMenu', {
             let { discussWidget, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,
                 hasMessagingMenu: true,
-                services,
             }));
             this.discussWidget = discussWidget;
             this.widget = widget;
@@ -57,6 +50,7 @@ QUnit.test('rendering with OdooBot has a request (default)', async function (ass
             }
             return this._super(...arguments);
         },
+        withMailbotHasRequestDefaultPatch: false,
     });
 
     assert.ok(
@@ -95,6 +89,7 @@ QUnit.test('rendering without OdooBot has a request (denied)', async function (a
             }
             return this._super(...arguments);
         },
+        withMailbotHasRequestDefaultPatch: false,
     });
 
     assert.containsNone(
@@ -124,6 +119,7 @@ QUnit.test('rendering without OdooBot has a request (accepted)', async function 
             }
             return this._super(...arguments);
         },
+        withMailbotHasRequestDefaultPatch: false,
     });
 
     assert.containsNone(
@@ -157,6 +153,7 @@ QUnit.test('respond to notification prompt (denied)', async function (assert) {
             }
             return this._super(...arguments);
         },
+        withMailbotHasRequestDefaultPatch: false,
     });
 
     document.querySelector('.o_MessagingMenu_toggler').click();

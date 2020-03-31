@@ -6,6 +6,7 @@ const BusService = require('bus.BusService');
 const ChatWindowService = require('mail.messaging.service.ChatWindow');
 const DialogService = require('mail.messaging.service.Dialog');
 const MessagingService = require('mail.messaging.service.Messaging');
+const { patchClassMethods } = require('mail.messaging.utils');
 const DiscussWidget = require('mail.messaging.widget.Discuss');
 const MessagingMenuWidget = require('mail.messaging.widget.MessagingMenu');
 
@@ -489,7 +490,7 @@ async function pause() {
 /**
  * Main function used to make a mocked environment with mocked messaging env.
  *
- * @param {Object} param0
+ * @param {Object} [param0={}]
  * @param {string} [param0.arch] makes only sense when `param0.hasView` is set:
  *   the arch to use in createView.
  * @param {Object} [param0.archs]
@@ -512,6 +513,10 @@ async function pause() {
  *   view instead of a generic widget.
  * @param {string} [param0.model] makes only sense when `param0.hasView` is set:
  *   the model to use in createView.
+ * @param {function} [param0.onBeforeGenerateEntities] function that is called
+ *   just after entities have been generated from entity registry. Useful to
+ *   make custom patches on some entities for the purpose of the test (e.g.
+ *   simulate a mobile device by mocking computation of `isMobile` of `Device`).
  * @param {integer} [param0.res_id] makes only sense when `param0.hasView` is set:
  *   the res_id to use in createView.
  * @param {Object} [param0.services]
@@ -524,10 +529,12 @@ async function pause() {
  *   the View class to use in createView.
  * @param {Object} [param0.viewOptions] makes only sense when `param0.hasView`
  *   is set: the view options to use in createView.
+ * @param {boolean} [param0.waitUntilMessagingInitialized=true]
+ * @param {boolean} [param0.withMailbotHasRequestDefaultPatch]
  * @param {...Object} [param0.kwargs]
  * @returns {Object}
  */
-async function start(param0) {
+async function start(param0 = {}) {
     let callbacks = {
         init: [],
         mount: [],
@@ -539,6 +546,8 @@ async function start(param0) {
         hasDiscuss = false,
         hasMessagingMenu = false,
         hasView = false,
+        onBeforeGenerateEntities,
+        waitUntilMessagingInitialized = true,
     } = param0;
     delete param0.hasChatWindow;
     delete param0.hasDiscuss;
@@ -563,6 +572,7 @@ async function start(param0) {
     const {
         services = getServices({ hasChatWindow, debug }),
         session = {},
+        withMailbotHasRequestDefaultPatch,
     } = param0;
     initCallbacks.forEach(callback => callback(param0));
     const kwargs = Object.assign({
@@ -577,7 +587,15 @@ async function start(param0) {
         partner_display_name: "Your Company, Admin",
         uid: 2,
     });
-    patchMessagingService(services.messaging, session);
+    const {
+        messagingCreatedPromise,
+        messagingInitializedPromise,
+        unpatch: unpatchMessagingService,
+    } = patchMessagingService(services.messaging, {
+        onBeforeGenerateEntities,
+        session,
+        withMailbotHasRequestDefaultPatch,
+    });
 
     let widget;
     const selector = debug ? 'body' : '#qunit-fixture';
@@ -587,7 +605,7 @@ async function start(param0) {
             destroy() {
                 this._super(...arguments);
                 destroyCallbacks.forEach(callback => callback({ widget }));
-                legacyUnpatch(services.messaging);
+                unpatchMessagingService();
                 legacyUnpatch(widget);
             }
         });
@@ -602,10 +620,15 @@ async function start(param0) {
                 delete widget.destroy;
                 destroyCallbacks.forEach(callback => callback({ widget }));
                 parent.destroy();
-                legacyUnpatch(services.messaging);
+                unpatchMessagingService();
             },
         });
     }
+    await messagingCreatedPromise;
+    if (waitUntilMessagingInitialized) {
+        await messagingInitializedPromise;
+    }
+
     await Promise.all(mountCallbacks.map(callback => callback({ selector, widget })));
     if (hasChatWindow || hasDiscuss || hasMessagingMenu) {
         await afterNextRender();
@@ -692,44 +715,84 @@ function pasteFiles(el, files) {
 }
 
 /**
- * @param {mail.messaging.service.Messaging} messaging_service
+ * @param {mail.messaging.service.Messaging} MessagingService
  * @param {Object} [param1={}]
+ * @param {function} [param1.onBeforeGenerateEntities]
  * @param {Object} [param1.session={}]
+ * @param {boolean} [param1.withMailbotHasRequestDefaultPatch=true]
+ * @returns {Object}
+ *   - `messagingCreatedPromise`, a promise that is resolved just after
+ *     messaging has been created.
+ *   - `messagingInitializedPromise`, a promise that is resolved just after
+ *     messaging has been initialized.
+ *   - `unpatch`, to unpatch messaging service.
  */
-function patchMessagingService(messaging_service, session = {}) {
+function patchMessagingService(MessagingService, {
+    onBeforeGenerateEntities,
+    session = {},
+    withMailbotHasRequestDefaultPatch = true,
+} = {}) {
     const _t = s => s;
     _t.database = {
         parameters: { direction: 'ltr' },
     };
-    legacyPatch(messaging_service, {
-        registry: {
-            initialEnv: makeTestEnvironment({
-                _t,
-                session: Object.assign({
-                    is_bound: Promise.resolve(),
-                    name: 'Admin',
-                    partner_display_name: 'Mitchell Admin',
-                    partner_id: 3,
-                    url: s => s,
-                    userId: 2,
-                }, session),
-            }),
-            onMessagingEnvCreated: messagingEnv => {
-                Object.assign(messagingEnv.store.state, {
-                    globalWindow: {
-                        innerHeight: 1080,
-                        innerWidth: 1920,
-                    },
-                    isMobile: false,
-                });
-                messagingEnv.store.actions._fetchPartnerImStatus = () => {};
-                messagingEnv.store.actions._loopFetchPartnerImStatus = () => {};
-                // TODO FIXME `mail_bot` should not have an impact on `mail` tests
-                messagingEnv.store.actions.checkOdoobotRequest = state => state.mailbotHasRequest = false;
-                messagingEnv.store.env.disableAnimation = true;
-            },
+    const messagingCreatedPromise = makeTestPromise();
+    const messagingInitializedPromise = makeTestPromise();
+    legacyPatch(MessagingService, {
+        initialEnv: makeTestEnvironment({
+            _t,
+            session: Object.assign({
+                is_bound: Promise.resolve(),
+                name: 'Admin',
+                partner_display_name: 'Mitchell Admin',
+                partner_id: 3,
+                url: s => s,
+                userId: 2,
+            }, session),
+        }),
+        start(...args) {
+            this._super(...args);
+            this.env.disableAnimation = true;
+            // simulate all JS resources have been loaded
+            const {
+                messagingCreatedPromise: createdPromise,
+                messagingInitializedPromise: initializedPromise,
+            } = this._onGlobalLoad();
+            createdPromise.then(() => messagingCreatedPromise.resolve());
+            initializedPromise.then(() => messagingInitializedPromise.resolve());
         },
+        /**
+         * @private
+         * @returns {Object}
+         */
+        _generateEntities() {
+            const entities = this._super();
+            patchClassMethods(entities.Device, 'mail.messaging.testUtils', {
+                _listenGlobalWindowResize: () => {},
+                _updateGlobalWindowInnerHeight: () => 1080,
+                _updateGlobalWindowInnerWidth: () => 1920,
+                _updateIsMobile: () => false,
+            });
+            patchClassMethods(entities.Partner, 'mail.messaging.testUtils', {
+                startLoopFetchImStatus: () => {},
+            });
+            if (withMailbotHasRequestDefaultPatch) {
+                patchClassMethods(entities.Mailbot, 'mail.messaging.testUtils', {
+                    _hasRequest: () => false,
+                });
+            }
+            if (onBeforeGenerateEntities) {
+                onBeforeGenerateEntities(entities);
+            }
+            return entities;
+        }
     });
+    const unpatchMessagingService = () => legacyUnpatch(MessagingService);
+    return {
+        messagingCreatedPromise,
+        messagingInitializedPromise,
+        unpatch: unpatchMessagingService,
+    };
 }
 
 //------------------------------------------------------------------------------

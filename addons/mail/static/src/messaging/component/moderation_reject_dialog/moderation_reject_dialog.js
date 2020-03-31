@@ -6,7 +6,7 @@ const useStore = require('mail.messaging.component_hook.useStore');
 const Dialog = require('web.OwlDialog');
 
 const { Component, useState } = owl;
-const { useDispatch, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class ModerationRejectDialog extends Component {
 
@@ -19,10 +19,9 @@ class ModerationRejectDialog extends Component {
             title: this.env._t("Message Rejected"),
             comment: this.env._t("Your message was rejected by moderator."),
         });
-        this.storeDispatch = useDispatch();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
             return {
-                messages: props.messageLocalIds.map(localId => state.messages[localId]),
+                messages: props.messageLocalIds.map(localId => this.env.entities.Message.get(localId)),
             };
         }, {
             compareDepth: {
@@ -41,7 +40,7 @@ class ModerationRejectDialog extends Component {
      * @returns {mail.messaging.entity.Message[]}
      */
     get messages() {
-        return this.storeProps.messages;
+        return this.props.messageLocalIds.map(localId => this.env.entities.Message.get(localId));
     }
 
     //--------------------------------------------------------------------------
@@ -64,11 +63,7 @@ class ModerationRejectDialog extends Component {
             title: this.state.title,
             comment: this.state.comment,
         };
-        this.storeDispatch('moderateMessages',
-            this.messages.map(message => message.localId),
-            'reject',
-            kwargs
-        );
+        this.env.entities.Message.moderate(this.messages, 'reject', kwargs);
     }
 
 }

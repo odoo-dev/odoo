@@ -11,7 +11,7 @@ const components = {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class Chatter extends Component {
 
@@ -20,17 +20,12 @@ class Chatter extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
-            const chatter = state.chatters[props.chatterLocalId];
-            const threadLocalId = chatter.threadLocalId;
-            const thread = threadLocalId ? state.threads[threadLocalId] : undefined;
+        useStore(props => {
+            const chatter = this.env.entities.Chatter.get(props.chatterLocalId);
+            const thread = chatter ? chatter.thread : undefined;
             let attachments = [];
             if (thread) {
-                attachments = thread.attachmentLocalIds.map(attachmentLocalId =>
-                    state.attachments[attachmentLocalId]
-                );
+                attachments = thread.allAttachments;
             }
             return { attachments, chatter, thread };
         }, {
@@ -42,13 +37,13 @@ class Chatter extends Component {
     }
 
     mounted() {
-        if (this.props.formRendererBus && this.storeProps.thread) {
+        if (this.chatter.thread) {
             this._notifyRendered();
         }
     }
 
     patched() {
-        if (this.props.formRendererBus && this.storeProps.thread) {
+        if (this.chatter.thread) {
             this._notifyRendered();
         }
     }
@@ -61,7 +56,7 @@ class Chatter extends Component {
      * @returns {mail.messaging.entity.Chatter}
      */
     get chatter() {
-        return this.storeProps.chatter;
+        return this.env.entities.Chatter.get(this.props.chatterLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -72,9 +67,9 @@ class Chatter extends Component {
      * @private
      */
     _notifyRendered() {
-        this.props.formRendererBus.trigger('o-chatter-rendered', {
-            attachments: this.storeProps.attachments,
-            threadLocalId: this.storeProps.thread.localId,
+        this.trigger('o-chatter-rendered', {
+            attachments: this.chatter.thread.allAttachments,
+            thread: this.chatter.thread.localId,
         });
     }
 
@@ -86,18 +81,15 @@ class Chatter extends Component {
      * @private
      */
     _onComposerMessagePosted() {
-        this.storeDispatch('hideChatterComposer', this.props.chatterLocalId);
+        this.chatter.update({ isComposerVisible: false });
     }
+
 }
 
 Object.assign(Chatter, {
     components,
     props: {
         chatterLocalId: String,
-        formRendererBus: {
-            type: Object,
-            optional: true,
-        },
     },
     template: 'mail.messaging.component.Chatter',
 });

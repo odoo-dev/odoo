@@ -253,7 +253,7 @@ QUnit.test('basic chatter rendering without messages', async function (assert) {
 });
 
 QUnit.test('chatter updating', async function (assert) {
-    assert.expect(7);
+    assert.expect(3);
 
     this.data['ir.attachment'].records = [{
         id: 1,
@@ -277,6 +277,14 @@ QUnit.test('chatter updating', async function (assert) {
         res_model: 'partner',
         type: 'binary',
     }];
+    this.data['mail.message'].records = [{
+        id: 1000,
+        body: "<p>test 1</p>",
+        author_id: [100, "Someone"],
+        model: 'res.partner',
+        res_id: 2,
+        moderation_status: 'accepted',
+    }];
     this.data['res.partner'].records = [{
         id: 1,
         display_name: "first partner",
@@ -286,31 +294,9 @@ QUnit.test('chatter updating', async function (assert) {
         display_name: "second partner",
         message_ids: [],
     }];
-    let callCount = 0;
     await this.createView({
         data: this.data,
         hasView: true,
-        async mockRPC(route, args) {
-            if (route === '/web/dataset/call_kw/mail.message/message_fetch') {
-                callCount++;
-                if (callCount === 1) {
-                    assert.step('message_fetch:1');
-                    return [];
-                } else {
-                    assert.step('message_fetch:2');
-                    return [{
-                        id: 1,
-                        body: "<p>test 1</p>",
-                        author_id: [100, "Someone"],
-                        channel_ids: [1],
-                        model: 'mail.channel',
-                        res_id: 1,
-                        moderation_status: 'accepted',
-                    }];
-                }
-            }
-            return this._super(...arguments);
-        },
         // View params
         View: FormView,
         model: 'res.partner',
@@ -340,7 +326,6 @@ QUnit.test('chatter updating', async function (assert) {
         0,
         "there should be no message"
     );
-    assert.verifySteps(['message_fetch:1']);
 
     document.querySelector(`.o_pager_next`).click();
     await afterNextRender();
@@ -349,7 +334,6 @@ QUnit.test('chatter updating', async function (assert) {
         1,
         "there should be a message"
     );
-    assert.verifySteps(['message_fetch:2']);
 });
 
 });

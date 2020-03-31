@@ -4,7 +4,7 @@ odoo.define('mail.messaging.component.ActivityMarkDonePopover', function (requir
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class ActivityMarkDonePopover extends Component {
 
@@ -13,10 +13,9 @@ class ActivityMarkDonePopover extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
             return {
-                activity: state.activities[props.activityLocalId],
+                activity: this.env.entities.Activity.get(props.activityLocalId),
             };
         });
         this._feedbackTextareaRef = useRef('feedbackTextarea');
@@ -30,7 +29,7 @@ class ActivityMarkDonePopover extends Component {
      * @returns {mail.messaging.entity.Activity}
      */
     get activity() {
-        return this.storeProps.activity;
+        return this.env.entities.Activity.get(this.props.activityLocalId);
     }
 
     /**
@@ -55,7 +54,7 @@ class ActivityMarkDonePopover extends Component {
      * @private
      */
     _onClickDone() {
-        this.storeDispatch('markActivityAsDone', this.props.activityLocalId, {
+        this.activity.markAsDone({
             feedback: this._feedbackTextareaRef.el.value,
         });
     }
@@ -64,11 +63,11 @@ class ActivityMarkDonePopover extends Component {
      * @private
      */
     async _onClickDoneAndScheduleNext() {
-        const action = await this.storeDispatch('markActivityAsDoneAndScheduleNext', this.props.activityLocalId, {
+        const action = await this.activity.markAsDoneAndScheduleNext({
             feedback: this._feedbackTextareaRef.el.value,
         });
         this.env.do_action(action, {
-            on_close: () => this.storeDispatch('refreshChatterActivities', this.activity.chatterLocalId),
+            on_close: () => this.activity.chatter.refreshActivities(),
         });
     }
 

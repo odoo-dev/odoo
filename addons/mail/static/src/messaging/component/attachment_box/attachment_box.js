@@ -10,24 +10,21 @@ const useDragVisibleDropZone = require('mail.messaging.component_hook.useDragVis
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class AttachmentBox extends Component {
 
     /**
-     * @param {...any} args
      * @override
      */
     constructor(...args) {
         super(...args);
         this.isDropZoneVisible = useDragVisibleDropZone();
-        this.storeDispatch = useDispatch();
-        this.storeProps = useStore((state, props) => {
-            const thread = state.threads[props.threadLocalId];
+        useStore(props => {
+            const thread = this.env.entities.Thread.get(props.threadLocalId);
             return {
-                attachmentLocalIds: thread ? thread.attachmentLocalIds : [],
-                threadId: thread ? thread.id : undefined,
-                threadModel: thread ? thread._model : undefined
+                attachments: thread ? thread.allAttachments : [],
+                thread,
             };
         });
         /**
@@ -49,8 +46,16 @@ class AttachmentBox extends Component {
      */
     get newAttachmentExtraData() {
         return {
-            threadLocalIds: [this.props.threadLocalId],
+            res_id: this.thread.id,
+            res_model: this.thread.model,
         };
+    }
+
+    /**
+     * @returns {mail.messaging.entity.Thread|undefined}
+     */
+    get thread() {
+        return this.env.entities.Thread.get(this.props.threadLocalId);
     }
 
     //--------------------------------------------------------------------------

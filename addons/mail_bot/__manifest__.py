@@ -23,6 +23,7 @@
     'qweb': [
         'views/discuss.xml',
         'static/src/messaging/component/messaging_menu/messaging_menu.xml',
+        'static/src/messaging/component/notification_alert/notification_alert.xml',
         'static/src/messaging/component/notification_list/notification_list.xml',
         'static/src/messaging/component/notification_request/notification_request.xml',
     ],

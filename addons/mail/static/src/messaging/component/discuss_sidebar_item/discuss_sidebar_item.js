@@ -9,8 +9,7 @@ const useStore = require('mail.messaging.component_hook.useStore');
 
 const Dialog = require('web.Dialog');
 
-const { Component, useState } = owl;
-const { useDispatch, useGetters } = owl.hooks;
+const { Component } = owl;
 
 class DiscussSidebarItem extends Component {
 
@@ -19,23 +18,14 @@ class DiscussSidebarItem extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.state = useState({
-            /**
-             * Determine whether this discuss item is currently being renamed.
-             */
-            isRenaming: false,
-        });
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
-            const thread = state.threads[props.threadLocalId];
-            const directPartner = thread.directPartnerLocalId
-                ? state.partners[thread.directPartnerLocalId]
-                : undefined;
+        useStore(props => {
+            const thread = this.env.entities.Thread.get(props.threadLocalId);
+            const directPartner = thread ? thread.directPartner : undefined;
             return {
                 directPartner,
+                discuss: this.env.entities.Discuss.instance,
                 thread,
-                threadName: this.storeGetters.threadName(props.threadLocalId),
+                threadName: thread ? thread.displayName : undefined,
             };
         });
     }
@@ -45,18 +35,12 @@ class DiscussSidebarItem extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {boolean}
-     */
-    hasUnpin() {
-        return this.thread.channel_type === 'chat';
-    }
-    /**
      * Get the counter of this discuss item, which is based on the thread type.
      *
      * @returns {integer}
      */
     get counter() {
-        if (this.thread._model === 'mail.box') {
+        if (this.thread.model === 'mail.box') {
             return this.thread.counter;
         } else if (this.thread.channel_type === 'channel') {
             return this.thread.message_needaction_counter;
@@ -67,10 +51,24 @@ class DiscussSidebarItem extends Component {
     }
 
     /**
+     * @returns {mail.messaging.entity.Discuss}
+     */
+    get discuss() {
+        return this.env.entities.Discuss.instance;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    hasUnpin() {
+        return this.thread.channel_type === 'chat';
+    }
+
+    /**
      * @returns {mail.messaging.entity.Thread}
      */
     get thread() {
-        return this.storeProps.thread;
+        return this.env.entities.Thread.get(this.props.threadLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -112,7 +110,7 @@ class DiscussSidebarItem extends Component {
      * @param {Event} ev
      */
     _onCancelRenaming(ev) {
-        this.state.isRenaming = false;
+        this.discuss.cancelRenaming(this.thread);
     }
 
     /**
@@ -120,9 +118,7 @@ class DiscussSidebarItem extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        this.trigger('o-clicked', {
-            threadLocalId: this.props.threadLocalId,
-        });
+        this.discuss.update({ thread: this.thread });
     }
 
     /**
@@ -144,7 +140,7 @@ class DiscussSidebarItem extends Component {
         if (this.thread.create_uid === this.env.session.uid) {
             await this._askAdminConfirmation();
         }
-        this.storeDispatch('unsubscribeFromChannel', this.props.threadLocalId);
+        this.thread.unsubscribe();
     }
 
     /**
@@ -153,7 +149,7 @@ class DiscussSidebarItem extends Component {
      */
     _onClickRename(ev) {
         ev.stopPropagation();
-        this.state.isRenaming = true;
+        this.discuss.setRenaming(this.thread);
     }
 
     /**
@@ -164,7 +160,7 @@ class DiscussSidebarItem extends Component {
         ev.stopPropagation();
         return this.env.do_action({
             type: 'ir.actions.act_window',
-            res_model: this.thread._model,
+            res_model: this.thread.model,
             res_id: this.thread.id,
             views: [[false, 'form']],
             target: 'current'
@@ -177,7 +173,7 @@ class DiscussSidebarItem extends Component {
      */
     _onClickUnpin(ev) {
         ev.stopPropagation();
-        return this.storeDispatch('unsubscribeFromChannel', this.thread.localId);
+        this.thread.unsubscribe();
     }
 
     /**
@@ -186,23 +182,16 @@ class DiscussSidebarItem extends Component {
      * @param {Object} ev.detail
      * @param {string} ev.detail.newName
      */
-    _onRename(ev) {
+    _onValidateEditableText(ev) {
         ev.stopPropagation();
-        this.state.isRenaming = false;
-        this.storeDispatch('renameThread',
-            this.props.threadLocalId,
-            ev.detail.newName);
+        this.thread.rename(ev.detail.newName);
     }
 
 }
 
 Object.assign(DiscussSidebarItem, {
     components,
-    defaultProps: {
-        isActive: false,
-    },
     props: {
-        isActive: Boolean,
         threadLocalId: String,
     },
     template: 'mail.messaging.component.DiscussSidebarItem',

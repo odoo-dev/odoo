@@ -6,7 +6,7 @@ const useStore = require('mail.messaging.component_hook.useStore');
 const Dialog = require('web.OwlDialog');
 
 const { Component } = owl;
-const { useDispatch, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class ModerationDiscardDialog extends Component {
 
@@ -15,10 +15,9 @@ class ModerationDiscardDialog extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeProps = useStore((state, props) => {
+        useStore(props => {
             return {
-                messages: props.messageLocalIds.map(localId => state.messages[localId]),
+                messages: props.messageLocalIds.map(localId => this.env.entities.Message.get(localId)),
             };
         }, {
             compareDepth: {
@@ -50,7 +49,7 @@ class ModerationDiscardDialog extends Component {
      * @returns {mail.messaging.entity.Message[]}
      */
     get messages() {
-        return this.storeProps.messages;
+        return this.props.messageLocalIds.map(localId => this.env.entities.Message.get(localId));
     }
 
     //--------------------------------------------------------------------------
@@ -69,10 +68,7 @@ class ModerationDiscardDialog extends Component {
      */
     _onClickDiscard() {
         this._dialogRef.comp._close();
-        this.storeDispatch('moderateMessages',
-            this.messages.map(message => message.localId),
-            'discard'
-        );
+        this.env.entities.Message.moderate(this.messages, 'discard');
     }
 
 }

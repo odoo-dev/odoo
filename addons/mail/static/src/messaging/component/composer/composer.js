@@ -13,7 +13,7 @@ const useStore = require('mail.messaging.component_hook.useStore');
 const mailUtils = require('mail.utils');
 
 const { Component } = owl;
-const { useDispatch, useGetters, useRef } = owl.hooks;
+const { useRef } = owl.hooks;
 
 class Composer extends Component {
 
@@ -23,14 +23,12 @@ class Composer extends Component {
     constructor(...args) {
         super(...args);
         this.isDropZoneVisible = useDragVisibleDropZone();
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
-            const composer = state.composers[props.composerLocalId];
+        useStore(props => {
+            const composer = this.env.entities.Composer.get(props.composerLocalId);
             return {
                 composer,
-                isMobile: state.isMobile,
-                thread: state.threads[composer.threadLocalId],
+                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                thread: composer ? composer.thread : undefined,
             };
         });
         /**
@@ -53,11 +51,12 @@ class Composer extends Component {
          */
         this._focusCount = 0;
         // to focus if the prop changes
-        this._lastComposerLocalId = this.props.composerLocalId;
+        this._lastComposer = undefined;
         this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);
     }
 
     mounted() {
+        this._lastComposer = this.composer;
         if (this.props.isFocusOnMount) {
             this.focus();
         }
@@ -68,16 +67,11 @@ class Composer extends Component {
         // focus when changing composer
         if (
             this.props.isFocusOnMount &&
-            this._lastComposerLocalId !== this.props.composerLocalId
+            this._lastComposer !== this.composer
         ) {
             this.focus();
         }
-        this._lastComposerLocalId = this.props.composerLocalId;
-        // focus requested by parent
-        if (this._focusCount !== this.props.focusCounter) {
-            this.focus();
-        }
-        this._focusCount = this.props.focusCounter;
+        this._lastComposer = this.composer;
     }
 
     willUnmount() {
@@ -92,7 +86,7 @@ class Composer extends Component {
      * @returns {mail.messaging.entity.Composer}
      */
     get composer() {
-        return this.storeProps.composer;
+        return this.env.entities.Composer.get(this.props.composerLocalId);
     }
 
     /**
@@ -112,12 +106,29 @@ class Composer extends Component {
     }
 
     /**
+     * Focus the composer.
+     */
+    focus() {
+        if (this.env.entities.Device.instance.isMobile) {
+            this.el.scrollIntoView();
+        }
+        this._textInputRef.comp.focus();
+    }
+
+    /**
+     * Focusout the composer.
+     */
+    focusout() {
+        this._textInputRef.comp.focusout();
+    }
+
+    /**
      * Determine whether composer should display a footer.
      *
      * @returns {boolean}
      */
     get hasFooter() {
-        return this.composer.attachmentLocalIds.length > 0 || !this.props.isCompact;
+        return this.composer.attachments.length > 0 || !this.props.isCompact;
     }
 
     /**
@@ -127,7 +138,7 @@ class Composer extends Component {
      */
     get hasHeader() {
         return (
-            (this.props.hasThreadName && this.storeProps.thread) ||
+            (this.props.hasThreadName && this.composer.thread) ||
             (this.props.hasFollowers && !this.props.isLog)
         );
     }
@@ -139,23 +150,7 @@ class Composer extends Component {
      * @returns {Object}
      */
     get newAttachmentExtraData() {
-        return { composerLocalId: this.props.composerLocalId };
-    }
-    /**
-     * Focus the composer.
-     */
-    focus() {
-        if (this.storeProps.isMobile) {
-            this.el.scrollIntoView();
-        }
-        this._textInputRef.comp.focus();
-    }
-
-    /**
-     * Focusout the composer.
-     */
-    focusout() {
-        this._textInputRef.comp.focusout();
+        return { composers: [this.composer] };
     }
 
     //--------------------------------------------------------------------------
@@ -169,7 +164,7 @@ class Composer extends Component {
      */
     async _postMessage() {
         // TODO: take suggested recipients into account
-        await this.storeDispatch('postMessage', this.props.composerLocalId, { isLog: this.props.isLog });
+        await this.composer.postMessage({ isLog: this.props.isLog });
         // TODO: we might need to remove trigger and use the store to wait for the post rpc to be done
         this.trigger('o-message-posted');
     }
@@ -208,7 +203,7 @@ class Composer extends Component {
         if (this._emojisButtonRef.comp.isInsideEventTarget(ev.target)) {
             return;
         }
-        this.trigger('o-discarded');
+        this.composer.discard();
     }
 
     /**
@@ -217,8 +212,7 @@ class Composer extends Component {
      * @private
      */
     async _onClickFullComposer() {
-        const attachmentIds = this.composer.attachmentLocalIds
-            .map(localId => this.env.store.state.attachments[localId].res_id);
+        const attachmentIds = this.composer.attachments.map(attachment => attachment.res_id);
 
         const context = {
             // default_parent_id: this.id,
@@ -253,7 +247,7 @@ class Composer extends Component {
      * @param {MouseEvent} ev
      */
     _onClickDiscard(ev) {
-        this.trigger('o-discarded');
+        this.composer.discard();
     }
 
     /**
@@ -265,21 +259,12 @@ class Composer extends Component {
     _onClickSend(ev) {
         if (
             !this.composer.textInputContent &&
-            this.composer.attachmentLocalIds.length === 0
+            this.composer.attachments.length === 0
         ) {
             return;
         }
         ev.stopPropagation();
         this._postMessage();
-    }
-
-    /**
-     * @private
-     * @param {CustomEvent} ev
-     */
-    _onDiscardInput(ev) {
-        ev.stopPropagation();
-        this.trigger('o-discarded');
     }
 
     /**
@@ -308,11 +293,7 @@ class Composer extends Component {
     _onEmojiSelection(ev) {
         ev.stopPropagation();
         this._textInputRef.comp.saveStateInStore();
-        this.storeDispatch(
-            'insertEmojiInComposerTextInput',
-            this.props.composerLocalId,
-            ev.detail.unicode,
-        );
+        this.composer.insertIntoTextInput(ev.detail.unicode);
         this._textInputRef.comp.focus();
     }
 
@@ -343,7 +324,7 @@ class Composer extends Component {
         // TODO SEB this is the same code as _onClickSend
         if (
             !this.composer.textInputContent &&
-            this.composer.attachmentLocalIds.length === 0
+            this.composer.attachments.length === 0
         ) {
             return;
         }
@@ -356,7 +337,6 @@ Object.assign(Composer, {
     components,
     defaultProps: {
         attachmentLocalIds: [],
-        focusCounter: 0,
         hasCurrentPartnerAvatar: true,
         hasDiscardButton: false,
         hasFollowers: false,
@@ -379,7 +359,6 @@ Object.assign(Composer, {
             optional: true,
         },
         composerLocalId: String,
-        focusCounter: Number,
         hasCurrentPartnerAvatar: Boolean,
         hasDiscardButton: Boolean,
         hasFollowers: Boolean,

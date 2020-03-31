@@ -1,6 +1,7 @@
 odoo.define('mail.systray.ActivityMenuTests', function (require) {
 "use strict";
 
+const { patchMessagingService } = require('mail.messaging.testUtils');
 var ActivityMenu = require('mail.systray.ActivityMenu');
 var mailTestUtils = require('mail.testUtils');
 
@@ -10,6 +11,8 @@ QUnit.module('mail', {}, function () {
 QUnit.module('ActivityMenu', {
     beforeEach: function () {
         this.services = mailTestUtils.getMailServices();
+        const { unpatch: unpatchMessagingService } = patchMessagingService(this.services.messaging);
+        this.unpatchMessagingService = unpatchMessagingService;
         this.data = {
             'mail.activity.menu': {
                 fields: {
@@ -77,6 +80,9 @@ QUnit.module('ActivityMenu', {
         this.session = {
             uid: 10,
         };
+    },
+    afterEach() {
+        this.unpatchMessagingService();
     },
 });
 

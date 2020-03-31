@@ -1,6 +1,7 @@
 odoo.define('mail.discuss_seen_indicator_tests', function (require) {
 "use strict";
 
+const { patchMessagingService } = require('mail.messaging.testUtils');
 var mailTestUtils = require('mail.testUtils');
 var testUtils = require('web.test_utils');
 
@@ -45,6 +46,8 @@ QUnit.module('Discuss (Seen Indicator)', {
             },
         };
         this.services = mailTestUtils.getMailServices();
+        const { unpatch: unpatchMessagingService } = patchMessagingService(this.services.messaging);
+        this.unpatchMessagingService = unpatchMessagingService;
 
         /**
          * Simulate that someone received message on channel
@@ -66,6 +69,9 @@ QUnit.module('Discuss (Seen Indicator)', {
             params.widget.call('bus_service', 'trigger', 'notification', [notification]);
             return testUtils.nextTick();
         };
+    },
+    afterEach() {
+        this.unpatchMessagingService();
     },
 });
 

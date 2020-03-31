@@ -7,7 +7,6 @@ const components = {
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
-const { useDispatch, useGetters } = owl.hooks;
 
 class ChatWindowHeader extends Component {
 
@@ -16,17 +15,12 @@ class ChatWindowHeader extends Component {
      */
     constructor(...args) {
         super(...args);
-        this.storeDispatch = useDispatch();
-        this.storeGetters = useGetters();
-        this.storeProps = useStore((state, props) => {
-            const thread = state.threads[props.chatWindowLocalId];
-            const threadName = thread
-                ? this.storeGetters.threadName(thread.localId)
-                : undefined;
+        useStore(props => {
+            const chatWindow = this.env.entities.ChatWindow.get(props.chatWindowLocalId);
             return {
-                isMobile: state.isMobile,
-                thread,
-                threadName,
+                chatWindow,
+                chatWindowName: chatWindow && chatWindow.name,
+                isDeviceMobile: this.env.entities.Device.instance.isMobile,
             };
         });
     }
@@ -36,10 +30,10 @@ class ChatWindowHeader extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.messaging.entity.Thread}
+     * @returns {mail.messaging.entity.ChatWindow}
      */
-    get thread() {
-        return this.storeProps.thread;
+    get chatWindow() {
+        return this.env.entities.ChatWindow.get(this.props.chatWindowLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -51,9 +45,8 @@ class ChatWindowHeader extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        this.trigger('o-clicked', {
-            chatWindowLocalId: this.props.chatWindowLocalId,
-        });
+        const chatWindow = this.chatWindow;
+        this.trigger('o-clicked', { chatWindow });
     }
 
     /**
@@ -62,7 +55,7 @@ class ChatWindowHeader extends Component {
      */
     _onClickClose(ev) {
         ev.stopPropagation();
-        this.storeDispatch('closeChatWindow', this.props.chatWindowLocalId);
+        this.chatWindow.close();
     }
 
     /**
@@ -71,23 +64,7 @@ class ChatWindowHeader extends Component {
      */
     _onClickExpand(ev) {
         ev.stopPropagation();
-        if (!this.thread) {
-            return;
-        }
-        if (['mail.channel', 'mail.box'].includes(this.thread._model)) {
-            this.env.do_action('mail.action_new_discuss', {
-                clear_breadcrumbs: false,
-                active_id: this.thread.localId,
-                on_reverse_breadcrumb: () =>
-                    // ideally discuss should do it itself...
-                    this.storeDispatch('closeDiscuss'),
-            });
-        } else {
-            this.storeDispatch('openDocument', {
-                id: this.thread.id,
-                model: this.thread._model,
-            });
-        }
+        this.chatWindow.expand();
     }
 
     /**
@@ -96,7 +73,7 @@ class ChatWindowHeader extends Component {
      */
     _onClickShiftLeft(ev) {
         ev.stopPropagation();
-        this.storeDispatch('shiftLeftChatWindow', this.props.chatWindowLocalId);
+        this.chatWindow.shiftLeft();
     }
 
     /**
@@ -105,7 +82,7 @@ class ChatWindowHeader extends Component {
      */
     _onClickShiftRight(ev) {
         ev.stopPropagation();
-        this.storeDispatch('shiftRightChatWindow', this.props.chatWindowLocalId);
+        this.chatWindow.shiftRight();
     }
 
 }
@@ -114,15 +91,11 @@ Object.assign(ChatWindowHeader, {
     components,
     defaultProps: {
         hasCloseAsBackButton: false,
-        hasShiftLeft: false,
-        hasShiftRight: false,
         isExpandable: false,
     },
     props: {
         chatWindowLocalId: String,
         hasCloseAsBackButton: Boolean,
-        hasShiftLeft: Boolean,
-        hasShiftRight: Boolean,
         isExpandable: Boolean,
     },
     template: 'mail.messaging.component.ChatWindowHeader',

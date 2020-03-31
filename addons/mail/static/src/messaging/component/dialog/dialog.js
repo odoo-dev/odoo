@@ -2,7 +2,7 @@ odoo.define('mail.messaging.component.Dialog', function (require) {
 'use strict';
 
 const { Component } = owl;
-const { useRef } = owl.hooks;
+const { useRef, useStore } = owl.hooks;
 
 class Dialog extends Component {
 
@@ -16,6 +16,11 @@ class Dialog extends Component {
          */
         this._componentRef = useRef('component');
         this._onClickGlobal = this._onClickGlobal.bind(this);
+        useStore(props => {
+            return {
+                dialog: this.env.entities.Dialog.get(props.dialogLocalId),
+            };
+        });
     }
 
     mounted() {
@@ -24,6 +29,17 @@ class Dialog extends Component {
 
     willUnmount() {
         document.removeEventListener('click', this._onClickGlobal, true);
+    }
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @returns {mail.messaging.entity.Dialog}
+     */
+    get dialog() {
+        return this.env.entities.Dialog.get(this.props.dialogLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -55,27 +71,14 @@ class Dialog extends Component {
         if (!this._componentRef.comp.isCloseable()) {
             return;
         }
-        this.trigger('o-close', { id: this.props.id });
-    }
-
-    /**
-     * Called when component of this dialog asks to close this dialog.
-     *
-     * @private
-     * @param {CustomEvent} ev
-     */
-    _onClose(ev) {
-        ev.stopPropagation();
-        this.trigger('o-close', { id: this.props.id });
+        this.dialog.close();
     }
 
 }
 
 Object.assign(Dialog, {
     props: {
-        componentName: String,
-        id: String,
-        info: Object,
+        dialogLocalId: String,
     },
     template: 'mail.messaging.component.Dialog',
 });
