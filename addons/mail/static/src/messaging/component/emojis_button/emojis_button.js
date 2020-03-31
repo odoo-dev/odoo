@@ -64,6 +64,7 @@ class EmojisButton extends components.PopoverButtonWithComponent {
             unicode: ev.detail.unicode,
         });
     }
+
 }
 
 return EmojisButton;

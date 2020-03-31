@@ -37,9 +37,10 @@ const MessagingMenu = Widget.extend({
         this._super(...arguments);
     },
     async on_attach_callback() {
-        components.MessagingMenu.env = this.env;
-        this.component = new components.MessagingMenu(null);
-        await this.component.mount(this.$el[0]);
+        const MessagingMenuComponent = components.MessagingMenu;
+        MessagingMenuComponent.env = this.env;
+        this.component = new MessagingMenuComponent(null);
+        await this.component.mount(this.el);
         // unwrap
         this.el.parentNode.insertBefore(this.component.el, this.el);
         this.el.parentNode.removeChild(this.el);

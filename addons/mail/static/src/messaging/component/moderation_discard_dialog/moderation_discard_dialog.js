@@ -63,6 +63,7 @@ class ModerationDiscardDialog extends Component {
     _onClickCancel() {
         this._dialogRef.comp._close();
     }
+
     /**
      * @private
      */

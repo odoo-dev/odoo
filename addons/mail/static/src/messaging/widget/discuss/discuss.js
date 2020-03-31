@@ -2,7 +2,7 @@ odoo.define('mail.messaging.widget.Discuss', function (require) {
 'use strict';
 
 const components = {
-    DiscussComponent: require('mail.messaging.component.Discuss'),
+    Discuss: require('mail.messaging.component.Discuss'),
 };
 const InvitePartnerDialog = require('mail.messaging.widget.DiscussInvitePartnerDialog');
 
@@ -55,10 +55,7 @@ const DiscussWidget = AbstractAction.extend({
 
         this.component = undefined;
 
-        this._initActiveThreadLocalId = this.options.active_id ||
-            (this.action.context && this.action.context.active_id) ||
-            (this.action.params && this.action.params.default_active_id) ||
-            'mail.box_inbox';
+        this._initActiveThreadLocalId = undefined;
         this._lastPushStateActiveThreadLocalId = null;
     },
     /**
@@ -67,6 +64,10 @@ const DiscussWidget = AbstractAction.extend({
     async willStart() {
         await this._super(...arguments);
         this.env = this.call('messaging', 'getEnv');
+        this._initActiveThreadLocalId = this.options.active_id ||
+            (this.action.context && this.action.context.active_id) ||
+            (this.action.params && this.action.params.default_active_id) ||
+            'mail.box_inbox';
     },
     /**
      * @override {web.AbstractAction}
@@ -90,9 +91,9 @@ const DiscussWidget = AbstractAction.extend({
             // prevent twice call to on_attach_callback (FIXME)
             return;
         }
-        const DiscussComponentComponent = components.DiscussComponent;
-        DiscussComponentComponent.env = this.env;
-        this.component = new DiscussComponentComponent(null, {
+        const DiscussComponent = components.Discuss;
+        DiscussComponent.env = this.env;
+        this.component = new DiscussComponent(null, {
             initActiveThreadLocalId: this._initActiveThreadLocalId,
         });
         this._pushStateActionManagerEventListener = ev => {
@@ -185,13 +186,18 @@ const DiscussWidget = AbstractAction.extend({
         const uncheckedMessageLocalIds = this.component.storeProps.uncheckedMessageLocalIds;
 
         // Invite
-        if (activeThread && activeThread.channel_type === 'channel') {
+        if (
+            activeThread &&
+            activeThread.channel_type === 'channel'
+        ) {
             this.$buttons.find('.o_invite').removeClass('o_hidden');
         } else {
             this.$buttons.find('.o_invite').addClass('o_hidden');
         }
         // Mark All Read
-        if (activeThreadLocalId === 'mail.box_inbox') {
+        if (
+            activeThreadLocalId === 'mail.box_inbox'
+        ) {
             this.$buttons
                 .find('.o_widget_Discuss_controlPanelButtonMarkAllRead')
                 .removeClass('o_hidden')
@@ -206,7 +212,9 @@ const DiscussWidget = AbstractAction.extend({
                 .addClass('o_hidden');
         }
         // Unstar All
-        if (activeThreadLocalId === 'mail.box_starred') {
+        if (
+            activeThreadLocalId === 'mail.box_starred'
+        ) {
             this.$buttons
                 .find('.o_unstar_all')
                 .removeClass('o_hidden')
@@ -221,7 +229,10 @@ const DiscussWidget = AbstractAction.extend({
                 .addClass('o_hidden');
         }
         // Mobile: Add channel
-        if (isMobile && activeMobileNavbarTabId === 'channel') {
+        if (
+            isMobile &&
+            activeMobileNavbarTabId === 'channel'
+        ) {
             this.$buttons
                 .find('.o_mobile_new_channel')
                 .removeClass('o_hidden');
@@ -231,7 +242,10 @@ const DiscussWidget = AbstractAction.extend({
                 .addClass('o_hidden');
         }
         // Mobile: Add message
-        if (isMobile && activeMobileNavbarTabId === 'chat') {
+        if (
+            isMobile &&
+            activeMobileNavbarTabId === 'chat'
+        ) {
             this.$buttons
                 .find('.o_mobile_new_message')
                 .removeClass('o_hidden');
@@ -260,6 +274,7 @@ const DiscussWidget = AbstractAction.extend({
         // Select All & Unselect All
         const $selectAll = this.$buttons.find('.o_widget_Discuss_controlPanelButtonSelectAll');
         const $unselectAll = this.$buttons.find('.o_widget_Discuss_controlPanelButtonUnselectAll');
+
         if (
             checkedMessageLocalIds.length > 0 ||
             uncheckedMessageLocalIds.length > 0
@@ -280,7 +295,10 @@ const DiscussWidget = AbstractAction.extend({
         const nonModerableMessageLocalIds = checkedMessageLocalIds.filter(messageLocalId =>
             !this.env.store.getters.isMessageModeratedByUser(messageLocalId)
         );
-        if (checkedMessageLocalIds.length > 0 && nonModerableMessageLocalIds.length === 0) {
+        if (
+            checkedMessageLocalIds.length > 0 &&
+            nonModerableMessageLocalIds.length === 0
+        ) {
             $moderationButtons.removeClass('o_hidden');
         } else {
             $moderationButtons.addClass('o_hidden');

@@ -6,25 +6,26 @@
             <t t-if="true">
                 <div class="o_Activity_sidebar">
                     <div class="o_Activity_user">
-                        <img class="o_Activity_userAvatar"
-                             t-attf-src="/web/image{{ activity.userId >= 0 ? ('/res.users/' + activity.userId + '/image_128') : '' }}"
-                             t-att-alt="activity.userDisplayName"/>
-                        <i class="o_Activity_icon fa" t-att-class="{
-                            'bg-success-full': activity.activityState === 'planned',
-                            'bg-warning-full': activity.activityState === 'today',
-                            'bg-danger-full': activity.activityState === 'overdue',
-                        }" t-attf-class="{{ activity.icon }}"/>
+                        <img class="o_Activity_userAvatar" t-attf-src="/web/image{{ activity.userId >= 0 ? ('/res.users/' + activity.userId + '/image_128') : '' }}" t-att-alt="activity.userDisplayName"/>
+                        <i class="o_Activity_icon fa"
+                            t-att-class="{
+                                'bg-success-full': activity.activityState === 'planned',
+                                'bg-warning-full': activity.activityState === 'today',
+                                'bg-danger-full': activity.activityState === 'overdue',
+                            }"
+                            t-attf-class="{{ activity.icon }}"
+                        />
                     </div>
                 </div>
                 <div class="o_Activity_core">
                     <div class="o_Activity_info">
                         <div class="o_Activity_dueDateText"
-                              t-att-class="{
+                            t-att-class="{
                                 'o-default': activity.activityState === 'default',
                                 'o-overdue': activity.activityState === 'overdue',
                                 'o-planned': activity.activityState === 'planned',
                                 'o-today': activity.activityState === 'today',
-                              }"
+                            }"
                         >
                             <t t-esc="delayLabel"/>
                         </div>
@@ -60,10 +61,7 @@
                                 <dt>Created</dt>
                                 <dd class="o_Activity_detailsCreation">
                                     <t t-esc="formattedCreateDatetime"/>
-                                    <img class="o_Activity_detailsUserAvatar o_Activity_detailsCreatorAvatar"
-                                         t-attf-src="/web/image{{ activity.creatorId >= 0 ? ('/res.users/' + activity.creatorId + '/image_128') : '' }}"
-                                         t-att-title="activity.creatorDisplayName"
-                                         t-att-alt="activity.creatorDisplayName"/>
+                                    <img class="o_Activity_detailsUserAvatar o_Activity_detailsCreatorAvatar" t-attf-src="/web/image{{ activity.creatorId >= 0 ? ('/res.users/' + activity.creatorId + '/image_128') : '' }}" t-att-title="activity.creatorDisplayName" t-att-alt="activity.creatorDisplayName"/>
                                     <span class="o_Activity_detailsCreator">
                                         <t t-esc="activity.creatorDisplayName"/>
                                     </span>
@@ -72,22 +70,20 @@
                             <t t-if="true">
                                 <dt>Assigned to</dt>
                                 <dd class="o_Activity_detailsAssignation">
-                                    <img class="o_Activity_detailsUserAvatar o_Activity_detailsAssignationUserAvatar"
-                                         t-attf-src="/web/image{{ activity.userId >= 0 ? ('/res.users/' + activity.userId + '/image_128') : '' }}"
-                                         t-att-title="activity.userDisplayName"
-                                         t-att-alt="activity.userDisplayName"/>
+                                    <img class="o_Activity_detailsUserAvatar o_Activity_detailsAssignationUserAvatar" t-attf-src="/web/image{{ activity.userId >= 0 ? ('/res.users/' + activity.userId + '/image_128') : '' }}" t-att-title="activity.userDisplayName" t-att-alt="activity.userDisplayName"/>
                                     <t t-esc="activity.userDisplayName"/>
                                 </dd>
                             </t>
                             <dt>Due on</dt>
                             <dd class="o_Activity_detailsDueDate">
                                 <span class="o_Activity_deadlineDateText"
-                                      t-att-class="{
+                                    t-att-class="{
                                         'o-default': activity.activityState === 'default',
                                         'o-overdue': activity.activityState === 'overdue',
                                         'o-planned': activity.activityState === 'planned',
                                         'o-today': activity.activityState === 'today',
-                                      }">
+                                    }"
+                                >
                                     <t t-esc="formattedDeadlineDate"/>
                                 </span>
                             </dd>
@@ -101,9 +97,11 @@
                     <t t-if="activity.mailTemplateLocalIds.length > 0">
                         <div class="o_Activity_mailTemplates">
                             <t t-foreach="activity.mailTemplateLocalIds" t-as="mailTemplateLocalId" t-key="mailTemplateLocalId">
-                                <MailTemplate class="o_Activity_mailTemplate"
+                                <MailTemplate
+                                    class="o_Activity_mailTemplate"
                                     activityLocalId="props.activityLocalId"
-                                    mailTemplateLocalId="mailTemplateLocalId"/>
+                                    mailTemplateLocalId="mailTemplateLocalId"
+                                />
                             </t>
                         </div>
                     </t>
@@ -111,21 +109,19 @@
                     <t t-if="activity.canWrite">
                         <div class="o_Activity_tools">
                             <t t-if="activity.activityCategory !== 'upload_file'">
-                                <ActivityMarkDoneButton class="o_Activity_toolButton o_Activity_markDoneButton btn-link"
+                                <ActivityMarkDoneButton
+                                    class="o_Activity_toolButton o_Activity_markDoneButton btn-link"
                                     activityLocalId="props.activityLocalId"
                                     popoverTitle="'Mark Done'"
                                 >
                                     <t t-set="buttonHtml">
-                                        <i class="fa fa-check"/>
-                                        Mark Done
+                                        <i class="fa fa-check"/> Mark Done
                                     </t>
                                 </ActivityMarkDoneButton>
                             </t>
                             <t t-else="">
-                                <button class="o_Activity_toolButton o_Activity_uploadButton btn btn-link"
-                                        t-on-click="_onClickUploadDocument">
-                                    <i class="fa fa-upload"/>
-                                    Upload Document
+                                <button class="o_Activity_toolButton o_Activity_uploadButton btn btn-link" t-on-click="_onClickUploadDocument">
+                                    <i class="fa fa-upload"/> Upload Document
                                 </button>
                                 <FileUploader
                                     attachmentLocalIds="activity.attachmentLocalIds"
@@ -135,15 +131,11 @@
                                     t-ref="fileUploader"
                                 />
                             </t>
-                            <button class="o_Activity_toolButton o_Activity_editButton btn btn-link"
-                                    t-on-click="_onClickEdit">
-                                <i class="fa fa-pencil"/>
-                                Edit
+                            <button class="o_Activity_toolButton o_Activity_editButton btn btn-link" t-on-click="_onClickEdit">
+                                <i class="fa fa-pencil"/> Edit
                             </button>
-                            <button class="o_Activity_toolButton o_Activity_cancelButton btn btn-link"
-                                    t-on-click="_onClickCancel">
-                                <i class="fa fa-times"/>
-                                Cancel
+                            <button class="o_Activity_toolButton o_Activity_cancelButton btn btn-link" t-on-click="_onClickCancel" >
+                                <i class="fa fa-times"/> Cancel
                             </button>
                         </div>
                     </t>

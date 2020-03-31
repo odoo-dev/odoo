@@ -14,7 +14,7 @@
                 'o-selected': props.isSelected,
                 'o-squashed': props.isSquashed,
                 'o-starred': isStarred,
-            }" t-on-click="_onClick" t-att-data-message-local-id="props.messageLocalId"
+            }" t-on-click="_onClick" t-att-data-message-local-id="message.localId"
         >
             <t t-if="true">
                 <div class="o_Message_sidebar" t-att-class="{ 'o-message-squashed': props.isSquashed }">
@@ -132,7 +132,7 @@
                         </t>
                     </t>
                     <div class="o_Message_content" t-ref="content">
-                        <t t-raw="storeGetters.messagePrettyBody(props.messageLocalId)"/>
+                        <t t-raw="storeGetters.messagePrettyBody(message.localId)"/>
                         <t t-if="message.subtype_description">
                             <p t-esc="message.subtype_description"/>
                         </t>
@@ -182,13 +182,13 @@
                     </t>
                 </div>
                 <t t-if="state.hasModerationBanDialog">
-                    <ModerationBanDialog messageLocalIds="[props.messageLocalId]" t-on-dialog-closed="_onDialogClosedModerationBan"/>
+                    <ModerationBanDialog messageLocalIds="[message.localId]" t-on-dialog-closed="_onDialogClosedModerationBan"/>
                 </t>
                 <t t-if="state.hasModerationDiscardDialog">
-                    <ModerationDiscardDialog messageLocalIds="[props.messageLocalId]" t-on-dialog-closed="_onDialogClosedModerationDiscard"/>
+                    <ModerationDiscardDialog messageLocalIds="[message.localId]" t-on-dialog-closed="_onDialogClosedModerationDiscard"/>
                 </t>
                 <t t-if="state.hasModerationRejectDialog">
-                    <ModerationRejectDialog messageLocalIds="[props.messageLocalId]" t-on-dialog-closed="_onDialogClosedModerationReject"/>
+                    <ModerationRejectDialog messageLocalIds="[message.localId]" t-on-dialog-closed="_onDialogClosedModerationReject"/>
                 </t>
             </t>
         </div>

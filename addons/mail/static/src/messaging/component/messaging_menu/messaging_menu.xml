@@ -62,7 +62,7 @@
                         />
                         <t t-if="storeProps.isMobile">
                             <MobileMessagingNavbar
-                                class="o_MessagingMenu_mobileMessagingNavbar"
+                                class="o_MessagingMenu_mobileNavbar"
                                 activeTabId="messagingMenu.activeTabId"
                                 tabs="tabs"
                                 t-on-o-select-mobile-messaging-navbar-tab="_onSelectMobileNavbarTab"

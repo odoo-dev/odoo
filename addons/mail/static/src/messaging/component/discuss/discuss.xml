@@ -29,10 +29,10 @@
                         t-ref="sidebar"
                     />
                 </t>
-                <t t-if="storeProps.isMobile" t-call="mail.messaging.component.DiscussContent"/>
+                <t t-if="storeProps.isMobile" t-call="mail.messaging.component.Discuss.Content"/>
                 <t t-else="">
                     <div class="o_Discuss_content">
-                        <t t-call="mail.messaging.component.DiscussContent"/>
+                        <t t-call="mail.messaging.component.Discuss.Content"/>
                     </div>
                 </t>
             </t>
@@ -46,7 +46,7 @@
         </div>
     </t>
 
-    <t t-name="mail.messaging.component.DiscussContent" owl="1">
+    <t t-name="mail.messaging.component.Discuss.Content" owl="1">
         <t t-if="storeProps.isMobile and discuss.activeMobileNavbarTabId === 'mailbox'">
             <DiscussMobileMailboxSelection
                 class="o_Discuss_mobileMailboxSelection"
@@ -63,7 +63,8 @@
                     placeholder="state.isAddingChannel ? addChannelInputPlaceholder : addChatInputPlaceholder"
                     select="_onMobileAddItemHeaderInputSelect"
                     source="_onMobileAddItemHeaderInputSource"
-                    t-on-o-hide="_onHideMobileAddItemHeader"/>
+                    t-on-o-hide="_onHideMobileAddItemHeader"
+                />
             </div>
         </t>
         <t t-if="(storeProps.isMobile and discuss.activeMobileNavbarTabId === 'mailbox' and discuss.activeThreadLocalId and storeProps.activeThread._model === 'mail.box') or (!storeProps.isMobile and discuss.activeThreadLocalId)">
@@ -81,7 +82,8 @@
                 haveMessagesReplyIcon="storeProps.activeThread.localId === 'mail.box_inbox'"
                 messageListInitialScrollTop="
                     state.threadCachesStoredScrollTop[storeProps.activeThreadCacheLocalId] and
-                    state.threadCachesStoredScrollTop[storeProps.activeThreadCacheLocalId].value"
+                    state.threadCachesStoredScrollTop[storeProps.activeThreadCacheLocalId].value
+                "
                 selectedMessageLocalId="state.replyingToMessageMessageLocalId"
                 threadLocalId="discuss.activeThreadLocalId"
                 t-on-o-rendered="_onThreadRendered"
@@ -103,7 +105,7 @@
         </t>
         <t t-if="storeProps.isMobile and !state.isReplyingToMessage">
             <MobileMessagingNavbar
-                class="o_Discuss_mobileMessagingNavbar"
+                class="o_Discuss_mobileNavbar"
                 activeTabId="discuss.activeMobileNavbarTabId"
                 tabs="mobileNavbarTabs()"
                 t-on-o-select-mobile-messaging-navbar-tab="_onSelectMobileNavbarTab"

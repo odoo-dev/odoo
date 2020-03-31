@@ -54,6 +54,7 @@ class ModerationBanDialog extends Component {
             'ban'
         );
     }
+
     /**
      * @private
      */

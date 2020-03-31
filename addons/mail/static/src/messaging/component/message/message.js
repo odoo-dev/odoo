@@ -457,7 +457,7 @@ class Message extends Component {
      */
     _onClickModerationAccept(ev) {
         ev.preventDefault();
-        this.storeDispatch('moderateMessages', [this.props.messageLocalId], 'accept');
+        this.storeDispatch('moderateMessages', [this.message.localId], 'accept');
     }
 
     /**
@@ -466,7 +466,7 @@ class Message extends Component {
      */
     _onClickModerationAllow(ev) {
         ev.preventDefault();
-        this.storeDispatch('moderateMessages', [this.props.messageLocalId], 'allow');
+        this.storeDispatch('moderateMessages', [this.message.localId], 'allow');
     }
 
     /**
@@ -514,7 +514,7 @@ class Message extends Component {
      */
     _onClickStar(ev) {
         ev.stopPropagation();
-        return this.storeDispatch('toggleStarMessage', this.props.messageLocalId);
+        return this.storeDispatch('toggleStarMessage', this.message.localId);
     }
 
     /**
@@ -523,7 +523,7 @@ class Message extends Component {
      */
     _onClickMarkAsRead(ev) {
         ev.stopPropagation();
-        return this.storeDispatch('markMessagesAsRead', [this.props.messageLocalId]);
+        return this.storeDispatch('markMessagesAsRead', [this.message.localId]);
     }
 
     /**
@@ -533,7 +533,7 @@ class Message extends Component {
     _onClickReply(ev) {
         ev.stopPropagation();
         this.trigger('o-reply-message', {
-            messageLocalId: this.props.messageLocalId,
+            messageLocalId: this.message.localId,
         });
     }
 

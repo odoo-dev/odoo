@@ -68,6 +68,7 @@ class Dialog extends Component {
         ev.stopPropagation();
         this.trigger('o-close', { id: this.props.id });
     }
+
 }
 
 Object.assign(Dialog, {

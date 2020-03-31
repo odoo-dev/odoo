@@ -55,6 +55,7 @@ class MailTemplate extends Component {
         ev.preventDefault();
         this.storeDispatch('sendMailTemplate', this.props.mailTemplateLocalId, this.props.activityLocalId);
     }
+
 }
 
 Object.assign(MailTemplate, {

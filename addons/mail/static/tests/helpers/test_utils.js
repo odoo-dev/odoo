@@ -5,8 +5,8 @@ var BusService = require('bus.BusService');
 
 var Discuss = require('mail.Discuss');
 const { patchMessagingService } = require('mail.messaging.testUtils');
-var MailService = require('mail.Service');
 const MessagingService = require('mail.messaging.service.Messaging');
+var MailService = require('mail.Service');
 
 var AbstractStorageService = require('web.AbstractStorageService');
 var Class = require('web.Class');

@@ -67,8 +67,9 @@ class ActivityMarkDonePopover extends Component {
         const action = await this.storeDispatch('markActivityAsDoneAndScheduleNext', this.props.activityLocalId, {
             feedback: this._feedbackTextareaRef.el.value,
         });
-        const on_close = () => this.storeDispatch('refreshChatterActivities', this.activity.chatterLocalId);
-        this.env.do_action(action, { on_close });
+        this.env.do_action(action, {
+            on_close: () => this.storeDispatch('refreshChatterActivities', this.activity.chatterLocalId),
+        });
     }
 
 }

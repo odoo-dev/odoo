@@ -208,6 +208,7 @@ class ComposerTextInput extends Component {
         this.trigger('o-discard');
         ev.preventDefault();
     }
+
 }
 
 Object.assign(ComposerTextInput, {

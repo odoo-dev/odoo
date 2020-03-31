@@ -107,9 +107,7 @@ class ChatterTopbar extends Component {
         return this.env.do_action(action, {
             // A bit "extreme", could be improved:
             // normally only an activity is created (no update nor delete)
-            on_close: () => {
-                this.storeDispatch('refreshChatterActivities', this.props.chatterLocalId);
-            }
+            on_close: () => this.storeDispatch('refreshChatterActivities', this.props.chatterLocalId),
         });
     }
 
@@ -124,6 +122,7 @@ class ChatterTopbar extends Component {
             this.storeDispatch('showChatterSendMessage', this.props.chatterLocalId);
         }
     }
+
 }
 
 Object.assign(ChatterTopbar, {

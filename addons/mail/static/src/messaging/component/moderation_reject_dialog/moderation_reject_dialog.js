@@ -54,6 +54,7 @@ class ModerationRejectDialog extends Component {
     _onClickCancel() {
         this._dialogRef.comp._close();
     }
+
     /**
      * @private
      */
@@ -69,6 +70,7 @@ class ModerationRejectDialog extends Component {
             kwargs
         );
     }
+
 }
 
 Object.assign(ModerationRejectDialog, {

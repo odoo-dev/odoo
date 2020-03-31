@@ -139,7 +139,7 @@ QUnit.test('message list desc order', async function (assert) {
                 email: "fred@example.com",
                 id: 10,
                 name: "Fred",
-            }
+            },
         ],
         name: "General",
         public: 'public',

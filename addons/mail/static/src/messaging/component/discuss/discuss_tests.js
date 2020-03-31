@@ -304,8 +304,9 @@ QUnit.test('sidebar: default active inbox', async function (assert) {
         }"]
     `);
     assert.ok(
-        inbox.querySelector(`:scope .o_DiscussSidebarItem_activeIndicator`)
-            .classList.contains('o-item-active'),
+        inbox.querySelector(`
+            :scope .o_DiscussSidebarItem_activeIndicator
+        `).classList.contains('o-item-active'),
         "inbox should be active by default"
     );
 });
@@ -2198,9 +2199,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
         },
     });
     assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Discuss_thread .o_Message
-        `).length,
+        document.querySelectorAll('.o_Discuss_thread .o_Message').length,
         2,
         "should have 2 messages"
     );
@@ -4533,7 +4532,6 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
         `),
         "should display the moderation box"
     );
-
     const mailboxCounter = document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
             'mail.box_moderation'
