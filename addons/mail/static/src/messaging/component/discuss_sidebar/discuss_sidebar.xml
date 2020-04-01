@@ -7,7 +7,7 @@
                 <t t-foreach="env.entities.Thread.allOrderedAndPinnedMailboxes" t-as="mailbox" t-key="mailbox.localId">
                     <DiscussSidebarItem
                         class="o_DiscussSidebar_item"
-                        thread="mailbox.localId"
+                        threadLocalId="mailbox.localId"
                     />
                 </t>
             </div>
@@ -40,7 +40,7 @@
                     <t t-foreach="quickSearchOrderedAndPinnedMultiUserChannels" t-as="channel" t-key="channel.localId">
                         <DiscussSidebarItem
                             class="o_DiscussSidebar_item"
-                            thread="channel.localId"
+                            threadLocalId="channel.localId"
                         />
                     </t>
                 </div>
@@ -69,7 +69,7 @@
                     <t t-foreach="quickSearchPinnedAndOrderedChats" t-as="chat" t-key="chat.localId">
                         <DiscussSidebarItem
                             class="o_DiscussSidebar_item"
-                            thread="chat.localId"
+                            threadLocalId="chat.localId"
                         />
                     </t>
                 </div>

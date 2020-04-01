@@ -30,7 +30,7 @@ QUnit.module('ThreadViewer', {
             ThreadViewerComponent.env = this.env;
             this.component = new ThreadViewerComponent(
                 null,
-                Object.assign({ threadViewer: threadViewer.localId }, otherProps)
+                Object.assign({ threadViewerLocalId: threadViewer.localId }, otherProps)
             );
             let target;
             if (isFixedSize) {

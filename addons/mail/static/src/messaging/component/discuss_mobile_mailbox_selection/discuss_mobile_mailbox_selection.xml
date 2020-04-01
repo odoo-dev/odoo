@@ -9,7 +9,7 @@
                         'btn-primary': discuss.thread === mailbox,
                         'btn-secondary': discuss.thread !== mailbox,
                         'o-active': discuss.thread === mailbox,
-                    }" t-on-click="_onClick" t-att-data-mailbox="mailbox.localId" type="button"
+                    }" t-on-click="_onClick" t-att-data-mailbox-local-id="mailbox.localId" type="button"
                 >
                     <t t-esc="mailbox.name"/>
                 </button>

@@ -14,7 +14,7 @@ class PartnerImStatusIcon extends Component {
         super(...args);
         useStore(props => {
             return {
-                partner: this.env.entities.Partner.get(props.partner),
+                partner: this.env.entities.Partner.get(props.partnerLocalId),
                 partnerRoot: this.env.entities.Partner.root,
             };
         });
@@ -28,14 +28,14 @@ class PartnerImStatusIcon extends Component {
      * @returns {mail.messaging.entity.Partner}
      */
     get partner() {
-        return this.env.entities.Partner.get(this.props.partner);
+        return this.env.entities.Partner.get(this.props.partnerLocalId);
     }
 
 }
 
 Object.assign(PartnerImStatusIcon, {
     props: {
-        partner: String,
+        partnerLocalId: String,
     },
     template: 'mail.messaging.component.PartnerImStatusIcon',
 });

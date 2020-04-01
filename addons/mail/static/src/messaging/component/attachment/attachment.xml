@@ -9,7 +9,7 @@
                 'o-has-card-details': detailsMode === 'card',
                 'o-temporary': attachment and attachment.isTemporary,
                 'o-viewable': attachment and attachment.isViewable,
-            }" t-att-title="attachment ? attachment.displayName : undefined" t-att-data-attachment="attachment ? attachment.localId : undefined"
+            }" t-att-title="attachment ? attachment.displayName : undefined" t-att-data-attachment-local-id="attachment ? attachment.localId : undefined"
         >
             <t t-if="attachment">
                 <!-- Image style-->

@@ -29,7 +29,7 @@ QUnit.module('ChatterTopbar', {
             };
             this.component = new ChatterTopBarComponent(
                 null,
-                Object.assign({ chatter: chatter.localId }, defaultProps, otherProps)
+                Object.assign({ chatterLocalId: chatter.localId }, defaultProps, otherProps)
             );
             await this.component.mount(this.widget.el);
         };

@@ -6,12 +6,12 @@
             <t t-if="chatter">
                 <ChatterTopbar
                     class="o_Chatter_topbar"
-                    chatter="chatter.localId"
+                    chatterLocalId="chatter.localId"
                 />
                 <t t-if="chatter.hasThread and chatter.thread and chatter.isComposerVisible">
                     <Composer
                         class="o_Chatter_composer"
-                        composer="chatter.thread.composer.localId"
+                        composerLocalId="chatter.thread.composer.localId"
                         hasTextInputSendOnEnterEnabled="false"
                         isCompact="false"
                         isExpandable="true"
@@ -23,14 +23,14 @@
                 <t t-if="chatter.isAttachmentBoxVisible">
                     <AttachmentBox
                         class="o_Chatter_attachmentBox"
-                        thread="chatter.thread.localId"
+                        threadLocalId="chatter.thread.localId"
                     />
                 </t>
                 <t t-if="chatter.thread">
                     <t t-if="chatter.hasActivities and chatter.activities.length > 0">
                         <ActivityBox
                             class="o_Chatter_activityBox"
-                            chatter="chatter.localId"
+                            chatterLocalId="chatter.localId"
                         />
                     </t>
                     <t t-if="chatter.hasThread">
@@ -39,7 +39,7 @@
                             hasComposer="false"
                             haveMessagesAuthorRedirect="true"
                             order="'desc'"
-                            threadViewer="chatter.threadViewer.localId"
+                            threadViewerLocalId="chatter.threadViewer.localId"
                             t-ref="thread"
                         />
                     </t>

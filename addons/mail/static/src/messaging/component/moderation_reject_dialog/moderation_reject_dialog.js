@@ -21,7 +21,7 @@ class ModerationRejectDialog extends Component {
         });
         useStore(props => {
             return {
-                messages: props.messages.map(localId => this.env.entities.Message.get(localId)),
+                messages: props.messageLocalIds.map(localId => this.env.entities.Message.get(localId)),
             };
         }, {
             compareDepth: {
@@ -40,7 +40,7 @@ class ModerationRejectDialog extends Component {
      * @returns {mail.messaging.entity.Message[]}
      */
     get messages() {
-        return this.props.messages.map(localId => this.env.entities.Message.get(localId));
+        return this.props.messageLocalIds.map(localId => this.env.entities.Message.get(localId));
     }
 
     //--------------------------------------------------------------------------
@@ -71,7 +71,7 @@ class ModerationRejectDialog extends Component {
 Object.assign(ModerationRejectDialog, {
     components: { Dialog },
     props: {
-        messages: {
+        messageLocalIds: {
             type: Array,
             element: String,
         },

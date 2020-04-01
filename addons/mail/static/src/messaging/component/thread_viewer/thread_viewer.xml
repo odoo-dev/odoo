@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.messaging.component.ThreadViewer" owl="1">
-        <div class="o_ThreadViewer" t-att-data-thread="threadViewer and threadViewer.thread and threadViewer.thread.localId">
+        <div class="o_ThreadViewer" t-att-data-thread-local-id="threadViewer and threadViewer.thread and threadViewer.thread.localId">
             <t t-if="threadViewer">
                 <t t-if="!threadViewer.threadCache.isLoaded or threadViewer.threadCache.isLoading" name="loadingCondition">
                     <div class="o_ThreadViewer_loading">
@@ -18,8 +18,8 @@
                         haveMessagesMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
                         haveMessagesReplyIcon="props.haveMessagesReplyIcon"
                         order="props.order"
-                        selectedMessage="props.selectedMessage"
-                        threadViewer="threadViewer.localId"
+                        selectedMessageLocalId="props.selectedMessageLocalId"
+                        threadViewerLocalId="threadViewer.localId"
                         t-ref="messageList"
                     />
                 </t>
@@ -27,7 +27,7 @@
                     <Composer
                         class="o_ThreadViewer_composer"
                         attachmentsDetailsMode="props.composerAttachmentsDetailsMode"
-                        composer="threadViewer.thread.composer.localId"
+                        composerLocalId="threadViewer.thread.composer.localId"
                         hasCurrentPartnerAvatar="props.hasComposerCurrentPartnerAvatar"
                         hasSendButton="props.hasComposerSendButton"
                         isFocusOnMount="!env.entities.Device.instance.isMobile"

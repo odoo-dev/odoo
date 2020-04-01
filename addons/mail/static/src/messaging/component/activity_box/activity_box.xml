@@ -34,7 +34,7 @@
                 <t t-if="chatter.isActivityBoxVisible">
                     <div class="o_ActivityList">
                         <t t-foreach="chatter.activities" t-as="activity" t-key="activity.localId">
-                            <Activity class="o_ActivityBox_activity" activity="activity.localId"/>
+                            <Activity class="o_ActivityBox_activity" activityLocalId="activity.localId"/>
                         </t>
                     </div>
                 </t>

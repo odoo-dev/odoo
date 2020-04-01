@@ -21,7 +21,7 @@ class Chatter extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const chatter = this.env.entities.Chatter.get(props.chatter);
+            const chatter = this.env.entities.Chatter.get(props.chatterLocalId);
             const thread = chatter ? chatter.thread : undefined;
             let attachments = [];
             if (thread) {
@@ -56,7 +56,7 @@ class Chatter extends Component {
      * @returns {mail.messaging.entity.Chatter}
      */
     get chatter() {
-        return this.env.entities.Chatter.get(this.props.chatter);
+        return this.env.entities.Chatter.get(this.props.chatterLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -89,7 +89,7 @@ class Chatter extends Component {
 Object.assign(Chatter, {
     components,
     props: {
-        chatter: String,
+        chatterLocalId: String,
     },
     template: 'mail.messaging.component.Chatter',
 });

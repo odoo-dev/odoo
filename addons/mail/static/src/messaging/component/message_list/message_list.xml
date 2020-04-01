@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.messaging.component.MessageList" owl="1">
-        <div class="o_MessageList" t-att-class="{ 'o-empty': threadViewer and threadViewer.messages.length === 0, 'o-has-message-selection': props.selectedMessage }" t-on-scroll="_onScroll">
+        <div class="o_MessageList" t-att-class="{ 'o-empty': threadViewer and threadViewer.messages.length === 0, 'o-has-message-selection': props.selectedMessageLocalId }" t-on-scroll="_onScroll">
             <t t-if="threadViewer">
                 <!-- No result messages -->
                 <t t-if="threadViewer.messages.length === 0">
@@ -63,16 +63,16 @@
                     <Message
                         class="o_MessageList_item o_MessageList_message"
                         t-att-class="{
-                            'o-has-message-selection': props.selectedMessage,
+                            'o-has-message-selection': props.selectedMessageLocalId,
                         }"
                         hasAuthorRedirect="props.haveMessagesAuthorRedirect"
                         hasMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
                         hasCheckbox="props.hasMessageCheckbox"
                         hasReplyIcon="props.haveMessagesReplyIcon"
-                        isSelected="props.selectedMessage === message.localId"
+                        isSelected="props.selectedMessageLocalId === message.localId"
                         isSquashed="isMessageSquashed"
-                        message="message.localId"
-                        threadViewer="threadViewer.localId"
+                        messageLocalId="message.localId"
+                        threadViewerLocalId="threadViewer.localId"
                         t-ref="{{ message.localId }}"
                     />
                     <t t-set="prev_message" t-value="message"/>

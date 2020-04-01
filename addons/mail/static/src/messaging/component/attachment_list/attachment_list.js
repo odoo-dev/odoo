@@ -23,7 +23,7 @@ Object.assign(AttachmentList, {
             type: Boolean,
             optional: true,
         },
-        attachments: {
+        attachmentLocalIds: {
             type: Array,
             element: String,
         },

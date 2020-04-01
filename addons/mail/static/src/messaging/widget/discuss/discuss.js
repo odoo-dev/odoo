@@ -301,7 +301,7 @@ const DiscussWidget = AbstractAction.extend({
      */
     _onClickInvite() {
         new InvitePartnerDialog(this, {
-            activeThread: this.discuss.thread,
+            activeThreadLocalId: this.discuss.threadLocalId,
             messagingEnv: this.env,
         }).open();
     },

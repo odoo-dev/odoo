@@ -13,7 +13,7 @@ class ChatterTopbar extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const chatter = this.env.entities.Chatter.get(props.chatter);
+            const chatter = this.env.entities.Chatter.get(props.chatterLocalId);
             const thread = chatter ? chatter.thread : undefined;
             const threadAttachments = thread ? thread.allAttachments : [];
             return {
@@ -32,7 +32,7 @@ class ChatterTopbar extends Component {
      * @returns {mail.messaging.entity.Chatter}
      */
     get chatter() {
-        return this.env.entities.Chatter.get(this.props.chatter);
+        return this.env.entities.Chatter.get(this.props.chatterLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -120,7 +120,7 @@ class ChatterTopbar extends Component {
 
 Object.assign(ChatterTopbar, {
     props: {
-        chatter: String,
+        chatterLocalId: String,
     },
     template: 'mail.messaging.component.ChatterTopbar',
 });

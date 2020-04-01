@@ -16,7 +16,7 @@ class ChatWindowHeader extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const chatWindow = this.env.entities.ChatWindow.get(props.chatWindow);
+            const chatWindow = this.env.entities.ChatWindow.get(props.chatWindowLocalId);
             return {
                 chatWindow,
                 chatWindowName: chatWindow && chatWindow.name,
@@ -33,7 +33,7 @@ class ChatWindowHeader extends Component {
      * @returns {mail.messaging.entity.ChatWindow}
      */
     get chatWindow() {
-        return this.env.entities.ChatWindow.get(this.props.chatWindow);
+        return this.env.entities.ChatWindow.get(this.props.chatWindowLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -94,7 +94,7 @@ Object.assign(ChatWindowHeader, {
         isExpandable: false,
     },
     props: {
-        chatWindow: String,
+        chatWindowLocalId: String,
         hasCloseAsBackButton: Boolean,
         isExpandable: Boolean,
     },

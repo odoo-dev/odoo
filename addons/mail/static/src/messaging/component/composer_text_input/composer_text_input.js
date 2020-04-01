@@ -18,7 +18,7 @@ class ComposerTextInput extends Component {
         super(...args);
         useStore(props => {
             return {
-                composer: this.env.entities.Composer.get(props.composer),
+                composer: this.env.entities.Composer.get(props.composerLocalId),
                 isDeviceMobile: this.env.entities.Device.instance.isMobile,
             };
         });
@@ -52,7 +52,7 @@ class ComposerTextInput extends Component {
      * @returns {mail.messaging.entity.Composer}
      */
     get composer() {
-        return this.env.entities.Composer.get(this.props.composer);
+        return this.env.entities.Composer.get(this.props.composerLocalId);
     }
 
     focus() {
@@ -210,7 +210,7 @@ Object.assign(ComposerTextInput, {
     },
     props: {
         hasSendOnEnterEnabled: Boolean,
-        composer: String,
+        composerLocalId: String,
     },
     template: 'mail.messaging.component.ComposerTextInput',
 });

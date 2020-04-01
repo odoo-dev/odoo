@@ -13,10 +13,10 @@ class MessageAuthorPrefix extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const message = this.env.entities.Message.get(props.message);
+            const message = this.env.entities.Message.get(props.messageLocalId);
             const author = message ? message.author : undefined;
-            const thread = props.thread
-                ? this.env.entities.Thread.get(props.thread)
+            const thread = props.threadLocalId
+                ? this.env.entities.Thread.get(props.threadLocalId)
                 : undefined;
             return {
                 author,
@@ -36,22 +36,22 @@ class MessageAuthorPrefix extends Component {
      * @returns {mail.messaging.entity.Message}
      */
     get message() {
-        return this.env.entities.Message.get(this.props.message);
+        return this.env.entities.Message.get(this.props.messageLocalId);
     }
 
     /**
      * @returns {mail.messaging.entity.Thread|undefined}
      */
     get thread() {
-        return this.env.entities.Thread.get(this.props.thread);
+        return this.env.entities.Thread.get(this.props.threadLocalId);
     }
 
 }
 
 Object.assign(MessageAuthorPrefix, {
     props: {
-        message: String,
-        thread: {
+        messageLocalId: String,
+        threadLocalId: {
             type: String,
             optional: true,
         },

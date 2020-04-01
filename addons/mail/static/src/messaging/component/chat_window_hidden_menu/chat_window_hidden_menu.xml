@@ -14,7 +14,7 @@
                     <li class="o_ChatWindowHiddenMenu_listItem" role="menuitem">
                         <ChatWindowHeader
                             class="o_ChatWindowHiddenMenu_chatWindowHeader"
-                            chatWindow="chatWindow.localId"
+                            chatWindowLocalId="chatWindow.localId"
                             t-on-o-clicked="_onClickedChatWindow"
                         />
                     </li>

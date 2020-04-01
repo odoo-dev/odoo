@@ -3,11 +3,11 @@
 
     <t t-name="mail.messaging.component.AttachmentList" owl="1">
         <div class="o_AttachmentList">
-            <t t-foreach="props.attachments" t-as="attachment" t-key="attachment">
+            <t t-foreach="props.attachmentLocalIds" t-as="attachmentLocalId" t-key="attachmentLocalId">
                 <Attachment
                     class="o_AttachmentList_attachment"
-                    attachment="attachment"
-                    attachments="props.attachments"
+                    attachmentLocalId="attachmentLocalId"
+                    attachmentLocalIds="props.attachmentLocalIds"
                     detailsMode="props.attachmentsDetailsMode"
                     imageSize="props.attachmentsImageSize"
                     isDownloadable="props.areAttachmentsDownloadable"

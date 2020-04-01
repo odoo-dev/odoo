@@ -13,7 +13,7 @@ class ThreadIcon extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const thread = this.env.entities.Thread.get(props.thread);
+            const thread = this.env.entities.Thread.get(props.threadLocalId);
             const directPartner = thread ? thread.directPartner : undefined;
             return {
                 directPartner,
@@ -31,14 +31,14 @@ class ThreadIcon extends Component {
      * @returns {mail.messaging.entity.Thread}
      */
     get thread() {
-        return this.env.entities.Thread.get(this.props.thread);
+        return this.env.entities.Thread.get(this.props.threadLocalId);
     }
 
 }
 
 Object.assign(ThreadIcon, {
     props: {
-        thread: String,
+        threadLocalId: String,
     },
     template: 'mail.messaging.component.ThreadIcon',
 });

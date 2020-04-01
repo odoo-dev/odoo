@@ -14,7 +14,7 @@
                         <ThreadPreview
                             class="o_NotificationList_preview"
                             t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }"
-                            thread="notification.thread.localId"
+                            threadLocalId="notification.thread.localId"
                         />
                     </t>
                     <t name="separatorCondition" t-if="!notification_last">

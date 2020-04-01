@@ -12,7 +12,7 @@
                 <t t-if="chatWindow.thread">
                     <ThreadIcon
                         class="o_ChatWindowHeader_icon o_ChatWindowHeader_item"
-                        thread="chatWindow.thread.localId"
+                        threadLocalId="chatWindow.thread.localId"
                     />
                 </t>
                 <div class="o_ChatWindowHeader_item o_ChatWindowHeader_name" t-att-title="chatWindow.name">

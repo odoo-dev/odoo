@@ -21,7 +21,7 @@ class AttachmentBox extends Component {
         super(...args);
         this.isDropZoneVisible = useDragVisibleDropZone();
         useStore(props => {
-            const thread = this.env.entities.Thread.get(props.thread);
+            const thread = this.env.entities.Thread.get(props.threadLocalId);
             return {
                 attachments: thread ? thread.allAttachments : [],
                 thread,
@@ -55,7 +55,7 @@ class AttachmentBox extends Component {
      * @returns {mail.messaging.entity.Thread|undefined}
      */
     get thread() {
-        return this.env.entities.Thread.get(this.props.thread);
+        return this.env.entities.Thread.get(this.props.threadLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -89,7 +89,7 @@ class AttachmentBox extends Component {
 Object.assign(AttachmentBox, {
     components,
     props: {
-        thread: String,
+        threadLocalId: String,
     },
     template: 'mail.messaging.component.AttachmentBox',
 });

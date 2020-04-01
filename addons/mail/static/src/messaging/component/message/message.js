@@ -45,11 +45,11 @@ class Message extends Component {
             timeElapsed: null,
         });
         useStore(props => {
-            const message = this.env.entities.Message.get(props.message);
+            const message = this.env.entities.Message.get(props.messageLocalId);
             const author = message ? message.author : undefined;
             const partnerRoot = this.env.entities.Partner.root;
             const originThread = message ? message.originThread : undefined;
-            const threadViewer = this.env.entities.ThreadViewer.get(props.threadViewer);
+            const threadViewer = this.env.entities.ThreadViewer.get(props.threadViewerLocalId);
             const thread = threadViewer ? threadViewer.thread : undefined;
             const threadStringifiedDomain = threadViewer
                 ? threadViewer.stringifiedDomain
@@ -229,7 +229,7 @@ class Message extends Component {
      * @returns {mail.messaging.entity.Message}
      */
     get message() {
-        return this.env.entities.Message.get(this.props.message);
+        return this.env.entities.Message.get(this.props.messageLocalId);
     }
 
     /**
@@ -274,7 +274,7 @@ class Message extends Component {
      * @returns {mail.messaging.entity.ThreadViewer}
      */
     get threadViewer() {
-        return this.env.entities.ThreadViewer.get(this.props.threadViewer);
+        return this.env.entities.ThreadViewer.get(this.props.threadViewerLocalId);
     }
 
     /**
@@ -575,8 +575,9 @@ Object.assign(Message, {
     },
     props: {
         attachmentsDetailsMode: {
-            type: String, //['auto', 'card', 'hover', 'none']
-            optional: true
+            type: String,
+            optional: true,
+            validate: prop => ['auto', 'card', 'hover', 'none'].includes(prop),
         },
         hasAuthorRedirect: Boolean,
         hasCheckbox: Boolean,
@@ -584,8 +585,8 @@ Object.assign(Message, {
         hasReplyIcon: Boolean,
         isSelected: Boolean,
         isSquashed: Boolean,
-        message: String,
-        threadViewer: {
+        messageLocalId: String,
+        threadViewerLocalId: {
             type: String,
             optional: true,
         },

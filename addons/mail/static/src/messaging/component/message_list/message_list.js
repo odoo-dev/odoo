@@ -18,7 +18,7 @@ class MessageList extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const threadViewer = this.env.entities.ThreadViewer.get(props.threadViewer);
+            const threadViewer = this.env.entities.ThreadViewer.get(props.threadViewerLocalId);
             const thread = threadViewer ? threadViewer.thread : undefined;
             const threadCache = threadViewer ? threadViewer.threadCache : undefined;
             return {
@@ -302,7 +302,7 @@ class MessageList extends Component {
      * @returns {mail.messaging.entity.ThreadViewer}
      */
     get threadViewer() {
-        return this.env.entities.ThreadViewer.get(this.props.threadViewer);
+        return this.env.entities.ThreadViewer.get(this.props.threadViewerLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -517,11 +517,11 @@ Object.assign(MessageList, {
             type: String,
             validate: prop => ['asc', 'desc'].includes(prop),
         },
-        selectedMessage: {
+        selectedMessageLocalId: {
             type: String,
             optional: true,
         },
-        threadViewer: String,
+        threadViewerLocalId: String,
     },
     template: 'mail.messaging.component.MessageList',
 });

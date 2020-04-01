@@ -14,7 +14,7 @@
                         <t t-foreach="livechats" t-as="livechat" t-key="livechat.localId">
                             <DiscussSidebarItem
                                 class="o_DiscussSidebar_item"
-                                thread="livechat.localId"
+                                threadLocalId="livechat.localId"
                             />
                         </t>
                     </div>

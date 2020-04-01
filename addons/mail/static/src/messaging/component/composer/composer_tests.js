@@ -30,7 +30,7 @@ QUnit.module('Composer', {
             const ComposerComponent = components.Composer;
             ComposerComponent.env = this.env;
             this.component = new ComposerComponent(null, Object.assign({
-                composer: composer.localId,
+                composerLocalId: composer.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
             await afterNextRender();

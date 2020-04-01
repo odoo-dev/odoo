@@ -17,7 +17,7 @@ class ModerationBanDialog extends Component {
         super(...args);
         useStore(props => {
             return {
-                messages: props.messages.map(localId => this.env.entities.Message.get(localId)),
+                messages: props.messageLocalIds.map(localId => this.env.entities.Message.get(localId)),
             };
         }, {
             compareDepth: {
@@ -36,7 +36,7 @@ class ModerationBanDialog extends Component {
      * @returns {mail.messaging.entity.Message[]}
      */
     get messages() {
-        return this.props.messages.map(localId => this.env.entities.Message.get(localId));
+        return this.props.messageLocalIds.map(localId => this.env.entities.Message.get(localId));
     }
 
     //--------------------------------------------------------------------------
@@ -63,7 +63,7 @@ class ModerationBanDialog extends Component {
 Object.assign(ModerationBanDialog, {
     components: { Dialog },
     props: {
-        messages: {
+        messageLocalIds: {
             type: Array,
             element: String,
         },

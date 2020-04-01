@@ -240,7 +240,7 @@ QUnit.test('chat window: basic rendering', async function (assert) {
     );
     const chatWindow = document.querySelector(`.o_ChatWindow`);
     assert.strictEqual(
-        chatWindow.dataset.thread,
+        chatWindow.dataset.threadLocalId,
         this.env.entities.Thread.channelFromId(20).localId,
         "should have open a chat window of channel"
     );
@@ -730,7 +730,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_NotificationList_preview[data-thread="${
+        .o_NotificationList_preview[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(10).localId
         }"]
     `).click();
@@ -742,7 +742,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
         `).length,
@@ -751,7 +751,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     );
     assert.ok(
         document.querySelector(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
         `).classList.contains('o-focused'),
@@ -762,7 +762,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_NotificationList_preview[data-thread="${
+        .o_NotificationList_preview[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `).click();
@@ -774,7 +774,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(20).localId
             }"]
         `).length,
@@ -783,7 +783,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
         `).length,
@@ -792,7 +792,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     );
     assert.ok(
         document.querySelector(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(20).localId
             }"]
         `).classList.contains('o-focused'),
@@ -800,7 +800,7 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     );
     assert.notOk(
         document.querySelector(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
         `).classList.contains('o-focused'),
@@ -866,7 +866,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_NotificationList_preview[data-thread="${
+        .o_NotificationList_preview[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(1).localId
         }"]
     `).click();
@@ -891,7 +891,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_NotificationList_preview[data-thread="${
+        .o_NotificationList_preview[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(2).localId
         }"]
     `).click();
@@ -916,7 +916,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     await afterNextRender();
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
-        .o_NotificationList_preview[data-thread="${
+        .o_NotificationList_preview[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(3).localId
         }"]
     `).click();
@@ -938,7 +938,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(1).localId
             }"]
         `).length,
@@ -947,7 +947,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(3).localId
             }"]
         `).length,
@@ -956,7 +956,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     );
     assert.ok(
         document.querySelector(`
-            .o_ChatWindow[data-thread="${
+            .o_ChatWindow[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(3).localId
             }"]
         `).classList.contains('o-focused'),

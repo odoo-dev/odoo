@@ -14,8 +14,8 @@ class MailTemplate extends Component {
         super(...args);
         useStore(props => {
             return {
-                activity: this.env.entities.Activity.get(props.activity),
-                mailTemplate: this.env.entities.MailTemplate.get(props.mailTemplate),
+                activity: this.env.entities.Activity.get(props.activityLocalId),
+                mailTemplate: this.env.entities.MailTemplate.get(props.mailTemplateLocalId),
             };
         });
     }
@@ -28,14 +28,14 @@ class MailTemplate extends Component {
      * @returns {mail.messaging.entity.Activity}
      */
     get activity() {
-        return this.env.entities.Activity.get(this.props.activity);
+        return this.env.entities.Activity.get(this.props.activityLocalId);
     }
 
     /**
      * @returns {mail.messaging.entity.MailTemplate}
      */
     get mailTemplate() {
-        return this.env.entities.MailTemplate.get(this.props.mailTemplate);
+        return this.env.entities.MailTemplate.get(this.props.mailTemplateLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -66,8 +66,8 @@ class MailTemplate extends Component {
 
 Object.assign(MailTemplate, {
     props: {
-        activity: String,
-        mailTemplate: String,
+        activityLocalId: String,
+        mailTemplateLocalId: String,
     },
     template: 'mail.messaging.component.MailTemplate',
 });

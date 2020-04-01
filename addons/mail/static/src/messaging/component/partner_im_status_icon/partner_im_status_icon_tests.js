@@ -21,7 +21,7 @@ QUnit.module('PartnerImStatusIcon', {
         this.createPartnerImStatusIcon = async partner => {
             const PartnerImStatusIconComponent = components.PartnerImStatusIcon;
             PartnerImStatusIconComponent.env = this.env;
-            this.component = new PartnerImStatusIconComponent(null, { partner: partner.localId });
+            this.component = new PartnerImStatusIconComponent(null, { partnerLocalId: partner.localId });
             await this.component.mount(this.widget.el);
         };
         this.start = async params => {
@@ -61,7 +61,7 @@ QUnit.test('initially online', async function (assert) {
         "should have partner IM status icon"
     );
     assert.strictEqual(
-        document.querySelector(`.o_PartnerImStatusIcon`).dataset.partner,
+        document.querySelector(`.o_PartnerImStatusIcon`).dataset.partnerLocalId,
         partner.localId,
         "partner IM status icon should be linked to partner with ID 7"
     );

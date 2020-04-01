@@ -23,7 +23,7 @@ QUnit.module('Chatter', {
             ChatterComponent.env = this.env;
             this.component = new ChatterComponent(
                 null,
-                Object.assign({ chatter: chatter.localId }, otherProps)
+                Object.assign({ chatterLocalId: chatter.localId }, otherProps)
             );
             await this.component.mount(this.widget.el);
             await afterNextRender();
@@ -96,7 +96,7 @@ QUnit.test('base rendering when chatter has no attachment', async function (asse
         "should have a thread in the chatter"
     );
     assert.strictEqual(
-        document.querySelector(`.o_Chatter_thread`).dataset.thread,
+        document.querySelector(`.o_Chatter_thread`).dataset.threadLocalId,
         this.env.entities.Thread.fromModelAndId({
             id: 100,
             model: 'res.partner',

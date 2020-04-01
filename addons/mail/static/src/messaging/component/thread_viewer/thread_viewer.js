@@ -77,7 +77,7 @@ class ThreadViewer extends Component {
      * @returns {mail.messaging.entity.ThreadViewer}
      */
     get threadViewer() {
-        return this.env.entities.ThreadViewer.get(this.props.threadViewer);
+        return this.env.entities.ThreadViewer.get(this.props.threadViewerLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -112,7 +112,7 @@ class ThreadViewer extends Component {
      * @returns {Object}
      */
     _useStoreSelector(props) {
-        const threadViewer = this.env.entities.ThreadViewer.get(props.threadViewer);
+        const threadViewer = this.env.entities.ThreadViewer.get(props.threadViewerLocalId);
         const thread = threadViewer ? threadViewer.thread : undefined;
         const threadCache = threadViewer ? threadViewer.threadCache : undefined;
         return {
@@ -174,13 +174,13 @@ Object.assign(ThreadViewer, {
             type: String,
             validate: prop => ['asc', 'desc'].includes(prop),
         },
-        selectedMessage: {
+        selectedMessageLocalId: {
             type: String,
             optional: true,
         },
         showComposerAttachmentsExtensions: Boolean,
         showComposerAttachmentsFilenames: Boolean,
-        threadViewer: String,
+        threadViewerLocalId: String,
     },
     template: 'mail.messaging.component.ThreadViewer',
 });

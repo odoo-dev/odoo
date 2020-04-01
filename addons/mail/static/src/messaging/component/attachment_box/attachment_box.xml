@@ -22,7 +22,7 @@
                     <AttachmentList
                         class="o_attachmentBox_attachmentList"
                         areAttachmentsDownloadable="true"
-                        attachments="thread.allAttachments.map(attachment => attachment.localId)"
+                        attachmentLocalIds="thread.allAttachments.map(attachment => attachment.localId)"
                         attachmentsDetailsMode="'hover'"
                         attachmentsImageSize="'small'"
                         showAttachmentsFilenames="true"
@@ -35,7 +35,7 @@
             </div>
             <t t-if="thread">
                 <FileUploader
-                    attachments="thread.allAttachments.map(attachment => attachment.localId)"
+                    attachmentLocalIds="thread.allAttachments.map(attachment => attachment.localId)"
                     newAttachmentExtraData="newAttachmentExtraData"
                     uploadModel="thread.model"
                     uploadId="thread.id"

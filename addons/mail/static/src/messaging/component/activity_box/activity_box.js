@@ -16,7 +16,7 @@ class ActivityBox extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const chatter = this.env.entities.Chatter.get(props.chatter);
+            const chatter = this.env.entities.Chatter.get(props.chatterLocalId);
             return {
                 chatter,
                 futureActivitiesCount: chatter ? chatter.futureActivities.length : 0,
@@ -34,7 +34,7 @@ class ActivityBox extends Component {
      * @returns {mail.messaging.entity.Chatter}
      */
     get chatter() {
-        return this.env.entities.Chatter.get(this.props.chatter);
+        return this.env.entities.Chatter.get(this.props.chatterLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -53,7 +53,7 @@ class ActivityBox extends Component {
 Object.assign(ActivityBox, {
     components,
     props: {
-        chatter: String,
+        chatterLocalId: String,
     },
     template: 'mail.messaging.component.ActivityBox',
 });

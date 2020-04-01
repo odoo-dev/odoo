@@ -14,7 +14,7 @@ class Attachment extends Component {
         super(...args);
         useStore(props => {
             return {
-                attachment: this.env.entities.Attachment.get(props.attachment),
+                attachment: this.env.entities.Attachment.get(props.attachmentLocalId),
             };
         });
     }
@@ -27,7 +27,7 @@ class Attachment extends Component {
      * @returns {mail.messaging.entity.Attachment}
      */
     get attachment() {
-        return this.env.entities.Attachment.get(this.props.attachment);
+        return this.env.entities.Attachment.get(this.props.attachmentLocalId);
     }
 
     /**
@@ -106,8 +106,8 @@ class Attachment extends Component {
         }
         this.env.entities.Attachment.view({
             attachment: this.attachment,
-            attachments: this.props.attachments.map(
-                attachment => this.env.entities.Attachment.get(attachment)
+            attachments: this.props.attachmentLocalIds.map(
+                attachmentLocalId => this.env.entities.Attachment.get(attachmentLocalId)
             ),
         });
     }
@@ -125,7 +125,7 @@ class Attachment extends Component {
 
 Object.assign(Attachment, {
     defaultProps: {
-        attachments: [],
+        attachmentLocalIds: [],
         detailsMode: 'auto',
         imageSize: 'medium',
         isDownloadable: false,
@@ -134,8 +134,8 @@ Object.assign(Attachment, {
         showFilename: true,
     },
     props: {
-        attachment: String,
-        attachments: {
+        attachmentLocalId: String,
+        attachmentLocalIds: {
             type: Array,
             element: String,
         },

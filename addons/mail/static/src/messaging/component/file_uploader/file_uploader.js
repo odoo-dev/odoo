@@ -115,8 +115,8 @@ class FileUploader extends Component {
      */
     async _unlinkExistingAttachments(files) {
         for (const file of files) {
-            const attachment = this.props.attachments
-                .map(attachment => this.env.entities.Attachment.get(attachment))
+            const attachment = this.props.attachmentLocalIds
+                .map(attachmentLocalId => this.env.entities.Attachment.get(attachmentLocalId))
                 .find(attachment => attachment.name === file.name && attachment.size === file.size);
             // if the files already exits, delete the file before upload
             if (attachment) {
@@ -180,7 +180,7 @@ Object.assign(FileUploader, {
         uploadModel: 'mail.compose.message'
     },
     props: {
-        attachments: {
+        attachmentLocalIds: {
             type: Array,
             element: String,
         },

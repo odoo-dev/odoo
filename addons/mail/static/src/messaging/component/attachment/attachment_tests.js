@@ -21,7 +21,7 @@ QUnit.module('Attachment', {
             const AttachmentComponent = components.Attachment;
             AttachmentComponent.env = this.env;
             this.component = new AttachmentComponent(null, Object.assign({
-                attachment: attachment.localId,
+                attachmentLocalId: attachment.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
         };
@@ -73,7 +73,7 @@ QUnit.test('simplest layout', async function (assert) {
     );
     const attachmentEl = document.querySelector('.o_Attachment');
     assert.strictEqual(
-        attachmentEl.dataset.attachment,
+        attachmentEl.dataset.attachmentLocalId,
         this.env.entities.Attachment.fromId(750).localId,
         "attachment component should be linked to attachment store model"
     );

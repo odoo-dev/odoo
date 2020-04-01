@@ -8,7 +8,7 @@
                 'o-has-footer': hasFooter,
                 'o-has-header': hasHeader,
                 'o-is-compact': props.isCompact,
-            }" t-att-data-composer="composer ? composer.localId : undefined"
+            }" t-att-data-composer-local-id="composer ? composer.localId : undefined"
         >
             <t t-if="composer">
                 <t t-if="isDropZoneVisible.value">
@@ -19,7 +19,7 @@
                     />
                 </t>
                 <FileUploader
-                    attachments="composer.attachments.map(attachment => attachment.localId)"
+                    attachmentLocalIds="composer.attachments.map(attachment => attachment.localId)"
                     newAttachmentExtraData="newAttachmentExtraData"
                     t-ref="fileUploader"
                 />
@@ -59,7 +59,7 @@
                             'o-composer-is-compact': props.isCompact,
                             'o_Composer_textInput-mobile': env.entities.Device.instance.isMobile,
                         }"
-                        composer="props.composer"
+                        composerLocalId="composer.localId"
                         hasSendOnEnterEnabled="props.hasTextInputSendOnEnterEnabled"
                         t-on-o-input-composer-text-input="_onInputTextInput"
                         t-on-o-keydown-enter="_onTextInputKeydownEnter"
@@ -107,7 +107,7 @@
                                 class="o_Composer_attachmentList"
                                 areAttachmentsEditable="true"
                                 attachmentsDetailsMode="props.attachmentsDetailsMode"
-                                attachments="composer.attachments.map(attachment => attachment.localId)"
+                                attachmentLocalIds="composer.attachments.map(attachment => attachment.localId)"
                                 showAttachmentsExtensions="props.showAttachmentsExtensions"
                                 showAttachmentsFilenames="props.showAttachmentsFilenames"
                             />

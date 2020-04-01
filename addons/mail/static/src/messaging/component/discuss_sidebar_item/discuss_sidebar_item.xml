@@ -7,11 +7,11 @@
                 'o-active': thread and discuss.thread === thread,
                 'o-starred-box': thread and thread.model === 'mail.box' and thread.id === 'starred',
                 'o-unread': thread and thread.message_unread_counter > 0,
-            }" t-on-click="_onClick" t-att-data-thread="thread ? thread.localId : undefined" t-att-data-thread-name="thread ? thread.displayName : undefined"
+            }" t-on-click="_onClick" t-att-data-thread-local-id="thread ? thread.localId : undefined" t-att-data-thread-name="thread ? thread.displayName : undefined"
         >
             <t t-if="thread">
                 <div class=" o_DiscussSidebarItem_activeIndicator o_DiscussSidebarItem_item" t-att-class="{ 'o-item-active': discuss.thread === thread }"/>
-                <ThreadIcon class="o_DiscussSidebarItem_item" thread="thread.localId"/>
+                <ThreadIcon class="o_DiscussSidebarItem_item" threadLocalId="thread.localId"/>
                 <t t-if="thread.channel_type === 'chat' and discuss.renamingThreads.includes(thread)">
                     <div class="o_DiscussSidebarItem_item o_DiscussSidebarItem_name o-editable">
                         <EditableText

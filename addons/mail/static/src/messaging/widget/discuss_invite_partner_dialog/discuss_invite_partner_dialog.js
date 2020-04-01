@@ -21,13 +21,13 @@ const PartnerInviteDialog = Dialog.extend({
      * @override {web.Dialog}
      * @param {mail.messaging.widget.Discuss} parent
      * @param {Object} param1
-     * @param {string} param1.activeThread
+     * @param {string} param1.activeThreadLocalId
      * @param {Object} param1.messagingEnv
      * @param {Object} param1.messagingEnv.store
      */
-    init(parent, { activeThread, messagingEnv }) {
+    init(parent, { activeThreadLocalId, messagingEnv }) {
         const env = messagingEnv;
-        const channel = env.entities.Thread.get(activeThread);
+        const channel = env.entities.Thread.get(activeThreadLocalId);
         this.channelId = channel.id;
         this.env = env;
         this._super(parent, {

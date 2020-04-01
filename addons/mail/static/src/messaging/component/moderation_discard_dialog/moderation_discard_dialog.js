@@ -17,7 +17,7 @@ class ModerationDiscardDialog extends Component {
         super(...args);
         useStore(props => {
             return {
-                messages: props.messages.map(localId => this.env.entities.Message.get(localId)),
+                messages: props.messageLocalIds.map(localId => this.env.entities.Message.get(localId)),
             };
         }, {
             compareDepth: {
@@ -49,7 +49,7 @@ class ModerationDiscardDialog extends Component {
      * @returns {mail.messaging.entity.Message[]}
      */
     get messages() {
-        return this.props.messages.map(localId => this.env.entities.Message.get(localId));
+        return this.props.messageLocalIds.map(localId => this.env.entities.Message.get(localId));
     }
 
     //--------------------------------------------------------------------------
@@ -76,7 +76,7 @@ class ModerationDiscardDialog extends Component {
 Object.assign(ModerationDiscardDialog, {
     components: { Dialog },
     props: {
-        messages: {
+        messageLocalIds: {
             type: Array,
             element: String,
         },

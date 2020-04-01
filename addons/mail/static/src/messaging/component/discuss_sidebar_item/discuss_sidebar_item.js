@@ -19,7 +19,7 @@ class DiscussSidebarItem extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const thread = this.env.entities.Thread.get(props.thread);
+            const thread = this.env.entities.Thread.get(props.threadLocalId);
             const directPartner = thread ? thread.directPartner : undefined;
             return {
                 directPartner,
@@ -68,7 +68,7 @@ class DiscussSidebarItem extends Component {
      * @returns {mail.messaging.entity.Thread}
      */
     get thread() {
-        return this.env.entities.Thread.get(this.props.thread);
+        return this.env.entities.Thread.get(this.props.threadLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -192,7 +192,7 @@ class DiscussSidebarItem extends Component {
 Object.assign(DiscussSidebarItem, {
     components,
     props: {
-        thread: String,
+        threadLocalId: String,
     },
     template: 'mail.messaging.component.DiscussSidebarItem',
 });

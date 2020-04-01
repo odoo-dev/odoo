@@ -26,7 +26,7 @@ QUnit.module('AttachmentBox', {
             const AttachmentBoxComponent = components.AttachmentBox;
             AttachmentBoxComponent.env = this.env;
             this.component = new AttachmentBoxComponent(null, Object.assign({
-                thread: thread.localId,
+                threadLocalId: thread.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
         };

@@ -27,7 +27,7 @@ QUnit.module('FileUploader', {
             FileUploaderComponent.env = this.env;
             const fileUploader = new FileUploaderComponent(
                 null,
-                Object.assign({ attachments: [] }, props)
+                Object.assign({ attachmentLocalIds: [] }, props)
             );
             await fileUploader.mount(this.widget.el);
             this.components.push(fileUploader);

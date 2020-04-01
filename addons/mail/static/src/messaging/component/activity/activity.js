@@ -29,7 +29,7 @@ class Activity extends Component {
         });
         useStore(props => {
             return {
-                activity: this.env.entities.Activity.get(props.activity),
+                activity: this.env.entities.Activity.get(props.activityLocalId),
             };
         });
         /**
@@ -47,7 +47,7 @@ class Activity extends Component {
      * @returns {mail.messaging.entity.Activity}
      */
     get activity() {
-        return this.env.entities.Activity.get(this.props.activity);
+        return this.env.entities.Activity.get(this.props.activityLocalId);
     }
 
     /**
@@ -170,7 +170,7 @@ class Activity extends Component {
 Object.assign(Activity, {
     components,
     props: {
-        activity: String,
+        activityLocalId: String,
     },
     template: 'mail.messaging.component.Activity',
 });

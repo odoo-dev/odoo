@@ -15,7 +15,7 @@ class ActivityMarkDonePopover extends Component {
         super(...args);
         useStore(props => {
             return {
-                activity: this.env.entities.Activity.get(props.activity),
+                activity: this.env.entities.Activity.get(props.activityLocalId),
             };
         });
         this._feedbackTextareaRef = useRef('feedbackTextarea');
@@ -29,7 +29,7 @@ class ActivityMarkDonePopover extends Component {
      * @returns {mail.messaging.entity.Activity}
      */
     get activity() {
-        return this.env.entities.Activity.get(this.props.activity);
+        return this.env.entities.Activity.get(this.props.activityLocalId);
     }
 
     /**
@@ -75,7 +75,7 @@ class ActivityMarkDonePopover extends Component {
 
 Object.assign(ActivityMarkDonePopover, {
     props: {
-        activity: String,
+        activityLocalId: String,
     },
     template: 'mail.messaging.component.ActivityMarkDonePopover',
 });

@@ -8,7 +8,7 @@
                 'o-bot': partner and env.entities.Partner.root === partner,
                 'o-offline': partner and partner.im_status === 'offline',
                 'o-online': partner and partner.im_status === 'online',
-            }" t-att-data-partner="partner ? partner.localId : undefined"
+            }" t-att-data-partner-local-id="partner ? partner.localId : undefined"
         >
             <t t-if="partner" name="rootCondition">
                 <i class="o_PartnerImStatusIcon_outerBackground fa fa-circle fa-stack-1x"/>

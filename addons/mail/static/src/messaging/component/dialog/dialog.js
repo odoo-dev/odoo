@@ -18,7 +18,7 @@ class Dialog extends Component {
         this._onClickGlobal = this._onClickGlobal.bind(this);
         useStore(props => {
             return {
-                dialog: this.env.entities.Dialog.get(props.dialog),
+                dialog: this.env.entities.Dialog.get(props.dialogLocalId),
             };
         });
     }
@@ -39,7 +39,7 @@ class Dialog extends Component {
      * @returns {mail.messaging.entity.Dialog}
      */
     get dialog() {
-        return this.env.entities.Dialog.get(this.props.dialog);
+        return this.env.entities.Dialog.get(this.props.dialogLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -78,7 +78,7 @@ class Dialog extends Component {
 
 Object.assign(Dialog, {
     props: {
-        dialog: String,
+        dialogLocalId: String,
     },
     template: 'mail.messaging.component.Dialog',
 });

@@ -64,7 +64,7 @@ QUnit.test('livechat in the sidebar', async function (assert) {
         "should have a channel group named 'Livechat'"
     );
     const livechat = groupLivechat.querySelector(`
-        .o_DiscussSidebarItem[data-thread="${
+        .o_DiscussSidebarItem[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(1).localId
         }"]
     `);

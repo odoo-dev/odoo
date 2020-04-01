@@ -22,7 +22,7 @@ QUnit.module('Message', {
             const MessageComponent = components.Message;
             MessageComponent.env = this.env;
             this.component = new MessageComponent(null, Object.assign({
-                message: message.localId,
+                messageLocalId: message.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
             await afterNextRender();
@@ -68,7 +68,7 @@ QUnit.test('basic rendering', async function (assert) {
     );
     const messageEl = document.querySelector('.o_Message');
     assert.strictEqual(
-        messageEl.dataset.message,
+        messageEl.dataset.messageLocalId,
         this.env.entities.Message.fromId(100).localId,
         "message component should be linked to message store model"
     );

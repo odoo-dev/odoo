@@ -24,10 +24,10 @@
             </t>
 
             <t t-if="discuss.hasModerationDiscardDialog">
-                <ModerationDiscardDialog messages="discuss.threadViewer.checkedMessages.map(message => message.localId)" t-on-dialog-closed="_onDialogClosedModerationDiscard"/>
+                <ModerationDiscardDialog messageLocalIds="discuss.threadViewer.checkedMessages.map(message => message.localId)" t-on-dialog-closed="_onDialogClosedModerationDiscard"/>
             </t>
             <t t-if="discuss.hasModerationRejectDialog">
-                <ModerationRejectDialog messages="discuss.threadViewer.checkedMessages.map(message => message.localId)" t-on-dialog-closed="_onDialogClosedModerationReject"/>
+                <ModerationRejectDialog messageLocalIds="discuss.threadViewer.checkedMessages.map(message => message.localId)" t-on-dialog-closed="_onDialogClosedModerationReject"/>
             </t>
         </div>
     </t>
@@ -61,10 +61,10 @@
                 haveMessagesAuthorRedirect="discuss.thread.channel_type !== 'chat'"
                 haveMessagesMarkAsReadIcon="discuss.thread.model === 'mail.box' and discuss.thread.id === 'inbox'"
                 haveMessagesReplyIcon="discuss.thread.model === 'mail.box' and discuss.thread.id === 'inbox'"
-                selectedMessage="
+                selectedMessageLocalId="
                     discuss.replyingToMessage and
                     discuss.replyingToMessage.localId"
-                threadViewer="discuss.threadViewer.localId"
+                threadViewerLocalId="discuss.threadViewer.localId"
                 t-on-o-rendered="_onThreadRendered"
             />
         </t>
@@ -91,7 +91,7 @@
         <t t-if="discuss.isReplyingToMessage">
             <Composer
                 class="o_Discuss_replyingToMessageComposer"
-                composer="discuss.replyingToMessage.originThread.composer.localId"
+                composerLocalId="discuss.replyingToMessage.originThread.composer.localId"
                 hasCurrentPartnerAvatar="!env.entities.Device.instance.isMobile"
                 hasDiscardButton="true"
                 hasThreadName="true"

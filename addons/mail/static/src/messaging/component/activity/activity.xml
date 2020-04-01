@@ -101,8 +101,8 @@
                             <t t-foreach="activity.mailTemplates" t-as="mailTemplate" t-key="mailTemplate.localId">
                                 <MailTemplate
                                     class="o_Activity_mailTemplate"
-                                    activity="activity.localId"
-                                    mailTemplate="mailTemplate.localId"
+                                    activityLocalId="activity.localId"
+                                    mailTemplateLocalId="mailTemplate.localId"
                                 />
                             </t>
                         </div>
@@ -113,7 +113,7 @@
                             <t t-if="activity.category !== 'upload_file'">
                                 <ActivityMarkDoneButton
                                     class="o_Activity_toolButton o_Activity_markDoneButton btn-link"
-                                    activity="activity.localId"
+                                    activityLocalId="activity.localId"
                                     popoverTitle="'Mark Done'"
                                 >
                                     <t t-set="buttonHtml">
@@ -126,7 +126,7 @@
                                     <i class="fa fa-upload"/> Upload Document
                                 </button>
                                 <FileUploader
-                                    attachments="activity.attachments.map(attachment => attachment.localId)"
+                                    attachmentLocalIds="activity.attachments.map(attachment => attachment.localId)"
                                     uploadId="activity.res_id"
                                     uploadModel="activity.res_model"
                                     t-on-o-attachment-created="_onAttachmentCreated"

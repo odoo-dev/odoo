@@ -18,7 +18,7 @@ class ThreadPreview extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const thread = this.env.entities.Thread.get(props.thread);
+            const thread = this.env.entities.Thread.get(props.threadLocalId);
             const mainThreadCache = thread ? thread.mainCache : undefined;
             let lastMessageAuthor;
             let lastMessage;
@@ -88,7 +88,7 @@ class ThreadPreview extends Component {
      * @returns {mail.messaging.entity.Thread}
      */
     get thread() {
-        return this.env.entities.Thread.get(this.props.thread);
+        return this.env.entities.Thread.get(this.props.threadLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -116,7 +116,7 @@ class ThreadPreview extends Component {
 Object.assign(ThreadPreview, {
     components,
     props: {
-        thread: String,
+        threadLocalId: String,
     },
     template: 'mail.messaging.component.ThreadPreview',
 });

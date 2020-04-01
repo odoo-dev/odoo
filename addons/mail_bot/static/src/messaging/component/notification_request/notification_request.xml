@@ -9,7 +9,7 @@
                     <PartnerImStatusIcon
                         class="o_NotificationRequest_partnerImStatusIcon"
                         t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }"
-                        partner="env.entities.Partner.root.localId"
+                        partnerLocalId="env.entities.Partner.root.localId"
                     />
                 </div>
             </div>

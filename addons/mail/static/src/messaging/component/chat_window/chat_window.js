@@ -20,7 +20,7 @@ class ChatWindow extends Component {
         super(...args);
         useStore(props => {
             return {
-                chatWindow: this.env.entities.ChatWindow.get(props.chatWindow),
+                chatWindow: this.env.entities.ChatWindow.get(props.chatWindowLocalId),
                 isDeviceMobile: this.env.entities.Device.instance.isMobile,
                 localeTextDirection: this.env.entities.Locale.instance.textDirection,
             };
@@ -67,7 +67,7 @@ class ChatWindow extends Component {
      * @returns {mail.messaging.entity.ChatWindow}
      */
     get chatWindow() {
-        return this.env.entities.ChatWindow.get(this.props.chatWindow);
+        return this.env.entities.ChatWindow.get(this.props.chatWindowLocalId);
     }
 
     /**
@@ -322,7 +322,7 @@ Object.assign(ChatWindow, {
         isFullscreen: false,
     },
     props: {
-        chatWindow: String,
+        chatWindowLocalId: String,
         hasCloseAsBackButton: Boolean,
         isDocked: Boolean,
         isExpandable: Boolean,

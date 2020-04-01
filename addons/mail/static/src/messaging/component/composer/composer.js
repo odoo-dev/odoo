@@ -24,7 +24,7 @@ class Composer extends Component {
         super(...args);
         this.isDropZoneVisible = useDragVisibleDropZone();
         useStore(props => {
-            const composer = this.env.entities.Composer.get(props.composer);
+            const composer = this.env.entities.Composer.get(props.composerLocalId);
             return {
                 composer,
                 isDeviceMobile: this.env.entities.Device.instance.isMobile,
@@ -86,7 +86,7 @@ class Composer extends Component {
      * @returns {mail.messaging.entity.Composer}
      */
     get composer() {
-        return this.env.entities.Composer.get(this.props.composer);
+        return this.env.entities.Composer.get(this.props.composerLocalId);
     }
 
     /**
@@ -336,7 +336,7 @@ class Composer extends Component {
 Object.assign(Composer, {
     components,
     defaultProps: {
-        attachments: [],
+        attachmentLocalIds: [],
         hasCurrentPartnerAvatar: true,
         hasDiscardButton: false,
         hasFollowers: false,
@@ -350,7 +350,7 @@ Object.assign(Composer, {
         isLog: false,
     },
     props: {
-        attachments: {
+        attachmentLocalIds: {
             type: Array,
             element: String,
         },
@@ -358,7 +358,7 @@ Object.assign(Composer, {
             type: String,
             optional: true,
         },
-        composer: String,
+        composerLocalId: String,
         hasCurrentPartnerAvatar: Boolean,
         hasDiscardButton: Boolean,
         hasFollowers: Boolean,
@@ -373,7 +373,7 @@ Object.assign(Composer, {
             type: Boolean,
             optional: true,
         },
-        initialAttachments: {
+        initialAttachmentLocalIds: {
             type: Array,
             element: String,
             optional: true,

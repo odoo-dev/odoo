@@ -9,12 +9,12 @@
                 'o-fullscreen': props.isFullscreen,
                 'o-mobile': env.entities.Device.instance.isMobile,
                 'o-new-message': chatWindow and chatWindow === env.entities.ChatWindow.newMessage,
-            }" t-on-click="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window="chatWindow ? chatWindow.localId : undefined" t-att-data-thread="chatWindow ? (chatWindow.thread ? chatWindow.thread.localId : '') : undefined"
+            }" t-on-click="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window-local-id="chatWindow ? chatWindow.localId : undefined" t-att-data-thread-local-id="chatWindow ? (chatWindow.thread ? chatWindow.thread.localId : '') : undefined"
         >
             <t t-if="chatWindow">
                 <ChatWindowHeader
                     class="o_ChatWindow_header"
-                    chatWindow="chatWindow.localId"
+                    chatWindowLocalId="chatWindow.localId"
                     hasCloseAsBackButton="props.hasCloseAsBackButton"
                     isExpandable="props.isExpandable"
                     t-on-o-clicked="_onClickedHeader"
@@ -28,7 +28,7 @@
                         hasComposerSendButton="env.entities.Device.instance.isMobile"
                         hasSquashCloseMessages="chatWindow.thread.model !== 'mail.box'"
                         haveMessagesAuthorRedirect="chatWindow.thread.channel_type !== 'chat'"
-                        threadViewer="chatWindow.threadViewer.localId"
+                        threadViewerLocalId="chatWindow.threadViewer.localId"
                         t-on-focusin="_onFocusinThread"
                         t-ref="thread"
                     />

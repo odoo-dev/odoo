@@ -148,7 +148,7 @@ QUnit.test('basic rendering: sidebar', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_groupMailbox
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
         `).length,
@@ -158,7 +158,7 @@ QUnit.test('basic rendering: sidebar', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_groupMailbox
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
         `).length,
@@ -168,7 +168,7 @@ QUnit.test('basic rendering: sidebar', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_groupMailbox
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('history').localId
             }"]
         `).length,
@@ -254,7 +254,7 @@ QUnit.test('sidebar: basic mailbox rendering', async function (assert) {
     await this.start();
     const inbox = document.querySelector(`
         .o_DiscussSidebar_groupMailbox
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('inbox').localId
         }"]
     `);
@@ -285,7 +285,7 @@ QUnit.test('sidebar: basic mailbox rendering', async function (assert) {
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -301,7 +301,7 @@ QUnit.test('sidebar: default active inbox', async function (assert) {
     await this.start();
     const inbox = document.querySelector(`
         .o_DiscussSidebar_groupMailbox
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('inbox').localId
         }"]
     `);
@@ -319,7 +319,7 @@ QUnit.test('sidebar: change item', async function (assert) {
     await this.start();
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -328,7 +328,7 @@ QUnit.test('sidebar: change item', async function (assert) {
     );
     assert.notOk(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -337,14 +337,14 @@ QUnit.test('sidebar: change item', async function (assert) {
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('starred').localId
         }"]
     `).click();
     await afterNextRender();
     assert.notOk(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -353,7 +353,7 @@ QUnit.test('sidebar: change item', async function (assert) {
     );
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -370,7 +370,7 @@ QUnit.test('sidebar: inbox with counter', async function (assert) {
     await this.start();
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -380,7 +380,7 @@ QUnit.test('sidebar: inbox with counter', async function (assert) {
     );
     assert.strictEqual(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -442,7 +442,7 @@ QUnit.test('sidebar: basic channel rendering', async function (assert) {
         .o_DiscussSidebar_item
     `);
     assert.strictEqual(
-        channel.dataset.thread,
+        channel.dataset.threadLocalId,
         this.env.entities.Thread.channelFromId(20).localId,
         "should have channel with Id 20"
     );
@@ -582,7 +582,7 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_groupChannel
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(100).localId
             }"]
         `).length,
@@ -592,7 +592,7 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_groupChannel
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(101).localId
             }"]
         `).length,
@@ -601,13 +601,13 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
     );
     const channel1 = document.querySelector(`
         .o_DiscussSidebar_groupChannel
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(100).localId
         }"]
     `);
     const channel2 = document.querySelector(`
         .o_DiscussSidebar_groupChannel
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(101).localId
         }"]
     `);
@@ -646,7 +646,7 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
     );
     const chat = document.querySelector(`.o_DiscussSidebar_groupChat .o_DiscussSidebar_item`);
     assert.strictEqual(
-        chat.dataset.thread,
+        chat.dataset.threadLocalId,
         this.env.entities.Thread.channelFromId(10).localId,
         "should have chat with Id 20"
     );
@@ -783,7 +783,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(11).localId
             }"]
         `).length,
@@ -793,7 +793,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(12).localId
             }"]
         `).length,
@@ -803,7 +803,7 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(13).localId
             }"]
         `).length,
@@ -812,19 +812,19 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
     );
     const chat1 = document.querySelector(`
         .o_DiscussSidebar_groupChat
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(11).localId
         }"]
     `);
     const chat2 = document.querySelector(`
         .o_DiscussSidebar_groupChat
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(12).localId
         }"]
     `);
     const chat3 = document.querySelector(`
         .o_DiscussSidebar_groupChat
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(13).localId
         }"]
     `);
@@ -957,7 +957,7 @@ QUnit.test('default thread rendering', async function (assert) {
     await this.start();
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
         `).length,
@@ -966,7 +966,7 @@ QUnit.test('default thread rendering', async function (assert) {
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
         `).length,
@@ -975,7 +975,7 @@ QUnit.test('default thread rendering', async function (assert) {
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('history').localId
             }"]
         `).length,
@@ -984,7 +984,7 @@ QUnit.test('default thread rendering', async function (assert) {
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(20).localId
             }"]
         `).length,
@@ -993,7 +993,7 @@ QUnit.test('default thread rendering', async function (assert) {
     );
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
         `).classList.contains('o-active'),
@@ -1014,14 +1014,14 @@ QUnit.test('default thread rendering', async function (assert) {
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('starred').localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
         `).classList.contains('o-active'),
@@ -1042,14 +1042,14 @@ QUnit.test('default thread rendering', async function (assert) {
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('history').localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('history').localId
             }"]
         `).classList.contains('o-active'),
@@ -1068,14 +1068,14 @@ QUnit.test('default thread rendering', async function (assert) {
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(20).localId
             }"]
         `).classList.contains('o-active'),
@@ -1137,7 +1137,7 @@ QUnit.test('default select thread in discuss params', async function (assert) {
     });
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -1158,7 +1158,7 @@ QUnit.test('auto-select thread in discuss context', async function (assert) {
     });
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -1240,7 +1240,7 @@ QUnit.test('load single message from channel initially', async function (assert)
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_MessageList_message[data-message="${
+            .o_MessageList_message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
         `).length,
@@ -1288,7 +1288,7 @@ QUnit.test('basic rendering of message', async function (assert) {
     const message = document.querySelector(`
         .o_Discuss_thread
         .o_ThreadViewer_messageList
-        .o_MessageList_message[data-message="${
+        .o_MessageList_message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
     `);
@@ -1418,14 +1418,14 @@ QUnit.test('basic rendering of squashed message', async function (assert) {
     const message1 = document.querySelector(`
         .o_Discuss_thread
         .o_ThreadViewer_messageList
-        .o_MessageList_message[data-message="${
+        .o_MessageList_message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
     `);
     const message2 = document.querySelector(`
         .o_Discuss_thread
         .o_ThreadViewer_messageList
-        .o_MessageList_message[data-message="${
+        .o_MessageList_message[data-message-local-id="${
             this.env.entities.Message.fromId(101).localId
         }"]
     `);
@@ -1531,14 +1531,14 @@ QUnit.test('inbox messages are never squashed', async function (assert) {
     const message1 = document.querySelector(`
         .o_Discuss_thread
         .o_ThreadViewer_messageList
-        .o_MessageList_message[data-message="${
+        .o_MessageList_message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
     `);
     const message2 = document.querySelector(`
         .o_Discuss_thread
         .o_ThreadViewer_messageList
-        .o_MessageList_message[data-message="${
+        .o_MessageList_message[data-message-local-id="${
             this.env.entities.Message.fromId(101).localId
         }"]
     `);
@@ -2103,7 +2103,7 @@ QUnit.test('restore thread scroll position', async function (assert) {
     // select channel2
     document.querySelector(`
         .o_DiscussSidebar_groupChannel
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(2).localId
         }"]
     `).click();
@@ -2111,7 +2111,7 @@ QUnit.test('restore thread scroll position', async function (assert) {
     // select channel1
     document.querySelector(`
         .o_DiscussSidebar_groupChannel
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(1).localId
         }"]
     `).click();
@@ -2125,7 +2125,7 @@ QUnit.test('restore thread scroll position', async function (assert) {
     // select channel2
     document.querySelector(`
         .o_DiscussSidebar_groupChannel
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(2).localId
         }"]
     `).click();
@@ -2208,7 +2208,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
         `).length,
@@ -2218,7 +2218,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(101).localId
             }"]
         `).length,
@@ -2228,7 +2228,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
             .o_Message_originThread
@@ -2239,7 +2239,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(101).localId
             }"]
             .o_Message_originThread
@@ -2250,7 +2250,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(101).localId
             }"]
             .o_Message_originThread
@@ -2261,7 +2261,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(101).localId
             }"]
             .o_Message_originThreadLink
@@ -2273,7 +2273,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     // click on origin link of message2 (= channel2)
     document.querySelector(`
         .o_Discuss_thread
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(101).localId
         }"]
         .o_Message_originThreadLink
@@ -2282,7 +2282,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_groupChannel
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(2).localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -2297,7 +2297,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
         `).length,
@@ -2307,7 +2307,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(101).localId
             }"]
         `).length,
@@ -2317,7 +2317,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
             .o_Message_originThread
@@ -2328,7 +2328,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(101).localId
             }"]
             .o_Message_originThread
@@ -2339,7 +2339,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
             .o_Message_originThread
@@ -2350,7 +2350,7 @@ QUnit.test('message origin redirect to channel', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
             .o_Message_originThreadLink
@@ -2431,7 +2431,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_groupChannel
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(1).localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -2441,7 +2441,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
     assert.notOk(
         document.querySelector(`
             .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -2455,13 +2455,13 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
     );
     const msg1 = document.querySelector(`
         .o_Discuss_thread
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
     `);
     const msg2 = document.querySelector(`
         .o_Discuss_thread
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(101).localId
         }"]
     `);
@@ -2489,7 +2489,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
     assert.notOk(
         document.querySelector(`
             .o_DiscussSidebar_groupChannel
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(1).localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -2499,7 +2499,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
@@ -2562,7 +2562,7 @@ QUnit.test('sidebar quick search', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_groupChannel .o_DiscussSidebar_item
-        `).dataset.thread,
+        `).dataset.threadLocalId,
         this.env.entities.Thread.channelFromId(12).localId,
         "should have filtered to a single channel item with Id 12"
     );
@@ -2609,7 +2609,7 @@ QUnit.test('basic control panel rendering', async function (assert) {
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('starred').localId
         }"]
     `).click();
@@ -2632,7 +2632,7 @@ QUnit.test('basic control panel rendering', async function (assert) {
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `).click();
@@ -2714,7 +2714,7 @@ QUnit.test('inbox: mark all messages as read', async function (assert) {
     });
     assert.strictEqual(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -2724,7 +2724,7 @@ QUnit.test('inbox: mark all messages as read', async function (assert) {
     );
     assert.strictEqual(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(20).localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -2747,7 +2747,7 @@ QUnit.test('inbox: mark all messages as read', async function (assert) {
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -2757,7 +2757,7 @@ QUnit.test('inbox: mark all messages as read', async function (assert) {
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(20).localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -2836,7 +2836,7 @@ QUnit.test('starred: unstar all', async function (assert) {
     });
     assert.strictEqual(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -2859,7 +2859,7 @@ QUnit.test('starred: unstar all', async function (assert) {
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -2939,7 +2939,7 @@ QUnit.test('toggle_star message', async function (assert) {
     });
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -2968,7 +2968,7 @@ QUnit.test('toggle_star message', async function (assert) {
     assert.verifySteps(['rpc:toggle_message_starred']);
     assert.strictEqual(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -2992,7 +2992,7 @@ QUnit.test('toggle_star message', async function (assert) {
     assert.verifySteps(['rpc:toggle_message_starred']);
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('starred').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -3151,7 +3151,7 @@ QUnit.test('composer state: attachments save and restore', async function (asser
         "should have 1 attachment in the composer"
     );
     assert.strictEqual(
-        document.querySelector(`.o_Composer .o_Attachment`).dataset.attachment,
+        document.querySelector(`.o_Composer .o_Attachment`).dataset.attachmentLocalId,
         this.env.entities.Attachment.fromId(1).localId,
         "should have correct 1st attachment in the composer"
     );
@@ -3166,17 +3166,17 @@ QUnit.test('composer state: attachments save and restore', async function (asser
         "should have 3 attachments in the composer"
     );
     assert.strictEqual(
-        document.querySelectorAll(`.o_Composer .o_Attachment`)[0].dataset.attachment,
+        document.querySelectorAll(`.o_Composer .o_Attachment`)[0].dataset.attachmentLocalId,
         this.env.entities.Attachment.fromId(2).localId,
         "should have attachment with id 2 as 1st attachment"
     );
     assert.strictEqual(
-        document.querySelectorAll(`.o_Composer .o_Attachment`)[1].dataset.attachment,
+        document.querySelectorAll(`.o_Composer .o_Attachment`)[1].dataset.attachmentLocalId,
         this.env.entities.Attachment.fromId(3).localId,
         "should have attachment with id 3 as 2nd attachment"
     );
     assert.strictEqual(
-        document.querySelectorAll(`.o_Composer .o_Attachment`)[2].dataset.attachment,
+        document.querySelectorAll(`.o_Composer .o_Attachment`)[2].dataset.attachmentLocalId,
         this.env.entities.Attachment.fromId(4).localId,
         "should have attachment with id 4 as 3rd attachment"
     );
@@ -3295,7 +3295,7 @@ QUnit.test('post a simple message', async function (assert) {
     );
     const message = document.querySelector(`.o_Message`);
     assert.strictEqual(
-        message.dataset.message,
+        message.dataset.messageLocalId,
         this.env.entities.Message.fromId(101).localId,
         "new message in thread should be linked to newly created message from message post"
     );
@@ -3414,7 +3414,7 @@ QUnit.test('mark channel as seen on last message visible', async function (asser
     });
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
         `).length,
@@ -3423,7 +3423,7 @@ QUnit.test('mark channel as seen on last message visible', async function (asser
     );
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
         `).classList.contains('o-unread'),
@@ -3431,14 +3431,14 @@ QUnit.test('mark channel as seen on last message visible', async function (asser
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(10).localId
         }"]
     `).click();
     await afterNextRender();
     assert.notOk(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.channelFromId(10).localId
             }"]
         `).classList.contains('o-unread'),
@@ -3462,7 +3462,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     });
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
         `),
@@ -3470,7 +3470,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     );
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
         `).classList.contains('o-active'),
@@ -3478,7 +3478,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     );
     assert.notOk(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -3508,7 +3508,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     await afterNextRender();
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -3517,7 +3517,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     );
     assert.strictEqual(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -3531,7 +3531,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
         "should have one message in inbox"
     );
     assert.strictEqual(
-        document.querySelector(`.o_Discuss_thread .o_Message`).dataset.message,
+        document.querySelector(`.o_Discuss_thread .o_Message`).dataset.messageLocalId,
         this.env.entities.Message.fromId(100).localId,
         "should display newly received needaction message"
     );
@@ -3553,7 +3553,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     await afterNextRender();
     assert.strictEqual(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
             .o_DiscussSidebarItem_counter
@@ -3569,7 +3569,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
         `),
@@ -3578,7 +3578,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_Discuss_thread
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(101).localId
             }"]
         `),
@@ -3662,7 +3662,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
         "should display a single message"
     );
     assert.strictEqual(
-        document.querySelector('.o_Message').dataset.message,
+        document.querySelector('.o_Message').dataset.messageLocalId,
         this.env.entities.Message.fromId(100).localId,
         "should display message with ID 100"
     );
@@ -3708,7 +3708,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
         "should still display a single message after posting reply"
     );
     assert.strictEqual(
-        document.querySelector('.o_Message').dataset.message,
+        document.querySelector('.o_Message').dataset.messageLocalId,
         this.env.entities.Message.fromId(100).localId,
         "should still display message with ID 100 after posting reply"
     );
@@ -3833,13 +3833,13 @@ QUnit.skip('load recent messages from thread (already loaded some old messages)'
         "should fetch a single message from inbox"
     );
     assert.strictEqual(
-        document.querySelector('.o_Message').dataset.message,
+        document.querySelector('.o_Message').dataset.messageLocalId,
         this.env.entities.Message.fromId(100).localId,
         "should have fetched 1st message of channel 'General' as needaction from inbox"
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `).click();
@@ -3855,7 +3855,7 @@ QUnit.skip('load recent messages from thread (already loaded some old messages)'
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
         `).length,
@@ -3876,7 +3876,7 @@ QUnit.skip('load recent messages from thread (already loaded some old messages)'
     );
     assert.strictEqual(
         document.querySelectorAll(`
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entitiesMessage.fromId(100).localId
             }"]
         `).length,
@@ -3942,7 +3942,7 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
     });
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('history').localId
             }"]
         `).classList.contains('o-active'),
@@ -3955,14 +3955,14 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('inbox').localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
         `).classList.contains('o-active'),
@@ -3983,7 +3983,7 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
     await afterNextRender();
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('inbox').localId
             }"]
         `).classList.contains('o-active'),
@@ -3996,14 +3996,14 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
     );
 
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('history').localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('history').localId
             }"]
         `).classList.contains('o-active'),
@@ -4109,7 +4109,7 @@ QUnit.test('all messages in "Inbox" in "History" after marked all as read', asyn
     );
 
     document.querySelector(`
-        .o_DiscussSidebarItem[data-thread="${
+        .o_DiscussSidebarItem[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('history').localId
         }"]
     `).click();
@@ -4528,14 +4528,14 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
 
     assert.ok(
         document.querySelector(`
-            .o_DiscussSidebar_item[data-thread="${
+            .o_DiscussSidebar_item[data-thread-local-id="${
                 this.env.entities.Thread.mailboxFromId('moderation').localId
             }"]
         `),
         "should display the moderation box"
     );
     const mailboxCounter = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('moderation').localId
         }"]
         .o_DiscussSidebarItem_counter
@@ -4552,7 +4552,7 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
 
     // 1. go to moderation mailbox
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('moderation').localId
         }"]
     `).click();
@@ -4692,7 +4692,7 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
 
     // 2. go to channel 'general'
     document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `).click();
@@ -4821,7 +4821,7 @@ QUnit.test('moderation: accept pending moderation message', async function (asse
 
     // 1. go to moderation box
     const moderationBox = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('moderation').localId
         }"]
     `);
@@ -4834,14 +4834,14 @@ QUnit.test('moderation: accept pending moderation message', async function (asse
     await afterNextRender();
     assert.ok(
         document.querySelector(`
-            .o_Message[data-message="${
+            .o_Message[data-message-local-id="${
                 this.env.entities.Message.fromId(100).localId
             }"]
         `),
         "should display the message to moderate"
     );
     const acceptButton = document.querySelector(`
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
         .o_Message_moderationAction.o-accept
@@ -4859,7 +4859,7 @@ QUnit.test('moderation: accept pending moderation message', async function (asse
 
     // 2. go to channel 'general'
     const channel = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `);
@@ -4871,7 +4871,7 @@ QUnit.test('moderation: accept pending moderation message', async function (asse
     channel.click();
     await afterNextRender();
     const message = document.querySelector(`
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
     `);
@@ -4951,7 +4951,7 @@ QUnit.test('moderation: reject pending moderation message (reject with explanati
 
     // 1. go to moderation box
     const moderationBox = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('moderation').localId
         }"]
     `);
@@ -4963,7 +4963,7 @@ QUnit.test('moderation: reject pending moderation message (reject with explanati
     moderationBox.click();
     await afterNextRender();
     const pendingMessage = document.querySelector(`
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
     `);
@@ -5046,7 +5046,7 @@ QUnit.test('moderation: reject pending moderation message (reject with explanati
 
     // 2. go to channel 'general'
     const channel = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `);
@@ -5106,7 +5106,7 @@ QUnit.test('moderation: discard pending moderation message (reject without expla
 
     // 1. go to moderation box
     const moderationBox = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.mailboxFromId('moderation').localId
         }"]
     `);
@@ -5118,7 +5118,7 @@ QUnit.test('moderation: discard pending moderation message (reject without expla
     moderationBox.click();
     await afterNextRender();
     const pendingMessage = document.querySelector(`
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
     `);
@@ -5176,7 +5176,7 @@ QUnit.test('moderation: discard pending moderation message (reject without expla
 
     // 2. go to channel 'general'
     const channel = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `);
@@ -5240,7 +5240,7 @@ QUnit.test('moderation: send message in moderated channel', async function (asse
 
     // go to channel 'general'
     const channel = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `);
@@ -5265,7 +5265,7 @@ QUnit.test('moderation: send message in moderated channel', async function (asse
     document.querySelector('.o_Composer_buttonSend').click();
     await afterNextRender();
     const messagePending = document.querySelector(`
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
         .o_Message_moderationPending
@@ -5311,7 +5311,7 @@ QUnit.test('moderation: sent message accepted in moderated channel', async funct
     });
 
     const channel = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `);
@@ -5323,7 +5323,7 @@ QUnit.test('moderation: sent message accepted in moderated channel', async funct
     channel.click();
     await afterNextRender();
     const messagePending = document.querySelector(`
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
         .o_Message_moderationPending
@@ -5354,7 +5354,7 @@ QUnit.test('moderation: sent message accepted in moderated channel', async funct
 
     // check message is accepted
     const message = document.querySelector(`
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
     `);
@@ -5399,7 +5399,7 @@ QUnit.test('moderation: sent message rejected in moderated channel', async funct
     });
 
     const channel = document.querySelector(`
-        .o_DiscussSidebar_item[data-thread="${
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.entities.Thread.channelFromId(20).localId
         }"]
     `);
@@ -5411,7 +5411,7 @@ QUnit.test('moderation: sent message rejected in moderated channel', async funct
     channel.click();
     await afterNextRender();
     const messagePending = document.querySelector(`
-        .o_Message[data-message="${
+        .o_Message[data-message-local-id="${
             this.env.entities.Message.fromId(100).localId
         }"]
         .o_Message_moderationPending

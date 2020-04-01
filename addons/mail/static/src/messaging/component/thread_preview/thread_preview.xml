@@ -6,7 +6,7 @@
             The preview template is used by the discuss in mobile, and by the systray
             menu in order to show preview of threads.
         -->
-        <div class="o_ThreadPreview" t-att-class="{ 'o-muted': thread and thread.message_unread_counter === 0 }" t-on-click="_onClick" t-att-data-thread="thread ? thread.localId : undefined">
+        <div class="o_ThreadPreview" t-att-class="{ 'o-muted': thread and thread.message_unread_counter === 0 }" t-on-click="_onClick" t-att-data-thread-local-id="thread ? thread.localId : undefined">
             <t t-if="thread">
                 <div class="o_ThreadPreview_sidebar">
                     <div class="o_ThreadPreview_imageContainer o_ThreadPreview_sidebarItem">
@@ -18,7 +18,7 @@
                                     'o-mobile': env.entities.Device.instance.isMobile,
                                     'o-muted': thread.message_unread_counter === 0,
                                 }"
-                                partner="thread.directPartner.localId"
+                                partnerLocalId="thread.directPartner.localId"
                             />
                         </t>
                     </div>
@@ -44,8 +44,8 @@
                         <span class="o_ThreadPreview_coreItem o_ThreadPreview_inlineText" t-att-class="{ 'o-empty': inlineLastMessageBody.length === 0 }">
                             <t t-if="thread.lastMessage and thread.lastMessage.author">
                                 <MessageAuthorPrefix
-                                    message="thread.lastMessage.localId"
-                                    thread="thread.localId"
+                                    messageLocalId="thread.lastMessage.localId"
+                                    threadLocalId="thread.localId"
                                 />
                             </t>
                             <t t-raw="inlineLastMessageBody"/>

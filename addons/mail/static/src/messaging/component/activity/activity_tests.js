@@ -28,7 +28,7 @@ QUnit.module('Activity', {
             const ActivityComponent = components.Activity;
             ActivityComponent.env = this.env;
             this.component = new ActivityComponent(null, {
-                activity: activity.localId,
+                activityLocalId: activity.localId,
             });
             await this.component.mount(this.widget.el);
         };
@@ -812,7 +812,7 @@ QUnit.test('activity click on cancel', async function (assert) {
             super(... args);
             useStore(props => {
                 return {
-                    activity: this.env.entities.Activity.get(props.activity),
+                    activity: this.env.entities.Activity.get(props.activityLocalId),
                 };
             });
         }
@@ -821,23 +821,23 @@ QUnit.test('activity click on cancel', async function (assert) {
          * @returns {mail.messaging.entity.Activity}
          */
         get activity() {
-            return this.env.entities.Activity.get(this.props.activity);
+            return this.env.entities.Activity.get(this.props.activityLocalId);
         }
     }
     ParentComponent.env = this.env;
     Object.assign(ParentComponent, {
         components,
-        props: { activity: String },
+        props: { activityLocalId: String },
         template: xml`
             <div>
                 <p>parent</p>
                 <t t-if="activity">
-                    <Activity activity="activity.localId"/>
+                    <Activity activityLocalId="activity.localId"/>
                 </t>
             </div>
         `,
     });
-    this.component = new ParentComponent(null, { activity: activity.localId });
+    this.component = new ParentComponent(null, { activityLocalId: activity.localId });
     await this.component.mount(this.widget.el);
 
     assert.strictEqual(

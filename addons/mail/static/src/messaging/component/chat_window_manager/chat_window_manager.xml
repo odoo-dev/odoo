@@ -9,7 +9,7 @@
             </t>
             <t t-foreach="env.entities.ChatWindow.allOrderedVisible" t-as="chatWindow" t-key="chatWindow.localId">
                 <ChatWindow
-                    chatWindow="chatWindow.localId"
+                    chatWindowLocalId="chatWindow.localId"
                     hasCloseAsBackButton="env.entities.Device.instance.isMobile"
                     isDocked="!env.entities.Device.instance.isMobile"
                     isExpandable="!env.entities.Device.instance.isMobile and chatWindow !== env.entities.ChatWindow.newMessage"
