@@ -19,14 +19,7 @@ const MessagingService = AbstractService.extend({
      * @override {web.AbstractService}
      */
     start() {
-        const self = this;
-
         this._super(...arguments);
-        /**
-         * Reference to generated Entity classes.
-         */
-        this.Entities = undefined;
-
         window.addEventListener('load', () => this._onGlobalLoad());
 
         /**
@@ -39,11 +32,12 @@ const MessagingService = AbstractService.extend({
             do_action: (...args) => this.do_action(...args),
             do_notify: (...args) => this.do_notify(...args),
             do_warn: (...args) => this.do_warn(...args),
+            entities: undefined,
             isMessagingInitialized() {
-                if (!self.Entities) {
+                if (!this.entities) {
                     return false;
                 }
-                const messaging = self.env.entities.Messaging.instance;
+                const messaging = this.entities.Messaging.instance;
                 if (!messaging) {
                     return false;
                 }
@@ -90,8 +84,8 @@ const MessagingService = AbstractService.extend({
      */
     destroy(...args) {
         this._super(...args);
-        if (this.Entities && this.Entities.Entity) {
-            const { Entity } = this.Entities;
+        if (this.env.entities && this.env.entities.Entity) {
+            const { Entity } = this.env.entities;
             while (Entity.all.length > 0) {
                 Entity.all[0].delete();
             }
@@ -182,27 +176,13 @@ const MessagingService = AbstractService.extend({
          */
         await new Promise(resolve => setTimeout(resolve));
 
-        const Entities = this._generateEntities();
         const env = this.env;
-        env.entities = {};
-        /**
-         * Make entities accessible from env. Singleton entities have special
-         * access from the instance from the environment, by calling entity with
-         * 1st character in lower case.
-         *
-         * For example:
-         *
-         * - `env.entities.Messaging`: entity class of Messaging
-         * - `env.entities.messaging`: singleton instance of Messaging
-         */
-        for (const [EntityName, Entity] of Object.entries(Entities)) {
-            env.entities[EntityName] = Entity;
-        }
+        env.entities = this._generateEntities();
         /**
          * Make environment accessible from Entities. Note that getter is used
          * to prevent recursive data structure.
          */
-        for (const Entity of Object.values(Entities)) {
+        for (const Entity of Object.values(env.entities)) {
             Object.defineProperty(Entity, 'env', {
                 get: () => env,
             });
@@ -211,13 +191,12 @@ const MessagingService = AbstractService.extend({
          * Check that all entity relations are correct, notably one relation
          * should have matching reversed relation.
          */
-        checkRelations(Entities);
-        for (const Entity of Object.values(Entities)) {
+        checkRelations(env.entities);
+        for (const Entity of Object.values(env.entities)) {
             Entity.init();
         }
-        this.Entities = Entities;
 
-        const messaging = Entities.Messaging.create();
+        const messaging = env.entities.Messaging.create();
         messagingCreatedPromiseResolve();
         await messaging.start();
         messagingInitializedPromiseResolve();
