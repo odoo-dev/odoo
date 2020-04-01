@@ -57,6 +57,7 @@
 
 .o_ThreadPreview_name {
     @include o-mail-notification-list-item-name-layout();
+    white-space: nowrap;
 }
 
 .o_ThreadPreview_partnerImStatusIcon {
