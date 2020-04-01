@@ -76,7 +76,15 @@ function DeviceFactory({ Entity }) {
 
     }
 
-    Object.assign(Device, { isSingleton: true });
+    Object.assign(Device, {
+        relations: Object.assign({}, Entity.relations, {
+            messaging: {
+                inverse: 'device',
+                to: 'Messaging',
+                type: 'one2one',
+            },
+        }),
+    });
 
     return Device;
 }

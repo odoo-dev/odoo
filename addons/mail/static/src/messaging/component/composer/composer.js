@@ -27,7 +27,7 @@ class Composer extends Component {
             const composer = this.env.entities.Composer.get(props.composerLocalId);
             return {
                 composer,
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                isDeviceMobile: this.env.messaging.device.isMobile,
                 thread: composer ? composer.thread : undefined,
             };
         });
@@ -109,7 +109,7 @@ class Composer extends Component {
      * Focus the composer.
      */
     focus() {
-        if (this.env.entities.Device.instance.isMobile) {
+        if (this.env.messaging.device.isMobile) {
             this.el.scrollIntoView();
         }
         this._textInputRef.comp.focus();

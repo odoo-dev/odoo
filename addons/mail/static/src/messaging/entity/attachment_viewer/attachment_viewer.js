@@ -52,7 +52,6 @@ function AttachmentViewerFactory({ Entity }) {
     }
 
     Object.assign(AttachmentViewer, {
-        isSingleton: true,
         relations: Object.assign({}, Entity.relations, {
             attachment: {
                 inverse: 'activeInAttachmentViewer',
@@ -63,6 +62,11 @@ function AttachmentViewerFactory({ Entity }) {
                 inverse: 'attachmentViewer',
                 to: 'Attachment',
                 type: 'many2many',
+            },
+            messaging: {
+                inverse: 'attachmentViewer',
+                to: 'Messaging',
+                type: 'one2one',
             },
         }),
     });

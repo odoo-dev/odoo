@@ -312,8 +312,8 @@ function ChatWindowFactory({ Entity }) {
             if (!this.env.entities.Device || !this.env.entities.Discuss) {
                 return visual;
             }
-            const device = this.env.entities.Device.instance;
-            const discuss =this.env.entities.Discuss.instance;
+            const device = this.env.messaging.device;
+            const discuss = this.env.messaging.discuss;
             if (!device || !discuss) {
                 return visual;
             }

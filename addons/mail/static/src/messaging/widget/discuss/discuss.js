@@ -68,7 +68,7 @@ const DiscussWidget = AbstractAction.extend({
             (this.action.context && this.action.context.active_id) ||
             (this.action.params && this.action.params.default_active_id) ||
             'mail.box_inbox';
-        this.discuss = this.env.entities.Discuss.instance;
+        this.discuss = this.env.messaging.discuss;
         this.discuss.update({ initActiveId });
     },
     /**
@@ -215,7 +215,7 @@ const DiscussWidget = AbstractAction.extend({
         }
         // Mobile: Add channel
         if (
-            this.env.entities.Device.instance.isMobile &&
+            this.env.messaging.device.isMobile &&
             this.discuss.activeMobileNavbarTabId === 'channel'
         ) {
             this.$buttons
@@ -228,7 +228,7 @@ const DiscussWidget = AbstractAction.extend({
         }
         // Mobile: Add message
         if (
-            this.env.entities.Device.instance.isMobile &&
+            this.env.messaging.device.isMobile &&
             this.discuss.activeMobileNavbarTabId === 'chat'
         ) {
             this.$buttons
@@ -239,7 +239,7 @@ const DiscussWidget = AbstractAction.extend({
                 .find('.o_mobile_new_message')
                 .addClass('o_hidden');
         }
-        if (this.env.entities.Device.instance.isMobile) {
+        if (this.env.messaging.device.isMobile) {
             this._setTitle(this.env._t("Discuss"));
         } else {
             let title;

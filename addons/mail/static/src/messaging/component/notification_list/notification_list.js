@@ -71,7 +71,7 @@ class NotificationList extends Component {
             };
         });
         return {
-            isDeviceMobile: this.env.entities.Device.instance.isMobile,
+            isDeviceMobile: this.env.messaging.device.isMobile,
             notifications,
         };
     }

@@ -53,10 +53,17 @@ class MessagingMenu extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * @returns {mail.messaging.entity.Discuss}
+     */
+    get discuss() {
+        return this.env.messaging && this.env.messaging.discuss;
+    }
+
+    /**
      * @returns {mail.messaging.entity.MessagingMenu}
      */
     get messagingMenu() {
-        return this.env.entities.MessagingMenu.instance;
+        return this.env.messaging.messagingMenu;
     }
 
     /**
@@ -94,10 +101,10 @@ class MessagingMenu extends Component {
      */
     _useStoreSelector(props) {
         return {
-            messagingMenu: this.env.entities.MessagingMenu.instance,
-            isDeviceMobile: this.env.entities.Device.instance.isMobile,
-            isDiscussOpen: this.env.entities.Discuss.instance.isOpen,
-            isMessagingInitialized: this.env.entities.Messaging.instance.isInitialized,
+            messagingMenu: this.env.messaging.messagingMenu,
+            isDeviceMobile: this.env.messaging.device.isMobile,
+            isDiscussOpen: this.env.messaging.discuss.isOpen,
+            isMessagingInitialized: this.env.messaging.isInitialized,
         };
     }
 
@@ -113,7 +120,7 @@ class MessagingMenu extends Component {
         // in mobile: keeps the messaging menu open in background
         // TODO SEB maybe need to move this to a mobile component?
         if (
-            this.env.entities.Device.instance.isMobile &&
+            this.env.messaging.device.isMobile &&
             this.env.entities.ChatWindow.hasVisibleChatWindows
         ) {
             return;
@@ -144,7 +151,7 @@ class MessagingMenu extends Component {
      */
     _onClickNewMessage(ev) {
         ev.stopPropagation();
-        if (!this.env.entities.Device.instance.isMobile) {
+        if (!this.env.messaging.device.isMobile) {
             this.env.entities.Thread.openNewMessage();
             this.messagingMenu.close();
         } else {
@@ -191,7 +198,7 @@ class MessagingMenu extends Component {
                 type: 'chat',
             });
         }
-        if (!this.env.entitiesDevice.instance.isMobile) {
+        if (!this.env.messaging.device.isMobile) {
             this.messagingMenu.close();
         }
     }
@@ -240,7 +247,7 @@ class MessagingMenu extends Component {
     _onSelectThread(ev) {
         ev.stopPropagation();
         this.env.entities.Thread.get(ev.detail.thread).open();
-        if (!this.env.entities.Device.instance.isMobile) {
+        if (!this.env.messaging.device.isMobile) {
             this.messagingMenu.close();
         }
     }

@@ -17,7 +17,7 @@ class NotificationRequest extends Component {
         super(...args);
         useStore(props => {
             return {
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                isDeviceMobile: this.env.messaging.device.isMobile,
                 partnerRoot: this.env.entities.Partner.root,
             };
         });
@@ -49,7 +49,8 @@ class NotificationRequest extends Component {
      * @param {string} value
      */
     _handleResponseNotificationPermission(value) {
-        this.env.entities.Mailbot.instance.update();
+        // manually force recompute because the permission is not in the store
+        this.env.messagingMenu.update();
         if (value !== 'granted') {
             this.env.call('bus_service', 'sendNotification',
                 this.env._t("Permission denied"),

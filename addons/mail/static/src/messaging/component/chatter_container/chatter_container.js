@@ -18,7 +18,7 @@ class ChatterContainer extends Component {
         this.chatter = undefined;
         this._wasMessagingInitialized = false;
         useStore(props => {
-            const isMessagingInitialized  = this.env.isMessagingInitialized();
+            const isMessagingInitialized = this.env.isMessagingInitialized();
             if (!this._wasMessagingInitialized && isMessagingInitialized) {
                 this._wasMessagingInitialized = true;
                 this.chatter = this.env.entities.Chatter.create(props);

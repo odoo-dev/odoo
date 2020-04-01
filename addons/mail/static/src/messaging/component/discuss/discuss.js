@@ -25,12 +25,12 @@ class Discuss extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const discuss = this.env.entities.Discuss.instance;
+            const discuss = this.env.messaging.discuss;
             return {
                 checkedMessages: discuss.threadViewer.checkedMessages,
                 discuss,
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
-                isMessagingInitialized: this.env.entities.Messaging.instance.isInitialized,
+                isDeviceMobile: this.env.messaging.device.isMobile,
+                isMessagingInitialized: this.env.messaging.isInitialized,
                 thread: discuss.thread,
                 threadCache: discuss.threadViewer.threadCache,
                 uncheckedMessages: discuss.threadViewer.uncheckedMessages,
@@ -58,7 +58,7 @@ class Discuss extends Component {
         this.discuss.update({ isOpen: true });
         if (this.discuss.thread) {
             this.trigger('o-push-state-action-manager');
-        } else if (this.env.entities.Messaging.instance.isInitialized) {
+        } else if (this.env.messaging.isInitialized) {
             this.discuss.openInitThread();
         }
         this._updateLocalStoreProps();
@@ -109,7 +109,7 @@ class Discuss extends Component {
      * @returns {mail.messaging.entity.Discuss}
      */
     get discuss() {
-        return this.env.entities.Discuss.instance;
+        return this.env.messaging && this.env.messaging.discuss;
     }
 
     /**

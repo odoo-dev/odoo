@@ -530,7 +530,7 @@ async function pause() {
  * @param {Object} [param0.viewOptions] makes only sense when `param0.hasView`
  *   is set: the view options to use in createView.
  * @param {boolean} [param0.waitUntilMessagingInitialized=true]
- * @param {boolean} [param0.withMailbotHasRequestDefaultPatch]
+ * @param {Object} [param0.withWindowNotification]
  * @param {...Object} [param0.kwargs]
  * @returns {Object}
  */
@@ -572,7 +572,7 @@ async function start(param0 = {}) {
     const {
         services = getServices({ hasChatWindow, debug }),
         session = {},
-        withMailbotHasRequestDefaultPatch,
+        withWindowNotification,
     } = param0;
     initCallbacks.forEach(callback => callback(param0));
     const kwargs = Object.assign({
@@ -594,7 +594,7 @@ async function start(param0 = {}) {
     } = patchMessagingService(services.messaging, {
         onBeforeGenerateEntities,
         session,
-        withMailbotHasRequestDefaultPatch,
+        withWindowNotification,
     });
 
     let widget;
@@ -719,7 +719,7 @@ function pasteFiles(el, files) {
  * @param {Object} [param1={}]
  * @param {function} [param1.onBeforeGenerateEntities]
  * @param {Object} [param1.session={}]
- * @param {boolean} [param1.withMailbotHasRequestDefaultPatch=true]
+ * @param {Object} [param1.withWindowNotification={}]
  * @returns {Object}
  *   - `messagingCreatedPromise`, a promise that is resolved just after
  *     messaging has been created.
@@ -730,7 +730,7 @@ function pasteFiles(el, files) {
 function patchMessagingService(MessagingService, {
     onBeforeGenerateEntities,
     session = {},
-    withMailbotHasRequestDefaultPatch = true,
+    withWindowNotification = { permission: 'denied' },
 } = {}) {
     const _t = s => s;
     _t.database = {
@@ -753,6 +753,9 @@ function patchMessagingService(MessagingService, {
         start(...args) {
             this._super(...args);
             this.env.disableAnimation = true;
+            if (withWindowNotification) {
+                Object.assign(this.env.windowNotification, withWindowNotification);
+            }
             // simulate all JS resources have been loaded
             const {
                 messagingCreatedPromise: createdPromise,
@@ -776,11 +779,6 @@ function patchMessagingService(MessagingService, {
             patchClassMethods(entities.Partner, 'mail.messaging.testUtils', {
                 startLoopFetchImStatus: () => {},
             });
-            if (withMailbotHasRequestDefaultPatch) {
-                patchClassMethods(entities.Mailbot, 'mail.messaging.testUtils', {
-                    _hasRequest: () => false,
-                });
-            }
             if (onBeforeGenerateEntities) {
                 onBeforeGenerateEntities(entities);
             }

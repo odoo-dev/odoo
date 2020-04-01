@@ -76,15 +76,10 @@ function EntityFactory() {
          *
          * @static
          * @param {Object} data data object with initial data, including relations.
-         * @throws {Error} in case Entity class is a singleton and it creates
-         *   more than one instance.
          * @returns {mail.messaging.entity.Entity} newly created entity
          */
         static create(data) {
             const { state } = this.env.store;
-            if (this.isSingleton && this.all.length > 0) {
-                throw new Error(`Singleton Entity class "${this.name}" cannot create more than one instance.`);
-            }
             const entity = new this(data);
             state.entities[entity.localId] = entity;
             // ensure observable version of entity is handled.
@@ -152,17 +147,6 @@ function EntityFactory() {
                 entity.update(data);
             }
             return entity;
-        }
-
-        /**
-         * @throws {Error} when called with non singleton classes
-         * @returns {mail.messaging.entity.Entity|undefined}
-         */
-        static get instance() {
-            if (!this.isSingleton) {
-                throw new Error(`Cannot get instance of non-singleton Entity class "${this.name}"`);
-            }
-            return this.all[0];
         }
 
         /**

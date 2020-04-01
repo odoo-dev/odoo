@@ -19,7 +19,7 @@ class ChatWindowManager extends Component {
         useStore(props => {
             return {
                 chatWindowVisual: this.env.entities.ChatWindow.visual,
-                device: this.env.entities.Device.instance,
+                device: this.env.messaging.device,
             };
         });
     }

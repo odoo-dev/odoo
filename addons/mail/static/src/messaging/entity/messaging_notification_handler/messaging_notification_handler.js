@@ -3,7 +3,7 @@ odoo.define('mail.messaging.entity.MessagingNotificationHandler', function (requ
 
 const { registerNewEntity } = require('mail.messaging.entity.core');
 
-const PREVIEW_MSG_MAX_SIZE = 350;  // optimal for native english speakers
+const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 
 function MessagingNotificationHandlerFactory({ Entity }) {
 
@@ -462,7 +462,7 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          */
         _notifyNewChannelMessageWhileOutOfFocus({ channel, message }) {
             const author = message.author;
-            const messaging = this.env.entities.Messaging.instance;
+            const messaging = this.env.messaging;
             let notificationTitle;
             if (!author) {
                 notificationTitle = this.env._t("New message");
@@ -504,7 +504,15 @@ function MessagingNotificationHandlerFactory({ Entity }) {
 
     }
 
-    Object.assign(MessagingNotificationHandler, { isSingleton: true });
+    Object.assign(MessagingNotificationHandler, {
+        relations: Object.assign({}, Entity.relations, {
+            messaging: {
+                inverse: 'notificationHandler',
+                to: 'Messaging',
+                type: 'one2one',
+            },
+        }),
+    });
 
     return MessagingNotificationHandler;
 }

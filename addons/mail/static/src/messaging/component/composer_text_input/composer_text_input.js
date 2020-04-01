@@ -19,7 +19,7 @@ class ComposerTextInput extends Component {
         useStore(props => {
             return {
                 composer: this.env.entities.Composer.get(props.composerLocalId),
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                isDeviceMobile: this.env.messaging.device.isMobile,
             };
         });
         /**
@@ -183,7 +183,7 @@ class ComposerTextInput extends Component {
         if (ev.shiftKey) {
             return;
         }
-        if (this.env.entities.Device.instance.isMobile) {
+        if (this.env.messaging.device.isMobile) {
             return;
         }
         this.trigger('o-keydown-enter');

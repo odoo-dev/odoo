@@ -10,10 +10,10 @@
             <t t-foreach="env.entities.ChatWindow.allOrderedVisible" t-as="chatWindow" t-key="chatWindow.localId">
                 <ChatWindow
                     chatWindowLocalId="chatWindow.localId"
-                    hasCloseAsBackButton="env.entities.Device.instance.isMobile"
-                    isDocked="!env.entities.Device.instance.isMobile"
-                    isExpandable="!env.entities.Device.instance.isMobile and chatWindow !== env.entities.ChatWindow.newMessage"
-                    isFullscreen="env.entities.Device.instance.isMobile"
+                    hasCloseAsBackButton="env.messaging.device.isMobile"
+                    isDocked="!env.messaging.device.isMobile"
+                    isExpandable="!env.messaging.device.isMobile and chatWindow !== env.entities.ChatWindow.newMessage"
+                    isFullscreen="env.messaging.device.isMobile"
                 />
             </t>
         </div>

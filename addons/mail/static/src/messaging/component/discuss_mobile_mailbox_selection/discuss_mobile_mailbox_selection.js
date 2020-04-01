@@ -16,7 +16,7 @@ class DiscussMobileMailboxSelection extends Component {
             return {
                 allOrderedAndPinnedMailboxes:
                     this.env.entities.Thread.allOrderedAndPinnedMailboxes,
-                discussThread: this.env.entities.Discuss.instance.thread,
+                discussThread: this.env.messaging.discuss.thread,
             };
         }, {
             compareDepth: {
@@ -33,7 +33,7 @@ class DiscussMobileMailboxSelection extends Component {
      * @returns {mail.messaging.entity.Discuss}
      */
     get discuss() {
-        return this.env.entities.Discuss.instance;
+        return this.env.messaging && this.env.messaging.discuss;
     }
 
     //--------------------------------------------------------------------------

@@ -12,13 +12,21 @@ function DiscussFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
+         * @param {mail.messaging.entity.Thread} thread
+         * @returns {string}
+         */
+        static threadToActiveId(thread) {
+            return `${thread.model}_${thread.id}`;
+        }
+
+        /**
          * @returns {string|undefined}
          */
         get activeId() {
             if (!this.thread) {
                 return undefined;
             }
-            return this.threadToActiveId(this.thread);
+            return this.constructor.threadToActiveId(this.thread);
         }
 
         /**
@@ -190,14 +198,6 @@ function DiscussFactory({ Entity }) {
             return this.threadViewer && this.threadViewer.thread;
         }
 
-        /**
-         * @param {mail.messaging.entity.Thread} thread
-         * @returns {string}
-         */
-        threadToActiveId(thread) {
-            return `${thread.model}_${thread.id}`;
-        }
-
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -301,7 +301,7 @@ function DiscussFactory({ Entity }) {
             if (threadOrLocalId) {
                 const thread = this.env.entities.Thread.get(threadOrLocalId);
                 this.threadViewer.update({ thread });
-                this._write({ initActiveId: this.threadToActiveId(thread.model) });
+                this._write({ initActiveId: this.constructor.threadToActiveId(thread.model) });
             } else if (
                 prevActiveMobileNavbarTabId !== this.activeMobileNavbarTabId &&
                 this.activeMobileNavbarTabId === 'mailbox' &&
@@ -326,8 +326,12 @@ function DiscussFactory({ Entity }) {
     }
 
     Object.assign(Discuss, {
-        isSingleton: true,
         relations: Object.assign({}, Entity.relations, {
+            messaging: {
+                inverse: 'discuss',
+                to: 'Messaging',
+                type: 'one2one',
+            },
             renamingThreads: {
                 inverse: 'renamingDiscuss',
                 to: 'Thread',
@@ -346,7 +350,6 @@ function DiscussFactory({ Entity }) {
             },
         }),
     });
-
     return Discuss;
 }
 

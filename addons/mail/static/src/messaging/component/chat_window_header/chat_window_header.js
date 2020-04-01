@@ -20,7 +20,7 @@ class ChatWindowHeader extends Component {
             return {
                 chatWindow,
                 chatWindowName: chatWindow && chatWindow.name,
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                isDeviceMobile: this.env.messaging.device.isMobile,
             };
         });
     }

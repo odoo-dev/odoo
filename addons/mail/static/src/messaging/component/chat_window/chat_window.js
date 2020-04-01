@@ -21,8 +21,8 @@ class ChatWindow extends Component {
         useStore(props => {
             return {
                 chatWindow: this.env.entities.ChatWindow.get(props.chatWindowLocalId),
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
-                localeTextDirection: this.env.entities.Locale.instance.textDirection,
+                isDeviceMobile: this.env.messaging.device.isMobile,
+                localeTextDirection: this.env.messaging.locale.textDirection,
             };
         });
         /**
@@ -90,8 +90,8 @@ class ChatWindow extends Component {
      * @private
      */
     _applyVisibleOffset() {
-        const locale = this.env.entities.Locale.instance;
-        const offsetFrom = locale.textDirection === 'rtl' ? 'left' : 'right';
+        const textDirection = this.env.messaging.locale.textDirection;
+        const offsetFrom = textDirection === 'rtl' ? 'left' : 'right';
         const oppositeFrom = offsetFrom === 'right' ? 'left' : 'right';
         this.el.style[offsetFrom] = this.chatWindow.visibleOffset + 'px';
         this.el.style[oppositeFrom] = 'auto';
@@ -223,7 +223,7 @@ class ChatWindow extends Component {
      */
     _onClickedHeader(ev) {
         ev.stopPropagation();
-        if (this.env.entities.Device.instance.isMobile) {
+        if (this.env.messaging.device.isMobile) {
             return;
         }
         this.chatWindow.toggleFold();

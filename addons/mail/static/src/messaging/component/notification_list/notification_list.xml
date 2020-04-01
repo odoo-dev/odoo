@@ -13,7 +13,7 @@
                     <t t-if="notification.type === 'thread'">
                         <ThreadPreview
                             class="o_NotificationList_preview"
-                            t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }"
+                            t-att-class="{ 'o-mobile': env.messaging.device.isMobile }"
                             threadLocalId="notification.thread.localId"
                         />
                     </t>

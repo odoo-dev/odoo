@@ -51,7 +51,7 @@ class DiscussSidebar extends Component {
      * @returns {mail.messaging.entity.Discuss}
      */
     get discuss() {
-        return this.env.entities.Discuss.instance;
+        return this.env.messaging && this.env.messaging.discuss;
     }
 
     /**
@@ -128,7 +128,7 @@ class DiscussSidebar extends Component {
             allOrderedAndPinnedMailboxes: Thread.allOrderedAndPinnedMailboxes,
             allOrderedAndPinnedMultiUserChannels: Thread.allOrderedAndPinnedMultiUserChannels,
             allPinnedChannelAmount: Thread.allPinnedChannels.length,
-            discuss: this.env.entities.Discuss.instance,
+            discuss: this.env.messaging.discuss,
         };
     }
 

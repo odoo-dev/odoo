@@ -23,7 +23,7 @@ class DiscussSidebarItem extends Component {
             const directPartner = thread ? thread.directPartner : undefined;
             return {
                 directPartner,
-                discuss: this.env.entities.Discuss.instance,
+                discuss: this.env.messaging.discuss,
                 thread,
                 threadName: thread ? thread.displayName : undefined,
             };
@@ -54,7 +54,7 @@ class DiscussSidebarItem extends Component {
      * @returns {mail.messaging.entity.Discuss}
      */
     get discuss() {
-        return this.env.entities.Discuss.instance;
+        return this.env.messaging && this.env.messaging.discuss;
     }
 
     /**

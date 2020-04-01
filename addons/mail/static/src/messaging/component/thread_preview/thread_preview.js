@@ -30,7 +30,7 @@ class ThreadPreview extends Component {
                 lastMessageAuthor = lastMessage.author;
             }
             return {
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                isDeviceMobile: this.env.messaging.device.isMobile,
                 lastMessage,
                 lastMessageAuthor,
                 thread,

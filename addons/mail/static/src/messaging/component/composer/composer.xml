@@ -57,7 +57,7 @@
                         class="o_Composer_textInput"
                         t-att-class="{
                             'o-composer-is-compact': props.isCompact,
-                            'o_Composer_textInput-mobile': env.entities.Device.instance.isMobile,
+                            'o_Composer_textInput-mobile': env.messaging.device.isMobile,
                         }"
                         composerLocalId="composer.localId"
                         hasSendOnEnterEnabled="props.hasTextInputSendOnEnterEnabled"
@@ -66,7 +66,7 @@
                         t-on-paste="_onPasteTextInput"
                         t-ref="textInput"
                     />
-                    <div class="o_Composer_buttons" t-att-class="{ 'o-composer-is-compact': props.isCompact, 'o-mobile': env.entities.Device.instance.isMobile }">
+                    <div class="o_Composer_buttons" t-att-class="{ 'o-composer-is-compact': props.isCompact, 'o-mobile': env.messaging.device.isMobile }">
                         <div class="o_Composer_toolButtons"
                             t-att-class="{
                                 'o-composer-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
@@ -79,7 +79,7 @@
                                 <EmojisButton
                                     class="o_Composer_button o_Composer_buttonEmojis o_Composer_toolButton btn-secondary"
                                     placement="'top'"
-                                    t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }"
+                                    t-att-class="{ 'o-mobile': env.messaging.device.isMobile }"
                                     t-on-o-emoji-selection="_onEmojiSelection"
                                     t-ref="emojisButton"
                                 >
@@ -87,11 +87,11 @@
                                         <i class="fa fa-smile-o"/>
                                     </t>
                                 </EmojisButton>
-                                <button class="o_Composer_button o_Composer_buttonAttachment o_Composer_toolButton btn btn-secondary fa fa-paperclip" t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }" t-on-click="_onClickAddAttachment" title="Add attachment" type="button" aria-label="Add attachment"/>
+                                <button class="o_Composer_button o_Composer_buttonAttachment o_Composer_toolButton btn btn-secondary fa fa-paperclip" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickAddAttachment" title="Add attachment" type="button" aria-label="Add attachment"/>
                             </div>
                             <t t-if="props.isExpandable">
                                 <div class="o_Composer_secondaryToolButtons">
-                                    <button class="btn btn-secondary fa fa-expand o_Composer_button o_Composer_buttonFullComposer o_Composer_toolButton" t-att-class="{ 'o-mobile': env.entities.Device.instance.isMobile }" t-on-click="_onClickFullComposer" title="Full composer" type="button" aria-label="Full composer"/>
+                                    <button class="btn btn-secondary fa fa-expand o_Composer_button o_Composer_buttonFullComposer o_Composer_toolButton" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickFullComposer" title="Full composer" type="button" aria-label="Full composer"/>
                                 </div>
                             </t>
                         </div>
@@ -126,17 +126,17 @@
             <t t-if="props.hasSendButton">
                 <button class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary"
                         t-att-class="{
-                            'fa': env.entities.Device.instance.isMobile,
-                            'fa-paper-plane-o': env.entities.Device.instance.isMobile,
+                            'fa': env.messaging.device.isMobile,
+                            'fa-paper-plane-o': env.messaging.device.isMobile,
                             'o-composer-is-compact': props.isCompact,
                         }"
                         t-on-click="_onClickSend"
                         t-att-disabled="(!composer.textInputContent and composer.attachments.length === 0) ? 'disabled' : ''"
                         type="button">
-                    <t t-if="!env.entities.Device.instance.isMobile"><t t-if="props.isLog">Log</t><t t-else="">Send</t></t>
+                    <t t-if="!env.messaging.device.isMobile"><t t-if="props.isLog">Log</t><t t-else="">Send</t></t>
                 </button>
             </t>
-            <t t-if="!env.entities.Device.instance.isMobile and props.hasDiscardButton">
+            <t t-if="!env.messaging.device.isMobile and props.hasDiscardButton">
                 <button class="o_Composer_actionButton o_Composer_button o_Composer_buttonDiscard btn btn-secondary" t-att-class="{ 'o-composer-is-compact': props.isCompact }" t-on-click="_onClickDiscard" type="button">
                     Discard
                 </button>

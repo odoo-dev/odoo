@@ -14,12 +14,9 @@ class NotificationAlert extends Component {
         super(...args);
         useStore(props => {
             const isMessagingInitialized = this.env.isMessagingInitialized();
-            let mailbot = isMessagingInitialized
-                ? this.env.entities.Mailbot.instance
-                : undefined;
             return {
                 isMessagingInitialized,
-                mailbot,
+                isNotificationBlocked: this.isNotificationBlocked,
             };
         });
     }
@@ -35,11 +32,10 @@ class NotificationAlert extends Component {
         if (!this.env.isMessagingInitialized()) {
             return false;
         }
-        const mailbot = this.env.entities.Mailbot.instance;
         return (
-            window.Notification &&
-            window.Notification.permission !== "granted" &&
-            !mailbot.hasRequest()
+            this.env.windowNotification &&
+            this.env.windowNotification.permission !== "granted" &&
+            !this.env.messaging.constructor.isNotificationPermissionDefault()
         );
     }
 

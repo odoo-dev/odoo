@@ -19,7 +19,7 @@ function ComposerFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         discard() {
-            const discuss = this.env.entities.Discuss.instance;
+            const discuss = this.env.messaging.discuss;
             const thread = this.thread;
             if (
                 !discuss.isOpen ||

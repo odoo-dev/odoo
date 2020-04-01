@@ -19,7 +19,7 @@ class AttachmentViewer extends Component {
         super(...args);
         this.MIN_SCALE = MIN_SCALE;
         useStore(props => {
-            const attachmentViewer = this.env.entities.AttachmentViewer.instance;
+            const attachmentViewer = this.env.messaging.attachmentViewer;
             return {
                 attachment: attachmentViewer.attachment,
                 attachments: attachmentViewer.attachments,
@@ -85,7 +85,7 @@ class AttachmentViewer extends Component {
      * @returns {mail.messaging.entity.AttachmentViewer}
      */
     get attachmentViewer() {
-        return this.env.entities.AttachmentViewer.instance;
+        return this.env.messaging.attachmentViewer;
     }
 
     /**

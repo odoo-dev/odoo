@@ -7,7 +7,7 @@
                 'o-focused': chatWindow and chatWindow.isFocused,
                 'o-folded': chatWindow and chatWindow.isFolded,
                 'o-fullscreen': props.isFullscreen,
-                'o-mobile': env.entities.Device.instance.isMobile,
+                'o-mobile': env.messaging.device.isMobile,
                 'o-new-message': chatWindow and chatWindow === env.entities.ChatWindow.newMessage,
             }" t-on-click="_onClick" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window-local-id="chatWindow ? chatWindow.localId : undefined" t-att-data-thread-local-id="chatWindow ? (chatWindow.thread ? chatWindow.thread.localId : '') : undefined"
         >
@@ -25,7 +25,7 @@
                         composerAttachmentsDetailsMode="'card'"
                         hasComposer="chatWindow.thread.model !== 'mail.box'"
                         hasComposerCurrentPartnerAvatar="false"
-                        hasComposerSendButton="env.entities.Device.instance.isMobile"
+                        hasComposerSendButton="env.messaging.device.isMobile"
                         hasSquashCloseMessages="chatWindow.thread.model !== 'mail.box'"
                         haveMessagesAuthorRedirect="chatWindow.thread.channel_type !== 'chat'"
                         threadViewerLocalId="chatWindow.threadViewer.localId"

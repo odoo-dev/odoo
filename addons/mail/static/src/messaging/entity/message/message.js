@@ -179,7 +179,7 @@ function MessageFactory({ Entity }) {
         }
 
         replyTo() {
-            const discuss = this.env.entities.Discuss.instance;
+            const discuss = this.env.messaging.discuss;
             if (!discuss.isOpen) {
                 return;
             }

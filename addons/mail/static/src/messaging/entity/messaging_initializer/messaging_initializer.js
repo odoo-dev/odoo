@@ -16,22 +16,7 @@ function MessagingInitializerFactory({ Entity }) {
          * the current users. This includes pinned channels for instance.
          */
         async start() {
-            await this.env.session.is_bound;
-            this.constructor._createSingletons();
-            const device = this.env.entities.Device.instance;
-            const context = Object.assign({
-                isMobile: device.isMobile,
-            }, this.env.session.user_context);
-            const discuss = this.env.entities.Discuss.instance;
-            const data = await this.env.rpc({
-                route: '/mail/init_messaging',
-                params: { context: context }
-            });
-            this._init(data);
-            if (discuss.isOpen) {
-                discuss.openInitThread();
-            }
-            this.env.entities.Partner.startLoopFetchImStatus();
+            await this.constructor._start(this);
         }
 
         //----------------------------------------------------------------------
@@ -43,13 +28,33 @@ function MessagingInitializerFactory({ Entity }) {
          *
          * @static
          * @private
+         * @param {mail.messaging.entity.MessagingInitializer} messagingInitializer
          */
-        static _createSingletons() {
-            this.env.entities.AttachmentViewer.create(); // AKU FIXME: should not be singleton...
-            this.env.entities.Device.create();
-            this.env.entities.Discuss.create();
-            this.env.entities.Locale.create();
-            this.env.entities.MessagingMenu.create();
+        static async _start(messagingInitializer) {
+            await this.env.session.is_bound;
+
+            messagingInitializer.messaging.link({
+                attachmentViewer: this.env.entities.AttachmentViewer.create(),
+                device: this.env.entities.Device.create(),
+                discuss: this.env.entities.Discuss.create(),
+                locale: this.env.entities.Locale.create(),
+                messagingMenu: this.env.entities.MessagingMenu.create(),
+            });
+
+            const device = this.env.messaging.device;
+            const context = Object.assign({
+                isMobile: device.isMobile,
+            }, this.env.session.user_context);
+            const discuss = this.env.messaging.discuss;
+            const data = await this.env.rpc({
+                route: '/mail/init_messaging',
+                params: { context: context }
+            });
+            messagingInitializer._init(data);
+            if (discuss.isOpen) {
+                discuss.openInitThread();
+            }
+            this.env.entities.Partner.startLoopFetchImStatus();
         }
 
         /**
@@ -84,7 +89,7 @@ function MessagingInitializerFactory({ Entity }) {
             shortcodes = [],
             starred_counter = 0
         }) {
-            const discuss = this.env.entities.Discuss.instance;
+            const discuss = this.env.messaging.discuss;
             this._initPartners(partner_root);
             this._initChannels({
                 channel_slots,
@@ -110,7 +115,7 @@ function MessagingInitializerFactory({ Entity }) {
          * @param {Object[]} shortcodes
          */
         _initCannedResponses(shortcodes) {
-            const messaging = this.env.entities.Messaging.instance;
+            const messaging = this.env.messaging;
             const cannedResponses = shortcodes
                 .map(s => {
                     const { id, source, substitution } = s;
@@ -161,7 +166,7 @@ function MessagingInitializerFactory({ Entity }) {
          * @param {Object[]} commandsData
          */
         _initCommands(commandsData) {
-            const messaging = this.env.entities.Messaging.instance;
+            const messaging = this.env.messaging;
             const commands = commandsData
                 .map(command => {
                     return Object.assign({
@@ -238,7 +243,7 @@ function MessagingInitializerFactory({ Entity }) {
             for (const suggestions of mentionPartnerSuggestionsData) {
                 for (const suggestion of suggestions) {
                     const { email, id, name } = suggestion;
-                    this.env.entities.Partner.insert({ email, id, name } );
+                    this.env.entities.Partner.insert({ email, id, name });
                 }
             }
         }
@@ -270,7 +275,15 @@ function MessagingInitializerFactory({ Entity }) {
 
     }
 
-    Object.assign(MessagingInitializer, { isSingleton: true });
+    Object.assign(MessagingInitializer, {
+        relations: Object.assign({}, Entity.relations, {
+            messaging: {
+                inverse: 'initializer',
+                to: 'Messaging',
+                type: 'one2one',
+            },
+        }),
+    });
 
     return MessagingInitializer;
 }

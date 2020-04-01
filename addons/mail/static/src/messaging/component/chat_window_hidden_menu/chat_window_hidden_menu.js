@@ -19,7 +19,8 @@ class ChatWindowHiddenMenu extends Component {
         useStore(props => {
             return {
                 chatWindowVisual: this.env.entities.ChatWindow.visual,
-                device: this.env.entities.Device.instance,
+                device: this.env.messaging.device,
+                localeTextDirection: this.env.messaging.locale.textDirection,
             };
         });
         this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);
@@ -59,7 +60,7 @@ class ChatWindowHiddenMenu extends Component {
      * @private
      */
     _applyListHeight() {
-        const device = this.env.entities.Device.instance;
+        const device = this.env.messaging.device;
         const height = device.globalWindowInnerHeight / 2;
         this._listRef.el.style['max-height'] = `${height}px`;
     }
@@ -68,8 +69,8 @@ class ChatWindowHiddenMenu extends Component {
      * @private
      */
     _applyOffset() {
-        const locale = this.env.entities.Locale.instance;
-        const offsetFrom = locale.textDirection === 'rtl' ? 'left' : 'right';
+        const textDirection = this.env.messaging.locale.textDirection;
+        const offsetFrom = textDirection === 'rtl' ? 'left' : 'right';
         const oppositeFrom = offsetFrom === 'right' ? 'left' : 'right';
         const offset = this.env.entities.ChatWindow.visual.hidden.offset;
         this.el.style[offsetFrom] = `${offset}px`;

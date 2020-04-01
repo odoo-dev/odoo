@@ -10,6 +10,20 @@ function MessagingFactory({ Entity }) {
         /**
          * @override
          */
+        static create(...args) {
+            const messaging = super.create(...args);
+
+            const initializer = this.env.entities.MessagingInitializer.create();
+            messaging.link({ initializer });
+
+            const notificationHandler = this.env.entities.MessagingNotificationHandler.create();
+            messaging.link({ notificationHandler });
+
+            return messaging;
+        }
+        /**
+         * @override
+         */
         static delete() {
             this.env.call('bus_service', 'off', 'window_focus', null, this._handleGlobalWindowFocus);
             super.delete();
@@ -25,10 +39,8 @@ function MessagingFactory({ Entity }) {
         async start() {
             this._handleGlobalWindowFocus = this._handleGlobalWindowFocus.bind(this);
             this.env.call('bus_service', 'on', 'window_focus', null, this._handleGlobalWindowFocus);
-            const initializer = this.env.entities.MessagingInitializer.create();
-            const notificationHandler = this.env.entities.MessagingNotificationHandler.create();
-            await initializer.start();
-            notificationHandler.start();
+            await this.initializer.start();
+            this.notificationHandler.start();
             this.update({ isInitialized: true });
         }
 
@@ -138,13 +150,58 @@ function MessagingFactory({ Entity }) {
                 views: [[false, 'form']],
                 res_id: id,
             });
-            this.env.entities.MessagingMenu.instance.close();
+            this.messagingMenu.close();
             this.env.entities.ChatWindow.closeAll();
         }
 
     }
 
-    Object.assign(Messaging, { isSingleton: true });
+    Object.assign(Messaging, {
+        relations: Object.assign({}, Entity.relations, {
+            attachmentViewer: {
+                inverse: 'messaging',
+                isCausal: true,
+                to: 'AttachmentViewer',
+                type: 'one2one',
+            },
+            device: {
+                inverse: 'messaging',
+                isCausal: true,
+                to: 'Device',
+                type: 'one2one',
+            },
+            discuss: {
+                inverse: 'messaging',
+                isCausal: true,
+                to: 'Discuss',
+                type: 'one2one',
+            },
+            initializer: {
+                inverse: 'messaging',
+                isCausal: true,
+                to: 'MessagingInitializer',
+                type: 'one2one',
+            },
+            locale: {
+                inverse: 'messaging',
+                isCausal: true,
+                to: 'Locale',
+                type: 'one2one',
+            },
+            messagingMenu: {
+                inverse: 'messaging',
+                isCausal: true,
+                to: 'MessagingMenu',
+                type: 'one2one',
+            },
+            notificationHandler: {
+                inverse: 'messaging',
+                isCausal: true,
+                to: 'MessagingNotificationHandler',
+                type: 'one2one',
+            },
+        }),
+    });
 
     return Messaging;
 }

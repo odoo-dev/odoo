@@ -22,7 +22,7 @@ class MessageList extends Component {
             const thread = threadViewer ? threadViewer.thread : undefined;
             const threadCache = threadViewer ? threadViewer.threadCache : undefined;
             return {
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                isDeviceMobile: this.env.messaging.device.isMobile,
                 messages: threadCache ? threadCache.orderedMessages : [],
                 thread,
                 threadCache,

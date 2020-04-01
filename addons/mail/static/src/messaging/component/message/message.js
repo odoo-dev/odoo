@@ -58,7 +58,7 @@ class Message extends Component {
                 attachments: message ? message.attachments : undefined,
                 author,
                 hasMessageCheckbox: message ? message.hasCheckbox : false,
-                isDeviceMobile: this.env.entities.Device.instance.isMobile,
+                isDeviceMobile: this.env.messaging.device.isMobile,
                 isMessageChecked: message && threadViewer
                     ? message.isChecked(thread, threadStringifiedDomain)
                     : false,
@@ -420,7 +420,7 @@ class Message extends Component {
      */
     _onClick(ev) {
         if (ev.target.closest('.o_mention')) {
-            this.env.entities.Messaging.instance.redirect({
+            this.env.messaging.redirect({
                 id: Number(ev.target.dataset.oeId),
                 model: ev.target.dataset.oeModel,
             });
@@ -428,7 +428,7 @@ class Message extends Component {
             return;
         }
         if (ev.target.closest('.o_mail_redirect')) {
-            this.env.entities.Messaging.instance.redirect({
+            this.env.messaging.redirect({
                 id: Number(ev.target.dataset.oeId),
                 model: ev.target.dataset.oeModel,
             });
@@ -450,7 +450,7 @@ class Message extends Component {
         if (!this.message.author) {
             return;
         }
-        this.env.entities.Messaging.instance.redirect({
+        this.env.messaging.redirect({
             id: this.message.author.id,
             model: this.message.author.model,
         });
@@ -507,7 +507,7 @@ class Message extends Component {
      */
     _onClickOriginThread(ev) {
         ev.preventDefault();
-        this.env.entities.Messaging.instance.redirect({
+        this.env.messaging.redirect({
             id: this.message.originThread.id,
             model: this.message.originThread.model,
         });

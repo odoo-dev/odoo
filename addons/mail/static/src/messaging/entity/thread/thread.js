@@ -120,7 +120,7 @@ function ThreadFactory({ Entity }) {
                 type,
             }
         ) {
-            const device = this.env.entities.Device.instance;
+            const device = this.env.messaging.device;
             const data = await this.env.rpc({
                 model: 'mail.channel',
                 method: type === 'chat' ? 'channel_get' : 'channel_create',
@@ -207,7 +207,7 @@ function ThreadFactory({ Entity }) {
          * @static
          */
         static openNewMessage() {
-            const discuss = this.env.entities.Discuss.instance;
+            const discuss = this.env.messaging.discuss;
             if (discuss.isOpen) {
                 discuss.openNewMessage();
             } else {
@@ -349,9 +349,9 @@ function ThreadFactory({ Entity }) {
          * @param {boolean} [param0.resetDiscussDomain=false]
          */
         open({ chatWindowMode, resetDiscussDomain = false } = {}) {
-            const device = this.env.entities.Device.instance;
-            const discuss = this.env.entities.Discuss.instance;
-            const messagingMenu = this.env.entities.MessagingMenu.instance;
+            const device = this.env.messaging.device;
+            const discuss = this.env.messaging.discuss;
+            const messagingMenu = this.env.messaging.messagingMenu;
             if (
                 (!device.isMobile && discuss.isOpen) ||
                 (device.isMobile && this.model === 'mail.box')
@@ -369,7 +369,7 @@ function ThreadFactory({ Entity }) {
         }
 
         openExpanded() {
-            const discuss = this.env.entities.Discuss.instance;
+            const discuss = this.env.messaging.discuss;
             if (['mail.channel', 'mail.box'].includes(this.model)) {
                 this.env.do_action('mail.action_new_discuss', {
                     clear_breadcrumbs: false,

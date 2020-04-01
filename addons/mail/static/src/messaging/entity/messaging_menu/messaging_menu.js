@@ -104,7 +104,15 @@ function MessagingMenuFactory({ Entity }) {
 
     }
 
-    Object.assign(MessagingMenu, { isSingleton: true });
+    Object.assign(MessagingMenu, {
+        relations: Object.assign({}, Entity.relations, {
+            messaging: {
+                inverse: 'messagingMenu',
+                to: 'Messaging',
+                type: 'one2one',
+            },
+        }),
+    });
 
     return MessagingMenu;
 }

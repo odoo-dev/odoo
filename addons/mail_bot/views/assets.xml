@@ -7,7 +7,7 @@
                 <script type="text/javascript" src="/mail_bot/static/src/messaging/component/notification_alert/notification_alert.js"></script>
                 <script type="text/javascript" src="/mail_bot/static/src/messaging/component/notification_list/notification_list.js"></script>
                 <script type="text/javascript" src="/mail_bot/static/src/messaging/component/notification_request/notification_request.js"></script>
-                <script type="text/javascript" src="/mail_bot/static/src/messaging/entity/mailbot/mailbot.js"></script>
+                <script type="text/javascript" src="/mail_bot/static/src/messaging/entity/messaging/messaging.js"></script>
                 <script type="text/javascript" src="/mail_bot/static/src/messaging/entity/messaging_initializer/messaging_initializer.js"></script>
                 <script type="text/javascript" src="/mail_bot/static/src/messaging/entity/messaging_menu/messaging_menu.js"></script>
                 <script type="text/javascript" src="/mail_bot/static/src/messaging/widget/notification_alert/notification_alert.js"></script>

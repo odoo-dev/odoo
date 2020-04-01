@@ -37,15 +37,15 @@ const MessagingService = AbstractService.extend({
                 if (!this.entities) {
                     return false;
                 }
-                const messaging = this.entities.Messaging.instance;
-                if (!messaging) {
+                if (!this.messaging) {
                     return false;
                 }
-                return messaging.isInitialized;
+                return this.messaging.isInitialized;
             },
             messagingBus: new EventBus(),
             rpc: (...args) => this._rpc(...args),
-            trigger_up: (...args) => this.trigger_up(...args)
+            trigger_up: (...args) => this.trigger_up(...args),
+            windowNotification: window.Notification,
         });
 
         /**
@@ -84,6 +84,7 @@ const MessagingService = AbstractService.extend({
      */
     destroy(...args) {
         this._super(...args);
+        this.env.messaging = undefined;
         if (this.env.entities && this.env.entities.Entity) {
             const { Entity } = this.env.entities;
             while (Entity.all.length > 0) {
@@ -196,9 +197,9 @@ const MessagingService = AbstractService.extend({
             Entity.init();
         }
 
-        const messaging = env.entities.Messaging.create();
+        env.messaging = env.entities.Messaging.create();
         messagingCreatedPromiseResolve();
-        await messaging.start();
+        await env.messaging.start();
         messagingInitializedPromiseResolve();
     },
 });

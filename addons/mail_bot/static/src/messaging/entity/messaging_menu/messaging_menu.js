@@ -19,9 +19,8 @@ registerClassPatchEntity('MessagingMenu', 'mail_bot.messaging.entity.MessagingMe
      * @override
      */
     _updateCounter() {
-        const mailbot = this.env.entities.Mailbot.instance;
         let res = this._super();
-        if (mailbot && mailbot.hasRequest()) {
+        if (this.env.messaging.constructor.isNotificationPermissionDefault()) {
             res += 1;
         }
         return res;

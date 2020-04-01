@@ -32,15 +32,15 @@ function _getEntryFromEntityName(entityName) {
  * @param {string} patchName
  * @param {Object} patch
  * @param {Object} [param3={}]
- * @param {Object} [param3.isOnClass=false]
+ * @param {string} [param3.type='instance'] 'instance', 'class' or 'relation'
  */
-function _registerPatchEntity(entityName, patchName, patch, { isOnClass = false } = {}) {
+function _registerPatchEntity(entityName, patchName, patch, { type = 'instance' } = {}) {
     const entry = _getEntryFromEntityName(entityName);
     Object.assign(entry, {
         patches: (entry.patches || []).concat([{
-            isOnClass,
             name: patchName,
             patch,
+            type,
         }]),
     });
 }
@@ -159,7 +159,7 @@ function generateEntities() {
     const generatedNames = [];
     let toGenerateNames = [...allNames];
     while (toGenerateNames.length > 0) {
-        const generateable = toGenerateNames.map(name => registry[name]).find(entry => {
+        const generatable = toGenerateNames.map(name => registry[name]).find(entry => {
             let isGenerateable = true;
             for (const dependencyName of entry.dependencies) {
                 if (!generatedNames.includes(dependencyName)) {
@@ -168,15 +168,21 @@ function generateEntities() {
             }
             return isGenerateable;
         });
-        if (!generateable) {
+        if (!generatable) {
             throw new Error(`Cannot generate following Entity classes: ${toGenerateNames.split(', ')}`);
         }
-        const Entity = generateable.factory(Entities);
-        for (const patch of generateable.patches) {
-            if (patch.isOnClass) {
-                patchClassMethods(Entity, patch.name, patch.patch);
-            } else {
-                patchInstanceMethods(Entity, patch.name, patch.patch);
+        const Entity = generatable.factory(Entities);
+        for (const patch of generatable.patches) {
+            switch (patch.type) {
+                case 'class':
+                    patchClassMethods(Entity, patch.name, patch.patch);
+                    break;
+                case 'instance':
+                    patchInstanceMethods(Entity, patch.name, patch.patch);
+                    break;
+                case 'relation':
+                    Object.assign(Entity.relations, patch.patch);
+                    break;
             }
         }
         Entities[Entity.name] = Entity;
@@ -193,7 +199,7 @@ function generateEntities() {
  * @param {Object} patch
  */
 function registerClassPatchEntity(entityName, patchName, patch) {
-    _registerPatchEntity(entityName, patchName, patch, { isOnClass: true });
+    _registerPatchEntity(entityName, patchName, patch, { type: 'class' });
 }
 
 /**
@@ -231,6 +237,17 @@ function registerNewEntity(name, factory, dependencies = []) {
     });
 }
 
+
+/**
+ *
+ * @param {string} entityName
+ * @param {string} patchName
+ * @param {Object} patch
+ */
+function registerRelationPatchEntity(entityName, patchName, patch) {
+    _registerPatchEntity(entityName, patchName, patch, { type: 'relation' });
+}
+
 //------------------------------------------------------------------------------
 // Export
 //------------------------------------------------------------------------------
@@ -241,6 +258,7 @@ return {
     registerClassPatchEntity,
     registerInstancePatchEntity,
     registerNewEntity,
+    registerRelationPatchEntity,
 };
 
 });
