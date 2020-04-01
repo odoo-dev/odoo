@@ -5,13 +5,11 @@ const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
-    getServices,
-    patchMessagingService,
     pause,
+    start,
 } = require('mail.messaging.testUtils');
 
 const FormView = require('web.FormView');
-const { createView } = require('web.test_utils');
 
 QUnit.module('mail_bot', {}, function () {
 QUnit.module('messaging', {}, function () {
@@ -30,31 +28,26 @@ QUnit.test('notification_alert widget: display blocked notification alert', asyn
 
     window.Notification.permission = 'denied';
 
-    const services = getServices();
-    const { unpatch: unpatchMessagingService } = patchMessagingService(services.messaging, {
-        withMailbotHasRequestDefaultPatch: false,
-    });
-
-    const form = await createView({
+    const { widget } = await start({
+        data: this.data,
+        hasView: true,
+        // View params
         View: FormView,
         model: 'mail.message',
-        data: this.data,
         arch: `
             <form>
                 <widget name="notification_alert"/>
             </form>`,
-        services,
     });
     await afterNextRender();
-    assert.containsOnce(form, '.o_notification_alert', "Blocked notification alert should be displayed");
+    assert.containsOnce(document.body, '.o_notification_alert', "Blocked notification alert should be displayed");
 
     window.Notification.permission = 'granted';
-    await form.reload();
-    afterNextRender();
-    assert.containsNone(form, '.o_notification_alert', "Blocked notification alert should not be displayed");
+    widget.reload();
+    await afterNextRender();
+    assert.containsNone(document.body, '.o_notification_alert', "Blocked notification alert should not be displayed");
 
-    unpatchMessagingService();
-    form.destroy();
+    widget.destroy();
 });
 
 });
