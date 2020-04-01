@@ -21,7 +21,11 @@ class ThreadPreview extends Component {
             const thread = this.env.entities.Thread.get(props.thread);
             const mainThreadCache = thread ? thread.mainCache : undefined;
             let lastMessageAuthor;
-            const { length: l, [l - 1]: lastMessage } = mainThreadCache.orderedMessages;
+            let lastMessage;
+            if (thread) {
+                const orderedMessages = mainThreadCache.orderedMessages;
+                lastMessage = orderedMessages[orderedMessages.length - 1];
+            }
             if (lastMessage) {
                 lastMessageAuthor = lastMessage.author;
             }
