@@ -9,8 +9,6 @@ const {
     start: utilsStart,
 } = require('mail.messaging.testUtils');
 
-const { makeTestPromise } = require('web.test_utils');
-
 QUnit.module('mail_bot', {}, function () {
 QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
@@ -44,7 +42,7 @@ QUnit.test('rendering with OdooBot has a request (default)', async function (ass
             }
             return this._super(...arguments);
         },
-        withWindowNotification: {
+        'window.Notification': {
             permission: 'default',
         },
     });
@@ -83,7 +81,7 @@ QUnit.test('rendering without OdooBot has a request (denied)', async function (a
             }
             return this._super(...arguments);
         },
-        withWindowNotification: {
+        'window.Notification': {
             permission: 'denied',
         },
     });
@@ -113,7 +111,7 @@ QUnit.test('rendering without OdooBot has a request (accepted)', async function 
             }
             return this._super(...arguments);
         },
-        withWindowNotification: {
+        'window.Notification': {
             permission: 'granted',
         },
     });
@@ -136,8 +134,6 @@ QUnit.test('rendering without OdooBot has a request (accepted)', async function 
 QUnit.test('respond to notification prompt (denied)', async function (assert) {
     assert.expect(3);
 
-    const self = this;
-
     await this.start({
         async mockRPC(route, args) {
             if (args.method === 'channel_fetch_preview') {
@@ -145,11 +141,11 @@ QUnit.test('respond to notification prompt (denied)', async function (assert) {
             }
             return this._super(...arguments);
         },
-        withWindowNotification: {
+        'window.Notification': {
             permission: 'default',
             requestPermission() {
-                self.env.windowNotification.permission = 'denied';
-                return makeTestPromise().resolve(self.env.windowNotification.permission);
+                this.permission = 'denied';
+                return Promise.resolve(this.permission);
             },
         },
     });

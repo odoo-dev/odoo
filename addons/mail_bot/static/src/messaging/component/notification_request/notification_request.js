@@ -50,7 +50,7 @@ class NotificationRequest extends Component {
      */
     _handleResponseNotificationPermission(value) {
         // manually force recompute because the permission is not in the store
-        this.env.messagingMenu.update();
+        this.env.messaging.messagingMenu.update();
         if (value !== 'granted') {
             this.env.call('bus_service', 'sendNotification',
                 this.env._t("Permission denied"),
@@ -67,7 +67,8 @@ class NotificationRequest extends Component {
      * @private
      */
     _onClick() {
-        const def = window.Notification && window.Notification.requestPermission();
+        const windowNotification = this.env.window.Notification;
+        const def = windowNotification && windowNotification.requestPermission();
         if (def) {
             def.then(this._handleResponseNotificationPermission.bind(this));
         }

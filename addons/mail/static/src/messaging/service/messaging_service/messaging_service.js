@@ -45,7 +45,6 @@ const MessagingService = AbstractService.extend({
             messagingBus: new EventBus(),
             rpc: (...args) => this._rpc(...args),
             trigger_up: (...args) => this.trigger_up(...args),
-            windowNotification: window.Notification,
         });
 
         /**

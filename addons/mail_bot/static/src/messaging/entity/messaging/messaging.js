@@ -12,8 +12,9 @@ registerClassPatchEntity('Messaging', 'mail_bot.messaging.entity.Messaging', {
      * @returns {boolean}
      */
     isNotificationPermissionDefault() {
-        return this.env.windowNotification
-            ? this.env.windowNotification.permission === 'default'
+        const windowNotification = this.env.window.Notification;
+        return windowNotification
+            ? windowNotification.permission === 'default'
             : false;
     },
 });

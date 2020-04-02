@@ -309,14 +309,11 @@ function ChatWindowFactory({ Entity }) {
          */
         static get visual() {
             let visual = JSON.parse(JSON.stringify(BASE_VISUAL));
-            if (!this.env.entities.Device || !this.env.entities.Discuss) {
+            if (!this.env.messaging || !this.env.messaging.isInitialized) {
                 return visual;
             }
             const device = this.env.messaging.device;
             const discuss = this.env.messaging.discuss;
-            if (!device || !discuss) {
-                return visual;
-            }
             const BETWEEN_GAP_WIDTH = 5;
             const CHAT_WINDOW_WIDTH = 325;
             const END_GAP_WIDTH = device.isMobile ? 0 : 10;

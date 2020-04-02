@@ -350,6 +350,7 @@ function DiscussFactory({ Entity }) {
             },
         }),
     });
+
     return Discuss;
 }
 

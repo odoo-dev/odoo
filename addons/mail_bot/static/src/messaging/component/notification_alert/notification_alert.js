@@ -32,9 +32,10 @@ class NotificationAlert extends Component {
         if (!this.env.isMessagingInitialized()) {
             return false;
         }
+        const windowNotification = this.env.window.Notification;
         return (
-            this.env.windowNotification &&
-            this.env.windowNotification.permission !== "granted" &&
+            windowNotification &&
+            windowNotification.permission !== "granted" &&
             !this.env.messaging.constructor.isNotificationPermissionDefault()
         );
     }

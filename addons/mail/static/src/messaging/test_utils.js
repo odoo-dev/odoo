@@ -430,7 +430,6 @@ function beforeEach(self) {
         '_.debounce': _.debounce,
         '_.throttle': _.throttle,
         'window.fetch': window.fetch,
-        'window.Notification': window.Notification,
     };
 
     (function patch() {
@@ -459,16 +458,12 @@ function beforeEach(self) {
                 }
             };
         };
-        window.Notification = {
-            permission: "denied",
-        };
     })();
 
     function unpatch() {
         _.debounce = originals['_.debounce'];
         _.throttle = originals['_.throttle'];
         window.fetch = originals['window.fetch'];
-        window.Notification = originals['window.Notification'];
     }
 
     Object.assign(self, { data, unpatch });
@@ -530,7 +525,7 @@ async function pause() {
  * @param {Object} [param0.viewOptions] makes only sense when `param0.hasView`
  *   is set: the view options to use in createView.
  * @param {boolean} [param0.waitUntilMessagingInitialized=true]
- * @param {Object} [param0.withWindowNotification]
+ * @param {Object} [param0.'window.Notification']
  * @param {...Object} [param0.kwargs]
  * @returns {Object}
  */
@@ -572,7 +567,7 @@ async function start(param0 = {}) {
     const {
         services = getServices({ hasChatWindow, debug }),
         session = {},
-        withWindowNotification,
+        'window.Notification': windowNotification,
     } = param0;
     initCallbacks.forEach(callback => callback(param0));
     const kwargs = Object.assign({
@@ -594,7 +589,7 @@ async function start(param0 = {}) {
     } = patchMessagingService(services.messaging, {
         onBeforeGenerateEntities,
         session,
-        withWindowNotification,
+        'window.Notification': windowNotification,
     });
 
     let widget;
@@ -719,7 +714,7 @@ function pasteFiles(el, files) {
  * @param {Object} [param1={}]
  * @param {function} [param1.onBeforeGenerateEntities]
  * @param {Object} [param1.session={}]
- * @param {Object} [param1.withWindowNotification={}]
+ * @param {Object} [param1.'window.Notification']
  * @returns {Object}
  *   - `messagingCreatedPromise`, a promise that is resolved just after
  *     messaging has been created.
@@ -730,7 +725,7 @@ function pasteFiles(el, files) {
 function patchMessagingService(MessagingService, {
     onBeforeGenerateEntities,
     session = {},
-    withWindowNotification = { permission: 'denied' },
+    'window.Notification': windowNotification,
 } = {}) {
     const _t = s => s;
     _t.database = {
@@ -738,24 +733,26 @@ function patchMessagingService(MessagingService, {
     };
     const messagingCreatedPromise = makeTestPromise();
     const messagingInitializedPromise = makeTestPromise();
+    const env = {
+        _t,
+        session: Object.assign({
+            is_bound: Promise.resolve(),
+            name: 'Admin',
+            partner_display_name: 'Mitchell Admin',
+            partner_id: 3,
+            url: s => s,
+            userId: 2,
+        }, session),
+        window: {},
+    };
+    if (windowNotification) {
+        env.window.Notification = windowNotification;
+    }
     legacyPatch(MessagingService, {
-        initialEnv: makeTestEnvironment({
-            _t,
-            session: Object.assign({
-                is_bound: Promise.resolve(),
-                name: 'Admin',
-                partner_display_name: 'Mitchell Admin',
-                partner_id: 3,
-                url: s => s,
-                userId: 2,
-            }, session),
-        }),
+        initialEnv: makeTestEnvironment(env),
         start(...args) {
             this._super(...args);
             this.env.disableAnimation = true;
-            if (withWindowNotification) {
-                Object.assign(this.env.windowNotification, withWindowNotification);
-            }
             // simulate all JS resources have been loaded
             const {
                 messagingCreatedPromise: createdPromise,
