@@ -9,6 +9,7 @@ from lxml import html
 from werkzeug import urls
 
 from odoo import tools, models, fields, api, _
+from odoo.exceptions import UserError
 
 
 class LinkTracker(models.Model):
@@ -102,6 +103,51 @@ class LinkTracker(models.Model):
 
         return title
 
+    @api.constrains('url', 'campaign_id', 'medium_id', 'source_id')
+    def _check_unicity(self):
+        """
+        Can not be implemented in SQL because we want to care about null values.
+        """
+        # build a query to fetch all needed link trackers at once
+        search_query = []
+        for tracker in self:
+            search_query = ['|'] + search_query + [
+                '&', '&', '&',
+                ('url', '=', tracker.url),
+                ('campaign_id', '=', tracker.campaign_id.id),
+                ('medium_id', '=', tracker.medium_id.id),
+                ('source_id', '=', tracker.source_id.id)
+            ]
+        all_link_trackers = self.search(search_query[1:])
+
+        # check for unicity
+        for tracker in self:
+            if all_link_trackers.filtered(
+                lambda l: l.url == tracker.url
+                and l.campaign_id == tracker.campaign_id
+                and l.medium_id == tracker.medium_id
+                and l.source_id == tracker.source_id
+            ) != tracker:
+                raise UserError(_('Link Tracker values must be unique'))
+
+    @api.model
+    def search_or_create(self, vals):
+        if 'url' not in vals:
+            raise ValueError('URL field required')
+        vals['url'] = tools.validate_url(vals['url'])
+
+        search_domain = [
+            (fname, '=', value)
+            for fname, value in vals.items()
+            if fname in ['url', 'campaign_id', 'medium_id', 'source_id']
+        ]
+        result = self.search(search_domain, limit=1)
+
+        if result:
+            return result
+
+        return self.create(vals)
+
     @api.model
     def create(self, vals):
         create_vals = vals.copy()
@@ -110,17 +156,6 @@ class LinkTracker(models.Model):
             raise ValueError('URL field required')
         else:
             create_vals['url'] = tools.validate_url(vals['url'])
-
-        search_domain = [
-            (fname, '=', value)
-            for fname, value in create_vals.items()
-            if fname in ['url', 'campaign_id', 'medium_id', 'source_id']
-        ]
-
-        result = self.search(search_domain, limit=1)
-
-        if result:
-            return result
 
         if not create_vals.get('title'):
             create_vals['title'] = self._get_title_from_url(create_vals['url'])
@@ -177,10 +212,6 @@ class LinkTracker(models.Model):
             return None
 
         return code_rec.link_id.redirected_url
-
-    _sql_constraints = [
-        ('url_utms_uniq', 'unique (url, campaign_id, medium_id, source_id)', 'The URL and the UTM combination must be unique')
-    ]
 
 
 class LinkTrackerCode(models.Model):

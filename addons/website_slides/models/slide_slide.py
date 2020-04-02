@@ -392,7 +392,7 @@ class Slide(models.Model):
                 base_url = slide.channel_id.get_base_url()
                 # link_tracker is not in dependencies, so use it to shorten url only if installed.
                 if self.env.registry.get('link.tracker'):
-                    url = self.env['link.tracker'].sudo().create({
+                    url = self.env['link.tracker'].sudo().search_or_create({
                         'url': '%s/slides/slide/%s' % (base_url, slug(slide)),
                         'title': slide.name,
                     }).short_url
