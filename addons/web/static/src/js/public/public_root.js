@@ -3,10 +3,10 @@ odoo.define('web.public.root', function (require) {
 
 var ajax = require('web.ajax');
 var dom = require('web.dom');
-var ServiceProviderMixin = require('web.ServiceProviderMixin');
 var session = require('web.session');
 var utils = require('web.utils');
 var publicWidget = require('web.public.widget');
+const publicEnv = require('web.public_env');
 
 var publicRootRegistry = new publicWidget.RootWidgetRegistry();
 
@@ -25,12 +25,14 @@ var localeDef = ajax.loadJS('/web/webclient/locale/' + lang.replace('-', '_'));
  * this Class instance. Its main role will be to retrieve RPC demands from its
  * children and handle them.
  */
-var PublicRoot = publicWidget.RootWidget.extend(ServiceProviderMixin, {
+var PublicRoot = publicWidget.RootWidget.extend({
+    env: publicEnv,
     events: _.extend({}, publicWidget.RootWidget.prototype.events || {}, {
         'submit .js_website_submit_form': '_onWebsiteFormSubmit',
         'click .js_disable_on_click': '_onDisableOnClick',
     }),
     custom_events: _.extend({}, publicWidget.RootWidget.prototype.custom_events || {}, {
+        'call_service': '_call_service',
         'context_get': '_onContextGet',
         'main_object_request': '_onMainObjectRequest',
         'widgets_start_request': '_onWidgetsStartRequest',
@@ -42,7 +44,6 @@ var PublicRoot = publicWidget.RootWidget.extend(ServiceProviderMixin, {
      */
     init: function () {
         this._super.apply(this, arguments);
-        ServiceProviderMixin.init.call(this);
         this.publicWidgets = [];
     },
     /**
@@ -91,9 +92,10 @@ var PublicRoot = publicWidget.RootWidget.extend(ServiceProviderMixin, {
     //--------------------------------------------------------------------------
 
     /**
-     * Automatically adds the global context to RPCs.
+     * Forwards service calls to the environment.
      *
-     * @override
+     * @private
+     * @param {OdooEvent} event
      */
     _call_service: function (ev) {
         if (ev.data.service === 'ajax' && ev.data.method === 'rpc') {
@@ -111,7 +113,10 @@ var PublicRoot = publicWidget.RootWidget.extend(ServiceProviderMixin, {
         } else if (ev.data.service === 'ajax' && ev.data.method === 'loadLibs') {
             ev.data.args[1] = _computeContext.call(this, ev.data.args[1]);
         }
-        return ServiceProviderMixin._call_service.apply(this, arguments);
+        const service = this.env.services[ev.data.service];
+        const result = service[ev.data.method](...ev.data.args);
+        ev.data.callback(result);
+        return result;
 
         function _computeContext(context, noContextKeys) {
             context = _.extend({}, this._getContext(), context);
