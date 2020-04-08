@@ -185,6 +185,9 @@ function ThreadCacheFactory({ Entity }) {
                 let message = this.env.entities.Message.insert(data);
                 this.link({ messages: message });
             }
+            for (const viewer of this.thread.viewers) {
+                viewer.handleThreadCacheLoaded(this);
+            }
         }
 
         /**

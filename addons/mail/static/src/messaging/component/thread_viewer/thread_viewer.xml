@@ -4,12 +4,12 @@
     <t t-name="mail.messaging.component.ThreadViewer" owl="1">
         <div class="o_ThreadViewer" t-att-data-thread-local-id="threadViewer and threadViewer.thread and threadViewer.thread.localId">
             <t t-if="threadViewer">
-                <t t-if="!threadViewer.threadCache.isLoaded or threadViewer.threadCache.isLoading" name="loadingCondition">
+                <t t-if="threadViewer.isShowingLoading" name="loadingCondition">
                     <div class="o_ThreadViewer_loading">
                         <span><i class="o_ThreadViewer_loadingIcon fa fa-spinner fa-spin" title="Loading..." role="img" aria-label="Loading..."/>Loading...</span>
                     </div>
                 </t>
-                <t t-else="">
+                <t t-elif="threadViewer.threadCache.isLoaded">
                     <MessageList
                         class="o_ThreadViewer_messageList"
                         hasMessageCheckbox="props.hasMessageCheckbox"

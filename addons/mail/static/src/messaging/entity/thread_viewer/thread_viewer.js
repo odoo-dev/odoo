@@ -12,6 +12,14 @@ function ThreadViewerFactory({ Entity }) {
 
     class ThreadViewer extends Entity {
 
+        /**
+         * @override
+         */
+        delete() {
+            this._stopLoading();
+            super.delete();
+        }
+
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
@@ -44,6 +52,16 @@ function ThreadViewerFactory({ Entity }) {
                 return [];
             }
             return threadCache.checkedMessages;
+        }
+
+        /**
+         * @param {mail.messaging.entity.ThreadCache} threadCache
+         */
+        handleThreadCacheLoaded(threadCache) {
+            if (threadCache !== this.threadCache) {
+                return;
+            }
+            this._stopLoading();
         }
 
         /**
@@ -126,6 +144,27 @@ function ThreadViewerFactory({ Entity }) {
 
         /**
          * @private
+         */
+        _prepareLoading() {
+            this._isPreparingLoading = true;
+            this._loaderTimeout = setTimeout(() => {
+                this.isShowingLoading = true;
+                this._isPreparingLoading = false;
+            }, 400);
+        }
+
+        /**
+         * @private
+         */
+        _stopLoading() {
+            clearTimeout(this._loaderTimeout);
+            this._loaderTimeout = null;
+            this.isShowingLoading = false;
+            this._isPreparingLoading = false;
+        }
+
+        /**
+         * @private
          * @param {string} hintType
          * @param {any} hintData
          * @returns {Object}
@@ -196,13 +235,22 @@ function ThreadViewerFactory({ Entity }) {
             });
 
             if (thread && this.thread !== thread) {
+                this._stopLoading();
                 this.link({ thread });
                 if (!this.threadCache.isLoaded && !this.threadCache.isLoading) {
                     this.threadCache.loadMessages();
                 }
             }
             if (this.threadCache !== prevThreadCache) {
+                this._stopLoading();
                 this._writeComponentHint('change-of-thread-cache');
+            }
+
+            if (
+                this.thread && this.threadCache.isLoading &&
+                !this.isShowingLoading && !this._isPreparingLoading
+            ) {
+                this._prepareLoading();
             }
         }
 
