@@ -208,15 +208,6 @@ var Thread = AbstractThread.extend(ServicesMixin, {
         return this._detached;
     },
     /**
-     * States whether the thread is linked to a document
-     * By default, threads are not linked to a document.
-     *
-     * @returns {boolean}
-     */
-    isLinkedToDocument: function () {
-        return false;
-    },
-    /**
      * States whether this thread has the mass mailing setting active or not.
      * This is a server-side setting, that determine the type of composer that
      * is used (basic or extended composer).
@@ -226,25 +217,6 @@ var Thread = AbstractThread.extend(ServicesMixin, {
      * @return {boolean}
      */
     isMassMailing: function () {
-        return false;
-    },
-    /**
-
-     * States whether the thread is moderated or not.
-     * By default, threads are not moderated.
-     *
-     * @returns {boolean}
-     */
-    isModerated: function () {
-        return false;
-    },
-    /**
-     * States whether the current user is moderator of this thread.
-     * By default, the current user is not moderator of this thread.
-     *
-     * @returns {boolean}
-     */
-    isMyselfModerator: function () {
         return false;
     },
     /**

@@ -37,14 +37,10 @@ var ThreadWidget = Widget.extend({
         'click .o_attachment_view': '_onAttachmentView',
         'click .o_attachment_delete_cross': '_onDeleteAttachment',
         'click .o_thread_message_needaction': '_onClickMessageNeedaction',
-        'click .o_thread_message_star': '_onClickMessageStar',
         'click .o_thread_message_reply': '_onClickMessageReply',
         'click .oe_mail_expand': '_onClickMailExpand',
         'click .o_thread_message': '_onClickMessage',
         'click': '_onClick',
-        'click .o_thread_message_notification_error': '_onClickMessageNotificationError',
-        'click .o_thread_message_moderation': '_onClickMessageModeration',
-        'change .moderation_checkbox': '_onChangeModerationCheckbox',
     },
 
     /**
@@ -60,12 +56,10 @@ var ThreadWidget = Widget.extend({
         this._enabledOptions = _.defaults(options || {}, {
             displayOrder: ORDER.ASC,
             displayMarkAsRead: true,
-            displayModerationCommands: false,
             displayStars: true,
             displayDocumentLinks: true,
             displayAvatars: true,
             squashCloseMessages: true,
-            displayNotificationIcons: true,
             displayReplyIcons: false,
             loadMoreOnScroll: false,
             hasMessageAttachmentDeletable: false,
@@ -74,12 +68,10 @@ var ThreadWidget = Widget.extend({
         this._disabledOptions = {
             displayOrder: this._enabledOptions.displayOrder,
             displayMarkAsRead: false,
-            displayModerationCommands: false,
             displayStars: false,
             displayDocumentLinks: false,
             displayAvatars: this._enabledOptions.displayAvatars,
             squashCloseMessages: false,
-            displayNotificationIcons: false,
             displayReplyIcons: false,
             loadMoreOnScroll: this._enabledOptions.loadMoreOnScroll,
             hasMessageAttachmentDeletable: false,
@@ -214,7 +206,6 @@ var ThreadWidget = Widget.extend({
             }, 1000*60);
         }
 
-        this._renderMessageNotificationPopover(messages);
         if (thread.hasSeenFeature()) {
             this._renderMessageSeenPopover(thread, messages);
         }
@@ -313,15 +304,6 @@ var ThreadWidget = Widget.extend({
         } else {
             this.scrollToBottom();
         }
-    },
-    /**
-     * Toggle all the moderation checkboxes in the thread
-     *
-     * @param {boolean} checked if true, check the boxes,
-     *      otherwise uncheck them.
-     */
-    toggleModerationCheckboxes: function (checked) {
-        this.$('.moderation_checkbox').prop('checked', checked);
     },
     /**
      * Unselect the selected message
@@ -453,40 +435,6 @@ var ThreadWidget = Widget.extend({
         }
     }, 500, true),
     /**
-     * Render the popover when mouse-hovering on the notification icon of a
-     * message in the thread.
-     * There is at most one such popover at any given time.
-     *
-     * @private
-     * @param {mail.model.AbstractMessage[]} messages list of messages in the
-     *   rendered thread, for which popover on mouseover interaction is
-     *   permitted.
-     */
-    _renderMessageNotificationPopover(messages) {
-        if (this._messageMailPopover) {
-            this._messageMailPopover.popover('hide');
-        }
-        if (!this.$('.o_thread_tooltip').length) {
-            return;
-        }
-        this._messageMailPopover = this.$('.o_thread_tooltip').popover({
-            html: true,
-            boundary: 'viewport',
-            placement: 'auto',
-            trigger: 'hover',
-            offset: '0, 1',
-            content: function () {
-                var messageID = $(this).data('message-id');
-                var message = _.find(messages, function (message) {
-                    return message.getID() === messageID;
-                });
-                return QWeb.render('mail.widget.Thread.Message.MailTooltip', {
-                    notifications: message.getNotifications(),
-                });
-            },
-        });
-    },
-    /**
      * Render the popover when mouse hovering on the seen icon of a message
      * in the thread. Only seen icons in non-squashed message have popover,
      * because squashed messages hides this icon on message mouseover.
@@ -565,13 +513,6 @@ var ThreadWidget = Widget.extend({
     },
     /**
      * @private
-     * @param {MouseEvent} ev
-     */
-    _onChangeModerationCheckbox: function (ev) {
-        this.trigger_up('update_moderation_buttons');
-    },
-    /**
-     * @private
      */
     _onClick: function () {
         if (this._selectedMessageID) {
@@ -605,18 +546,6 @@ var ThreadWidget = Widget.extend({
      * @private
      * @param {MouseEvent} ev
      */
-    _onClickMessageNotificationError(ev) {
-        const messageID = $(ev.currentTarget).data('message-id');
-        this.do_action('mail.mail_resend_message_action', {
-            additional_context: {
-                mail_message_to_resend: messageID,
-            }
-        });
-    },
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
     _onClickMessageReply: function (ev) {
         this._selectedMessageID = $(ev.currentTarget).data('message-id');
         this.$('.o_thread_message').removeClass('o_thread_selected_message');
@@ -624,27 +553,6 @@ var ThreadWidget = Widget.extend({
             .addClass('o_thread_selected_message');
         this.trigger('select_message', this._selectedMessageID);
         ev.stopPropagation();
-    },
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickMessageStar: function (ev) {
-        var messageID = $(ev.currentTarget).data('message-id');
-        this.trigger('toggle_star_status', messageID);
-    },
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickMessageModeration: function (ev) {
-        var $button = $(ev.currentTarget);
-        var messageID = $button.data('message-id');
-        var decision = $button.data('decision');
-        this.trigger_up('message_moderation', {
-            messageID: messageID,
-            decision: decision,
-        });
     },
     /**
      * @private

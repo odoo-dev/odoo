@@ -75,14 +75,6 @@ var AbstractThread = Class.extend(Mixins.EventDispatcherMixin, {
         return this._name;
     },
     /**
-     * By default, threads do not have out-of-office feature
-     *
-     * @return {string|undefined}
-     */
-    getOutOfOfficeInfo: function () {
-        return undefined;
-    },
-    /**
      * Get the status of the thread (e.g. 'online', 'offline', etc.)
      *
      * @returns {string}
@@ -112,12 +104,6 @@ var AbstractThread = Class.extend(Mixins.EventDispatcherMixin, {
         return !_.isEmpty(this.getMessages());
     },
     /**
-     * @return {boolean}
-     */
-    hasOutOfOffice() {
-        return !!this.getOutOfOfficeInfo();
-    },
-    /**
      * States whether this thread is compatible with the 'seen' feature.
      * By default, threads do not have thsi feature active.
      * @see {mail.model.ThreadSeenMixin} to enable this feature on a thread.
@@ -125,16 +111,6 @@ var AbstractThread = Class.extend(Mixins.EventDispatcherMixin, {
      * @returns {boolean}
      */
     hasSeenFeature: function () {
-        return false;
-    },
-    /**
-     * States whether this thread is compatible with the 'is typing...' feature.
-     * By default, threads do not have this feature active.
-     * @see {mail.model.ThreadTypingMixin} to enable this feature on a thread.
-     *
-     * @returns {boolean}
-     */
-    hasTypingNotification: function () {
         return false;
     },
     /**

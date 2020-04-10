@@ -29,7 +29,6 @@ var AbstractService = require('web.AbstractService');
 var DMChat = require('mail.model.DMChat');
 var Livechat = require('mail.model.Livechat');
 var Mailbox = require('mail.model.Mailbox');
-var MailFailure = require('mail.model.MailFailure');
 var Message = require('mail.model.Message');
 var MultiUserChannel = require('mail.model.MultiUserChannel');
 var mailUtils = require('mail.utils');
@@ -63,6 +62,8 @@ var MailManager =  AbstractService.extend({
         this._initializeInternalState();
         this._listenOnBuses();
         this._fetchMailStateFromServer();
+
+        window.mail_manager = this;
     },
 
     //--------------------------------------------------------------------------
@@ -74,7 +75,6 @@ var MailManager =  AbstractService.extend({
      *
      * @param {Object} data message data
      * @param {integer} data.id
-     * @param {string} [data.moderation_status]
      * @param {Object} [options]
      * @param {Array} [options.domain]
      * @param {boolean} [options.incrementUnread] whether we should increment
@@ -90,11 +90,6 @@ var MailManager =  AbstractService.extend({
         if (!message) {
             prom = this._addNewMessage(data, options);
         } else {
-            if (data.moderation_status === 'accepted') {
-                message.setModerationStatus('accepted', {
-                    additionalThreadIDs: data.channel_ids
-                });
-            }
             this._addMessageToThreads(message, options);
             prom = Promise.resolve(message);
         }
@@ -196,14 +191,6 @@ var MailManager =  AbstractService.extend({
         });
     },
     /**
-     * Returns a list of mail failures
-     *
-     * @returns {mail.model.MailFailure[]} list of mail failures
-     */
-    getMailFailures: function () {
-        return this._mailFailures;
-    },
-    /**
      * Get partners as mentions from a chatter
      * Typically all employees as partner suggestions.
      *
@@ -236,24 +223,14 @@ var MailManager =  AbstractService.extend({
 
         var channelDef = this._getSystrayChannelPreviews(filter);
         var inboxDef = this._getSystrayInboxPreviews(filter);
-        var failureDef = this._getSystrayMailFailurePreviews(filter);
 
-        return Promise.all([channelDef, inboxDef, failureDef])
+        return Promise.all([channelDef, inboxDef])
             .then(function (result) { //previewsChannel, previewsInbox, previewsFailure
                 // order: failures > inbox > channel, each group must be sorted
                 var previewsChannel = self._sortPreviews(result[0]);
                 var previewsInbox = self._sortPreviews(result[1]);
-                var previewsFailure = self._sortPreviews(result[2]);
-                return _.union(previewsFailure, previewsInbox, previewsChannel);
+                return _.union(previewsInbox, previewsChannel);
             });
-    },
-    /**
-     * Get the list of channel IDs where the current user is a moderator
-     *
-     * @returns {integer[]}
-     */
-    getModeratedChannelIDs: function () {
-        return this._moderatedChannelIDs || [];
     },
     /**
      * Get the OdooBot ID, which is the default authorID for transient messages
@@ -281,14 +258,6 @@ var MailManager =  AbstractService.extend({
      */
     getThreads: function () {
         return this._threads;
-    },
-    /**
-     * States whether the current user is a moderator or not
-     *
-     * @returns {boolean}
-     */
-    isMyselfModerator: function () {
-        return this._isMyselfModerator;
     },
     /**
      * States whether the mail manager is ready or not
@@ -378,20 +347,6 @@ var MailManager =  AbstractService.extend({
         }
     },
     /**
-     * Remove the message from all of its threads
-     *
-     * @param {mail.model.Message} message
-     */
-    removeMessageFromThreads: function (message) {
-        var self = this;
-        _.each(message.getThreadIDs(), function (threadID) {
-            var thread = self.getThread(threadID);
-            if (thread) {
-                thread.removeMessage(message.getID());
-            }
-        });
-    },
-    /**
      * Search among prefetched partners, using the string 'searchVal'
      *
      * @param {string} searchVal
@@ -417,17 +372,6 @@ var MailManager =  AbstractService.extend({
                 };
             });
             return _.sortBy(suggestions, 'label');
-        });
-    },
-    /**
-     * Unstars all messages from all channels
-     *
-     * @returns {Promise}
-     */
-    unstarAll: function () {
-        return this._rpc({
-            model: 'mail.message',
-            method: 'unstar_all',
         });
     },
 
@@ -703,71 +647,6 @@ var MailManager =  AbstractService.extend({
         });
     },
     /**
-     * Get the previews of the mail failures
-     * Mail failures of a same model with the same type are grouped together, so
-     * that there are few preview items on the messaging menu in the systray.
-     *
-     * To determine whether this is a model preview or a document preview review
-     * the documentID is omitted for a model preview, whereas it is set for a
-     * preview of a failure related to a document.
-     *
-     * @returns {Promise<Object[]>} resolved with previews of mail failures
-     */
-    _getMailFailurePreviews: function () {
-        // items = list of objects:
-        //  item = {
-        //      unreadCounter: {integer},
-        //      failure: {mail.model.MailFailure},
-        //      isSameDocument: {boolean}
-        //  }
-        var items = [];
-        _.each(this._mailFailures, function (failure) {
-            var unreadCounter = 1;
-            var isSameDocument = true;
-            var sameModelAndTypeItem = _.find(items, function (item) {
-                if (
-                    item.failure.isLinkedToDocument() &&
-                    (item.failure.getDocumentModel() === failure.getDocumentModel()) &&
-                    (item.failure.getMessageType() === failure.getMessageType())
-                ) {
-                    isSameDocument = item.failure.getDocumentID() === failure.getDocumentID();
-                    return true;
-                }
-                return false;
-            });
-
-            if (failure.isLinkedToDocument() && sameModelAndTypeItem) {
-                unreadCounter = sameModelAndTypeItem.unreadCounter + 1;
-                isSameDocument = sameModelAndTypeItem.isSameDocument && isSameDocument;
-                var index = _.findIndex(items, sameModelAndTypeItem);
-                items[index] = {
-                    unreadCounter: unreadCounter,
-                    failure: failure,
-                    isSameDocument: isSameDocument,
-                };
-            } else {
-                items.push({
-                    unreadCounter: unreadCounter,
-                    failure: failure,
-                    isSameDocument: true,
-                });
-            }
-        });
-        return _.map(items, function (item) {
-            // return preview with correct unread counter
-            // also unset documentID if the grouped mail failures are from
-            // same model but different document
-            var preview = {};
-            _.extend(preview, item.failure.getPreview(), {
-                unreadCounter: item.unreadCounter,
-            });
-            if (!item.isSameDocument) {
-                preview.documentID = undefined;
-            }
-            return preview;
-        });
-    },
-    /**
      * @private
      * @param {string|undefined} [filter] the filter to apply on channel
      *   previews in systray messaging menu
@@ -827,20 +706,6 @@ var MailManager =  AbstractService.extend({
         }
     },
     /**
-     * Get the previews of mail failure, based on selected filter.
-     *
-     * @private
-     * @param {string|undefined} [filter]
-     */
-    _getSystrayMailFailurePreviews: function (filter) {
-        // mail failure previews
-        if (filter === 'mailbox_inbox' || !filter) {
-            return this._getMailFailurePreviews();
-        } else {
-            return Promise.resolve([]);
-        }
-    },
-    /**
      * Initialize the internal state of the mail service. Ensure that all
      * attributes are set before doing any operation on them.
      *
@@ -852,12 +717,9 @@ var MailManager =  AbstractService.extend({
         this._commands = [];
         this._discussMenuID = undefined;
         this._discussOpen = false;
-        this._isMyselfModerator = false;
-        this._mailFailures = [];
         // list of employees for chatter mentions
         this._mentionPartnerSuggestions = [];
         this._messages = [];
-        this._moderatedChannelIDs = [];
         // # of message received when odoo is out of focus
         this._outOfFocusUnreadMessageCounter = 0;
         // partner_ids we have a pinned DM chat with
@@ -868,10 +730,6 @@ var MailManager =  AbstractService.extend({
         this._addMailbox({
             id: 'inbox',
             name: _t("Inbox"),
-        });
-        this._addMailbox({
-            id: 'starred',
-            name: _t("Starred"),
         });
         this._addMailbox({
             id: 'history',
@@ -1183,7 +1041,7 @@ var MailManager =  AbstractService.extend({
     /**
      * Sort threads
      *
-     * In case of mailboxes (Inbox, Starred), the name is translated
+     * In case of mailboxes (Inbox) the name is translated
      * thanks to _lt (lazy translate). In this case, channel.getName() is an
      * object, not a string.
      *
@@ -1263,9 +1121,7 @@ var MailManager =  AbstractService.extend({
         // commands are needed for channel instantiation
         this._updateCommandsFromServer(result);
         var prom = this._updateChannelsFromServer(result);
-        this._updateModerationSettingsFromServer(result);
         this._updateMailboxesFromServer(result);
-        this._updateMailFailuresFromServer(result);
         this._updateCannedResponsesFromServer(result);
 
         this._mentionPartnerSuggestions = result.mention_partner_suggestions;
@@ -1275,56 +1131,15 @@ var MailManager =  AbstractService.extend({
     },
     /**
      * Update the mailboxes with mail data fetched from server, namely 'Inbox',
-     * 'Starred', 'History', and 'Moderation Queue' if the user is a moderator of a channel
+     * 'History'.
      *
      * @private
      * @param {Object} data
-     * @param {boolean} [data.is_moderator=false] states whether the user is
-     *   moderator of a channel
-     * @param {integer} [data.moderation_counter=0] states the mailbox counter
-     *   to set to 'Moderation Queue'
      * @param {integer} [data.needaction_inbox_counter=0] states the mailbox
      *   counter to set to 'Inbox'
-     * @param {integer} [data.starred_counter=0] states the mailbox counter to
-     *   set to 'Starred'
      */
     _updateMailboxesFromServer: function (data) {
         this.getMailbox('inbox').setMailboxCounter(data.needaction_inbox_counter || 0);
-        this.getMailbox('starred').setMailboxCounter(data.starred_counter || 0);
-
-        if (data.is_moderator) {
-            this._addMailbox({
-                id: 'moderation',
-                name: _t("Moderate Messages"),
-                mailboxCounter: data.moderation_counter || 0,
-            });
-        }
-    },
-    /**
-     * Update mail failures with mail data fetched from the server
-     *
-     * @private
-     * @param {Object} data
-     * @param {Object[]} data.mail_failures data to update mail failures
-     *   locally
-     */
-    _updateMailFailuresFromServer: function (data) {
-        var self = this;
-        this._mailFailures = _.map(data.mail_failures, function (mailFailureData) {
-            return new MailFailure(self, mailFailureData);
-        });
-    },
-    /**
-     * Update moderation settings with mail data fetched from server
-     *
-     * @private
-     * @param {Object} data
-     * @param {boolean} [data.is_moderator=false]
-     * @param {integer[]} [data.moderation_channel_ids]
-     */
-    _updateModerationSettingsFromServer: function (data) {
-        this._isMyselfModerator = data.is_moderator;
-        this._moderatedChannelIDs = data.moderation_channel_ids;
     },
 
     //--------------------------------------------------------------------------

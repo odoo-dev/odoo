@@ -66,9 +66,6 @@
                 flex: 1 1 auto;
                 @include o-text-overflow;
             }
-            .o_mail_thread_typing_icon_dot {
-                background: gray('600');;
-            }
             .o_mail_sidebar_needaction, .o_mail_partner_unpin, .o_mail_channel_settings {
                 flex: 0 0 auto;
             }
@@ -198,11 +195,6 @@
 
             &.o_mail_discuss_title_main {
                 font-size: $font-size-base;
-
-                &.o_mail_mailbox_title_starred > .badge {
-                    background-color: gray('600');
-                    border-color: gray('600');
-                }
             }
         }
 

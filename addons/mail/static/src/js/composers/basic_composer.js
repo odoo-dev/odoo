@@ -30,7 +30,6 @@ var BasicComposer = Widget.extend({
         'focus .o_mail_emoji_container .o_mail_emoji': '_onEmojiImageFocus',
         'dragover .o_file_drop_zone_container': '_onFileDragover',
         'drop .o_file_drop_zone_container': '_onFileDrop',
-        'input .o_input': '_onInput',
         'keydown .o_composer_input textarea': '_onKeydown',
         'keyup .o_composer_input': '_onKeyup',
         'click .o_composer_button_send': '_sendMessage',
@@ -123,9 +122,6 @@ var BasicComposer = Widget.extend({
         this._renderAttachments();
         $(window).on(this.fileuploadID, this._onAttachmentLoaded.bind(this));
         this.on('change:attachment_ids', this, this._renderAttachments);
-
-        this.call('mail_service', 'getMailBus')
-            .on('update_typing_partners', this, this._onUpdateTypingPartners);
 
         // Mention
         var prependPromise = this._mentionManager.prependTo(this.$('.o_composer'));
@@ -372,15 +368,7 @@ var BasicComposer = Widget.extend({
                     { limit: limit, search: search }
                 );
             }
-            return Promise.resolve(suggestions).then(function (suggestions) {
-                //add im_status on suggestions
-                _.each(suggestions, function (suggestionsSet) {
-                    _.each(suggestionsSet, function (suggestion) {
-                        suggestion.im_status = self.call('mail_service', 'getImStatus', { partnerID: suggestion.id });
-                    });
-                });
-                return suggestions;
-            });
+            return Promise.resolve(suggestions);
         });
     },
     /**
@@ -755,17 +743,6 @@ var BasicComposer = Widget.extend({
         }
     },
     /**
-     * Called when the input in the composer changes
-     *
-     * @private
-     */
-    _onInput: function () {
-        if (this.options.thread && this.options.thread.hasTypingNotification()) {
-            var isTyping = this.$input.val().length > 0;
-            this.options.thread.setMyselfTyping({ typing: isTyping });
-        }
-    },
-    /**
      * _onKeydown event is triggered when is key is pressed
      *      - on UP and DOWN arrow is pressed then event prevents it's default
      *              behaviour if mention manager is open else it break it.
@@ -838,24 +815,6 @@ var BasicComposer = Widget.extend({
             default:
                 this._mentionManager.detectDelimiter();
         }
-    },
-    /**
-     * @private
-     * @param {integer|string} threadID
-     */
-    _onUpdateTypingPartners: function (threadID) {
-        if (!this.options.showTyping) {
-            return;
-        }
-        if (!this.options.thread) {
-            return;
-        }
-        if (this.options.thread.getID() !== threadID) {
-            return;
-        }
-        this.$('.o_composer_thread_typing').html(QWeb.render('mail.Composer.ThreadTyping', {
-            thread: this.options.thread,
-        }));
     },
 });
 

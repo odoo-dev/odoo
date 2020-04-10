@@ -1,9 +1,9 @@
 odoo.define('mail.systray.MessagingMenuTests', function (require) {
 "use strict";
 
+const { getMailServices } = require('mail.messaging.testUtils');
 var DocumentThread = require('mail.model.DocumentThread');
 var MessagingMenu = require('mail.systray.MessagingMenu');
-var mailTestUtils = require('mail.testUtils');
 
 var testUtils = require('web.test_utils');
 
@@ -57,10 +57,6 @@ QUnit.module('MessagingMenu', {
                         type: 'many2many',
                         relation: 'mail.channel',
                     },
-                    starred: {
-                        string: "Starred",
-                        type: 'boolean',
-                    },
                     needaction: {
                       string: "Need Action",
                       type: 'boolean',
@@ -70,10 +66,6 @@ QUnit.module('MessagingMenu', {
                         type: 'one2many',
                         relation: 'res.partner',
                     },
-                    starred_partner_ids: {
-                      string: "partner ids",
-                      type: 'integer',
-                    }
                 },
                 records: [{
                     id: 1,
@@ -92,13 +84,13 @@ QUnit.module('MessagingMenu', {
                 },
             },
         };
-        this.services = mailTestUtils.getMailServices();
+        this.services = getMailServices({ hasLegacyMail: true });
     },
     afterEach: function () {
         // unpatch _.debounce and _.throttle
         _.debounce = this.underscoreDebounce;
         _.throttle = this.underscoreThrottle;
-    }
+    },
 });
 
 QUnit.test('messaging menu widget: menu with no records', async function (assert) {
@@ -245,64 +237,6 @@ QUnit.test('messaging menu widget: open inbox for needaction not linked to any d
     messagingMenu.destroy();
 });
 
-QUnit.test("messaging menu widget: mark as read on thread preview", async function ( assert ) {
-    assert.expect(8);
-
-    testUtils.mock.patch(DocumentThread, {
-            markAsRead: function () {
-                if (
-                    this.getDocumentModel() === 'crm.lead' &&
-                    this.getDocumentID() === 126
-                ) {
-                    assert.step('markedAsRead');
-                }
-            },
-        });
-
-    this.data['mail.message'].records = [{
-        id: 10,
-        channel_ids: ['mailbox_inbox'],
-        res_id: 126,
-        needaction: true,
-        module_icon: "/crm/static/description/icon.png",
-        date: "2018-04-05 06:37:26",
-        subject: "Re: Interest in your Graphic Design Project",
-        model: "crm.lead",
-        body: "<span>Testing Messaging</span>"
-    }];
-
-    var messagingMenu = new MessagingMenu();
-    await testUtils.mock.addMockEnvironment(messagingMenu, {
-        services: this.services,
-        data: this.data,
-    });
-
-    await messagingMenu.appendTo(testUtils.prepareTarget());
-    await testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
-    assert.hasClass(messagingMenu.$el,'o_mail_systray_item',
-        'should be the instance of widget');
-    assert.hasClass(messagingMenu.$el,'show',
-        'MessagingMenu should be open');
-
-    var $preview = messagingMenu.$('.o_mail_preview.o_preview_unread');
-    assert.strictEqual($preview.length, 1,
-        "should have one unread preview");
-    assert.strictEqual($preview.data('document-model'), 'crm.lead',
-        "should preview be linked to correct document model");
-    assert.strictEqual($preview.data('document-id'), 126,
-        "should preview be linked to correct document ID");
-    assert.containsOnce(messagingMenu, '.o_mail_preview_mark_as_read',
-        "should have mark as read icon next to preview");
-
-    await testUtils.dom.click(messagingMenu.$(".o_mail_preview_mark_as_read"));
-
-    assert.verifySteps(['markedAsRead'],
-        "the document thread should be marked as read");
-
-    testUtils.mock.unpatch(DocumentThread);
-    messagingMenu.destroy();
-});
-
 QUnit.test('needaction messages in channels should appear, in addition to channel preview', async function (assert) {
     // Let's suppose a channel whose before-last message (msg1) is a needaction,
     // but not the last message (msg2). In that case, the systray messaging
@@ -357,69 +291,6 @@ QUnit.test('needaction messages in channels should appear, in addition to channe
     assert.strictEqual($preview2.find('.o_last_message_preview').text().replace(/\s/g, ""),
         "Other:lastmessagecontent",
         "2nd preview (channel preview) should display last message preview");
-
-    messagingMenu.destroy();
-});
-
-QUnit.test('preview of message on a document + mark as read', async function (assert) {
-    assert.expect(7);
-
-    this.data.initMessaging = {
-        needaction_inbox_counter: 1,
-    };
-
-    var partnerID = 44;
-    var needactionMessage = {
-        author_id: [1, "Demo"],
-        body: "<p>*MessageOnDocument*</p>",
-        id: 689,
-        model: 'some.res.model',
-        needaction: true,
-        needaction_partner_ids: [partnerID],
-        record_name: "Some Record",
-        res_id: 1,
-    };
-    this.data['some.res.model'] = {
-        fields: {
-            message_ids: {string: 'Messages', type: 'one2many'},
-        },
-        records: [{
-            id: 1,
-            message_ids: [689],
-        }],
-    };
-    this.data['mail.message'].records.push(needactionMessage);
-
-    var messagingMenu = new MessagingMenu();
-    await testUtils.mock.addMockEnvironment(messagingMenu, {
-        services: this.services,
-        data: this.data,
-        session: {
-            partner_id: partnerID,
-        },
-    });
-    await messagingMenu.appendTo(testUtils.prepareTarget());
-    await testUtils.nextTick();
-    assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '1',
-        "should display a counter of 1 on the messaging menu icon");
-
-    await testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
-
-    assert.containsOnce(messagingMenu, '.o_mail_preview',
-        "should display one preview");
-    assert.strictEqual(messagingMenu.$('.o_mail_preview').data('preview-id'),
-        "some.res.model_1",
-        "preview should be the document thread preview");
-    assert.hasClass(messagingMenu.$('.o_mail_preview:first'),'o_preview_unread',
-        "document thread preview should be marked as unread");
-    assert.strictEqual(messagingMenu.$('.o_preview_unread .o_last_message_preview').text().replace(/\s/g, ''),
-        "Demo:*MessageOnDocument*", "should correctly display the preview");
-
-    await testUtils.dom.click(messagingMenu.$('.o_mail_preview_mark_as_read'));
-    assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '0',
-        "should display a counter of 0 on the messaging menu icon");
-    assert.containsNone(messagingMenu, '.o_mail_preview',
-        "should not display any preview");
 
     messagingMenu.destroy();
 });
@@ -553,94 +424,6 @@ QUnit.test('new message of type "notification" are not considered as unread mess
             .replace(/\s/g, ""),
         "Someone:Left#general",
         "should display author name and inline body of notification message (last message of channel)");
-
-    messagingMenu.destroy();
-});
-
-QUnit.test('preview of inbox message not linked to document + mark as read', async function (assert) {
-    assert.expect(17);
-
-    this.data.initMessaging = {
-        needaction_inbox_counter: 2,
-    };
-
-    var needactionMessages = [{
-        author_id: [1, "Demo"],
-        body: "<p>*Message1*</p>",
-        id: 689,
-        needaction: true,
-        needaction_partner_ids: [44],
-    }, {
-        author_id: [1, "Demo"],
-        body: "<p>*Message2*</p>",
-        id: 690,
-        needaction: true,
-        needaction_partner_ids: [44],
-    }];
-    this.data['mail.message'].records =
-        this.data['mail.message'].records.concat(needactionMessages);
-
-    var messagingMenu = new MessagingMenu();
-    await testUtils.mock.addMockEnvironment(messagingMenu, {
-        services: this.services,
-        data: this.data,
-        session: {
-            partner_id: 44,
-        },
-        mockRPC: function (route, args) {
-            if (args.method === 'set_message_done') {
-                assert.step('method: set_message_done, messageIDs: ' + JSON.stringify(args.args[0]));
-            }
-            return this._super.apply(this, arguments);
-        },
-    });
-    await messagingMenu.appendTo(testUtils.prepareTarget());
-    await testUtils.nextTick();
-
-    assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '2',
-        "should display a counter of 2 on the messaging menu icon");
-
-    await testUtils.dom.click(messagingMenu.$('.dropdown-toggle'));
-
-    assert.strictEqual(messagingMenu.$('.o_mail_preview').length, 2,
-        "should display two previews");
-
-    var $preview1 = messagingMenu.$('.o_mail_preview').eq(0);
-    var $preview2 = messagingMenu.$('.o_mail_preview').eq(1);
-
-    assert.strictEqual($preview1.data('preview-id'),
-        "mailbox_inbox",
-        "1st preview should be from the mailbox inbox");
-    assert.strictEqual($preview2.data('preview-id'),
-        "mailbox_inbox",
-        "2nd preview should also be from the mailbox inbox");
-    assert.ok($preview1.hasClass('o_preview_unread'),
-        "1st preview should be marked as unread");
-    assert.ok($preview2.hasClass('o_preview_unread'),
-        "2nd preview should also be marked as unread");
-    assert.strictEqual($preview1.find('.o_last_message_preview').text().replace(/\s/g, ''),
-        "Demo:*Message1*", "should correctly display the 1st preview");
-    assert.strictEqual($preview2.find('.o_last_message_preview').text().replace(/\s/g, ''),
-        "Demo:*Message2*", "should correctly display the 2nd preview");
-
-    await testUtils.dom.click($preview1.find('.o_mail_preview_mark_as_read'));
-    assert.verifySteps(['method: set_message_done, messageIDs: [689]'],
-        "should mark 1st preview as read");
-    assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '1',
-        "should display a counter of 1 on the messaging menu icon after marking one preview as read");
-    assert.strictEqual(messagingMenu.$('.o_mail_preview').length, 1,
-        "should display a single preview remaining");
-    assert.strictEqual(messagingMenu.$('.o_mail_preview .o_last_message_preview').text().replace(/\s/g, ''),
-        "Demo:*Message2*", "preview 2 should be the remaining one");
-
-    $preview2 = messagingMenu.$('.o_mail_preview');
-    await testUtils.dom.click($preview2.find('.o_mail_preview_mark_as_read'));
-    assert.verifySteps(['method: set_message_done, messageIDs: [690]'],
-        "should mark 2nd preview as read");
-    assert.strictEqual(messagingMenu.$('.o_notification_counter').text(), '0',
-        "should display a counter of 0 on the messaging menu icon after marking both previews as read");
-    assert.strictEqual(messagingMenu.$('.o_mail_preview').length, 0,
-        "should display no preview remaining");
 
     messagingMenu.destroy();
 });
@@ -1081,11 +864,10 @@ QUnit.test('messaging menu widget: click twice preview on slow message_fetch sho
             if (args.method === 'channel_minimize') {
                 // called to detach thread in chat window
                 // simulate longpolling response with new chat window state
-                const channelInfo = {
-                    ...self.data['mail.channel'].records[0],
+                const channelInfo = Object.assign({}, self.data['mail.channel'].records[0],{
                     is_minimized: true,
                     state: 'open',
-                };
+                });
                 const notifications = [ [['myDB', 'res.partner'], channelInfo] ];
                 messagingMenu.call('bus_service', 'trigger', 'notification', notifications);
             }

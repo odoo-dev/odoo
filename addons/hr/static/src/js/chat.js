@@ -53,7 +53,8 @@ odoo.define('hr.employee_chat', function (require) {
         }),
 
         _onOpenChat: function (ev) {
-            this.call('mail_service', 'openDMChatWindow', ev.data.partner_id);
+            const env = this.call('messaging', 'getEnv');
+            env.entities.Partner.fromId(ev.data.partner_id).openChat();
         },
     });
 

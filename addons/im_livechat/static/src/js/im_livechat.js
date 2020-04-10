@@ -48,7 +48,6 @@ var LivechatButton = Widget.extend({
         'close_chat_window': '_onCloseChatWindow',
         'post_message_chat_window': '_onPostMessageChatWindow',
         'save_chat_window': '_onSaveChatWindow',
-        'updated_typing_partners': '_onUpdatedTypingPartners',
         'updated_unread_counter': '_onUpdatedUnreadCounter',
     },
     events: {
@@ -180,21 +179,9 @@ var LivechatButton = Widget.extend({
                     channel_uuid: this._livechat.getUUID(),
                     page_history: history,
                 });
-            } else if (notification[1].info === 'typing_status') {
-                var isWebsiteUser = notification[1].is_website_user;
-                if (isWebsiteUser) {
-                    return; // do not handle typing status notification of myself
-                }
-                var partnerID = notification[1].partner_id;
-                if (notification[1].is_typing) {
-                    this._livechat.registerTyping({ partnerID: partnerID });
-                } else {
-                    this._livechat.unregisterTyping({ partnerID: partnerID });
-                }
             } else { // normal message
                 // If message from notif is already in chatter messages, stop handling
                 if (this._messages.some(message => message.getID() === notification[1].id)) {
-                    this._livechat.unregisterTyping({ partnerID: notification[1].author_id[0] });
                     return;
                 }
                 this._addMessage(notification[1]);
@@ -356,7 +343,6 @@ var LivechatButton = Widget.extend({
                 body: this.options.default_message,
                 channel_ids: [this._livechat.getID()],
                 date: time.datetime_to_str(new Date()),
-                tracking_value_ids: [],
             }, {prepend: true});
         }
     },
@@ -413,14 +399,6 @@ var LivechatButton = Widget.extend({
     _onSaveChatWindow: function (ev) {
         ev.stopPropagation();
         utils.set_cookie('im_livechat_session', JSON.stringify(this._livechat.toData()), 60*60);
-    },
-    /**
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onUpdatedTypingPartners: function (ev) {
-        ev.stopPropagation();
-        this._chatWindow.renderHeader();
     },
     /**
      * @private

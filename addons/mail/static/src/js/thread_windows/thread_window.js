@@ -58,9 +58,7 @@ var ThreadWindow = AbstractThreadWindow.extend({
 
         var superDef = this._super().then(this._listenThreadWidget.bind(this));
 
-        this.call('mail_service', 'getMailBus')
-            .on('update_typing_partners', this, this._onUpdateTypingPartners)
-            .on('update_channel', this, this._onUpdateChannel);
+        this.call('mail_service', 'getMailBus').on('update_channel', this, this._onUpdateChannel);
 
         var composerDef;
         if (!this.hasThread()) {
@@ -143,22 +141,6 @@ var ThreadWindow = AbstractThreadWindow.extend({
     removePassive: function () {
         this._passive = false;
     },
-    renderOutOfOffice: function () {
-        var $outOfOffice = this.$('.o_out_of_office');
-        const thread = this.getThread();
-        if (!thread.hasOutOfOffice()) {
-            if ($outOfOffice.length) {
-                $outOfOffice.remove();
-            }
-            return;
-        }
-        const $newOutOfOffice = $(QWeb.render('mail.thread.OutOfOffice', { thread }));
-        if ($outOfOffice.length) {
-            $outOfOffice.replaceWith($newOutOfOffice);
-        } else {
-            $newOutOfOffice.insertAfter(this.$('.o_thread_window_header'));
-        }
-    },
     /**
      * Update this thread window
      *
@@ -214,7 +196,6 @@ var ThreadWindow = AbstractThreadWindow.extend({
         this._threadWidget
             .on('redirect', this, this._onRedirect)
             .on('redirect_to_channel', this, this._onRedirectToChannel)
-            .on('toggle_star_status', this, this._onToggleStarStatus);
     },
     /**
      * Open this thread window.
@@ -361,27 +342,6 @@ var ThreadWindow = AbstractThreadWindow.extend({
             this.removePassive();
             this._thread.markAsRead();
         }
-    },
-    /**
-     * @private
-     * @param {integer} messageID
-     */
-    _onToggleStarStatus: function (messageID) {
-        var message = this.call('mail_service', 'getMessage', messageID);
-        message.toggleStarStatus();
-    },
-    /**
-     * @private
-     * @param {integer|string} threadID
-     */
-    _onUpdateTypingPartners: function (threadID) {
-        if (!this.hasThread()) {
-            return;
-        }
-        if (this._thread.getID() !== threadID) {
-            return;
-        }
-        this.renderHeader();
     },
     /**
      * @private
