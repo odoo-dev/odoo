@@ -80,14 +80,6 @@ $o-mail-thread-window-zindex: $zindex-modal + 1 !default;
             cursor: pointer;
             flex: 1 1 auto;
             @include o-text-overflow;
-
-            .o_mail_thread_typing_icon {
-                padding-left: 2px;
-
-                .o_mail_thread_typing_icon_dot {
-                    background: gray('300');
-                }
-            }
         }
 
         .o_thread_window_buttons {

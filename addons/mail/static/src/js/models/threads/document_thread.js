@@ -167,16 +167,6 @@ var DocumentThread = Thread.extend({
         return this._messages;
     },
     /**
-     * States whether the thread is linked to a document
-     * Document thread's are always linked to a document.
-     *
-     * @override
-     * @returns {boolean}
-     */
-    isLinkedToDocument: function () {
-        return true;
-    },
-    /**
      * @param {integer[]} attachmentIDs
      */
     removeAttachmentsFromMessages: function (attachmentIDs) {

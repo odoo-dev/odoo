@@ -59,7 +59,6 @@ var AbstractThreadWindow = Widget.extend({
             autofocus: true,
             displayStars: true,
             displayReplyIcons: false,
-            displayNotificationIcons: false,
             placeholder: _t("Say something"),
         });
 

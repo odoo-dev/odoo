@@ -75,7 +75,6 @@
         <span class="o_thread_window_title">
             <t t-esc="title"/>
             <span t-if="unreadCounter"> (<t t-esc="unreadCounter"/>)</span>
-            <t t-if="thread and thread.hasTypingNotification() and thread.isSomeoneTyping()" t-call="mail.ThreadTypingIcon"/>
         </span>
         <span t-if="!widget.isMobile()" class="o_thread_window_buttons">
             <a href="#" class="o_thread_window_close fa fa-close"/>

@@ -28,7 +28,6 @@
                     <!-- threads -->
                     <script type="text/javascript" src="/mail/static/src/js/models/threads/abstract_thread.js"></script>
                     <script type="text/javascript" src="/im_livechat/static/src/js/models/website_livechat.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/mixins/thread_typing_mixin.js"></script>
                     <!-- messages -->
                     <script type="text/javascript" src="/mail/static/src/js/models/messages/abstract_message.js"></script>
                     <script type="text/javascript" src="/im_livechat/static/src/js/models/website_livechat_message.js"></script>
