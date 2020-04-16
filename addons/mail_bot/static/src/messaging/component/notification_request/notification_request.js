@@ -18,7 +18,9 @@ class NotificationRequest extends Component {
         useStore(props => {
             return {
                 isDeviceMobile: this.env.messaging.device.isMobile,
-                partnerRoot: this.env.messaging.partnerRoot,
+                partnerRoot: this.env.messaging.partnerRoot
+                    ? this.env.messaging.partnerRoot.__state
+                    : undefined,
             };
         });
     }

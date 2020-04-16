@@ -185,7 +185,10 @@ const DiscussWidget = AbstractAction.extend({
         // Mark All Read
         if (
             this.discuss.thread &&
-            this.discuss.thread === this.env.entities.Thread.mailboxFromId('inbox')
+            this.discuss.thread === this.env.entities.Thread.find(thread =>
+                thread.id === 'inbox' &&
+                thread.model === 'mail.box'
+            )
         ) {
             this.$buttons
                 .find('.o_widget_Discuss_controlPanelButtonMarkAllRead')
@@ -199,7 +202,10 @@ const DiscussWidget = AbstractAction.extend({
         // Unstar All
         if (
             this.discuss.thread &&
-            this.discuss.thread === this.env.entities.Thread.mailboxFromId('starred')
+            this.discuss.thread === this.env.entities.Thread.find(thread =>
+                thread.id === 'starred' &&
+                thread.model === 'mail.box'
+            )
         ) {
             this.$buttons
                 .find('.o_unstar_all')
@@ -259,7 +265,9 @@ const DiscussWidget = AbstractAction.extend({
         const $moderationButtons = this.$buttons.find('.o_widget_Discuss_controlPanelButtonModeration');
         if (
             this.discuss.threadViewer.checkedMessages.length > 0 &&
-            this.discuss.threadViewer.checkedMessages.filter(message => !message.isModeratedByUser).length === 0
+            this.discuss.threadViewer.checkedMessages.filter(
+                message => !message.isModeratedByCurrentPartner
+            ).length === 0
         ) {
             $moderationButtons.removeClass('o_hidden');
         } else {
@@ -295,7 +303,7 @@ const DiscussWidget = AbstractAction.extend({
      */
     _onClickInvite() {
         new InvitePartnerDialog(this, {
-            activeThreadLocalId: this.discuss.threadLocalId,
+            activeThreadLocalId: this.discuss.thread.localId,
             messagingEnv: this.env,
         }).open();
     },
@@ -369,7 +377,9 @@ const DiscussWidget = AbstractAction.extend({
      */
     _onSearch(ev) {
         ev.stopPropagation();
-        this.discuss.update({ threadStringifiedDomain: JSON.stringify(ev.data.domain) });
+        this.discuss.threadViewer.update({
+            stringifiedDomain: JSON.stringify(ev.data.domain),
+        });
     },
 });
 

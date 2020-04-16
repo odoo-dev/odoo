@@ -19,11 +19,12 @@ class MessageAuthorPrefix extends Component {
                 ? this.env.entities.Thread.get(props.threadLocalId)
                 : undefined;
             return {
-                author,
-                authorName: author ? author.nameOrDisplayName : undefined,
-                currentPartner: this.env.messaging.currentPartner,
-                message,
-                thread,
+                author: author ? author.__state : undefined,
+                currentPartner: this.env.messaging.currentPartner
+                    ? this.env.messaging.currentPartner.__state
+                    : undefined,
+                message: message ? message.__state : undefined,
+                thread: thread ? thread.__state : undefined,
             };
         });
     }

@@ -13,8 +13,9 @@ class Attachment extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
+            const attachment = this.env.entities.Attachment.get(props.attachmentLocalId);
             return {
-                attachment: this.env.entities.Attachment.get(props.attachmentLocalId),
+                attachment: attachment ? attachment.__state : undefined,
             };
         });
     }

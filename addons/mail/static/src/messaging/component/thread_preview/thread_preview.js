@@ -31,11 +31,14 @@ class ThreadPreview extends Component {
             }
             return {
                 isDeviceMobile: this.env.messaging.device.isMobile,
-                lastMessage,
-                lastMessageAuthor,
-                thread,
-                threadDirectPartner: thread ? thread.directPartner : undefined,
-                threadName: thread ? thread.displayName : undefined,
+                lastMessage: lastMessage ? lastMessage.__state : undefined,
+                lastMessageAuthor: lastMessageAuthor
+                    ? lastMessageAuthor.__state
+                    : undefined,
+                thread: thread ? thread.__state : undefined,
+                threadDirectPartner: thread && thread.directPartner
+                    ? thread.directPartner.__state
+                    : undefined,
             };
         });
     }

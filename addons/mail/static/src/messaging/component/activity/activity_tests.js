@@ -156,7 +156,7 @@ QUnit.test('activity info layout when planned after tomorrow', async function (a
     const fiveDaysFromNow = new Date();
     fiveDaysFromNow.setDate(today.getDate() + 5);
     const activity = this.env.entities.Activity.create({
-        date_deadline: date_to_str(fiveDaysFromNow),
+        dateDeadline: date_to_str(fiveDaysFromNow),
         state: 'planned',
     });
     await this.createActivityComponent(activity);
@@ -189,7 +189,7 @@ QUnit.test('activity info layout when planned tomorrow', async function (assert)
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const activity = this.env.entities.Activity.create({
-        date_deadline: date_to_str(tomorrow),
+        dateDeadline: date_to_str(tomorrow),
         state: 'planned',
     });
     await this.createActivityComponent(activity);
@@ -220,7 +220,7 @@ QUnit.test('activity info layout when planned today', async function (assert) {
     await this.start();
     const today = new Date();
     const activity = this.env.entities.Activity.create({
-        date_deadline: date_to_str(today),
+        dateDeadline: date_to_str(today),
         state: 'today',
     });
     await this.createActivityComponent(activity);
@@ -253,7 +253,7 @@ QUnit.test('activity info layout when planned yesterday', async function (assert
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
     const activity = this.env.entities.Activity.create({
-        date_deadline: date_to_str(yesterday),
+        dateDeadline: date_to_str(yesterday),
         state: 'overdue',
     });
     await this.createActivityComponent(activity);
@@ -286,7 +286,7 @@ QUnit.test('activity info layout when planned before yesterday', async function 
     const fiveDaysBeforeNow = new Date();
     fiveDaysBeforeNow.setDate(today.getDate() - 5);
     const activity = this.env.entities.Activity.create({
-        date_deadline: date_to_str(fiveDaysBeforeNow),
+        dateDeadline: date_to_str(fiveDaysBeforeNow),
         state: 'overdue',
     });
     await this.createActivityComponent(activity);
@@ -346,7 +346,7 @@ QUnit.test('activity without summary layout', async function (assert) {
 
     await this.start();
     const activity = this.env.entities.Activity.create({
-        activity_type_id: [1, 'Fake type'],
+        type: [['insert', { id: 1, displayName: "Fake type" }]],
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -384,11 +384,11 @@ QUnit.test('activity details toggle', async function (assert) {
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const activity = this.env.entities.Activity.create({
-        activity_type_id: [1, 'Fake type'],
-        create_date: date_to_str(today),
-        create_uid: [1, 'Admin'],
-        date_deadline: date_to_str(tomorrow),
+        creator: [['insert', { id: 1, partnerDisplayName: "Admin" }]],
+        dateCreate: date_to_str(today),
+        dateDeadline: date_to_str(tomorrow),
         state: 'planned',
+        type: [['insert', { id: 1, displayName: "Fake type" }]],
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -432,12 +432,12 @@ QUnit.test('activity details layout', async function (assert) {
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const activity = this.env.entities.Activity.create({
-        activity_type_id: [1, 'Fake type'],
-        create_date: date_to_str(today),
-        create_uid: [1, 'Admin'],
-        date_deadline: date_to_str(tomorrow),
+        assignee: [['insert', { id: 10, partnerDisplayName: "Pauvre pomme" }]],
+        creator: [['insert', { id: 1, partnerDisplayName: "Admin" }]],
+        dateCreate: date_to_str(today),
+        dateDeadline: date_to_str(tomorrow),
         state: 'planned',
-        user_id: [10, 'Pauvre pomme'],
+        type: [['insert', { id: 1, displayName: "Fake type" }]],
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -505,7 +505,7 @@ QUnit.test('activity with mail template layout', async function (assert) {
 
     await this.start();
     const activity = this.env.entities.Activity.create({
-        mail_template_ids: [{ id: 1, name: "Dummy mail template" }]
+        mailTemplates: [['insert', { id: 1, name: "Dummy mail template" }]],
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -584,10 +584,10 @@ QUnit.test('activity with mail template: preview mail', async function (assert) 
         },
     });
     const activity = this.env.entities.Activity.create({
-        mail_template_ids: [{
+        mailTemplates: [['insert', {
             id: 1,
             name: "Dummy mail template",
-        }],
+        }]],
         res_id: 42,
         res_model: 'res.partner',
     });
@@ -627,11 +627,11 @@ QUnit.test('activity with mail template: send mail', async function (assert) {
         },
     });
     const activity = this.env.entities.Activity.create({
-        res_id: 42,
-        mail_template_ids: [{
+        mailTemplates: [['insert', {
             id: 1,
             name: "Dummy mail template",
-        }],
+        }]],
+        res_id: 42,
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -660,8 +660,8 @@ QUnit.test('activity upload document is available', async function (assert) {
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const activity = this.env.entities.Activity.create({
-        activity_category: 'upload_file',
-        can_write: true
+        canWrite: true,
+        category: 'upload_file',
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -689,8 +689,8 @@ QUnit.test('activity click on mark as done', async function (assert) {
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const activity = this.env.entities.Activity.create({
-        activity_category: 'not_upload_file',
-        can_write: true
+        canWrite: true,
+        category: 'not_upload_file',
     });
     await this.createActivityComponent(activity);
 
@@ -755,9 +755,9 @@ QUnit.test('activity click on edit', async function (assert) {
         },
     });
     const activity = this.env.entities.Activity.create({
+        canWrite: true,
         id: 12,
-        can_write: true,
-        mail_template_ids: [{ id: 1, name: "Dummy mail template" }],
+        mailTemplates: [['insert', { id: 1, name: "Dummy mail template" }]],
         res_id: 42,
         res_model: 'res.partner',
     });
@@ -825,7 +825,11 @@ QUnit.test('activity edition', async function (assert) {
             },
         },
     });
-    const activity = this.env.entities.Activity.create(this.data['mail.activity'].records[0]);
+    const activity = this.env.entities.Activity.create(
+        this.env.entities.Activity.convertData(
+            this.data['mail.activity'].records[0]
+        )
+    );
     await this.createActivityComponent(activity);
 
     assert.containsOnce(
@@ -889,12 +893,12 @@ QUnit.test('activity click on cancel', async function (assert) {
         },
     });
     const activity = this.env.entities.Activity.create({
+        canWrite: true,
         id: 12,
-        can_write: true,
-        mail_template_ids: [{
+        mailTemplates: [['insert', {
             id: 1,
             name: "Dummy mail template",
-        }],
+        }]],
         res_id: 42,
         res_model: 'res.partner',
     });
@@ -905,8 +909,9 @@ QUnit.test('activity click on cancel', async function (assert) {
         constructor(...args) {
             super(... args);
             useStore(props => {
+                const activity = this.env.entities.Activity.get(props.activityLocalId);
                 return {
-                    activity: this.env.entities.Activity.get(props.activityLocalId),
+                    activity: activity ? activity.__state : undefined,
                 };
             });
         }

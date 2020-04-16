@@ -16,9 +16,11 @@ class ThreadIcon extends Component {
             const thread = this.env.entities.Thread.get(props.threadLocalId);
             const directPartner = thread ? thread.directPartner : undefined;
             return {
-                directPartner,
-                partnerRoot: this.env.messaging.partnerRoot,
-                thread,
+                directPartner: directPartner ? directPartner.__state : undefined,
+                partnerRoot: this.env.messaging.partnerRoot
+                    ? this.env.messaging.partnerRoot.__state
+                    : undefined,
+                thread: thread ? thread.__state : undefined,
             };
         });
     }

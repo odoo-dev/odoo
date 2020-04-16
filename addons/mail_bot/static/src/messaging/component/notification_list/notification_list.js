@@ -30,7 +30,7 @@ patch(components.mail.NotificationList, 'mail_bot.messaging.component.Notificati
         const res = this._super(...arguments);
         if (
             props.filter === 'all' &&
-            this.env.messaging.constructor.isNotificationPermissionDefault()
+            this.env.messaging.isNotificationPermissionDefault()
         ) {
             res.notifications.unshift({
                 type: 'odoobotRequest',

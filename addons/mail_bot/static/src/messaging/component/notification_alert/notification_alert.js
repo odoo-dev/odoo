@@ -36,7 +36,7 @@ class NotificationAlert extends Component {
         return (
             windowNotification &&
             windowNotification.permission !== "granted" &&
-            !this.env.messaging.constructor.isNotificationPermissionDefault()
+            !this.env.messaging.isNotificationPermissionDefault()
         );
     }
 

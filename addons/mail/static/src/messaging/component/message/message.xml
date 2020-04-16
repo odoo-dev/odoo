@@ -82,7 +82,7 @@
                                     </t>
                                 </div>
                             </t>
-                            <t t-if="message.moderation_status === 'pending_moderation' and !message.isModeratedByUser">
+                            <t t-if="message.moderation_status === 'pending_moderation' and !message.isModeratedByCurrentPartner">
                                 <span class="o_Message_moderationPending o-author" title="Your message is pending moderation.">Pending moderation</span>
                             </t>
                             <div class="o_Message_commands o_Message_headerCommands" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }">
@@ -115,7 +115,7 @@
                                 </t>
                             </div>
                         </div>
-                        <t t-if="message.isModeratedByUser">
+                        <t t-if="message.isModeratedByCurrentPartner">
                             <div class="o_Message_moderationSubHeader">
                                 <t t-if="threadViewer and props.hasCheckbox and message.hasCheckbox">
                                     <input class="o_Message_checkbox" type="checkbox" t-att-checked="message.isChecked(threadViewer.thread, threadViewer.stringifiedDomain) ? 'checked': ''" t-on-change="_onChangeCheckbox" t-ref="checkbox"/>

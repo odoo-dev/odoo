@@ -20,10 +20,8 @@ class FollowButton extends Component {
         });
         useStore(props => {
             const thread = this.env.entities.Thread.get(props.threadLocalId);
-            const isCurrentPartnerFollowing = thread.isCurrentPartnerFollowing;
             return {
-                isCurrentPartnerFollowing,
-                thread,
+                thread: thread ? thread.__state : undefined,
             };
         });
     }

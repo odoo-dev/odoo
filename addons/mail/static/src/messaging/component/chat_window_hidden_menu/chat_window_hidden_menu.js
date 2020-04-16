@@ -18,9 +18,8 @@ class ChatWindowHiddenMenu extends Component {
         super(...args);
         useStore(props => {
             return {
-                chatWindowManagerVisual: this.env.messaging.chatWindowManager.visual,
+                chatWindowManager: this.env.messaging.chatWindowManager,
                 device: this.env.messaging.device,
-                isHiddenMenuOpen: this.env.messaging.chatWindowManager.isHiddenMenuOpen,
                 localeTextDirection: this.env.messaging.locale.textDirection,
             };
         });

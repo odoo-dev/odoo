@@ -1,9 +1,9 @@
 odoo.define('mail_bot.messaging.entity.MessagingInitializer', function (require) {
 'use strict';
 
-const { registerClassPatchEntity } = require('mail.messaging.entity.core');
+const { registerInstancePatchEntity } = require('mail.messaging.entityCore');
 
-registerClassPatchEntity('MessagingInitializer', 'mail_bot.messaging.entity.MessagingInitializer', {
+registerInstancePatchEntity('MessagingInitializer', 'mail_bot.messaging.entity.MessagingInitializer', {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -23,8 +23,8 @@ registerClassPatchEntity('MessagingInitializer', 'mail_bot.messaging.entity.Mess
     /**
      * @override
      */
-    async _start(messagingInitializer) {
-        await this._super(messagingInitializer);
+    async _start() {
+        await this._super();
 
         if ('odoobot_initialized' in this.env.session && !this.env.session.odoobot_initialized) {
             this._showOdoobotTimeout();

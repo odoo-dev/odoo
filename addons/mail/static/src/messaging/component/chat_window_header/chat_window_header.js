@@ -18,8 +18,7 @@ class ChatWindowHeader extends Component {
         useStore(props => {
             const chatWindow = this.env.entities.ChatWindow.get(props.chatWindowLocalId);
             return {
-                chatWindow,
-                chatWindowName: chatWindow && chatWindow.name,
+                chatWindow: chatWindow ? chatWindow.__state : undefined,
                 isDeviceMobile: this.env.messaging.device.isMobile,
             };
         });

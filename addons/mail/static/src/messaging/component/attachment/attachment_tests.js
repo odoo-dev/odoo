@@ -74,7 +74,7 @@ QUnit.test('simplest layout', async function (assert) {
     const attachmentEl = document.querySelector('.o_Attachment');
     assert.strictEqual(
         attachmentEl.dataset.attachmentLocalId,
-        this.env.entities.Attachment.fromId(750).localId,
+        this.env.entities.Attachment.find(attachment => attachment.id === 750).localId,
         "attachment component should be linked to attachment store model"
     );
     assert.strictEqual(

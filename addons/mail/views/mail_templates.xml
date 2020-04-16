@@ -152,7 +152,6 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/dialog_manager/dialog_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/discuss/discuss.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/entity/entity.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/entity/entity_core.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/follower/follower.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/follower_subtype/follower_subtype.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/follower_subtype_list/follower_subtype_list.js"></script>
@@ -168,6 +167,9 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/thread_cache/thread_cache.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/thread_viewer/thread_viewer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/user/user.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/entity_core.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/entity_field.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/entity_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/messaging_env.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/service/chat_window_service/chat_window_service.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/service/dialog_service/dialog_service.js"></script>

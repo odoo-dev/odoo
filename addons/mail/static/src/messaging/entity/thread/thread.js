@@ -1,14 +1,8 @@
 odoo.define('mail.messaging.entity.Thread', function (require) {
 'use strict';
 
-const {
-    fields: {
-        many2many,
-        one2many,
-        one2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2many, many2one, one2many, one2one } = require('mail.messaging.EntityField');
 
 function ThreadFactory({ Entity }) {
 
@@ -20,99 +14,82 @@ function ThreadFactory({ Entity }) {
 
         /**
          * @static
-         * @returns {mail.messaging.entity.Thread[]}
+         * @param {Object} data
+         * @return {Object}
          */
-        static get allChannels() {
-            return this.all.filter(thread => thread.model === 'mail.channel');
-        }
+        static convertData(data) {
+            const data2 = {};
+            if ('channel_type' in data) {
+                data2.channel_type = data.channel_type;
+                data2.model = 'mail.channel';
+            }
+            if ('create_uid' in data) {
+                data2.creator = [['insert', { id: data.create_uid }]];
+            }
+            if ('custom_channel_name' in data) {
+                data2.custom_channel_name = data.custom_channel_name;
+            }
+            if ('group_based_subscription' in data) {
+                data2.group_based_subscription = data.group_based_subscription;
+            }
+            if ('id' in data) {
+                data2.id = data.id;
+            }
+            if ('is_minimized' in data && 'state' in data) {
+                data2.foldState = data.is_minimized ? data.state : 'closed';
+            }
+            if ('is_moderator' in data) {
+                data2.is_moderator = data.is_moderator;
+            }
+            if ('mass_mailing' in data) {
+                data2.mass_mailing = data.mass_mailing;
+            }
+            if ('moderation' in data) {
+                data2.moderation = data.moderation;
+            }
+            if ('message_needaction_counter' in data) {
+                data2.message_needaction_counter = data.message_needaction_counter;
+            }
+            if ('message_unread_counter' in data) {
+                data2.message_unread_counter = data.message_unread_counter;
+            }
+            if ('name' in data) {
+                data2.name = data.name;
+            }
+            if ('public' in data) {
+                data2.public = data.public;
+            }
+            if ('seen_message_id' in data) {
+                data2.seen_message_id = data.seen_message_id;
+            }
+            if ('seen_partners_info' in data) {
+                data2.seen_partners_info = data.seen_partners_info;
+            }
+            if ('uuid' in data) {
+                data2.uuid = data.uuid;
+            }
 
-        /**
-         * @static
-         * @returns {mail.messaging.entity.Thread[]}
-         */
-        static get allMailboxes() {
-            return this.all.filter(thread => thread.model === 'mail.box');
-        }
+            // relation
+            if ('direct_partner' in data) {
+                if (!data.direct_partner) {
+                    data2.directPartner = [['unlink-all']];
+                } else {
+                    data2.directPartner = [
+                        ['insert', this.env.entities.Partner.convertData(data.direct_partner[0])]
+                    ];
+                }
+            }
+            if ('members' in data) {
+                if (!data.members) {
+                    data2.attachments = [['unlink-all']];
+                } else {
+                    data2.members = [
+                        ['insert-and-replace', data.members.map(memberData => this.env.entities.Partner.convertData(memberData))]
+                    ];
+                }
+            }
 
-        /**
-         * @static
-         * @returns {mail.messaging.entity.Thread[]}
-         */
-        static get allOrderedAndPinnedChannels() {
-            return this.allChannels.sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);
-        }
-
-        /**
-         * @static
-         * @returns {mail.messaging.entity.Thread[]}
-         */
-        static get allOrderedAndPinnedChats() {
-            return this.allPinnedChannels
-                .filter(channel => channel.channel_type === 'chat')
-                .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);
-        }
-
-        /**
-         * @static
-         * @returns {mail.messaging.entity.Thread[]}
-         */
-        static get allOrderedAndPinnedMultiUserChannels() {
-            return this.allPinnedChannels
-                .filter(channel => channel.channel_type === 'channel')
-                .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);
-        }
-
-        /**
-         * @static
-         * @returns {mail.messaging.entity.Thread[]}
-         */
-        static get allOrderedAndPinnedMailboxes() {
-            return this.allMailboxes
-                .filter(mailbox => mailbox.isPinned)
-                .sort((mailbox1, mailbox2) => {
-                    if (mailbox1.id === 'inbox') {
-                        return -1;
-                    }
-                    if (mailbox2.id === 'inbox') {
-                        return 1;
-                    }
-                    if (mailbox1.id === 'starred') {
-                        return -1;
-                    }
-                    if (mailbox2.id === 'starred') {
-                        return 1;
-                    }
-                    const mailbox1Name = mailbox1.displayName;
-                    const mailbox2Name = mailbox2.displayName;
-                    mailbox1Name < mailbox2Name ? -1 : 1;
-                });
-        }
-
-        /**
-         * @static
-         * @returns {mail.messaging.entity.Thread[]}
-         */
-        static get allPinnedChannels() {
-            return this.allChannels.filter(channel => channel.isPinned);
-        }
-
-        /**
-         * @static
-         * @returns {mail.messaging.entity.Thread[]}
-         */
-        static get allUnreadChannels() {
-            return this.allChannels.filter(
-                channel => channel.message_unread_counter > 0
-            );
-        }
-
-        /**
-         * @static
-         * @param {integer} id
-         * @returns {mail.messaging.entity.Thread|undefined}
-         */
-        static channelFromId(id) {
-            return this.allChannels.find(channel => channel.id === id);
+            return data2;
         }
 
         /**
@@ -149,22 +126,14 @@ function ThreadFactory({ Entity }) {
                     }),
                 }
             });
-            const thread = this.create(Object.assign({}, data, { isPinned: true }));
+            const thread = this.create(Object.assign(
+                {},
+                this.convertData(data),
+                { isPinned: true }
+            ));
             if (autoselect) {
                 thread.open({ chatWindowMode: autoselectChatWindowMode });
             }
-        }
-
-        /**
-         * @static
-         * @param {Object} param0
-         * @param {integer} param0.id
-         * @param {string} param0.model
-         * @returns {mail.messaging.entity.Thread|undefined}
-         */
-        static fromModelAndId({ id, model }) {
-            const allThreads = this.all;
-            return allThreads.find(thread => thread.model === model && thread.id === id);
         }
 
         /**
@@ -176,7 +145,10 @@ function ThreadFactory({ Entity }) {
          * @param {boolean} [param1.autoselect=false]
          */
         static async joinChannel(channelId, { autoselect = false } = {}) {
-            const channel = this.channelFromId(channelId);
+            const channel = this.find(thread =>
+                thread.id === channelId &&
+                thread.model === 'mail.channel'
+            );
             if (channel && channel.isPinned) {
                 return;
             }
@@ -185,7 +157,11 @@ function ThreadFactory({ Entity }) {
                 method: 'channel_join_and_get_info',
                 args: [[channelId]]
             });
-            const thread = this.create(Object.assign({}, data, { isPinned: true }));
+            const thread = this.create(Object.assign(
+                {},
+                this.convertData(data),
+                { isPinned: true }
+            ));
             if (autoselect) {
                 thread.open({ resetDiscussDomain: true });
             }
@@ -212,17 +188,10 @@ function ThreadFactory({ Entity }) {
             }, { shadow: true });
             for (const preview of messagePreviews) {
                 const messageData = preview.last_message;
-                this.env.entities.Message.insert(messageData);
+                this.env.entities.Message.insert(
+                    this.env.entities.Message.convertData(messageData)
+                );
             }
-        }
-
-        /**
-         * @static
-         * @param {string} id
-         * @returns {mail.messaging.entity.Thread|undefined}
-         */
-        static mailboxFromId(id) {
-            return this.allMailboxes.find(mailbox => mailbox.id === id);
         }
 
         /**
@@ -238,14 +207,6 @@ function ThreadFactory({ Entity }) {
         }
 
         /**
-         * @returns {mail.messaging.entity.Attachment[]}
-         */
-        get allAttachments() {
-            return [...this.originThreadAttachments.concat(this.attachments)]
-                .sort((a1, a2) => a1.id < a2.id ? 1 : -1);
-        }
-
-        /**
          * @param {string} [stringifiedDomain='[]']
          * @returns {mail.messaging.entity.ThreadCache}
          */
@@ -254,32 +215,10 @@ function ThreadFactory({ Entity }) {
             if (!cache) {
                 cache = this.env.entities.ThreadCache.create({
                     stringifiedDomain,
-                    thread: this,
+                    thread: [['link', this]],
                 });
             }
             return cache;
-        }
-
-        /**
-         * @returns {mail.messaging.entity.ChatWindow[]}
-         */
-        get chatWindows() {
-            const chatWindowViewers = this.viewers.filter(viewer => !!viewer.chatWindow);
-            return chatWindowViewers.map(viewer => viewer.chatWindow);
-        }
-
-        /**
-         * @returns {string}
-         */
-        get displayName() {
-            if (this.channel_type === 'chat' && this.directPartner) {
-                return this.custom_channel_name || this.directPartner.nameOrDisplayName;
-            }
-            if (this.channel_type === 'livechat') {
-                // FIXME: should be patch in im_livechat
-                return this.correspondent_name;
-            }
-            return this.name;
         }
 
         /**
@@ -299,9 +238,8 @@ function ThreadFactory({ Entity }) {
             });
             for (const attachmentData of attachmentsData) {
                 this.env.entities.Attachment.insert(Object.assign({
-                    res_id: this.id,
-                    res_model: this.model,
-                }, attachmentData));
+                    originThread: [['link', this]],
+                }, this.env.entities.Attachment.convertData(attachmentData)));
             }
             this.update({ areAttachmentsLoaded: true });
         }
@@ -323,43 +261,10 @@ function ThreadFactory({ Entity }) {
         }
 
         /**
-         * @returns {boolean}
-         */
-        get isCurrentPartnerFollowing() {
-            return this.followers.some(follower =>
-                follower.partner && follower.partner === this.env.messaging.currentPartner
-            );
-        }
-
-        /**
-         * @returns {boolean}
-         */
-        get isModeratedByUser() {
-            if (this.model !== 'mail.channel') {
-                return false;
-            }
-            return Thread.moderatedChannelIds.includes(this.id);
-        }
-
-        /**
-         * @returns {mail.messaging.entity.Message|undefined}
-         */
-        get lastMessage() {
-            return this.mainCache.lastMessage;
-        }
-
-        /**
          * Load new messages on the main cache of this thread.
          */
         loadNewMessages() {
             this.mainCache.loadNewMessages();
-        }
-
-        /**
-         * @returns {mail.messaging.entity.ThreadCache}
-         */
-        get mainCache() {
-            return this.caches.find(cache => cache.stringifiedDomain === '[]');
         }
 
         /**
@@ -411,9 +316,9 @@ function ThreadFactory({ Entity }) {
                 (device.isMobile && this.model === 'mail.box')
             ) {
                 if (resetDiscussDomain) {
-                    discuss.update({ threadStringifiedDomain: '[]' });
+                    discuss.threadViewer.update({ stringifiedDomain: '[]' });
                 }
-                discuss.update({ thread: this });
+                discuss.threadViewer.update({ thread: [['link', this]] });
             } else {
                 this.env.messaging.chatWindowManager.openThread(this, { mode: chatWindowMode });
             }
@@ -475,13 +380,13 @@ function ThreadFactory({ Entity }) {
                         context: {}, // FIXME empty context to be overridden in session.js with 'allowed_company_ids' task-2243187
                     }
                 });
-                this.unlink({ followers: null });
-                for (const data of followers) {
-                    const follower = this.env.entities.Follower.insert(data);
-                    this.link({ followers: follower });
-                }
+                this.update({
+                    followers: [['insert-and-replace', followers.map(data => this.env.entities.Follower.convertData(data))]],
+                });
             } else {
-                this.unlink({ followers: null });
+                this.update({
+                    followers: [['unlink-all']],
+                });
             }
         }
 
@@ -515,16 +420,6 @@ function ThreadFactory({ Entity }) {
         }
 
         /**
-         * @param {string} newFoldState
-         */
-        updateFoldState(newFoldState) {
-            this.update({
-                is_minimized: newFoldState === 'closed' ? false : true,
-                state: newFoldState,
-            });
-        }
-
-        /**
          * Unsubscribe current user from provided channel.
          */
         async unsubscribe() {
@@ -549,6 +444,86 @@ function ThreadFactory({ Entity }) {
         /**
          * @override
          */
+        static _findFunctionFromData(data) {
+            return entity => entity.id === data.id && entity.model === data.model;
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Attachment[]}
+         */
+        _computeAllAttachments() {
+            const allAttachments = [...new Set(this.originThreadAttachments.concat(this.attachments))]
+                .sort((a1, a2) => a1.id < a2.id ? 1 : -1);
+            return [['replace', allAttachments]];
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.ChatWindow[]}
+         */
+        _computeChatWindows() {
+            const chatWindowViewers = this.viewers.filter(viewer => !!viewer.chatWindow);
+            return [['replace', chatWindowViewers.map(viewer => viewer.chatWindow)]];
+        }
+
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeDisplayName() {
+            if (this.channel_type === 'chat' && this.directPartner) {
+                return this.custom_channel_name || this.directPartner.nameOrDisplayName;
+            }
+            return this.name;
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsCurrentPartnerFollowing() {
+            return this.followers.some(follower =>
+                follower.partner && follower.partner === this.env.messaging.currentPartner
+            );
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsModeratedByCurrentPartner() {
+            if (this.model !== 'mail.channel') {
+                return false;
+            }
+            if (!this.messaging) {
+                return false;
+            }
+            if (!this.messaging.currentPartner) {
+                return false;
+            }
+            return this.messaging.currentPartner.moderatedChannelIds.includes(this.id);
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.ThreadCache}
+         */
+        _computeMainCache() {
+            return [['replace', this.cache('[]')]];
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Messaging}
+         */
+        _computeMessaging() {
+            return [['link', this.env.messaging]];
+        }
+
+        /**
+         * @override
+         */
         _createInstanceLocalId(data) {
             const { channel_type, id, isTemporary = false, model } = data;
             let threadModel = model;
@@ -556,9 +531,9 @@ function ThreadFactory({ Entity }) {
                 threadModel = 'mail.channel';
             }
             if (isTemporary) {
-                return `${this.constructor.name}_${id}`;
+                return `${this.constructor.entityName}_${id}`;
             }
-            return `${this.constructor.name}_${threadModel}_${id}`;
+            return `${this.constructor.entityName}_${threadModel}_${id}`;
         }
 
         /**
@@ -588,87 +563,12 @@ function ThreadFactory({ Entity }) {
         /**
          * @override
          */
-        _update(data) {
-            const prevFoldState = this.foldState;
-
-            const {
-                areAttachmentsLoaded = this.areAttachmentsLoaded || false,
-                channel_type = this.channel_type,
-                // FIXME: should be patch in im_livechat
-                correspondent_name = this.correspondent_name,
-                counter = this.counter || 0,
-                create_uid = this.create_uid,
-                custom_channel_name = this.custom_channel_name,
-                direct_partner, direct_partner: [directPartnerData] = [],
-                group_based_subscription = this.group_based_subscription || false,
-                id = this.id,
-                isPinned = this.isPinned || false,
-                isTemporary = this.isTemporary || false,
-                is_minimized,
-                is_moderator = this.is_moderator || false,
-                mass_mailing = this.mass_mailing || false,
-                members: membersData,
-                message_needaction_counter = this.message_needaction_counter || 0,
-                message_unread_counter = this.message_unread_counter || 0,
-                model = this.model,
-                moderation = this.moderation || false,
-                name = this.name,
-                public: public2 = this.public,
-                seen_message_id = this.seen_message_id,
-                seen_partners_info = this.seen_partners_info,
-                state,
-                uuid = this.uuid,
-            } = data;
-
-            let threadModel = model;
-            if (!threadModel && channel_type) {
-                threadModel = 'mail.channel';
-            }
-            if (!threadModel || !id) {
-                throw new Error('thread must always have `model` and `id`');
-            }
-            let threadIsPinned = isPinned;
-            if (threadModel === 'mail.box') {
-                threadIsPinned = true;
-            }
-
-            let foldState;
-            if (is_minimized !== undefined) {
-                if (!is_minimized) {
-                    foldState = 'closed';
-                } else {
-                    foldState = state ? state : (this.foldState || 'open');
-                }
-            } else {
-                foldState = this.foldState || 'closed';
-            }
-
-            Object.assign(this, {
-                areAttachmentsLoaded,
-                channel_type,
-                correspondent_name,
-                counter,
-                create_uid,
-                custom_channel_name,
-                foldState,
-                group_based_subscription,
-                id,
-                isPinned: threadIsPinned,
-                isTemporary,
-                is_moderator,
-                mass_mailing,
-                message_needaction_counter,
-                message_unread_counter,
-                model: threadModel,
-                moderation,
-                name,
-                public: public2,
-                seen_message_id,
-                seen_partners_info,
-                uuid,
-            });
-
-            if (this.model === 'mail.channel' && prevFoldState && this.foldState !== prevFoldState) {
+        _updateAfter(previous) {
+            if (
+                this.model === 'mail.channel' &&
+                previous.foldState &&
+                this.foldState !== previous.foldState
+            ) {
                 this.notifyFoldStateToServer();
             }
 
@@ -681,39 +581,32 @@ function ThreadFactory({ Entity }) {
                     chatWindow.close();
                 }
             }
-            // composer
-            if (!this.composer) {
-                const composer = this.env.entities.Composer.create();
-                this.link({ composer });
-            }
-            // directPartner
-            if (direct_partner) {
-                let directPartner = this.env.entities.Partner.insert(directPartnerData);
-                this.link({ directPartner });
-            }
-            // main thread cache
-            if (!this.mainCache) {
-                this.env.entities.ThreadCache.create({ thread: this });
-            }
-            // members
-            if (membersData) {
-                const prevMembers = this.members;
-                const newMembers = [];
-                for (const memberData of membersData) {
-                    let member = this.env.entities.Partner.insert(memberData);
-                    newMembers.push(member);
-                    this.link({ members: member });
-                }
-                const oldPrevMembers = prevMembers.filter(member => !newMembers.include(member));
-                for (const member of oldPrevMembers) {
-                    this.unlink({ members: member });
-                }
-            }
+        }
+
+        /**
+         * @override
+         */
+        _updateBefore() {
+            return {
+                foldState: this.foldState,
+            };
         }
 
     }
 
+    Thread.entityName = 'Thread';
+
     Thread.fields = {
+        allAttachments: many2many('Attachment', {
+            compute: '_computeAllAttachments',
+            dependencies: [
+                'attachments',
+                'originThreadAttachments',
+            ],
+        }),
+        areAttachmentsLoaded: attr({
+            default: false,
+        }),
         attachments: many2many('Attachment', {
             inverse: 'threads',
         }),
@@ -721,28 +614,120 @@ function ThreadFactory({ Entity }) {
             inverse: 'thread',
             isCausal: true,
         }),
+        channel_type: attr(),
+        chatWindows: one2many('ChatWindow', {
+            compute: '_computeChatWindows',
+            dependencies: ['viewersChatWindow'],
+        }),
         composer: one2one('Composer', {
+            autocreate: true,
             inverse: 'thread',
             isCausal: true,
         }),
+        counter: attr({
+            default: 0,
+        }),
+        creator: many2one('User'),
+        custom_channel_name: attr(),
         directPartner: one2one('Partner', {
             inverse: 'directPartnerThread',
+        }),
+        directPartnerNameOrDisplayName: attr({
+            related: 'directPartner.nameOrDisplayName',
+        }),
+        displayName: attr({
+            compute: '_computeDisplayName',
+            dependencies: [
+                'channel_type',
+                'custom_channel_name',
+                'directPartner',
+                'directPartnerNameOrDisplayName',
+                'name',
+            ],
+        }),
+        foldState: attr({
+            default: 'closed',
+        }),
+        followersPartner: many2many('Partner', {
+            related: 'followers.partner',
         }),
         followers: one2many('Follower', {
             inverse: 'followedThread',
         }),
+        group_based_subscription: attr({
+            default: false,
+        }),
+        id: attr(),
+        isCurrentPartnerFollowing: attr({
+            compute: '_computeIsCurrentPartnerFollowing',
+            default: false,
+            dependencies: [
+                'followers',
+                'followersPartner',
+                'messagingCurrentPartner',
+            ],
+        }),
+        isModeratedByCurrentPartner: attr({
+            compute: '_computeIsModeratedByCurrentPartner',
+            dependencies: [
+                'model',
+                'messagingCurrentPartner',
+            ],
+        }),
+        isPinned: attr({
+            default: false,
+        }),
+        isTemporary: attr({
+            default: false,
+        }),
+        is_moderator: attr({
+            default: false,
+        }),
+        lastMessage: many2one('Message', {
+            related: 'mainCache.lastMessage',
+        }),
+        mainCache: one2one('ThreadCache', {
+            compute: '_computeMainCache',
+            dependencies: ['caches'],
+        }),
+        mass_mailing: attr({
+            default: false,
+        }),
         members: many2many('Partner', {
             inverse: 'memberThreads',
         }),
+        message_needaction_counter: attr({
+            default: 0,
+        }),
+        message_unread_counter: attr({
+            default: 0,
+        }),
+        messaging: many2one('Messaging', {
+            compute: '_computeMessaging',
+        }),
+        messagingCurrentPartner: many2one('Partner', {
+            related: 'messaging.currentPartner',
+        }),
+        model: attr(),
+        moderation: attr({
+            default: false,
+        }),
+        name: attr(),
         originThreadAttachments: one2many('Attachment', {
             inverse: 'originThread',
         }),
+        public: attr(),
+        seen_message_id: attr(),
+        seen_partners_info: attr(),
         typingMembers: many2many('Partner'),
+        uuid: attr(),
         viewers: one2many('ThreadViewer', {
             inverse: 'thread',
         }),
+        viewersChatWindow: many2many('ChatWindow', {
+            related: 'viewers.chatWindow',
+        }),
     };
-    Thread.moderatedChannelIds = [];
 
     return Thread;
 }

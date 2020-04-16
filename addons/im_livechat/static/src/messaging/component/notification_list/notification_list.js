@@ -22,7 +22,11 @@ patch(components.NotificationList, 'im_livechat.messaging.component.Notification
      */
     _useStoreSelectorThreads(props) {
         if (props.filter === 'livechat') {
-            return this.env.entities.Thread.allOrderedAndPinnedLivechats();
+            return this.env.entities.Thread.all(thread =>
+                thread.channel_type === 'livechat' &&
+                thread.isPinned &&
+                thread.model === 'mail.channel'
+            );
         }
         return this._super(...arguments);
     },

@@ -1,12 +1,8 @@
 odoo.define('mail.messaging.entity.ThreadViewer', function (require) {
 'use strict';
 
-const {
-    fields: {
-        many2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2many, many2one, one2one } = require('mail.messaging.EntityField');
 
 function ThreadViewerFactory({ Entity }) {
 
@@ -44,17 +40,6 @@ function ThreadViewerFactory({ Entity }) {
         }
 
         /**
-         * @returns {mail.messaging.entity.Message[]}
-         */
-        get checkedMessages() {
-            const threadCache = this.threadCache;
-            if (!threadCache) {
-                return [];
-            }
-            return threadCache.checkedMessages;
-        }
-
-        /**
          * @param {mail.messaging.entity.ThreadCache} threadCache
          */
         handleThreadCacheLoaded(threadCache) {
@@ -78,19 +63,8 @@ function ThreadViewerFactory({ Entity }) {
                     break;
             }
             this.update({
-                componentHintList: this.componentHintList.filter(filterFun)
+                componentHintList: this.componentHintList.filter(filterFun),
             });
-        }
-
-        /**
-         * @returns {mail.messaging.entity.Message[]}
-         */
-        get messages() {
-            const threadCache = this.threadCache;
-            if (!threadCache) {
-                return [];
-            }
-            return threadCache.messages;
         }
 
         /**
@@ -107,40 +81,31 @@ function ThreadViewerFactory({ Entity }) {
             });
         }
 
+        //----------------------------------------------------------------------
+        // Private
+        //----------------------------------------------------------------------
+
         /**
+         * @private
          * @returns {mail.messaging.entity.ThreadCache|undefined}
          */
-        get threadCache() {
+        _computeThreadCache() {
             if (!this.thread) {
-                return undefined;
+                return [];
             }
-            return this.thread.cache(this.stringifiedDomain);
+            return [['replace', this.thread.cache(this.stringifiedDomain)]];
         }
 
         /**
+         * @private
          * @returns {integer|undefined}
          */
-        get threadCacheInitialPosition() {
+        _computeThreadCacheInitialPosition() {
             if (!this.threadCache) {
                 return undefined;
             }
             return this.threadCacheInitialScrollPositions[this.threadCache.localId];
         }
-
-        /**
-         * @returns {mail.messaging.entity.Message[]}
-         */
-        get uncheckedMessages() {
-            const threadCache = this.threadCache;
-            if (!threadCache) {
-                return [];
-            }
-            return threadCache.uncheckedMessages;
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
 
         /**
          * @private
@@ -193,57 +158,16 @@ function ThreadViewerFactory({ Entity }) {
         /**
          * @override
          */
-        _update(data) {
-            const {
-                /**
-                 * List of component hints. Hints contain information that help
-                 * components make UI/UX decisions based on their UI state.
-                 * For instance, on receiving new messages and the last message
-                 * is visible, it should auto-scroll to this new last message.
-                 *
-                 * Format of a component hint:
-                 *
-                 *   {
-                 *       type: {string} the name of the component hint. Useful
-                 *                      for components to dispatch behaviour
-                 *                      based on its type.
-                 *       data: {Object} data related to the component hint.
-                 *                      For instance, if hint suggests to scroll
-                 *                      to a certain message, data may contain
-                 *                      message id.
-                 *   }
-                 */
-                componentHintList = this.componentHintList || [],
-                stringifiedDomain = this.stringifiedDomain,
-                thread,
-                /**
-                 * List of saved initial scroll positions of thread caches.
-                 * Useful to restore scroll position on changing back to this
-                 * thread cache. Note that this is only applied when opening
-                 * the thread cache, because scroll position may change fast so
-                 * save is already throttled
-                 */
-                threadCacheInitialScrollPositions = this.threadCacheInitialScrollPositions || {},
-            } = data;
-
-            const prevThreadCache = this.threadCache;
-
-            Object.assign(this, {
-                componentHintList,
-                stringifiedDomain,
-                threadCacheInitialScrollPositions,
-            });
-
-            if (thread && this.thread !== thread) {
+        _updateAfter(previous) {
+            if (this.thread && this.thread !== previous.thread) {
                 this._stopLoading();
-                this.link({ thread });
                 if (!this.threadCache.isLoaded && !this.threadCache.isLoading) {
                     this.threadCache.loadMessages();
                 }
             }
-            if (this.threadCache !== prevThreadCache) {
+            if (this.threadCache !== previous.threadCache) {
                 this._stopLoading();
-                this._writeComponentHint('change-of-thread-cache');
+                this.addComponentHint('change-of-thread-cache');
             }
 
             if (
@@ -255,20 +179,86 @@ function ThreadViewerFactory({ Entity }) {
         }
 
         /**
-         * @private
-         * @param {string} hintType
-         * @param {any} hintData
+         * @override
          */
-        _writeComponentHint(hintType, hintData) {
-            const hint = this._makeComponentHint(hintType, hintData);
-            this.componentHintList = this.componentHintList.concat([hint]);
+        _updateBefore() {
+            return {
+                thread: this.thread,
+                threadCache: this.threadCache,
+            };
         }
 
     }
 
+    ThreadViewer.entityName = 'ThreadViewer';
+
     ThreadViewer.fields = {
+        chatWindow: one2one('ChatWindow', {
+            inverse: 'threadViewer',
+        }),
+        checkedMessages: many2many('Message', {
+            related: 'threadCache.checkedMessages',
+        }),
+        /**
+         * List of component hints. Hints contain information that help
+         * components make UI/UX decisions based on their UI state.
+         * For instance, on receiving new messages and the last message
+         * is visible, it should auto-scroll to this new last message.
+         *
+         * Format of a component hint:
+         *
+         *   {
+         *       type: {string} the name of the component hint. Useful
+         *                      for components to dispatch behaviour
+         *                      based on its type.
+         *       data: {Object} data related to the component hint.
+         *                      For instance, if hint suggests to scroll
+         *                      to a certain message, data may contain
+         *                      message id.
+         *   }
+         */
+        componentHintList: attr({
+            default: [],
+        }),
+        messages: many2many('Message', {
+            related: 'threadCache.messages',
+        }),
+        stringifiedDomain: attr({
+            default: '[]',
+        }),
         thread: many2one('Thread', {
             inverse: 'viewers',
+        }),
+        threadCache: many2one('ThreadCache', {
+            compute: '_computeThreadCache',
+            dependencies: [
+                'stringifiedDomain',
+                'thread',
+                'threadCaches',
+            ],
+        }),
+        threadCacheInitialPosition: attr({
+            compute: '_computeThreadCacheInitialPosition',
+            dependencies: [
+                'threadCache',
+                'threadCacheInitialScrollPositions',
+            ],
+        }),
+        /**
+         * List of saved initial scroll positions of thread caches.
+         * Useful to restore scroll position on changing back to this
+         * thread cache. Note that this is only applied when opening
+         * the thread cache, because scroll position may change fast so
+         * save is already throttled
+         */
+        threadCacheInitialScrollPositions: attr({
+            default: {},
+        }),
+        threadCaches: many2many('ThreadCache', {
+            related: 'thread.caches',
+        }),
+        uncheckedMessages: many2many('Message', {
+            related: 'threadCache.uncheckedMessages',
         }),
     };
 

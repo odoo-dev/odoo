@@ -80,7 +80,7 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
     const thread = this.env.entities.Thread.create({
         channel_type: 'channel',
         id: 100,
-        members: [
+        members: [['insert', [
             {
                 email: "john@example.com",
                 id: 9,
@@ -91,11 +91,12 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
                 id: 10,
                 name: "Fred",
             },
-        ],
+        ]]],
+        model: 'mail.channel',
         name: "General",
         public: 'public',
     });
-    const threadViewer = this.env.entities.ThreadViewer.create({ thread });
+    const threadViewer = this.env.entities.ThreadViewer.create({ thread: [['link', thread]] });
     await this.createThreadViewerComponent(threadViewer, { hasComposer: true });
     dragenterFiles(document.querySelector('.o_ThreadViewer'));
     await afterNextRender();
@@ -139,7 +140,7 @@ QUnit.test('message list desc order', async function (assert) {
     const thread = this.env.entities.Thread.create({
         channel_type: 'channel',
         id: 100,
-        members: [
+        members: [['insert', [
             {
                 email: "john@example.com",
                 id: 9,
@@ -150,11 +151,12 @@ QUnit.test('message list desc order', async function (assert) {
                 id: 10,
                 name: "Fred",
             },
-        ],
+        ]]],
+        model: 'mail.channel',
         name: "General",
         public: 'public',
     });
-    const threadViewer = this.env.entities.ThreadViewer.create({ thread });
+    const threadViewer = this.env.entities.ThreadViewer.create({ thread: [['link', thread]] });
     await this.createThreadViewerComponent(threadViewer, { order: 'desc' }, { isFixedSize: true });
     const messageItems = document.querySelectorAll(`.o_MessageList_item`);
     assert.notOk(
@@ -227,7 +229,7 @@ QUnit.test('message list asc order', async function (assert) {
     const thread = this.env.entities.Thread.create({
         channel_type: 'channel',
         id: 100,
-        members: [
+        members: [['insert', [
             {
                 email: "john@example.com",
                 id: 9,
@@ -238,11 +240,12 @@ QUnit.test('message list asc order', async function (assert) {
                 id: 10,
                 name: "Fred",
             },
-        ],
+        ]]],
+        model: 'mail.channel',
         name: "General",
         public: 'public',
     });
-    const threadViewer = this.env.entities.ThreadViewer.create({ thread });
+    const threadViewer = this.env.entities.ThreadViewer.create({ thread: [['link', thread]] });
     await this.createThreadViewerComponent(threadViewer, { order: 'asc' }, { isFixedSize: true });
     const messageItems = document.querySelectorAll(`.o_MessageList_item`);
     assert.notOk(

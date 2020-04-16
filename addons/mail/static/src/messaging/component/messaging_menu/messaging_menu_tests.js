@@ -585,7 +585,10 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(10).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 10 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -595,7 +598,10 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(20).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 20 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -613,7 +619,10 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(10).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 10 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -623,7 +632,10 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(20).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 20 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         0,
@@ -644,7 +656,10 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(10).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 10 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         0,
@@ -654,7 +669,10 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(20).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 20 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -672,7 +690,10 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(10).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 10 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -682,7 +703,10 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(20).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 20 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,

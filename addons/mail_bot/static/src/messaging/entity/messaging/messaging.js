@@ -1,9 +1,9 @@
 odoo.define('mail_bot.messaging.entity.Messaging', function (require) {
 'use strict';
 
-const { registerClassPatchEntity } = require('mail.messaging.entity.core');
+const { registerInstancePatchEntity } = require('mail.messaging.entityCore');
 
-registerClassPatchEntity('Messaging', 'mail_bot.messaging.entity.Messaging', {
+registerInstancePatchEntity('Messaging', 'mail_bot.messaging.entity.Messaging', {
     //----------------------------------------------------------------------
     // Public
     //----------------------------------------------------------------------

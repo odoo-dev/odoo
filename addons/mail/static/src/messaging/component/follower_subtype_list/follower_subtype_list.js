@@ -21,11 +21,13 @@ class FollowerSubtypeList extends Component {
                 ? followerSubtypeList.follower
                 : undefined;
             const followerSubtypes = follower ? follower.subtypes : [];
-            return [
-                follower,
-                followerSubtypeList,
-                followerSubtypes,
-            ];
+            return {
+                follower: follower ? follower.__state : undefined,
+                followerSubtypeList: followerSubtypeList
+                    ? followerSubtypeList.__state
+                    : undefined,
+                followerSubtypes: followerSubtypes.map(subtype => subtype.__state),
+            };
         }, {
             compareDepth: {
                 followerSubtypes: 1,

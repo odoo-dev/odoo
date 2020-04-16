@@ -471,7 +471,10 @@ QUnit.test('composer text input cleared on message post', async function (assert
             return this._super(...arguments);
         },
     });
-    const thread = this.env.entities.Thread.channelFromId(20);
+    const thread = this.env.entities.Thread.find(thread =>
+        thread.id === 20 &&
+        thread.model === 'mail.channel'
+    );
     await this.createComposerComponent(thread.composer);
     // Type message
     document.querySelector(`.o_ComposerTextInput_textarea`).focus();

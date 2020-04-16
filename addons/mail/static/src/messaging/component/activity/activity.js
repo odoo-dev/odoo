@@ -28,8 +28,14 @@ class Activity extends Component {
             areDetailsVisible: false,
         });
         useStore(props => {
+            const activity = this.env.entities.Activity.get(props.activityLocalId);
             return {
-                activity: this.env.entities.Activity.get(props.activityLocalId),
+                activity: activity ? activity.__state : undefined,
+                assigneeNameOrDisplayName: (
+                    activity &&
+                    activity.assignee &&
+                    activity.assignee.nameOrDisplayName()
+                ),
             };
         });
         /**
@@ -54,7 +60,7 @@ class Activity extends Component {
      * @returns {string}
      */
     get assignedUserText() {
-        return _.str.sprintf(this.env._t("for %s"), this.activity.assignee.nameOrDisplayName);
+        return _.str.sprintf(this.env._t("for %s"), this.activity.assignee.nameOrDisplayName());
     }
 
     /**

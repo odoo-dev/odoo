@@ -26,9 +26,11 @@ class Composer extends Component {
         useStore(props => {
             const composer = this.env.entities.Composer.get(props.composerLocalId);
             return {
-                composer,
+                composer: composer ? composer.__state : undefined,
                 isDeviceMobile: this.env.messaging.device.isMobile,
-                thread: composer ? composer.thread : undefined,
+                thread: composer && composer.thread
+                    ? composer.thread.__state
+                    : undefined,
             };
         });
         /**
@@ -150,7 +152,9 @@ class Composer extends Component {
      * @returns {Object}
      */
     get newAttachmentExtraData() {
-        return { composers: [this.composer] };
+        return {
+            composers: [['replace', this.composer]],
+        };
     }
 
     //--------------------------------------------------------------------------

@@ -56,7 +56,7 @@ QUnit.test('basic rendering', async function (assert) {
 
     await this.start();
     const message = this.env.entities.Message.create({
-        author_id: [7, "Demo User"],
+        author: [['insert', { id: 7, display_name: "Demo User" }]],
         body: "<p>Test</p>",
         id: 100,
     });
@@ -69,7 +69,7 @@ QUnit.test('basic rendering', async function (assert) {
     const messageEl = document.querySelector('.o_Message');
     assert.strictEqual(
         messageEl.dataset.messageLocalId,
-        this.env.entities.Message.fromId(100).localId,
+        this.env.entities.Message.find(message => message.id === 100).localId,
         "message component should be linked to message store model"
     );
     assert.strictEqual(
@@ -128,33 +128,36 @@ QUnit.test('delete attachment linked to message', async function (assert) {
 
     await this.start();
     const message = this.env.entities.Message.create({
-        attachment_ids: [{
+        attachments: [['insert-and-replace', {
             filename: "BLAH.jpg",
             id: 10,
             name: "BLAH",
-        }],
-        author_id: [7, "Demo User"],
+        }]],
+        author: [['insert', { id: 7, display_name: "Demo User" }]],
         body: "<p>Test</p>",
         id: 100,
     });
     await this.createMessageComponent(message);
     document.querySelector('.o_Attachment_asideItemUnlink').click();
     await afterNextRender();
-    assert.notOk(this.env.entities.Attachment.fromId(10));
+    assert.notOk(this.env.entities.Attachment.find(attachment => attachment.id === 10));
 });
 
 QUnit.test('moderation: moderated channel with pending moderation message (author)', async function (assert) {
     assert.expect(1);
 
     await this.start();
-    const message = this.env.entities.Message.create({
-        author_id: [1, "Admin"],
-        body: "<p>Test</p>",
-        channel_ids: [20],
-        id: 100,
+    const thread = this.env.entities.Thread.create({
+        id: 20,
         model: 'mail.channel',
+    });
+    const message = this.env.entities.Message.create({
+        author: [['insert', { id: 1, display_name: "Admin" }]],
+        body: "<p>Test</p>",
+        id: 100,
         moderation_status: 'pending_moderation',
-        res_id: 20,
+        originThread: [['link', thread]],
+        threadCaches: [['link', thread.mainCache]],
     });
     await this.createMessageComponent(message);
 
@@ -172,14 +175,17 @@ QUnit.test('moderation: moderated channel with pending moderation message (moder
         moderation_channel_ids: [20],
     });
     await this.start();
-    const message = this.env.entities.Message.create({
-        author_id: [7, "Demo User"],
-        body: "<p>Test</p>",
-        channel_ids: [20],
-        id: 100,
+    const thread = this.env.entities.Thread.create({
+        id: 20,
         model: 'mail.channel',
+    });
+    const message = this.env.entities.Message.create({
+        author: [['insert', { id: 7, display_name: "Demo User" }]],
+        body: "<p>Test</p>",
+        id: 100,
         moderation_status: 'pending_moderation',
-        res_id: 20,
+        originThread: [['link', thread]],
+        threadCaches: [['link', thread.mainCache]],
     });
     await this.createMessageComponent(message);
     const messageEl = document.querySelector('.o_Message');

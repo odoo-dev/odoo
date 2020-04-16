@@ -1,13 +1,8 @@
 odoo.define('mail.messaging.entity.Discuss', function (require) {
 'use strict';
 
-const {
-    fields: {
-        one2many,
-        one2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, one2many, one2one } = require('mail.messaging.EntityField');
 
 function DiscussFactory({ Entity }) {
 
@@ -19,27 +14,9 @@ function DiscussFactory({ Entity }) {
 
         /**
          * @param {mail.messaging.entity.Thread} thread
-         * @returns {string}
-         */
-        static threadToActiveId(thread) {
-            return `${thread.model}_${thread.id}`;
-        }
-
-        /**
-         * @returns {string|undefined}
-         */
-        get activeId() {
-            if (!this.thread) {
-                return undefined;
-            }
-            return this.constructor.threadToActiveId(this.thread);
-        }
-
-        /**
-         * @param {mail.messaging.entity.Thread} thread
          */
         cancelThreadRenaming(thread) {
-            this.unlink({ renamingThreads: thread });
+            this.update({ renamingThreads: [['unlink', thread]] });
         }
 
         clearIsAddingItem() {
@@ -51,7 +28,7 @@ function DiscussFactory({ Entity }) {
         }
 
         clearReplyingToMessage() {
-            this.unlink({ replyingToMessage: null });
+            this.update({ replyingToMessage: [['unlink-all']] });
         }
 
         /**
@@ -128,7 +105,9 @@ function DiscussFactory({ Entity }) {
          */
         handleAddChatAutocompleteSelect(ev, ui) {
             const partnerId = ui.item.id;
-            const partner = this.env.entities.Partner.fromId(partnerId);
+            const partner = this.env.entities.Partner.find(partner =>
+                partner.id === partnerId
+            );
             const chat = partner.directPartnerThread;
             if (chat) {
                 this._openThread(chat.localId);
@@ -166,27 +145,23 @@ function DiscussFactory({ Entity }) {
         }
 
         /**
-         * @returns {boolean}
-         */
-        get isReplyingToMessage() {
-            return !!this.replyingToMessage;
-        }
-
-        /**
          * @param {Object} param0
          * @param {function} param0.dispatch
          * @param {Object} param0.getters
          */
         openInitThread() {
             const [model, id] = this.initActiveId.split('_');
-            const thread = this.env.entities.Thread.fromModelAndId({
-                id: model !== 'mail.box' ? Number(id) : id,
-                model,
-            });
+            const thread = this.env.entities.Thread.find(thread =>
+                thread.id === (model !== 'mail.box' ? Number(id) : id) &&
+                thread.model === model
+            );
             if (!thread) {
                 return;
             }
-            this.update({ thread, threadStringifiedDomain: '[]' });
+            this.threadViewer.update({
+                stringifiedDomain: '[]',
+                thread: [['link', thread]],
+            });
             thread.open({ resetDiscussDomain: true });
         }
 
@@ -196,21 +171,22 @@ function DiscussFactory({ Entity }) {
          */
         async renameThread(thread, newName) {
             await thread.rename(newName);
-            this.unlink({ renamingThreads: thread });
+            this.update({ renamingThreads: [['unlink', thread]] });
         }
 
         /**
          * @param {mail.messaging.entity.Thread} thread
          */
         setThreadRenaming(thread) {
-            this.link({ renamingThreads: thread });
+            this.update({ renamingThreads: [['link', thread ]] });
         }
 
         /**
-         * @returns {mail.messaging.entity.Thread|undefined}
+         * @param {mail.messaging.entity.Thread} thread
+         * @returns {string}
          */
-        get thread() {
-            return this.threadViewer && this.threadViewer.thread;
+        threadToActiveId(thread) {
+            return `${thread.model}_${thread.id}`;
         }
 
         //----------------------------------------------------------------------
@@ -218,132 +194,200 @@ function DiscussFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
-         * @override
+         * @private
+         * @returns {string|undefined}
          */
-        _update(data) {
-            if (!this.threadViewer) {
-                const threadViewer = this.env.entities.ThreadViewer.create();
-                this.link({ threadViewer });
+        _computeActiveId() {
+            if (!this.thread) {
+                return undefined;
             }
+            return this.threadToActiveId(this.thread);
+        }
+
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeAddingChannelValue() {
             if (!this.isOpen) {
-                this.isOpen = false;
+                return "";
             }
-            if (!this.activeMobileNavbarTabId) {
-                this.activeMobileNavbarTabId = 'mailbox';
+            return this.addingChannelValue;
+        }
+
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeInitActiveId() {
+            if (!this.isOpen) {
+                return this.defaultInitActiveId;
             }
-
-            const wasOpen = this.isOpen;
-            const prevActiveMobileNavbarTabId = this.activeMobileNavbarTabId;
-
-            const {
-                /**
-                 * Active mobile navbar tab, either 'mailbox', 'chat', or 'channel'.
-                 */
-                activeMobileNavbarTabId = this.activeMobileNavbarTabId,
-                /**
-                 * Value that is used to create a channel from the sidebar.
-                 */
-                addingChannelValue = this.addingChannelValue || "",
-                /**
-                 * Determine if the moderation discard dialog is displayed.
-                 */
-                hasModerationDiscardDialog = this.hasModerationDiscardDialog || false,
-                /**
-                 * Determine if the moderation reject dialog is displayed.
-                 */
-                hasModerationRejectDialog = this.hasModerationRejectDialog || false,
-                /**
-                 * Formatted init thread on opening discuss for the first time,
-                 * when no active thread is defined. Useful to set a thread to
-                 * open without knowing its local id in advance.
-                 * format: <threadModel>_<threadId>
-                 */
-                initActiveId = this.initActiveId,
-                /**
-                 * Determine whether current user is currently adding a channel from
-                 * the sidebar.
-                 */
-                isAddingChannel = this.isAddingChannel || false,
-                /**
-                 * Determine whether current user is currently adding a chat from
-                 * the sidebar.
-                 */
-                isAddingChat = this.isAddingChat || false,
-                /**
-                 * Whether the discuss app is open or not. Useful to determine
-                 * whether the discuss or chat window logic should be applied.
-                 */
-                isOpen = this.isOpen,
-                /**
-                 * The menu_id of discuss app, received on mail/init_messaging and
-                 * used to open discuss from elsewhere.
-                 */
-                menu_id = this.menu_id || null,
-                /**
-                 * Quick search input value in the discuss sidebar (desktop). Useful
-                 * to filter channels and chats based on this input content.
-                 */
-                sidebarQuickSearchValue = this.sidebarQuickSearchValue || "",
-                thread: threadOrLocalId,
-                /**
-                 * Domain of the messages in the thread. Determine the thread cache
-                 * to use with provided thread local Id.
-                 */
-                threadStringifiedDomain,
-            } = data;
-
-            Object.assign(this, {
-                activeMobileNavbarTabId: activeMobileNavbarTabId
-                    ? activeMobileNavbarTabId
-                    : this.activeMobileNavbarTabId,
-                addingChannelValue,
-                defaultInitActiveId: 'mail.box_inbox',
-                hasModerationDiscardDialog,
-                hasModerationRejectDialog,
-                initActiveId,
-                isAddingChannel,
-                isAddingChat,
-                isOpen,
-                menu_id,
-                sidebarQuickSearchValue,
-            });
-
-            if (threadStringifiedDomain) {
-                this.threadViewer.update({ stringifiedDomain: threadStringifiedDomain });
+            if (this.thread) {
+                return this.threadToActiveId(this.thread);
             }
+            return this.initActiveId;
+        }
 
-            const inboxMailbox = this.env.entities.Thread.mailboxFromId('inbox');
-            if (threadOrLocalId) {
-                const thread = this.env.entities.Thread.get(threadOrLocalId);
-                this.threadViewer.update({ thread });
-                this.initActiveId = this.constructor.threadToActiveId(thread.model);
-            } else if (
-                prevActiveMobileNavbarTabId !== this.activeMobileNavbarTabId &&
-                this.activeMobileNavbarTabId === 'mailbox' &&
-                inboxMailbox
-            ) {
-                this.threadViewer.update({ thread: inboxMailbox });
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsAddingChannel() {
+            if (!this.isOpen) {
+                return false;
             }
+            return this.isAddingChannel;
+        }
 
-            if (wasOpen !== this.isOpen) {
-                if (!this.isOpen) {
-                    Object.assign(this, {
-                        addingChannelValue: "",
-                        initActiveId: this.defaultInitActiveId,
-                        isAddingChannel: false,
-                        isAddingChat: false,
-                    });
-                    this.unlink({ replyingToMessage: null });
-                }
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsAddingChat() {
+            if (!this.isOpen) {
+                return false;
             }
+            return this.isAddingChat;
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsReplyingToMessage() {
+            return !!this.replyingToMessage;
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Message|undefined}
+         */
+        _computeReplyingToMessage() {
+            if (!this.isOpen) {
+                return [['unlink-all']];
+            }
+            return [];
         }
 
     }
 
+    Discuss.entityName = 'Discuss';
+
     Discuss.fields = {
+        activeId: attr({
+            compute: '_computeActiveId',
+            dependencies: [
+                'thread',
+                'threadId',
+                'threadModel',
+            ],
+        }),
+        /**
+         * Active mobile navbar tab, either 'mailbox', 'chat', or 'channel'.
+         */
+        activeMobileNavbarTabId: attr({
+            default: 'mailbox',
+        }),
+        /**
+         * Value that is used to create a channel from the sidebar.
+         */
+        addingChannelValue: attr({
+            compute: '_computeAddingChannelValue',
+            default: "",
+            dependencies: ['isOpen'],
+        }),
+        defaultInitActiveId: attr({
+            default: 'mail.box_inbox',
+        }),
+        /**
+         * Determine if the moderation discard dialog is displayed.
+         */
+        hasModerationDiscardDialog: attr({
+            default: false,
+        }),
+        /**
+         * Determine if the moderation reject dialog is displayed.
+         */
+        hasModerationRejectDialog: attr({
+            default: false,
+        }),
+        /**
+         * Formatted init thread on opening discuss for the first time,
+         * when no active thread is defined. Useful to set a thread to
+         * open without knowing its local id in advance.
+         * format: <threadModel>_<threadId>
+         */
+        initActiveId: attr({
+            compute: '_computeInitActiveId',
+            default: 'mail.box_inbox',
+            dependencies: [
+                'isOpen',
+                'thread',
+                'threadId',
+                'threadModel',
+            ],
+        }),
+        /**
+         * Determine whether current user is currently adding a channel from
+         * the sidebar.
+         */
+        isAddingChannel: attr({
+            compute: '_computeIsAddingChannel',
+            default: false,
+            dependencies: ['isOpen'],
+        }),
+        /**
+         * Determine whether current user is currently adding a chat from
+         * the sidebar.
+         */
+        isAddingChat: attr({
+            compute: '_computeIsAddingChat',
+            default: false,
+            dependencies: ['isOpen'],
+        }),
+        /**
+         * Whether the discuss app is open or not. Useful to determine
+         * whether the discuss or chat window logic should be applied.
+         */
+        isOpen: attr({
+            default: false,
+        }),
+        isReplyingToMessage: attr({
+            compute: '_computeIsReplyingToMessage',
+            default: false,
+            dependencies: ['replyingToMessage'],
+        }),
+        /**
+         * The menu_id of discuss app, received on mail/init_messaging and
+         * used to open discuss from elsewhere.
+         */
+        menu_id: attr({
+            default: null,
+        }),
         renamingThreads: one2many('Thread'),
-        replyingToMessage: one2one('Message'),
+        replyingToMessage: one2one('Message', {
+            compute: '_computeReplyingToMessage',
+            dependencies: ['isOpen'],
+        }),
+        /**
+         * Quick search input value in the discuss sidebar (desktop). Useful
+         * to filter channels and chats based on this input content.
+         */
+        sidebarQuickSearchValue: attr({
+            default: "",
+        }),
+        thread: one2one('Thread', {
+            related: 'threadViewer.thread',
+        }),
+        threadId: attr({
+            related: 'thread.id',
+        }),
+        threadModel: attr({
+            related: 'thread.model',
+        }),
         threadViewer: one2one('ThreadViewer', {
+            autocreate: true,
             isCausal: true,
         }),
     };

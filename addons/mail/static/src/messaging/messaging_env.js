@@ -1,7 +1,7 @@
 odoo.define('mail.messaging.messaging_env', function (require) {
 'use strict';
 
-const { generateEntities } = require('mail.messaging.entity.core');
+const EntityManager = require('mail.messaging.EntityManager');
 
 const { Store } = owl;
 const { EventBus } = owl.core;
@@ -17,9 +17,7 @@ async function addMessagingToEnv(env) {
      */
     const store = new Store({
         env,
-        state: {
-            entities: {},
-        },
+        state: {},
     });
     /**
      * Environment keys used in messaging.
@@ -28,6 +26,7 @@ async function addMessagingToEnv(env) {
         autofetchPartnerImStatus: true,
         disableAnimation: false,
         entities: undefined,
+        entityManager: new EntityManager(env),
         isMessagingInitialized() {
             if (!this.messaging) {
                 return false;
@@ -37,6 +36,9 @@ async function addMessagingToEnv(env) {
         messaging: undefined,
         messagingBus: new EventBus(),
         store,
+    });
+    Object.defineProperty(env, 'entities', {
+        get() { return this.entityManager.classes; },
     });
     /**
      * Messaging entities.
@@ -60,29 +62,7 @@ async function addMessagingToEnv(env) {
          */
         await new Promise(resolve => setTimeout(resolve));
     }
-    _addMessagingEntities(env);
-}
-
-/**
- * Adds the messaging entities to the given env.
- *
- * @private
- * @param {Object} env
- */
-function _addMessagingEntities(env) {
-    /**
-     * Generate the entities.
-     */
-    env.entities = generateEntities();
-    /**
-     * Make environment accessible from Entities. Note that getter is used
-     * to prevent cyclic data structure.
-     */
-    for (const Entity of Object.values(env.entities)) {
-        Object.defineProperty(Entity, 'env', {
-            get: () => env,
-        });
-    }
+    env.entityManager.start();
     /**
      * Create the messaging singleton entity.
      */

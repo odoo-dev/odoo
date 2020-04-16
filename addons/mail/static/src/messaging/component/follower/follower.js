@@ -16,7 +16,8 @@ class Follower extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            return [this.env.entities.Follower.get(props.followerLocalId)];
+            const follower = this.env.entities.Follower.get(props.followerLocalId);
+            return [follower ? follower.__state : undefined];
         });
     }
 

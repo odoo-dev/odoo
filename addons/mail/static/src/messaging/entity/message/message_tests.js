@@ -8,6 +8,8 @@ const {
     start: utilsStart,
 } = require('mail.messaging.testUtils');
 
+const { str_to_datetime } = require('web.time');
+
 QUnit.module('mail', {}, function () {
 QUnit.module('messaging', {}, function () {
 QUnit.module('entity', {}, function () {
@@ -39,37 +41,54 @@ QUnit.test('create', async function (assert) {
     assert.expect(31);
 
     await this.start();
-    assert.notOk(this.env.entities.Partner.fromId(5));
-    assert.notOk(this.env.entities.Thread.channelFromId(100));
-    assert.notOk(this.env.entities.Attachment.fromId(750));
-    assert.notOk(this.env.entities.Message.fromId(4000));
+    assert.notOk(this.env.entities.Partner.find(partner => partner.id === 5));
+    assert.notOk(this.env.entities.Thread.find(thread =>
+        thread.id === 100 &&
+        thread.model === 'mail.channel'
+    ));
+    assert.notOk(this.env.entities.Attachment.find(attachment => attachment.id === 750));
+    assert.notOk(this.env.entities.Message.find(message => message.id === 4000));
 
+    const thread = this.env.entities.Thread.create({
+        id: 100,
+        model: 'mail.channel',
+        name: "General",
+    });
     const message = this.env.entities.Message.create({
-        attachment_ids: [{
+        attachments: [['insert-and-replace', {
             filename: "test.txt",
             id: 750,
             mimetype: 'text/plain',
             name: "test.txt",
-        }],
-        author_id: [5, "Demo"],
+        }]],
+        author: [['insert', { id: 5, display_name: "Demo" }]],
         body: "<p>Test</p>",
-        channel_ids: [100],
-        date: "2019-05-05 10:00:00",
+        date: moment(str_to_datetime("2019-05-05 10:00:00")),
         id: 4000,
-        model: 'mail.channel',
-        needaction_partner_ids: [2, 3],
-        record_name: "General",
-        starred_partner_ids: [3, 4],
-        res_id: 100,
+        originThread: [['link', thread]],
+        threadCaches: [['link', [
+            thread.mainCache,
+            this.env.entities.Thread.find(thread =>
+                thread.id === 'inbox' &&
+                thread.model === 'mail.box'
+            ).mainCache,
+            this.env.entities.Thread.find(thread =>
+                thread.id === 'starred' &&
+                thread.model === 'mail.box'
+            ).mainCache,
+        ]]],
     });
 
-    assert.ok(this.env.entities.Partner.fromId(5));
-    assert.ok(this.env.entities.Thread.channelFromId(100));
-    assert.ok(this.env.entities.Attachment.fromId(750));
-    assert.ok(this.env.entities.Message.fromId(4000));
+    assert.ok(this.env.entities.Partner.find(partner => partner.id === 5));
+    assert.ok(this.env.entities.Thread.find(thread =>
+        thread.id === 100 &&
+        thread.model === 'mail.channel'
+    ));
+    assert.ok(this.env.entities.Attachment.find(attachment => attachment.id === 750));
+    assert.ok(this.env.entities.Message.find(message => message.id === 4000));
 
     assert.ok(message);
-    assert.strictEqual(this.env.entities.Message.fromId(4000), message);
+    assert.strictEqual(this.env.entities.Message.find(message => message.id === 4000), message);
     assert.strictEqual(message.body, "<p>Test</p>");
     assert.ok(message.date instanceof moment);
     assert.strictEqual(
@@ -77,27 +96,42 @@ QUnit.test('create', async function (assert) {
         "2019-05-05 10:00:00"
     );
     assert.strictEqual(message.id, 4000);
-    assert.strictEqual(message.originThread, this.env.entities.Thread.channelFromId(100));
+    assert.strictEqual(message.originThread, this.env.entities.Thread.find(thread =>
+        thread.id === 100 &&
+        thread.model === 'mail.channel'
+    ));
     assert.ok(
-        message.allThreads.includes(this.env.entities.Thread.channelFromId(100))
+        message.allThreads.includes(this.env.entities.Thread.find(thread =>
+            thread.id === 100 &&
+            thread.model === 'mail.channel'
+        ))
     );
     // from partnerId being in needaction_partner_ids
-    assert.ok(message.allThreads.includes(this.env.entities.Thread.mailboxFromId('inbox')));
+    assert.ok(message.allThreads.includes(this.env.entities.Thread.find(thread =>
+        thread.id === 'inbox' &&
+        thread.model === 'mail.box'
+    )));
     // from partnerId being in starred_partner_ids
-    assert.ok(message.allThreads.includes(this.env.entities.Thread.mailboxFromId('starred')));
-    const attachment = this.env.entities.Attachment.fromId(750);
+    assert.ok(message.allThreads.includes(this.env.entities.Thread.find(thread =>
+        thread.id === 'starred' &&
+        thread.model === 'mail.box'
+    )));
+    const attachment = this.env.entities.Attachment.find(attachment => attachment.id === 750);
     assert.ok(attachment);
     assert.strictEqual(attachment.filename, "test.txt");
     assert.strictEqual(attachment.id, 750);
     assert.notOk(attachment.isTemporary);
     assert.strictEqual(attachment.mimetype, 'text/plain');
     assert.strictEqual(attachment.name, "test.txt");
-    const channel = this.env.entities.Thread.channelFromId(100);
+    const channel = this.env.entities.Thread.find(thread =>
+        thread.id === 100 &&
+        thread.model === 'mail.channel'
+    );
     assert.ok(channel);
     assert.strictEqual(channel.model, 'mail.channel');
     assert.strictEqual(channel.id, 100);
     assert.strictEqual(channel.name, "General");
-    const partner = this.env.entities.Partner.fromId(5);
+    const partner = this.env.entities.Partner.find(partner => partner.id === 5);
     assert.ok(partner);
     assert.strictEqual(partner.display_name, "Demo");
     assert.strictEqual(partner.id, 5);

@@ -1,7 +1,7 @@
 odoo.define('mail.messaging.entity.MessagingNotificationHandler', function (require) {
 'use strict';
 
-const { registerNewEntity } = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 
@@ -140,33 +140,41 @@ function MessagingNotificationHandlerFactory({ Entity }) {
             if (channel_ids.length === 1) {
                 await this.env.entities.Thread.joinChannel(channel_ids[0]);
             }
-            let message = this.env.entities.Message.fromId(data.id);
+            let message = this.env.entities.Message.find(message => message.id === data.id);
             if (message) {
                 const oldMessageModerationStatus = message.moderation_status;
-                const oldMessageWasModeratedByUser = message.isModeratedByUser;
-                message.update(data);
+                const oldMessageWasModeratedByCurrentPartner = message.isModeratedByCurrentPartner;
+                message.update(this.env.entities.Message.convertData(data));
                 if (
                     oldMessageModerationStatus === 'pending_moderation' &&
                     message.moderation_status !== 'pending_moderation' &&
-                    oldMessageWasModeratedByUser
+                    oldMessageWasModeratedByCurrentPartner
                 ) {
-                    const moderation = this.env.entities.Thread.mailboxFromId('moderation');
+                    const moderation = this.env.entities.Thread.find(thread =>
+                        thread.id === 'moderation' &&
+                        thread.model === 'mail.box'
+                    );
                     moderation.update({ counter: moderation.counter - 1 });
                 }
                 return;
             }
-            message = this.env.entities.Message.create(data);
+            message = this.env.entities.Message.create(
+                this.env.entities.Message.convertData(data)
+            );
             for (const thread of message.allThreads) {
                 if (thread.model === 'mail.channel') {
                     const mainThreadCache = thread.mainCache;
-                    mainThreadCache.link({ messages: message });
+                    mainThreadCache.update({ messages: [['link', message]] });
                 }
             }
             const currentPartner = this.env.messaging.currentPartner;
             if (authorPartnerId === currentPartner.id) {
                 return;
             }
-            const channel = this.env.entities.Thread.channelFromId(channelId);
+            const channel = this.env.entities.Thread.find(thread =>
+                thread.id === channelId &&
+                thread.model === 'mail.channel'
+            );
             const isOdooFocused = this.env.call('bus_service', 'isOdooFocused');
             if (!isOdooFocused) {
                 this._notifyNewChannelMessageWhileOutOfFocus({ channel, message });
@@ -190,7 +198,10 @@ function MessagingNotificationHandlerFactory({ Entity }) {
             if (currentPartner.id !== partner_id) {
                 return;
             }
-            const channel = this.env.entities.Thread.channelFromId(channelId);
+            const channel = this.env.entities.Thread.find(thread =>
+                thread.id === channelId &&
+                thread.model === 'mail.channel'
+            );
             channel.update({
                 message_unread_counter: 0,
                 seen_message_id: last_message_id,
@@ -202,20 +213,23 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {Object} data
          */
         _handleNotificationNeedaction(data) {
-            const message = this.env.entities.Message.insert(data);
-            const inboxMailbox = this.env.entities.Thread.mailboxFromId('inbox');
+            const message = this.env.entities.Message.insert(
+                this.env.entities.Message.convertData(data)
+            );
+            const inboxMailbox = this.env.entities.Thread.find(thread =>
+                thread.id === 'inbox' &&
+                thread.model === 'mail.box'
+            );
             inboxMailbox.update({ counter: inboxMailbox.counter + 1 });
             for (const thread of message.allThreads) {
                 if (
                     thread.channel_type === 'channel' &&
                     message.allThreads.includes(inboxMailbox)
                 ) {
-                    thread.update({
-                        message_needaction_counter: thread.message_needaction_counter + 1,
-                    });
+                    thread.update({ message_needaction_counter: thread.message_needaction_counter + 1 });
                 }
                 const mainThreadCache = thread.mainCache;
-                mainThreadCache.link({ messages: message });
+                mainThreadCache.update({ messages: [['link', message]] });
             }
         }
 
@@ -266,7 +280,9 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {Object} data.message
          */
         _handleNotificationPartnerAuthor(data) {
-            this.env.entities.Message.insert(data.message);
+            this.env.entities.Message.insert(
+                this.env.entities.Message.convertData(data.message)
+            );
         }
 
         /**
@@ -292,7 +308,10 @@ function MessagingNotificationHandlerFactory({ Entity }) {
             if (channel_type !== 'channel' || channelState !== 'open') {
                 return;
             }
-            let channel = this.env.entities.Thread.channelFromId(id);
+            let channel = this.env.entities.Thread.find(thread =>
+                thread.id === id &&
+                thread.model === 'mail.channel'
+            );
             if (
                 !is_minimized &&
                 info !== 'creation' &&
@@ -310,9 +329,11 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 );
             }
             if (!channel) {
-                channel = this.env.entities.Thread.create(
-                    Object.assign({}, data, { isPinned: true })
-                );
+                channel = this.env.entities.Thread.create(Object.assign(
+                    {},
+                    this.env.entities.Thread.convertData(data),
+                    { isPinned: true }
+                ));
             }
         }
 
@@ -322,13 +343,16 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {integer[]} param0.messag_ids
          */
         _handleNotificationPartnerDeletion({ message_ids }) {
-            const moderationMailbox = this.env.entities.Thread.mailboxFromId('moderation');
+            const moderationMailbox = this.env.entities.Thread.find(thread =>
+                thread.id === 'moderation' &&
+                thread.model === 'mail.box'
+            );
             for (const id of message_ids) {
-                const message = this.env.entities.Message.fromId(id);
+                const message = this.env.entities.Message.find(message => message.id === id);
                 if (
                     message &&
                     message.moderation_status === 'pending_moderation' &&
-                    message.originThread.isModeratedByUser
+                    message.originThread.isModeratedByCurrentPartner
                 ) {
                     moderationMailbox.update({ counter: moderationMailbox.counter - 1 });
                 }
@@ -349,20 +373,26 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {integer[]} [param0.message_ids=[]]
          */
         _handleNotificationPartnerMarkAsRead({ channel_ids = [], message_ids = [] }) {
-            const inboxMailbox = this.env.entities.Thread.mailboxFromId('inbox');
-            const historyMailbox = this.env.entities.Thread.mailboxFromId('history');
+            const inboxMailbox = this.env.entities.Thread.find(thread =>
+                thread.id === 'inbox' &&
+                thread.model === 'mail.box'
+            );
+            const historyMailbox = this.env.entities.Thread.find(thread =>
+                thread.id === 'history' &&
+                thread.model === 'mail.box'
+            );
             const mainHistoryThreadCache = historyMailbox.mainCache;
             for (const cache of inboxMailbox.caches) {
-                for (const messageId of message_ids) {
-                    const message = this.env.entities.Message.fromId(messageId);
-                    if (!message) {
-                        continue;
-                    }
-                    cache.unlink({ messages: message });
-                    mainHistoryThreadCache.link({ messages: message });
-                }
+                const messages = message_ids
+                    .map(id => this.env.entities.Message.find(message => message.id === id))
+                    .filter(message => !!message);
+                cache.update({ messages: [['unlink', messages]] });
+                mainHistoryThreadCache.update({ messages: [['link', messages]] });
             }
-            for (const channel of this.env.entities.Thread.allChannels) {
+            const channels = this.env.entities.Thread.all(thread =>
+                thread.model === 'mail.channel'
+            );
+            for (const channel of channels) {
                 channel.update({ message_needaction_counter: 0 });
             }
             inboxMailbox.update({ counter: inboxMailbox.counter - message_ids.length });
@@ -374,8 +404,13 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {Object} param0.message
          */
         _handleNotificationPartnerModerator({ message: data }) {
-            this.env.entities.Message.insert(data);
-            const moderationMailbox = this.env.entities.Thread.mailboxFromId('moderation');
+            this.env.entities.Message.insert(
+                this.env.entities.Message.convertData(data)
+            );
+            const moderationMailbox = this.env.entities.Thread.find(thread =>
+                thread.id === 'moderation' &&
+                thread.model === 'mail.box'
+            );
             if (moderationMailbox) {
                 moderationMailbox.update({ counter: moderationMailbox.counter + 1 });
             }
@@ -388,18 +423,21 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {boolean} param0.starred
          */
         _handleNotificationPartnerToggleStar({ message_ids = [], starred }) {
-            const starredMailbox = this.env.entities.Thread.mailboxFromId('starred');
+            const starredMailbox = this.env.entities.Thread.find(thread =>
+                thread.id === 'starred' &&
+                thread.model === 'mail.box'
+            );
             for (const messageId of message_ids) {
-                const message = this.env.entities.Message.fromId(messageId);
+                const message = this.env.entities.Message.find(message => message.id === messageId);
                 if (!message) {
                     continue;
                 }
                 if (starred) {
-                    message.link({ threadCaches: starredMailbox.mainCache });
+                    message.update({ threadCaches: [['link', starredMailbox.mainCache]] });
                     starredMailbox.update({ counter: starredMailbox.counter + 1 });
                 } else {
                     for (const cache of starredMailbox.caches) {
-                        cache.unlink({ messages: message });
+                        cache.update({ messages: [['unlink', message]] });
                     }
                     starredMailbox.update({ counter: starredMailbox.counter - 1 });
                 }
@@ -411,10 +449,10 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {Object} data
          */
         _handleNotificationPartnerTransientMessage(data) {
-            const messageIds = this.env.entities.Message.all.map(message => message.id);
+            const messageIds = this.env.entities.Message.all().map(message => message.id);
             const partnerRoot = this.env.messaging.partnerRoot;
             this.env.entities.Message.create(Object.assign({}, data, {
-                author_id: [partnerRoot.id, partnerRoot.display_name],
+                author: [['link', partnerRoot]],
                 id: (messageIds ? Math.max(...messageIds) : 0) + 0.01,
                 isTransient: true,
             }));
@@ -425,7 +463,10 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {integer} channelId
          */
         _handleNotificationPartnerUnsubscribe(channelId) {
-            const channel = this.env.entities.Thread.channelFromId(channelId);
+            const channel = this.env.entities.Thread.find(thread =>
+                thread.id === channelId &&
+                thread.model === 'mail.channel'
+            );
             if (!channel) {
                 return;
             }
@@ -497,9 +538,7 @@ function MessagingNotificationHandlerFactory({ Entity }) {
             }
             const notificationContent = message.prettyBody.substr(0, PREVIEW_MSG_MAX_SIZE);
             this.env.call('bus_service', 'sendNotification', notificationTitle, notificationContent);
-            messaging.update({
-                outOfFocusUnreadMessageCounter: messaging.outOfFocusUnreadMessageCounter + 1,
-            });
+            messaging.update({ outOfFocusUnreadMessageCounter: messaging.outOfFocusUnreadMessageCounter + 1 });
             const titlePattern = messaging.outOfFocusUnreadMessageCounter === 1
                 ? this.env._t("%d Message")
                 : this.env._t("%d Messages");
@@ -510,6 +549,8 @@ function MessagingNotificationHandlerFactory({ Entity }) {
         }
 
     }
+
+    MessagingNotificationHandler.entityName = 'MessagingNotificationHandler';
 
     return MessagingNotificationHandler;
 }

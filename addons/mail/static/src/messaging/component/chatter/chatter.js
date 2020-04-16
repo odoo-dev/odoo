@@ -27,7 +27,11 @@ class Chatter extends Component {
             if (thread) {
                 attachments = thread.allAttachments;
             }
-            return { attachments, chatter, thread };
+            return {
+                attachments: attachments.map(attachment => attachment.__state),
+                chatter: chatter ? chatter.__state : undefined,
+                thread: thread ? thread.__state : undefined,
+            };
         }, {
             compareDepth: {
                 attachments: 1,
@@ -88,12 +92,8 @@ class Chatter extends Component {
 
 Object.assign(Chatter, {
     components,
-    defaultProps: {
-        hasTopbarCloseButton: false,
-    },
     props: {
         chatterLocalId: String,
-        hasTopbarCloseButton: Boolean,
     },
     template: 'mail.messaging.component.Chatter',
 });

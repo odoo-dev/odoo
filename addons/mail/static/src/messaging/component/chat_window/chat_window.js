@@ -19,8 +19,9 @@ class ChatWindow extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
+            const chatWindow = this.env.entities.ChatWindow.get(props.chatWindowLocalId);
             return {
-                chatWindow: this.env.entities.ChatWindow.get(props.chatWindowLocalId),
+                chatWindow: chatWindow ? chatWindow.__state : undefined,
                 isDeviceMobile: this.env.messaging.device.isMobile,
                 localeTextDirection: this.env.messaging.locale.textDirection,
             };
@@ -154,7 +155,7 @@ class ChatWindow extends Component {
      */
     _onAutocompleteSelect(ev, ui) {
         const partnerId = ui.item.id;
-        const partner = this.env.entities.Partner.fromId(partnerId);
+        const partner = this.env.entities.Partner.find(partner => partner.id === partnerId);
         const chat = partner.directPartnerThread;
         if (chat) {
             chat.open({ chatWindowMode: 'from_new_message' });

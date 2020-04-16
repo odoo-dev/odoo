@@ -55,18 +55,20 @@ class Message extends Component {
                 ? threadViewer.stringifiedDomain
                 : undefined;
             return {
-                attachments: message ? message.attachments : undefined,
-                author,
+                attachments: message
+                    ? message.attachments.map(attachment => attachment.__state)
+                    : undefined,
+                author: author ? author.__state : undefined,
                 hasMessageCheckbox: message ? message.hasCheckbox : false,
                 isDeviceMobile: this.env.messaging.device.isMobile,
                 isMessageChecked: message && threadViewer
                     ? message.isChecked(thread, threadStringifiedDomain)
                     : false,
-                message,
-                originThread,
-                partnerRoot,
-                thread,
-                threadViewer,
+                message: message ? message.__state : undefined,
+                originThread: originThread ? originThread.__state : undefined,
+                partnerRoot: partnerRoot ? partnerRoot.__state : undefined,
+                thread: thread ? thread.__state : undefined,
+                threadViewer: threadViewer ? threadViewer.__state : undefined,
             };
         });
         /**
@@ -221,7 +223,10 @@ class Message extends Component {
      * @returns {boolean}
      */
     get isStarred() {
-        const starredMailbox = this.env.entities.Thread.mailboxFromId('starred');
+        const starredMailbox = this.env.entities.Thread.find(thread =>
+            thread.id === 'starred' &&
+            thread.model === 'mail.box'
+        );
         return this.message.allThreads.includes(starredMailbox);
     }
 

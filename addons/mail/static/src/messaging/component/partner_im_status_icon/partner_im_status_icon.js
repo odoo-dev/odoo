@@ -13,9 +13,12 @@ class PartnerImStatusIcon extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
+            const partner = this.env.entities.Partner.get(props.partnerLocalId);
             return {
-                partner: this.env.entities.Partner.get(props.partnerLocalId),
-                partnerRoot: this.env.messaging.partnerRoot,
+                partner: partner ? partner.__state : undefined,
+                partnerRoot: this.env.messaging.partnerRoot
+                    ? this.env.messaging.partnerRoot.__state
+                    : undefined,
             };
         });
     }

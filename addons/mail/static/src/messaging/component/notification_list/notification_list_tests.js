@@ -28,8 +28,7 @@ QUnit.module('NotificationList', {
             const NotificationListComponent = components.NotificationList;
             NotificationListComponent.env = this.env;
             this.component = new NotificationListComponent(null, { filter });
-            await this.component.mount(this.widget.el);
-            await afterNextRender();
+            await afterNextRender(async () => await this.component.mount(this.widget.el));
         };
 
         this.start = async params => {

@@ -1,12 +1,8 @@
 odoo.define('mail.messaging.entity.DialogManager', function (require) {
 'use strict';
 
-const {
-    fields: {
-        one2many,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, one2many } = require('mail.messaging.EntityField');
 
 function DialogManagerFactory({ Entity }) {
 
@@ -15,13 +11,6 @@ function DialogManagerFactory({ Entity }) {
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
-
-        /**
-         * @returns {mail.messaging.entity.Dialog}
-         */
-        get allOrdered() {
-            return this._ordered.map(_dialog => this.env.entities.Dialog.get(_dialog));
-        }
 
         /**
          * @param {mail.messaging.entity.Dialog} dialog
@@ -37,24 +26,19 @@ function DialogManagerFactory({ Entity }) {
          */
         open(entityName, entityData) {
             const dialog = this.env.entities.Dialog.create({
-                entityName,
-                entityData,
-                manager: this,
+                manager: [['link', this]],
             });
-            return dialog;
-        }
-
-        /**
-         * @param {mail.messaging.entity.Dialog} dialog
-         */
-        register(dialog) {
-            if (this.allOrdered.includes(dialog)) {
-                return;
+            if (!entityName) {
+                throw new Error("Dialog should have a link to entity");
             }
-            this.link({ dialogs: dialog });
-            this.update({
-                _ordered: this._ordered.concat([dialog.localId]),
-            });
+            const Entity = this.env.entities[entityName];
+            if (!Entity) {
+                throw new Error(`No entity exists with name ${entityName}`);
+            }
+            const entity = Entity.create(entityData);
+            dialog.update({ entity: [['link', entity]] });
+            this.update({ _ordered: this._ordered.concat([dialog.localId]) });
+            return dialog;
         }
 
         /**
@@ -64,11 +48,11 @@ function DialogManagerFactory({ Entity }) {
             if (!this.allOrdered.includes(dialog)) {
                 return;
             }
-            this.unlink({ dialogs: dialog });
             this.update({
                 _ordered: this._ordered.filter(
                     _dialog => _dialog !== dialog.localId
                 ),
+                dialogs: [['unlink', dialog]],
             });
         }
 
@@ -77,22 +61,28 @@ function DialogManagerFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
-         * @override
+         * FIXME: dependent on implementation that uses arbitrary order in relations!!
+         *
+         * @private
+         * @returns {mail.messaging.entity.Dialog}
          */
-        _update(data) {
-            const {
-                /**
-                 * List of ordered dialogs (list of local ids)
-                 */
-                _ordered = this._ordered || [],
-            } = data;
-
-            Object.assign(this, { _ordered });
+        _computeAllOrdered() {
+            return [['replace', this._ordered.map(_dialog => this.env.entities.Dialog.get(_dialog))]];
         }
-
     }
 
+    DialogManager.entityName = 'DialogManager';
+
     DialogManager.fields = {
+        _ordered: attr({ default: [] }),
+        // FIXME: dependent on implementation that uses arbitrary order in relations!!
+        allOrdered: one2many('Dialog', {
+            compute: '_computeAllOrdered',
+            dependencies: [
+                '_ordered',
+                'dialogs',
+            ],
+        }),
         dialogs: one2many('Dialog', {
             inverse: 'manager',
             isCausal: true,

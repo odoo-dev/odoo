@@ -8,6 +8,7 @@ const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
+    pause,
     start: utilsStart,
 } = require('mail.messaging.testUtils');
 
@@ -63,15 +64,12 @@ QUnit.test('base rendering not editable', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.entities.Follower.create({
-        channel_id: 1,
-        email: "bla@bla.bla",
+        channel: [['insert', { id: 1, model: 'mail.channel', name: "François Perusse" }]],
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: false,
-        name: "François Perusse",
-        partner_id: null,
+        isActive: true,
+        isEditable: false,
     });
-    follower.link({ followedThread: thread });
     await this.createFollowerComponent(follower);
     assert.containsOnce(
         document.body,
@@ -116,15 +114,12 @@ QUnit.test('base rendering editable', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.entities.Follower.create({
-        channel_id: 1,
-        email: "bla@bla.bla",
+        channel: [['insert', { id: 1, model: 'mail.channel', name: "François Perusse" }]],
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
-        partner_id: null,
+        isActive: true,
+        isEditable: true,
     });
-    follower.link({ followedThread: thread });
     await this.createFollowerComponent(follower);
     assert.containsOnce(
         document.body,
@@ -194,14 +189,12 @@ QUnit.test('click on channel follower details', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.entities.Follower.create({
-        channel_id: 1,
-        email: "bla@bla.bla",
+        channel: [['insert', { id: 1, model: 'mail.channel', name: "channel" }]],
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: true,
-        name: "channel",
+        isActive: true,
+        isEditable: true,
     });
-    follower.link({ followedThread: thread });
     await this.createFollowerComponent(follower);
     assert.containsOnce(
         document.body,
@@ -257,14 +250,16 @@ QUnit.test('click on partner follower details', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.entities.Follower.create({
-        partner_id: this.env.session.partner_id,
-        email: "bla@bla.bla",
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
+        isActive: true,
+        isEditable: true,
+        partner: [['insert', {
+            email: "bla@bla.bla",
+            id: this.env.session.partner_id,
+            name: "François Perusse",
+        }]],
     });
-    follower.link({ followedThread: thread });
     await this.createFollowerComponent(follower);
     assert.containsOnce(
         document.body,
@@ -312,14 +307,16 @@ QUnit.test('click on edit follower', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.entities.Follower.create({
-        partner_id: this.env.session.partner_id,
-        email: "bla@bla.bla",
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
+        isActive: true,
+        isEditable: true,
+        partner: [['insert', {
+            email: "bla@bla.bla",
+            id: this.env.session.partner_id,
+            name: "François Perusse",
+        }]],
     });
-    follower.link({ followedThread: thread });
     await this.createFollowerComponent(follower);
     assert.containsOnce(
         document.body,

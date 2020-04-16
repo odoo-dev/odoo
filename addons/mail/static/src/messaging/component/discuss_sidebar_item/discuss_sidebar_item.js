@@ -22,10 +22,9 @@ class DiscussSidebarItem extends Component {
             const thread = this.env.entities.Thread.get(props.threadLocalId);
             const directPartner = thread ? thread.directPartner : undefined;
             return {
-                directPartner,
-                discuss: this.env.messaging.discuss,
-                thread,
-                threadName: thread ? thread.displayName : undefined,
+                directPartner: directPartner ? directPartner.__state : undefined,
+                discuss: this.env.messaging.discuss.__state,
+                thread: thread ? thread.__state : undefined,
             };
         });
     }
@@ -118,7 +117,7 @@ class DiscussSidebarItem extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        this.discuss.update({ thread: this.thread });
+        this.discuss.threadViewer.update({ thread: [['link', this.thread]] });
     }
 
     /**
@@ -137,7 +136,7 @@ class DiscussSidebarItem extends Component {
      */
     async _onClickLeave(ev) {
         ev.stopPropagation();
-        if (this.thread.create_uid === this.env.session.uid) {
+        if (this.thread.creator === this.env.messaging.currentUser) {
             await this._askAdminConfirmation();
         }
         this.thread.unsubscribe();

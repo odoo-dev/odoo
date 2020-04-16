@@ -117,9 +117,9 @@ class ThreadViewer extends Component {
         const threadCache = threadViewer ? threadViewer.threadCache : undefined;
         return {
             isDeviceMobile: this.env.messaging.device.isMobile,
-            thread,
-            threadCache,
-            threadViewer,
+            thread: thread ? thread.__state : undefined,
+            threadCache: threadCache ? threadCache.__state : undefined,
+            threadViewer: threadViewer ? threadViewer.__state : undefined,
         };
     }
 

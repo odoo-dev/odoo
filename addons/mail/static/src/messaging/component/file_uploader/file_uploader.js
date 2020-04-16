@@ -139,7 +139,11 @@ class FileUploader extends Component {
             const { error, filename, id, mimetype, name, size } = fileData;
             if (error || !id) {
                 this.env.do_warn(error);
-                const relatedTemporaryAttachments = this.env.entities.Attachment.allFromFilename(filename);
+                const relatedTemporaryAttachments = this.env.entities.Attachment
+                    .find(attachment =>
+                        attachment.filename === filename &&
+                        attachment.isTemporary
+                    );
                 for (const attachment of relatedTemporaryAttachments) {
                     attachment.delete();
                 }

@@ -60,25 +60,26 @@ QUnit.test('simplest layout of a followed subtype', async function (assert) {
         model: 'res.partner',
     });
     const follower = this.env.entities.Follower.create({
-        channel_id: 1,
-        email: "bla@bla.bla",
+        channel: [['insert', {
+            id: 1,
+            model: 'mail.channel',
+            name: "François Perusse",
+        }]],
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
-        partner_id: null,
+        isActive: true,
+        isEditable: true,
     });
     const followerSubtype = this.env.entities.FollowerSubtype.create({
-        default: true,
-        internal: false,
         id: 1,
+        isDefault: true,
+        isInternal: false,
         name: "Dummy test",
-        res_model: 'res.partner'
+        resModel: 'res.partner'
     });
-    follower.link({
-        selectedSubtypes: followerSubtype,
-        followedThread: thread,
-        subtypes: followerSubtype,
+    follower.update({
+        selectedSubtypes: [['link', followerSubtype]],
+        subtypes: [['link', followerSubtype]],
     });
     await this.createFollowerSubtypeComponent({
         follower,
@@ -120,25 +121,24 @@ QUnit.test('simplest layout of a not followed subtype', async function (assert) 
         model: 'res.partner',
     });
     const follower = this.env.entities.Follower.create({
-        channel_id: 1,
-        email: "bla@bla.bla",
+        channel: [['insert', {
+            id: 1,
+            model: 'mail.channel',
+            name: "François Perusse",
+        }]],
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
-        partner_id: null,
+        isActive: true,
+        isEditable: true,
     });
     const followerSubtype = this.env.entities.FollowerSubtype.create({
-        default: true,
-        internal: false,
         id: 1,
+        isDefault: true,
+        isInternal: false,
         name: "Dummy test",
-        res_model: 'res.partner'
+        resModel: 'res.partner'
     });
-    follower.link({
-        followedThread: thread,
-        subtypes: followerSubtype,
-    });
+    follower.update({ subtypes: [['link', followerSubtype]] });
     await this.createFollowerSubtypeComponent({
         follower,
         followerSubtype,
@@ -179,25 +179,24 @@ QUnit.test('toggle follower subtype checkbox', async function (assert) {
         model: 'res.partner',
     });
     const follower = this.env.entities.Follower.create({
-        channel_id: 1,
-        email: "bla@bla.bla",
+        channel: [['insert', {
+            id: 1,
+            model: 'mail.channel',
+            name: "François Perusse",
+        }]],
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
-        partner_id: null,
+        isActive: true,
+        isEditable: true,
     });
     const followerSubtype = this.env.entities.FollowerSubtype.create({
-        default: true,
-        internal: false,
         id: 1,
+        isDefault: true,
+        isInternal: false,
         name: "Dummy test",
-        res_model: 'res.partner'
+        resModel: 'res.partner'
     });
-    follower.link({
-        followedThread: thread,
-        subtypes: followerSubtype,
-    });
+    follower.update({ subtypes: [['link', followerSubtype]] });
     await this.createFollowerSubtypeComponent({
         follower,
         followerSubtype,

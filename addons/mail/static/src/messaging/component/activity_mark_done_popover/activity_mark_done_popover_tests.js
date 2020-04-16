@@ -17,7 +17,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('ActivityMarkDonePopover', {
     beforeEach() {
         utilsBeforeEach(this);
-        this.createActivityMarkDonePopoverComponent = async function (activity) {
+        this.createActivityMarkDonePopoverComponent = async activity => {
             const ActivityMarkDonePopoverComponent = components.ActivityMarkDonePopover;
             ActivityMarkDonePopoverComponent.env = this.env;
             this.component = new ActivityMarkDonePopoverComponent(null, {
@@ -50,8 +50,8 @@ QUnit.test('activity mark done popover simplest layout', async function (assert)
 
     await this.start();
     const activity = this.env.entities.Activity.create({
-        activity_category: 'not_upload_file',
-        can_write: true,
+        canWrite: true,
+        category: 'not_upload_file',
         id: 12,
     });
     await this.createActivityMarkDonePopoverComponent(activity);
@@ -93,8 +93,8 @@ QUnit.test('activity with force next mark done popover simplest layout', async f
 
     await this.start();
     const activity = this.env.entities.Activity.create({
-        activity_category: 'not_upload_file',
-        can_write: true,
+        canWrite: true,
+        category: 'not_upload_file',
         force_next: true,
         id: 12,
     });
@@ -137,8 +137,8 @@ QUnit.test('activity mark done popover click on discard', async function (assert
 
     await this.start();
     const activity = this.env.entities.Activity.create({
-        activity_category: 'not_upload_file',
-        can_write: true,
+        canWrite: true,
+        category: 'not_upload_file',
         id: 12,
     });
     await this.createActivityMarkDonePopoverComponent(activity);
@@ -185,8 +185,8 @@ QUnit.test('activity mark done popover mark done without feedback', async functi
         },
     });
     const activity = this.env.entities.Activity.create({
-        activity_category: 'not_upload_file',
-        can_write: true,
+        canWrite: true,
+        category: 'not_upload_file',
         id: 12,
     });
     await this.createActivityMarkDonePopoverComponent(activity);
@@ -220,8 +220,8 @@ QUnit.test('activity mark done popover mark done with feedback', async function 
         },
     });
     const activity = this.env.entities.Activity.create({
-        activity_category: 'not_upload_file',
-        can_write: true,
+        canWrite: true,
+        category: 'not_upload_file',
         id: 12,
     });
     await this.createActivityMarkDonePopoverComponent(activity);
@@ -257,8 +257,8 @@ QUnit.test('activity mark done popover mark done and schedule next', async funct
         },
     });
     const activity = this.env.entities.Activity.create({
-        activity_category: 'not_upload_file',
-        can_write: true,
+        canWrite: true,
+        category: 'not_upload_file',
         id: 12,
     });
     await this.createActivityMarkDonePopoverComponent(activity);

@@ -58,7 +58,7 @@
                             </t>
                         </div>
                 </div>
-                <t t-if="props.hasCloseButton">
+                <t t-if="chatter.hasTopbarCloseButton">
                     <div class="o_ChatterTopbar_buttonClose" title="Close" t-on-click="_onClickClose">
                         <i class="fa fa-times"/>
                     </div>

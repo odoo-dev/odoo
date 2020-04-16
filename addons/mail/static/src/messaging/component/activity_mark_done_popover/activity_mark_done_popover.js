@@ -14,8 +14,9 @@ class ActivityMarkDonePopover extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
+            const activity = this.env.entities.Activity.get(props.activityLocalId);
             return {
-                activity: this.env.entities.Activity.get(props.activityLocalId),
+                activity: activity ? activity.__state : undefined,
             };
         });
         this._feedbackTextareaRef = useRef('feedbackTextarea');

@@ -1,31 +1,14 @@
 odoo.define('mail.messaging.entity.FollowerSubtypeList', function (require) {
 'use strict';
 
-const {
-    fields: {
-        many2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { many2one } = require('mail.messaging.EntityField');
 
 function FollowerSubtypeListFactory({ Entity }) {
 
-    class FollowerSubtypeList extends Entity {
+    class FollowerSubtypeList extends Entity {}
 
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
-        /**
-         * @override
-         */
-        _update(data) {
-            const { follower } = data;
-            if (follower) {
-                this.link({ follower });
-            }
-        }
-    }
+    FollowerSubtypeList.entityName = 'FollowerSubtypeList';
 
     FollowerSubtypeList.fields = {
         follower: many2one('Follower'),

@@ -1,16 +1,24 @@
 odoo.define('mail.messaging.entity.User', function (require) {
 'use strict';
 
-const {
-    fields: {
-        one2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, one2one } = require('mail.messaging.EntityField');
 
 function UserFactory({ Entity }) {
 
     class User extends Entity {
+
+        /**
+         * @override
+         */
+        delete() {
+            if (this.env.messaging) {
+                if (this === this.env.messaging.currentUser) {
+                    this.env.messaging.update({ currentUser: [['unlink-all']] });
+                }
+            }
+            super.delete();
+        }
 
         //----------------------------------------------------------------------
         // Public
@@ -19,10 +27,10 @@ function UserFactory({ Entity }) {
         /**
          * @returns {string}
          */
-        get nameOrDisplayName() {
+        nameOrDisplayName() {
             const partner = this.partner;
             if (!partner) {
-                return this._displayName;
+                return this.partnerDisplayName;
             }
             return partner.nameOrDisplayName;
         }
@@ -35,38 +43,31 @@ function UserFactory({ Entity }) {
          * @override
          */
         _createInstanceLocalId(data) {
-            return `${this.constructor.name}_${data.id}`;
+            return `${this.constructor.entityName}_${data.id}`;
         }
 
         /**
          * @override
          */
-        _update(data) {
-            const {
-                displayName,
-                id = this.id,
-            } = data;
-
-            Object.assign(this, {
-                id,
-                model: 'res.user',
-            });
-
-            if (displayName) {
-                if (this.partner) {
-                    this.partner.update({ display_name: displayName });
-                } else {
-                    this._displayName = displayName;
-                }
+        _updateAfter(previous) {
+            if (this.partnerDisplayName && this.partner) {
+                this.partner.update({ display_name: this.partnerDisplayName });
             }
         }
 
     }
 
+    User.entityName = 'User';
+
     User.fields = {
+        id: attr(),
+        model: attr({
+            default: 'res.user',
+        }),
         partner: one2one('Partner', {
             inverse: 'user',
         }),
+        partnerDisplayName: attr(),
     };
 
     return User;

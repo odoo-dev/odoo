@@ -13,9 +13,11 @@ class MailTemplate extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
+            const activity = this.env.entities.Activity.get(props.activityLocalId);
+            const mailTemplate = this.env.entities.MailTemplate.get(props.mailTemplateLocalId);
             return {
-                activity: this.env.entities.Activity.get(props.activityLocalId),
-                mailTemplate: this.env.entities.MailTemplate.get(props.mailTemplateLocalId),
+                activity: activity ? activity.__state : undefined,
+                mailTemplate: mailTemplate ? mailTemplate.__state : undefined,
             };
         });
     }

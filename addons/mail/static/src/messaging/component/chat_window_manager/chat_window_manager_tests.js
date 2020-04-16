@@ -241,7 +241,10 @@ QUnit.test('chat window: basic rendering', async function (assert) {
     const chatWindow = document.querySelector(`.o_ChatWindow`);
     assert.strictEqual(
         chatWindow.dataset.threadLocalId,
-        this.env.entities.Thread.channelFromId(20).localId,
+        this.env.entities.Thread.find(thread =>
+            thread.id === 20 &&
+            thread.model === 'mail.channel'
+        ).localId,
         "should have open a chat window of channel"
     );
     assert.strictEqual(
@@ -737,7 +740,10 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
         .o_NotificationList_preview[data-thread-local-id="${
-            this.env.entities.Thread.channelFromId(10).localId
+            this.env.entities.Thread.find(thread =>
+                thread.id === 10 &&
+                thread.model === 'mail.channel'
+            ).localId
         }"]
     `).click();
     await afterNextRender();
@@ -749,7 +755,10 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     assert.strictEqual(
         document.querySelectorAll(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(10).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 10 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -758,7 +767,10 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     assert.ok(
         document.querySelector(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(10).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 10 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).classList.contains('o-focused'),
         "chat window of chat should have focus"
@@ -769,7 +781,10 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
         .o_NotificationList_preview[data-thread-local-id="${
-            this.env.entities.Thread.channelFromId(20).localId
+            this.env.entities.Thread.find(thread =>
+                thread.id === 20 &&
+                thread.model === 'mail.channel'
+            ).localId
         }"]
     `).click();
     await afterNextRender();
@@ -781,7 +796,10 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     assert.strictEqual(
         document.querySelectorAll(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(20).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 20 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -790,7 +808,10 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     assert.strictEqual(
         document.querySelectorAll(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(10).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 10 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -799,7 +820,10 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     assert.ok(
         document.querySelector(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(20).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 20 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).classList.contains('o-focused'),
         "chat window of channel should have focus"
@@ -807,7 +831,10 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     assert.notOk(
         document.querySelector(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(10).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 10 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).classList.contains('o-focused'),
         "chat window of chat should no longer have focus"
@@ -871,7 +898,10 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
         .o_NotificationList_preview[data-thread-local-id="${
-            this.env.entities.Thread.channelFromId(1).localId
+            this.env.entities.Thread.find(thread =>
+                thread.id === 1 &&
+                thread.model === 'mail.channel'
+            ).localId
         }"]
     `).click();
     await afterNextRender();
@@ -896,7 +926,10 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
         .o_NotificationList_preview[data-thread-local-id="${
-            this.env.entities.Thread.channelFromId(2).localId
+            this.env.entities.Thread.find(thread =>
+                thread.id === 2 &&
+                thread.model === 'mail.channel'
+            ).localId
         }"]
     `).click();
     await afterNextRender();
@@ -921,7 +954,10 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     document.querySelector(`
         .o_MessagingMenu_dropdownMenu
         .o_NotificationList_preview[data-thread-local-id="${
-            this.env.entities.Thread.channelFromId(3).localId
+            this.env.entities.Thread.find(thread =>
+                thread.id === 3 &&
+                thread.model === 'mail.channel'
+            ).localId
         }"]
     `).click();
     await afterNextRender();
@@ -943,7 +979,10 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     assert.strictEqual(
         document.querySelectorAll(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(1).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 1 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -952,7 +991,10 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     assert.strictEqual(
         document.querySelectorAll(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(3).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 3 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).length,
         1,
@@ -961,7 +1003,10 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     assert.ok(
         document.querySelector(`
             .o_ChatWindow[data-thread-local-id="${
-                this.env.entities.Thread.channelFromId(3).localId
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 3 &&
+                    thread.model === 'mail.channel'
+                ).localId
             }"]
         `).classList.contains('o-focused'),
         "chat window of channel 3 should have focus"

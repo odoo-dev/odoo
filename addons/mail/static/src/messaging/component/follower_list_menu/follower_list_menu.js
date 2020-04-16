@@ -25,8 +25,8 @@ class FollowerListMenu extends Component {
             const thread = this.env.entities.Thread.get(props.threadLocalId);
             const followers = thread ? thread.followers : [];
             return {
-                followers,
-                thread,
+                followers: followers.map(follower => follower.__state),
+                thread: thread ? thread.__state : undefined,
             };
         }, {
             compareDepth: {

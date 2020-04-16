@@ -18,10 +18,7 @@ class ActivityBox extends Component {
         useStore(props => {
             const chatter = this.env.entities.Chatter.get(props.chatterLocalId);
             return {
-                chatter,
-                futureActivitiesCount: chatter ? chatter.futureActivities.length : 0,
-                overdueActivitiesCount: chatter ? chatter.overdueActivities.length : 0,
-                todayActivitiesCount: chatter ? chatter.todayActivities.length : 0,
+                chatter: chatter ? chatter.__state : undefined,
             };
         });
     }

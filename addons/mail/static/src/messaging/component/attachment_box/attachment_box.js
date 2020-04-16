@@ -23,8 +23,10 @@ class AttachmentBox extends Component {
         useStore(props => {
             const thread = this.env.entities.Thread.get(props.threadLocalId);
             return {
-                attachments: thread ? thread.allAttachments : [],
-                thread,
+                attachments: thread
+                    ? thread.allAttachments.map(attachment => attachment.__state)
+                    : [],
+                thread: thread ? thread.__state : undefined,
             };
         });
         /**
@@ -46,8 +48,7 @@ class AttachmentBox extends Component {
      */
     get newAttachmentExtraData() {
         return {
-            res_id: this.thread.id,
-            res_model: this.thread.model,
+            originThread: [['link', this.thread]],
         };
     }
 

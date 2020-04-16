@@ -1,13 +1,8 @@
 odoo.define('mail.messaging.entity.Follower', function (require) {
 'use strict';
 
-const {
-    fields: {
-        many2many,
-        many2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2many, many2one } = require('mail.messaging.EntityField');
 
 function FollowerFactory({ Entity }) {
 
@@ -18,21 +13,47 @@ function FollowerFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
+         * @static
+         * @param {Object} data
+         * @returns {Object}
+         */
+        static convertData(data) {
+            const data2 = {};
+            if ('channel_id' in data) {
+                const channelData = { id: data.channel_id, model: 'mail.channel' };
+                if ('name' in data) {
+                    channelData.name = data.name;
+                }
+                data2.channel = [['insert', channelData]];
+            }
+            if ('id' in data) {
+                data2.id = data.id;
+            }
+            if ('is_active' in data) {
+                data2.isActive = data.is_active;
+            }
+            if ('is_editable' in data) {
+                data2.isEditable = data.is_editable;
+            }
+            if ('partner_id' in data) {
+                const partnerData = { id: data.partner_id };
+                if ('email' in data) {
+                    partnerData.email = data.email;
+                }
+                if ('name' in data) {
+                    partnerData.name = data.name;
+                }
+                data2.partner = [['insert', partnerData]];
+            }
+            return data2;
+        }
+
+        /**
          *  Close subtypes dialog
          */
         closeSubtypes() {
             this.env.messaging.dialogManager.close(this._subtypesListDialog);
             this._subtypesListDialog = undefined;
-        }
-
-        /**
-         * @return {string}
-         */
-        get name() {
-            if (this.channel) {
-                return this.channel.name;
-            }
-            return this.partner.name;
         }
 
         /**
@@ -54,37 +75,11 @@ function FollowerFactory({ Entity }) {
         }
 
         /**
-         * @returns {integer}
-         */
-        get resId() {
-            if (this.partner) {
-                return this.partner.id;
-            }
-            if (this.channel) {
-                return this.channel.id;
-            }
-            return 0;
-        }
-
-        /**
-         * @returns {string}
-         */
-        get resModel() {
-            if (this.partner) {
-                return this.partner.model;
-            }
-            if (this.channel) {
-                return this.channel.model;
-            }
-            return '';
-        }
-
-        /**
          * @param {mail.messaging.entity.FollowerSubtype} subtype
          */
         selectSubtype(subtype) {
             if (!this.selectedSubtypes.includes(subtype)) {
-                this.link({ selectedSubtypes: subtype });
+                this.update({ selectedSubtypes: [['link', subtype]] });
             }
         }
 
@@ -96,18 +91,20 @@ function FollowerFactory({ Entity }) {
                 route: '/mail/read_subscription_data',
                 params: { follower_id: this.id },
             });
-            this.unlink({ subtypes: null });
+            this.update({ subtypes: [['unlink-all']] });
             for (const data of subtypesData) {
-                const subtype = this.env.entities.FollowerSubtype.insert(data);
-                this.link({ subtypes: subtype });
+                const subtype = this.env.entities.FollowerSubtype.insert(
+                    this.env.entities.FollowerSubtype.convertData(data)
+                );
+                this.update({ subtypes: [['link', subtype]] });
                 if (data.followed) {
-                    this.link({ selectedSubtypes: subtype });
+                    this.update({ selectedSubtypes: [['link', subtype]] });
                 } else {
-                    this.unlink({ selectedSubtypes: subtype });
+                    this.update({ selectedSubtypes: [['unlink', subtype]] });
                 }
             }
             this._subtypesListDialog = this.env.messaging.dialogManager.open('FollowerSubtypeList', {
-                follower: this,
+                follower: [['replace', this]],
             });
         }
 
@@ -116,7 +113,7 @@ function FollowerFactory({ Entity }) {
          */
         unselectSubtype(subtype) {
             if (this.selectedSubtypes.includes(subtype)) {
-                this.unlink({ selectedSubtypes: subtype });
+                this.update({ selectedSubtypes: [['unlink', subtype]] });
             }
         }
 
@@ -151,56 +148,105 @@ function FollowerFactory({ Entity }) {
 
         /**
          * @private
-         * @param {Object} data
+         * @returns {string}
          */
-        _update(data) {
-            const {
-                channel_id,
-                email,
-                id,
-                is_active: isActive,
-                is_editable: isEditable,
-                name,
-                partner_id,
-            } = data;
-
-            Object.assign(this, {
-                id,
-                isActive,
-                isEditable,
-            });
-
-            if (channel_id) {
-                let channel = this.env.entities.Thread.channelFromId(channel_id);
-                if (channel) {
-                    channel.update({ name });
-                } else {
-                    channel = this.env.entities.Thread.insert({
-                        id: channel_id,
-                        model: 'mail.channel',
-                        name,
-                    });
-                }
-                this.link({ channel });
+        _computeName() {
+            if (this.channel) {
+                return this.channel.name;
             }
-            if (partner_id) {
-                const partner = this.env.entities.Partner.insert({
-                    email,
-                    id: partner_id,
-                    name,
-                });
-                this.link({ partner });
+            if (this.partner) {
+                return this.partner.name;
             }
+            return '';
         }
+
+        /**
+         * @private
+         * @returns {integer}
+         */
+        _computeResId() {
+            if (this.partner) {
+                return this.partner.id;
+            }
+            if (this.channel) {
+                return this.channel.id;
+            }
+            return 0;
+        }
+
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeResModel() {
+            if (this.partner) {
+                return this.partner.model;
+            }
+            if (this.channel) {
+                return this.channel.model;
+            }
+            return '';
+        }
+
     }
 
+    Follower.entityName = 'Follower';
+
     Follower.fields = {
+        resId: attr({
+            compute: '_computeResId',
+            default: 0,
+            dependencies: [
+                'channelId',
+                'partnerId',
+            ],
+        }),
         channel: many2one('Thread'),
-        selectedSubtypes: many2many('FollowerSubtype'),
+        channelId: attr({
+            related: 'channel.id',
+        }),
+        channelModel: attr({
+            related: 'channel.model',
+        }),
+        channelName: attr({
+            related: 'channel.name',
+        }),
         followedThread: many2one('Thread', {
             inverse: 'followers',
         }),
+        id: attr(),
+        isActive: attr({
+            default: true,
+        }),
+        isEditable: attr({
+            default: false,
+        }),
+        name: attr({
+            compute: '_computeName',
+            dependencies: [
+                'channelName',
+                'partnerName',
+            ],
+        }),
         partner: many2one('Partner'),
+        partnerId: attr({
+            related: 'partner.id',
+        }),
+        partnerModel: attr({
+            related: 'partner.model',
+        }),
+        partnerName: attr({
+            related: 'partner.name',
+        }),
+        resModel: attr({
+            compute: '_computeResModel',
+            default: '',
+            dependencies: [
+                'channelModel',
+                'partnerModel',
+            ],
+        }),
+        selectedSubtypes: many2many('FollowerSubtype'),
         subtypes: many2many('FollowerSubtype'),
     };
 

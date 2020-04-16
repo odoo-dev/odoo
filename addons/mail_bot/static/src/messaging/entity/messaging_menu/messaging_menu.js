@@ -1,15 +1,9 @@
 odoo.define('mail_bot.messaging.entity.MessagingMenu', function (require) {
 'use strict';
 
-const { registerClassPatchEntity } = require('mail.messaging.entity.core');
+const { registerInstancePatchEntity } = require('mail.messaging.entityCore');
 
-/**
- * FIXME: using constructor so that patch is applied on class
- * instead of instance. This is necessary in order for patches
- * not affecting observable and incrementing rev number each
- * time a patched method is called.
- */
-registerClassPatchEntity('MessagingMenu', 'mail_bot.messaging.entity.MessagingMenu', {
+registerInstancePatchEntity('MessagingMenu', 'mail_bot.messaging.entity.MessagingMenu', {
 
     //----------------------------------------------------------------------
     // Private
@@ -20,7 +14,7 @@ registerClassPatchEntity('MessagingMenu', 'mail_bot.messaging.entity.MessagingMe
      */
     _updateCounter() {
         let res = this._super();
-        if (this.env.messaging.constructor.isNotificationPermissionDefault()) {
+        if (this.env.messaging.isNotificationPermissionDefault()) {
             res += 1;
         }
         return res;

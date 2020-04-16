@@ -1,31 +1,12 @@
 odoo.define('mail.messaging.entity.Messaging', function (require) {
 'use strict';
 
-const {
-    fields: {
-        one2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, one2one } = require('mail.messaging.EntityField');
 
 function MessagingFactory({ Entity }) {
 
     class Messaging extends Entity {
-
-        /**
-         * @override
-         */
-        static create(...args) {
-            const messaging = super.create(...args);
-
-            const initializer = this.env.entities.MessagingInitializer.create();
-            messaging.link({ initializer });
-
-            const notificationHandler = this.env.entities.MessagingNotificationHandler.create();
-            messaging.link({ notificationHandler });
-
-            return messaging;
-        }
 
         //----------------------------------------------------------------------
         // Public
@@ -46,7 +27,7 @@ function MessagingFactory({ Entity }) {
                 res_id: id,
             });
             this.messagingMenu.close();
-            this.env.entities.ChatWindow.closeAll();
+            this.chatWindowManager.closeAll();
         }
 
         /**
@@ -61,7 +42,10 @@ function MessagingFactory({ Entity }) {
          */
         async redirect({ id, model }) {
             if (model === 'mail.channel') {
-                const channel = this.env.entities.Thread.channelFromId(id);
+                const channel = this.env.entities.Thread.find(thread =>
+                    thread.id === id &&
+                    thread.model === 'mail.channel'
+                );
                 if (!channel || !channel.isPinned) {
                     this.env.entities.Thread.joinChannel(id, { autoselect: true });
                     return;
@@ -109,9 +93,17 @@ function MessagingFactory({ Entity }) {
          * Start messaging and related entities.
          */
         async start() {
+            this.update({
+                initializer: [['create']],
+                notificationHandler: [['create']],
+            });
             this._handleGlobalWindowFocus = this._handleGlobalWindowFocus.bind(this);
             this.env.call('bus_service', 'on', 'window_focus', null, this._handleGlobalWindowFocus);
             await this.initializer.start();
+            if (!this.constructor.get(this)) {
+                // destroyed in the mean time.
+                return;
+            }
             this.notificationHandler.start();
             this.update({ isInitialized: true });
         }
@@ -130,29 +122,7 @@ function MessagingFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
-         * @override
-         */
-        _update(data) {
-            const {
-                cannedReponses = this.cannedReponses || {},
-                commands = this.commands || {},
-                isInitialized = this.isInitialized || false,
-                outOfFocusUnreadMessageCounter = this.outOfFocusUnreadMessageCounter || 0,
-            } = data;
-
-            Object.assign(this, {
-                cannedReponses,
-                commands,
-                isInitialized,
-                outOfFocusUnreadMessageCounter,
-            });
-        }
-
-        /**
          * @private
-         * @param {Object} param0
-         * @param {Object} param0.env
-         * @param {Object} param0.state
          */
         _handleGlobalWindowFocus() {
             this.update({ outOfFocusUnreadMessageCounter: 0 });
@@ -163,14 +133,24 @@ function MessagingFactory({ Entity }) {
 
     }
 
+    Messaging.entityName = 'Messaging';
+
     Messaging.fields = {
         attachmentViewer: one2one('AttachmentViewer', {
             isCausal: true,
         }),
+        cannedResponses: attr({
+            default: {},
+        }),
         chatWindowManager: one2one('ChatWindowManager', {
+            inverse: 'messaging',
             isCausal: true,
         }),
+        commands: attr({
+            default: {},
+        }),
         currentPartner: one2one('Partner'),
+        currentUser: one2one('User'),
         device: one2one('Device', {
             isCausal: true,
         }),
@@ -184,6 +164,9 @@ function MessagingFactory({ Entity }) {
             inverse: 'messaging',
             isCausal: true,
         }),
+        isInitialized: attr({
+            default: false,
+        }),
         locale: one2one('Locale', {
             isCausal: true,
         }),
@@ -192,6 +175,9 @@ function MessagingFactory({ Entity }) {
         }),
         notificationHandler: one2one('MessagingNotificationHandler', {
             isCausal: true,
+        }),
+        outOfFocusUnreadMessageCounter: attr({
+            default: 0,
         }),
         partnerRoot: one2one('Partner'),
     };

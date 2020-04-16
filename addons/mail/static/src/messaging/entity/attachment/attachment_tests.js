@@ -39,7 +39,7 @@ QUnit.test('create (txt)', async function (assert) {
     assert.expect(9);
 
     await this.start();
-    assert.notOk(this.env.entities.Attachment.fromId(750));
+    assert.notOk(this.env.entities.Attachment.find(attachment => attachment.id === 750));
 
     const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
@@ -48,8 +48,8 @@ QUnit.test('create (txt)', async function (assert) {
         name: "test.txt",
     });
     assert.ok(attachment);
-    assert.ok(this.env.entities.Attachment.fromId(750));
-    assert.strictEqual(this.env.entities.Attachment.fromId(750), attachment);
+    assert.ok(this.env.entities.Attachment.find(attachment => attachment.id === 750));
+    assert.strictEqual(this.env.entities.Attachment.find(attachment => attachment.id === 750), attachment);
     assert.strictEqual(attachment.filename, "test.txt");
     assert.strictEqual(attachment.id, 750);
     assert.notOk(attachment.isTemporary);
@@ -61,7 +61,7 @@ QUnit.test('displayName', async function (assert) {
     assert.expect(5);
 
     await this.start();
-    assert.notOk(this.env.entities.Attachment.fromId(750));
+    assert.notOk(this.env.entities.Attachment.find(attachment => attachment.id === 750));
 
     const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
@@ -70,8 +70,8 @@ QUnit.test('displayName', async function (assert) {
         name: "test.txt",
     });
     assert.ok(attachment);
-    assert.ok(this.env.entities.Attachment.fromId(750));
-    assert.strictEqual(attachment, this.env.entities.Attachment.fromId(750));
+    assert.ok(this.env.entities.Attachment.find(attachment => attachment.id === 750));
+    assert.strictEqual(attachment, this.env.entities.Attachment.find(attachment => attachment.id === 750));
     assert.strictEqual(attachment.displayName, "test.txt");
 });
 
@@ -79,7 +79,7 @@ QUnit.test('extension', async function (assert) {
     assert.expect(5);
 
     await this.start();
-    assert.notOk(this.env.entities.Attachment.fromId(750));
+    assert.notOk(this.env.entities.Attachment.find(attachment => attachment.id === 750));
 
     const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
@@ -88,8 +88,8 @@ QUnit.test('extension', async function (assert) {
         name: "test.txt",
     });
     assert.ok(attachment);
-    assert.ok(this.env.entities.Attachment.fromId(750));
-    assert.strictEqual(attachment, this.env.entities.Attachment.fromId(750));
+    assert.ok(this.env.entities.Attachment.find(attachment => attachment.id === 750));
+    assert.strictEqual(attachment, this.env.entities.Attachment.find(attachment => attachment.id === 750));
     assert.strictEqual(attachment.extension, 'txt');
 });
 
@@ -97,7 +97,7 @@ QUnit.test('fileType', async function (assert) {
     assert.expect(5);
 
     await this.start();
-    assert.notOk(this.env.entities.Attachment.fromId(750));
+    assert.notOk(this.env.entities.Attachment.find(attachment => attachment.id === 750));
 
     const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
@@ -106,8 +106,8 @@ QUnit.test('fileType', async function (assert) {
         name: "test.txt",
     });
     assert.ok(attachment);
-    assert.ok(this.env.entities.Attachment.fromId(750));
-    assert.strictEqual(attachment, this.env.entities.Attachment.fromId(750));
+    assert.ok(this.env.entities.Attachment.find(attachment => attachment.id === 750));
+    assert.strictEqual(attachment, this.env.entities.Attachment.find(attachment => attachment.id === 750));
     assert.strictEqual(attachment.fileType, 'text');
 });
 
@@ -115,7 +115,7 @@ QUnit.test('isTextFile', async function (assert) {
     assert.expect(5);
 
     await this.start();
-    assert.notOk(this.env.entities.Attachment.fromId(750));
+    assert.notOk(this.env.entities.Attachment.find(attachment => attachment.id === 750));
 
     const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
@@ -124,8 +124,8 @@ QUnit.test('isTextFile', async function (assert) {
         name: "test.txt",
     });
     assert.ok(attachment);
-    assert.ok(this.env.entities.Attachment.fromId(750));
-    assert.strictEqual(attachment, this.env.entities.Attachment.fromId(750));
+    assert.ok(this.env.entities.Attachment.find(attachment => attachment.id === 750));
+    assert.strictEqual(attachment, this.env.entities.Attachment.find(attachment => attachment.id === 750));
     assert.ok(attachment.isTextFile);
 });
 
@@ -133,7 +133,7 @@ QUnit.test('isViewable', async function (assert) {
     assert.expect(5);
 
     await this.start();
-    assert.notOk(this.env.entities.Attachment.fromId(750));
+    assert.notOk(this.env.entities.Attachment.find(attachment => attachment.id === 750));
 
     const attachment = this.env.entities.Attachment.create({
         filename: "test.txt",
@@ -142,8 +142,8 @@ QUnit.test('isViewable', async function (assert) {
         name: "test.txt",
     });
     assert.ok(attachment);
-    assert.ok(this.env.entities.Attachment.fromId(750));
-    assert.strictEqual(attachment, this.env.entities.Attachment.fromId(750));
+    assert.ok(this.env.entities.Attachment.find(attachment => attachment.id === 750));
+    assert.strictEqual(attachment, this.env.entities.Attachment.find(attachment => attachment.id === 750));
     assert.ok(attachment.isViewable);
 });
 

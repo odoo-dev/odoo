@@ -19,8 +19,9 @@ class Dialog extends Component {
         this._componentRef = useRef('component');
         this._onClickGlobal = this._onClickGlobal.bind(this);
         useStore(props => {
+            const dialog = this.env.entities.Dialog.get(props.dialogLocalId);
             return {
-                dialog: this.env.entities.Dialog.get(props.dialogLocalId),
+                dialog: dialog ? dialog.__state : undefined,
             };
         });
     }

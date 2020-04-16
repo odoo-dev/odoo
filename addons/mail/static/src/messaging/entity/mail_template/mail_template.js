@@ -1,12 +1,8 @@
 odoo.define('mail.messaging.entity.MailTemplate', function (require) {
 'use strict';
 
-const {
-    fields: {
-        many2many,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2many } = require('mail.messaging.EntityField');
 
 function MailTemplateFactory({ Entity }) {
 
@@ -57,31 +53,16 @@ function MailTemplateFactory({ Entity }) {
             }
         }
 
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
-        /**
-         * @override
-         */
-        _update(data) {
-            let {
-                id = this.id,
-                name = this.name,
-            } = data;
-
-            Object.assign(this, {
-                id,
-                name,
-            });
-        }
-
     }
+
+    MailTemplate.entityName = 'MailTemplate';
 
     MailTemplate.fields = {
         activities: many2many('Activity', {
             inverse: 'mailTemplates',
         }),
+        id: attr(),
+        name: attr(),
     };
 
     return MailTemplate;

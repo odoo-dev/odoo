@@ -17,8 +17,9 @@ class ComposerTextInput extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
+            const composer = this.env.entities.Composer.get(props.composerLocalId);
             return {
-                composer: this.env.entities.Composer.get(props.composerLocalId),
+                composer: composer ? composer.__state : undefined,
                 isDeviceMobile: this.env.messaging.device.isMobile,
             };
         });

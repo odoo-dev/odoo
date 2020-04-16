@@ -13,9 +13,8 @@ class FollowerSubtype extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            return [
-                this.env.entities.FollowerSubtype.get(props.followerSubtypeLocalId),
-            ];
+            const followerSubtype = this.env.entities.FollowerSubtype.get(props.followerSubtypeLocalId);
+            return [followerSubtype ? followerSubtype.__state : undefined];
         });
     }
 

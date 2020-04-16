@@ -1,13 +1,8 @@
 odoo.define('mail.messaging.entity.ThreadCache', function (require) {
 'use strict';
 
-const {
-    fields: {
-        many2many,
-        many2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2many, many2one } = require('mail.messaging.EntityField');
 
 const MESSAGE_FETCH_LIMIT = 30;
 
@@ -18,14 +13,6 @@ function ThreadCacheFactory({ Entity }) {
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
-
-        /**
-         * @returns {mail.messaging.entity.Message|undefined}
-         */
-        get lastMessage() {
-            const { length: l, [l - 1]: lastMessage } = this.orderedMessages;
-            return lastMessage;
-        }
 
         /**
          * Load this thread cache, by fetching the most recent messages in this
@@ -79,6 +66,10 @@ function ThreadCacheFactory({ Entity }) {
             if (this.isLoading) {
                 return;
             }
+            if (!this.isLoaded) {
+                await this.loadMessages();
+                return;
+            }
             const messageIds = this.messages.map(message => message.id);
             const searchDomain = JSON.parse(this.stringifiedDomain);
             let domain = searchDomain.length ? searchDomain : [];
@@ -87,7 +78,7 @@ function ThreadCacheFactory({ Entity }) {
                 const lastMessageId = Math.max(...messageIds);
                 domain = [['id', '>', lastMessageId]].concat(domain);
             }
-            this.update({ isLoadingMore: true });
+            this.update({ isLoading: true });
             const messageFetchKwargs = this._getFetchMessagesKwargs();
             messageFetchKwargs.limit = false;
             const messagesData = await this.env.rpc({
@@ -99,25 +90,39 @@ function ThreadCacheFactory({ Entity }) {
             this._handleMessagesLoaded(messagesData);
         }
 
-        /**
-         * @returns {mail.messaging.entity.Message[]}
-         */
-        get orderedMessages() {
-            return this.messages.sort((m1, m2) => m1.id < m2.id ? -1 : 1);
-        }
-
-        /**
-         * @returns {mail.messaging.entity.Message[]}
-         */
-        get uncheckedMessages() {
-            return this.messages.filter(
-                message => message.hasCheckbox && !this.checkedMessages.includes(message)
-            );
-        }
-
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Message|undefined}
+         */
+        _computeLastMessage() {
+            const { length: l, [l - 1]: lastMessage } = this.orderedMessages;
+            if (!lastMessage) {
+                return [['unlink-all']];
+            }
+            return [['replace', lastMessage]];
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Message[]}
+         */
+        _computeOrderedMessages() {
+            return [['replace', this.messages.sort((m1, m2) => m1.id < m2.id ? -1 : 1)]];
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Message[]}
+         */
+        _computeUncheckedMessages() {
+            return [['replace', this.messages.filter(
+                message => message.hasCheckbox && !this.checkedMessages.includes(message)
+            )]];
+        }
 
         /**
          * @override
@@ -125,10 +130,9 @@ function ThreadCacheFactory({ Entity }) {
         _createInstanceLocalId(data) {
             const {
                 stringifiedDomain = '[]',
-                thread: threadOrLocalId,
+                thread: [[commandInsert, thread]],
             } = data;
-            const thread = this.env.entities.Thread.get(threadOrLocalId);
-            return `${this.constructor.name}_[${thread.localId}]_<${stringifiedDomain}>`;
+            return `${this.constructor.entityName}_[${thread.localId}]_<${stringifiedDomain}>`;
         }
 
         /**
@@ -180,54 +184,60 @@ function ThreadCacheFactory({ Entity }) {
                 isLoaded: true,
                 isLoading: false,
                 isLoadingMore: false,
+                messages: [['insert', messagesData.map(data => this.env.entities.Message.convertData(data))]],
             });
-            for (const data of messagesData) {
-                let message = this.env.entities.Message.insert(data);
-                this.link({ messages: message });
-            }
             for (const viewer of this.thread.viewers) {
                 viewer.handleThreadCacheLoaded(this);
             }
         }
 
-        /**
-         * @override
-         */
-        _update(data) {
-            const {
-                isAllHistoryLoaded = this.isAllHistoryLoaded || false,
-                isLoaded = this.isLoaded || false,
-                isLoading = this.isLoading || false,
-                isLoadingMore = this.isLoadingMore || false,
-                stringifiedDomain = this.stringifiedDomain || '[]',
-                thread: threadOrLocalId,
-            } = data;
-
-            Object.assign(this, {
-                isAllHistoryLoaded,
-                isLoaded,
-                isLoading,
-                isLoadingMore,
-                stringifiedDomain,
-            });
-
-            if (threadOrLocalId) {
-                const thread = this.env.entities.Thread.get(threadOrLocalId);
-                this.link({ thread });
-            }
-        }
-
     }
+
+    ThreadCache.entityName = 'ThreadCache';
 
     ThreadCache.fields = {
         checkedMessages: many2many('Message', {
             inverse: 'checkedThreadCaches',
         }),
-        thread: many2one('Thread', {
-            inverse: 'caches',
+        isAllHistoryLoaded: attr({
+            default: false,
+        }),
+        isLoaded: attr({
+            default: false,
+        }),
+        isLoading: attr({
+            default: false,
+        }),
+        isLoadingMore: attr({
+            default: false,
+        }),
+        lastMessage: many2one('Message', {
+            compute: '_computeLastMessage',
+            dependencies: ['orderedMessages'],
+        }),
+        messagesCheckboxes: attr({
+            related: 'messages.hasCheckbox',
         }),
         messages: many2many('Message', {
             inverse: 'threadCaches',
+        }),
+        orderedMessages: many2many('Message', {
+            compute: '_computeOrderedMessages',
+            dependencies: ['messages'],
+        }),
+        stringifiedDomain: attr({
+            default: '[]',
+        }),
+        thread: many2one('Thread', {
+            inverse: 'caches',
+        }),
+        uncheckedMessages: many2many('Message', {
+            compute: '_computeUncheckedMessages',
+            dependencies: [
+                'checkedMessages',
+                'messagesCheckboxes',
+                'messages',
+            ],
         }),
     };
 

@@ -1,7 +1,8 @@
 odoo.define('mail.messaging.entity.Device', function (require) {
 'use strict';
 
-const { registerNewEntity } = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr } = require('mail.messaging.EntityField');
 
 function DeviceFactory({ Entity }) {
 
@@ -12,7 +13,8 @@ function DeviceFactory({ Entity }) {
          */
         static create() {
             const entity = super.create();
-            entity._onResize = _.debounce(() => entity.update(), 100);
+            entity._refresh();
+            entity._onResize = _.debounce(() => entity._refresh(), 100);
             return entity;
         }
 
@@ -41,17 +43,24 @@ function DeviceFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
-         * @override
+         * @private
          */
-        _update() {
-            Object.assign(this, {
+        _refresh() {
+            this.update({
                 globalWindowInnerHeight: this.env.window.innerHeight,
                 globalWindowInnerWidth: this.env.window.innerWidth,
                 isMobile: this.env.device.isMobile,
             });
         }
-
     }
+
+    Device.entityName = 'Device';
+
+    Device.fields = {
+        globalWindowInnerHeight: attr(),
+        globalWindowInnerWidth: attr(),
+        isMobile: attr(),
+    };
 
     return Device;
 }

@@ -1,12 +1,8 @@
 odoo.define('mail.messaging.entity.ChatWindowManager', function (require) {
 'use strict';
 
-const {
-    fields: {
-        one2many,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2one, one2many, one2one } = require('mail.messaging.EntityField');
 
 function ChatWindowManagerFactory({ Entity }) {
 
@@ -55,64 +51,30 @@ function ChatWindowManagerFactory({ Entity }) {
 
     class ChatWindowManager extends Entity {
 
-
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
 
         /**
-         * @returns {mail.messaging.entity.ChatWindow}
+         * Close all chat windows.
+         *
          */
-        get allOrdered() {
-            return this._ordered.map(_chatWindow => this.env.entities.ChatWindow.get(_chatWindow));
-        }
-
-        /**
-         * @returns {mail.messaging.entity.ChatWindow[]}
-         */
-        get allOrderedVisible() {
-            return this.visual.visible.map(({ _chatWindow }) => this.env.entities.ChatWindow.get(_chatWindow));
-        }
-
-        /**
-         * @returns {mail.messaging.entity.ChatWindow[]}
-         */
-        get allOrderedHidden() {
-            return this.visual.hidden._chatWindows.map(_chatWindow => this.env.entities.ChatWindow.get(_chatWindow));
-        }
-
-        /**
-         * @returns {boolean}
-         */
-        get hasHiddenChatWindows() {
-            return this.visual.hidden._chatWindows.length > 0;
-        }
-
-        /**
-         * @returns {boolean}
-         */
-        get hasVisibleChatWindows() {
-            return this.visual.visible.length > 0;
-        }
-
-        /**
-         * @returns {mail.messaging.entity.ChatWindow|undefined}
-         */
-        get lastVisible() {
-            const { length: l, [l - 1]: lastVisible } = this.allOrderedVisible;
-            return lastVisible;
-        }
-
-        /**
-         * @returns {mail.messaging.entity.ChatWindow|undefined}
-         */
-        get newMessageChatWindow() {
-            return this.allOrdered.find(chatWindow => !chatWindow.thread);
+        closeAll() {
+            const chatWindows = this.allOrdered;
+            for (const chatWindow of chatWindows) {
+                chatWindow.close();
+            }
+            this.update({ _ordered: [] });
         }
 
         openNewMessage() {
             if (!this.newMessageChatWindow) {
-                this.env.entities.ChatWindow.create({ manager: this });
+                const chatWindow = this.env.entities.ChatWindow.create({
+                    manager: [['link', this]],
+                });
+                this.update({
+                    _ordered: this._ordered.concat([chatWindow.localId]),
+                });
             }
             this.newMessageChatWindow.makeVisible();
             this.newMessageChatWindow.focus();
@@ -125,13 +87,20 @@ function ChatWindowManagerFactory({ Entity }) {
          */
         openThread(thread, { mode = 'last_visible' } = {}) {
             if (thread.foldState === 'closed') {
-                thread.updateFoldState('open');
+                thread.update({ foldState: 'open' });
             }
-            let chatWindow = this.env.entities.ChatWindow.fromThread(thread);
+            let chatWindow = this.env.entities.ChatWindow.find(chatWindow =>
+                chatWindow.thread === thread
+            );
             if (!chatWindow) {
                 chatWindow = this.env.entities.ChatWindow.create({
-                    manager: this,
-                    thread,
+                    manager: [['link', this]],
+                    threadViewer: [['create', {
+                        thread: [['link', thread]],
+                    }]],
+                });
+                this.update({
+                    _ordered: this._ordered.concat([chatWindow.localId]),
                 });
             }
             if (mode === 'last_visible' && !chatWindow.isVisible) {
@@ -145,19 +114,6 @@ function ChatWindowManagerFactory({ Entity }) {
                 this.newMessageChatWindow.close();
             }
             chatWindow.focus();
-        }
-
-        /**
-         * @param {mail.messaging.entity.ChatWindow} chatWindow
-         */
-        register(chatWindow) {
-            if (this.allOrdered.includes(chatWindow)) {
-                return;
-            }
-            this.link({ chatWindows: chatWindow });
-            this.update({
-                _ordered: this._ordered.concat([chatWindow.localId]),
-            });
         }
 
         /**
@@ -222,9 +178,95 @@ function ChatWindowManagerFactory({ Entity }) {
         }
 
         /**
+         * @param {mail.messaging.entity.ChatWindow} chatWindow
+         */
+        unregister(chatWindow) {
+            if (!this.allOrdered.includes(chatWindow)) {
+                return;
+            }
+            this.update({
+                _ordered: this._ordered.filter(
+                    _chatWindow => _chatWindow !== chatWindow.localId
+                ),
+                chatWindows: [['unlink', chatWindow]],
+            });
+        }
+
+        //----------------------------------------------------------------------
+        // Private
+        //----------------------------------------------------------------------
+
+        /**
+         * // FIXME: dependent on implementation that uses arbitrary order in relations!!
+         *
+         * @private
+         * @returns {mail.messaging.entity.ChatWindow}
+         */
+        _computeAllOrdered() {
+            return [['replace', this._ordered.map(_chatWindow => this.env.entities.ChatWindow.get(_chatWindow))]];
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.ChatWindow[]}
+         */
+        _computeAllOrderedHidden() {
+            return this.visual.hidden._chatWindows.map(_chatWindow => this.env.entities.ChatWindow.get(_chatWindow));
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.ChatWindow[]}
+         */
+        _computeAllOrderedVisible() {
+            return [['replace', this.visual.visible.map(({ _chatWindow }) => this.env.entities.ChatWindow.get(_chatWindow))]];
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeHasHiddenChatWindows() {
+            return this.visual.hidden._chatWindows.length > 0;
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeHasVisibleChatWindows() {
+            return this.visual.visible.length > 0;
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.ChatWindow|undefined}
+         */
+        _computeLastVisible() {
+            const { length: l, [l - 1]: lastVisible } = this.allOrderedVisible;
+            if (!lastVisible) {
+                return [['unlink-all']];
+            }
+            return [['replace', lastVisible]];
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.ChatWindow|undefined}
+         */
+        _computeNewMessageChatWindow() {
+            const chatWindow = this.allOrdered.find(chatWindow => !chatWindow.thread);
+            if (!chatWindow) {
+                return [];
+            }
+            return [['replace', chatWindow]];
+        }
+
+        /**
+         * @private
          * @returns {integer}
          */
-        get unreadHiddenConversationAmount() {
+        _computeUnreadHiddenConversationAmount() {
             const allHiddenWithThread = this.allOrderedHidden.filter(
                 chatWindow => chatWindow.thread
             );
@@ -238,24 +280,10 @@ function ChatWindowManagerFactory({ Entity }) {
         }
 
         /**
-         * @param {mail.messaging.entity.ChatWindow} chatWindow
-         */
-        unregister(chatWindow) {
-            if (!this.allOrdered.includes(chatWindow)) {
-                return;
-            }
-            this.unlink({ chatWindows: chatWindow });
-            this.update({
-                _ordered: this._ordered.filter(
-                    _chatWindow => _chatWindow !== chatWindow.localId
-                ),
-            });
-        }
-
-        /**
+         * @private
          * @returns {Object}
          */
-        get visual() {
+        _computeVisual() {
             let visual = JSON.parse(JSON.stringify(BASE_VISUAL));
             if (!this.env.messaging || !this.env.messaging.isInitialized) {
                 return visual;
@@ -320,34 +348,91 @@ function ChatWindowManagerFactory({ Entity }) {
             return visual;
         }
 
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
-        /**
-         * @override
-         */
-        _update(data) {
-            const {
-                /**
-                 * List of ordered chat windows (list of local ids)
-                 */
-                _ordered = this._ordered || [],
-                isHiddenMenuOpen = this.isHiddenMenuOpen || false,
-            } = data;
-
-            Object.assign(this, {
-                _ordered,
-                isHiddenMenuOpen,
-            });
-        }
-
     }
 
+    ChatWindowManager.entityName = 'ChatWindowManager';
+
     ChatWindowManager.fields = {
+        /**
+         * List of ordered chat windows (list of local ids)
+         */
+        _ordered: attr({ default: [] }),
+        // FIXME: dependent on implementation that uses arbitrary order in relations!!
+        allOrdered: one2many('ChatWindow', {
+            compute: '_computeAllOrdered',
+            dependencies: [
+                '_ordered',
+                'chatWindows',
+            ],
+        }),
+        allOrderedHidden: one2many('ChatWindow', {
+            compute: '_computeAllOrderedHidden',
+            dependencies: ['visual'],
+        }),
+        allOrderedHiddenThread: one2many('Thread', {
+            related: 'allOrderedHidden.thread',
+        }),
+        allOrderedHiddenThreadMessageUnreadCounter: attr({
+            related: 'allOrderedHiddenThread.message_unread_counter',
+        }),
+        allOrderedVisible: one2many('ChatWindow', {
+            compute: '_computeAllOrderedVisible',
+            dependencies: ['visual'],
+        }),
         chatWindows: one2many('ChatWindow', {
             inverse: 'manager',
             isCausal: true,
+        }),
+        device: one2one('Device', {
+            related: 'messaging.device',
+        }),
+        deviceGlobalWindowInnerWidth: attr({
+            related: 'device.globalWindowInnerWidth',
+        }),
+        deviceIsMobile: attr({
+            related: 'device.isMobile',
+        }),
+        discuss: one2one('Discuss', {
+            related: 'messaging.discuss',
+        }),
+        discussIsOpen: attr({
+            related: 'discuss.isOpen',
+        }),
+        hasHiddenChatWindows: attr({
+            compute: '_computeHasHiddenChatWindows',
+            dependencies: ['visual'],
+        }),
+        hasVisibleChatWindows: attr({
+            compute: '_computeHasVisibleChatWindows',
+            dependencies: ['visual'],
+        }),
+        isHiddenMenuOpen: attr({
+            default: false,
+        }),
+        lastVisible: many2one('ChatWindow', {
+            compute: '_computeLastVisible',
+            dependencies: ['allOrderedVisible'],
+        }),
+        messaging: one2one('Messaging', {
+            inverse: 'chatWindowManager',
+        }),
+        newMessageChatWindow: one2one('ChatWindow', {
+            compute: '_computeNewMessageChatWindow',
+            dependencies: ['allOrdered'],
+        }),
+        unreadHiddenConversationAmount: attr({
+            compute: '_computeUnreadHiddenConversationAmount',
+            dependencies: ['allOrderedHiddenThreadMessageUnreadCounter'],
+        }),
+        visual: attr({
+            compute: '_computeVisual',
+            default: BASE_VISUAL,
+            dependencies: [
+                'allOrdered',
+                'deviceGlobalWindowInnerWidth',
+                'deviceIsMobile',
+                'discussIsOpen',
+            ],
         }),
     };
 

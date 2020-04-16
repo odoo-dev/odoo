@@ -1,29 +1,40 @@
 odoo.define('mail.messaging.entity.Entity', function (require) {
 'use strict';
 
-const {
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
-
-const STORED_RELATION_PREFIX = `_`;
+const { registerNewEntity } = require('mail.messaging.entityCore');
 
 function EntityFactory() {
 
     class Entity {
+
+        /**
+         * @param {Object} [param0={}]
+         * @param {boolean} [param0.valid=false] if set, this constructor is
+         *   called by static method `create()`. This should always be the case.
+         * @throws {Error} in case constructor is called in an invalid way, i.e.
+         *   by instantiating the entity manually with `new` instead of from
+         *   static method `create()`.
+         */
+        constructor({ valid = false } = {}) {
+            if (!valid) {
+                throw new Error("Entity must always be instantiated from static method 'create()'");
+            }
+        }
 
         //--------------------------------------------------------------------------
         // Public
         //--------------------------------------------------------------------------
 
         /**
-         * Returns all instance entities of this entity class.
+         * Returns all instance entities of this entity class that match
+         * provided criteria.
          *
          * @static
-         * @returns {mail.messaging.entity.Entity[]} all instances of this entity
+         * @param {function} [filterFunc]
+         * @returns {mail.messaging.entity.Entity[]}
          */
-        static get all() {
-            const { state } = this.env.store;
-            return Object.values(state.entities).filter(entity => entity instanceof this);
+        static all(filterFunc) {
+            return this.env.entityManager.all(this, filterFunc);
         }
 
         /**
@@ -32,39 +43,23 @@ function EntityFactory() {
          * instantiation must never been done with keyword `new` outside of this
          * function, otherwise the instance entity will not be registered.
          *
-         * Provided data is used to update this instance entity for the 1st time.
-         * These data should be explicitly handled in `_update()` method,
-         * otherwise they are ignored.
-         *
          * @static
-         * @param {Object} [data={}] data object with initial data, including relations.
+         * @param {Object} [data] data object with initial data, including relations.
          * @returns {mail.messaging.entity.Entity} newly created entity
          */
-        static create(data = {}) {
-            const { state } = this.env.store;
-            const entity = new this(data);
-            Object.defineProperty(entity, 'env', {
-                get: () => this.env,
-            });
-            entity.localId = entity._createInstanceLocalId(data);
-            this.__init(entity);
-
-            state.entities[entity.localId] = entity;
-            // ensure observable version of entity is handled.
-            const proxifiedEntity = state.entities[entity.localId];
-            proxifiedEntity._update(data);
-            return proxifiedEntity;
+        static create(data) {
+            return this.env.entityManager.create(this, data);
         }
 
         /**
-         * Get the instance entity that has provided id, if it exists.
+         * Get the instance entity that has provided criteria, if it exists.
          *
          * @static
-         * @param {any} id
+         * @param {function} findFunc
          * @returns {mail.messaging.entity.Entity|undefined}
          */
-        static fromId(id) {
-            return this.all.find(entity => entity.id === id);
+        static find(findFunc) {
+            return this.env.entityManager.find(this, findFunc);
         }
 
         /**
@@ -79,191 +74,51 @@ function EntityFactory() {
          * @returns {mail.messaging.entity.Entity|undefined}
          */
         static get(entityOrLocalId) {
-            const { state } = this.env.store;
-            if (entityOrLocalId === undefined) {
-                return undefined;
-            }
-            const entity = state.entities[
-                entityOrLocalId.isEntity
-                    ? entityOrLocalId.localId
-                    : entityOrLocalId
-            ];
-            if (!(entity instanceof this) && entity !== this) {
-                return;
-            }
-            return entity;
+            return this.env.entityManager.get(this, entityOrLocalId);
         }
 
         /**
          * This method creates an instance entity or updates one, depending
-         * on provided data. This method assumes that instance entities are
-         * uniquely identifiable per their `id` data.
+         * on provided data.
          *
          * @static
          * @param {Object} data
-         * @param {any} data.id
          * @returns {mail.messaging.entity.Entity} created or updated entity.
          */
         static insert(data) {
-            let entity = this.fromId(data.id);
-            if (!entity) {
-                entity = this.create(data);
-            } else {
-                entity.update(data);
-            }
-            return entity;
+            return this.env.entityManager.insert(this, data);
         }
 
         /**
-         * @static
-         * @returns {Object[]}
-         */
-        static get relations() {
-            return Object.values(this.fields)
-                .filter(field => field.fieldType === 'relation');
-        }
-
-        /**
-         * This method deletes this instance entity. After this operation, it's
-         * as if this entity never existed. Note that relation are removed,
-         * which may delete more relations if some of them are causal.
+         * This method deletes this instance entity.
          */
         delete() {
-            const { state } = this.env.store;
-            if (!this.constructor.get(this)) {
-                // Entity has already been deleted.
-                // (e.g. unlinking one of its reverse relation was causal)
-                return;
-            }
-            const data = {};
-            for (const relation of this.constructor.relations) {
-                if (relation.isCausal) {
-                    switch (relation.type) {
-                        case 'one2one':
-                        case 'many2one':
-                            if (this[relation.fieldName]) {
-                                this[relation.fieldName].delete();
-                            }
-                            break;
-                        case 'one2many':
-                        case 'many2many':
-                            for (const relatedEntity of this[relation.fieldName]) {
-                                relatedEntity.delete();
-                            }
-                            break;
-                    }
-                }
-                data[relation.fieldName] = null;
-            }
-            this.unlink(data);
-            delete state.entities[this.localId];
-        }
-
-        /**
-         * @returns {boolean}
-         */
-        get isEntity() {
-            return true;
-        }
-
-        /**
-         * Update relation on this instance entity with provided data.
-         *
-         * Relations of type x2one are processed as "replacement", while
-         * relations of type x2many are processed as as "addition".
-         *
-         * Key should be named after relation names, and each values should be
-         * either local id(s) or entity(ies) that respect the definition of
-         * this relation.
-         *
-         * @param {Object} data
-         */
-        link(data) {
-            for (const [relationName, relationValue] of Object.entries(data)) {
-                const relation = this.constructor.fields[relationName];
-                switch (relation.type) {
-                    case 'one2one':
-                        this.constructor.__linkSingleOne2One(this, {
-                            relationName,
-                            relationValue,
-                        });
-                        break;
-                    case 'one2many':
-                        this.constructor.__linkSingleOne2Many(this, {
-                            relationName,
-                            relationValue,
-                        });
-                        break;
-                    case 'many2one':
-                        this.constructor.__linkSingleMany2One(this, {
-                            relationName,
-                            relationValue,
-                        });
-                        break;
-                    case 'many2many':
-                        this.constructor.__linkSingleMany2Many(this, {
-                            relationName,
-                            relationValue,
-                        });
-                        break;
-                }
-            }
-        }
-
-        /**
-         * Update relation on this instance entity with provided data.
-         *
-         * Any relation, regardless of their type, are processed as removal
-         * of provided value.
-         *
-         * Key should be named after relation names, and each values should be
-         * either local id(s) or entity(ies) that respect the definition of
-         * this relation. Special value `null` can be used to remove all
-         * relations of provided relation name.
-         *
-         * @param {Object} data
-         */
-        unlink(data) {
-            if (!this.constructor.get(this)) {
-                // Entity has already been deleted.
-                // (e.g. unlinking one of its reverse relation was causal)
-                return;
-            }
-            for (const [relationName, relationValue] of Object.entries(data)) {
-                const relation = this.constructor.fields[relationName];
-                switch (relation.type) {
-                    case 'one2one':
-                        this.constructor.__unlinkSingleOne2One(this, { relationName });
-                        break;
-                    case 'one2many':
-                        this.constructor.__unlinkSingleOne2Many(this, { relationName, relationValue });
-                        break;
-                    case 'many2one':
-                        this.constructor.__unlinkSingleMany2One(this, { relationName });
-                        break;
-                    case 'many2many':
-                        this.constructor.__unlinkSingleMany2Many(this, { relationName, relationValue });
-                        break;
-                }
-            }
+            this.env.entityManager.delete(this);
         }
 
         /**
          * Update this instance entity with provided data.
          *
-         * Provided data is used to update this instance entity for the 1st time.
-         * These data should be explicitly handled in `_update()` method,
-         * otherwise they are ignored.
-         *
          * @param {Object} [data={}]
          */
         update(data = {}) {
-            this._update(data);
+            this.env.entityManager.update(this, data);
         }
 
         //--------------------------------------------------------------------------
         // Private
         //--------------------------------------------------------------------------
+
+        /**
+         * @static
+         * @private
+         * @param {Object} data
+         * @param {any} data.id
+         * @return {function}
+         */
+        static _findFunctionFromData(data) {
+            return entity => entity.id === data.id;
+        }
 
         /**
          * This method generates a local id for this instance entity that is
@@ -281,381 +136,53 @@ function EntityFactory() {
          * @returns {string}
          */
         _createInstanceLocalId(data) {
-            return _.uniqueId(`${this.constructor.name}_`);
+            return _.uniqueId(`${this.constructor.entityName}_`);
         }
 
         /**
-         * This method is called when this instance entity is being created or
-         * updated with provided data. This method should be overriden in order
-         * to manage the data, otherwise they are ignored.
+         * This function is called when this entity has been explicitly updated
+         * with `.update()` or static method `.create()`, at the end of an
+         * entity update cycle. This is a backward-compatible behaviour that
+         * is deprecated: you should use computed fields instead.
          *
+         * @deprecated
+         * @abstract
+         * @private
+         * @param {Object} previous contains data that have been stored by
+         *   `_updateBefore()`. Useful to make extra update decisions based on
+         *   previous data.
+         */
+        _updateAfter(previous) {}
+
+        /**
+         * This function is called just at the beginning of an explicit update
+         * on this function, with `.update()` or static method `.create()`. This
+         * is useful to remember previous values of fields in `_updateAfter`.
+         * This is a backward-compatible behaviour that is deprecated: you
+         * should use computed fields instead.
+         *
+         * @deprecated
          * @abstract
          * @private
          * @param {Object} data
+         * @returns {Object}
          */
-        _update(data) {}
-
-        //--------------------------------------------------------------------------
-        // Internal
-        //--------------------------------------------------------------------------
-
-        /**
-         * Technical management of initialisation of provided entity. Should
-         * never be called/overriden outside of this file.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.Entity} entity
-         */
-        static __init(entity) {
-            for (const relation of this.relations) {
-                if (['one2many', 'many2many'].includes(relation.type)) {
-                    // Ensure X2many relations are arrays by defaults.
-                    const storedRelationName = this.__getStoredRelationName(relation.fieldName);
-                    entity[storedRelationName] = [];
-                }
-                // compute getters
-                Object.defineProperty(entity, relation.fieldName, {
-                    get: () => {
-                        const storedRelationName = this.__getStoredRelationName(relation.fieldName);
-                        const RelatedEntity = this.env.entities[relation.to];
-                        if (['one2one', 'many2one'].includes(relation.type)) {
-                            return RelatedEntity.get(entity[storedRelationName]);
-                        }
-                        return entity[storedRelationName]
-                            .map(localId => RelatedEntity.get(localId))
-                            /**
-                             * FIXME: Stored relation may still contain
-                             * outdated entities.
-                             */
-                            .filter(entity => !!entity);
-                    }
-                });
-            }
-        }
-
-        /**
-         * This method returns the obj key on this entity that stores data
-         * about the relation with provided name. Useful for the technical
-         * management of changes in relations, in order to write in the stored
-         * key of given entity.
-         *
-         * Indeed, <entity>.<relationName> is a getter that maps stored data
-         * of relation to entities. Stored data of a set relation contain
-         * local ids (reason: normalize data in store).
-         *
-         * @static
-         * @private
-         * @param {string} relationName
-         * @returns {string}
-         */
-        static __getStoredRelationName(relationName) {
-            return `${STORED_RELATION_PREFIX}${relationName}`;
-        }
-
-        /**
-         * Technical management of updating a link operation of provided
-         * relation of type many2many. Should never be called/overriden outside
-         * of this file.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.Entity} entity
-         * @param {Object} param1
-         * @param {string} param1.relationName
-         * @param {string|mail.messaging.entity.Entity|<mail.messaging.entity.Entity|string>[]} param1.relationValue
-         */
-        static __linkSingleMany2Many(entity, { relationName, relationValue }) {
-            const relation = this.fields[relationName];
-            const storedRelationName = this.__getStoredRelationName(relationName);
-            const prevValue = entity[storedRelationName];
-            const value = relationValue instanceof Array
-                ? relationValue.map(e => e.isEntity ? e.localId: e)
-                : [relationValue.isEntity ? relationValue.localId : relationValue];
-            if (value.every(valueItem => prevValue.includes(valueItem))) {
-                // Do not alter relations if unchanged.
-                return;
-            }
-            entity[storedRelationName] = [...new Set(entity[storedRelationName].concat(value))];
-            for (const valueItem of value) {
-                if (prevValue.includes(valueItem)) {
-                    continue;
-                }
-                const RelatedEntity = this.env.entities[relation.to];
-                const related = RelatedEntity.get(valueItem);
-                const storedRelatedRelationName =
-                    RelatedEntity.__getStoredRelationName(relation.inverse);
-                related[storedRelatedRelationName] = [
-                    ...new Set(related[storedRelatedRelationName].concat([entity.localId]))
-                ];
-            }
-        }
-
-        /**
-         * Technical management of updating a link operation of provided
-         * relation of type many2one. Should never be called/overriden outside
-         * of this file.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.Entity} entity
-         * @param {Object} param1
-         * @param {string} param1.relationName
-         * @param {string|mail.messaging.entity.Entity} param1.relationValue
-         */
-        static __linkSingleMany2One(entity, { relationName, relationValue }) {
-            const relation = this.fields[relationName];
-            const storedRelationName = this.__getStoredRelationName(relationName);
-            const prevValue = entity[storedRelationName];
-            const value = relationValue.isEntity ? relationValue.localId : relationValue;
-            if (value === entity[storedRelationName]) {
-                // Do not alter relations if unchanged.
-                return;
-            }
-            entity[storedRelationName] = value;
-            const RelatedEntity = this.env.entities[relation.to];
-            if (prevValue) {
-                const related = RelatedEntity.get(prevValue);
-                if (!related) {
-                    // prev Entity has already been deleted.
-                    return;
-                }
-                const storedRelatedRelationName =
-                    RelatedEntity.__getStoredRelationName(relation.inverse);
-                related[storedRelatedRelationName] =
-                    related[storedRelatedRelationName].filter(
-                        valueItem => valueItem !== entity.localId
-                    );
-                if (relation.isCausal) {
-                    related.delete();
-                }
-            }
-            const related = RelatedEntity.get(value);
-            const storedRelatedRelationName =
-                RelatedEntity.__getStoredRelationName(relation.inverse);
-            related[storedRelatedRelationName] =
-                    related[storedRelatedRelationName].concat([entity.localId]);
-        }
-
-        /**
-         * Technical management of updating a link operation of provided
-         * relation of type one2many. Should never be called/overriden outside
-         * of this file.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.Entity} entity
-         * @param {Object} param1
-         * @param {string} param1.relationName
-         * @param {string|mail.messaging.entity.Entity|<string|mail.messaging.entity.Entity>[]} param1.relationValue
-         */
-        static __linkSingleOne2Many(entity, { relationName, relationValue }) {
-            const relation = this.fields[relationName];
-            const storedRelationName = this.__getStoredRelationName(relationName);
-            const prevValue = entity[storedRelationName];
-            const value = relationValue instanceof Array
-                ? relationValue.map(e => e.isEntity ? e.localId: e)
-                : [relationValue.isEntity ? relationValue.localId : relationValue];
-            if (value.every(valueItem => prevValue.includes(valueItem))) {
-                // Do not alter relations if unchanged.
-                return;
-            }
-            entity[storedRelationName] = [...new Set(entity[storedRelationName].concat(value))];
-            for (const valueItem of value) {
-                if (prevValue.includes(valueItem)) {
-                    continue;
-                }
-                const RelatedEntity = this.env.entities[relation.to];
-                const related = RelatedEntity.get(valueItem);
-                const storedRelatedRelationName =
-                    RelatedEntity.__getStoredRelationName(relation.inverse);
-                related[storedRelatedRelationName] = entity.localId;
-            }
-        }
-
-        /**
-         * Technical management of updating a link operation of provided
-         * relation of type one2one. Should never be called/overriden outside
-         * of this file.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.Entity} entity
-         * @param {Object} param1
-         * @param {string} param1.relationName
-         * @param {string|mail.messaging.entity.Entity} param1.relationValue
-         */
-        static __linkSingleOne2One(entity, { relationName, relationValue }) {
-            const relation = this.fields[relationName];
-            const storedRelationName = this.__getStoredRelationName(relationName);
-            const prevValue = entity[storedRelationName];
-            const value = relationValue.isEntity ? relationValue.localId : relationValue;
-            entity[storedRelationName] = value;
-            const RelatedEntity = this.env.entities[relation.to];
-            if (prevValue) {
-                const related = RelatedEntity.get(prevValue);
-                const storedRelatedRelationName =
-                    RelatedEntity.__getStoredRelationName(relation.inverse);
-                related[storedRelatedRelationName] = undefined;
-                if (relation.isCausal) {
-                    related.delete();
-                }
-            }
-            const related = RelatedEntity.get(value);
-            const storedRelatedRelationName = RelatedEntity.__getStoredRelationName(relation.inverse);
-            related[storedRelatedRelationName] = entity.localId;
-        }
-
-        /**
-         * Technical management of unlink operation of provided relation of
-         * type many2many. Should never be called/overriden outside of this file.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.Entity} entity
-         * @param {Object} param1
-         * @param {string} param1.relationName
-         * @param {string|mail.messaging.entity.Entity|<string|mail.messaging.entity.Entity>[]|null} param1.relationValue
-         */
-        static __unlinkSingleMany2Many(entity, { relationName, relationValue }) {
-            if (!this.get(entity)) {
-                // Entity has already been deleted.
-                // (e.g. unlinking one of its reverse relation was causal)
-                return;
-            }
-            const relation = this.fields[relationName];
-            const storedRelationName = this.__getStoredRelationName(relationName);
-            const value = relationValue === null
-                ? [...entity[storedRelationName]]
-                : relationValue instanceof Array
-                ? relationValue.map(e => e.isEntity ? e.localId: e)
-                : [relationValue.isEntity ? relationValue.localId : relationValue];
-            entity[storedRelationName] = entity[storedRelationName].filter(
-                valueItem => !value.includes(valueItem)
-            );
-            const RelatedEntity = this.env.entities[relation.to];
-            for (const valueItem of value) {
-                const related = RelatedEntity.get(valueItem);
-                const storedRelatedRelationName =
-                    RelatedEntity.__getStoredRelationName(relation.inverse);
-                related[storedRelatedRelationName] =
-                    related[storedRelatedRelationName].filter(
-                        valueItem => valueItem !== entity.localId
-                    );
-                if (relation.isCausal) {
-                    related.delete();
-                }
-            }
-        }
-
-        /**
-         * Technical management of unlink operation of provided relation of
-         * type many2one. Should never be called/overriden outside of this file.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.Entity} entity
-         * @param {Object} param1
-         * @param {string} param1.relationName
-         */
-        static __unlinkSingleMany2One(entity, { relationName }) {
-            if (!this.get(entity)) {
-                // Entity has already been deleted.
-                // (e.g. unlinking one of its reverse relation was causal)
-                return;
-            }
-            const relation = this.fields[relationName];
-            const storedRelationName = this.__getStoredRelationName(relationName);
-            const prevValue = entity[storedRelationName];
-            if (prevValue) {
-                const RelatedEntity = this.env.entities[relation.to];
-                const prevEntity = RelatedEntity.get(prevValue);
-                RelatedEntity.__unlinkSingleOne2Many(prevEntity, {
-                    relationName: relation.inverse,
-                    relationValue: entity.localId,
-                });
-            }
-        }
-
-        /**
-         * Technical management of unlink operation of provided relation of
-         * type one2many. Should never be called/overriden outside of this file.
-         *
-         * @static
-         * @private
-         * @param {string|mail.messaging.entity.Entity} entity
-         * @param {Object} param1
-         * @param {string} param1.relationName
-         * @param {string|mail.messaging.entity.Entity|<string|mail.messaging.entity.Entity>[]|null} param1.relationValue
-         *   if null, unlink all items in the relation of provided entity.
-         */
-        static __unlinkSingleOne2Many(entity, { relationName, relationValue }) {
-            if (!this.get(entity)) {
-                // Entity has already been deleted.
-                // (e.g. unlinking one of its reverse relation was causal)
-                return;
-            }
-            const relation = this.fields[relationName];
-            const storedRelationName = this.__getStoredRelationName(relationName);
-            const prevValue = entity[storedRelationName];
-            const value = relationValue === null
-                ? [...entity[storedRelationName]]
-                : relationValue instanceof Array
-                ? relationValue.map(e => e.isEntity ? e.localId: e)
-                : [relationValue.isEntity ? relationValue.localId : relationValue];
-            entity[storedRelationName] = entity[storedRelationName].filter(
-                valueItem => !value.includes(valueItem)
-            );
-            if (prevValue) {
-                const RelatedEntity = this.env.entities[relation.to];
-                for (const valueItem of value) {
-                    const related = RelatedEntity.get(valueItem);
-                    const storedRelatedRelationName =
-                        RelatedEntity.__getStoredRelationName(relation.inverse);
-                    related[storedRelatedRelationName] = undefined;
-                    if (relation.isCausal) {
-                        related.delete();
-                    }
-                }
-            }
-        }
-
-        /**
-         * Technical management of unlink operation of provided relation of
-         * type one2one. Should never be called/overriden outside of this file.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.Entity} entity
-         * @param {Object} param1
-         * @param {string} param1.relationName
-         */
-        static __unlinkSingleOne2One(entity, { relationName }) {
-            if (!this.get(entity)) {
-                // Entity has already been deleted.
-                // (e.g. unlinking one of its reverse relation was causal)
-                return;
-            }
-            const relation = this.fields[relationName];
-            const storedRelationName = this.__getStoredRelationName(relationName);
-            const prevValue = entity[storedRelationName];
-            entity[storedRelationName] = undefined;
-            const RelatedEntity = this.env.entities[relation.to];
-            if (prevValue) {
-                const related = RelatedEntity.get(prevValue);
-                const storedRelatedRelationName =
-                    RelatedEntity.__getStoredRelationName(relation.inverse);
-                related[storedRelatedRelationName] = undefined;
-            }
+        _updateBefore() {
+            return {};
         }
 
     }
 
     /**
+     * Name of the entity class. Important to refer to appropriate entity class
+     * like in relational fields. Name of entity classes must be unique.
+     */
+    Entity.entityName = 'Entity';
+    /**
      * Entity classes should define fields in static prop or getter `field`.
      * It contains an object with name of field as key and value are objects
      * that define the field. There are some helpers to ease the making of these
-     * objects, @see `mail.messaging.entity.core.fields`
+     * objects, @see `mail.messaging.entityCore:fields`
      *
      * Note: fields of super-class are automatically inherited, therefore a
      * sub-class should (re-)define fields without copying ancestors' fields.

@@ -46,9 +46,11 @@ patch(components.ThreadViewer, 'hr_holidays.messaging.component.ThreadViewer', {
      */
     _useStoreSelector(props) {
         const res = this._super(...arguments);
-        const directPartner = res.thread ? res.thread.directPartner : undefined;
+        const threadViewer = this.env.entities.ThreadViewer.get(props.threadViewerLocalId);
+        const thread = threadViewer ? threadViewer.thread : undefined;
+        const directPartner = thread ? thread.directPartner : undefined;
         return Object.assign({}, res, {
-            directPartner,
+            directPartner: directPartner ? directPartner.__state : undefined,
         });
     },
 });

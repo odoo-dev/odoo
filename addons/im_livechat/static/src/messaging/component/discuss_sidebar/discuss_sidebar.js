@@ -19,7 +19,11 @@ patch(components.DiscussSidebar, 'im_livechat.messaging.component.DiscussSidebar
      * @returns {mail.messaging.entity.Thread[]}
      */
     quickSearchOrderedAndPinnedLivechatList() {
-        const allOrderedAndPinnedLivechats = this.env.entities.Thread.allOrderedAndPinnedLivechats();
+        const allOrderedAndPinnedLivechats = this.env.entities.Thread.all(thread =>
+            thread.channel_type === 'livechat' &&
+            thread.isPinned &&
+            thread.model === 'mail.channel'
+        );
         if (!this.discuss.sidebarQuickSearchValue) {
             return allOrderedAndPinnedLivechats;
         }
@@ -49,8 +53,16 @@ patch(components.DiscussSidebar, 'im_livechat.messaging.component.DiscussSidebar
      */
     _useStoreSelector(props) {
         return Object.assign(this._super(...arguments), {
-            allOrderedAndPinnedLivechats: this.env.entities.Thread.allOrderedAndPinnedLivechats(),
-        });
+            allOrderedAndPinnedLivechats: this.env.entities.Thread
+                .all(thread =>
+                    thread.channel_type === 'livechat' &&
+                    thread.isPinned &&
+                    thread.model === 'mail.channel'
+                )
+                .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1)
+                .map(livechat => livechat.__state),
+            }
+        );
     },
 
 });

@@ -23,10 +23,12 @@ class MessageList extends Component {
             const threadCache = threadViewer ? threadViewer.threadCache : undefined;
             return {
                 isDeviceMobile: this.env.messaging.device.isMobile,
-                messages: threadCache ? threadCache.orderedMessages : [],
-                thread,
-                threadCache,
-                threadViewer,
+                messages: threadCache
+                    ? threadCache.orderedMessages.map(message => message.__state)
+                    : [],
+                thread: thread ? thread.__state : undefined,
+                threadCache: threadCache ? threadCache.__state : undefined,
+                threadViewer: threadViewer ? threadViewer.__state : undefined,
             };
         }, {
             compareDepth: {

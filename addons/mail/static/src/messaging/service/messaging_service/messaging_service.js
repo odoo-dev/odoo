@@ -79,6 +79,8 @@ const MessagingService = AbstractService.extend({
         this.env.bus.off('will_show_home_menu', this);
         if (this.env.messaging) {
             this.env.messaging.stop();
+            this.env.messaging.delete();
+            this.env.messaging = undefined;
         }
     },
 

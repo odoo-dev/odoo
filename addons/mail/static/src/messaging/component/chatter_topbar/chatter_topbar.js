@@ -22,7 +22,7 @@ class ChatterTopbar extends Component {
             const threadAttachments = thread ? thread.allAttachments : [];
             return {
                 areThreadAttachmentsLoaded: thread && thread.areAttachmentsLoaded,
-                chatter,
+                chatter: chatter ? chatter.__state : undefined,
                 threadAttachmentsAmount: threadAttachments.length,
             };
         });
@@ -114,12 +114,8 @@ class ChatterTopbar extends Component {
 
 Object.assign(ChatterTopbar, {
     components,
-    defaultProps: {
-        hasCloseButton: false,
-    },
     props: {
         chatterLocalId: String,
-        hasCloseButton: Boolean,
     },
     template: 'mail.messaging.component.ChatterTopbar',
 });

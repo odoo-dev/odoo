@@ -1,12 +1,8 @@
 odoo.define('mail.messaging.entity.MessagingInitializer', function (require) {
 'use strict';
 
-const {
-    fields: {
-        one2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { one2one } = require('mail.messaging.EntityField');
 
 function MessagingInitializerFactory({ Entity }) {
 
@@ -21,7 +17,62 @@ function MessagingInitializerFactory({ Entity }) {
          * the current user. This includes pinned channels for instance.
          */
         async start() {
-            await this.constructor._start(this);
+            await this.env.session.is_bound;
+            if (!this.constructor.get(this)) {
+                // destroyed in the mean time.
+                return;
+            }
+
+            this.env.entities.Thread.create({
+                id: 'inbox',
+                isPinned: true,
+                model: 'mail.box',
+                name: this.env._t("Inbox"),
+            });
+            this.env.entities.Thread.create({
+                id: 'starred',
+                isPinned: true,
+                model: 'mail.box',
+                name: this.env._t("Starred"),
+            });
+            this.env.entities.Thread.create({
+                id: 'history',
+                isPinned: true,
+                model: 'mail.box',
+                name: this.env._t("History"),
+            });
+
+            this.messaging.update({
+                attachmentViewer: [['create']],
+                chatWindowManager: [['create']],
+                device: [['create']],
+                dialogManager: [['create']],
+                discuss: [['create']],
+                locale: [['create']],
+                messagingMenu: [['create']],
+            });
+
+            const device = this.messaging.device;
+            device.start();
+            const context = Object.assign({
+                isMobile: device.isMobile,
+            }, this.env.session.user_context);
+            const discuss = this.messaging.discuss;
+            const data = await this.env.rpc({
+                route: '/mail/init_messaging',
+                params: { context: context }
+            });
+            if (!this.constructor.get(this)) {
+                // destroyed in the mean time.
+                return;
+            }
+            this._init(data);
+            if (discuss.isOpen) {
+                discuss.openInitThread();
+            }
+            if (this.env.autofetchPartnerImStatus) {
+                this.env.entities.Partner.startLoopFetchImStatus();
+            }
         }
 
         /**
@@ -36,61 +87,6 @@ function MessagingInitializerFactory({ Entity }) {
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
-
-        /**
-         * Static method in order to be patched.
-         *
-         * @static
-         * @private
-         * @param {mail.messaging.entity.MessagingInitializer} messagingInitializer
-         */
-        static async _start(messagingInitializer) {
-            await this.env.session.is_bound;
-
-            this.env.entities.Thread.create({
-                id: 'inbox',
-                model: 'mail.box',
-                name: this.env._t("Inbox"),
-            });
-            this.env.entities.Thread.create({
-                id: 'starred',
-                model: 'mail.box',
-                name: this.env._t("Starred"),
-            });
-            this.env.entities.Thread.create({
-                id: 'history',
-                model: 'mail.box',
-                name: this.env._t("History"),
-            });
-
-            messagingInitializer.messaging.link({
-                attachmentViewer: this.env.entities.AttachmentViewer.create(),
-                chatWindowManager: this.env.entities.ChatWindowManager.create(),
-                device: this.env.entities.Device.create(),
-                dialogManager: this.env.entities.DialogManager.create(),
-                discuss: this.env.entities.Discuss.create(),
-                locale: this.env.entities.Locale.create(),
-                messagingMenu: this.env.entities.MessagingMenu.create(),
-            });
-
-            const device = this.env.messaging.device;
-            device.start();
-            const context = Object.assign({
-                isMobile: device.isMobile,
-            }, this.env.session.user_context);
-            const discuss = this.env.messaging.discuss;
-            const data = await this.env.rpc({
-                route: '/mail/init_messaging',
-                params: { context: context }
-            });
-            messagingInitializer._init(data);
-            if (discuss.isOpen) {
-                discuss.openInitThread();
-            }
-            if (this.env.autofetchPartnerImStatus) {
-                this.env.entities.Partner.startLoopFetchImStatus();
-            }
-        }
 
         /**
          * @private
@@ -121,12 +117,12 @@ function MessagingInitializerFactory({ Entity }) {
             shortcodes = [],
             starred_counter = 0
         }) {
-            const discuss = this.env.messaging.discuss;
-            this._initPartners(partner_root);
-            this._initChannels({
-                channel_slots,
+            const discuss = this.messaging.discuss;
+            this._initPartners({
                 moderation_channel_ids,
+                partner_root,
             });
+            this._initChannels(channel_slots);
             this._initCommands(commands);
             this._initMailboxes({
                 is_moderator,
@@ -145,7 +141,7 @@ function MessagingInitializerFactory({ Entity }) {
          * @param {Object[]} shortcodes
          */
         _initCannedResponses(shortcodes) {
-            const messaging = this.env.messaging;
+            const messaging = this.messaging;
             const cannedResponses = shortcodes
                 .map(s => {
                     const { id, source, substitution } = s;
@@ -160,33 +156,23 @@ function MessagingInitializerFactory({ Entity }) {
 
         /**
          * @private
-         * @param {Object} param0
-         * @param {Object} param0.channel_slots
-         * @param {Object[]} [param0.channel_slots.channel_channel=[]]
-         * @param {Object[]} [param0.channel_slots.channel_direct_message=[]]
-         * @param {Object[]} [param0.channel_slots.channel_livechat=[]]
-         * @param {Object[]} [param0.channel_slots.channel_private_group=[]]
-         * @param {integer[]} [param0.moderation_channel_ids=[]]
+         * @param {Object} [param0={}]
+         * @param {Object[]} [param0.channel_channel=[]]
+         * @param {Object[]} [param0.channel_direct_message=[]]
+         * @param {Object[]} [param0.channel_private_group=[]]
          */
         _initChannels({
-            channel_slots: {
-                channel_channel = [],
-                channel_direct_message = [],
-                // AKU FIXME: should be patch in im_livechat
-                channel_livechat = [],
-                channel_private_group = [],
-            },
-            moderation_channel_ids = [],
-        }) {
-            for (const data of channel_channel.concat(channel_direct_message, channel_livechat, channel_private_group)) {
-                let channel = this.env.entities.Thread.channelFromId(data.id);
-                if (!channel) {
-                    channel = this.env.entities.Thread.create(
-                        Object.assign({}, data, { isPinned: true })
-                    );
-                }
+            channel_channel = [],
+            channel_direct_message = [],
+            channel_private_group = [],
+        } = {}) {
+            for (const data of channel_channel.concat(channel_direct_message, channel_private_group)) {
+                this.env.entities.Thread.insert(Object.assign(
+                    {},
+                    this.env.entities.Thread.convertData(data),
+                    { isPinned: true }
+                ));
             }
-            this.env.entities.Thread.moderatedChannelIds = moderation_channel_ids;
         }
 
         /**
@@ -194,7 +180,7 @@ function MessagingInitializerFactory({ Entity }) {
          * @param {Object[]} commandsData
          */
         _initCommands(commandsData) {
-            const messaging = this.env.messaging;
+            const messaging = this.messaging;
             const commands = commandsData
                 .map(command => {
                     return Object.assign({
@@ -222,14 +208,21 @@ function MessagingInitializerFactory({ Entity }) {
             needaction_inbox_counter,
             starred_counter,
         }) {
-            const inbox = this.env.entities.Thread.mailboxFromId('inbox');
-            const starred = this.env.entities.Thread.mailboxFromId('starred');
+            const inbox = this.env.entities.Thread.find(thread =>
+                thread.id === 'inbox' &&
+                thread.model === 'mail.box'
+            );
+            const starred = this.env.entities.Thread.find(thread =>
+                thread.id === 'starred' &&
+                thread.model === 'mail.box'
+            );
             inbox.update({ counter: needaction_inbox_counter });
             starred.update({ counter: starred_counter });
             if (is_moderator) {
                 this.env.entities.Thread.create({
                     counter: moderation_counter,
                     id: 'moderation',
+                    isPinned: true,
                     model: 'mail.box',
                     name: this.env._t("Moderation"),
                 });
@@ -265,26 +258,29 @@ function MessagingInitializerFactory({ Entity }) {
          * @param {integer} param0[0] partner root id
          * @param {string} param0[1] partner root display_name
          */
-        _initPartners([partnerRootId, partnerRootDisplayName]) {
-            const currentPartner = this.env.entities.Partner.insert({
-                display_name: this.env.session.partner_display_name,
-                id: this.env.session.partner_id,
-                name: this.env.session.name,
-                userId: this.env.session.uid,
-            });
-            this.messaging.link({ currentPartner });
-            if (currentPartner.id !== partnerRootId) {
-                const partnerRoot = this.env.entities.Partner.insert({
+        _initPartners({
+            moderation_channel_ids = [],
+            partner_root: [partnerRootId, partnerRootDisplayName],
+        }) {
+            this.messaging.update({
+                currentPartner: [['insert', {
+                    display_name: this.env.session.partner_display_name,
+                    id: this.env.session.partner_id,
+                    moderatedChannelIds: moderation_channel_ids,
+                    name: this.env.session.name,
+                    user: [['insert', { id: this.env.session.uid }]],
+                }]],
+                currentUser: [['insert', { id: this.env.session.uid }]],
+                partnerRoot: [['insert', {
                     display_name: partnerRootDisplayName,
                     id: partnerRootId,
-                });
-                this.messaging.link({ partnerRoot });
-            } else {
-                this.messaging.link({ partnerRoot: currentPartner });
-            }
+                }]],
+            });
         }
 
     }
+
+    MessagingInitializer.entityName = 'MessagingInitializer';
 
     MessagingInitializer.fields = {
         messaging: one2one('Messaging', {

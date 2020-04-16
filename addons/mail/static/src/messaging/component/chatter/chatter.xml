@@ -7,7 +7,6 @@
                 <ChatterTopbar
                     class="o_Chatter_topbar"
                     chatterLocalId="chatter.localId"
-                    hasCloseButton="props.hasTopbarCloseButton"
                 />
                 <t t-if="chatter.hasThread and chatter.thread and chatter.isComposerVisible">
                     <Composer

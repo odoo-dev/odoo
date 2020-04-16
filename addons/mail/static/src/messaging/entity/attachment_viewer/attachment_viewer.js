@@ -1,66 +1,38 @@
 odoo.define('mail.messaging.entity.AttachmentViewer', function (require) {
 'use strict';
 
-const {
-    fields: {
-        many2many,
-        many2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2many, many2one } = require('mail.messaging.EntityField');
 
 function AttachmentViewerFactory({ Entity }) {
 
-    class AttachmentViewer extends Entity {
+    class AttachmentViewer extends Entity {}
 
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
-        /**
-         * @override
-         * @param {mail.messaging.entity.Attachment} [data.attachment]
-         * @param {mail.messaging.entity.Attachment[]} [data.attachments]
-         */
-        _update(data) {
-            const {
-                /**
-                 * Angle of the image. Changes when the user rotates it.
-                 */
-                angle = this.angle || 0,
-                attachment,
-                attachments,
-                /**
-                 * Determine whether the image is loading or not. Useful to diplay
-                 * a spinner when loading image initially.
-                 */
-                isImageLoading = this.isImageLoading || false,
-                /**
-                 * Scale size of the image. Changes when user zooms in/out.
-                 */
-                scale = this.scale || 1,
-            } = data;
-
-            if (!this.attachment && attachment) {
-                this.link({ attachment });
-            }
-            if (!this.attachments && attachments) {
-                this.link({ attachments });
-            }
-
-            Object.assign(this, {
-                angle,
-                isImageLoading,
-                scale,
-            });
-        }
-
-    }
+    AttachmentViewer.entityName = 'AttachmentViewer';
 
     AttachmentViewer.fields = {
+        /**
+         * Angle of the image. Changes when the user rotates it.
+         */
+        angle: attr({
+            default: 0,
+        }),
         attachment: many2one('Attachment'),
         attachments: many2many('Attachment', {
             inverse: 'attachmentViewer',
+        }),
+        /**
+         * Determine whether the image is loading or not. Useful to diplay
+         * a spinner when loading image initially.
+         */
+        isImageLoading: attr({
+            default: false,
+        }),
+        /**
+         * Scale size of the image. Changes when user zooms in/out.
+         */
+        scale: attr({
+            default: 1,
         }),
     };
 

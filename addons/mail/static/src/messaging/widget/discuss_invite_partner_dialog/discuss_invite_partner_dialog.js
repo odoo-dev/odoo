@@ -57,7 +57,9 @@ const PartnerInviteDialog = Dialog.extend({
                 if (item.id === 'odoobot') {
                     status = 'bot';
                 } else {
-                    const partner = this.env.entities.Partner.fromId(item.id);
+                    const partner = this.env.entities.Partner.find(partner =>
+                        partner.id === item.id
+                    );
                     status = partner.im_status;
                 }
                 const $status = QWeb.render('mail.messaging.widget.UserStatus', { status });

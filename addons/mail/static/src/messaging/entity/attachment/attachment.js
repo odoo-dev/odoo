@@ -1,13 +1,8 @@
 odoo.define('mail.messaging.entity.Attachment', function (require) {
 'use strict';
 
-const {
-    fields: {
-        many2many,
-        many2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2many, many2one } = require('mail.messaging.EntityField');
 
 function AttachmentFactory({ Entity }) {
 
@@ -24,19 +19,34 @@ function AttachmentFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
-         * @param {string} filename
-         * @returns {mail.messaging.entity.Attachment[]}
+         * @static
+         * @param {Object} data
+         * @return {Object}
          */
-        static allFromFilename(filename) {
-            return this.all.filter(attachment => attachment.filename === filename);
-        }
+        static convertData(data) {
+            const data2 = {};
+            if ('filename' in data) {
+                data2.filename = data.filename;
+            }
+            if ('id' in data) {
+                data2.id = data.id;
+            }
+            if ('mimetype' in data) {
+                data2.mimetype = data.mimetype;
+            }
+            if ('name' in data) {
+                data2.name = data.name;
+            }
 
-        /**
-         * @param {string} filename
-         * @returns {mail.messaging.entity.Attachment|undefined}
-         */
-        static temporaryFromFilename(filename) {
-            return this.allFromFilename(filename).find(attachment => attachment.isTemporary);
+            // relation
+            if ('res_id' in data && 'res_model' in data) {
+                data2.originThread = [['insert', {
+                    id: data.res_id,
+                    model: data.res_model,
+                }]];
+            }
+
+            return data2;
         }
 
         /**
@@ -58,13 +68,53 @@ function AttachmentFactory({ Entity }) {
             if (!attachments.includes(attachment)) {
                 return;
             }
-            this.env.messaging.dialogManager.open('AttachmentViewer', { attachment, attachments });
+            this.env.messaging.dialogManager.open('AttachmentViewer', {
+                attachment: [['replace', attachment]],
+                attachments: [['replace', attachments]],
+            });
         }
 
         /**
+         * Remove this attachment globally.
+         */
+        async remove() {
+            await this.env.rpc({
+                model: 'ir.attachment',
+                method: 'unlink',
+                args: [this.id],
+            }, { shadow: true });
+            this.delete();
+        }
+
+        //----------------------------------------------------------------------
+        // Private
+        //----------------------------------------------------------------------
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Composer[]}
+         */
+        _computeComposers() {
+            if (this.isTemporary) {
+                return [];
+            }
+            const relatedTemporaryAttachment = Attachment.find(attachment =>
+                attachment.filename === this.filename &&
+                attachment.isTemporary
+            );
+            if (relatedTemporaryAttachment) {
+                const composers = relatedTemporaryAttachment.composers;
+                relatedTemporaryAttachment.delete();
+                return [['replace', composers]];
+            }
+            return [];
+        }
+
+        /**
+         * @private
          * @returns {string}
          */
-        get defaultSource() {
+        _computeDefaultSource() {
             if (this.fileType === 'image') {
                 return `/web/image/${this.id}?unique=1&amp;signature=${this.checksum}&amp;model=ir.attachment`;
             }
@@ -93,23 +143,26 @@ function AttachmentFactory({ Entity }) {
         }
 
         /**
+         * @private
          * @returns {string}
          */
-        get displayName() {
+        _computeDisplayName() {
             return this.name || this.filename;
         }
 
         /**
+         * @private
          * @returns {string|undefined}
          */
-        get extension() {
+        _computeExtension() {
             return this.filename && this.filename.split('.').pop();
         }
 
         /**
+         * @private
          * @returns {string|undefined}
          */
-        get fileType() {
+        _computeFileType() {
             if (this.type === 'url' && !this.url) {
                 return undefined;
             } else if (!this.mimetype) {
@@ -128,16 +181,29 @@ function AttachmentFactory({ Entity }) {
         }
 
         /**
+         * @private
+         * @returns {integer}
+         */
+        _computeId() {
+            if (this.isTemporary && (this.id === undefined || this.id > 0)) {
+                return getAttachmentNextTemporaryId();
+            }
+            return this.id;
+        }
+
+        /**
+         * @private
          * @returns {boolean}
          */
-        get isLinkedToComposer() {
+        _computeIsLinkedToComposer() {
             return this.composers.length > 0;
         }
 
         /**
+         * @private
          * @returns {boolean}
          */
-        get isTextFile() {
+        _computeIsTextFile() {
             if (!this.fileType) {
                 return false;
             }
@@ -145,9 +211,10 @@ function AttachmentFactory({ Entity }) {
         }
 
         /**
+         * @private
          * @returns {boolean}
          */
-        get isViewable() {
+        _computeIsViewable() {
             return (
                 this.mediaType === 'image' ||
                 this.mediaType === 'video' ||
@@ -157,27 +224,12 @@ function AttachmentFactory({ Entity }) {
         }
 
         /**
-         * @returns {string|undefined}
+         * @private
+         * @returns {string}
          */
-        get mediaType() {
+        _computeMediaType() {
             return this.mimetype && this.mimetype.split('/').shift();
         }
-
-        /**
-         * Unlink the provided attachment.
-         */
-        async remove() {
-            await this.env.rpc({
-                model: 'ir.attachment',
-                method: 'unlink',
-                args: [this.id],
-            }, { shadow: true });
-            this.delete();
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
 
         /**
          * @override
@@ -185,78 +237,14 @@ function AttachmentFactory({ Entity }) {
         _createInstanceLocalId(data) {
             const { id, isTemporary = false } = data;
             if (isTemporary) {
-                return `${this.constructor.name}_${nextTemporaryId}`;
+                return `${this.constructor.entityName}_${nextTemporaryId}`;
             }
-            return `${this.constructor.name}_${id}`;
-        }
-
-        /**
-         * @override
-         */
-        _update(data) {
-            let {
-                composers,
-                filename,
-                id = getAttachmentNextTemporaryId(),
-                isTemporary = false,
-                mimetype = '',
-                name,
-                res_id,
-                res_model,
-                size,
-            } = data;
-
-            Object.assign(this, {
-                filename,
-                id,
-                isTemporary,
-                mimetype,
-                name,
-                size,
-            });
-
-            // composers
-            if (composers !== undefined) {
-                if (composers === null) {
-                    this.unlink({ composers: null });
-                } else {
-                    const prevComposers = this.composers;
-                    const prevOldComposers = prevComposers.filter(composer => !composers.includes(composer));
-                    const newComposers = composers.filter(composer => !prevComposers.includes(composer));
-                    this.unlink({ composers: prevOldComposers });
-                    this.link({ composers: newComposers });
-                }
-            }
-            // originThread
-            if (res_id && res_model) {
-                let newOriginThread = this.env.entities.Thread.fromModelAndId({
-                    id: res_id,
-                    model: res_model,
-                });
-                if (!newOriginThread) {
-                    newOriginThread = this.env.entities.Thread.create({
-                        id: res_id,
-                        model: res_model,
-                    });
-                }
-                const prevOriginThread = this.originThread;
-                if (newOriginThread !== prevOriginThread) {
-                    this.link({ originThread: newOriginThread });
-                }
-            }
-            // non-temporary attachment related to a temporary attachment
-            if (!isTemporary) {
-                const relatedTemporaryAttachment = Attachment.temporaryFromFilename(filename);
-                if (relatedTemporaryAttachment) {
-                    const composers = relatedTemporaryAttachment.composers;
-                    // AKU TODO: link to appropriate position
-                    this.link({ composers });
-                    relatedTemporaryAttachment.delete();
-                }
-            }
+            return `${this.constructor.entityName}_${id}`;
         }
 
     }
+
+    Attachment.entityName = 'Attachment';
 
     Attachment.fields = {
         activities: many2many('Activity', {
@@ -265,18 +253,84 @@ function AttachmentFactory({ Entity }) {
         attachmentViewer: many2many('AttachmentViewer', {
             inverse: 'attachments',
         }),
+        checkSum: attr(),
         composers: many2many('Composer', {
+            compute: '_computeComposers',
             inverse: 'attachments',
+        }),
+        defaultSource: attr({
+            compute: '_computeDefaultSource',
+            dependencies: [
+                'checkSum',
+                'fileType',
+                'id',
+                'url',
+            ],
+        }),
+        displayName: attr({
+            compute: '_computeDisplayName',
+            dependencies: [
+                'filename',
+                'name',
+            ],
+        }),
+        extension: attr({
+            compute: '_computeExtension',
+            dependencies: ['filename'],
+        }),
+        filename: attr(),
+        fileType: attr({
+            compute: '_computeFileType',
+            dependencies: [
+                'mimetype',
+                'type',
+                'url',
+            ],
+        }),
+        id: attr({
+            compute: '_computeId',
+            dependencies: ['isTemporary'],
+            readonly: false,
+        }),
+        isLinkedToComposer: attr({
+            compute: '_computeIsLinkedToComposer',
+            dependencies: ['composers'],
+        }),
+        isTemporary: attr({
+            default: false,
+        }),
+        isTextFile: attr({
+            compute: '_computeIsTextFile',
+            dependencies: ['fileType'],
+        }),
+        isViewable: attr({
+            compute: '_computeIsViewable',
+            dependencies: [
+                'mediaType',
+                'isTextFile',
+                'mimetype',
+            ],
+        }),
+        mediaType: attr({
+            compute: '_computeMediaType',
+            dependencies: ['mimetype'],
         }),
         messages: many2many('Message', {
             inverse: 'attachments',
         }),
+        mimetype: attr({
+            default: '',
+        }),
+        name: attr(),
         originThread: many2one('Thread', {
             inverse: 'originThreadAttachments',
         }),
+        size: attr(),
         threads: many2many('Thread', {
             inverse: 'attachments',
         }),
+        type: attr(),
+        url: attr(),
     };
 
     return Attachment;

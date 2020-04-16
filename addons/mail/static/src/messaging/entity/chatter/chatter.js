@@ -1,13 +1,8 @@
 odoo.define('mail.messaging.entity.Chatter', function (require) {
 'use strict';
 
-const {
-    fields: {
-        one2many,
-        one2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, one2many, one2one } = require('mail.messaging.EntityField');
 
 function ChatterFactory({ Entity }) {
 
@@ -33,20 +28,6 @@ function ChatterFactory({ Entity }) {
         // Public
         //----------------------------------------------------------------------
 
-        /**
-         * @returns {mail.messaging.entity.Activity[]}
-         */
-        get futureActivities() {
-            return this.activities.filter(activity => activity.state === 'planned');
-        }
-
-        /**
-         * @returns {mail.messaging.entity.Activity[]}
-         */
-        get overdueActivities() {
-            return this.activities.filter(activity => activity.state === 'overdue');
-        }
-
         refresh() {
             const thread = this.thread;
             if (!thread || thread.isTemporary) {
@@ -70,17 +51,12 @@ function ChatterFactory({ Entity }) {
             });
             const activities = [];
             for (const activityData of activitiesData) {
-                const activity = this.env.entities.Activity.insert(activityData);
+                const activity = this.env.entities.Activity.insert(
+                    this.env.entities.Activity.convertData(activityData)
+                );
                 activities.push(activity);
             }
-            const oldPrevActivities = this.activities.filter(
-                activity => !activities.includes(activity)
-            );
-            const newActivities = activities.filter(
-                activity => !this.activities.includes(activity)
-            );
-            this.unlink({ activities: oldPrevActivities });
-            this.link({ activities: newActivities });
+            this.update({ activities: [['replace', activities]] });
         }
 
         showLogNote() {
@@ -97,20 +73,6 @@ function ChatterFactory({ Entity }) {
             });
         }
 
-        /**
-         * @returns {mail.messaging.entity.Thread}
-         */
-        get thread() {
-            return this.threadViewer && this.threadViewer.thread;
-        }
-
-        /**
-         * @returns {mail.messaging.entity.Activity[]}
-         */
-        get todayActivities() {
-            return this.activities.filter(activity => activity.state === 'today');
-        }
-
         toggleActivityBoxVisibility() {
             this.update({ isActivityBoxVisible: !this.isActivityBoxVisible });
         }
@@ -120,89 +82,91 @@ function ChatterFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
-         * @override
-         * @param {integer} [data.threadId]
-         * @param {string} [data.threadModel]
+         * @private
+         * @returns {mail.messaging.entity.Activity[]}
          */
-        _update(data) {
-            const prevActivityIds = this.activityIds || [];
-            const prevFollowerIds = this.followerIds || [];
-            const prevMessageIds = this.messageIds || [];
-            const prevThreadModel = this.threadModel;
-            const prevThreadId = this.threadId;
-            const prevThread = this.thread;
+        _computeFutureActivities() {
+            return [['replace', this.activities.filter(activity => activity.state === 'planned')]];
+        }
 
-            const {
-                activityIds = this.activityIds || [],
-                context = this.context || {},
-                followerIds = this.followerIds || [],
-                hasActivities = this.hasActivities || true,
-                hasFollowers = this.hasFollowers || true,
-                hasThread = this.hasThread || true,
-                isActivityBoxVisible = this.isActivityBoxVisible || true,
-                isAttachmentBoxVisible = this.isAttachmentBoxVisible || false,
-                isComposerLog = this.isComposerLog || true,
-                isComposerVisible = this.isComposerVisible || false,
-                isDisabled = this.isDisabled || false,
-                messageIds = this.messageIds || [],
-                threadId = this.threadId,
-                threadModel = this.threadModel,
-            } = data;
-
-            if (!this.threadViewer) {
-                const threadViewer = this.env.entities.ThreadViewer.create();
-                this.link({ threadViewer });
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsDisabled() {
+            if (!this.threadId) {
+                return true;
             }
+            return this.isDisabled;
+        }
 
-            Object.assign(this, {
-                activityIds,
-                context,
-                followerIds,
-                hasActivities,
-                hasFollowers,
-                hasThread,
-                isActivityBoxVisible,
-                isAttachmentBoxVisible,
-                isComposerLog,
-                isComposerVisible,
-                isDisabled: threadId ? isDisabled : true,
-                messageIds,
-                threadId,
-                threadModel,
-            });
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Activity[]}
+         */
+        _computeOverdueActivities() {
+            return [['replace', this.activities.filter(activity => activity.state === 'overdue')]];
+        }
 
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Activity[]}
+         */
+        _computeTodayActivities() {
+            return [['replace', this.activities.filter(activity => activity.state === 'today')]];
+        }
+
+        /**
+         * @override
+         */
+        _updateAfter(previous) {
             // thread
             if (
-                this.threadModel !== prevThreadModel ||
-                this.threadId !== prevThreadId ||
-                (this.threadId === prevThreadId && prevThreadId === undefined)
+                this.threadModel !== previous.threadModel ||
+                this.threadId !== previous.threadId
             ) {
                 // change of thread
                 this._updateRelationThread();
-                if (prevThread && prevThread.isTemporary) {
+                if (previous.thread && previous.thread.isTemporary) {
                     // AKU FIXME: make dedicated models for "temporary" threads,
                     // so that it auto-handles causality of messages for deletion
                     // automatically
-                    const oldMainThreadCache = prevThread.mainCache;
+                    const oldMainThreadCache = previous.thread.mainCache;
                     const message = oldMainThreadCache.messages[0];
                     message.delete();
-                    prevThread.delete();
+                    previous.thread.delete();
                 }
             }
 
-            if (prevActivityIds.join(',') !== this.activityIds.join(',')) {
+            if (previous.activityIds.join(',') !== this.activityIds.join(',')) {
                 this.refreshActivities();
             }
-            if (prevFollowerIds.join(',') !== this.followerIds.join(',')) {
+            if (
+                previous.followerIds.join(',') !== this.followerIds.join(',') &&
+                !this.thread.isTemporary
+            ) {
                 this.thread.refreshFollowers();
             }
             if (
-                this.threadId !== prevThreadId ||
-                this.threadModel !== prevThreadModel ||
-                this.messageIds.join(',') !== prevMessageIds.join(',')
+                previous.thread !== this.thread ||
+                (this.thread && this.messageIds.join(',') !== previous.messageIds.join(','))
             ) {
                 this.refresh();
             }
+        }
+
+        /**
+         * @override
+         */
+        _updateBefore() {
+            return {
+                activityIds: this.activityIds,
+                followerIds: this.followerIds,
+                messageIds: this.messageIds,
+                threadModel: this.threadModel,
+                threadId: this.threadId,
+                thread: this.thread,
+            };
         }
 
         /**
@@ -210,6 +174,9 @@ function ChatterFactory({ Entity }) {
          */
         _updateRelationThread() {
             if (!this.threadId) {
+                if (this.thread && this.thread.isTemporary) {
+                    return;
+                }
                 const nextId = getThreadNextTemporaryId();
                 const thread = this.env.entities.Thread.create({
                     areAttachmentsLoaded: true,
@@ -219,38 +186,100 @@ function ChatterFactory({ Entity }) {
                 });
                 const currentPartner = this.env.messaging.currentPartner;
                 const message = this.env.entities.Message.create({
-                    author_id: [currentPartner.id, currentPartner.display_name],
+                    author: [['link', currentPartner]],
                     body: this.env._t("Creating a new record..."),
                     id: getMessageNextTemporaryId(),
                     isTemporary: true,
                 });
-                this.threadViewer.update({ thread });
+                this.threadViewer.update({ thread: [['link', thread]] });
                 for (const cache of thread.caches) {
-                    cache.link({ messages: message });
+                    cache.update({ messages: [['link', message]] });
                 }
             } else {
                 // thread id and model
-                let thread = this.env.entities.Thread.fromModelAndId({
+                const thread = this.env.entities.Thread.insert({
                     id: this.threadId,
                     model: this.threadModel,
                 });
-                if (!thread) {
-                    thread = this.env.entities.Thread.create({
-                        id: this.threadId,
-                        model: this.threadModel,
-                    });
-                }
-                this.threadViewer.update({ thread });
+                this.threadViewer.update({ thread: [['link', thread]] });
             }
         }
 
     }
 
+    Chatter.entityName = 'Chatter';
+
     Chatter.fields = {
         activities: one2many('Activity', {
             inverse: 'chatter',
         }),
-        threadViewer: one2one('ThreadViewer'),
+        activityIds: attr({
+            default: [],
+        }),
+        activitiesState: attr({
+            related: 'activities.state',
+        }),
+        context: attr({
+            default: {},
+        }),
+        followerIds: attr({
+            default: [],
+        }),
+        futureActivities: one2many('Activity', {
+            compute: '_computeFutureActivities',
+            dependencies: ['activitiesState'],
+        }),
+        hasActivities: attr({
+            default: true,
+        }),
+        hasFollowers: attr({
+            default: true,
+        }),
+        hasThread: attr({
+            default: true,
+        }),
+        hasTopbarCloseButton: attr({
+            default: false,
+        }),
+        isActivityBoxVisible: attr({
+            default: true,
+        }),
+        isAttachmentBoxVisible: attr({
+            default: false,
+        }),
+        isComposerLog: attr({
+            default: true,
+        }),
+        isComposerVisible: attr({
+            default: false,
+        }),
+        isDisabled: attr({
+            compute: '_computeIsDisabled',
+            default: false,
+            dependencies: ['threadId'],
+        }),
+        messageIds: attr({
+            default: [],
+        }),
+        overdueActivities: one2many('Activity', {
+            compute: '_computeOverdueActivities',
+            dependencies: ['activitiesState'],
+        }),
+        thread: one2one('Thread', {
+            related: 'threadViewer.thread',
+        }),
+        threadAttachmentCount: attr({
+            default: 0,
+        }),
+        threadId: attr(),
+        threadModel: attr(),
+        threadViewer: one2one('ThreadViewer', {
+            autocreate: true,
+        }),
+        todayActivities: one2many('Activity', {
+            compute: '_computeTodayActivities',
+            dependencies: ['activitiesState'],
+        }),
     };
 
     return Chatter;

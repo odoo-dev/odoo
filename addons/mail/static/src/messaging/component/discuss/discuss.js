@@ -27,13 +27,15 @@ class Discuss extends Component {
         useStore(props => {
             const discuss = this.env.messaging.discuss;
             return {
-                checkedMessages: discuss.threadViewer.checkedMessages,
-                discuss,
+                checkedMessages: discuss.threadViewer.checkedMessages.map(message => message.__state),
+                discuss: discuss.__state,
                 isDeviceMobile: this.env.messaging.device.isMobile,
                 isMessagingInitialized: this.env.messaging.isInitialized,
-                thread: discuss.thread,
-                threadCache: discuss.threadViewer.threadCache,
-                uncheckedMessages: discuss.threadViewer.uncheckedMessages,
+                thread: discuss.thread ? discuss.thread.__state : undefined,
+                threadCache: discuss.threadViewer.threadCache
+                    ? discuss.threadViewer.threadCache.__state
+                    : undefined,
+                uncheckedMessages: discuss.threadViewer.uncheckedMessages.map(message => message.__state),
             };
         }, {
             compareDepth: {
@@ -247,10 +249,10 @@ class Discuss extends Component {
      * @private
      * @param {CustomEvent} ev
      * @param {Object} ev.detail
-     * @param {string} ev.detail.thread
+     * @param {mail.messaging.entity.Thread} ev.detail.thread
      */
     _onSelectThread(ev) {
-        this.discuss.update({ thread: ev.detail.thread });
+        this.discuss.threadViewer.update({ thread: [['link', ev.detail.thread]] });
     }
 
     /**

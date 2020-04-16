@@ -409,15 +409,17 @@ QUnit.test('click on remove follower', async function (assert) {
         id: 100,
         model: 'res.partner',
     });
-    const follower = await this.env.entities.Follower.create({
-        partner_id: this.env.session.partner_id,
-        email: "bla@bla.bla",
+    await this.env.entities.Follower.create({
+        followedThread: [['link', thread]],
         id: 2,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
+        isActive: true,
+        isEditable: true,
+        partner: [['insert', {
+            email: "bla@bla.bla",
+            id: this.env.session.partner_id,
+            name: "François Perusse",
+        }]],
     });
-    follower.link({ followedThread: thread });
     await this.createFollowerListMenuComponent(thread);
 
     await afterNextRender(() => {

@@ -1,7 +1,8 @@
 odoo.define('mail.messaging.entity.MessagingMenu', function (require) {
 'use strict';
 
-const { registerNewEntity } = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr } = require('mail.messaging.EntityField');
 
 function MessagingMenuFactory({ Entity }) {
 
@@ -23,20 +24,11 @@ function MessagingMenuFactory({ Entity }) {
         }
 
         /**
-         * @param {string} activeTabId
-         */
-        setActiveTabId(activeTabId) {
-            this.update({ activeTabId });
-        }
-
-        /**
          * Toggle the visibility of the messaging menu "new message" input in
          * mobile.
          */
         toggleMobileNewMessage() {
-            this.update({
-                isMobileNewMessageToggled: !this.isMobileNewMessageToggled,
-            });
+            this.update({ isMobileNewMessageToggled: !this.isMobileNewMessageToggled });
         }
 
         /**
@@ -51,58 +43,60 @@ function MessagingMenuFactory({ Entity }) {
         //----------------------------------------------------------------------
 
         /**
-         * FIXME: using constructor so that patch is applied on class
-         * instead of instance. This is necessary in order for patches
-         * not affecting observable and incrementing rev number each
-         * time a patched method is called.
-         *
-         * @static
          * @private
          * @returns {integer}
          */
-        static _updateCounter() {
-            const inboxMailbox = this.env.entities.Thread.mailboxFromId('inbox');
-            return (
-                this.env.entities.Thread.allUnreadChannels.length +
-                (inboxMailbox ? inboxMailbox.counter : 0)
+        _updateCounter() {
+            const inboxMailbox = this.env.entities.Thread.find(thread =>
+                thread.id === 'inbox' &&
+                thread.model === 'mail.box'
             );
+            const unreadChannels = this.env.entities.Thread.all(thread =>
+                thread.message_unread_counter > 0 &&
+                thread.model === 'mail.channel'
+            );
+            return (
+                unreadChannels.length + (inboxMailbox ? inboxMailbox.counter : 0));
         }
 
         /**
          * @override
          */
-        _update(data) {
-            const {
-                /**
-                 * Tab selected in the messaging menu.
-                 * Either 'all', 'chat' or 'channel'.
-                 */
-                activeTabId = this.activeTabId || 'all',
-                /**
-                 * Determine whether the mobile new message input is visible or not.
-                 */
-                isMobileNewMessageToggled = this.isMobileNewMessageToggled || false,
-                /**
-                 * Determine whether the messaging menu dropdown is open or not.
-                 */
-                isOpen = this.isOpen || false,
-            } = data;
-
-            Object.assign(this, {
-                activeTabId,
-                /**
-                 * FIXME: using static method so that patch is applied on class
-                 * instead of instance. This is necessary in order for patches
-                 * not affecting observable and incrementing rev number each
-                 * time a patched method is called.
-                 */
-                counter: this.constructor._updateCounter(),
-                isMobileNewMessageToggled,
-                isOpen,
-            });
+        _updateAfter(previous) {
+            const counter = this._updateCounter();
+            if (this.counter !== counter) {
+                this.update({ counter });
+            }
         }
 
     }
+
+    MessagingMenu.entityName = 'MessagingMenu';
+
+    MessagingMenu.fields = {
+        /**
+         * Tab selected in the messaging menu.
+         * Either 'all', 'chat' or 'channel'.
+         */
+        activeTabId: attr({
+            default: 'all',
+        }),
+        counter: attr({
+            default: 0,
+        }),
+        /**
+         * Determine whether the mobile new message input is visible or not.
+         */
+        isMobileNewMessageToggled: attr({
+            default: false,
+        }),
+        /**
+         * Determine whether the messaging menu dropdown is open or not.
+         */
+        isOpen: attr({
+            default: false,
+        }),
+    };
 
     return MessagingMenu;
 }

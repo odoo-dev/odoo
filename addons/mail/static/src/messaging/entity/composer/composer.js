@@ -2,13 +2,8 @@ odoo.define('mail.messaging.entity.Composer', function (require) {
 'use strict';
 
 const emojis = require('mail.emojis');
-const {
-    fields: {
-        many2many,
-        one2one,
-    },
-    registerNewEntity,
-} = require('mail.messaging.entity.core');
+const { registerNewEntity } = require('mail.messaging.entityCore');
+const { attr, many2many, one2one } = require('mail.messaging.EntityField');
 
 const {
     addLink,
@@ -74,10 +69,10 @@ function ComposerFactory({ Entity }) {
             const thread = this.thread;
             if (thread.model === 'mail.box') {
                 const { res_id, res_model } = options;
-                const otherThread = this.env.entities.Thread.fromModelAndId({
-                    id: res_id,
-                    model: res_model,
-                });
+                const otherThread = this.env.entities.Thread.find(thread =>
+                    thread.id === res_id &&
+                    thread.model === res_model
+                );
                 return otherThread.composer.postMessage(Object.assign({}, data));
             }
             const {
@@ -142,10 +137,16 @@ function ComposerFactory({ Entity }) {
                     method: 'message_format',
                     args: [[messageId]]
                 });
-                this.env.entities.Message.insert(Object.assign({}, messageData, {
-                    model: thread.model,
-                    res_id: thread.id
-                }));
+                this.env.entities.Message.insert(Object.assign(
+                    {},
+                    this.env.entities.Message.convertData(messageData),
+                    {
+                        originThread: [['insert', {
+                            id: thread.id,
+                            model: thread.model,
+                        }]],
+                    })
+                );
                 thread.loadNewMessages();
             }
             for (const threadViewer of this.thread.viewers) {
@@ -189,6 +190,7 @@ function ComposerFactory({ Entity }) {
         }
 
         /**
+         *
          * @private
          * @param {string} content html content
          * @returns {String|undefined} command, if any in the content
@@ -225,35 +227,29 @@ function ComposerFactory({ Entity }) {
          */
         _reset() {
             this.update({
+                attachments: [['unlink-all']],
                 textInputContent: '',
                 textInputCursorStart: 0,
                 textInputCursorEnd: 0,
-            });
-            this.unlink({ attachments: null });
-        }
-
-        /**
-         * @override
-         */
-        _update(data) {
-            const {
-                textInputContent = this.textInputContent || "",
-                textInputCursorStart = this.textInputCursorStart || 0,
-                textInputCursorEnd = this.textInputCursorEnd || 0,
-            } = data;
-
-            Object.assign(this, {
-                textInputContent,
-                textInputCursorStart,
-                textInputCursorEnd,
             });
         }
 
     }
 
+    Composer.entityName = 'Composer';
+
     Composer.fields = {
         attachments: many2many('Attachment', {
             inverse: 'composers',
+        }),
+        textInputContent: attr({
+            default: "",
+        }),
+        textInputCursorStart: attr({
+            default: 0,
+        }),
+        textInputCursorEnd: attr({
+            default: 0,
         }),
         thread: one2one('Thread', {
             inverse: 'composer',

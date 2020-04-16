@@ -17,7 +17,7 @@ class ModerationDiscardDialog extends Component {
         super(...args);
         useStore(props => {
             return {
-                messages: props.messageLocalIds.map(localId => this.env.entities.Message.get(localId)),
+                messages: props.messageLocalIds.map(localId => this.env.entities.Message.get(localId)).map(message => message.__state),
             };
         }, {
             compareDepth: {
