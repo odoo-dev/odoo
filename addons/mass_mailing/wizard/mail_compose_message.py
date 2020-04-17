@@ -96,9 +96,11 @@ class MailComposeMessage(models.TransientModel):
                 }
                 # propagate failed states to trace when still-born
                 if mail_values.get('state') == 'cancel':
-                    trace_vals['ignored'] = fields.Datetime.now()
+                    trace_vals['trace_status'] = 'cancel'
+                    trace_vals['trace_status_update'] = fields.Datetime.now()
                 elif mail_values.get('state') == 'exception':
-                    trace_vals['exception'] = fields.Datetime.now()
+                    trace_vals['trace_status'] = 'error'
+                    trace_vals['trace_status_update'] = fields.Datetime.now()
                 if error_code:
                     trace_vals['failure_type'] = error_code
 

@@ -49,7 +49,7 @@ class MassSMSCase(SMSCase):
             ('sms_sms_id_int', 'in', found_sms.ids),
         ])
         self.assertEqual(len(found_sms), len(found_traces))
-        self.assertTrue(all(s.state == 'outgoing' for s in found_traces))
+        self.assertTrue(all(s.trace_status == 'outgoing' for s in found_traces))
         self.assertTrue(all(s.res_model == records._name for s in found_traces))
         self.assertEqual(set(found_traces.mapped('res_id')), set(records.ids))
         self.assertTrue(all(s.mass_mailing_id == mailing for s in found_traces))
@@ -60,7 +60,7 @@ class MassSMSCase(SMSCase):
         :param recipients_info: list[{
           'partner': res.partner record (may be empty),
           'number': number used for notification (may be empty, computed based on partner),
-          'state': outgoing / sent / ignored / bounced / exception / opened (sent by default),
+          'trace_status': outgoing / sent / ignored / bounced / exception / opened (sent by default),
           'record: linked record,
           'content': optional: if set, check content of sent SMS
           'failure_type': optional: sms_number_missing / sms_number_format / sms_credit / sms_server
@@ -84,25 +84,25 @@ class MassSMSCase(SMSCase):
         for recipient_info in recipients_info:
             partner = recipient_info.get('partner', self.env['res.partner'])
             number = recipient_info.get('number')
-            state = recipient_info.get('state', 'outgoing')
+            status = recipient_info.get('trace_status', 'outgoing')
             content = recipient_info.get('content', None)
             if number is None and partner:
                 number = partner._sms_get_recipients_info()[partner.id]['sanitized']
 
-            notif = traces.filtered(lambda s: s.sms_number == number and s.state == state)
-            self.assertTrue(notif, 'SMS: not found notification for number %s, (state: %s)' % (number, state))
+            notif = traces.filtered(lambda trace: trace.sms_number == number and trace.trace_status == status)
+            self.assertTrue(notif, 'SMS: not found notification for number %s, (status: %s)' % (number, status))
 
             if check_sms:
-                if state == 'sent':
+                if status == 'sent':
                     self.assertSMSSent([number], content)
-                elif state == 'outgoing':
+                elif status == 'outgoing':
                     self.assertSMSOutgoing(partner, number, content)
-                elif state == 'exception':
+                elif status == 'error':
                     self.assertSMSFailed(partner, number, recipient_info['failure_type'], content)
-                elif state == 'ignored':
+                elif status == 'cancel':
                     self.assertSMSCanceled(partner, number, recipient_info['failure_type'], content)
-                elif state == 'bounced':
-                    self.assertSMSFailed(partner, number, recipient_info['failure_type'], content)
+                elif status == 'bounce':
+                    raise NotImplementedError()
                 else:
                     raise NotImplementedError()
 

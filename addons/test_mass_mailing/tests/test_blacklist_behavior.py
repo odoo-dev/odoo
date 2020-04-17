@@ -58,6 +58,11 @@ class TestAutoBlacklist(common.TestMassMailCommon):
         with self.mock_mail_gateway(mail_unlink_sent=False):
             new_mailing._process_mass_mailing_queue()
         self.assertMailTraces(
+<<<<<<< HEAD
             [{'email': 'test.record.00@test.example.com', 'state': 'ignored'}],
             new_mailing, target, author=self.env.user.partner_id, check_mail=True
+=======
+            [{'email': 'test.record.00@test.example.com', 'trace_status': 'cancel'}],
+            new_mailing, target, check_mail=True
+>>>>>>> 6585c3993ba... [REF] mass_mailing: improve traces state management
         )

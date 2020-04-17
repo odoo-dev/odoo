@@ -105,11 +105,11 @@ class TestMailingInternals(TestMassMailCommon):
         traces = self.env['mailing.trace'].search([('model', '=', customers._name), ('res_id', 'in', customers.ids)])
         self.assertEqual(len(traces), 3)
         customer0_trace = traces.filtered(lambda t: t.res_id == customers[0].id)
-        self.assertEqual(customer0_trace.state, 'replied')
+        self.assertEqual(customer0_trace.trace_status, 'reply')
         customer1_trace = traces.filtered(lambda t: t.res_id == customers[1].id)
-        self.assertEqual(customer1_trace.state, 'replied')
+        self.assertEqual(customer1_trace.trace_status, 'reply')
         customer2_trace = traces.filtered(lambda t: t.res_id == customers[2].id)
-        self.assertEqual(customer2_trace.state, 'sent')
+        self.assertEqual(customer2_trace.trace_status, 'sent')
 
         # check mailing statistics
         self.assertEqual(mailing.sent, 3)

@@ -31,11 +31,17 @@ class TestMassMailing(TestMassMailCommon):
             [{'email': 'test.record.00@test.example.com'},
              {'email': 'test.record.01@test.example.com'},
              {'email': 'test.record.02@test.example.com'},
+<<<<<<< HEAD
              {'email': 'test.record.03@test.example.com', 'state': 'ignored'},
              {'email': 'test.record.04@test.example.com', 'state': 'ignored'}],
             mailing, recipients, author=self.env.user.partner_id, check_mail=True
+=======
+             {'email': 'test.record.03@test.example.com', 'trace_status': 'cancel'},
+             {'email': 'test.record.04@test.example.com', 'trace_status': 'cancel'}],
+            mailing, recipients, check_mail=True
+>>>>>>> 6585c3993ba... [REF] mass_mailing: improve traces state management
         )
-        self.assertEqual(mailing.ignored, 2)
+        self.assertEqual(mailing.canceled, 2)
 
     @users('user_marketing')
     @mute_logger('odoo.addons.mail.models.mail_mail')
@@ -57,14 +63,19 @@ class TestMassMailing(TestMassMailCommon):
             mailing._process_mass_mailing_queue()
 
         self.assertMailTraces(
-            [{'email': 'test.record.00@test.example.com', 'state': 'ignored'},
-             {'email': 'test.record.01@test.example.com', 'state': 'ignored'},
+            [{'email': 'test.record.00@test.example.com', 'trace_status': 'cancel'},
+             {'email': 'test.record.01@test.example.com', 'trace_status': 'cancel'},
              {'email': 'test.record.02@test.example.com'},
              {'email': 'test.record.03@test.example.com'},
+<<<<<<< HEAD
              {'email': 'test.record.04@test.example.com', 'state': 'ignored'}],
             mailing, recipients, author=self.env.user.partner_id, check_mail=True
+=======
+             {'email': 'test.record.04@test.example.com', 'trace_status': 'cancel'}],
+            mailing, recipients, check_mail=True
+>>>>>>> 6585c3993ba... [REF] mass_mailing: improve traces state management
         )
-        self.assertEqual(mailing.ignored, 3)
+        self.assertEqual(mailing.canceled, 3)
 
     @users('user_marketing')
     @mute_logger('odoo.addons.mail.models.mail_mail')
@@ -114,13 +125,13 @@ class TestMassMailing(TestMassMailCommon):
             mailing._process_mass_mailing_queue()
 
         self.assertMailTraces(
-            [{'email': 'test@test.example.com', 'state': 'ignored'},
-             {'email': 'test@test.example.com', 'state': 'sent'},
+            [{'email': 'test@test.example.com', 'trace_status': 'cancel'},
+             {'email': 'test@test.example.com', 'trace_status': 'sent'},
              {'email': 'test3@test.example.com'},
              {'email': 'test4@test.example.com'},
-             {'email': 'test5@test.example.com', 'state': 'ignored'}],
+             {'email': 'test5@test.example.com', 'trace_status': 'cancel'}],
             mailing,
             mailing_contact_1 | mailing_contact_2 | mailing_contact_3 | mailing_contact_4 | mailing_contact_5,
             author=self.env.user.partner_id, check_mail=True
         )
-        self.assertEqual(mailing.ignored, 2)
+        self.assertEqual(mailing.canceled, 2)

@@ -201,9 +201,14 @@ class TestMassMailFeatures(MassMailCommon):
 
         self.assertMailTraces(
             [{'email': 'test1@example.com'},
+<<<<<<< HEAD
              {'email': 'test2@example.com', 'state': 'ignored'}],
             mailing, partner_a + partner_b,
             author=self.env.user.partner_id, check_mail=True
+=======
+             {'email': 'test2@example.com', 'trace_status': 'cancel'}],
+            mailing, partner_a + partner_b, check_mail=True
+>>>>>>> 6585c3993ba... [REF] mass_mailing: improve traces state management
         )
 
     @users('user_marketing')

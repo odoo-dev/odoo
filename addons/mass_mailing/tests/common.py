@@ -15,7 +15,7 @@ class MassMailCase(MailCase, MockLinkTracker):
         :param recipients_info: list[{
             'partner': res.partner record (may be empty),
             'email': email used when sending email (may be empty, computed based on partner),
-            'state': outgoing / sent / ignored / bounced / exception / opened (sent by default) (sent by default),
+            'trace_status': outgoing / sent / open / reply / bounce / error / cancel (sent by default),
             'record: linked record,
             'content': UDPATE ME
             'failure_type': optional: UPDATE ME
@@ -38,18 +38,18 @@ class MassMailCase(MailCase, MockLinkTracker):
         for recipient_info in recipients_info:
             partner = recipient_info.get('partner', self.env['res.partner'])
             email = recipient_info.get('email')
-            state = recipient_info.get('state', 'sent')
+            status = recipient_info.get('trace_status', 'sent')
             record = recipient_info.get('record', records[0] if records and len(records) == 1 else None)
             content = recipient_info.get('content')
             if email is None and partner:
                 email = partner.email_normalized
 
             recipient_trace = traces.filtered(
-                lambda t: t.email == email and t.state == state and (t.res_id == record.id if record else True)
+                lambda t: t.email == email and t.trace_status == status and (t.res_id == record.id if record else True)
             )
             self.assertTrue(
                 len(recipient_trace) == 1,
-                'MailTrace: email %s (recipient %s, state: %s, record: %s): found %s records (1 expected)' % (email, partner, state, record, len(recipient_trace))
+                'MailTrace: email %s (recipient %s, status: %s, record: %s): found %s records (1 expected)' % (email, partner, status, record, len(recipient_trace))
             )
             if 'failure_type' in recipient_info:
                 self.assertEqual(recipient_trace.failure_type, recipient_info['failure_type'])
@@ -61,6 +61,7 @@ class MassMailCase(MailCase, MockLinkTracker):
                 if content:
                     fields_values['body_html_content'] = content
 
+<<<<<<< HEAD
                 if state == 'sent':
                     self.assertMailMailWEmails([email], 'sent', content, author=author, fields_values=fields_values, check_email=True)
                 elif state in ['opened', 'replied']:  # replied imply something has been sent
@@ -73,6 +74,18 @@ class MassMailCase(MailCase, MockLinkTracker):
                     self.assertMailMailWEmails([email], 'canceled', content, author=author, fields_values=fields_values)
                 elif state == 'bounced':
                     self.assertMailMailWEmails([email], 'canceled', content, author=author, fields_values=fields_values, check_email=True)
+=======
+                if status == 'sent':
+                    self.assertMailMailWEmails([email], 'sent', content, fields_values=fields_values)
+                elif status in ['open', 'reply']:  # replied imply something has been sent
+                    self.assertMailMailWEmails([email], 'sent', content, fields_values=fields_values)
+                elif status == 'cancel':
+                    self.assertMailMailWEmails([email], 'cancel', content, fields_values=fields_values)
+                elif status == 'bounce':
+                    self.assertMailMailWEmails([email], 'cancel', content, fields_values=fields_values)
+                elif status == 'error':
+                    self.assertMailMailWEmails([email], 'exception', content, fields_values=fields_values)
+>>>>>>> 6585c3993ba... [REF] mass_mailing: improve traces state management
                 else:
                     raise NotImplementedError()
 

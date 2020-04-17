@@ -52,15 +52,15 @@ class MailingTraceReport(models.Model):
             'utm_source.name as name',
             'mailing.mailing_type',
             'utm_campaign.name as campaign',
-            'trace.scheduled as scheduled_date',
+            'trace.create_date as scheduled_date',
             'mailing.state',
             'mailing.email_from',
-            'count(trace.sent) as sent',
-            '(count(trace.sent) - count(trace.bounced)) as delivered',
-            'count(trace.opened) as opened',
-            'count(trace.replied) as replied',
-            'count(trace.clicked) as clicked',
-            'count(trace.bounced) as bounced'
+            'count(trace.sent_datetime) as sent',
+            '(count(trace.sent_datetime) - count(trace.trace_status in ("error", "bounce", "cancel"))) as delivered',
+            'count(trace.trace_status = "open") as opened',
+            'count(trace.trace_status = "reply") as replied',
+            'count(trace.links_click_done) as clicked',
+            'count(trace.trace_status = "bounce") as bounced'
         ]
 
     def _report_get_request_from_items(self):
@@ -76,7 +76,7 @@ class MailingTraceReport(models.Model):
 
     def _report_get_request_group_by_items(self):
         return [
-            'trace.scheduled',
+            'trace.create_date',
             'utm_source.name',
             'utm_campaign.name',
             'mailing.mailing_type',

@@ -26,6 +26,7 @@ class SMSComposer(models.TransientModel):
         )
 
     def _prepare_mass_sms_trace_values(self, record, sms_values):
+        now = fields.Datetime.now()
         trace_code = self.env['mailing.trace']._get_random_code()
         trace_values = {
             'model': self.res_model,
@@ -37,10 +38,12 @@ class SMSComposer(models.TransientModel):
         }
         if sms_values['state'] == 'error':
             trace_values['failure_type'] = sms_values['error_code']
-            trace_values['exception'] = fields.Datetime.now()
+            trace_values['trace_status'] = 'error'
+            trace_values['trace_status_update'] = now
         elif sms_values['state'] == 'canceled':
             trace_values['failure_type'] = sms_values['error_code']
-            trace_values['ignored'] = fields.Datetime.now()
+            trace_values['trace_status'] = 'cancel'
+            trace_values['trace_status_update'] = now
         else:
             if self.mass_sms_allow_unsubscribe:
                 sms_values['body'] = '%s\n%s' % (sms_values['body'] or '', _('STOP SMS : %s', self._get_unsubscribe_url(record.id, trace_code, sms_values['number'])))

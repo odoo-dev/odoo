@@ -66,25 +66,25 @@ class TestMassMailing(TestMailFullCommon):
             recipient_info = {
                 'email': recipient.email_normalized,
                 'content': 'Hello <span class="text-muted">%s</span' % recipient.name}
-            # opt-out: ignored (cancel mail)
+            # opt-out: cancel (cancel mail)
             if recipient in recipients[1] | recipients[2]:
-                recipient_info['state'] = 'ignored'
+                recipient_info['trace_status'] = "cancel"
                 recipient_info['failure_type'] = "mail_optout"
-            # blacklisted: ignored (cancel mail)
+            # blacklisted: cancel (cancel mail)
             elif recipient in recipients[3] | recipients[4]:
-                recipient_info['state'] = 'ignored'
+                recipient_info['trace_status'] = "cancel"
                 recipient_info['failure_type'] = "mail_bl"
-            # duplicates: ignored (cancel mail)
+            # duplicates: cancel (cancel mail)
             elif recipient == recipient_dup_1:
-                recipient_info['state'] = 'ignored'
+                recipient_info['trace_status'] = "cancel"
                 recipient_info['failure_type'] = "mail_dup"
-            # void: ignored (failed mail)
+            # void: error (failed mail)
             elif recipient == recipient_void_1:
-                recipient_info['state'] = 'exception'
+                recipient_info['trace_status'] = "error"
                 recipient_info['failure_type'] = "RECIPIENT"
-            # falsy: ignored (failed mail)
+            # falsy: error (failed mail)
             elif recipient == recipient_falsy_1:
-                recipient_info['state'] = 'exception'
+                recipient_info['trace_status'] = "error"
                 recipient_info['failure_type'] = "RECIPIENT"
                 recipient_info['email'] = recipient.email_from  # normalized is False but email should be falsymail
             else:
@@ -107,7 +107,7 @@ class TestMassMailing(TestMailFullCommon):
 
         self.assertEqual(mailing.sent, 0, 'Mailing: sent: 0 (still outgoing mails)')
         self.assertEqual(mailing.scheduled, 6, 'Mailing: scheduled: 10 valid - 2 bl - 2 optout')
-        self.assertEqual(mailing.ignored, 5, 'Mailing: ignored: 2 bl + 2 optout + 1 duplicate')
+        self.assertEqual(mailing.canceled, 5, 'Mailing: canceled: 2 bl + 2 optout + 1 duplicate')
         self.assertEqual(mailing.failed, 2, 'Mailing: failed: 2 invalid')
         self.assertEqual(mailing.expected, 8)
         self.assertEqual(mailing.delivered, 0)
