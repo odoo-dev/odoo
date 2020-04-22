@@ -65,6 +65,19 @@ function _checkFields(Entities) {
                     }" has no inverse field "${RelatedEntity.name}/${field.inverse}".`
                 );
             }
+            if (inverseField.inverse !== fieldName) {
+                throw new Error(
+                    `Inverse field name of relation "${
+                        Entity.name
+                    }/${
+                        fieldName
+                    }" does not match with field name of relation "${
+                        RelatedEntity.name
+                    }/${
+                        inverseField.inverse
+                    }".`
+                );
+            }
             const allSelfAndParentNames = [];
             let target = Entity;
             while (target) {
