@@ -13,21 +13,22 @@ function ActivityFactory({ Entity }) {
 
     class Activity extends Entity {
 
-        /**
-         * @override
-         */
-        delete() {
-            this.env.rpc({
-                model: 'mail.activity',
-                method: 'unlink',
-                args: [[this.id]],
-            });
-            super.delete();
-        }
 
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
+
+        /**
+         * Delete the record from database and delete the entity.
+         */
+        async deleteRecord() {
+            await this.env.rpc({
+                model: 'mail.activity',
+                method: 'unlink',
+                args: [[this.id]],
+            });
+            this.delete();
+        }
 
         async fetchAndUpdate() {
             const data = await this.env.rpc({
@@ -43,10 +44,10 @@ function ActivityFactory({ Entity }) {
 
         /**
          * @param {Object} param0
-         * @param {mail.messaging.entity.Attachment[]} param0.attachments
+         * @param {mail.messaging.entity.Attachment[]} [param0.attachments=[]]
          * @param {string|boolean} [param0.feedback=false]
          */
-        async markAsDone({ attachments, feedback = false }) {
+        async markAsDone({ attachments = [], feedback = false }) {
             const attachmentIds = attachments.map(attachment => attachment.id);
             await this.env.rpc({
                 model: 'mail.activity',
@@ -54,11 +55,13 @@ function ActivityFactory({ Entity }) {
                 args: [[this.id]],
                 kwargs: {
                     attachment_ids: attachmentIds,
-                    context: this.chatter.context,
                     feedback,
                 },
+                context: this.chatter ? this.chatter.context : {},
             });
-            this.chatter.refresh();
+            if (this.chatter) {
+                this.chatter.refresh();
+            }
             this.delete();
         }
 
@@ -67,16 +70,25 @@ function ActivityFactory({ Entity }) {
          * @param {string} param0.feedback
          * @returns {Object}
          */
-        async markAsDoneAndSchedule({ feedback }) {
+        async markAsDoneAndScheduleNext({ feedback }) {
             const action = await this.env.rpc({
                 model: 'mail.activity',
                 method: 'action_feedback_schedule_next',
                 args: [[this.id]],
                 kwargs: { feedback },
             });
-            this.chatter.refresh();
+            const chatter = this.chatter;
+            if (chatter) {
+                this.chatter.refresh();
+            }
             this.delete();
-            return action;
+            this.env.do_action(action, {
+                on_close: () => {
+                    if (chatter) {
+                        chatter.refreshActivities();
+                    }
+                },
+            });
         }
 
         //----------------------------------------------------------------------
@@ -100,7 +112,7 @@ function ActivityFactory({ Entity }) {
                     creatorDisplayName,
                 ] = [],
                 date_deadline: dateDeadline,
-                forceNext = this.forceNext || false,
+                force_next = this.force_next || false,
                 icon,
                 id = this.id,
                 mail_template_ids = [],
@@ -120,7 +132,7 @@ function ActivityFactory({ Entity }) {
                 category,
                 dateCreate,
                 dateDeadline,
-                forceNext,
+                force_next,
                 icon,
                 id,
                 note,

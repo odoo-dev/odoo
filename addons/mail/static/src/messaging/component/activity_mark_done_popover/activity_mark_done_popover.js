@@ -62,12 +62,9 @@ class ActivityMarkDonePopover extends Component {
     /**
      * @private
      */
-    async _onClickDoneAndScheduleNext() {
-        const action = await this.activity.markAsDoneAndScheduleNext({
+    _onClickDoneAndScheduleNext() {
+        this.activity.markAsDoneAndScheduleNext({
             feedback: this._feedbackTextareaRef.el.value,
-        });
-        this.env.do_action(action, {
-            on_close: () => this.activity.chatter.refreshActivities(),
         });
     }
 

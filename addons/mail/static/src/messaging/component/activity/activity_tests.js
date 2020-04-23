@@ -705,16 +705,18 @@ QUnit.test('activity click on mark as done', async function (assert) {
         "should have activity Mark as Done button"
     );
 
-    document.querySelector('.o_Activity_markDoneButton').click();
-    await afterNextRender();
+    await afterNextRender(() => {
+        document.querySelector('.o_Activity_markDoneButton').click();
+    });
     assert.strictEqual(
         document.querySelectorAll('.o_ActivityMarkDonePopover').length,
         1,
         "should have opened the mark done popover"
     );
 
-    document.querySelector('.o_Activity_markDoneButton').click();
-    await afterNextRender();
+    await afterNextRender(() => {
+        document.querySelector('.o_Activity_markDoneButton').click();
+    });
     assert.strictEqual(
         document.querySelectorAll('.o_ActivityMarkDonePopover').length,
         0,

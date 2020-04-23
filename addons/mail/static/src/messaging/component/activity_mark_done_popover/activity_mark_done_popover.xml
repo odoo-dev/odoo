@@ -6,17 +6,14 @@
             <t t-if="activity">
                 <textarea class="form-control o_ActivityMarkDonePopover_feedback" rows="3" placeholder="Write Feedback" t-ref="feedbackTextarea"/>
                 <div class="o_ActivityMarkDonePopover_buttons">
-                    <t t-if="!activity.forceNext">
-                        <button type="button" class="btn btn-sm btn-primary" t-on-click="_onClickDoneAndScheduleNext" t-esc="DONE_AND_SCHEDULE_NEXT" t-att-data-previous-activity-type-id="previous_activity_type_id"/>
-                        <button type="button" class="btn btn-sm btn-primary" t-on-click="_onClickDone">
+                    <button type="button" class="o_ActivityMarkDonePopover_doneScheduleNextButton btn btn-sm btn-primary" t-on-click="_onClickDoneAndScheduleNext" t-esc="DONE_AND_SCHEDULE_NEXT"/>
+                    <t t-if="!activity.force_next">
+                        <button type="button" class="o_ActivityMarkDonePopover_doneButton btn btn-sm btn-primary" t-on-click="_onClickDone">
                             Done
                         </button>
-                        <button type="button" class="btn btn-sm btn-link" t-on-click="_onClickDiscard">
+                        <button type="button" class="o_ActivityMarkDonePopover_discardButton btn btn-sm btn-link" t-on-click="_onClickDiscard">
                             Discard
                         </button>
-                    </t>
-                    <t t-else="">
-                        <button type="button" class="btn btn-sm btn-primary" t-esc="DONE_AND_SCHEDULE_NEXT"/>
                     </t>
                 </div>
             </t>

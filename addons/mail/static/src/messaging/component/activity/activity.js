@@ -123,7 +123,7 @@ class Activity extends Component {
      */
     _onClickCancel(ev) {
         ev.preventDefault();
-        this.activity.delete();
+        this.activity.deleteRecord();
     }
 
     /**

@@ -103,7 +103,6 @@ QUnit.test('hover following button', async function (assert) {
     const self = this;
 
     await this.start({
-        debug: true,
         async mockRPC(route, args) {
             if (route.includes('web/image/')) {
                 return;

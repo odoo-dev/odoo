@@ -212,7 +212,6 @@ var BasicActivity = AbstractField.extend({
     /**
      * @private
      * @param {integer} id
-     * @param {integer} previousActivityTypeID
      * @param {function} callback
      * @return {Promise}
      */
