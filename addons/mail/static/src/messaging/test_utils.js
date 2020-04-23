@@ -88,7 +88,7 @@ const MockMailService = Class.extend({
         // Avoid waiting on window load in addMessagingToEnv because files are
         // already loaded when running tests.
         testEnv.generateEntitiesImmediately = true;
-        addMessagingToEnv(testEnv);
+        const messagingCreatedPromise = addMessagingToEnv(testEnv);
         // Disable features that would interfere with tests.
         Object.assign(testEnv, {
             autofetchPartnerImStatus: false,
@@ -96,6 +96,7 @@ const MockMailService = Class.extend({
         });
         return MessagingService.extend({
             env: testEnv,
+            messagingCreatedPromise,
         });
     },
     notification() {

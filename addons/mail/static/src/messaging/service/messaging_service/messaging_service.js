@@ -7,10 +7,11 @@ const AbstractService = require('web.AbstractService');
 const { serviceRegistry } = require('web.core');
 const env = require('web.env');
 
-addMessagingToEnv(env);
+const messagingCreatedPromise = addMessagingToEnv(env);
 
 const MessagingService = AbstractService.extend({
     env,
+    messagingCreatedPromise,
     /**
      * @override {web.AbstractService}
      */
@@ -29,7 +30,7 @@ const MessagingService = AbstractService.extend({
         /**
          * Messaging initialization.
          */
-        const messagingInitializedPromise = this.env.messagingCreatedPromise.then(async () => {
+        const messagingInitializedPromise = this.messagingCreatedPromise.then(async () => {
             // TODO FIXME The method uses service specific env keys so it can
             // only be called after a service has properly set up those keys.
             await this.env.messaging.start();

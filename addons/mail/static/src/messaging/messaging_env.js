@@ -8,12 +8,10 @@ const { EventBus } = owl.core;
 
 /**
  * Adds messaging features to the given env.
- * Note: some features will become available asynchronously, which will be
- * notified with the resolution of `env.messagingCreatedPromise`.
  *
  * @param {Object} env
  */
-function addMessagingToEnv(env) {
+async function addMessagingToEnv(env) {
     /**
      * Messaging store
      */
@@ -43,12 +41,8 @@ function addMessagingToEnv(env) {
     /**
      * Messaging entities.
      */
-    let messagingCreatedPromise;
-    if (env.generateEntitiesImmediately) {
-        _addMessagingEntities(env);
-        messagingCreatedPromise = Promise.resolve();
-    } else {
-        messagingCreatedPromise = new Promise(resolve => {
+    if (!env.generateEntitiesImmediately) {
+        await new Promise(resolve => {
             /**
              * Called when all JS resources are loaded. This is useful in order
              * to do some processing after other JS files have been parsed, for
@@ -57,18 +51,16 @@ function addMessagingToEnv(env) {
              * applied before messaging initialization.
              */
             window.addEventListener('load', resolve);
-        }).then(async () => {
-            /**
-             * All JS resources are loaded, but not necessarily processed.
-             * We assume no messaging-related modules return any Promise,
-             * therefore they should be processed *at most* asynchronously at
-             * "Promise time".
-             */
-            await new Promise(resolve => setTimeout(resolve));
-            _addMessagingEntities(env);
         });
+        /**
+         * All JS resources are loaded, but not necessarily processed.
+         * We assume no messaging-related modules return any Promise,
+         * therefore they should be processed *at most* asynchronously at
+         * "Promise time".
+         */
+        await new Promise(resolve => setTimeout(resolve));
     }
-    Object.assign(env, { messagingCreatedPromise });
+    _addMessagingEntities(env);
 }
 
 /**
