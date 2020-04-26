@@ -39,8 +39,8 @@ class FetchmailServer(models.Model):
         ('pop', 'POP Server'),
         ('imap', 'IMAP Server'),
         ('local', 'Local Server'),
-    ], string='Server Type', index=True, required=True, default='pop')
-    is_ssl = fields.Boolean('SSL/TLS', help="Connections are encrypted with SSL/TLS through a dedicated port (default: IMAPS=993, POP3S=995)")
+    ], string='Server Type', index=True, required=True, default='pop', readonly=True, states={'draft': [('readonly', False)]})
+    is_ssl = fields.Boolean('SSL/TLS', help="Connections are encrypted with SSL/TLS through a dedicated port (default: IMAPS=993, POP3S=995)", readonly=True, states={'draft': [('readonly', False)]})
     attach = fields.Boolean('Keep Attachments', help="Whether attachments should be downloaded. "
                                                      "If not enabled, incoming emails will be stripped of any attachments before being processed", default=True)
     original = fields.Boolean('Keep Original', help="Whether a full original copy of each email should be kept for reference "
@@ -107,7 +107,7 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
                 connection = IMAP4_SSL(self.server, int(self.port))
             else:
                 connection = IMAP4(self.server, int(self.port))
-            connection.login(self.user, self.password)
+            self._imap_login(connection)
         elif self.server_type == 'pop':
             if self.is_ssl:
                 connection = POP3_SSL(self.server, int(self.port))
@@ -120,6 +120,15 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
         # Add timeout on socket
         connection.sock.settimeout(MAIL_TIMEOUT)
         return connection
+
+    def _imap_login(self, connection):
+        """Authenticate the IMAP connection.
+
+        Can be overridden in other module for different authentication methods.
+
+        :param connection: The IMAP connection to authenticate
+        """
+        connection.login(self.user, self.password)
 
     def button_confirm_login(self):
         for server in self:

@@ -44,12 +44,26 @@ class GoogleService(models.AbstractModel):
             'redirect_uri': redirect_uri,
             'grant_type': "authorization_code"
         }
+
+        error_msg = None
+        error_messages = {
+            'invalid_client': _('Your credentials are invalid.')
+        }
         try:
             req = requests.post(GOOGLE_TOKEN_ENDPOINT, data=data, headers=headers, timeout=TIMEOUT)
+
+            try:
+                content = req.json()
+                error_msg = error_messages.get(content.get('error'))
+            except ValueError:
+                content = None
+
             req.raise_for_status()
-            content = req.json()
         except IOError:
-            error_msg = _("Something went wrong during your token generation. Maybe your Authorization Code is invalid or already expired")
+            error_msg = _(
+                "Something went wrong during your token generation.\n%s",
+                error_msg or _("Maybe your Authorization Code is invalid or already expired"),
+            )
             raise self.env['res.config.settings'].get_config_warning(error_msg)
 
         return content.get('refresh_token')
