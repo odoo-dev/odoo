@@ -16,7 +16,7 @@
                                 'bg-danger-full': activity.state === 'overdue',
                             }"
                         >
-                            <i t-attf-class="{{ activity.icon }}"/>
+                            <i class="fa" t-attf-class="{{ activity.icon }}"/>
                         </div>
                     </div>
                 </div>
