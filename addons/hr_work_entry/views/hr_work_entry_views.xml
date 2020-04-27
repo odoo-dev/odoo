@@ -164,6 +164,10 @@
                             <field name="sequence"/>
                             <field name="color" widget="color_picker"/>
                         </group>
+                        <!-- arj fixme: the right place for these is in hr_work_entry_holidays but it is an enterprise module  -->
+                        <group name="time_off">
+                            <field name="leave_right"/>
+                        </group>
                     </group>
                 </sheet>
             </form>

@@ -219,6 +219,11 @@ class HrWorkEntryType(models.Model):
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to false, it will allow you to hide the work entry type without removing it.")
+    # Without enterprise module work_entry_holidays_holidays, the work_entry_type is not set on the leave_type in hr_holidays
+    # For accrual allocations, the leaves accrue by default
+    leave_right = fields.Boolean(
+        string="Keep Time Off Right", default=False,
+        help="Work entries counts for time off right for next year.")
 
     _sql_constraints = [
         ('unique_work_entry_code', 'UNIQUE(code)', 'The same code cannot be associated to multiple work entry types.'),

@@ -220,6 +220,19 @@
         </field>
     </record>
 
+    <record id="hr_employee_view_form_inherit_accrual" model="ir.ui.view">
+        <field name="name">hr.employee.form.accrual</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='hr_settings']" position="inside">
+                <group string="Time Off" name="timeoff" groups="hr_holidays.group_allow_accrual">
+                    <field name="accrual_plan_ids"  widget="many2many_tags" class="oe_inline"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
     <record id="hr_employee_public_form_view_inherit" model="ir.ui.view">
         <field name="name">hr.employee.public.leave.form.inherit</field>
         <field name="model">hr.employee.public</field>

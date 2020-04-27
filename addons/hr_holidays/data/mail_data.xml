@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+<!--    arj fixme: 1 when mail template ok-->
+    <data noupdate="0">
         <!-- Leave specific activities -->
         <record id="mail_act_leave_approval" model="mail.activity.type">
             <field name="name">Time Off Approval</field>
@@ -53,5 +54,6 @@
             <field name="res_model">hr.leave.allocation</field>
             <field name="description">Allocation Request</field>
         </record>
+
     </data>
 </odoo>

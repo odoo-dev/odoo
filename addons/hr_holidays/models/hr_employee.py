@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import datetime
+from datetime import datetime
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.tools.float_utils import float_round
+
 
 
 class HrEmployeeBase(models.AbstractModel):
@@ -40,29 +41,41 @@ class HrEmployeeBase(models.AbstractModel):
     allocation_used_display = fields.Char(compute='_compute_total_allocation_used')
     hr_icon_display = fields.Selection(selection_add=[('presence_holiday_absent', 'On leave'),
                                                       ('presence_holiday_present', 'Present but on leave')])
+    allocation_item_ids = fields.One2many('hr.leave.allocation.item', 'employee_id', string='Accrual Item')
+    accrual_plan_ids = fields.Many2many('hr.leave.accrual.plan', string='Accrual Plan',
+                                        groups="hr.group_hr_user", help="Accrual plan applying to this employee",
+                                        compute='_compute_accrual_plan',
+                                        )
 
     def _get_date_start_work(self):
+        # arj fixme Question for YTI; KBA
+        # arj fixme problem: the create date cannot be overridden during CSV import of employee.
+        # Old employee with many years of seniority cannot be placed automatically in the right accrual step.
+        # We could either: set a start date on the employee compute it to the create-date when nothing is set and allow to override it during csv import
         return self.create_date
 
     def _get_remaining_leaves(self):
         """ Helper to compute the remaining leaves for the current employees
             :returns dict where the key is the employee id, and the value is the remain leaves
         """
+        self.env['hr.leave.allocation.item'].flush(['number_of_days'])
+        self.env['hr.leave'].flush(['holiday_status_id', 'number_of_days', 'employee_id', 'state'])
+
         self._cr.execute("""
             SELECT
                 sum(h.number_of_days) AS days,
                 h.employee_id
             FROM
                 (
-                    SELECT holiday_status_id, number_of_days,
-                        state, employee_id
-                    FROM hr_leave_allocation
-                    UNION ALL
                     SELECT holiday_status_id, (number_of_days * -1) as number_of_days,
                         state, employee_id
                     FROM hr_leave
+                    UNION ALL
+                    SELECT holiday_status_id, item.number_of_days, state,  item.employee_id
+                    FROM hr_leave_allocation_item as item
+                    JOIN hr_leave_allocation ON hr_leave_allocation.id = item.allocation_id
                 ) h
-                join hr_leave_type s ON (s.id=h.holiday_status_id)
+                JOIN hr_leave_type s ON (s.id=h.holiday_status_id)
             WHERE
                 s.active = true AND h.state='validate' AND
                 (s.allocation_type='fixed' OR s.allocation_type='fixed_allocation') AND
@@ -80,14 +93,15 @@ class HrEmployeeBase(models.AbstractModel):
             employee.remaining_leaves = value
 
     def _compute_allocation_count(self):
-        data = self.env['hr.leave.allocation'].read_group([
+        data_accrual = self.env['hr.leave.allocation.item'].read_group([
             ('employee_id', 'in', self.ids),
             ('holiday_status_id.active', '=', True),
             ('state', '=', 'validate'),
         ], ['number_of_days:sum', 'employee_id'], ['employee_id'])
-        rg_results = dict((d['employee_id'][0], d['number_of_days']) for d in data)
+        rg_results_accrual = dict((d['employee_id'][0], d['number_of_days']) for d in data_accrual)
         for employee in self:
-            employee.allocation_count = rg_results.get(employee.id, 0.0)
+            allocation_count = rg_results_accrual.get(employee.id, 0.0)
+            employee.allocation_count = allocation_count
             employee.allocation_display = "%g" % employee.allocation_count
 
     def _compute_total_allocation_used(self):
@@ -156,10 +170,46 @@ class HrEmployeeBase(models.AbstractModel):
         holidays = self.env['hr.leave'].sudo().search([
             ('employee_id', '!=', False),
             ('state', 'not in', ['cancel', 'refuse']),
-            ('date_from', '<=', datetime.datetime.utcnow()),
-            ('date_to', '>=', datetime.datetime.utcnow())
+            ('date_from', '<=', datetime.utcnow()),
+            ('date_to', '>=', datetime.utcnow())
         ])
         return [('id', 'in', holidays.mapped('employee_id').ids)]
+
+    def _compute_accrual_plan(self):
+        """
+        When the accrual_plan_ids are modified, the allocation items must be updated accordingly.
+        """
+        allocation_item_ids = self.env['hr.leave.allocation.item'].search([('employee_id', 'in', self.ids)])
+        for employee in self:
+            allocations = allocation_item_ids.filtered(lambda item: item.employee_id.id == employee.id).mapped('allocation_id')
+            accrual_plan_ids = allocations.mapped('accrual_plan_id').ids
+            employee.sudo().write({'accrual_plan_ids': [(6, 0, accrual_plan_ids)]})
+
+    @api.model
+    def _refresh_accrual_values(self):
+        """
+        When the employee is updated, we need to refresh the accrual allocation items and the
+        :return:
+        """
+        allocation_ids = self.env['hr.leave.allocation'].search(
+            [('allocation_type', '=', 'accrual')])
+        allocation_ids._update_allocation_item()
+
+    def _update_accrual_plan(self, plan_id, addition):
+        """
+        When a accrual item is modified, this function is called to update the chatter and
+        :param plan_id: integer the id of the accrual_plan set on the employee
+        :param addition: boolean: true if a new plan is added on the employee.
+        """
+        for employee in self:
+            if addition:
+                employee.sudo().write({'accrual_plan_ids': [(4, plan_id.id)]})
+                body = _("Employee is added to the accrual plan <strong>%(plan_name)s</strong>", plan_name=plan_id.name)
+            else:
+                employee.sudo().write({'accrual_plan_ids': [(3, plan_id.id)]})
+                body = _("Employee is removed from the accrual plan <strong>%(plan_name)s</strong>", plan_name=plan_id.name)
+            employee._compute_accrual_plan()
+            employee.sudo().message_post(body=body, message_type='comment', subtype_xmlid='mail.mt_comment')
 
     @api.model
     def create(self, values):
@@ -170,7 +220,11 @@ class HrEmployeeBase(models.AbstractModel):
             approver_group = self.env.ref('hr_holidays.group_hr_holidays_responsible', raise_if_not_found=False)
             if approver_group:
                 approver_group.sudo().write({'users': [(4, values['leave_manager_id'])]})
-        return super(HrEmployeeBase, self).create(values)
+        result = super(HrEmployeeBase, self).create(values)
+        # When one of the following field is updated, the accrual items must be recalculated
+        if values.get('department_id') or values.get('company_id'):
+            self._refresh_accrual_values()
+        return result
 
     def write(self, values):
         if 'parent_id' in values:
@@ -203,4 +257,16 @@ class HrEmployeeBase(models.AbstractModel):
             holidays.write(hr_vals)
             allocations = self.env['hr.leave.allocation'].sudo().search([('state', 'in', ['draft', 'confirm']), ('employee_id', 'in', self.ids)])
             allocations.write(hr_vals)
+        if values.get('department_id') or values.get('category_ids') or values.get('company_id'):
+            self._refresh_accrual_values()
         return res
+
+    def unlink(self):
+        allocation_item_ids = self.mapped('allocation_item_ids')
+        super().unlink()
+        return allocation_item_ids.unlink()
+
+    def toggle_active(self):
+        allocation_item_ids = self.mapped('allocation_item_ids')
+        allocation_item_ids.toggle_active()
+        super().toggle_active()
