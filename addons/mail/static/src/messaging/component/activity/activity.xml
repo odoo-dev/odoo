@@ -110,7 +110,7 @@
                     </t>
 
                     <t t-if="activity.canWrite">
-                        <div class="o_Activity_tools">
+                        <div name="tools" class="o_Activity_tools">
                             <t t-if="activity.category !== 'upload_file'">
                                 <Popover position="'right'" title="MARK_DONE">
                                     <button class="o_Activity_toolButton o_Activity_markDoneButton btn btn-link" t-att-title="MARK_DONE">

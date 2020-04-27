@@ -662,7 +662,6 @@ function ThreadFactory({ Entity }) {
             compute: '_computeIsCurrentPartnerFollowing',
             default: false,
             dependencies: [
-                'followers',
                 'followersPartner',
                 'messagingCurrentPartner',
             ],

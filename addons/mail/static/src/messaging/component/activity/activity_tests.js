@@ -33,9 +33,6 @@ QUnit.module('Activity', {
             await this.component.mount(this.widget.el);
         };
         this.start = async params => {
-            if (this.widget) {
-                this.widget.destroy();
-            }
             let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,
             }));

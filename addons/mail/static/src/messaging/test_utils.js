@@ -438,6 +438,7 @@ function beforeEach(self) {
                 },
             },
         },
+        'mail.followers': { fields: {} },
         'mail.message': {
             fields: {
                 attachment_ids: {

@@ -15,7 +15,7 @@ var getArch = function () {
                     '<field name="foo"/>' +
                 '</sheet>' +
                 '<div class="oe_chatter">' +
-                    '<field name="message_ids" widget="mail_thread"/>' +
+                    '<field name="message_ids"/>' +
                 '</div>' +
             '</form>';
 };

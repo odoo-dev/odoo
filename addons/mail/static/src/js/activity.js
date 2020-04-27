@@ -542,6 +542,7 @@ var BasicActivity = AbstractField.extend({
 // -----------------------------------------------------------------------------
 // Activities Widget for Form views ('mail_activity' widget)
 // -----------------------------------------------------------------------------
+// FIXME seems to still be needed in some cases like systray
 var Activity = BasicActivity.extend({
     className: 'o_mail_activity',
     events:_.extend({}, BasicActivity.prototype.events, {
@@ -797,7 +798,6 @@ var ActivityException = AbstractField.extend({
 });
 
 field_registry
-    .add('mail_activity', Activity)
     .add('kanban_activity', KanbanActivity)
     .add('activity_exception', ActivityException);
 

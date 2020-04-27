@@ -67,6 +67,24 @@ class AttachmentBox extends Component {
      * @private
      * @param {Event} ev
      */
+    _onAttachmentCreated(ev) {
+        // FIXME Could be changed by spying attachments count (task-2252858)
+        this.trigger('o-attachments-changed');
+    }
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onAttachmentRemoved(ev) {
+        // FIXME Could be changed by spying attachments count (task-2252858)
+        this.trigger('o-attachments-changed');
+    }
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
     _onClickAdd(ev) {
         ev.preventDefault();
         ev.stopPropagation();
