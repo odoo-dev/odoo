@@ -45,9 +45,18 @@ QUnit.module('FormRenderer', {
         this.underscoreThrottle = _.throttle;
         _.debounce = _.identity;
         _.throttle = _.identity;
-        this.createView = async (...args) => {
+        // FIXME archs could be removed once task-2248306 is done
+        this.createView = async (viewParams, ...args) => {
             await afterNextRender(async () => {
-                const { widget } = await start(...args);
+                const viewArgs = Object.assign({
+                    archs: {
+                        'mail.activity,false,list': '<tree/>',
+                        'mail.followers,false,list': '<tree/>',
+                        'mail.message,false,list': '<tree/>',
+                    }},
+                    viewParams,
+                );
+                const { widget } = await start(viewArgs, ...args);
                 this.view = widget;
             });
         };
@@ -115,8 +124,8 @@ QUnit.test('basic chatter rendering without followers', async function (assert) 
                     <field name="name"/>
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="activity_ids" widget="mail_activity"/>
-                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
                 </div>
             </form>
         `,
@@ -177,8 +186,8 @@ QUnit.test('basic chatter rendering without activities', async function (assert)
                     <field name="name"/>
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
                 </div>
             </form>
         `,
@@ -239,8 +248,8 @@ QUnit.test('basic chatter rendering without messages', async function (assert) {
                     <field name="name"/>
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
                 </div>
             </form>
         `,
@@ -338,7 +347,7 @@ QUnit.test('chatter updating', async function (assert) {
                     <field name="name"/>
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="message_ids"/>
                 </div>
             </form>
         `,

@@ -140,6 +140,8 @@
 
     <!--
         Chatter main div
+        FIXME still used in web_studio and should not (task-2246809)
+        see : web_studio/static/src/js/views/view_editors/form_editor.js
     -->
     <t t-name="mail.Chatter">
         <aside class="o_chatter">

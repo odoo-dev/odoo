@@ -129,8 +129,8 @@ a:not([href]):not([tabindex]).o_Activity_detailsButton {
     color: gray('500');
 
     &:hover {
-        color: gray('600');
         opacity: 1;
+        color: gray('600');
     }
 }
 
@@ -155,8 +155,8 @@ a:not([href]):not([tabindex]).o_Activity_detailsButton {
 }
 
 .o_Activity_toolButton {
-    color: gray('500');
     opacity: 0.5;
+    color: gray('500');
 
     &:hover {
         opacity: 1;

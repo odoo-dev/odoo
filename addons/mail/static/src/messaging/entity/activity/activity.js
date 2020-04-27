@@ -201,12 +201,37 @@ function ActivityFactory({ Entity }) {
             });
         }
 
+        //----------------------------------------------------------------------
+        // Private
+        //----------------------------------------------------------------------
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsCurrentPartnerAssignee() {
+            if (!this.assigneePartner || !this.messagingCurrentPartner) {
+                return false;
+            }
+            return this.assigneePartner === this.messagingCurrentPartner;
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Messaging}
+         */
+        _computeMessaging() {
+            return [['link', this.env.messaging]];
+        }
     }
 
     Activity.entityName = 'Activity';
 
     Activity.fields = {
         assignee: many2one('User'),
+        assigneePartner: many2one('Partner', {
+            related: 'assignee.partner',
+        }),
         attachments: many2many('Attachment', {
             inverse: 'activities',
         }),
@@ -225,8 +250,22 @@ function ActivityFactory({ Entity }) {
         }),
         icon: attr(),
         id: attr(),
+        isCurrentPartnerAssignee: attr({
+            compute: '_computeIsCurrentPartnerAssignee',
+            default: false,
+            dependencies: [
+                'assigneePartner',
+                'messagingCurrentPartner',
+            ],
+        }),
         mailTemplates: many2many('MailTemplate', {
             inverse: 'activities',
+        }),
+        messaging: many2one('Messaging', {
+            compute: '_computeMessaging',
+        }),
+        messagingCurrentPartner: many2one('Partner', {
+            related: 'messaging.currentPartner',
         }),
         note: attr(),
         res_id: attr(),

@@ -120,6 +120,7 @@ class Attachment extends Component {
     _onClickUnlink(ev) {
         ev.stopPropagation();
         this.attachment.remove();
+        this.trigger('o-attachment-removed');
     }
 
 }

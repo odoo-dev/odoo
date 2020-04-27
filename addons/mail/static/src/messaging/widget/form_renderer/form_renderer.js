@@ -20,6 +20,7 @@ FormRenderer.include({
      */
     init(parent, state, params) {
         this._super(...arguments);
+        this.chatterFields = params.chatterFields;
         this.env = this.call('messaging', 'getEnv');
         this.mailFields = params.mailFields;
         this._chatterContainerComponent = undefined;
@@ -44,9 +45,11 @@ FormRenderer.include({
     _destroyChatterContainer() {
         if (this._chatterContainerComponent) {
             this._chatterContainerComponent.destroy();
-            this._chatterContainerComponent.parentWidget.off('o_chatter_rendered', this);
             this._chatterContainerComponent = undefined;
         }
+        this.off('o_attachments_changed', this);
+        this.off('o_chatter_rendered', this);
+        this.off('o_message_posted', this);
     },
     /**
      * Returns whether the form renderer has a chatter to display or not.
@@ -70,7 +73,13 @@ FormRenderer.include({
         );
         // Not in custom_events because other modules may remove this listener
         // while attempting to extend them.
-        this._chatterContainerComponent.parentWidget.on('o_chatter_rendered', this, ev => this._onChatterRendered(ev));
+        this.on('o_chatter_rendered', this, ev => this._onChatterRendered(ev));
+        if (this.chatterFields.hasRecordReloadOnMessagePosted) {
+            this.on('o_message_posted', this, ev => this.trigger_up('reload'));
+        }
+        if (this.chatterFields.hasRecordReloadOnAttachmentsChanged) {
+            this.on('o_attachments_changed', this, ev => this.trigger_up('reload'));
+        }
     },
     /**
      * @private
@@ -92,9 +101,10 @@ FormRenderer.include({
             activityIds,
             context,
             followerIds,
-            hasActivities: !!this.mailFields.mail_activity,
-            hasFollowers: !!this.mailFields.mail_followers,
-            hasThread: !!this.mailFields.mail_thread,
+            hasActivities: this.chatterFields.hasActivityIds,
+            hasFollowers: this.chatterFields.hasMessageFollowerIds,
+            hasThread: this.chatterFields.hasMessageIds,
+            isAttachmentBoxVisible: this.chatterFields.isActivityBoxVisible,
             messageIds,
             threadAttachmentCount,
             threadId: this.state.res_id,
