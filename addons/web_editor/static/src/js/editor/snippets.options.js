@@ -39,6 +39,9 @@ function _addTitleAndAllowedAttributes(el, title, options) {
         const titleEl = _buildTitleElement(title);
         tooltipEl = titleEl;
         el.appendChild(titleEl);
+    } else if (options && options.dataAttributes.img) {
+        const imgEl = _buildImgElement(options.dataAttributes.img);
+        el.appendChild(imgEl);
     }
 
     if (options && options.classes) {
@@ -194,7 +197,6 @@ const UserValueWidget = Widget.extend({
      */
     async start() {
         await this._super(...arguments);
-
         if (this.el.classList.contains('o_we_img_animate')) {
             const buildImgExtensionSwitcher = (from, to) => {
                 const regex = new RegExp(`${from}$`, 'i');
@@ -886,29 +888,18 @@ const InputUserValueWidget = UserValueWidget.extend({
     /**
      * @override
      */
-    start: function () {
+    start: async function () {
         const unit = this.el.dataset.unit || '';
         this.el.dataset.unit = unit;
         if (this.el.dataset.saveUnit === undefined) {
             this.el.dataset.saveUnit = unit;
         }
 
-        this.inputEl = document.createElement('input');
-        this.inputEl.setAttribute('type', 'text');
-        this.inputEl.setAttribute('placeholder', this.el.getAttribute('placeholder') || '');
-        this.inputEl.classList.toggle('text-left', !unit);
-        this.inputEl.classList.toggle('text-right', !!unit);
-        this.containerEl.appendChild(this.inputEl);
-
-        var unitEl = document.createElement('span');
-        unitEl.textContent = unit;
-        this.containerEl.appendChild(unitEl);
-
         return this._super(...arguments);
     },
 
     //--------------------------------------------------------------------------
-    // Private
+    // Public
     //--------------------------------------------------------------------------
 
     /**
@@ -997,6 +988,46 @@ const InputUserValueWidget = UserValueWidget.extend({
      */
     _floatToStr: function (value) {
         return `${parseFloat(value.toFixed(5))}`;
+    },
+});
+
+const InputUserValueWidget = UnitUserValueWidget.extend({
+    tagName: 'we-input',
+    events: {
+        'input input': '_onInputInput',
+        'blur input': '_onInputBlur',
+        'keydown input': '_onInputKeydown',
+    },
+
+    /**
+     * @override
+     */
+    start: async function () {
+        await this._super(...arguments);
+
+        const unit = this.el.dataset.unit;
+        this.inputEl = document.createElement('input');
+        this.inputEl.setAttribute('type', 'text');
+        this.inputEl.setAttribute('placeholder', this.el.getAttribute('placeholder') || '');
+        this.inputEl.classList.toggle('text-left', !unit);
+        this.inputEl.classList.toggle('text-right', !!unit);
+        this.containerEl.appendChild(this.inputEl);
+
+        var unitEl = document.createElement('span');
+        unitEl.textContent = unit;
+        this.containerEl.appendChild(unitEl);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _updateUI: async function () {
+        await this._super(...arguments);
+        this.inputEl.value = this._value;
     },
 
     //--------------------------------------------------------------------------
@@ -1550,7 +1581,7 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
     },
 });
 
-const RangeUserValueWidget = UserValueWidget.extend({
+const RangeUserValueWidget = UnitUserValueWidget.extend({
     tagName: 'we-range',
     events: {
         'change input': '_onInputChange',
@@ -1574,8 +1605,8 @@ const RangeUserValueWidget = UserValueWidget.extend({
      * @override
      */
     setValue(value, methodName) {
-        this.input.value = value;
-        return this._super(...arguments);
+        this._super(...arguments);
+        this.input.value = this._value;
     },
 
     //--------------------------------------------------------------------------
@@ -4262,6 +4293,7 @@ return {
     NULL_ID: NULL_ID,
     UserValueWidget: UserValueWidget,
     userValueWidgetsRegistry: userValueWidgetsRegistry,
+    UnitUserValueWidget: UnitUserValueWidget,
 
     addTitleAndAllowedAttributes: _addTitleAndAllowedAttributes,
     buildElement: _buildElement,

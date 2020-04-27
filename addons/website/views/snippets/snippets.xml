@@ -431,7 +431,7 @@
 
     <div data-js="menu_data"
          data-selector="#top_menu li > a"
-         data-exclude=".dropdown-toggle, li.o_header_menu_button a"
+         data-exclude=".dropdown-toggle, li.o_header_menu_button a, [data-toggle], .o_offcanvas_logo"
          data-no-check="true"/>
 
     <div data-js="company_data"
@@ -451,6 +451,51 @@
                      data-customize-website-views="website.header_shadow"
                      data-select-class="shadow"
                      data-no-preview="true"/>
+
+        <we-select string="Pre Header"
+                   id="preheader_templates_select"
+                   data-dependencies="!header_transparent_opt"
+                   data-variable="preheader-template"
+                   data-reload="/">
+            <we-button id="option_template_preheader_none"
+                       data-name="preheader_none_opt"
+                       data-customize-website-views=""
+                       data-customize-website-variable=""
+                       string="None"/>
+            <we-button id="option_template_preheader_magazine"
+                       data-name="preheader_magazine_opt"
+                       data-customize-website-views="website.template_preheader_magazine"
+                       data-customize-website-variable="magazine"
+                       string="Magazine"/>
+            <we-button id="option_template_preheader_icons"
+                       data-name="preheader_icons_opt"
+                       data-customize-website-views="website.template_preheader_icons"
+                       data-customize-website-variable="icons"
+                       string="Icons"/>
+            <we-button id="option_template_preheader_image"
+                       data-name="preheader_image_opt"
+                       data-customize-website-views="website.template_preheader_image"
+                       data-customize-website-variable="image"
+                       string="Image"/>
+        </we-select>
+        <we-colorpicker string="⌙ Colors"
+                        data-dependencies="!preheader_none_opt"
+                        data-customize-website-color=""
+                        data-color="preheader"
+                        data-with-combinations="true"/>
+        <we-imagepicker string="⌙ Background"
+                        data-apply-to=".o_preheader_image"
+                        data-dependencies="preheader_image_opt"
+                        data-background=""
+                        data-allow-videos="*"/>
+        <we-range string="⌙ Height"
+                  data-dependencies="preheader_image_opt"
+                  data-customize-website-variable="1vw"
+                  data-variable="preheader-height"
+                  data-unit="vw"
+                  data-max="5"
+                  data-step="0.1"/>
+
         <we-select string="Logo" data-reload="/">
             <we-button data-customize-website-views="website.website_name">Text</we-button>
             <we-button data-customize-website-views="website.layout_logo_show">Image</we-button>
@@ -473,8 +518,9 @@
             <we-fontfamilypicker data-variable="navbar-font"/>
             <we-input data-customize-website-variable="null" data-variable="header-font-size" data-unit="px" data-save-unit="rem"/>
         </we-row>
-        <we-select id="header_templates_select" data-variable="header-template" string="Template" data-reload="/">
-            <we-button id="option_template_header_logo_menu"
+
+        <we-select string="Template" data-variable="header-template" data-reload="/">
+            <we-button title="Default"
                        data-name="header_logo_menu_opt"
                        data-customize-website-views=""
                        data-customize-website-variable="'logo_menu'"
@@ -505,29 +551,65 @@
                        data-name="header_effect_standard_opt"
                        data-select-class="o_header_standard o_top_fixed_element"
                        data-customize-website-views="website.header_visibility_standard"
-                       string="Standard"/>
+                       data-img="/website/static/src/img/snippets_options/header_effect_standard.png"/>
             <we-button id="option_header_effect_scroll"
+                       t-att-data-select-label="header_effect_scroll_label"
+                       class="o_we_img_animate"
                        data-name="header_effect_scroll_opt"
                        data-select-class=""
                        data-customize-website-views=""
-                       string="Scroll"/>
+                       data-img="/website/static/src/img/snippets_options/header_effect_scroll.png"/>
             <we-button id="option_header_effect_fixed"
+                       t-att-data-select-label="header_effect_fixed_label"
+                       class="o_we_img_animate"
                        data-name="header_effect_fixed_opt"
-                       data-select-class="o_header_fixed o_top_fixed_element"
+                       data-select-class="o_header_fixed"
                        data-customize-website-views="website.header_visibility_fixed"
-                       string="Fixed"/>
+                       data-img="/website/static/src/img/snippets_options/header_effect_fixed.png"/>
             <we-button id="option_header_effect_disappears"
+                       t-att-data-select-label="header_effect_disappears_label"
+                       class="o_we_img_animate"
                        data-name="header_effect_disappears_opt"
-                       data-select-class="o_header_disappears o_top_fixed_element"
+                       data-select-class="o_header_disappears"
                        data-customize-website-views="website.header_visibility_disappears"
-                       string="Disappears"/>
+                       data-img="/website/static/src/img/snippets_options/header_effect_disappears.png"/>
             <we-button id="option_header_effect_fade_out"
+                       t-att-data-select-label="header_effect_fadeout_label"
+                       class="o_we_img_animate"
                        data-name="header_effect_fade_out_opt"
-                       data-select-class="o_header_fade_out o_top_fixed_element"
+                       data-select-class="o_header_fade_out"
                        data-customize-website-views="website.header_visibility_fade_out"
-                       string="Fade Out"/>
+                       data-img="/website/static/src/img/snippets_options/header_effect_fade_out.png"/>
         </we-select>
-        <we-select id="option_header_dropdown" string="Sub Menus" data-no-preview="true">
+
+        <we-select string="Navbar Links Style" data-variable="header-links-style" data-reload="/">
+            <we-button string="Default"
+                       data-name="option_header_navbar_links_default"
+                       data-customize-website-views=""
+                       data-customize-website-variable="default"/>
+            <we-button string="Fill"
+                       data-name="option_header_navbar_links_fill"
+                       data-customize-website-views="website.header_navbar_pills_style"
+                       data-customize-website-variable="fill"/>
+            <we-button string="Outline"
+                       data-name="option_header_navbar_links_outline"
+                       data-customize-website-views=""
+                       data-customize-website-variable="outline"/>
+            <we-button string="Pills"
+                       data-name="option_header_navbar_links_pills"
+                       data-customize-website-views="website.header_navbar_pills_style"
+                       data-customize-website-variable="pills"/>
+            <we-button string="Block"
+                       data-name="option_header_navbar_block"
+                       data-customize-website-views="website.header_navbar_pills_style"
+                       data-customize-website-variable="block"/>
+            <we-button string="Border Bottom"
+                       data-name="option_header_navbar_border_bottom"
+                       data-customize-website-views=""
+                       data-customize-website-variable="border-bottom"/>
+        </we-select>
+
+        <we-select id="option_header_dropdown" string="Sub Menus" data-dependencies="!header_hamburger_opt" data-no-preview="true">
             <we-button data-select-class="o_hoverable_dropdown"
                        data-customize-website-views="website.header_hoverable_dropdown">On Hover</we-button>
             <we-button data-select-class="" data-name="header_dropdown_on_click_opt">On Click</we-button>
@@ -558,14 +640,20 @@
             data-excluded="theme, common, custom"/>
     </div>
 
+    <!-- Footer - Colors & Layouts -->
     <div data-selector="#wrapwrap > footer"
          data-no-check="true"
          groups="website.group_website_designer">
+
+        <!-- Colors -->
         <we-colorpicker string="Colors"
                         data-customize-website-color="" data-color="footer"
                         data-with-combinations="true"/>
-        <we-select string="Footer Template" data-variable="footer-template" data-reload="/">
-            <we-button id="option_template_footer_products_contacts_about_us"
+        <!-- Layouts -->
+        <we-select string="Layout"
+            data-variable="footer-template"
+            data-reload="/">
+            <we-button string="Default"
                        data-customize-website-views="website.footer_custom"
                        data-customize-website-variable="'products_contacts_about_us'"
                        string="Products - Contacts - About us"/>
@@ -607,6 +695,34 @@
                 data-reload="/"/>
     </div>
 
+    <!-- Footer - Borders & Shadows -->
+    <div data-js="Box"
+         data-selector="#wrapwrap > footer"
+         data-target="#footer"
+         data-no-check="true"
+         groups="website.group_website_designer">
+            <t t-call="website.snippet_options_border"/>
+            <t t-call="website.snippet_options_shadow"/>
+    </div>
+
+    <!-- Scroll to Top -->
+    <div data-selector="#wrapwrap > footer"
+         data-no-check="true"
+         groups="website.group_website_designer">
+        <we-row string="Scroll Top Button">
+            <we-checkbox data-name="footer_scrolltop_opt"
+                         data-customize-website-views="website.option_footer_scrolltop"
+                         data-customize-website-variable="false|true"
+                         data-variable="footer-scrolltop"
+                         data-reload="/"/>
+            <we-select data-dependencies="footer_scrolltop_opt" data-apply-to="#o_footer_scrolltop_wrapper">
+                <we-button string="Left" data-select-class="justify-content-start"/>
+                <we-button string="Center" data-select-class="justify-content-center"/>
+                <we-button string="Right" data-select-class="justify-content-end"/>
+            </we-select>
+        </we-row>
+    </div>
+
     <div data-js="HideFooter"
         data-selector="[data-main-object^='website.page('] #wrapwrap > footer"
         data-no-check="true"
@@ -617,6 +733,7 @@
                      data-no-preview="true"/>
     </div>
 
+    <!-- Copyright -->
     <div data-selector=".o_footer_copyright"
          data-no-check="true"
          groups="website.group_website_designer">

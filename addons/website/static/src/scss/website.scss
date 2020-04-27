@@ -64,13 +64,102 @@ $-seen-urls: ();
     background-position: center;
     background-attachment: fixed;
 
-    @if ($o-theme-layout == 'boxed') {
-        @include media-breakpoint-up(md) {
-            padding: 0 7.5%;
+    @if o-website-value('layout') != 'full' {
+        @include media-breakpoint-up(sm) {
+            padding-right: $grid-gutter-width * 2;
+            padding-left: $grid-gutter-width * 2;
+
+            > * {
+                // When the website is visually acting like a container (eg.
+                // boxed layout), increase its maximum size to handle bigger
+                // horizontal paddings.
+                $-max-widths: ();
+                @each $key, $value in $container-max-widths {
+                    $-max-widths: map-merge($-max-widths, (
+                        #{$key}: $value + $grid-gutter-width * 2,
+                    ));
+                }
+                @include make-container(0);
+                @include make-container-max-widths($-max-widths);
+            }
+
+            > header .container {
+                max-width: 100% !important;
+            }
+
+            // Vertical alignment when top-menu has visually "no background"
+            @if o-color('menu') == o-color('body') {
+                > header {
+                    .navbar, .container {
+                        padding-left: 0;
+                        padding-right: 0;
+                    }
+                }
+            }
+
+            > main {
+                background-color: o-color('o-cc1-bg');
+            }
         }
 
-        #wrap {
-            background-color: o-color('o-cc1-bg');
+        @if o-website-value('layout') == 'framed' {
+            @include media-breakpoint-up(md) {
+                padding-top: $grid-gutter-width;
+                padding-bottom: $grid-gutter-width * 1.5;
+            }
+        } @else if o-website-value('layout') == 'postcard' {
+            @include media-breakpoint-up(md) {
+                $-border-radius: $border-radius-lg;
+                // Don't know why (browser rounding mistake?) but the inner
+                // border radius must be 1px lower for this to be visually ok
+                // (despite the fact there is no border or any space)
+                $-inner-border-radius: $-border-radius - 0.0625rem;
+                > * {
+                    margin-bottom: $spacer * 2;
+                }
+                > header {
+                    &, &.o_header_affix {
+                        .navbar {
+                            @include border-bottom-radius($-border-radius);
+                        }
+                    }
+                }
+                > main, > footer {
+                    @include border-radius($-border-radius);
+
+                    .oe_structure > :first-child {
+                        @include border-top-radius($-inner-border-radius);
+                    }
+                }
+                > main .oe_structure > :last-child,
+                .o_footer_copyright {
+                    @include border-bottom-radius($-inner-border-radius);
+                }
+            }
+        }
+    }
+}
+
+@if o-website-value('preheader-template') {
+    #o_preheader {
+        @include o-apply-colors('preheader');
+
+        @if o-website-value('preheader-template') == 'icons' {
+
+            .o_preheader_icons > a {
+                width: $spacer * 2;
+                height: $spacer * 2;
+                margin-left: $spacer * .25;
+                border: 0;
+                padding: 0;
+            }
+        } @else if o-website-value('preheader-template') == 'image' {
+            height: o-website-value('preheader-height');
+        }
+
+        #wrapwrap.o_header_overlay & {
+            // Hide preheaders if menu is set as transparent
+            display: none;
         }
     }
 }
@@ -133,6 +222,7 @@ $-header-nav-link-height: $nav-link-height;
         @include o-apply-colors('copyright', $background: o-color('footer'));
     }
 }
+
 h2, h3, h4, h5, h6 {
     color: color('o-cc1-h2');
 }
@@ -642,14 +732,6 @@ $-transition-duration: 200ms;
         transition: transform $-transition-duration;
     }
 
-    .navbar-collapse {
-        @if o-website-value('header-template') != 'logo_hamburger' {
-            max-height: 70vh;
-        }
-        &.show {
-            overflow-y: auto;
-        }
-    }
     &.o_header_is_scrolled {
         .navbar-brand {
             font-size: $o-theme-navbar-fixed-logo-height / $line-height-base;
@@ -658,11 +740,12 @@ $-transition-duration: 200ms;
                 height: $o-theme-navbar-fixed-logo-height;
             }
         }
-        @include media-breakpoint-up(md) {
-            @if (index(('menu_logo_below', 'logo_menu_below'), o-website-value('header-template'))) != null {
+        @if o-website-value('header-template') == 'vertical' {
+            @include media-breakpoint-up(md) {
                 .navbar-brand {
                     font-size: 0px;
                     opacity: 0;
+
                     img {
                         height: 0px;
                     }
@@ -708,18 +791,65 @@ $-transition-duration: 200ms;
     }
 }
 
-// Header templates
+$-off-canvas-hamburger: o-website-value('hamburger-type') == 'off-canvas';
+$-hamburger-left: o-website-value('hamburger-position') == 'left';
+$-hamburger-center: o-website-value('hamburger-position') == 'center';
+
 header {
     &#top {
         // We need this z-index for the shadow option of the header
         z-index: $zindex-modal - 20;
     }
     &:not(.o_header_no_transition) {
+        #top_menu_container {
+            transition: all $-transition-duration;
+        }
         .navbar-brand {
-            transition: font-size $-transition-duration, opacity $-transition-duration ease-out;
+            transition: margin $-transition-duration, font-size $-transition-duration, opacity $-transition-duration ease-out;
 
             img {
                 transition: height $-transition-duration;
+            }
+        }
+    }
+
+    &:not(.o_header_is_scrolled) {
+        $-is-hamburger: o-website-value('header-template') == 'hamburger';
+        $-is-vertical: o-website-value('header-template') == 'vertical';
+        @include media-breakpoint-up(md) {
+            @if $-is-hamburger or $-is-vertical {
+                #top_menu_container {
+                    padding-top: $spacer * 0.5;
+                    padding-bottom: $spacer * 0.5;
+                }
+            }
+            @if $-is-vertical {
+                .navbar-brand {
+                    margin-bottom: $spacer;
+                }
+            }
+        }
+    }
+
+    .navbar {
+        flex-direction: if($-hamburger-left, row-reverse, row);
+    }
+    #top_menu_container {
+        flex-direction: inherit;
+    }
+    @if $-hamburger-left {
+        .navbar-brand {
+            margin-right: 0;
+            margin-left: $navbar-padding-x;
+        }
+    } @else if $-hamburger-center {
+        .collapsing, .show {
+            #top_menu {
+                @if not $-off-canvas-hamburger {
+                    padding-top: 15vh;
+                    padding-bottom: 15vh;
+                }
+                text-align: center;
             }
         }
     }
@@ -729,66 +859,169 @@ header {
         .o_navbar_toggler_container {
             flex: 0 0 0;
             min-width: 0;
+            direction: if($-hamburger-left, ltr, rtl);
         }
     }
-    @if index(('hamburger_logo', 'logo_hamburger'), o-website-value('header-template')) {
-        .navbar-brand {
-            text-align: center;
-        }
-        .navbar-brand, .logo img {
-            margin: auto;
-        }
-        .navbar-nav {
-            margin-top: $spacer / 2;
-        }
-        @if o-website-value('header-template') == 'logo_hamburger' {
-            .o_navbar_toggler_container {
-                direction: rtl;
-            }
-            &:not(.o_header_is_scrolled) .container {
-                padding-top: $spacer;
-                padding-bottom: $spacer;
-            }
-            .container {
-                transition: padding 200ms;
+}
 
-                #top_menu.navbar-nav {
-                    height: 90vh;
-                    padding-top : 10vh;
+@if $-off-canvas-hamburger {
+    #top_menu_collapse {
+        flex-direction: if($-hamburger-left, row, row-reverse);
+
+        &.collapsing, &.show {
+            @include o-position-absolute(0, 0, 0, 0);
+            position: fixed;
+            display: flex;
+            align-items: stretch;
+            z-index: $zindex-sticky;
+            transition: none;
+            transform: none;
+
+            .o_offcanvas_menu_backdrop {
+                @include o-position-absolute(0, 0, 0, 0);
+                opacity: .2;
+                cursor: pointer;
+            }
+
+            #top_menu {
+                overflow: auto;
+                flex-wrap: nowrap;
+                @if $-hamburger-center {
+                    width: 100%;
+                    max-width: none;
+                } @else {
+                    max-width: 560px;
+                }
+                background-color: o-color('menu');
+                transition: transform $-transition-duration cubic-bezier(.694, .0482, .335, 1);
+
+                @if $-hamburger-center {
+                    .o_offcanvas_menu_backdrop {
+                        display: none;
+                    }
+                    .o_offcanvas_menu_toggler {
+                        max-width: 90%;
+                    }
+                }
+
+                .nav-item, .o_offcanvas_logo {
+                    padding-left: $grid-gutter-width;
+                    padding-right: $grid-gutter-width;
+                }
+                .nav-item, .dropdown-menu {
+                    text-align: inherit;
+                }
+
+                // Open all dropdowns
+                .dropdown-toggle {
+                    padding-bottom: $nav-link-padding-y*0.5;
+
+                    &:after {
+                        content: none;
+                    }
                 }
                 .dropdown-menu {
-                    text-align: center;
+                    display: block;
+                    padding-top:0;
+                    border: 0;
+                    background: inherit;
+                    color: inherit;
+                }
+                .dropdown-item {
+                    padding-left: .5em;
+                    padding-right: .5em;
+                }
+            }
+
+            .o_connected_user header:not(.o_header_is_scrolled) &,
+            .o_connected_user header.o_header_affixed & {
+                padding-top: $o-navbar-height;
+            }
+        }
+        &.collapsing #top_menu {
+            @if o-website-value('hamburger-position') == 'center' {
+                transform: translateY(-100%);
+            } @else if o-website-value('hamburger-position') == 'left' {
+                transform: translateX(-100%);
+            } @else if o-website-value('hamburger-position') == 'right' {
+                transform: translateX(100%);
+            }
+        }
+        &.show #top_menu {
+            transform: translate(0);
+        }
+
+        .o_offcanvas_menu_backdrop {
+            @if $-hamburger-left {
+                background-image: linear-gradient(90deg, currentColor 20%, transparent);
+            } @else {
+                background-image: linear-gradient(-90deg, currentColor 20%, transparent);
+            }
+        }
+    }
+}
+
+@if o-website-value('header-template') == 'sidebar' {
+    @include media-breakpoint-up(lg) {
+        #wrapwrap {
+            // Hack: padding-left is used by layout option (boxed, etc) so use
+            // border-left here to be able to combine the effect.
+            border-left: o-website-value('sidebar-width') solid transparent;
+
+            > header {
+                @include o-position-absolute(0, auto, 0, 0);
+                position: fixed;
+                z-index: $zindex-fixed;
+                display: flex;
+                // Important to define the width on the header itself as the
+                // preheader would stretch it over the content otherwise
+                width: o-website-value('sidebar-width');
+                transform: none !important;
+
+                .navbar:not(#o_preheader) {
+                    width: 100%;
+                    align-items: start;
+                    padding: $spacer;
+
+                    .navbar-brand {
+                        max-width: 100%;
+                        padding: 0 0 $spacer 0;
+                    }
+                    #top_menu_container {
+                        flex-direction: column;
+                        align-items: start;
+                        padding: 0;
+                    }
+                    .navbar-nav {
+                        flex-direction: column;
+                    }
+                    .nav-link,
+                    .dropdown-item {
+                        white-space: initial;
+                    }
+                    .dropdown-menu {
+                        position: relative;
+                    }
                 }
             }
         }
-    } @else if index(('logo_menu_below', 'menu_logo_below'), o-website-value('header-template')) {
-        .navbar-brand {
-            text-align: center;
+        body.o_connected_user #wrapwrap > header {
+            top: $o-navbar-height;
         }
-        .navbar-expand-md {
-            > .container {
-                flex-wrap: wrap;
+        @if o-website-value('preheader-template') {
+            #o_preheader {
+                position: fixed;
+                right: 0;
+                left: o-website-value('sidebar-width');
             }
-            .navbar-collapse {
-                flex-basis: 100%;
-            }
-        }
-        .navbar-brand, #top_menu.navbar-nav, .logo img {
-            margin: auto;
-        }
-        .navbar-brand {
-            @include media-breakpoint-up(md) {
-                @if o-website-value('header-template') == 'menu_logo_below' {
-                    margin-top: $navbar-padding-y;
-                } @else {
-                    margin-bottom: $navbar-padding-y;
+            @if index(('magazine', 'icons'), o-website-value('preheader-template')) {
+                #wrapwrap > main {
+                    // Header visibilities
+                    padding-top: $spacer * 3 !important;
                 }
-            }
-        }
-        @if o-website-value('header-template') == 'menu_logo_below' {
-            .navbar-collapse {
-                @include media-breakpoint-up(md) {
-                    order: -1;
+            } @else if o-website-value('preheader-template') == 'image' {
+                #wrapwrap > main {
+                    padding-top: o-website-value('preheader-height');
                 }
             }
         }
@@ -849,24 +1082,50 @@ header {
     }
 }
 
-// Footer Templates
-#footer {
-    @if o-website-value('footer-template') != 'products_contacts_about_us' {
-        @if o-website-value('footer-template') == 'logo_about_us_below' {
-            .o_footer_logo {
-                margin-top: $spacer;
-                margin-bottom: $spacer;
+// Navbar Links Styles
+@if index(('block', 'border-bottom'), o-website-value('header-links-style')) {
+    @include media-breakpoint-up(md) {
+        .navbar {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    }
+}
+.navbar-nav {
+    .nav-link {
+        @if o-website-value('header-links-style') == 'outline' {
+            // Need to force the padding in this case so that it stays in mobile
+            padding-right: $navbar-nav-link-padding-x;
+            padding-left: $navbar-nav-link-padding-x;
+            border: $border-width solid transparent;
+            @include border-radius($nav-pills-border-radius);
+        } @else if o-website-value('header-links-style') == 'block' {
+            // There is no way to control navbar links vertical padding in BS4
+            // independently from nav ones, just double them here instead
+            padding-top: $nav-link-padding-y * 2;
+            padding-bottom: $nav-link-padding-y * 2;
+            @include border-radius(0);
+        } @else if o-website-value('header-links-style') == 'border-bottom' {
+            // There is no way to control navbar links vertical padding in BS4
+            // independently from nav ones, just double them here instead
+            padding-top: ($nav-link-padding-y * 2);
+            padding-bottom: ($nav-link-padding-y * 2);
+            border-bottom: $nav-link-padding-y solid transparent;
+
+            // Replace horizontal paddings by margins (do this with an extra
+            // class to override .navbar-expand-* paddings priority).
+            .navbar & {
+                padding-left: 0;
+                padding-right: 0;
+                margin: 0 $navbar-nav-link-padding-x;
             }
-            .o_footer_about_us {
-                margin-bottom: $spacer;
-            }
-        } @else if o-website-value('footer-template') == 'links_address_logo' {
-            &, p {
-                text-align: center;
-            }
-            &, ul, .o_footer_address, .o_footer_logo {
-                padding-top: $spacer;
-            }
+        }
+    }
+
+    @if index(('outline', 'border-bottom'), o-website-value('header-links-style')) {
+        .nav-link.active,
+        .show > .nav-link {
+            border-color: currentColor;
         }
     }
 }
@@ -885,6 +1144,31 @@ header {
                 position: sticky;
                 z-index: -1;
             }
+        }
+    }
+}
+
+@if o-website-value('footer-scrolltop') {
+    #o_footer_scrolltop {
+        $-footer-color: o-color('footer');
+        $-copyright-color: o-color('copyright');
+        $-copyright-color: mix(rgba($-copyright-color, 1.0), $-footer-color, percentage(alpha($-copyright-color)));
+
+        box-sizing: content-box;
+        width: 3rem;
+        height: 3rem;
+        border: 0;
+        padding: 0;
+        @include o-apply-colors('footer', $with-extras: false, $background: $-footer-color);
+        text-decoration: none;
+
+        @if $-footer-color == $-copyright-color {
+            color: rgba(color-yiq($-footer-color), 0.5);
+        }
+
+        @include hover-focus {
+            @include o-apply-colors($-copyright-color, $with-extras: false, $background: $-footer-color);
+            text-decoration: none;
         }
     }
 }

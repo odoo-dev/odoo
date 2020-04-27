@@ -1713,7 +1713,16 @@ options.registry.collapse = options.Class.extend({
     },
 });
 
-options.registry.Header = options.Class.extend({
+options.registry.Header = options.registry.background.extend({
+
+    /**
+     * @override
+     */
+    async updateUI() {
+        await this._super(...arguments);
+        const isHamburger = this.$('.navbar-toggler').is(':visible');
+        this.$el.find('#hamburger_opt_label').toggleClass('d-none', isHamburger);
+    },
 
     //--------------------------------------------------------------------------
     // Private

@@ -1,4 +1,3 @@
-$o-theme-layout: 'full';
 
 //------------------------------------------------------------------------------
 // Colors
@@ -262,6 +261,7 @@ $o-base-website-values-palette: (
 
     'footer-template': 'products_contacts_about_us',
     'footer-effect': null, // null / 'slideout_slide_hover' / 'slideout_shadow'
+    'footer-scrolltop': false,
 );
 $o-font-aliases-to-keys: (
     'base': 'font',
