@@ -145,23 +145,7 @@ class Activity extends Component {
      * @param {MouseEvent} ev
      */
     _onClickEdit(ev) {
-        ev.preventDefault();
-        const action = {
-            type: 'ir.actions.act_window',
-            name: this.env._t("Schedule Activity"),
-            res_model: 'mail.activity',
-            view_mode: 'form',
-            views: [[false, 'form']],
-            target: 'new',
-            context: {
-                default_res_id: this.activity.res_id,
-                default_res_model: this.activity.res_model,
-            },
-            res_id: this.activity.id,
-        };
-        return this.env.do_action(action, {
-            on_close: () => this.activity.fetchAndUpdate(),
-        });
+        this.activity.edit();
     }
 
     /**

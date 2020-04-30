@@ -606,7 +606,7 @@ QUnit.test('activity with mail template: preview mail', async function (assert) 
     document.querySelector('.o_MailTemplate_preview').click();
     assert.verifySteps(
         ['do_action'],
-        "should have call 'compose email' action correctly"
+        "should have called 'compose email' action correctly"
     );
 });
 
@@ -770,13 +770,106 @@ QUnit.test('activity click on edit', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll('.o_Activity_editButton').length,
         1,
-        "should have activity mail template name preview button"
+        "should have activity edit button"
     );
 
     document.querySelector('.o_Activity_editButton').click();
     assert.verifySteps(
         ['do_action'],
         "should have called 'schedule activity' action correctly"
+    );
+});
+
+QUnit.test('activity edition', async function (assert) {
+    assert.expect(14);
+
+    const self = this;
+    this.data['mail.activity'].records = [{
+        can_write: true,
+        icon: 'fa-times',
+        id: 12,
+        res_id: 42,
+        res_model: 'res.partner',
+    }];
+    await this.start({
+        intercepts: {
+            do_action(ev) {
+                assert.step('do_action');
+                assert.strictEqual(
+                    ev.data.action.context.default_res_id,
+                    42,
+                    'Action should have the activity res id as default res id in context'
+                );
+                assert.strictEqual(
+                    ev.data.action.context.default_res_model,
+                    'res.partner',
+                    'Action should have the activity res model as default res model in context'
+                );
+                assert.strictEqual(
+                    ev.data.action.type,
+                    'ir.actions.act_window',
+                    'Action should be of type "ir.actions.act_window"'
+                );
+                assert.strictEqual(
+                    ev.data.action.res_model,
+                    'mail.activity',
+                    'Action should have "mail.activity" as res_model'
+                );
+                assert.strictEqual(
+                    ev.data.action.res_id,
+                    12,
+                    'Action should have activity id as res_id'
+                );
+                self.data['mail.activity'].records[0].icon = 'fa-check';
+                ev.data.options.on_close();
+            },
+        },
+    });
+    const activity = this.env.entities.Activity.create(this.data['mail.activity'].records[0]);
+    await this.createActivityComponent(activity);
+
+    assert.containsOnce(
+        document.body,
+        '.o_Activity',
+        "should have activity component"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Activity_editButton',
+        "should have activity edit button"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Activity_icon',
+        "should have activity icon"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Activity_icon.fa-times',
+        "should have initial activity icon"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_Activity_icon.fa-check',
+        "should not have new activity icon when not edited yet"
+    );
+
+    await afterNextRender(() => {
+        document.querySelector('.o_Activity_editButton').click();
+    });
+    assert.verifySteps(
+        ['do_action'],
+        "should have called 'schedule activity' action correctly"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_Activity_icon.fa-times',
+        "should no more have initial activity icon once edited"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Activity_icon.fa-check',
+        "should now have new activity icon once edited"
     );
 });
 

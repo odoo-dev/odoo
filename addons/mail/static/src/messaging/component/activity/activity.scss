@@ -19,7 +19,7 @@
     margin-inline-end: map-get($spacers, 2);
 }
 
-.o_Activity_icon {
+.o_Activity_iconContainer {
     @include o-position-absolute($top: auto, $left: auto, $bottom: -5px, $right: -5px);
     display: flex;
     align-items: center;
@@ -138,7 +138,7 @@ a:not([href]):not([tabindex]).o_Activity_detailsButton {
     font-weight: bold;
 }
 
-.o_Activity_icon {
+.o_Activity_iconContainer {
     color: white;
     border-color: white;
     border-radius: 100%;
