@@ -30,8 +30,34 @@ function ActivityFactory({ Entity }) {
             this.delete();
         }
 
+        /**
+         * Opens (legacy) form view dialog to edit current activity and updates
+         * the activity when dialog is closed.
+         */
+        edit() {
+            const action = {
+                type: 'ir.actions.act_window',
+                name: this.env._t("Schedule Activity"),
+                res_model: 'mail.activity',
+                view_mode: 'form',
+                views: [[false, 'form']],
+                target: 'new',
+                context: {
+                    default_res_id: this.res_id,
+                    default_res_model: this.res_model,
+                },
+                res_id: this.id,
+            };
+            this.env.do_action(action, {
+                on_close: () => this.fetchAndUpdate(),
+            });
+        }
+
+        /**
+         * Updates current activity from its server state.
+         */
         async fetchAndUpdate() {
-            const data = await this.env.rpc({
+            const [data] = await this.env.rpc({
                 model: 'mail.activity',
                 method: 'activity_format',
                 args: [this.id],

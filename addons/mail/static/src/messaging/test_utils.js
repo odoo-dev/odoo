@@ -396,6 +396,25 @@ function beforeEach(self) {
                 mimetype: { type: 'char', string: "mimetype" },
             },
         },
+        'mail.activity': {
+            fields: {
+                can_write: {
+                    type: 'boolean',
+                },
+                icon: {
+                    type: 'string',
+                },
+                id: {
+                    type: 'integer',
+                },
+                res_id: {
+                    type: 'integer',
+                },
+                res_model: {
+                    type: 'string',
+                },
+            },
+        },
         'mail.channel': {
             fields: {
                 channel_type: {

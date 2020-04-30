@@ -9,14 +9,14 @@
                         <t t-if="activity.assignee">
                             <img class="o_Activity_userAvatar" t-attf-src="/web/image/res.users/{{ activity.assignee.id }}/image_128" t-att-alt="activity.assignee.nameOrDisplayName"/>
                         </t>
-                        <div class="o_Activity_icon"
+                        <div class="o_Activity_iconContainer"
                             t-att-class="{
                                 'bg-success-full': activity.state === 'planned',
                                 'bg-warning-full': activity.state === 'today',
                                 'bg-danger-full': activity.state === 'overdue',
                             }"
                         >
-                            <i class="fa" t-attf-class="{{ activity.icon }}"/>
+                            <i class="o_Activity_icon fa" t-attf-class="{{ activity.icon }}"/>
                         </div>
                     </div>
                 </div>
