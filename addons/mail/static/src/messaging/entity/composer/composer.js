@@ -131,7 +131,7 @@ function ComposerFactory({ Entity }) {
                     subtype_id,
                     subtype_xmlid: isLog ? 'mail.mt_note' : 'mail.mt_comment',
                 });
-                const messageId = await this.env.rpc({
+                messageId = await this.env.rpc({
                     model: thread.model,
                     method: 'message_post',
                     args: [thread.id],

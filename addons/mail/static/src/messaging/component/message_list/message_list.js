@@ -166,23 +166,12 @@ class MessageList extends Component {
     /**
      * @returns {mail.messaging.component.Message|undefined}
      */
-    get lastCurrentPartnerMessageRef() {
-        const currentPartnerMessageRefs = this.messageRefs.filter(messageRef =>
-            (
-                messageRef.message.author &&
-                messageRef.message.author === this.env.messaging.currentPartner
-            )
-        );
-        const { length: l, [l - 1]: lastCurrentPartnerMessageRefs } = currentPartnerMessageRefs;
-        return lastCurrentPartnerMessageRefs;
-    }
-
-    /**
-     * @returns {mail.messaging.component.Message|undefined}
-     */
-    get lastMessageRef() {
-        const { length: l, [l - 1]: lastMessageRef } = this.messageRefs;
-        return lastMessageRef;
+    get mostRecentMessageRef() {
+        if (this.props.order === 'desc') {
+            return this.messageRefs[0];
+        }
+        const { length: l, [l - 1]: mostRecentMessageRef } = this.messageRefs;
+        return mostRecentMessageRef;
     }
 
     /**
@@ -328,7 +317,7 @@ class MessageList extends Component {
             } else {
                 const lastMessage = threadCache.lastMessage;
                 if (this.messageRefFromId(lastMessage.id)) {
-                    await this._scrollToLastMessage();
+                    await this._scrollToMostRecentMessage();
                     isProcessed = true;
                 }
             }
@@ -385,12 +374,12 @@ class MessageList extends Component {
         if (threadCache.messages.length === 0) {
             return;
         }
-        if (!this.lastMessageRef) {
+        if (!this.mostRecentMessageRef) {
             return;
         }
         if (
             threadCache === thread.mainCache &&
-            this.lastMessageRef.isPartiallyVisible()
+            this.mostRecentMessageRef.isPartiallyVisible()
         ) {
             thread.markAsSeen();
         }
@@ -422,12 +411,12 @@ class MessageList extends Component {
      * @private
      * @returns {Promise}
      */
-    async _scrollToLastMessage() {
-        if (!this.lastMessageRef) {
+    async _scrollToMostRecentMessage() {
+        if (!this.mostRecentMessageRef) {
             return;
         }
         this._isAutoLoadOnScrollActive = false;
-        await this.lastMessageRef.scrollIntoView();
+        await this.mostRecentMessageRef.scrollIntoView();
         if (!this.el) {
             this._isAutoLoadOnScrollActive = true;
             return;
