@@ -637,12 +637,13 @@
             we recommend you to try to use the new color system, which is
             still customizable.
         </we-alert>
-        <we-row string="Theme colors">
+        <we-row string="Theme colors" class="o_we_fw">
             <we-colorpicker data-name="color_1_opt" title="Primary" data-customize-website-color="" data-color="o-color-1"/>
             <we-colorpicker data-name="color_2_opt" title="Secondary" data-customize-website-color="" data-color="o-color-2"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-3"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-4"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-5"/>
+            <we-select class="ml-auto" data-icon="fa-lightbulb-o" data-variable="color-palettes-number"/>
         </we-row>
         <div class="o_color_combinations_edition"/>
         <we-row string="Status Colors">
