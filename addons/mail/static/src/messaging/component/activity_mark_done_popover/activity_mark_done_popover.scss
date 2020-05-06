@@ -13,6 +13,7 @@
     display: flex;
     flex: 1;
     justify-content: space-between;
+    margin-top: map-get($spacers, 2);
 }
 
 .o_ActivityMarkDonePopover_feedback {
