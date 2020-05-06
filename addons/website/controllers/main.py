@@ -466,7 +466,19 @@ class Website(Home):
         Returns:
             boolean
         """
-        request.env['web_editor.assets'].make_scss_customization(url, values)
+        Assets = request.env['web_editor.assets']
+
+        if 'color-palettes-number' in values:
+            Assets.reset_asset('/website/static/src/scss/options/colors/user_color_palette.scss', 'web.assets_common')
+            # Do not reset all theme colors for compatibility (not removing alpha -> epsilon colors)
+            Assets.make_scss_customization('/website/static/src/scss/options/colors/user_theme_color_palette.scss', {
+                'success': 'null',
+                'info': 'null',
+                'warning': 'null',
+                'danger': 'null',
+            })
+
+        Assets.make_scss_customization(url, values)
         return True
 
     @http.route(['/website/update_visitor_timezone'], type='json', auth="public", website=True)
