@@ -112,15 +112,14 @@
                     <t t-if="activity.canWrite">
                         <div class="o_Activity_tools">
                             <t t-if="activity.category !== 'upload_file'">
-                                <ActivityMarkDoneButton
-                                    class="o_Activity_toolButton o_Activity_markDoneButton btn-link"
-                                    activityLocalId="activity.localId"
-                                    popoverTitle="'Mark Done'"
-                                >
-                                    <t t-set="buttonHtml">
+                                <Popover position="'right'" title="MARK_DONE">
+                                    <button class="o_Activity_toolButton o_Activity_markDoneButton btn btn-link" t-att-title="MARK_DONE">
                                         <i class="fa fa-check"/> Mark Done
+                                    </button>
+                                    <t t-set="opened">
+                                        <ActivityMarkDonePopover activityLocalId="props.activityLocalId"/>
                                     </t>
-                                </ActivityMarkDoneButton>
+                                </Popover>
                             </t>
                             <t t-else="">
                                 <button class="o_Activity_toolButton o_Activity_uploadButton btn btn-link" t-on-click="_onClickUploadDocument">

@@ -104,7 +104,6 @@
         'static/src/messaging/component/moderation_reject_dialog/moderation_reject_dialog.xml',
         'static/src/messaging/component/notification_list/notification_list.xml',
         'static/src/messaging/component/partner_im_status_icon/partner_im_status_icon.xml',
-        'static/src/messaging/component/popover_button/popover_button.xml',
         'static/src/messaging/component/thread_icon/thread_icon.xml',
         'static/src/messaging/component/thread_preview/thread_preview.xml',
         'static/src/messaging/component/thread_viewer/thread_viewer.xml',

@@ -2,7 +2,7 @@ odoo.define('mail.messaging.component.Activity', function (require) {
 'use strict';
 
 const components = {
-    ActivityMarkDoneButton: require('mail.messaging.component.ActivityMarkDoneButton'),
+    ActivityMarkDonePopover: require('mail.messaging.component.ActivityMarkDonePopover'),
     FileUploader: require('mail.messaging.component.FileUploader'),
     MailTemplate: require('mail.messaging.component.MailTemplate'),
 };
@@ -94,6 +94,13 @@ class Activity extends Component {
         const momentDeadlineDate = moment(auto_str_to_date(this.activity.dateDeadline));
         const datetimeFormat = getLangDateFormat();
         return momentDeadlineDate.format(datetimeFormat);
+    }
+
+    /**
+     * @returns {string}
+     */
+    get MARK_DONE() {
+        return this.env._t("Mark Done");
     }
 
     /**
