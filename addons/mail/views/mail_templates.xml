@@ -92,7 +92,6 @@
                 <!-- owl -->
                 <script type="text/javascript" src="/mail/static/src/messaging/component/activity/activity.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/activity_box/activity_box.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/component/activity_mark_done_button/activity_mark_done_button.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/activity_mark_done_popover/activity_mark_done_popover.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/attachment/attachment.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/attachment_box/attachment_box.js"></script>
@@ -116,7 +115,6 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/component/discuss_sidebar_item/discuss_sidebar_item.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/drop_zone/drop_zone.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/editable_text/editable_text.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/component/emojis_button/emojis_button.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/emojis_popover/emojis_popover.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/file_uploader/file_uploader.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/follow_button/follow_button.js"></script>
@@ -135,8 +133,6 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/component/moderation_reject_dialog/moderation_reject_dialog.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/notification_list/notification_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/partner_im_status_icon/partner_im_status_icon.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/component/popover_button/popover_button.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/component/popover_button_with_component/popover_button_with_component.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/thread_icon/thread_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/thread_preview/thread_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/thread_viewer/thread_viewer.js"></script>

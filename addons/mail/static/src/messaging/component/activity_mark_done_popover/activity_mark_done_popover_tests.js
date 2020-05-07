@@ -142,9 +142,10 @@ QUnit.test('activity mark done popover click on discard', async function (assert
         id: 12,
     });
     await this.createActivityMarkDonePopoverComponent(activity);
-    document.addEventListener('o-discard-clicked', () => {
+    function onPopoverClose(ev) {
         assert.step('event_triggered');
-    }, true);
+    }
+    document.addEventListener('o-popover-close', onPopoverClose);
 
     assert.containsOnce(
         document.body,
@@ -159,6 +160,7 @@ QUnit.test('activity mark done popover click on discard', async function (assert
     document.querySelector('.o_ActivityMarkDonePopover_discardButton').click();
     assert.verifySteps(['event_triggered'], 'Discard clicked should trigger the right event');
 
+    document.removeEventListener('o-popover-close', onPopoverClose);
 });
 
 QUnit.test('activity mark done popover mark done without feedback', async function (assert) {

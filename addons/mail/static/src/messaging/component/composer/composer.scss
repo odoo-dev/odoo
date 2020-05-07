@@ -186,6 +186,13 @@
     }
 }
 
+// TODO FIXME o-open on the button should be enough, https://github.com/odoo/owl/issues/693
+.o_is_open {
+    .o_Composer_button {
+        background-color: gray('200');
+    }
+}
+
 .o_Composer_buttonDiscard {
     border: 1px solid lighten(gray('400'), 5%);
 }

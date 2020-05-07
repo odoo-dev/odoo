@@ -47,7 +47,7 @@ class ActivityMarkDonePopover extends Component {
      * @private
      */
     _onClickDiscard() {
-        this.trigger('o-discard-clicked');
+        this.trigger('o-popover-close');
     }
 
     /**

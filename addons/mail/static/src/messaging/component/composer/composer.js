@@ -4,7 +4,7 @@ odoo.define('mail.messaging.component.Composer', function (require) {
 const components = {
     AttachmentList: require('mail.messaging.component.AttachmentList'),
     DropZone: require('mail.messaging.component.DropZone'),
-    EmojisButton: require('mail.messaging.component.EmojisButton'),
+    EmojisPopover: require('mail.messaging.component.EmojisPopover'),
     FileUploader: require('mail.messaging.component.FileUploader'),
     TextInput: require('mail.messaging.component.ComposerTextInput'),
 };
@@ -35,7 +35,7 @@ class Composer extends Component {
          * Reference of the emoji button. Useful to include emoji popover as
          * click "inside" the composer for the prop `isDiscardOnClickAway`.
          */
-        this._emojisButtonRef = useRef('emojisButton');
+        this._emojisPopoverRef = useRef('emojisPopover');
         /**
          * Reference of the file uploader.
          * Useful to programmatically prompts the browser file uploader.
@@ -200,7 +200,7 @@ class Composer extends Component {
             return;
         }
         // emoji popover is outside but should be considered inside
-        if (this._emojisButtonRef.comp.isInsideEventTarget(ev.target)) {
+        if (this._emojisPopoverRef.comp.isInsideEventTarget(ev.target)) {
             return;
         }
         this.composer.discard();

@@ -24,6 +24,7 @@ class EmojisPopover extends Component {
      * @param {MouseEvent} ev
      */
     _onClickEmoji(ev) {
+        this.trigger('o-popover-close');
         this.trigger('o-emoji-selection', {
             unicode: ev.currentTarget.dataset.unicode,
         });

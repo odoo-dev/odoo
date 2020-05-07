@@ -693,7 +693,7 @@ QUnit.test('activity click on mark as done', async function (assert) {
         can_write: true
     });
     await this.createActivityComponent(activity);
-    await afterNextRender();
+
     assert.strictEqual(
         document.querySelectorAll('.o_Activity').length,
         1,
@@ -774,10 +774,9 @@ QUnit.test('activity click on edit', async function (assert) {
     );
 
     document.querySelector('.o_Activity_editButton').click();
-    await afterNextRender();
     assert.verifySteps(
         ['do_action'],
-        "should have call 'schedule activity' action correctly"
+        "should have called 'schedule activity' action correctly"
     );
 });
 

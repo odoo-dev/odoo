@@ -33,7 +33,6 @@ QUnit.module('Composer', {
                 composerLocalId: composer.localId,
             }, otherProps));
             await this.component.mount(this.widget.el);
-            await afterNextRender();
         };
 
         this.start = async params => {
@@ -57,7 +56,6 @@ QUnit.module('Composer', {
         }
         this.env = undefined;
         delete components.Composer.env;
-        await nextAnimationFrame(); // ensures tribute is detached on next frame
     },
 });
 
