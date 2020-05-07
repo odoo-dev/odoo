@@ -42,6 +42,23 @@ odoo.define("web.env", function (require) {
         }).then(response => response[readMethod]());
     }
 
+    /**
+     * Returns whether the given element fits inside the viewport.
+     *
+     * @param {HTMLElement} element
+     * @returns {boolean}
+     */
+    function isElementInViewport(element) {
+        const rect = element.getBoundingClientRect();
+        const html = document.documentElement;
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || html.clientHeight) &&
+            rect.right <= (window.innerWidth || html.clientWidth)
+        );
+    }
+
     function navigate(url, params) {
         window.location = $.param.querystring(url, params);
     }
@@ -143,6 +160,7 @@ odoo.define("web.env", function (require) {
             blockUI,
             getCookie,
             httpRequest,
+            isElementInViewport,
             navigate,
             reloadPage,
             rpc: performRPC,
