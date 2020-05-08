@@ -24,17 +24,29 @@ function ChatterFactory({ Entity }) {
 
     class Chatter extends Entity {
 
+        /**
+         * @override
+         */
+        delete() {
+            this._stopAttachmentsLoading();
+            super.delete();
+        }
+
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
 
-        refresh() {
+        async refresh() {
             const thread = this.thread;
             if (!thread || thread.isTemporary) {
                 return;
             }
             thread.loadNewMessages();
-            thread.fetchAttachments();
+            if (!this._isPreparingAttachmentsLoading && !this.isShowingAttachmentsLoading) {
+                this._prepareAttachmentsLoading();
+            }
+            await thread.fetchAttachments();
+            this._stopAttachmentsLoading();
         }
 
         async refreshActivities() {
@@ -114,6 +126,27 @@ function ChatterFactory({ Entity }) {
          */
         _computeTodayActivities() {
             return [['replace', this.activities.filter(activity => activity.state === 'today')]];
+        }
+
+        /**
+         * @private
+         */
+        _prepareAttachmentsLoading() {
+            this._isPreparingAttachmentsLoading = true;
+            this._attachmentsLoaderTimeout = setTimeout(() => {
+                this.update({isShowingAttachmentsLoading: true});
+                this._isPreparingAttachmentsLoading = false;
+            }, this.env.loadingBaseDelayDuration);
+        }
+
+        /**
+         * @private
+         */
+        _stopAttachmentsLoading() {
+            clearTimeout(this._attachmentsLoaderTimeout);
+            this._attachmentsLoaderTimeout = null;
+            this.update({isShowingAttachmentsLoading: false});
+            this._isPreparingAttachmentsLoading = false;
         }
 
         /**
@@ -257,6 +290,9 @@ function ChatterFactory({ Entity }) {
             compute: '_computeIsDisabled',
             default: false,
             dependencies: ['threadId'],
+        }),
+        isShowingAttachmentsLoading: attr({
+            default: false,
         }),
         messageIds: attr({
             default: [],
