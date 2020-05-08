@@ -93,6 +93,7 @@ const MockMailService = Class.extend({
         Object.assign(testEnv, {
             autofetchPartnerImStatus: false,
             disableAnimation: true,
+            loadingBaseDelayDuration: 0,
         });
         return MessagingService.extend({
             env: testEnv,

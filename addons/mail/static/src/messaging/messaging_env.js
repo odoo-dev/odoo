@@ -33,6 +33,7 @@ async function addMessagingToEnv(env) {
             }
             return this.messaging.isInitialized;
         },
+        loadingBaseDelayDuration: 400,
         messaging: undefined,
         messagingBus: new EventBus(),
         store,

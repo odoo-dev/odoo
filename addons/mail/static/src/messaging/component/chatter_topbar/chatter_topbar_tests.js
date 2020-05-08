@@ -165,6 +165,47 @@ QUnit.test('base disabled rendering', async function (assert) {
     );
 });
 
+QUnit.test('attachment loading is delayed', async function (assert) {
+    assert.expect(4);
+
+    await this.start({
+        async mockRPC(route) {
+            if (route.includes('ir.attachment/search_read')) {
+                return new Promise(() => {}); // simulate long loading
+            }
+            return this._super(...arguments);
+        }
+    });
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
+    });
+    await this.createChatterTopbarComponent(chatter);
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar`).length,
+        1,
+        "should have a chatter topbar"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
+        1,
+        "should have an attachments button in chatter menu"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
+        0,
+        "attachments button should not have a loader yet"
+    );
+
+    await afterNextRender();
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
+        1,
+        "attachments button should now have a loader"
+    );
+});
+
 QUnit.test('attachment counter while loading attachments', async function (assert) {
     assert.expect(4);
 
@@ -181,6 +222,7 @@ QUnit.test('attachment counter while loading attachments', async function (asser
         threadModel: 'res.partner',
     });
     await this.createChatterTopbarComponent(chatter);
+    await afterNextRender();
 
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
@@ -222,6 +264,8 @@ QUnit.test('attachment counter transition when attachments become loaded)', asyn
         threadModel: 'res.partner',
     });
     await this.createChatterTopbarComponent(chatter);
+    await afterNextRender();
+
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -243,7 +287,7 @@ QUnit.test('attachment counter transition when attachments become loaded)', asyn
         "attachments button should not have a counter"
     );
 
-    attachmentPromise.resolve(); // Simulates attachments are loaded
+    attachmentPromise.resolve();
     await afterNextRender();
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
