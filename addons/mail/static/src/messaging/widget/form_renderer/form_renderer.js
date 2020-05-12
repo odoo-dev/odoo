@@ -32,25 +32,21 @@ FormRenderer.include({
         // Do not load chatter in form view dialogs
         this._isFromFormViewDialog = params.isFromFormViewDialog;
     },
+    /**
+     * @override
+     */
+    destroy() {
+        this._super(...arguments);
+        this._chatterContainerComponent = undefined;
+        this.off('o_attachments_changed', this);
+        this.off('o_chatter_rendered', this);
+        this.off('o_message_posted', this);
+    },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Destroy the chatter component
-     *
-     * @private
-     */
-    _destroyChatterContainer() {
-        if (this._chatterContainerComponent) {
-            this._chatterContainerComponent.destroy();
-            this._chatterContainerComponent = undefined;
-        }
-        this.off('o_attachments_changed', this);
-        this.off('o_chatter_rendered', this);
-        this.off('o_message_posted', this);
-    },
     /**
      * Returns whether the form renderer has a chatter to display or not.
      * This is based on arch, which should have `div.oe_chatter`.
