@@ -310,7 +310,149 @@ class EntityManager {
     /**
      * @private
      * @param {Object} Entities
-     * @throws {Error} in case some relations are not correct
+     * @throws {Error} in case some declared fields are not correct.
+     */
+    _checkDeclaredFieldsOnClasses(Entities) {
+        for (const Entity of Object.values(Entities)) {
+            for (const fieldName in Entity.fields) {
+                const field = Entity.fields[fieldName];
+                // 0. Get parented declared fields
+                const parentedMatchingFields = [];
+                let TargetEntity = Entity.__proto__;
+                while (Entities[TargetEntity.entityName]) {
+                    if (TargetEntity.fields) {
+                        const matchingField = TargetEntity.fields[fieldName];
+                        if (matchingField) {
+                            parentedMatchingFields.push(matchingField);
+                        }
+                    }
+                    TargetEntity = TargetEntity.__proto__;
+                }
+                // 1. Field type is required.
+                if (!(['attribute', 'relation'].includes(field.fieldType))) {
+                    throw new Error(`Field "${Entity.entityName}/${fieldName}" has unsupported type ${field.fieldType}.`);
+                }
+                // 2. Invalid keys based on field type.
+                if (field.fieldType === 'attribute') {
+                    const invalidKeys = Object.keys(field).filter(key =>
+                        ![
+                            'autocreate',
+                            'compute',
+                            'default',
+                            'dependencies',
+                            'fieldType',
+                            'related',
+                        ].includes(key)
+                    );
+                    if (invalidKeys.length > 0) {
+                        throw new Error(`Field "${Entity.entityName}/${fieldName}" contains some invalid keys: "${invalidKeys.join(", ")}".`);
+                    }
+                }
+                if (field.fieldType === 'relation') {
+                    const invalidKeys = Object.keys(field).filter(key =>
+                        ![
+                            'autocreate',
+                            'compute',
+                            'dependencies',
+                            'fieldType',
+                            'inverse',
+                            'isCausal',
+                            'related',
+                            'relationType',
+                            'to',
+                        ].includes(key)
+                    );
+                    if (invalidKeys.length > 0) {
+                        throw new Error(`Field "${Entity.entityName}/${fieldName}" contains some invalid keys: "${invalidKeys.join(", ")}".`);
+                    }
+                    if (!Entities[field.to]) {
+                        throw new Error(`Relational field "${Entity.entityName}/${fieldName}" targets to unknown entity name "${field.to}".`);
+                    }
+                }
+                // 3. Computed field.
+                if (field.compute && !(typeof field.compute === 'string')) {
+                    throw new Error(`Field "${Entity.entityName}/${fieldName}" property "compute" must be a string (instance method name).`);
+                }
+                if (field.compute && !(Entity.prototype[field.compute])) {
+                    throw new Error(`Field "${Entity.entityName}/${fieldName}" property "compute" does not refer to an instance method of this Entity class.`);
+                }
+                if (
+                    field.dependencies &&
+                    (!field.compute && !parentedMatchingFields.some(field => field.compute))
+                ) {
+                    throw new Error(`Field "${Entity.entityName}/${fieldName} contains dependendencies but no compute method in itself or parented matching fields (dependencies only make sense for compute fields)."`);
+                }
+                if (
+                    (field.compute || parentedMatchingFields.some(field => field.compute)) &&
+                    (field.dependencies || parentedMatchingFields.some(field => field.dependencies))
+                ) {
+                    if (!(field.dependencies instanceof Array)) {
+                        throw new Error(`Compute field "${Entity.entityName}/${fieldName}" dependencies must be an array of field names.`);
+                    }
+                    const unknownDependencies = field.dependencies.every(dependency => !(Entity.fields[dependency]));
+                    if (unknownDependencies.length > 0) {
+                        throw new Error(`Compute field "${Entity.entityName}/${fieldName}" contains some unknown dependencies: "${unknownDependencies.join(", ")}".`);
+                    }
+                }
+                // 4. Related field.
+                if (field.compute && field.related) {
+                    throw new Error(`Field "${Entity.entityName}/${fieldName}" cannot be a related and compute field at the same time.`);
+                }
+                if (field.related) {
+                    if (!(typeof field.related === 'string')) {
+                        throw new Error(`Field "${Entity.entityName}/${fieldName}" property "related" has invalid format.`);
+                    }
+                    const [relationName, relatedFieldName, other] = field.related.split('.');
+                    if (!relationName || !relatedFieldName || other) {
+                        throw new Error(`Field "${Entity.entityName}/${fieldName}" property "related" has invalid format.`);
+                    }
+                    // find relation on self or parents.
+                    let relatedRelation;
+                    let TargetEntity = Entity;
+                    while (Entities[TargetEntity.entityName] && !relatedRelation) {
+                        if (TargetEntity.fields) {
+                            relatedRelation = TargetEntity.fields[relationName];
+                        }
+                        TargetEntity = TargetEntity.__proto__;
+                    }
+                    if (!relatedRelation) {
+                        throw new Error(`Related field "${Entity.entityName}/${fieldName}" relates to unknown relation name "${relationName}".`);
+                    }
+                    if (relatedRelation.fieldType !== 'relation') {
+                        throw new Error(`Related field "${Entity.entityName}/${fieldName}" relates to non-relational field "${relationName}".`);
+                    }
+                    // Assuming related relation is valid...
+                    // find field name on related entity or any parents.
+                    const RelatedEntity = Entities[relatedRelation.to];
+                    let relatedField;
+                    TargetEntity = RelatedEntity;
+                    while (Entities[TargetEntity.entityName] && !relatedField) {
+                        if (TargetEntity.fields) {
+                            relatedField = TargetEntity.fields[relatedFieldName];
+                        }
+                        TargetEntity = TargetEntity.__proto__;
+                    }
+                    if (!relatedField) {
+                        throw new Error(`Related field "${Entity.entityName}/${fieldName}" relates to unknown related entity field "${relatedFieldName}".`);
+                    }
+                    if (relatedField.fieldType !== field.fieldType) {
+                        throw new Error(`Related field "${Entity.entityName}/${fieldName}" has mismatch type with its related entity field.`);
+                    }
+                    if (
+                        relatedField.fieldType === 'relation' &&
+                        relatedField.to !== field.to
+                    ) {
+                        throw new Error(`Related field "${Entity.entityName}/${fieldName}" has mismatch target entity name with its related entity field.`);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @private
+     * @param {Object} Entities
+     * @throws {Error} in case some fields are not correct.
      */
     _checkProcessedFieldsOnClasses(Entities) {
         for (const Entity of Object.values(Entities)) {
@@ -434,6 +576,7 @@ class EntityManager {
     /**
      * @private
      * @returns {Object}
+     * @throws {Error} in case it cannot generate Entity classes.
      */
     _generateClasses() {
         const allNames = Object.keys(registry);
@@ -469,10 +612,20 @@ class EntityManager {
                         break;
                 }
             }
+            if (!Entity.entityName) {
+                throw new Error(`Missing static property "entityName" on Entity class "${Entity.name}".`);
+            }
+            if (generatedNames.includes(Entity.entityName)) {
+                throw new Error(`Duplicate entity name "${Entity.entityName}" shared on 2 distinct Entity classes.`);
+            }
             Entities[Entity.entityName] = Entity;
             generatedNames.push(Entity.entityName);
             toGenerateNames = toGenerateNames.filter(name => name !== Entity.entityName);
         }
+        /**
+         * Check that declared entity fields are correct.
+         */
+        this._checkDeclaredFieldsOnClasses(Entities);
         /**
          * Process declared entity fields definitions, so that these field
          * definitions are much easier to use in the system. For instance, all
@@ -739,7 +892,7 @@ class EntityManager {
         for (const [k, v] of Object.entries(data)) {
             const field = entity.constructor.fields[k];
             if (!field) {
-                throw new Error("Cannot create/update entity with data unrelated to a field.");
+                throw new Error(`Cannot create/update entity with data unrelated to a field. (entity name: "${entity.constructor.entityName}", non-field attempted update: "${k}")`);
             }
             field.set(entity, v);
         }

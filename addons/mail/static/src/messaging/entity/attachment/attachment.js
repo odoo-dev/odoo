@@ -290,7 +290,6 @@ function AttachmentFactory({ Entity }) {
         id: attr({
             compute: '_computeId',
             dependencies: ['isTemporary'],
-            readonly: false,
         }),
         isLinkedToComposer: attr({
             compute: '_computeIsLinkedToComposer',
