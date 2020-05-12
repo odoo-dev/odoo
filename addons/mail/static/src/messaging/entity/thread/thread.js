@@ -81,7 +81,7 @@ function ThreadFactory({ Entity }) {
             }
             if ('members' in data) {
                 if (!data.members) {
-                    data2.attachments = [['unlink-all']];
+                    data2.members = [['unlink-all']];
                 } else {
                     data2.members = [
                         ['insert-and-replace', data.members.map(memberData => this.env.entities.Partner.convertData(memberData))]
