@@ -265,13 +265,12 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-6 mt-3" t-foreach="[0, 1, 2, 3, 4, 5]" t-as="i">
+                                <div class="col-6 mt-3" t-foreach="[1, 2, 3, 4, 5]" t-as="i">
                                     <div t-attf-class="o_cc#{i} p-3 border">
                                         <div class="row">
                                             <div class="col-7">
                                                 <h2>
-                                                    <t t-if="i>0">Preset <t t-esc="i"/></t>
-                                                    <t t-else="">No preset</t> Heading
+                                                    Preset <t t-esc="i"/>
                                                 </h2>
                                                 <p>Paragraph text. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. <i>Integer posuere erat a ante</i>. <a href="#">Link text</a></p>
                                                 <p class="text-muted">Text muted. Lorem <b>ipsum dolor sit amet</b>, consectetur.</p>
