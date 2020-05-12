@@ -168,6 +168,7 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/thread_viewer/thread_viewer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/user/user.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity_core.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/entity_errors.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity_field.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/messaging_env.js"></script>

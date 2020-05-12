@@ -17,11 +17,7 @@ function MessagingInitializerFactory({ Entity }) {
          * the current user. This includes pinned channels for instance.
          */
         async start() {
-            await this.env.session.is_bound;
-            if (!this.constructor.get(this)) {
-                // destroyed in the mean time.
-                return;
-            }
+            await this.async(() => this.env.session.is_bound);
 
             this.env.entities.Thread.create({
                 id: 'inbox',
@@ -58,14 +54,10 @@ function MessagingInitializerFactory({ Entity }) {
                 isMobile: device.isMobile,
             }, this.env.session.user_context);
             const discuss = this.messaging.discuss;
-            const data = await this.env.rpc({
+            const data = await this.async(() => this.env.rpc({
                 route: '/mail/init_messaging',
                 params: { context: context }
-            });
-            if (!this.constructor.get(this)) {
-                // destroyed in the mean time.
-                return;
-            }
+            }));
             this._init(data);
             if (discuss.isOpen) {
                 discuss.openInitThread();

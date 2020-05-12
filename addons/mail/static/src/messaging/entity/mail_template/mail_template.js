@@ -43,11 +43,11 @@ function MailTemplateFactory({ Entity }) {
          * @param {mail.messaging.entity.Activity} activity
          */
         async send(activity) {
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: activity.res_model,
                 method: 'activity_send_mail',
                 args: [[activity.res_id], this.id],
-            });
+            }));
             if (activity.chatter) {
                 activity.chatter.refresh();
             }

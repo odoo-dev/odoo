@@ -81,7 +81,7 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                         return;
                 }
             });
-            await Promise.all(proms);
+            await this.async(() => Promise.all(proms));
         }
 
         /**
@@ -138,7 +138,7 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 channel_ids,
             } = data;
             if (channel_ids.length === 1) {
-                await this.env.entities.Thread.joinChannel(channel_ids[0]);
+                await this.async(() => this.env.entities.Thread.joinChannel(channel_ids[0]));
             }
             let message = this.env.entities.Message.find(message => message.id === data.id);
             if (message) {

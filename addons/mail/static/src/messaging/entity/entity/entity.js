@@ -2,6 +2,7 @@ odoo.define('mail.messaging.entity.Entity', function (require) {
 'use strict';
 
 const { registerNewEntity } = require('mail.messaging.entityCore');
+const { EntityDeletedError } = require('mail.messaging.entityErrors');
 
 function EntityFactory() {
 
@@ -87,6 +88,36 @@ function EntityFactory() {
          */
         static insert(data) {
             return this.env.entityManager.insert(this, data);
+        }
+
+        /**
+         * Perform an async function and wait until it is done. If the entity
+         * is deleted, it raises an EntityDeletedError.
+         *
+         * @param {function} func an async function
+         * @throws {EntityDeletedError} in case the current entity is not alive
+         *   at the end of async function call, whether it's resolved or
+         *   rejected.
+         * @throws {any} forwards any error in case the current entity is still
+         *   alive at the end of rejected async function call.
+         * @returns {any} result of resolved async function.
+         */
+        async async(func) {
+            return new Promise((resolve, reject) => {
+                func().then(result => {
+                    if (this.constructor.get(this)) {
+                        resolve(result);
+                    } else {
+                        reject(new EntityDeletedError(this.localId));
+                    }
+                }).catch(error => {
+                    if (this.constructor.get(this)) {
+                        reject(error);
+                    } else {
+                        reject(new EntityDeletedError(this.localId));
+                    }
+                });
+            });
         }
 
         /**

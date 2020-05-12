@@ -107,12 +107,12 @@ function ComposerFactory({ Entity }) {
                     command,
                     subtype_xmlid: 'mail.mt_comment'
                 });
-                messageId = await this.env.rpc({
+                messageId = await this.async(() => this.env.rpc({
                     model: 'mail.channel',
                     method: command ? 'execute_command' : 'message_post',
                     args: [thread.id],
                     kwargs: postData
-                });
+                }));
             } else {
                 Object.assign(postData, {
                     channel_ids: channel_ids.map(channelId => [4, channelId, false]),
@@ -126,17 +126,17 @@ function ComposerFactory({ Entity }) {
                     subtype_id,
                     subtype_xmlid: isLog ? 'mail.mt_note' : 'mail.mt_comment',
                 });
-                messageId = await this.env.rpc({
+                messageId = await this.async(() => this.env.rpc({
                     model: thread.model,
                     method: 'message_post',
                     args: [thread.id],
                     kwargs: postData
-                });
-                const [messageData] = await this.env.rpc({
+                }));
+                const [messageData] = await this.async(() => this.env.rpc({
                     model: 'mail.message',
                     method: 'message_format',
                     args: [[messageId]]
-                });
+                }));
                 this.env.entities.Message.insert(Object.assign(
                     {},
                     this.env.entities.Message.convertData(messageData),

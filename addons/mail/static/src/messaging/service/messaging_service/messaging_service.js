@@ -1,6 +1,7 @@
 odoo.define('mail.messaging.service.Messaging', function (require) {
 'use strict';
 
+const { EntityDeletedError } = require('mail.messaging.entityErrors');
 const { addMessagingToEnv } = require('mail.messaging.messaging_env');
 
 const AbstractService = require('web.AbstractService');
@@ -12,6 +13,7 @@ const messagingCreatedPromise = addMessagingToEnv(env);
 const MessagingService = AbstractService.extend({
     env,
     messagingCreatedPromise,
+    shouldRaiseEntityDeletedError: false,
     /**
      * @override {web.AbstractService}
      */
@@ -34,6 +36,15 @@ const MessagingService = AbstractService.extend({
             // TODO FIXME The method uses service specific env keys so it can
             // only be called after a service has properly set up those keys.
             await this.env.messaging.start();
+        }).catch(error => {
+            if (
+                error instanceof EntityDeletedError &&
+                !this.shouldRaiseEntityDeletedError
+            ) {
+                // Ignore entity deleted error.
+                return;
+            }
+            throw error;
         });
         Object.assign(this.env, {
             messagingInitializedPromise,

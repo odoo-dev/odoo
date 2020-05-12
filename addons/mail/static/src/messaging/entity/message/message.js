@@ -252,11 +252,11 @@ function MessageFactory({ Entity }) {
          * partner Inbox.
          */
         async markAsRead() {
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: 'mail.message',
                 method: 'set_message_done',
                 args: [[this.id]]
-            });
+            }));
         }
 
         /**
@@ -270,7 +270,7 @@ function MessageFactory({ Entity }) {
          * @param {string} [kwargs.comment]
          */
         async moderate(decision, kwargs) {
-            await this.constructor.moderate([this], decision, kwargs);
+            await this.async(() => this.constructor.moderate([this], decision, kwargs));
         }
 
         /**
@@ -308,11 +308,11 @@ function MessageFactory({ Entity }) {
          * Toggle the starred status of the provided message.
          */
         async toggleStar() {
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: 'mail.message',
                 method: 'toggle_message_starred',
                 args: [[this.id]]
-            });
+            }));
         }
 
         //----------------------------------------------------------------------

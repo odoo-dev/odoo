@@ -97,6 +97,7 @@ const MockMailService = Class.extend({
         return MessagingService.extend({
             env: testEnv,
             messagingCreatedPromise,
+            shouldRaiseEntityDeletedError: true,
         });
     },
     notification() {
@@ -112,11 +113,12 @@ const MockMailService = Class.extend({
             bus_service: this.bus_service(),
             dialog: this.dialog(isDebug),
             local_storage: this.local_storage(),
-            messaging: this.messaging(env),
             notification: this.notification(),
         };
         if (hasLegacyMail) {
             services.mail_service = this.mail_service();
+        } else {
+            services.messaging = this.messaging(env);
         }
         if (hasChatWindow) {
             services.chat_window = this.chat_window(isDebug);

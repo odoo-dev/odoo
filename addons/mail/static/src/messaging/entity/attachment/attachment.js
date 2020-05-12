@@ -78,11 +78,11 @@ function AttachmentFactory({ Entity }) {
          * Remove this attachment globally.
          */
         async remove() {
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: 'ir.attachment',
                 method: 'unlink',
                 args: [this.id],
-            }, { shadow: true });
+            }, { shadow: true }));
             this.delete();
         }
 

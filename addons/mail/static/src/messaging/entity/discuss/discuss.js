@@ -66,11 +66,11 @@ function DiscussFactory({ Entity }) {
         async handleAddChannelAutocompleteSource(req, res) {
             const value = _.escape(req.term);
             this.update({ addingChannelValue: value });
-            const result = await this.env.rpc({
+            const result = await this.async(() => this.env.rpc({
                 model: 'mail.channel',
                 method: 'channel_search_to_join',
                 args: [value],
-            });
+            }));
             const items = result.map(data => {
                 let escapedName = _.escape(data.name);
                 return Object.assign(data, {
@@ -170,7 +170,7 @@ function DiscussFactory({ Entity }) {
          * @param {string} newName
          */
         async renameThread(thread, newName) {
-            await thread.rename(newName);
+            await this.async(() => thread.rename(newName));
             this.update({ renamingThreads: [['unlink', thread]] });
         }
 

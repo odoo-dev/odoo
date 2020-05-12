@@ -66,11 +66,11 @@ function FollowerFactory({ Entity }) {
             } else {
                 args.push([this.channel.id]);
             }
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: this.followedThread.model,
                 method: 'message_unsubscribe',
                 args
-            });
+            }));
             this.delete();
         }
 
@@ -87,10 +87,10 @@ function FollowerFactory({ Entity }) {
          * Show (editable) list of subtypes of this follower.
          */
         async showSubtypes() {
-            const subtypesData = await this.env.rpc({
+            const subtypesData = await this.async(() => this.env.rpc({
                 route: '/mail/read_subscription_data',
                 params: { follower_id: this.id },
-            });
+            }));
             this.update({ subtypes: [['unlink-all']] });
             for (const data of subtypesData) {
                 const subtype = this.env.entities.FollowerSubtype.insert(
@@ -132,12 +132,12 @@ function FollowerFactory({ Entity }) {
                 } else {
                     kwargs.channel_ids = [this.channel.id];
                 }
-                await this.env.rpc({
+                await this.async(() => this.env.rpc({
                     model: this.followedThread.model,
                     method: 'message_subscribe',
                     args: [[this.followedThread.id]],
                     kwargs,
-                });
+                }));
             }
             this.closeSubtypes();
         }

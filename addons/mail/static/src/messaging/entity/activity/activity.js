@@ -17,11 +17,11 @@ function ActivityFactory({ Entity }) {
          * Delete the record from database and delete the entity.
          */
         async deleteRecord() {
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: 'mail.activity',
                 method: 'unlink',
                 args: [[this.id]],
-            });
+            }));
             this.delete();
         }
 
@@ -141,11 +141,11 @@ function ActivityFactory({ Entity }) {
         }
 
         async fetchAndUpdate() {
-            const [data] = await this.env.rpc({
+            const [data] = await this.async(() => this.env.rpc({
                 model: 'mail.activity',
                 method: 'activity_format',
                 args: [this.id],
-            });
+            }));
             this.update(this.constructor.convertData(data));
             if (this.chatter) {
                 this.chatter.refresh();
@@ -159,7 +159,7 @@ function ActivityFactory({ Entity }) {
          */
         async markAsDone({ attachments = [], feedback = false }) {
             const attachmentIds = attachments.map(attachment => attachment.id);
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: 'mail.activity',
                 method: 'action_feedback',
                 args: [[this.id]],
@@ -168,7 +168,7 @@ function ActivityFactory({ Entity }) {
                     feedback,
                 },
                 context: this.chatter ? this.chatter.context : {},
-            });
+            }));
             if (this.chatter) {
                 this.chatter.refresh();
             }
@@ -181,12 +181,12 @@ function ActivityFactory({ Entity }) {
          * @returns {Object}
          */
         async markAsDoneAndScheduleNext({ feedback }) {
-            const action = await this.env.rpc({
+            const action = await this.async(() => this.env.rpc({
                 model: 'mail.activity',
                 method: 'action_feedback_schedule_next',
                 args: [[this.id]],
                 kwargs: { feedback },
-            });
+            }));
             const chatter = this.chatter;
             if (chatter) {
                 this.chatter.refresh();

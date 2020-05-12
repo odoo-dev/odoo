@@ -226,7 +226,7 @@ function ThreadFactory({ Entity }) {
          * with these attachments, which are used by attachment box in the chatter.
          */
         async fetchAttachments() {
-            const attachmentsData = await this.env.rpc({
+            const attachmentsData = await this.async(() => this.env.rpc({
                 model: 'ir.attachment',
                 method: 'search_read',
                 domain: [
@@ -235,7 +235,7 @@ function ThreadFactory({ Entity }) {
                 ],
                 fields: ['id', 'name', 'mimetype'],
                 orderBy: [{ name: 'id', asc: false }],
-            });
+            }));
             for (const attachmentData of attachmentsData) {
                 this.env.entities.Attachment.insert(Object.assign({
                     originThread: [['link', this]],
@@ -248,7 +248,7 @@ function ThreadFactory({ Entity }) {
          * Add current user to provided thread's followers.
          */
         async follow() {
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: this.model,
                 method: 'message_subscribe',
                 args: [[this.id]],
@@ -256,7 +256,7 @@ function ThreadFactory({ Entity }) {
                     partner_ids: [this.env.messaging.currentPartner.id],
                     context: {}, // FIXME empty context to be overridden in session.js with 'allowed_company_ids' task-2243187
                 },
-            });
+            }));
             this.refreshFollowers();
         }
 
@@ -275,11 +275,11 @@ function ThreadFactory({ Entity }) {
                 return;
             }
             if (this.model === 'mail.channel') {
-                const seen_message_id = await this.env.rpc({
+                const seen_message_id = await this.async(() => this.env.rpc({
                     model: 'mail.channel',
                     method: 'channel_seen',
                     args: [[this.id]]
-                }, { shadow: true });
+                }, { shadow: true }));
                 this.update({ seen_message_id });
             }
             this.update({ message_unread_counter: 0 });
@@ -290,14 +290,14 @@ function ThreadFactory({ Entity }) {
          * and cross-device chat window state synchronization.
          */
         async notifyFoldStateToServer() {
-            await this.env.rpc({
+            await this.async(() => this.env.rpc({
                 model: 'mail.channel',
                 method: 'channel_fold',
                 kwargs: {
                     uuid: this.uuid,
                     state: this.foldState,
                 }
-            }, { shadow: true });
+            }, { shadow: true }));
         }
 
         /**
@@ -367,19 +367,19 @@ function ThreadFactory({ Entity }) {
          */
         async refreshFollowers() {
             // FIXME Do that with only one RPC (see task-2243180)
-            const [{ message_follower_ids: followerIds }] = await this.env.rpc({
+            const [{ message_follower_ids: followerIds }] = await this.async(() => this.env.rpc({
                 model: this.model,
                 method: 'read',
                 args: [this.id, ['message_follower_ids']],
-            });
+            }));
             if (followerIds && followerIds.length > 0) {
-                const { followers } = await this.env.rpc({
+                const { followers } = await this.async(() => this.env.rpc({
                     route: '/mail/read_followers',
                     params: {
                         follower_ids: followerIds,
                         context: {}, // FIXME empty context to be overridden in session.js with 'allowed_company_ids' task-2243187
                     }
-                });
+                }));
                 this.update({
                     followers: [['insert-and-replace', followers.map(data => this.env.entities.Follower.convertData(data))]],
                 });
@@ -397,14 +397,14 @@ function ThreadFactory({ Entity }) {
          */
         async rename(newName) {
             if (this.channel_type === 'chat') {
-                await this.env.rpc({
+                await this.async(() => this.env.rpc({
                     model: 'mail.channel',
                     method: 'channel_set_custom_name',
                     args: [this.id],
                     kwargs: {
                         name: newName,
                     },
-                });
+                }));
             }
             this.update({ custom_channel_name: newName });
         }
@@ -416,7 +416,7 @@ function ThreadFactory({ Entity }) {
             const currentPartnerFollower = this.followers.find(
                 follower => follower.partner === this.env.messaging.currentPartner
             );
-            await currentPartnerFollower.remove();
+            await this.async(() => currentPartnerFollower.remove());
         }
 
         /**

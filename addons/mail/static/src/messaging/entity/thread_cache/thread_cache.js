@@ -28,12 +28,12 @@ function ThreadCacheFactory({ Entity }) {
             this.update({ isLoading: true });
             let messagesData = [];
             if (!this.thread.isTemporary) {
-                messagesData = await this.env.rpc({
+                messagesData = await this.async(() => this.env.rpc({
                     model: 'mail.message',
                     method: 'message_fetch',
                     args: [domain],
                     kwargs: this._getFetchMessagesKwargs(),
-                }, { shadow: true });
+                }, { shadow: true }));
             }
             this._handleMessagesLoaded(messagesData);
         }
@@ -50,12 +50,12 @@ function ThreadCacheFactory({ Entity }) {
                 ...this.messages.map(message => message.id)
             );
             domain = [['id', '<', minMessageId]].concat(domain);
-            const messagesData = await this.env.rpc({
+            const messagesData = await this.async(() => this.env.rpc({
                 model: 'mail.message',
                 method: 'message_fetch',
                 args: [domain],
                 kwargs: this._getFetchMessagesKwargs(),
-            }, { shadow: true });
+            }, { shadow: true }));
             for (const viewer of this.thread.viewers) {
                 viewer.addComponentHint('more-messages-loaded');
             }
@@ -67,7 +67,7 @@ function ThreadCacheFactory({ Entity }) {
                 return;
             }
             if (!this.isLoaded) {
-                await this.loadMessages();
+                await this.async(() => this.loadMessages());
                 return;
             }
             const messageIds = this.messages.map(message => message.id);
@@ -81,12 +81,12 @@ function ThreadCacheFactory({ Entity }) {
             this.update({ isLoading: true });
             const messageFetchKwargs = this._getFetchMessagesKwargs();
             messageFetchKwargs.limit = false;
-            const messagesData = await this.env.rpc({
+            const messagesData = await this.async(() => this.env.rpc({
                 model: 'mail.message',
                 method: 'message_fetch',
                 args: [domain],
                 kwargs: messageFetchKwargs,
-            }, { shadow: true });
+            }, { shadow: true }));
             this._handleMessagesLoaded(messagesData);
         }
 

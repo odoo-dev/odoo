@@ -123,11 +123,11 @@ function PartnerFactory({ Entity }) {
         }
 
         async checkIsUser() {
-            const userIds = await this.env.rpc({
+            const userIds = await this.async(() => this.env.rpc({
                 model: 'res.users',
                 method: 'search',
                 args: [[['partner_id', '=', this.id]]],
-            });
+            }));
             if (userIds.length) {
                 this.update({ user: [['insert', { id: userIds[0] }]] });
             }

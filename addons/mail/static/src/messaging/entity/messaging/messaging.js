@@ -61,7 +61,7 @@ function MessagingFactory({ Entity }) {
                 }
                 const partner = this.env.entities.Partner.insert({ id });
                 if (!partner.user) {
-                    await partner.checkIsUser();
+                    await this.async(() => partner.checkIsUser());
                 }
                 if (!partner.user) {
                     // partner is not a user, open document instead
@@ -99,11 +99,7 @@ function MessagingFactory({ Entity }) {
             });
             this._handleGlobalWindowFocus = this._handleGlobalWindowFocus.bind(this);
             this.env.call('bus_service', 'on', 'window_focus', null, this._handleGlobalWindowFocus);
-            await this.initializer.start();
-            if (!this.constructor.get(this)) {
-                // destroyed in the mean time.
-                return;
-            }
+            await this.async(() => this.initializer.start());
             this.notificationHandler.start();
             this.update({ isInitialized: true });
         }

@@ -24,7 +24,7 @@ registerInstancePatchEntity('MessagingInitializer', 'mail_bot.messaging.entity.M
      * @override
      */
     async _start() {
-        await this._super();
+        await this.async(() => this._super());
 
         if ('odoobot_initialized' in this.env.session && !this.env.session.odoobot_initialized) {
             this._showOdoobotTimeout();
