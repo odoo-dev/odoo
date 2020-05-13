@@ -10,6 +10,15 @@ function MessagingNotificationHandlerFactory({ Entity }) {
 
     class MessagingNotificationHandler extends Entity {
 
+        /**
+         * @override
+         */
+        delete() {
+            this.env.call('bus_service', 'off', 'notification');
+            this.env.call('bus_service', 'stopPolling');
+            super.delete();
+        }
+
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
@@ -21,14 +30,6 @@ function MessagingNotificationHandlerFactory({ Entity }) {
         start() {
             this.env.call('bus_service', 'onNotification', null, notifs => this._handleNotifications(notifs));
             this.env.call('bus_service', 'startPolling');
-        }
-
-        /**
-         * Called when messaging becomes stopped.
-         */
-        stop() {
-            this.env.call('bus_service', 'off', 'notification');
-            this.env.call('bus_service', 'stopPolling');
         }
 
         //----------------------------------------------------------------------
@@ -90,6 +91,7 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {Object} data
          * @param {integer} data.channelId
          * @param {string} [data.info]
+         * @param {boolean} [data.is_typing]
          * @param {integer} [data.last_message_id]
          * @param {integer} [data.partner_id]
          */
@@ -97,6 +99,7 @@ function MessagingNotificationHandlerFactory({ Entity }) {
             const {
                 channelId,
                 info,
+                is_typing,
                 last_message_id,
                 partner_id,
             } = data;
@@ -110,12 +113,11 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                         partner_id,
                     });
                 case 'typing_status':
-                    /**
-                     * data.is_typing
-                     * data.is_website_user
-                     * data.partner_id
-                     */
-                    return; // disabled typing status notification feature
+                    return this._handleNotificationChannelTypingStatus({
+                        channelId,
+                        is_typing,
+                        partner_id,
+                    });
                 default:
                     return this._handleNotificationChannelMessage(data);
             }
@@ -216,6 +218,40 @@ function MessagingNotificationHandlerFactory({ Entity }) {
             });
             // manually force recompute of counter
             this.messaging.messagingMenu.update();
+        }
+
+        /**
+         * @private
+         * @param {Object} param0
+         * @param {integer} param0.channelId
+         * @param {boolean} param0.is_typing
+         * @param {integer} param0.partner_id
+         */
+        _handleNotificationChannelTypingStatus({
+            channelId,
+            is_typing,
+            partner_id,
+        }) {
+            const channel = this.env.entities.Thread.insert({ id: channelId, model: 'mail.channel' });
+            const partner = this.env.entities.Partner.insert({ id: partner_id });
+            if (partner === this.env.messaging.currentPartner) {
+                // Ignore management of current partner is typing notification.
+                return;
+            }
+            if (is_typing) {
+                if (channel.typingMembers.includes(partner)) {
+                    channel.refreshOtherMemberTypingMember(partner);
+                } else {
+                    channel.registerOtherMemberTypingMember(partner);
+                }
+            } else {
+                if (!channel.typingMembers.includes(partner)) {
+                    // Ignore no longer typing notifications of members that
+                    // are not registered as typing something.
+                    return;
+                }
+                channel.unregisterOtherMemberTypingMember(partner);
+            }
         }
 
         /**
@@ -519,11 +555,11 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 return;
             }
             let message;
-            if (channel.directPartner) {
-                const directPartner = channel.directPartner;
+            if (channel.correspondent) {
+                const correspondent = channel.correspondent;
                 message = _.str.sprintf(
                     this.env._t("You unpinned your conversation with <b>%s</b>."),
-                    directPartner.name
+                    correspondent.name
                 );
             } else {
                 message = _.str.sprintf(

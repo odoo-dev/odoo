@@ -98,7 +98,10 @@ function MessageFactory({ Entity }) {
             if ('author_id' in data) {
                 if (!data.author_id) {
                     data2.author = [['unlink-all']];
-                } else {
+                } else if (data.author_id[0] !== 0) {
+                    // partner id 0 is a hack of message_format to refer to an
+                    // author non-related to a partner. display_name equals
+                    // email_from, so this is omitted due to being redundant.
                     data2.author = [
                         ['insert', {
                             display_name: data.author_id[1],

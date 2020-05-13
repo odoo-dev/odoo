@@ -113,16 +113,6 @@ var AbstractThread = Class.extend(Mixins.EventDispatcherMixin, {
         return false;
     },
     /**
-     * States whether this thread is compatible with the 'is typing...' feature.
-     * By default, threads do not have this feature active.
-     * @see {mail.model.ThreadTypingMixin} to enable this feature on a thread.
-     *
-     * @returns {boolean}
-     */
-    hasTypingNotification: function () {
-        return false;
-    },
-    /**
      * States whether this thread is folded or not.
      *
      * @return {boolean}

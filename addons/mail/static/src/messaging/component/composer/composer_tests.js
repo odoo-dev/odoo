@@ -458,11 +458,6 @@ QUnit.test('composer text input cleared on message post', async function (assert
         },
     });
     await this.start({
-        discuss: {
-            params: {
-                default_active_id: 'mail.channel_20',
-            },
-        },
         async mockRPC(route, args) {
             if (args.method === 'message_post') {
                 assert.step('message_post');
@@ -494,6 +489,288 @@ QUnit.test('composer text input cleared on message post', async function (assert
         document.querySelector(`.o_ComposerTextInput_textarea`).value,
         "",
         "should have no content in composer input after posting message"
+    );
+});
+
+QUnit.test('composer with thread typing notification status', async function (assert) {
+    assert.expect(2);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: 'channel',
+                id: 20,
+                name: "General",
+            }],
+        },
+    });
+    await this.start();
+    const thread = this.env.entities.Thread.find(thread =>
+        thread.id === 20 &&
+        thread.model === 'mail.channel'
+    );
+    await this.createComposerComponent(thread.composer, { hasThreadTyping: true });
+
+    assert.containsOnce(
+        document.body,
+        '.o_Composer_threadTextualTypingStatus',
+        "Composer should have a thread textual typing status bar"
+    );
+    assert.strictEqual(
+        document.body.querySelector('.o_Composer_threadTextualTypingStatus').textContent,
+        "",
+        "By default, thread textual typing status bar should be empty"
+    );
+});
+
+QUnit.test('current partner notify is typing to other thread members', async function (assert) {
+    assert.expect(2);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: 'channel',
+                id: 20,
+                members: [{
+                    email: 'admin@odoo.com',
+                    id: 3,
+                    name: 'Admin',
+                }, {
+                    email: 'demo@odoo.com',
+                    id: 7,
+                    name: 'Demo',
+                }],
+                name: "General",
+            }],
+        },
+    });
+    await this.start({
+        env: {
+            session: {
+                name: 'Admin',
+                partner_display_name: 'Your Company, Admin',
+                partner_id: 3,
+                uid: 2,
+            },
+        },
+        async mockRPC(route, args) {
+            if (args.method === 'notify_typing') {
+                assert.step(`notify_typing:${args.kwargs.is_typing}`);
+                return;
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.entities.Thread.find(thread =>
+        thread.id === 20 &&
+        thread.model === 'mail.channel'
+    );
+    await this.createComposerComponent(thread.composer, { hasThreadTyping: true });
+
+    document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+    document.execCommand('insertText', false, "a");
+    document.querySelector(`.o_ComposerTextInput_textarea`)
+        .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'a' }));
+
+    assert.verifySteps(
+        ['notify_typing:true'],
+        "should have notified current partner typing status"
+    );
+});
+
+QUnit.test('current partner is typing should not translate on textual typing status', async function (assert) {
+    assert.expect(3);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: 'channel',
+                id: 20,
+                members: [{
+                    email: 'admin@odoo.com',
+                    id: 3,
+                    name: 'Admin',
+                }, {
+                    email: 'demo@odoo.com',
+                    id: 7,
+                    name: 'Demo',
+                }],
+                name: "General",
+            }],
+        },
+    });
+    await this.start({
+        env: {
+            session: {
+                name: 'Admin',
+                partner_display_name: 'Your Company, Admin',
+                partner_id: 3,
+                uid: 2,
+            },
+        },
+        hasTimeControl: true,
+        async mockRPC(route, args) {
+            if (args.method === 'notify_typing') {
+                assert.step(`notify_typing:${args.kwargs.is_typing}`);
+                return;
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.entities.Thread.find(thread =>
+        thread.id === 20 &&
+        thread.model === 'mail.channel'
+    );
+    await this.createComposerComponent(thread.composer, { hasThreadTyping: true });
+
+    document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+    document.execCommand('insertText', false, "a");
+    document.querySelector(`.o_ComposerTextInput_textarea`)
+        .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'a' }));
+
+    assert.verifySteps(
+        ['notify_typing:true'],
+        "should have notified current partner typing status"
+    );
+
+    await nextAnimationFrame();
+    assert.strictEqual(
+        document.body.querySelector('.o_Composer_threadTextualTypingStatus').textContent,
+        "",
+        "Thread textual typing status bar should not display current partner is typing"
+    );
+});
+
+QUnit.test('current partner notify no longer is typing to thread members after 5 seconds inactivity', async function (assert) {
+    assert.expect(4);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: 'channel',
+                id: 20,
+                members: [{
+                    email: 'admin@odoo.com',
+                    id: 3,
+                    name: 'Admin',
+                }, {
+                    email: 'demo@odoo.com',
+                    id: 7,
+                    name: 'Demo',
+                }],
+                name: "General",
+            }],
+        },
+    });
+    await this.start({
+        env: {
+            session: {
+                name: 'Admin',
+                partner_display_name: 'Your Company, Admin',
+                partner_id: 3,
+                uid: 2,
+            },
+        },
+        hasTimeControl: true,
+        async mockRPC(route, args) {
+            if (args.method === 'notify_typing') {
+                assert.step(`notify_typing:${args.kwargs.is_typing}`);
+                return;
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.entities.Thread.find(thread =>
+        thread.id === 20 &&
+        thread.model === 'mail.channel'
+    );
+    await this.createComposerComponent(thread.composer, { hasThreadTyping: true });
+
+    document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+    document.execCommand('insertText', false, "a");
+    document.querySelector(`.o_ComposerTextInput_textarea`)
+        .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'a' }));
+
+    assert.verifySteps(
+        ['notify_typing:true'],
+        "should have notified current partner is typing"
+    );
+
+    await this.env.testUtils.advanceTime(5 * 1000);
+    assert.verifySteps(
+        ['notify_typing:false'],
+        "should have notified current partner no longer is typing (inactive for 5 seconds)"
+    );
+});
+
+QUnit.test('current partner notify is typing again to other members every 50s of long continuous typing', async function (assert) {
+    assert.expect(4);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: 'channel',
+                id: 20,
+                members: [{
+                    email: 'admin@odoo.com',
+                    id: 3,
+                    name: 'Admin',
+                }, {
+                    email: 'demo@odoo.com',
+                    id: 7,
+                    name: 'Demo',
+                }],
+                name: "General",
+            }],
+        },
+    });
+    await this.start({
+        env: {
+            session: {
+                name: 'Admin',
+                partner_display_name: 'Your Company, Admin',
+                partner_id: 3,
+                uid: 2,
+            },
+        },
+        hasTimeControl: true,
+        async mockRPC(route, args) {
+            if (args.method === 'notify_typing') {
+                assert.step(`notify_typing:${args.kwargs.is_typing}`);
+                return;
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.entities.Thread.find(thread =>
+        thread.id === 20 &&
+        thread.model === 'mail.channel'
+    );
+    await this.createComposerComponent(thread.composer, { hasThreadTyping: true });
+
+    document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+    document.execCommand('insertText', false, "a");
+    document.querySelector(`.o_ComposerTextInput_textarea`)
+        .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'a' }));
+    assert.verifySteps(
+        ['notify_typing:true'],
+        "should have notified current partner is typing"
+    );
+
+    // simulate current partner typing a character every 2.5 seconds for 50 seconds straight.
+    let totalTimeElapsed = 0;
+    const elapseTickTime = 2.5 * 1000;
+    while (totalTimeElapsed < 50 * 1000) {
+        document.execCommand('insertText', false, "a");
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'a' }));
+        totalTimeElapsed += elapseTickTime;
+        await this.env.testUtils.advanceTime(elapseTickTime);
+    }
+
+    assert.verifySteps(
+        ['notify_typing:true'],
+        "should have notified current partner is still typing after 50s of straight typing"
     );
 });
 

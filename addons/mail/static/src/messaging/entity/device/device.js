@@ -18,6 +18,14 @@ function DeviceFactory({ Entity }) {
             return entity;
         }
 
+        /**
+         * @override
+         */
+        delete() {
+            window.removeEventListener('resize', this._onResize);
+            super.delete();
+        }
+
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
@@ -29,13 +37,6 @@ function DeviceFactory({ Entity }) {
             // TODO FIXME Not using this.env.window because it's proxified, and
             // addEventListener does not work on proxified window. task-2234596
             window.addEventListener('resize', this._onResize);
-        }
-
-        /**
-         * Called when messaging is stopped.
-         */
-        stop() {
-            window.removeEventListener('resize', this._onResize);
         }
 
         //----------------------------------------------------------------------

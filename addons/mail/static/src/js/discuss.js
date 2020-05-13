@@ -362,11 +362,9 @@ var Discuss = AbstractAction.extend({
         this.$('.o_mail_discuss_loading').remove();
         this._basicComposer = new BasicComposer(this, {
             mentionPartnersRestricted: true,
-            showTyping: true,
         });
         this._extendedComposer = new ExtendedComposer(this, {
             mentionPartnersRestricted: true,
-            showTyping: true,
         });
         this._basicComposer
             .on('post_message', this, this._onPostMessage)
@@ -803,7 +801,6 @@ var Discuss = AbstractAction.extend({
             .on('update_needaction', this, this._onUpdateNeedaction)
             .on('update_thread_unread_counter', this, this._onUpdateThreadUnreadCounter)
             .on('activity_updated', this, this._onActivityUpdated)
-            .on('update_typing_partners', this, this._onTypingPartnersUpdated)
             .on('update_channel', this, this._onUpdateChannel);
     },
     /**
@@ -1155,12 +1152,6 @@ var Discuss = AbstractAction.extend({
             // this will be done as soon as the default thread is set
             this._fetchAndRenderThread();
         }
-    },
-    /**
-     * @private
-     */
-    _onTypingPartnersUpdated: function () {
-        this._updateThreads();
     },
     /**
      * @private

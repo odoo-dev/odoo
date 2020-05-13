@@ -58,9 +58,7 @@ var ThreadWindow = AbstractThreadWindow.extend({
 
         var superDef = this._super().then(this._listenThreadWidget.bind(this));
 
-        this.call('mail_service', 'getMailBus')
-            .on('update_typing_partners', this, this._onUpdateTypingPartners)
-            .on('update_channel', this, this._onUpdateChannel);
+        this.call('mail_service', 'getMailBus').on('update_channel', this, this._onUpdateChannel);
 
         var composerDef;
         if (!this.hasThread()) {
@@ -344,19 +342,6 @@ var ThreadWindow = AbstractThreadWindow.extend({
             this.removePassive();
             this._thread.markAsRead();
         }
-    },
-    /**
-     * @private
-     * @param {integer|string} threadID
-     */
-    _onUpdateTypingPartners: function (threadID) {
-        if (!this.hasThread()) {
-            return;
-        }
-        if (this._thread.getID() !== threadID) {
-            return;
-        }
-        this.renderHeader();
     },
     /**
      * @private

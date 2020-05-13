@@ -725,7 +725,7 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
     assert.strictEqual(
         chat.querySelector(`:scope .o_DiscussSidebarItem_name`).textContent,
         "Demo",
-        "should have direct partner name as name"
+        "should have correspondent name as name"
     );
     assert.strictEqual(
         chat.querySelectorAll(`:scope .o_DiscussSidebarItem_commands`).length,
@@ -3868,11 +3868,12 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
         "composer text input should be auto-focus"
     );
 
-    document.execCommand('insertText', false, "Test");
-    document.querySelector(`.o_ComposerTextInput_textarea`)
-        .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+    await afterNextRender(() => {
+        document.execCommand('insertText', false, "Test");
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+    });
     assert.verifySteps(['message_post']);
-    await afterNextRender();
     assert.notOk(
         document.querySelector('.o_Composer'),
         "should no longer have composer after posting reply to message"

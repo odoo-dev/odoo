@@ -2,28 +2,15 @@ odoo.define('mail.messaging.entity.Partner', function (require) {
 'use strict';
 
 const { registerNewEntity } = require('mail.messaging.entityCore');
-const { attr, many2many, one2many, one2one } = require('mail.messaging.EntityField');
+const { attr, many2many, many2one, one2many, one2one } = require('mail.messaging.EntityField');
 
 const utils = require('web.utils');
 
 function PartnerFactory({ Entity }) {
 
-    class Partner extends Entity {
+    let nextPublicId = -1;
 
-        /**
-         * @override
-         */
-        delete() {
-            if (this.env.messaging) {
-                if (this === this.env.messaging.currentPartner) {
-                    this.env.messaging.update({ currentPartner: [['unlink-all']] });
-                }
-                if (this === this.env.messaging.partnerRoot) {
-                    this.env.messaging.update({ partnerRoot: [['unlink-all']] });
-                }
-            }
-            super.delete();
-        }
+    class Partner extends Entity {
 
         //----------------------------------------------------------------------
         // Public
@@ -37,6 +24,16 @@ function PartnerFactory({ Entity }) {
          */
         static convertData(data) {
             const data2 = {};
+            if ('country' in data) {
+                if (!data.country) {
+                    data2.country = [['unlink-all']];
+                } else {
+                    data2.country = [['insert', {
+                        id: data.country[0],
+                        name: data.country[1],
+                    }]];
+                }
+            }
             if ('display_name' in data) {
                 data2.display_name = data.display_name;
             }
@@ -54,20 +51,26 @@ function PartnerFactory({ Entity }) {
             }
 
             // relation
-            if ('userId' in data) {
-                if (!data.userId) {
+            if ('user_id' in data) {
+                if (!data.user_id) {
                     data2.user = [['unlink-all']];
                 } else {
                     data2.user = [
                         ['insert', {
-                            id: data.userId[0],
-                            partnerDisplayName: data.userId[1],
+                            id: data.user_id[0],
+                            partnerDisplayName: data.user_id[1],
                         }],
                     ];
                 }
             }
 
             return data2;
+        }
+
+        static getNextPublicId() {
+            const id = nextPublicId;
+            nextPublicId -= 1;
+            return id;
         }
 
         /**
@@ -137,7 +140,7 @@ function PartnerFactory({ Entity }) {
          * Opens an existing or new chat.
          */
         openChat() {
-            const chat = this.directPartnerThread;
+            const chat = this.correspondentThreads.find(thread => thread.channel_type === 'chat');
             if (chat) {
                 chat.open();
             } else {
@@ -222,9 +225,10 @@ function PartnerFactory({ Entity }) {
     Partner.entityName = 'Partner';
 
     Partner.fields = {
-        directPartnerThread: one2one('Thread', {
-            inverse: 'directPartner',
+        correspondentThreads: one2many('Thread', {
+            inverse: 'correspondent',
         }),
+        country: many2one('Country'),
         display_name: attr({
             default: "",
         }),

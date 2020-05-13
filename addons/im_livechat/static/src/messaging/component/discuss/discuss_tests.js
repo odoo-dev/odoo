@@ -42,9 +42,13 @@ QUnit.test('livechat in the sidebar', async function (assert) {
     this.data.initMessaging = {
         channel_slots: {
             channel_livechat: [{
-                id: 1,
                 channel_type: "livechat",
-                correspondent_name: "Visitor",
+                id: 1,
+                livechat_visitor: {
+                    country: false,
+                    id: false,
+                    name: "Visitor",
+                },
             }],
         },
     };

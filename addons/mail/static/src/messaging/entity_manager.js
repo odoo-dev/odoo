@@ -116,6 +116,7 @@ class EntityManager {
         // to field getter.
         const proxifiedEntity = this._makeProxifiedEntity(entity);
         this._instances[entity.localId] = proxifiedEntity;
+        proxifiedEntity.init();
         this._makeDefaults(proxifiedEntity);
 
         const data2 = Object.assign({}, data);
@@ -179,6 +180,15 @@ class EntityManager {
         entity.update(data);
         delete this._instances[entity.localId];
         delete this.env.store.state[entity.localId];
+    }
+
+    /**
+     * Delete all entity instances.
+     */
+    deleteAll() {
+        for (const entity of Object.values(this._instances)) {
+            entity.delete();
+        }
     }
 
     /**

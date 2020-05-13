@@ -107,6 +107,8 @@
         'static/src/messaging/component/partner_im_status_icon/partner_im_status_icon.xml',
         'static/src/messaging/component/thread_icon/thread_icon.xml',
         'static/src/messaging/component/thread_preview/thread_preview.xml',
+        'static/src/messaging/component/thread_textual_typing_status/thread_textual_typing_status.xml',
+        'static/src/messaging/component/thread_typing_icon/thread_typing_icon.xml',
         'static/src/messaging/component/thread_viewer/thread_viewer.xml',
         'static/src/messaging/widget/common.xml',
         'static/src/messaging/widget/discuss/discuss.xml',

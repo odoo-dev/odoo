@@ -3,8 +3,16 @@
     <t t-inherit="mail.messaging.component.ThreadIcon" t-inherit-mode="extension">
         <xpath expr="//*[@name='rootCondition']" position="inside">
             <t t-elif="thread.channel_type === 'livechat'">
-                <!-- TODO FIXME add typing icon -->
-                <div class="fa fa-comments" title="Livechat"/>
+                <t t-if="thread.orderedOtherTypingMembers.length > 0">
+                    <ThreadTypingIcon
+                        class="o_ThreadIcon_typing"
+                        animation="'pulse'"
+                        title="thread.typingStatusText"
+                    />
+                </t>
+                <t t-else="">
+                    <div class="fa fa-comments" title="Livechat"/>
+                </t>
             </t>
         </xpath>
     </t>

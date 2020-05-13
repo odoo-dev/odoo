@@ -13,7 +13,7 @@
 
     &.o-has-current-partner-avatar {
         grid-template-columns: 50px 1fr;
-        padding: 0px 13px 10px 3px;
+        padding: map-get($spacers, 0) map-get($spacers, 3) map-get($spacers, 1) map-get($spacers, 1);
 
         &:not(.o-has-footer) {
             padding-bottom: 20px;
@@ -58,7 +58,6 @@
 
 .o_Composer_coreFooter {
     grid-area: core-footer;
-    margin: 10px;
 
     &:not(.o-composer-is-compact) {
         margin-left: 0;
@@ -67,7 +66,6 @@
 
 .o_Composer_coreHeader {
     grid-area: core-header;
-    margin: 10px;
 }
 
 .o_Composer_coreMain {
@@ -114,6 +112,17 @@
         .note-editable {
             min-height: 40px;
         }
+    }
+}
+
+.o_Composer_threadTextualTypingStatus {
+    font-size: $font-size-sm;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:before {
+        // invisible character so that typing status bar has constant height, regardless of text content.
+        content: "\200b"; /* unicode zero width space character */
     }
 }
 

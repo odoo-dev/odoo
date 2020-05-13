@@ -1,6 +1,9 @@
 odoo.define('mail.messaging.component.ThreadIcon', function (require) {
 'use strict';
 
+const components = {
+    ThreadTypingIcon: require('mail.messaging.component.ThreadTypingIcon'),
+};
 const useStore = require('mail.messaging.component_hook.useStore');
 
 const { Component } = owl;
@@ -14,9 +17,9 @@ class ThreadIcon extends Component {
         super(...args);
         useStore(props => {
             const thread = this.env.entities.Thread.get(props.threadLocalId);
-            const directPartner = thread ? thread.directPartner : undefined;
+            const correspondent = thread ? thread.correspondent : undefined;
             return {
-                directPartner: directPartner ? directPartner.__state : undefined,
+                correspondent: correspondent ? correspondent.__state : undefined,
                 partnerRoot: this.env.messaging.partnerRoot
                     ? this.env.messaging.partnerRoot.__state
                     : undefined,
@@ -39,6 +42,7 @@ class ThreadIcon extends Component {
 }
 
 Object.assign(ThreadIcon, {
+    components,
     props: {
         threadLocalId: String,
     },

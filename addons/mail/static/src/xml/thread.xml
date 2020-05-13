@@ -523,15 +523,4 @@
         </div>
     </t>
 
-    <!--
-        @param {mail.model.Thread} thread with typing feature
-    -->
-    <t t-name="mail.ThreadTypingIcon">
-        <span class="o_mail_thread_typing_icon" t-att-title="thread.getTypingMembersToText()">
-            <span class="o_mail_thread_typing_icon_dot"/>
-            <span class="o_mail_thread_typing_icon_dot"/>
-            <span class="o_mail_thread_typing_icon_dot"/>
-        </span>
-    </t>
-
 </templates>

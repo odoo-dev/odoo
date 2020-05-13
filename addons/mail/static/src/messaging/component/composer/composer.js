@@ -7,6 +7,7 @@ const components = {
     EmojisPopover: require('mail.messaging.component.EmojisPopover'),
     FileUploader: require('mail.messaging.component.FileUploader'),
     TextInput: require('mail.messaging.component.ComposerTextInput'),
+    ThreadTextualTypingStatus: require('mail.messaging.component.ThreadTextualTypingStatus'),
 };
 const useDragVisibleDropZone = require('mail.messaging.component_hook.useDragVisibleDropZone');
 const useStore = require('mail.messaging.component_hook.useStore');
@@ -130,7 +131,11 @@ class Composer extends Component {
      * @returns {boolean}
      */
     get hasFooter() {
-        return this.composer.attachments.length > 0 || !this.props.isCompact;
+        return (
+            this.props.hasThreadTyping ||
+            this.composer.attachments.length > 0 ||
+            !this.props.isCompact
+        );
     }
 
     /**
@@ -347,6 +352,7 @@ Object.assign(Composer, {
         hasSendButton: true,
         hasTextInputSendOnEnterEnabled: true,
         hasThreadName: false,
+        hasThreadTyping: false,
         isCompact: true,
         isDiscardOnClickAway: false,
         isExpandable: false,
@@ -369,6 +375,7 @@ Object.assign(Composer, {
         hasSendButton: Boolean,
         hasTextInputSendOnEnterEnabled: Boolean,
         hasThreadName: Boolean,
+        hasThreadTyping: Boolean,
         showAttachmentsExtensions: {
             type: Boolean,
             optional: true,

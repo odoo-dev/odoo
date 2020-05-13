@@ -156,7 +156,7 @@ class ChatWindow extends Component {
     _onAutocompleteSelect(ev, ui) {
         const partnerId = ui.item.id;
         const partner = this.env.entities.Partner.find(partner => partner.id === partnerId);
-        const chat = partner.directPartnerThread;
+        const chat = partner.correspondentThreads.find(thread => thread.channel_type === 'chat');
         if (chat) {
             chat.open({ chatWindowMode: 'from_new_message' });
         } else {

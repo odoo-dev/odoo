@@ -3,10 +3,8 @@ odoo.define('im_livechat.messaging.entity.Thread', function (require) {
 
 const {
     registerClassPatchEntity,
-    registerFieldPatchEntity,
     registerInstancePatchEntity,
 } = require('mail.messaging.entityCore');
-const { attr } = require('mail.messaging.EntityField');
 
 registerClassPatchEntity('Thread', 'im_livechat.messaging.entity.Thread', {
 
@@ -19,8 +17,25 @@ registerClassPatchEntity('Thread', 'im_livechat.messaging.entity.Thread', {
      */
     convertData(data) {
         const data2 = this._super(data);
-        if ('correspondent_name' in data) {
-            data2.correspondent_name = data.correspondent_name;
+        if ('livechat_visitor' in data) {
+            if (!data2.members) {
+                data2.members = [];
+            }
+            if (!data.livechat_visitor.id) {
+                // Create partner derived from public partner.
+                const partner = this.env.entities.Partner.create(
+                    Object.assign(
+                        this.env.entities.Partner.convertData(data.livechat_visitor),
+                        { id: this.env.entities.Partner.getNextPublicId() }
+                    )
+                );
+                data2.correspondent = [['link', partner]];
+                data2.members.push(['link', partner]);
+            } else {
+                const partnerData = this.env.entities.Partner.convertData(data.livechat_visitor);
+                data2.correspondent = [['insert', partnerData]];
+                data2.members.push(['insert', partnerData]);
+            }
         }
         return data2;
     },
@@ -36,20 +51,11 @@ registerInstancePatchEntity('Thread', 'im_livechat.messaging.entity.Thread', {
      * @override
      */
     _computeDisplayName() {
-        if (this.channel_type === 'livechat') {
-            return this.correspondent_name;
+        if (this.channel_type === 'livechat' && this.correspondent) {
+            return this.correspondent.nameOrDisplayName;
         }
         return this._super();
     },
-});
-
-registerFieldPatchEntity('Thread', 'im_livechat.messaging.entity.Thread', {
-    displayName: attr({
-        dependencies: [
-            'correspondent_name',
-        ],
-    }),
-    correspondent_name: attr(),
 });
 
 });

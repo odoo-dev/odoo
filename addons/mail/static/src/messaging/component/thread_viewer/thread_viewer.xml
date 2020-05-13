@@ -30,6 +30,7 @@
                         composerLocalId="threadViewer.thread.composer.localId"
                         hasCurrentPartnerAvatar="props.hasComposerCurrentPartnerAvatar"
                         hasSendButton="props.hasComposerSendButton"
+                        hasThreadTyping="props.hasComposerThreadTyping"
                         isFocusOnMount="!env.messaging.device.isMobile"
                         showAttachmentsExtensions="props.showComposerAttachmentsExtensions"
                         showAttachmentsFilenames="props.showComposerAttachmentsFilenames"

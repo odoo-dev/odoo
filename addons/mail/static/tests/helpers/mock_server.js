@@ -150,6 +150,7 @@ MockServer.include({
             'menu_id': false,
             'needaction_inbox_counter': 0,
             'partner_root': [2, "OdooBot"],
+            'public_partner': [4, "Public user"],
             'shortcodes': [],
             'starred_counter': 0,
         });

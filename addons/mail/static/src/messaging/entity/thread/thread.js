@@ -3,10 +3,110 @@ odoo.define('mail.messaging.entity.Thread', function (require) {
 
 const { registerNewEntity } = require('mail.messaging.entityCore');
 const { attr, many2many, many2one, one2many, one2one } = require('mail.messaging.EntityField');
+const throttle = require('mail.messaging.utils.throttle');
+const Timer = require('mail.messaging.utils.Timer');
 
 function ThreadFactory({ Entity }) {
 
     class Thread extends Entity {
+
+        /**
+         * @override
+         */
+        init(...args) {
+            super.init(...args);
+            /**
+             * Timer of current partner that was currently typing something, but
+             * there is no change on the input for 5 seconds. This is used
+             * in order to automatically notify other members that current
+             * partner has stopped typing something, due to making no changes
+             * on the composer for some time.
+             */
+            this._currentPartnerInactiveTypingTimer = new Timer(
+                this.env,
+                () => this.async(() => this._onCurrentPartnerInactiveTypingTimeout()),
+                5 * 1000
+            );
+            /**
+             * Last 'is_typing' status of current partner that has been notified
+             * to other members. Useful to prevent spamming typing notifications
+             * to other members if it hasn't changed. An exception is the
+             * current partner long typing scenario where current partner has
+             * to re-send the same typing notification from time to time, so
+             * that other members do not assume he/she is no longer typing
+             * something from not receiving any typing notifications for a
+             * very long time.
+             *
+             * Supported values: true/false/undefined.
+             * undefined makes only sense initially and during current partner
+             * long typing timeout flow.
+             */
+            this._currentPartnerLastNotifiedIsTyping = undefined;
+            /**
+             * Timer of current partner that is typing a very long text. When
+             * the other members do not receive any typing notification for a
+             * long time, they must assume that the related partner is no longer
+             * typing something (e.g. they have closed the browser tab).
+             * This is a timer to let other members know that current partner
+             * is still typing something, so that they should not assume he/she
+             * has stopped typing something.
+             */
+            this._currentPartnerLongTypingTimer = new Timer(
+                this.env,
+                () => this.async(() => this._onCurrentPartnerLongTypingTimeout()),
+                50 * 1000
+            );
+            /**
+             * Determines whether the next request to notify current partner
+             * typing status should always result to making RPC, regardless of
+             * whether last notified current partner typing status is the same.
+             * Most of the time we do not want to notify if value hasn't
+             * changed, exception being the long typing scenario of current
+             * partner.
+             */
+            this._forceNotifyNextCurrentPartnerTypingStatus = false;
+            /**
+             * Registry of timers of partners currently typing in the thread,
+             * excluding current partner. This is useful in order to
+             * automatically unregister typing members when not receive any
+             * typing notification after a long time. Timers are internally
+             * indexed by partner entities as key. The current partner is
+             * ignored in this registry of timers.
+             *
+             * @see registerOtherMemberTypingMember
+             * @see unregisterOtherMemberTypingMember
+             */
+            this._otherMembersLongTypingTimers = new Map();
+
+            /**
+             * Clearable and cancellable throttled version of the
+             * `_notifyCurrentPartnerTypingStatus` method.
+             * This is useful when the current partner posts a message and
+             * types something else afterwards: it must notify immediately that
+             * he/she is typing something, instead of waiting for the throttle
+             * internal timer.
+             *
+             * @see _notifyCurrentPartnerTypingStatus
+             */
+            this._throttleNotifyCurrentPartnerTypingStatus = throttle(
+                this.env,
+                ({ isTyping }) => this.async(() => this._notifyCurrentPartnerTypingStatus({ isTyping })),
+                2.5 * 1000
+            );
+        }
+
+        /**
+         * @override
+         */
+        delete(...args) {
+            this._currentPartnerInactiveTypingTimer.clear();
+            this._currentPartnerLongTypingTimer.clear();
+            this._throttleNotifyCurrentPartnerTypingStatus.clear();
+            for (const timer of this._otherMembersLongTypingTimers.values()) {
+                timer.clear();
+            }
+            super.delete(...args);
+        }
 
         //----------------------------------------------------------------------
         // Public
@@ -72,9 +172,9 @@ function ThreadFactory({ Entity }) {
             // relation
             if ('direct_partner' in data) {
                 if (!data.direct_partner) {
-                    data2.directPartner = [['unlink-all']];
+                    data2.correspondent = [['unlink-all']];
                 } else {
-                    data2.directPartner = [
+                    data2.correspondent = [
                         ['insert', this.env.entities.Partner.convertData(data.direct_partner[0])]
                     ];
                 }
@@ -391,6 +491,68 @@ function ThreadFactory({ Entity }) {
         }
 
         /**
+         * Refresh the typing status of the current partner.
+         */
+        refreshCurrentPartnerIsTyping() {
+            this._currentPartnerInactiveTypingTimer.reset();
+        }
+
+        /**
+         * Called to refresh a registered other member partner that is typing
+         * something.
+         *
+         * @param {mail.messaging.entity.Partner} partner
+         */
+        refreshOtherMemberTypingMember(partner) {
+            this._otherMembersLongTypingTimers.get(partner).reset();
+        }
+
+        /**
+         * Called when current partner is inserting some input in composer.
+         * Useful to notify current partner is currently typing something in the
+         * composer of this thread to all other members.
+         */
+        async registerCurrentPartnerIsTyping() {
+            // Handling of typing timers.
+            this._currentPartnerInactiveTypingTimer.start();
+            this._currentPartnerLongTypingTimer.start();
+            // Manage typing member relation.
+            const currentPartner = this.env.messaging.currentPartner;
+            const newOrderedTypingMemberLocalIds = this.orderedTypingMemberLocalIds
+                .filter(localId => localId !== currentPartner.localId);
+            newOrderedTypingMemberLocalIds.push(currentPartner.localId);
+            this.update({
+                orderedTypingMemberLocalIds: newOrderedTypingMemberLocalIds,
+                typingMembers: [['link', currentPartner]],
+            });
+            // Notify typing status to other members.
+            await this._throttleNotifyCurrentPartnerTypingStatus({ isTyping: true });
+        }
+
+        /**
+         * Called to register a new other member partner that is typing
+         * something.
+         *
+         * @param {mail.messaging.entity.Partner} partner
+         */
+        registerOtherMemberTypingMember(partner) {
+            const timer = new Timer(
+                this.env,
+                () => this.async(() => this._onOtherMemberLongTypingTimeout(partner)),
+                60 * 1000
+            );
+            this._otherMembersLongTypingTimers.set(partner, timer);
+            timer.start();
+            const newOrderedTypingMemberLocalIds = this.orderedTypingMemberLocalIds
+                .filter(localId => localId !== partner.localId);
+            newOrderedTypingMemberLocalIds.push(partner.localId);
+            this.update({
+                orderedTypingMemberLocalIds: newOrderedTypingMemberLocalIds,
+                typingMembers: [['link', partner]],
+            });
+        }
+
+        /**
          * Rename the given thread with provided new name.
          *
          * @param {string} newName
@@ -420,21 +582,70 @@ function ThreadFactory({ Entity }) {
         }
 
         /**
+         * Called when current partner has explicitly stopped inserting some
+         * input in composer. Useful to notify current partner has currently
+         * stopped typing something in the composer of this thread to all other
+         * members.
+         *
+         * @param {Object} [param0={}]
+         * @param {boolean} [param0.immediateNotify=false] if set, is typing
+         *   status of current partner is immediately notified and doesn't
+         *   consume throttling at all.
+         */
+        async unregisterCurrentPartnerIsTyping({ immediateNotify = false } = {}) {
+            // Handling of typing timers.
+            this._currentPartnerInactiveTypingTimer.clear();
+            this._currentPartnerLongTypingTimer.clear();
+            // Manage typing member relation.
+            const currentPartner = this.env.messaging.currentPartner;
+            const newOrderedTypingMemberLocalIds = this.orderedTypingMemberLocalIds
+                .filter(localId => localId !== currentPartner.localId);
+            this.update({
+                orderedTypingMemberLocalIds: newOrderedTypingMemberLocalIds,
+                typingMembers: [['unlink', currentPartner]],
+            });
+            // Notify typing status to other members.
+            if (immediateNotify) {
+                this._throttleNotifyCurrentPartnerTypingStatus.clear();
+            }
+            await this.async(
+                () => this._throttleNotifyCurrentPartnerTypingStatus({ isTyping: false })
+            );
+        }
+
+        /**
+         * Called to unregister an other member partner that is no longer typing
+         * something.
+         *
+         * @param {mail.messaging.entity.Partner} partner
+         */
+        unregisterOtherMemberTypingMember(partner) {
+            this._otherMembersLongTypingTimers.get(partner).clear();
+            this._otherMembersLongTypingTimers.delete(partner);
+            const newOrderedTypingMemberLocalIds = this.orderedTypingMemberLocalIds
+                .filter(localId => localId !== partner.localId);
+            this.update({
+                orderedTypingMemberLocalIds: newOrderedTypingMemberLocalIds,
+                typingMembers: [['unlink', partner]],
+            });
+        }
+
+        /**
          * Unsubscribe current user from provided channel.
          */
         async unsubscribe() {
             if (this.channel_type === 'mail.channel') {
-                return this.env.rpc({
+                return this.async(() => this.env.rpc({
                     model: 'mail.channel',
                     method: 'action_unfollow',
                     args: [[this.id]]
-                });
+                }));
             }
-            return this.env.rpc({
+            return this.async(() => this.env.rpc({
                 model: 'mail.channel',
                 method: 'channel_pin',
                 args: [this.uuid, false]
-            });
+            }));
         }
 
         //----------------------------------------------------------------------
@@ -472,8 +683,8 @@ function ThreadFactory({ Entity }) {
          * @returns {string}
          */
         _computeDisplayName() {
-            if (this.channel_type === 'chat' && this.directPartner) {
-                return this.custom_channel_name || this.directPartner.nameOrDisplayName;
+            if (this.channel_type === 'chat' && this.correspondent) {
+                return this.custom_channel_name || this.correspondent.nameOrDisplayName;
             }
             return this.name;
         }
@@ -522,6 +733,60 @@ function ThreadFactory({ Entity }) {
         }
 
         /**
+         * @private
+         * @returns {mail.messaging.entity.Partner[]}
+         */
+        _computeOrderedOtherTypingMembers() {
+            return [[
+                'replace',
+                this.orderedTypingMembers.filter(
+                    member => member !== this.env.messaging.currentPartner
+                ),
+            ]];
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Partner[]}
+         */
+        _computeOrderedTypingMembers() {
+            return [[
+                'replace',
+                this.orderedTypingMemberLocalIds
+                    .map(localId => this.env.entities.Partner.get(localId))
+                    .filter(member => !!member),
+            ]];
+        }
+
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeTypingStatusText() {
+            if (this.orderedOtherTypingMembers.length === 0) {
+                return this.constructor.fields.typingStatusText.default;
+            }
+            if (this.orderedOtherTypingMembers.length === 1) {
+                return _.str.sprintf(
+                    this.env._t("%s is typing..."),
+                    this.orderedOtherTypingMembers[0].nameOrDisplayName
+                );
+            }
+            if (this.orderedOtherTypingMembers.length === 2) {
+                return _.str.sprintf(
+                    this.env._t("%s and %s are typing..."),
+                    this.orderedOtherTypingMembers[0].nameOrDisplayName,
+                    this.orderedOtherTypingMembers[1].nameOrDisplayName
+                );
+            }
+            return _.str.sprintf(
+                this.env._t("%s, %s and more are typing..."),
+                this.orderedOtherTypingMembers[0].nameOrDisplayName,
+                this.orderedOtherTypingMembers[1].nameOrDisplayName
+            );
+        }
+
+        /**
          * @override
          */
         _createInstanceLocalId(data) {
@@ -534,6 +799,30 @@ function ThreadFactory({ Entity }) {
                 return `${this.constructor.entityName}_${id}`;
             }
             return `${this.constructor.entityName}_${threadModel}_${id}`;
+        }
+
+        /**
+         * @private
+         * @param {Object} param0
+         * @param {boolean} param0.isTyping
+         */
+        async _notifyCurrentPartnerTypingStatus({ isTyping }) {
+            if (
+                this._forceNotifyNextCurrentPartnerTypingStatus ||
+                isTyping !== this._currentPartnerLastNotifiedIsTyping
+            ) {
+                await this.async(() => this.env.rpc({
+                    model: 'mail.channel',
+                    method: 'notify_typing',
+                    args: [this.id],
+                    kwargs: { is_typing: isTyping },
+                }, { shadow: true }));
+                if (isTyping && this._currentPartnerLongTypingTimer.isRunning) {
+                    this._currentPartnerLongTypingTimer.reset();
+                }
+            }
+            this._forceNotifyNextCurrentPartnerTypingStatus = false;
+            this._currentPartnerLastNotifiedIsTyping = isTyping;
         }
 
         /**
@@ -595,6 +884,42 @@ function ThreadFactory({ Entity }) {
             };
         }
 
+        //----------------------------------------------------------------------
+        // Handlers
+        //----------------------------------------------------------------------
+
+        /**
+         * @private
+         */
+        async _onCurrentPartnerInactiveTypingTimeout() {
+            await this.async(() => this.unregisterCurrentPartnerIsTyping());
+        }
+
+        /**
+         * Called when current partner has been typing for a very long time.
+         * Immediately notify other members that he/she is still typing.
+         *
+         * @private
+         */
+        async _onCurrentPartnerLongTypingTimeout() {
+            this._forceNotifyNextCurrentPartnerTypingStatus = true;
+            this._throttleNotifyCurrentPartnerTypingStatus.clear();
+            await this.async(
+                () => this._throttleNotifyCurrentPartnerTypingStatus({ isTyping: true })
+            );
+        }
+
+        /**
+         * @private
+         * @param {mail.messaging.entity.Partner} partner
+         */
+        async _onOtherMemberLongTypingTimeout(partner) {
+            if (!this.typingMembers.includes(partner)) {
+                this._otherMembersLongTypingTimers.delete(partner);
+                return;
+            }
+            this.unregisterOtherMemberTypingMember(partner);
+        }
     }
 
     Thread.entityName = 'Thread';
@@ -627,24 +952,24 @@ function ThreadFactory({ Entity }) {
             inverse: 'thread',
             isCausal: true,
         }),
+        correspondent: many2one('Partner', {
+            inverse: 'correspondentThreads',
+        }),
+        correspondentNameOrDisplayName: attr({
+            related: 'correspondent.nameOrDisplayName',
+        }),
         counter: attr({
             default: 0,
         }),
         creator: many2one('User'),
         custom_channel_name: attr(),
-        directPartner: one2one('Partner', {
-            inverse: 'directPartnerThread',
-        }),
-        directPartnerNameOrDisplayName: attr({
-            related: 'directPartner.nameOrDisplayName',
-        }),
         displayName: attr({
             compute: '_computeDisplayName',
             dependencies: [
                 'channel_type',
+                'correspondent',
+                'correspondentNameOrDisplayName',
                 'custom_channel_name',
-                'directPartner',
-                'directPartnerNameOrDisplayName',
                 'name',
             ],
         }),
@@ -716,13 +1041,50 @@ function ThreadFactory({ Entity }) {
             default: false,
         }),
         name: attr(),
+        /**
+         * Ordered typing members on this thread, excluding the current partner.
+         */
+        orderedOtherTypingMembers: many2many('Partner', {
+            compute: '_computeOrderedOtherTypingMembers',
+            dependencies: ['orderedTypingMembers'],
+        }),
+        /**
+         * Ordered typing members on this thread. Lower index means this member
+         * is currently typing for the longest time. This list includes current
+         * partner as typer.
+         */
+        orderedTypingMembers: many2many('Partner', {
+            compute: '_computeOrderedTypingMembers',
+            dependencies: [
+                'orderedTypingMemberLocalIds',
+                'typingMembers',
+            ],
+        }),
+        /**
+         * Technical attribute to manage ordered list of typing members.
+         */
+        orderedTypingMemberLocalIds: attr({
+            default: [],
+        }),
         originThreadAttachments: one2many('Attachment', {
             inverse: 'originThread',
         }),
         public: attr(),
         seen_message_id: attr(),
         seen_partners_info: attr(),
+        /**
+         * Members that are currently typing something in the composer of this
+         * thread, including current partner.
+         */
         typingMembers: many2many('Partner'),
+        /**
+         * Text that represents the status on this thread about typing members.
+         */
+        typingStatusText: attr({
+            compute: '_computeTypingStatusText',
+            default: '',
+            dependencies: ['orderedOtherTypingMembers'],
+        }),
         uuid: attr(),
         viewers: one2many('ThreadViewer', {
             inverse: 'thread',

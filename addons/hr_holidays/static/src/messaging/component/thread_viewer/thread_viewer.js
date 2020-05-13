@@ -15,20 +15,20 @@ patch(components.ThreadViewer, 'hr_holidays.messaging.component.ThreadViewer', {
     //--------------------------------------------------------------------------
 
     /**
-     * Returns the "out of office" text for the direct partner of the thread if
+     * Returns the "out of office" text for the correspondent of the thread if
      * applicable.
      *
      * @returns {string}
      */
     getOutOfOfficeText() {
-        if (!this.threadViewer.thread.directPartner) {
+        if (!this.threadViewer.thread.correspondent) {
             return "";
         }
-        if (!this.threadViewer.thread.directPartner.out_of_office_date_end) {
+        if (!this.threadViewer.thread.correspondent.out_of_office_date_end) {
             return "";
         }
         const currentDate = new Date();
-        const date = str_to_datetime(this.threadViewer.thread.directPartner.out_of_office_date_end);
+        const date = str_to_datetime(this.threadViewer.thread.correspondent.out_of_office_date_end);
         const options = { day: 'numeric', month: 'short' };
         if (currentDate.getFullYear() !== date.getFullYear()) {
             options.year = 'numeric';
@@ -48,9 +48,9 @@ patch(components.ThreadViewer, 'hr_holidays.messaging.component.ThreadViewer', {
         const res = this._super(...arguments);
         const threadViewer = this.env.entities.ThreadViewer.get(props.threadViewerLocalId);
         const thread = threadViewer ? threadViewer.thread : undefined;
-        const directPartner = thread ? thread.directPartner : undefined;
+        const correspondent = thread ? thread.correspondent : undefined;
         return Object.assign({}, res, {
-            directPartner: directPartner ? directPartner.__state : undefined,
+            correspondent: correspondent ? correspondent.__state : undefined,
         });
     },
 });

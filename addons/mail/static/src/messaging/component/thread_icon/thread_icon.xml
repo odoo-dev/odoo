@@ -13,25 +13,24 @@
                         <div class="o_ThreadIcon_channelPublic fa fa-hashtag" title="Public channel"/>
                     </t>
                 </t>
-                <t t-elif="thread.channel_type === 'chat' and thread.directPartner">
-                    <t t-if="thread.directPartner.im_status === 'online'">
+                <t t-elif="thread.channel_type === 'chat' and thread.correspondent">
+                    <t t-if="thread.orderedOtherTypingMembers.length > 0">
+                        <ThreadTypingIcon
+                            class="o_ThreadIcon_typing"
+                            animation="'pulse'"
+                            title="thread.typingStatusText"
+                        />
+                    </t>
+                    <t t-elif="thread.correspondent.im_status === 'online'">
                         <div class="o_ThreadIcon_online fa fa-circle" title="Online"/>
                     </t>
-                    <t t-elif="thread.directPartner.im_status === 'offline'">
+                    <t t-elif="thread.correspondent.im_status === 'offline'">
                         <div class="o_ThreadIcon_offline fa fa-circle-o" title="Offline"/>
                     </t>
-                    <t t-elif="thread.directPartner.im_status === 'away'">
+                    <t t-elif="thread.correspondent.im_status === 'away'">
                         <div class="o_ThreadIcon_away fa fa-circle" title="Away"/>
                     </t>
-                    <!-- TODO FIXME this condition should probably be at the top to be applied before the others -->
-                    <t t-elif="thread.typingMembers.includes(thread.directPartner)">
-                        <div class="o_ThreadIcon_typing" title="Is typing...">
-                            <span class="o_ThreadIcon_typingDot"/>
-                            <span class="o_ThreadIcon_typingDot"/>
-                            <span class="o_ThreadIcon_typingDot"/>
-                        </div>
-                    </t>
-                    <t t-elif="thread.directPartner === env.messaging.partnerRoot">
+                    <t t-elif="thread.correspondent === env.messaging.partnerRoot">
                         <div class="o_ThreadIcon_online fa fa-heart" title="Bot"/>
                     </t>
                     <t t-else="" name="noImStatusCondition">

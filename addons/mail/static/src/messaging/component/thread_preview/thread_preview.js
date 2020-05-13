@@ -36,8 +36,8 @@ class ThreadPreview extends Component {
                     ? lastMessageAuthor.__state
                     : undefined,
                 thread: thread ? thread.__state : undefined,
-                threadDirectPartner: thread && thread.directPartner
-                    ? thread.directPartner.__state
+                threadCorrespondent: thread && thread.correspondent
+                    ? thread.correspondent.__state
                     : undefined,
             };
         });
@@ -53,8 +53,8 @@ class ThreadPreview extends Component {
      * @returns {string}
      */
     image() {
-        if (this.thread.directPartner) {
-            return `/web/image/res.partner/${this.thread.directPartner.id}/image_128`;
+        if (this.thread.correspondent) {
+            return `/web/image/res.partner/${this.thread.correspondent.id}/image_128`;
         }
         return `/web/image/mail.channel/${this.thread.id}/image_128`;
     }

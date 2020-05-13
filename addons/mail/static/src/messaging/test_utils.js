@@ -13,6 +13,7 @@ var MailService = require('mail.Service');
 
 const AbstractStorageService = require('web.AbstractStorageService');
 const Class = require('web.Class');
+const { delay } = require('web.concurrency');
 const NotificationService = require('web.NotificationService');
 const RamStorage = require('web.RamStorage');
 const makeTestEnvironment = require('web.test_env');
@@ -68,12 +69,71 @@ const MockMailService = Class.extend({
     },
     /**
      * @param {Object} [env={}]
+     * @param {Object} [env.session]
+     * @param {Object} [param1={}]
+     * @param {boolean} [param1.hasTimeControl=false]
      */
-    messaging(env = {}) {
+    messaging(env = {}, { hasTimeControl = false } = {}) {
         const _t = s => s;
         _t.database = {
             parameters: { direction: 'ltr' },
         };
+        if (hasTimeControl) {
+            if (!env.window) {
+                env.window = {};
+            }
+            // list of timeout ids that have timed out.
+            let timedOutIds = [];
+            // key: timeoutId, value: func + remaining duration
+            const timeouts = new Map();
+            Object.assign(env.window, {
+                clearTimeout: id => {
+                    timeouts.delete(id);
+                    timedOutIds = timedOutIds.filter(i => i !== id);
+                },
+                setTimeout: (func, duration) => {
+                    const timeoutId = _.uniqueId('timeout_');
+                    const timeout = {
+                        id: timeoutId,
+                        isTimedOut: false,
+                        func,
+                        duration,
+                    };
+                    timeouts.set(timeoutId, timeout);
+                    if (duration === 0) {
+                        timedOutIds.push(timeoutId);
+                        timeout.isTimedOut = true;
+                    }
+                    return timeoutId;
+                },
+            });
+            if (!env.testUtils) {
+                env.testUtils = {};
+            }
+            Object.assign(env.testUtils, {
+                advanceTime: async duration => {
+                    await nextTick();
+                    for (const id of timeouts.keys()) {
+                        const timeout = timeouts.get(id);
+                        if (timeout.isTimedOut) {
+                            continue;
+                        }
+                        timeout.duration = Math.max(timeout.duration - duration, 0);
+                        if (timeout.duration === 0) {
+                            timedOutIds.push(id);
+                        }
+                    }
+                    while (timedOutIds.length > 0) {
+                        const id = timedOutIds.shift();
+                        const timeout = timeouts.get(id);
+                        timeouts.delete(id);
+                        timeout.func();
+                        await nextTick();
+                    }
+                    await nextTick();
+                },
+            });
+        }
         const testEnv = makeTestEnvironment(Object.assign(env, {
             _t: env._t || _t,
             session: Object.assign({
@@ -108,18 +168,19 @@ const MockMailService = Class.extend({
         env = {},
         hasChatWindow = false,
         hasLegacyMail = false,
+        hasTimeControl = false,
         isDebug = false,
     } = {}) {
         const services = {
             bus_service: this.bus_service(),
-            dialog: this.dialog(isDebug),
             local_storage: this.local_storage(),
             notification: this.notification(),
         };
         if (hasLegacyMail) {
             services.mail_service = this.mail_service();
         } else {
-            services.messaging = this.messaging(env);
+            services.dialog = this.dialog(isDebug);
+            services.messaging = this.messaging(env, { hasTimeControl });
         }
         if (hasChatWindow) {
             services.chat_window = this.chat_window(isDebug);
@@ -284,11 +345,13 @@ function _useMessagingMenu(callbacks) {
  * @param {boolean} [param0.env]
  * @param {boolean} [param0.hasChatWindow]
  * @param {boolean} [param0.hasLegacyMail]
+ * @param {boolean} [param0.hasTimeControl]
  * @param {boolean} [param0.isDebug]
+ * @param {Object} [param0.session]
  * @returns {Object}
  */
-function getMailServices({ env, hasChatWindow, hasLegacyMail, isDebug } = {}) {
-    return new MockMailService().getServices({ env, hasChatWindow, hasLegacyMail, isDebug });
+function getMailServices({ env, hasChatWindow, hasLegacyMail, hasTimeControl, isDebug, session } = {}) {
+    return new MockMailService().getServices({ env, hasChatWindow, hasLegacyMail, hasTimeControl, isDebug, session });
 }
 
 //------------------------------------------------------------------------------
@@ -305,6 +368,14 @@ function nextAnimationFrame() {
     return new Promise(function (resolve) {
         setTimeout(() => requestAnimationFrame(() => resolve()));
     });
+}
+
+/**
+ * Wait a task tick, so that anything in micro-task queue that can be processed
+ * is processed.
+ */
+async function nextTick() {
+    await delay(0);
 }
 
 /**
@@ -386,6 +457,7 @@ function beforeEach(self) {
             moderation_channel_ids: [],
             needaction_inbox_counter: 0,
             partner_root: [2, "OdooBot"],
+            public_partner: [4, "Public"],
             shortcodes: [],
             starred_counter: 0,
         },
@@ -673,6 +745,10 @@ async function pause() {
  * @param {boolean} [param0.hasDiscuss=false] if set, mount discuss app.
  * @param {boolean} [param0.hasMessagingMenu=false] if set, mount messaging
  *   menu.
+ * @param {boolean} [param0.hasTimeControl=false] if set, all flow of time
+ *   in `env.setTimeout` are fully controlled by test itself.
+ *     @see advanceTime() function returned by this function to advance time
+ *       with this mode.
  * @param {boolean} [param0.hasView=false] if set, use createView to create a
  *   view instead of a generic widget.
  * @param {string} [param0.model] makes only sense when `param0.hasView` is set:
@@ -680,6 +756,7 @@ async function pause() {
  * @param {integer} [param0.res_id] makes only sense when `param0.hasView` is set:
  *   the res_id to use in createView.
  * @param {Object} [param0.services]
+ * @param {Object} [param0.session]
  * @param {Object} [param0.View] makes only sense when `param0.hasView` is set:
  *   the View class to use in createView.
  * @param {Object} [param0.viewOptions] makes only sense when `param0.hasView`
@@ -700,9 +777,11 @@ async function start(param0 = {}) {
         hasDialog = false,
         hasDiscuss = false,
         hasMessagingMenu = false,
+        hasTimeControl = false,
         hasView = false,
         waitUntilMessagingInitialized = true,
     } = param0;
+    delete param0.fullTimeoutControl;
     delete param0.hasChatWindow;
     delete param0.hasDiscuss;
     delete param0.hasMessagingMenu;
@@ -730,7 +809,7 @@ async function start(param0 = {}) {
         env,
     } = param0;
     const {
-        services = getMailServices({ env, hasChatWindow, debug }),
+        services = getMailServices({ env, hasChatWindow, hasTimeControl, isDebug: debug, session: param0.session }),
     } = param0;
     initCallbacks.forEach(callback => callback(param0));
     const kwargs = Object.assign({
@@ -870,6 +949,7 @@ return {
     inputFiles,
     MockMailService,
     nextAnimationFrame,
+    nextTick,
     pasteFiles,
     pause,
     start,

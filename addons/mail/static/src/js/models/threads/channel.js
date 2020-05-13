@@ -2,7 +2,6 @@ odoo.define('mail.model.Channel', function (require) {
 "use strict";
 
 var SearchableThread = require('mail.model.SearchableThread');
-var ThreadTypingMixin = require('mail.model.ThreadTypingMixin');
 var mailUtils = require('mail.utils');
 
 const config = require('web.config');
@@ -17,7 +16,7 @@ var time = require('web.time');
  * Any piece of code in JS that make use of channels must ideally interact with
  * such objects, instead of direct data from the server.
  */
-var Channel = SearchableThread.extend(ThreadTypingMixin, {
+var Channel = SearchableThread.extend({
     /**
      * @override
      * @param {Object} params
@@ -46,7 +45,6 @@ var Channel = SearchableThread.extend(ThreadTypingMixin, {
     init: function (params) {
         var self = this;
         this._super.apply(this, arguments);
-        ThreadTypingMixin.init.apply(this, arguments);
 
         var data = params.data;
         var options = params.options;
@@ -331,15 +329,6 @@ var Channel = SearchableThread.extend(ThreadTypingMixin, {
         return [['channel_ids', 'in', [this._id]]];
     },
     /**
-     * @override {mail.model.ThreadTypingMixin}
-     * @private
-     * @param {Object} params
-     * @param {integer} params.partnerID
-     */
-    _isTypingMyselfInfo: function (params) {
-        return session.partner_id === params.partnerID;
-    },
-    /**
      * Marks this channel as read.
      * The last seen message will be the last message.
      * Resolved with the last seen message, only for non-mailbox channels
@@ -352,21 +341,6 @@ var Channel = SearchableThread.extend(ThreadTypingMixin, {
         var superDef = this._super.apply(this, arguments);
         var seenDef = this._notifySeen();
         return Promise.all([superDef, seenDef]);
-    },
-    /**
-     * @override {mail.model.ThreadTypingMixin}
-     * @private
-     * @param {Object} params
-     * @param {boolean} params.typing
-     * @returns {Promise}
-     */
-    _notifyMyselfTyping: function (params) {
-        return this._rpc({
-            model: 'mail.channel',
-            method: 'notify_typing',
-            args: [this.getID()],
-            kwargs: { is_typing: params.typing },
-        }, { shadow: true });
     },
     /**
      * @private
@@ -409,17 +383,6 @@ var Channel = SearchableThread.extend(ThreadTypingMixin, {
                     return messageData;
                 });
         });
-    },
-    /**
-     * Warn views that the list of users that are currently typing on this
-     * thread has been updated.
-     *
-     * @override {mail.model.ThreadTypingMixin}
-     * @private
-     */
-    _warnUpdatedTypingPartners: function () {
-        this.call('mail_service', 'getMailBus')
-            .trigger('update_typing_partners', this.getID());
     },
 });
 

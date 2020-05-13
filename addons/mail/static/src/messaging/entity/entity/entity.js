@@ -22,6 +22,16 @@ function EntityFactory() {
             }
         }
 
+        /**
+         * Called when the entity is being created, but not yet processed
+         * its create value on the fields. This method is handy to define purely
+         * technical property on this entity, like handling of timers. This
+         * method acts like the constructor, but has a very important difference:
+         * the `this` is the proxified entity, so evaluation of field values
+         * on get/set work correctly.
+         */
+        init() {}
+
         //--------------------------------------------------------------------------
         // Public
         //--------------------------------------------------------------------------

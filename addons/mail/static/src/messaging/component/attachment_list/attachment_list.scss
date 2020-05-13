@@ -5,20 +5,11 @@
 .o_AttachmentList {
     display: flex;
     flex-flow: wrap;
+    justify-content: flex-start;
 }
 
 .o_AttachmentList_attachment {
-    margin-left: 3px;
-    margin-right: 3px;
-    margin-bottom: 6px;
-
-    &:first-child {
-        margin-left: 0;
-    }
-
-    &:last-child {
-        margin-right: 0;
-    }
+    margin: map-get($spacers, 1);
 }
 
 // ------------------------------------------------------------------

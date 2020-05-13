@@ -57,15 +57,6 @@ function MessagingInitializerFactory({ Entity }) {
             }
         }
 
-        /**
-         * Called when messaging is stopped.
-         */
-        stop() {
-            if (this.messaging.device) {
-                this.messaging.device.stop();
-            }
-        }
-
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -96,6 +87,7 @@ function MessagingInitializerFactory({ Entity }) {
             moderation_counter = 0,
             needaction_inbox_counter = 0,
             partner_root,
+            public_partner,
             shortcodes = [],
             starred_counter = 0
         }) {
@@ -103,6 +95,7 @@ function MessagingInitializerFactory({ Entity }) {
             this._initPartners({
                 moderation_channel_ids,
                 partner_root,
+                public_partner,
             });
             this._initChannels(channel_slots);
             this._initCommands(commands);
@@ -253,6 +246,7 @@ function MessagingInitializerFactory({ Entity }) {
         _initPartners({
             moderation_channel_ids = [],
             partner_root: [partnerRootId, partnerRootDisplayName],
+            public_partner: [publicPartnerId, publicPartnerDisplayName],
         }) {
             this.messaging.update({
                 currentPartner: [['insert', {
@@ -266,6 +260,10 @@ function MessagingInitializerFactory({ Entity }) {
                 partnerRoot: [['insert', {
                     display_name: partnerRootDisplayName,
                     id: partnerRootId,
+                }]],
+                publicPartner: [['insert', {
+                    display_name: publicPartnerDisplayName,
+                    id: publicPartnerId,
                 }]],
             });
         }

@@ -131,7 +131,7 @@ QUnit.test('create (chat)', async function (assert) {
 
     const channel = this.env.entities.Thread.create({
         channel_type: 'chat',
-        directPartner: [['insert', {
+        correspondent: [['insert', {
             email: "demo@example.com",
             id: 5,
             im_status: 'online',
@@ -154,8 +154,8 @@ QUnit.test('create (chat)', async function (assert) {
     assert.strictEqual(channel.model, 'mail.channel');
     assert.strictEqual(channel.channel_type, 'chat');
     assert.strictEqual(channel.id, 200);
-    assert.ok(channel.directPartner);
-    assert.strictEqual(partner, channel.directPartner);
+    assert.ok(channel.correspondent);
+    assert.strictEqual(partner, channel.correspondent);
     assert.strictEqual(partner.email, "demo@example.com");
     assert.strictEqual(partner.id, 5);
     assert.strictEqual(partner.im_status, 'online');

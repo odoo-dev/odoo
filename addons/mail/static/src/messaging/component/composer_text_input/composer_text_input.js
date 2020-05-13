@@ -24,6 +24,11 @@ class ComposerTextInput extends Component {
             };
         });
         /**
+         * Last content of textarea from input event. Useful to determine
+         * whether the current partner is typing something.
+         */
+        this._textareaLastInputValue = "";
+        /**
          * Reference of the textarea. Useful to set height, selection and content.
          */
         this._textareaRef = useRef('textarea');
@@ -89,7 +94,7 @@ class ComposerTextInput extends Component {
     // Private
     //--------------------------------------------------------------------------
 
-        /**
+    /**
      * Returns selection end position.
      *
      * @private
@@ -152,6 +157,10 @@ class ComposerTextInput extends Component {
      * @private
      */
     _onInputTextarea() {
+        if (this._textareaLastInputValue !== this._textareaRef.el.value) {
+            this.composer.handleCurrentPartnerIsTyping();
+        }
+        this._textareaLastInputValue = this._textareaRef.el.value;
         this._updateHeight();
         this.trigger('o-input-composer-text-input');
     }

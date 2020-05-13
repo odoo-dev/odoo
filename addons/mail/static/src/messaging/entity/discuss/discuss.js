@@ -108,9 +108,9 @@ function DiscussFactory({ Entity }) {
             const partner = this.env.entities.Partner.find(partner =>
                 partner.id === partnerId
             );
-            const chat = partner.directPartnerThread;
+            const chat = partner.correspondentThreads.find(thread => thread.channel_type === 'chat');
             if (chat) {
-                this._openThread(chat.localId);
+                this.threadViewer.update({ thread: [['link', chat]] });
             } else {
                 this.env.entities.Thread.createChannel({
                     autoselect: true,

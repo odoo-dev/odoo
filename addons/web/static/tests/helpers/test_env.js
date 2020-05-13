@@ -68,6 +68,7 @@ odoo.define('web.test_env', async function (require) {
                 },
             }, env.session),
             window: Object.assign({
+                clearTimeout: (...args) => window.clearTimeout(...args),
                 innerHeight: 1080,
                 innerWidth: 1920,
                 Notification: {
@@ -76,6 +77,7 @@ odoo.define('web.test_env', async function (require) {
                         return this.permission;
                     },
                 },
+                setTimeout: (...args) => window.setTimeout(...args),
             }, env.window),
         };
         testEnv = Object.assign(env, defaultEnv);

@@ -2,11 +2,19 @@ odoo.define('mail.messaging.entity.Messaging', function (require) {
 'use strict';
 
 const { registerNewEntity } = require('mail.messaging.entityCore');
-const { attr, one2one } = require('mail.messaging.EntityField');
+const { attr, many2one, one2one } = require('mail.messaging.EntityField');
 
 function MessagingFactory({ Entity }) {
 
     class Messaging extends Entity {
+
+        /**
+         * @override
+         */
+        delete() {
+            this.env.call('bus_service', 'off', 'window_focus', null, this._handleGlobalWindowFocus);
+            super.delete();
+        }
 
         //----------------------------------------------------------------------
         // Public
@@ -70,7 +78,7 @@ function MessagingFactory({ Entity }) {
                     });
                     return;
                 }
-                const chat = partner.directPartnerThread;
+                const chat = partner.correspondentThreads.find(thread => thread.channel_type === 'chat');
                 if (!chat) {
                     this.env.entities.Thread.createChannel({
                         autoselect: true,
@@ -97,15 +105,6 @@ function MessagingFactory({ Entity }) {
             await this.async(() => this.initializer.start());
             this.notificationHandler.start();
             this.update({ isInitialized: true });
-        }
-
-        /**
-         * Stop messaging and related entities.
-         */
-        stop() {
-            this.env.call('bus_service', 'off', 'window_focus', null, this._handleGlobalWindowFocus);
-            this.initializer.stop();
-            this.notificationHandler.stop();
         }
 
         //----------------------------------------------------------------------
@@ -185,7 +184,8 @@ function MessagingFactory({ Entity }) {
         outOfFocusUnreadMessageCounter: attr({
             default: 0,
         }),
-        partnerRoot: one2one('Partner'),
+        partnerRoot: many2one('Partner'),
+        publicPartner: many2one('Partner'),
     };
 
     return Messaging;

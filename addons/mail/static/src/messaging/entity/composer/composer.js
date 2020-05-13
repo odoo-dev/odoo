@@ -67,6 +67,7 @@ function ComposerFactory({ Entity }) {
          */
         async postMessage(data, options) {
             const thread = this.thread;
+            this.thread.unregisterCurrentPartnerIsTyping({ immediateNotify: true });
             if (thread.model === 'mail.box') {
                 const { res_id, res_model } = options;
                 const otherThread = this.env.entities.Thread.find(thread =>
@@ -153,6 +154,22 @@ function ComposerFactory({ Entity }) {
                 threadViewer.addComponentHint('current-partner-just-posted-message', messageId);
             }
             this._reset();
+        }
+
+        /**
+         * Called when current partner is inserting some input in composer.
+         * Useful to notify current partner is currently typing something in the
+         * composer of this thread to all other members.
+         */
+        handleCurrentPartnerIsTyping() {
+            if (!this.thread) {
+                return;
+            }
+            if (this.thread.typingMembers.includes(this.env.messaging.currentPartner)) {
+                this.thread.refreshCurrentPartnerIsTyping();
+            } else {
+                this.thread.registerCurrentPartnerIsTyping();
+            }
         }
 
         /**

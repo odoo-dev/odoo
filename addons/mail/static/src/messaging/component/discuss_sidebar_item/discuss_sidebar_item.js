@@ -20,9 +20,9 @@ class DiscussSidebarItem extends Component {
         super(...args);
         useStore(props => {
             const thread = this.env.entities.Thread.get(props.threadLocalId);
-            const directPartner = thread ? thread.directPartner : undefined;
+            const correspondent = thread ? thread.correspondent : undefined;
             return {
-                directPartner: directPartner ? directPartner.__state : undefined,
+                correspondent: correspondent ? correspondent.__state : undefined,
                 discuss: this.env.messaging.discuss.__state,
                 thread: thread ? thread.__state : undefined,
             };

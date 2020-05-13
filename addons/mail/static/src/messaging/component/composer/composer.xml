@@ -105,6 +105,9 @@
                 </div>
                 <t t-if="hasFooter">
                     <div class="o_Composer_coreFooter" t-att-class="{ 'o-composer-is-compact': props.isCompact }">
+                        <t t-if="props.hasThreadTyping">
+                            <ThreadTextualTypingStatus class="o_Composer_threadTextualTypingStatus" threadLocalId="composer.thread.localId"/>
+                        </t>
                         <t t-if="composer.attachments.length > 0">
                             <AttachmentList
                                 class="o_Composer_attachmentList"
