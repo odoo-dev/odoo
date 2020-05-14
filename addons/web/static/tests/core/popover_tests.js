@@ -17,7 +17,13 @@ odoo.define('web.popover_tests', function (require) {
             assert.expect(11);
 
             class SubComponent extends Component {}
-            SubComponent.template = xml`<div class="o_subcomponent" t-esc="props.text"/>`;
+            SubComponent.template = xml`
+                <div
+                    class="o_subcomponent"
+                    style="width: 280px;"
+                    t-esc="props.text"
+                />
+            `;
 
             class Parent extends Component {
                 constructor() {

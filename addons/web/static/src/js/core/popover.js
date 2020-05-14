@@ -213,23 +213,23 @@ odoo.define('web.Popover', function () {
             return {
                 top: {
                     name: 'top',
-                    top: targetTop - popoverHeight,
-                    left: targetLeft - (popoverWidth - targetWidth) / 2,
+                    top: Math.round(targetTop - popoverHeight),
+                    left: Math.round(targetLeft - (popoverWidth - targetWidth) / 2),
                 },
                 right: {
                     name: 'right',
-                    top: targetTop - (popoverHeight - targetHeight) / 2,
-                    left: targetLeft + targetWidth,
+                    top: Math.round(targetTop - (popoverHeight - targetHeight) / 2),
+                    left: Math.round(targetLeft + targetWidth),
                 },
                 bottom: {
                     name: 'bottom',
-                    top: targetTop + targetHeight,
-                    left: targetLeft - (popoverWidth - targetWidth) / 2,
+                    top: Math.round(targetTop + targetHeight),
+                    left: Math.round(targetLeft - (popoverWidth - targetWidth) / 2),
                 },
                 left: {
                     name: 'left',
-                    top: targetTop - (popoverHeight - targetHeight) / 2,
-                    left: targetLeft - popoverWidth,
+                    top: Math.round(targetTop - (popoverHeight - targetHeight) / 2),
+                    left: Math.round(targetLeft - popoverWidth),
                 },
             };
         }
