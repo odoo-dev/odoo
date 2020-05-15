@@ -9,37 +9,13 @@
     overflow: auto;
 }
 
-.o_FormRenderer_chatterContainer {
-    display: flex;
-    flex: 1 1 auto;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
+.o_Chatter_composer {
+    border-bottom: $border-width solid;
 
-    @media (min-width: 576px) {
-        max-width: 540px;
+    &.o-bordered {
+        border-left: $border-width solid;
+        border-right: $border-width solid;
     }
-
-    @media (min-width: 768px) {
-        max-width: 720px;
-    }
-
-    @media (min-width: 992px) {
-        max-width: 960px;
-    }
-
-    @media (min-width: 1200px) {
-        max-width: 1140px;
-    }
-
-    @media (min-width: 1534px) {
-        width: 530px;
-    }
-}
-
-// FIX to hide chatter in dialogs when they are opened from an action returned by python code
-.modal .modal-dialog .o_form_view .o_FormRenderer_chatterContainer {
-    display: none;
 }
 
 // ------------------------------------------------------------------
@@ -48,8 +24,14 @@
 
 .o_Chatter {
     background-color: white;
+    border-color: $border-color;
+}
 
-    @media (min-width: 1534px) {
-        border-left: 1px solid gray('300');
+.o_Chatter_composer {
+    border-bottom-color: $border-color;
+
+    &.o-bordered {
+        border-left-color: $border-color;
+        border-right-color: $border-color;
     }
 }

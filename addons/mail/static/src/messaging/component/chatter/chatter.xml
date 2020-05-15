@@ -11,6 +11,7 @@
                 <t t-if="chatter.hasThread and chatter.thread and chatter.isComposerVisible">
                     <Composer
                         class="o_Chatter_composer"
+                        t-att-class="{ 'o-bordered': chatter.hasExternalBorder }"
                         composerLocalId="chatter.thread.composer.localId"
                         hasTextInputSendOnEnterEnabled="false"
                         isCompact="false"

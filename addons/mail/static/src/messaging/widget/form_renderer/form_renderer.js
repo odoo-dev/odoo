@@ -108,6 +108,19 @@ FormRenderer.include({
         };
     },
     /**
+     * Create the DOM element that will contain the chatter. This is made in
+     * a separate method so it can be overridden (like in mail_enterprise for
+     * example).
+     *
+     * @private
+     * @returns {jQuery.Element}
+     */
+    _makeChatterContainerTarget() {
+        const $el = $('<div class="o_FormRenderer_chatterContainer"/>');
+        this._chatterContainerTarget = $el[0];
+        return $el;
+    },
+    /**
      * Mount the chatter
      *
      * Force re-mounting chatter component in DOM. This is necessary
@@ -134,9 +147,7 @@ FormRenderer.include({
             node.tag === 'div' &&
             node.attrs.class === 'oe_chatter'
         ) {
-            const $el = $('<div class="o_FormRenderer_chatterContainer"/>');
-            this._chatterContainerTarget = $el[0];
-            return $el;
+            return this._makeChatterContainerTarget();
         }
         return this._super(...arguments);
     },

@@ -262,6 +262,9 @@ function ChatterFactory({ Entity }) {
         hasActivities: attr({
             default: true,
         }),
+        hasExternalBorder: attr({
+            default: true,
+        }),
         hasFollowers: attr({
             default: true,
         }),

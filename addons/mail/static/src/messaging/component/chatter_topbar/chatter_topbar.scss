@@ -13,6 +13,14 @@
     flex: 1;
     flex-direction: row;
     flex-wrap: wrap;
+
+    &.o-has-active-button {
+        border-bottom: $border-width solid;
+    }
+}
+
+.o_ChatterTopbar_button {
+    margin-bottom: -$border-width; /* Needed to allow "overriding" of the bottom border */
 }
 
 .o_ChatterTopbar_buttonAttachmentsCountLoader {
@@ -21,11 +29,6 @@
 
 .o_ChatterTopbar_buttonCount {
     padding-left: 0.25rem;
-}
-
-.o_ChatterTopbar_buttonSendMessage {
-    padding: 0 16px;
-    border-left: none;
 }
 
 .o_ChatterTopbar_buttonClose {
@@ -51,12 +54,36 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_ChatterTopbar .o-active {
-    color: $o-brand-odoo;
-    background-color: lighten(gray('300'), 7%);
-    border-color: gray('300');
-    border-bottom-color: transparent;
-    border-top-color: transparent;
+.o_ChatterTopbar_actions.o-has-active-button {
+    border-color: $border-color;
+}
+
+.o_ChatterTopbar_button {
+    border-radius: 0;
+
+    &:hover {
+        background-color: gray('300');
+    }
+
+    &.o-active {
+        color: $o-brand-odoo;
+        background-color: lighten(gray('300'), 7%);
+        border-right-color: $border-color;
+
+        &:not(:first-of-type),
+        &:first-of-type.o-bordered {
+            border-left-color: $border-color;
+        }
+
+        &.o-bordered {
+            border-top-color: $border-color;
+        }
+
+        &:hover {
+            background-color: gray('300');
+            color: $link-hover-color;
+        }
+    }
 }
 
 .o_ChatterTopbar_buttonClose {

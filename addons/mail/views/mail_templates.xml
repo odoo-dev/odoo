@@ -230,6 +230,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/thread_preview/thread_preview.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/thread_viewer/thread_viewer.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/widget/discuss/discuss.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/widget/form_renderer/form_renderer.scss"/>
             </xpath>
         </template>
 
