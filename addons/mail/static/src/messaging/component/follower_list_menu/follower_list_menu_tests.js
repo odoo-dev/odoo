@@ -94,6 +94,7 @@ QUnit.test('base rendering editable', async function (assert) {
         model: 'res.partner',
     });
     await this.createFollowerListMenuComponent(thread);
+
     assert.containsOnce(
         document.body,
         '.o_FollowerListMenu',
@@ -190,6 +191,7 @@ QUnit.test('click on "add followers" button', async function (assert) {
         model: 'res.partner',
     });
     await this.createFollowerListMenuComponent(thread);
+
     assert.containsOnce(
         document.body,
         '.o_FollowerListMenu',
@@ -320,6 +322,7 @@ QUnit.test('click on "add channels" button', async function (assert) {
         model: 'res.partner',
     });
     await this.createFollowerListMenuComponent(thread);
+
     assert.containsOnce(
         document.body,
         '.o_FollowerListMenu',

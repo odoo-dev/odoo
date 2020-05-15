@@ -439,7 +439,31 @@ function beforeEach(self) {
                 },
             },
         },
-        'mail.followers': { fields: {} },
+        'mail.followers': {
+            fields: {
+                channel_id: {
+                    type: 'integer',
+                },
+                email: {
+                    type: 'string',
+                },
+                id: {
+                    type: 'integer',
+                },
+                is_active: {
+                    type: 'boolean',
+                },
+                is_editable: {
+                    type: 'boolean',
+                },
+                name: {
+                    type: 'string',
+                },
+                partner_id: {
+                    type: 'integer',
+                },
+            },
+        },
         'mail.message': {
             fields: {
                 attachment_ids: {
@@ -550,6 +574,11 @@ function beforeEach(self) {
                 im_status: {
                     string: "status",
                     type: 'char',
+                },
+                message_follower_ids: {
+                    relation: 'follower',
+                    string: "Followers",
+                    type: "one2many",
                 },
             },
             records: [],
