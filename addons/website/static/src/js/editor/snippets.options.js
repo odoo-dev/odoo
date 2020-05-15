@@ -7,6 +7,7 @@ var core = require('web.core');
 var Dialog = require('web.Dialog');
 const wUtils = require('website.utils');
 var options = require('web_editor.snippets.options');
+const weUtils = require('web_editor.utils');
 require('website.s_popup_options');
 
 var _t = core._t;
@@ -365,10 +366,12 @@ options.Class.include({
         const colorType = params.colorType ? (params.colorType + '_') : '';
         const url = `${baseURL}user_${colorType}color_palette.scss`;
 
-        if (!ColorpickerWidget.isCSSColor(color)) {
-            const style = window.getComputedStyle(document.documentElement);
-            color = style.getPropertyValue('--' + color).trim();
-            color = ColorpickerWidget.normalizeCSSColor(color);
+        if (color) {
+            if (weUtils.isColorCombinationName(color)) {
+                color = parseInt(color);
+            } else if (!ColorpickerWidget.isCSSColor(color)) {
+                color = `'${color}'`;
+            }
         }
         return this._makeSCSSCusto(url, {[params.color]: color});
     },

@@ -14,9 +14,9 @@ $enable-deprecation-messages: false !default;
     @return o-get-most-contrast($color, $light, $dark, $background, $threshold, $cross-mix);
 }
 
-@mixin o-bg-color($color, $text-color: null, $with-muted: true, $important: true) {
+@mixin o-bg-color($color, $text-color: null, $with-muted: true, $important: true, $background: $body-bg) {
     @if ($color) {
-        $-yiq-color: if($text-color, $text-color, color-yiq($color));
+        $-yiq-color: if($text-color, $text-color, color-yiq($color, $background: $background));
         background-color: $color#{if($important, ' !important', '')};
         color: $-yiq-color; // not important so that text utilities still work
 
