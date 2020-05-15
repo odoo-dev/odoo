@@ -8,7 +8,6 @@ const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
-    pause,
     start: utilsStart,
 } = require('mail.messaging.testUtils');
 
@@ -391,6 +390,156 @@ QUnit.test('attachment counter with attachments', async function (assert) {
         document.querySelector(`.o_ChatterTopbar_buttonAttachmentsCount`).textContent,
         '2',
         'attachment counter should contain "2"'
+    );
+});
+
+QUnit.test('rendering with multiple partner followers', async function (assert) {
+    assert.expect(7);
+
+    await this.start();
+    this.data['res.partner'].records = [{
+        id: 100,
+        message_follower_ids: [1, 2],
+    }];
+    this.data['mail.followers'].records = [
+        {
+            // simulate real return from RPC
+            // (the presence of the key and the falsy value need to be handled correctly)
+            channel_id: false,
+            id: 1,
+            name: "Jean Michang",
+            partner_id: 12,
+        }, {
+            // simulate real return from RPC
+            // (the presence of the key and the falsy value need to be handled correctly)
+            channel_id: false,
+            id: 2,
+            name: "Eden Hazard",
+            partner_id: 11,
+        },
+    ];
+    const chatter = this.env.entities.Chatter.create({
+        followerIds: [1, 2],
+        threadId: 100,
+        threadModel: 'res.partner',
+    });
+    await this.createChatterTopbarComponent(chatter);
+
+    assert.containsOnce(
+        document.body,
+        '.o_FollowerListMenu',
+        "should have followers menu component"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_FollowerListMenu_buttonFollowers',
+        "should have followers button"
+    );
+
+    await afterNextRender(() => {
+        document.querySelector('.o_FollowerListMenu_buttonFollowers').click();
+    });
+    assert.containsOnce(
+        document.body,
+        '.o_FollowerListMenu_dropdown',
+        "followers dropdown should be opened"
+    );
+    assert.containsN(
+        document.body,
+        '.o_Follower',
+        2,
+        "exactly two followers should be listed"
+    );
+    assert.containsN(
+        document.body,
+        '.o_Follower_name',
+        2,
+        "exactly two follower names should be listed"
+    );
+    assert.strictEqual(
+        document.querySelectorAll('.o_Follower_name')[0].textContent.trim(),
+        "Jean Michang",
+        "first follower is 'Jean Michang'"
+    );
+    assert.strictEqual(
+        document.querySelectorAll('.o_Follower_name')[1].textContent.trim(),
+        "Eden Hazard",
+        "second follower is 'Eden Hazard'"
+    );
+});
+
+QUnit.test('rendering with multiple channel followers', async function (assert) {
+    assert.expect(7);
+
+    this.data['res.partner'].records = [{
+        id: 100,
+        message_follower_ids: [1, 2],
+    }];
+    await this.start();
+    this.data['mail.followers'].records = [
+        {
+            channel_id: 11,
+            id: 1,
+            name: "channel numero 5",
+            // simulate real return from RPC
+            // (the presence of the key and the falsy value need to be handled correctly)
+            partner_id: false,
+        }, {
+            channel_id: 12,
+            id: 2,
+            name: "channel armstrong",
+            // simulate real return from RPC
+            // (the presence of the key and the falsy value need to be handled correctly)
+            partner_id: false,
+        },
+    ];
+    const chatter = this.env.entities.Chatter.create({
+        followerIds: [1, 2],
+        threadId: 100,
+        threadModel: 'res.partner',
+    });
+    await this.createChatterTopbarComponent(chatter);
+
+    assert.containsOnce(
+        document.body,
+        '.o_FollowerListMenu',
+        "should have followers menu component"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_FollowerListMenu_buttonFollowers',
+        "should have followers button"
+    );
+
+    await afterNextRender(() => {
+        document.querySelector('.o_FollowerListMenu_buttonFollowers').click();
+    });
+    assert.containsOnce(
+        document.body,
+        '.o_FollowerListMenu_dropdown',
+        "followers dropdown should be opened"
+    );
+    assert.containsN(
+        document.body,
+        '.o_Follower',
+        2,
+        "exactly two followers should be listed"
+    );
+    assert.containsN(
+        document.body,
+        '.o_Follower_name',
+        2,
+        "exactly two follower names should be listed"
+    );
+    assert.strictEqual(
+        document.querySelectorAll('.o_Follower_name')[0].textContent.trim(),
+        "channel numero 5",
+        "first follower is 'channel numero 5'"
+    );
+    assert.strictEqual(
+        document.querySelectorAll('.o_Follower_name')[1].textContent.trim(),
+        "channel armstrong",
+        "second follower is 'channel armstrong'"
     );
 });
 

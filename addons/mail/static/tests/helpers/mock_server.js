@@ -48,6 +48,18 @@ MockServer.include({
         });
         return previews;
     },
+
+    /**
+     * Simulate the '/mail/read_followers' route
+     *
+     * @private
+     * @return {Object} list of followers
+     */
+    async _mockFollowersRead(args) {
+        const ids = args.follower_ids; // list of followers IDs to read
+        const followers = this._getRecords('mail.followers', [['id', 'in', ids]]);
+        return { followers };
+    },
     /**
      * Simulate the 'get_activity_method' on 'mail.activity'
      *
@@ -282,7 +294,7 @@ MockServer.include({
     /**
      * @override
      */
-    _performRpc: function (route, args) {
+    async _performRpc(route, args) {
         // routes
         if (route === '/mail/init_messaging') {
             return Promise.resolve(this._mockInitMessaging(args));
@@ -314,6 +326,9 @@ MockServer.include({
         }
         if (args.method === 'message_post') {
             return Promise.resolve(this._mockMessagePost(args));
+        }
+        if (route === '/mail/read_followers') {
+            return this._mockFollowersRead(args);
         }
         if (args.method === 'activity_format') {
             var res = this._mockRead(args.model, args.args, args.kwargs);

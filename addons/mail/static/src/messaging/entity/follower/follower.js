@@ -20,11 +20,16 @@ function FollowerFactory({ Entity }) {
         static convertData(data) {
             const data2 = {};
             if ('channel_id' in data) {
-                const channelData = { id: data.channel_id, model: 'mail.channel' };
-                if ('name' in data) {
-                    channelData.name = data.name;
+                if (!data.channel_id) {
+                    data2.channel = [['unlink-all']];
+                } else {
+                    const channelData = {
+                        id: data.channel_id,
+                        model: 'mail.channel',
+                        name: data.name,
+                    };
+                    data2.channel = [['insert', channelData]];
                 }
-                data2.channel = [['insert', channelData]];
             }
             if ('id' in data) {
                 data2.id = data.id;
@@ -36,14 +41,16 @@ function FollowerFactory({ Entity }) {
                 data2.isEditable = data.is_editable;
             }
             if ('partner_id' in data) {
-                const partnerData = { id: data.partner_id };
-                if ('email' in data) {
-                    partnerData.email = data.email;
+                if (!data.partner_id) {
+                    data2.partner = [['unlink-all']];
+                } else {
+                    const partnerData = {
+                        email: data.email,
+                        id: data.partner_id,
+                        name: data.name,
+                    };
+                    data2.partner = [['insert', partnerData]];
                 }
-                if ('name' in data) {
-                    partnerData.name = data.name;
-                }
-                data2.partner = [['insert', partnerData]];
             }
             return data2;
         }
