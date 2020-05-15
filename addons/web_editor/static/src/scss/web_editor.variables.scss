@@ -441,3 +441,16 @@ $o-color-combinations-preset-number: 1;
 // Translations
 $o-we-content-to-translate-color: rgb(255, 255, 90) !default;
 $o-we-translated-content-color: rgb(120, 215, 110) !default;
+
+// Apply colors according to the given identifier. Can either be a preset
+// number, a color name or a css color.
+@mixin o-apply-colors($identifier, $background: $body-bg) {
+    $-related-color: o-related-color($identifier, $max-recursions: 10);
+    @if type-of($-related-color) == 'number' {
+        // This is a preset to be applied, just extend it. This should probably
+        // be avoided and use the class in XML if possible.
+        @extend .o_cc#{$-related-color};
+    } @else {
+        @include o-bg-color(o-color($-related-color), $background: $background);
+    }
+}
