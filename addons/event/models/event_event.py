@@ -49,7 +49,7 @@ class EventType(models.Model):
         _tz_get, string='Timezone', default=lambda self: self.env.user.tz or 'UTC')
     # communication
     use_mail_schedule = fields.Boolean(
-        'Automatically Send Emails', default=True)
+        'Automatically Send Mails', default=True)
     event_type_mail_ids = fields.One2many(
         'event.type.mail', 'event_type_id',
         string='Mail Schedule', compute='_compute_event_type_mail_ids',

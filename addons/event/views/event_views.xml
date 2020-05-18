@@ -31,7 +31,7 @@
                                 </div>
                             </div>
                         </div>
-                        <h2>Communication</h2>
+                        <h2>Default Communication</h2>
                         <div class="row mt16 o_settings_container" name="event_type_communication">
                             <div class="col-12 col-lg-12 o_setting_box">
                                 <div class="o_setting_left_pane">
