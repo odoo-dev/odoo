@@ -18,6 +18,7 @@ class Dialog extends Component {
          */
         this._componentRef = useRef('component');
         this._onClickGlobal = this._onClickGlobal.bind(this);
+        this._onKeydownDocument = this._onKeydownDocument.bind(this);
         useStore(props => {
             const dialog = this.env.entities.Dialog.get(props.dialogLocalId);
             return {
@@ -28,10 +29,12 @@ class Dialog extends Component {
 
     mounted() {
         document.addEventListener('click', this._onClickGlobal, true);
+        document.addEventListener('keydown', this._onKeydownDocument);
     }
 
     willUnmount() {
         document.removeEventListener('click', this._onClickGlobal, true);
+        document.removeEventListener('keydown', this._onKeydownDocument);
     }
 
     //--------------------------------------------------------------------------
@@ -67,14 +70,24 @@ class Dialog extends Component {
      * @param {MouseEvent} ev
      */
     _onClickGlobal(ev) {
-        if (this.el.contains(ev.target)) {
+        if (this._componentRef.el.contains(ev.target)) {
             return;
         }
         // TODO SEB this should be child logic (will crash if child doesn't have isCloseable!!)
-        if (!this._componentRef.comp.isCloseable()) {
+        if (this._componentRef.comp.isCloseable && !this._componentRef.comp.isCloseable()) {
             return;
         }
         this.dialog.close();
+    }
+
+    /**
+     * @private
+     * @param {KeyboardEvent} ev
+     */
+    _onKeydownDocument(ev) {
+        if (ev.key === 'Escape') {
+            this.dialog.close();
+        }
     }
 
 }
