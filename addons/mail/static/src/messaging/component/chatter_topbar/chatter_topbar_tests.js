@@ -55,14 +55,7 @@ QUnit.module('ChatterTopbar', {
 QUnit.test('base rendering', async function (assert) {
     assert.expect(8);
 
-    await this.start({
-        async mockRPC(route) {
-            if (route.includes('ir.attachment/search_read')) {
-                return [];
-            }
-            return this._super(...arguments);
-        }
-    });
+    await this.start();
     const chatter = this.env.entities.Chatter.create({
         threadId: 100,
         threadModel: 'res.partner',
@@ -114,14 +107,7 @@ QUnit.test('base rendering', async function (assert) {
 QUnit.test('base disabled rendering', async function (assert) {
     assert.expect(8);
 
-    await this.start({
-        async mockRPC(route) {
-            if (route.includes('ir.attachment/search_read')) {
-                return [];
-            }
-            return this._super(...arguments);
-        }
-    });
+    await this.start();
     const chatter = this.env.entities.Chatter.create({
         threadModel: 'res.partner',
     });
@@ -308,14 +294,7 @@ QUnit.test('attachment counter transition when attachments become loaded)', asyn
 QUnit.test('attachment counter without attachments', async function (assert) {
     assert.expect(4);
 
-    await this.start({
-        async mockRPC(route) {
-            if (route.includes('ir.attachment/search_read')) {
-                return [];
-            }
-            return this._super(...arguments);
-        }
-    });
+    await this.start();
     const chatter = this.env.entities.Chatter.create({
         threadId: 100,
         threadModel: 'res.partner',
@@ -390,6 +369,66 @@ QUnit.test('attachment counter with attachments', async function (assert) {
         document.querySelector(`.o_ChatterTopbar_buttonAttachmentsCount`).textContent,
         '2',
         'attachment counter should contain "2"'
+    );
+});
+
+QUnit.test('composer state conserved when clicking on another topbar button', async function (assert) {
+    assert.expect(8);
+
+    await this.start();
+    const chatter = this.env.entities.Chatter.create({
+        threadId: 100,
+        threadModel: 'res.partner',
+    });
+    await this.createChatterTopbarComponent(chatter);
+
+    assert.containsOnce(
+        document.body,
+        `.o_ChatterTopbar`,
+        "should have a chatter topbar"
+    );
+    assert.containsOnce(
+        document.body,
+        `.o_ChatterTopbar_buttonSendMessage`,
+        "should have a send message button in chatter menu"
+    );
+    assert.containsOnce(
+        document.body,
+        `.o_ChatterTopbar_buttonLogNote`,
+        "should have a log note button in chatter menu"
+    );
+    assert.containsOnce(
+        document.body,
+        `.o_ChatterTopbar_buttonAttachments`,
+        "should have an attachments button in chatter menu"
+    );
+
+    await afterNextRender(() => {
+        document.querySelector(`.o_ChatterTopbar_buttonLogNote`).click();
+    });
+    assert.containsOnce(
+        document.body,
+        `.o_ChatterTopbar_buttonLogNote.o-active`,
+        "log button should now be active"
+    );
+    assert.containsNone(
+        document.body,
+        `.o_ChatterTopbar_buttonSendMessage.o-active`,
+        "send message button should not be active"
+    );
+
+    await afterNextRender(() => {
+        document.querySelector(`.o_ChatterTopbar_buttonAttachments`).click();
+    });
+    assert.containsOnce(
+        document.body,
+        `.o_ChatterTopbar_buttonLogNote.o-active`,
+        "log button should still be active"
+    );
+    assert.containsNone(
+        document.body,
+        `.o_ChatterTopbar_buttonSendMessage.o-active`,
+        "send message button should still be not active"
     );
 });
 
