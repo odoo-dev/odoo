@@ -23,7 +23,7 @@ $enable-deprecation-messages: false !default;
         @if ($with-muted) {
             .text-muted {
                 // Always important since the basic BS rule is important
-                color: rgba($-yiq-color, 0.6) !important;
+                color: scale-color($-yiq-color, $alpha: -30%) !important;
             }
         }
     }
