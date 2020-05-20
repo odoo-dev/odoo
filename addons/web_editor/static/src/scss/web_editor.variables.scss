@@ -333,11 +333,15 @@ $o-color-palettes: (
         'o-color-5': #383E45,
     ),
     (
-        'o-color-1': #0D6EFD,
-        'o-color-2': #6C757D,
-        'o-color-3': #E7E9EA,
+        'o-color-1': #337ab7,
+        'o-color-2': #e9ecef,
+        'o-color-3': #F8F9FA,
         'o-color-4': #FFFFFF,
         'o-color-5': #343a40,
+
+        'menu': 2,
+        'footer': 2,
+        'copyright': 5,
     ),
 ) !default;
 $o-color-palette-number: 1 !default;
