@@ -18,12 +18,14 @@ QUnit.module('component', {}, function () {
 QUnit.module('Follower', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createFollowerComponent = async (follower) => {
             const FollowerComponent = components.Follower;
             FollowerComponent.env = this.env;
             this.component = new FollowerComponent(null, { followerLocalId: follower.localId });
             await this.component.mount(this.widget.el);
         };
+
         this.start = async params => {
             let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,

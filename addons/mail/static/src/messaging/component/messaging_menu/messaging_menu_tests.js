@@ -17,6 +17,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('MessagingMenu', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();
@@ -223,6 +224,38 @@ QUnit.test('basic rendering', async function (assert) {
         `).length,
         1,
         "should display no conversation in thread preview list"
+    );
+});
+
+QUnit.test('counter is taking into account failure notification', async function (assert) {
+    assert.expect(2);
+
+    this.data.initMessaging.mail_failures = [{
+        date: moment.utc().format("YYYY-MM-DD HH:mm:ss"),
+        id: 11,
+        message_type: 'email',
+        model: 'mail.channel',
+        notifications: [{
+            failure_type: 'SMTP',
+            id: 21,
+            notification_status: 'exception',
+            notification_type: 'email',
+            partner_id: [41, "Someone"],
+        }],
+        res_id: 31,
+        res_model_name: "Channel",
+    }];
+    await this.start();
+
+    assert.containsOnce(
+        document.body,
+        '.o_MessagingMenu_counter',
+        "should display a notification counter next to the messaging menu for one notification"
+    );
+    assert.strictEqual(
+        document.querySelector('.o_MessagingMenu_counter').textContent,
+        "1",
+        "should display a counter of '1' next to the messaging menu"
     );
 });
 

@@ -24,6 +24,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('Activity', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createActivityComponent = async function (activity) {
             const ActivityComponent = components.Activity;
             ActivityComponent.env = this.env;
@@ -32,6 +33,7 @@ QUnit.module('Activity', {
             });
             await this.component.mount(this.widget.el);
         };
+
         this.start = async params => {
             let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,
@@ -552,7 +554,7 @@ QUnit.test('activity with mail template: preview mail', async function (assert) 
 
     await this.start({
         intercepts: {
-            do_action: function (ev) {
+            do_action(ev) {
                 assert.step('do_action');
                 assert.strictEqual(
                     ev.data.action.context.default_res_id,
@@ -726,7 +728,7 @@ QUnit.test('activity click on edit', async function (assert) {
 
     await this.start({
         intercepts: {
-            do_action: function (ev) {
+            do_action(ev) {
                 assert.step('do_action');
                 assert.strictEqual(
                     ev.data.action.context.default_res_id,

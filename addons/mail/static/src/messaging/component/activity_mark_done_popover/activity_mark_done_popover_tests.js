@@ -17,6 +17,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('ActivityMarkDonePopover', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createActivityMarkDonePopoverComponent = async activity => {
             const ActivityMarkDonePopoverComponent = components.ActivityMarkDonePopover;
             ActivityMarkDonePopoverComponent.env = this.env;
@@ -25,6 +26,7 @@ QUnit.module('ActivityMarkDonePopover', {
             });
             await this.component.mount(this.widget.el);
         };
+
         this.start = async params => {
             let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,

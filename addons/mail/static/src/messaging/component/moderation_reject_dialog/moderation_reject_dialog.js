@@ -20,8 +20,9 @@ class ModerationRejectDialog extends Component {
             comment: this.env._t("Your message was rejected by moderator."),
         });
         useStore(props => {
+            const messages = props.messageLocalIds.map(localId => this.env.entities.Message.get(localId));
             return {
-                messages: props.messageLocalIds.map(localId => this.env.entities.Message.get(localId)).map(message => message.__state),
+                messages: messages.map(message => message ? message.__state : undefined),
             };
         }, {
             compareDepth: {

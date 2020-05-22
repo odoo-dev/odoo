@@ -112,8 +112,7 @@ QUnit.test('messaging menu widget: menu with no records', async function (assert
     messagingMenu.destroy();
 });
 
-QUnit.skip('messaging menu widget: messaging not ready', async function (assert) {
-    // skip because mail service and messaging service are both doing init_messaging
+QUnit.test('messaging menu widget: messaging not ready', async function (assert) {
     assert.expect(8);
 
     const messagingReadyProm = testUtils.makeTestPromise();

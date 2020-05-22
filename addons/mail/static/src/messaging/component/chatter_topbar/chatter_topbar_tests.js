@@ -19,6 +19,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('ChatterTopbar', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createChatterTopbarComponent = async (chatter, otherProps) => {
             const ChatterTopBarComponent = components.ChatterTopBar;
             ChatterTopBarComponent.env = this.env;
@@ -28,6 +29,7 @@ QUnit.module('ChatterTopbar', {
             );
             await this.component.mount(this.widget.el);
         };
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();

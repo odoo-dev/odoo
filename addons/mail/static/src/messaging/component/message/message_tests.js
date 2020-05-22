@@ -18,6 +18,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('Message', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createMessageComponent = async (message, otherProps) => {
             const MessageComponent = components.Message;
             MessageComponent.env = this.env;
@@ -27,6 +28,7 @@ QUnit.module('Message', {
             await this.component.mount(this.widget.el);
             await afterNextRender();
         };
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();
@@ -215,6 +217,134 @@ QUnit.test('moderation: moderated channel with pending moderation message (moder
         "there should be a contextual moderation decision to ban the user of the message"
     );
     // The actions are tested as part of discuss tests.
+});
+
+QUnit.test('Notification Sent', async function (assert) {
+    assert.expect(9);
+
+    await this.start();
+    const message = this.env.entities.Message.create({
+        id: 10,
+        message_type: 'email',
+        notifications: [['insert', {
+            id: 11,
+            notification_status: 'sent',
+            notification_type: 'email',
+            partner: [['insert', { id: 12, name: "Someone" }]],
+        }]],
+    });
+    await this.createMessageComponent(message);
+
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "should display a message component"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message_notificationIconContainer',
+        "should display the notification icon container"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message_notificationIcon',
+        "should display the notification icon"
+    );
+    assert.hasClass(
+        document.querySelector('.o_Message_notificationIcon'),
+        'fa-envelope-o',
+        "icon should represent email success"
+    );
+
+    await afterNextRender(() => {
+        document.querySelector('.o_Message_notificationIconContainer').click();
+    });
+    assert.containsOnce(
+        document.body,
+        '.o_NotificationPopover',
+        "notification popover should be open"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_NotificationPopover_notificationIcon',
+        "popover should have one icon"
+    );
+    assert.hasClass(
+        document.querySelector('.o_NotificationPopover_notificationIcon'),
+        'fa-check',
+        "popover should have the sent icon"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_NotificationPopover_notificationPartnerName',
+        "popover should have the partner name"
+    );
+    assert.strictEqual(
+        document.querySelector('.o_NotificationPopover_notificationPartnerName').textContent.trim(),
+        "Someone",
+        "partner name should be correct"
+    );
+});
+
+QUnit.test('Notification Error', async function (assert) {
+    assert.expect(8);
+
+    await this.start({
+        intercepts: {
+            do_action(ev) {
+                assert.step('do_action');
+                assert.strictEqual(
+                    ev.data.action,
+                    'mail.mail_resend_message_action',
+                    "action should be the one to resend email"
+                );
+                assert.strictEqual(
+                    ev.data.options.additional_context.mail_message_to_resend,
+                    10,
+                    "action should have correct message id"
+                );
+            },
+        },
+    });
+    const message = this.env.entities.Message.create({
+        id: 10,
+        message_type: 'email',
+        notifications: [['insert', {
+            id: 11,
+            notification_status: 'exception',
+            notification_type: 'email',
+        }]],
+    });
+    await this.createMessageComponent(message);
+
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "should display a message component"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message_notificationIconContainer',
+        "should display the notification icon container"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message_notificationIcon',
+        "should display the notification icon"
+    );
+    assert.hasClass(
+        document.querySelector('.o_Message_notificationIcon'),
+        'fa-envelope',
+        "icon should represent email error"
+    );
+
+    await afterNextRender(() => {
+        document.querySelector('.o_Message_notificationIconContainer').click();
+    });
+    assert.verifySteps(
+        ['do_action'],
+        "should do an action to display the resend email dialog"
+    );
 });
 
 });

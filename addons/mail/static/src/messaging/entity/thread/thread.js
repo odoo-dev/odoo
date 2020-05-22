@@ -708,6 +708,7 @@ function ThreadFactory({ Entity }) {
             related: 'messaging.currentPartner',
         }),
         model: attr(),
+        model_name: attr(),
         moderation: attr({
             default: false,
         }),

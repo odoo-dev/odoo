@@ -14,7 +14,7 @@
                 'o-starred': message and isStarred,
             }" t-on-click="_onClick" t-att-data-message-local-id="message and message.localId"
         >
-            <t t-if="message">
+            <t t-if="message" name="rootCondition">
                 <div class="o_Message_sidebar" t-att-class="{ 'o-message-squashed': props.isSquashed }">
                     <t t-if="!props.isSquashed">
                         <div class="o_Message_authorAvatarContainer o_Message_sidebarItem">
@@ -84,6 +84,25 @@
                             </t>
                             <t t-if="message.moderation_status === 'pending_moderation' and !message.isModeratedByCurrentPartner">
                                 <span class="o_Message_moderationPending o-author" title="Your message is pending moderation.">Pending moderation</span>
+                            </t>
+                            <t t-if="message.notifications.length > 0">
+                                <t t-if="message.failureNotifications.length > 0">
+                                    <span class="o_Message_notificationIconContainer o-error" t-on-click="_onClickFailure">
+                                        <i name="failureIcon" class="o_Message_notificationIcon fa fa-envelope"/>
+                                    </span>
+                                </t>
+                                <t t-else="">
+                                    <Popover>
+                                        <span class="o_Message_notificationIconContainer">
+                                            <i name="notificationIcon" class="o_Message_notificationIcon fa fa-envelope-o"/>
+                                        </span>
+                                        <t t-set="opened">
+                                            <NotificationPopover
+                                                notificationLocalIds="message.notifications.map(notification => notification.localId)"
+                                            />
+                                        </t>
+                                    </Popover>
+                                </t>
                             </t>
                             <div class="o_Message_commands o_Message_headerCommands" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }">
                                 <t t-if="!message.isTemporary and ((message.message_type !== 'notification' and message.originThread and message.originThread.model === 'mail.channel') or !message.isTransient) and message.moderation_status !== 'pending_moderation'">

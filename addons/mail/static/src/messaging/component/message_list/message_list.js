@@ -276,6 +276,13 @@ class MessageList extends Component {
         ) {
             return false;
         }
+        if (
+            prevMessage.notifications.length > 0 ||
+            message.notifications.length > 0
+        ) {
+            // visual about notifications is restricted to non-squashed messages
+            return false;
+        }
         const prevOriginThread = prevMessage.originThread;
         const originThread = message.originThread;
         if (

@@ -17,6 +17,12 @@
                             threadLocalId="notification.thread.localId"
                         />
                     </t>
+                    <t t-if="notification.notificationGroup">
+                        <NotificationGroup
+                            class="o_NotificationList_group"
+                            notificationGroupLocalId="notification.notificationGroup.localId"
+                        />
+                    </t>
                     <t name="separatorCondition" t-if="!notification_last">
                         <div class="o_NotificationList_separator"/>
                     </t>

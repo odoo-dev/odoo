@@ -3,7 +3,7 @@ odoo.define('mail.messaging.entity.Message', function (require) {
 
 const emojis = require('mail.emojis');
 const { registerNewEntity } = require('mail.messaging.entityCore');
-const { attr, many2many, many2one } = require('mail.messaging.EntityField');
+const { attr, many2many, many2one, one2many } = require('mail.messaging.EntityField');
 const { addLink, parseAndTransform } = require('mail.utils');
 
 const { str_to_datetime } = require('web.time');
@@ -37,12 +37,6 @@ function MessageFactory({ Entity }) {
             };
             if ('body' in data) {
                 data2.body = data.body;
-            }
-            if ('customer_email_data' in data) {
-                data2.customer_email_data = data.customer_email_data;
-            }
-            if ('customer_email_status' in data) {
-                data2.customer_email_status = data.customer_email_status;
             }
             if ('date' in data && data.date) {
                 data2.date = moment(str_to_datetime(data.date));
@@ -78,12 +72,6 @@ function MessageFactory({ Entity }) {
             if ('module_icon' in data) {
                 data2.module_icon = data.module_icon;
             }
-            if ('snailmail_error' in data) {
-                data2.snailmail_error = data.snailmail_error;
-            }
-            if ('snailmail_status' in data) {
-                data2.snailmail_status = data.snailmail_status;
-            }
             if ('subject' in data) {
                 data2.subject = data.subject;
             }
@@ -115,7 +103,7 @@ function MessageFactory({ Entity }) {
                         ['insert', {
                             display_name: data.author_id[1],
                             id: data.author_id[0],
-                        }]
+                        }],
                     ];
                 }
             }
@@ -147,6 +135,9 @@ function MessageFactory({ Entity }) {
                 if ('record_name' in data && data.record_name) {
                     originThreadData.name = data.record_name;
                 }
+                if ('res_model_name' in data && data.res_model_name) {
+                    originThreadData.model_name = data.res_model_name;
+                }
                 data2.originThread = [['insert', originThreadData]];
             }
             if ('needaction_partner_ids' in data) {
@@ -159,6 +150,11 @@ function MessageFactory({ Entity }) {
                 } else {
                     data2.threadCaches.push(['unlink', inbox.mainCache]);
                 }
+            }
+            if ('notifications' in data) {
+                data2.notifications = [['insert', data.notifications.map(notificationData =>
+                    this.env.entities.Notification.convertData(notificationData)
+                )]];
             }
             if ('starred_partner_ids' in data) {
                 const starred = this.env.entities.Thread.find(thread =>
@@ -274,6 +270,17 @@ function MessageFactory({ Entity }) {
         }
 
         /**
+         * Opens the view that allows to resend the message in case of failure.
+         */
+        openResendAction() {
+            this.env.do_action('mail.mail_resend_message_action', {
+                additional_context: {
+                    mail_message_to_resend: this.id,
+                },
+            });
+        }
+
+        /**
          * Action to initiate reply to given message.
          */
         replyTo() {
@@ -330,6 +337,15 @@ function MessageFactory({ Entity }) {
                 allThreads = allThreads.concat([this.originThread]);
             }
             return [['replace', [...new Set(allThreads)]]];
+        }
+
+        /**
+         * @returns {boolean}
+         */
+        _computeFailureNotifications() {
+            return [['replace', this.notifications.filter(notifications =>
+                ['exception', 'bounce'].includes(notifications.notification_status)
+            )]];
         }
 
         /**
@@ -404,15 +420,15 @@ function MessageFactory({ Entity }) {
         attachments: many2many('Attachment', {
             inverse: 'messages',
         }),
-        author: many2one('Partner'),
+        author: many2one('Partner', {
+            inverse: 'messagesAsAuthor',
+        }),
         body: attr({
             default: "",
         }),
         checkedThreadCaches: many2many('ThreadCache', {
             inverse: 'checkedMessages',
         }),
-        customer_email_data: attr(),
-        customer_email_status: attr(),
         date: attr({
             default: moment(),
         }),
@@ -421,6 +437,10 @@ function MessageFactory({ Entity }) {
             compute: '_computeHasCheckbox',
             default: false,
             dependencies: ['isModeratedByCurrentPartner'],
+        }),
+        failureNotifications: one2many('Notification', {
+            compute: '_computeFailureNotifications',
+            dependencies: ['notificationsStatus'],
         }),
         id: attr(),
         isModeratedByCurrentPartner: attr({
@@ -450,6 +470,14 @@ function MessageFactory({ Entity }) {
         message_type: attr(),
         moderation_status: attr(),
         module_icon: attr(),
+        notifications: one2many('Notification', {
+            inverse: 'message',
+            isCausal: true,
+        }),
+        notificationsStatus: attr({
+            default: [],
+            related: 'notifications.notification_status',
+        }),
         originThread: many2one('Thread'),
         originThreadIsModeratedByCurrentPartner: attr({
             default: false,
@@ -459,8 +487,6 @@ function MessageFactory({ Entity }) {
             compute: '_computePrettyBody',
             dependencies: ['body'],
         }),
-        snailmail_error: attr(),
-        snailmail_status: attr(),
         subject: attr(),
         subtype_description: attr(),
         subtype_id: attr(),

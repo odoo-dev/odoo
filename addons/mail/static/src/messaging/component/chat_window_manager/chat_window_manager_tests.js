@@ -18,6 +18,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('ChatWindowManager', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.start = async params => {
             let { env, widget } = await utilsStart(Object.assign({
                 hasChatWindow: true,

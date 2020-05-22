@@ -2,6 +2,7 @@ odoo.define('mail.messaging.component.NotificationList', function (require) {
 'use strict';
 
 const components = {
+    NotificationGroup: require('mail.messaging.component.NotificationGroup'),
     ThreadPreview: require('mail.messaging.component.ThreadPreview'),
 };
 const useStore = require('mail.messaging.component_hook.useStore');
@@ -68,7 +69,7 @@ class NotificationList extends Component {
      */
     _useStoreSelector(props) {
         const threads = this._useStoreSelectorThreads(props);
-        const notifications = threads
+        let notifications = threads
             .sort((t1, t2) => {
                 if (t1.message_unread_counter > 0 && t2.message_unread_counter === 0) {
                     return -1;
@@ -93,6 +94,18 @@ class NotificationList extends Component {
                     uniqueId: thread.localId,
                 };
             });
+        if (props.filter === 'all') {
+            const notificationGroups = this.env.messaging.notificationGroupManager.groups;
+            notifications = Object.values(notificationGroups)
+                .sort((group1, group2) =>
+                    group1.date.isAfter(group2.date) ? -1 : 1
+                ).map(notificationGroup => {
+                    return {
+                        notificationGroup,
+                        uniqueId: notificationGroup.localId,
+                    };
+                }).concat(notifications);
+        }
         return {
             isDeviceMobile: this.env.messaging.device.isMobile,
             notifications,

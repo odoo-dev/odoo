@@ -18,7 +18,6 @@
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_window_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_service.js"></script>
                 <!-- Models -->
-                <script type="text/javascript" src="/mail/static/src/js/models/mail_failure.js"></script>
                     <!-- messages -->
                     <script type="text/javascript" src="/mail/static/src/js/models/messages/abstract_message.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/models/messages/message.js"></script>
@@ -130,7 +129,9 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/component/moderation_ban_dialog/moderation_ban_dialog.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/moderation_discard_dialog/moderation_discard_dialog.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/moderation_reject_dialog/moderation_reject_dialog.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/component/notification_group/notification_group.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/notification_list/notification_list.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/component/notification_popover/notification_popover.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/partner_im_status_icon/partner_im_status_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/thread_icon/thread_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/thread_preview/thread_preview.js"></script>
@@ -142,9 +143,9 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/activity_type/activity_type.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/attachment/attachment.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/attachment_viewer/attachment_viewer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/entity/chatter/chatter.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/chat_window/chat_window.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/chat_window_manager/chat_window_manager.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/entity/chatter/chatter.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/composer/composer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/device/device.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/dialog/dialog.js"></script>
@@ -161,6 +162,9 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/messaging_initializer/messaging_initializer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/messaging_menu/messaging_menu.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/messaging_notification_handler/messaging_notification_handler.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/entity/notification/notification.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/entity/notification_group/notification_group.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/entity/notification_group_manager/notification_group_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/partner/partner.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/thread/thread.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/thread_cache/thread_cache.js"></script>
@@ -218,7 +222,9 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/message_list/message_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/messaging_menu/messaging_menu.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/mobile_messaging_navbar/mobile_messaging_navbar.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/notification_group/notification_group.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/notification_list/notification_list.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/notification_popover/notification_popover.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/partner_im_status_icon/partner_im_status_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/thread_icon/thread_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/messaging/component/thread_preview/thread_preview.scss"/>
@@ -250,7 +256,6 @@
                 <!-- systray -->
                     <script type="text/javascript" src="/mail/static/tests/systray/systray_activity_menu_tests.js"></script>
                     <script type="text/javascript" src="/mail/static/tests/systray/systray_messaging_menu_tests.js"></script>
-                    <script type="text/javascript" src="/mail/static/tests/systray/systray_messaging_menu_mail_failure_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/discuss_seen_indicator_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/discuss_typing_notification_tests.js"></script>
                 <!-- tools -->
@@ -273,15 +278,16 @@
                 <script type="text/javascript" src="/mail/static/src/messaging/component/composer/composer_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/discuss/discuss_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/file_uploader/file_uploader_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/component/message/message_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/component/messaging_menu/messaging_menu_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/follow_button/follow_button_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/follower/follower_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/follower_list_menu/follower_list_menu_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/follower_subtype/follower_subtype_tests.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/component/message/message_tests.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/component/messaging_menu/messaging_menu_tests.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/component/notification_list/notification_list_tests.js"></script>
+                <script type="text/javascript" src="/mail/static/src/messaging/component/notification_list/notification_list_notification_group_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/partner_im_status_icon/partner_im_status_icon_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component/thread_viewer/thread_viewer_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging/component/notification_list/notification_list_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/component_hook/use_store/use_store_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/attachment/attachment_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging/entity/message/message_tests.js"></script>

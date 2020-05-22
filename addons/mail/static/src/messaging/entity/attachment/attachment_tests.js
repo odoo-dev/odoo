@@ -14,6 +14,7 @@ QUnit.module('entity', {}, function () {
 QUnit.module('Attachment', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();

@@ -208,15 +208,6 @@ var Thread = AbstractThread.extend(ServicesMixin, {
         return this._detached;
     },
     /**
-     * States whether the thread is linked to a document
-     * By default, threads are not linked to a document.
-     *
-     * @returns {boolean}
-     */
-    isLinkedToDocument: function () {
-        return false;
-    },
-    /**
      * States whether this thread has the mass mailing setting active or not.
      * This is a server-side setting, that determine the type of composer that
      * is used (basic or extended composer).

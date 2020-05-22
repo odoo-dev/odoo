@@ -18,12 +18,14 @@ QUnit.module('component', {}, function () {
 QUnit.module('PartnerImStatusIcon', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createPartnerImStatusIcon = async partner => {
             const PartnerImStatusIconComponent = components.PartnerImStatusIcon;
             PartnerImStatusIconComponent.env = this.env;
             this.component = new PartnerImStatusIconComponent(null, { partnerLocalId: partner.localId });
             await this.component.mount(this.widget.el);
         };
+
         this.start = async params => {
             let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,

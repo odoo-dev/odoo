@@ -62,7 +62,7 @@ const MockMailService = Class.extend({
     local_storage() {
         return AbstractStorageService.extend({ storage: new RamStorage() });
     },
-    mail_service: function () {
+    mail_service() {
         // TODO FIXME: legacy service to remove before merging messaging
         return MailService.extend();
     },

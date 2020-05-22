@@ -14,6 +14,7 @@ QUnit.module('entity', {}, function () {
 QUnit.module('Thread', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();

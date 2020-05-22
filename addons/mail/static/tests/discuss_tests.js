@@ -132,8 +132,7 @@ QUnit.test('basic rendering', async function (assert) {
     discuss.destroy();
 });
 
-QUnit.skip('messaging not ready', async function (assert) {
-    // skip because mail service and messaging service are both doing init_messaging
+QUnit.test('messaging not ready', async function (assert) {
     assert.expect(9);
 
     const messagingReadyProm = testUtils.makeTestPromise();
@@ -183,8 +182,7 @@ QUnit.skip('messaging not ready', async function (assert) {
     discuss.destroy();
 });
 
-QUnit.skip('messaging initially ready', async function (assert) {
-    // skip because mail service and messaging service are both doing init_messaging
+QUnit.test('messaging initially ready', async function (assert) {
     assert.expect(7);
 
     const startDiscussProm = testUtils.makeTestPromise();
