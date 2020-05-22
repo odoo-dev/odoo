@@ -63,33 +63,8 @@ var MessagingMenu = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Called when clicking on a preview related to a mail failure
-     *
-     * @private
-     * @param {$.Element} $target DOM of preview element clicked
-     */
-    _clickMailFailurePreview: function ($target) {
-        var documentID = $target.data('document-id');
-        var documentModel = $target.data('document-model');
-        if (documentModel && documentID) {
-            this._openDocument(documentModel, documentID);
-        } else if (documentModel !== 'mail.channel') {
-            // preview of mail failures grouped to different document of same model
-            this.do_action({
-                name: "Mail failures",
-                type: 'ir.actions.act_window',
-                view_mode: 'kanban,list,form',
-                views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
-                target: 'current',
-                res_model: documentModel,
-                domain: [['message_has_error', '=', true]],
-            });
-        }
-    },
-    /**
      * Compute the counter next to the systray messaging menu. This counter is
-     * the sum of unread messages in channels, the counter of the mailbox inbox,
-     * and the amount of mail failures.
+     * the sum of unread messages in channels, the counter of the mailbox inbox.
      *
      * @private
      * @returns {integer}
@@ -103,9 +78,8 @@ var MessagingMenu = Widget.extend({
             return c > 0 ? acc + 1 : acc;
         }, 0);
         var inboxCounter = this.call('mail_service', 'getMailbox', 'inbox').getMailboxCounter();
-        var mailFailureCounter = this.call('mail_service', 'getMailFailures').length;
 
-        return unreadChannelCounter + inboxCounter + mailFailureCounter;
+        return unreadChannelCounter + inboxCounter;
     },
     /**
      * @private
@@ -133,15 +107,6 @@ var MessagingMenu = Widget.extend({
         if (previewID === 'mailbox_inbox') {
             var messageIDs = [].concat($preview.data('message-ids'));
             this.call('mail_service', 'markMessagesAsRead', messageIDs);
-        } else if (previewID === 'mail_failure') {
-            var documentModel = $preview.data('document-model');
-            var unreadCounter = $preview.data('unread-counter');
-            this.do_action('mail.mail_resend_cancel_action', {
-                additional_context: {
-                    default_model: documentModel,
-                    unread_counter: unreadCounter
-                }
-            });
         } else {
             // this is mark as read on a thread
             var thread = this.call('mail_service', 'getThread', previewID);
@@ -240,7 +205,7 @@ var MessagingMenu = Widget.extend({
     /**
      * Update the counter on the systray messaging menu icon.
      * The counter display the number of unread messages in channels (DM included), the number of
-     * messages in Inbox mailbox, and the number of mail failures.
+     * messages in Inbox mailbox.
      * Also updates the previews if the messaging menu is open.
      *
      * Note that the number of unread messages in document thread are ignored, because they are
@@ -311,7 +276,7 @@ var MessagingMenu = Widget.extend({
     },
     /**
      * When a preview is clicked on, we want to open the related object
-     * (thread, mail failure, etc.)
+     * (thread, etc.)
      *
      * @private
      * @param {MouseEvent} ev
@@ -320,9 +285,7 @@ var MessagingMenu = Widget.extend({
         var $target = $(ev.currentTarget);
         var previewID = $target.data('preview-id');
 
-        if (previewID === 'mail_failure') {
-            this._clickMailFailurePreview($target);
-        } else if (previewID === 'mailbox_inbox') {
+        if (previewID === 'mailbox_inbox') {
             // inbox preview for non-document thread,
             // e.g. needaction message of channel
             var documentID = $target.data('document-id');

@@ -17,6 +17,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('FollowButton', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createFollowButtonComponent = async (thread, otherProps = {}) => {
             const FollowButtonComponent = components.FollowButton;
             FollowButtonComponent.env = this.env;
@@ -25,6 +26,7 @@ QUnit.module('FollowButton', {
             );
             await this.component.mount(this.widget.el);
         };
+
         this.start = async params => {
             let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,

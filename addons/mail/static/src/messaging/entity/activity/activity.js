@@ -82,7 +82,7 @@ function ActivityFactory({ Entity }) {
                         ['insert', {
                             displayName: data.activity_type_id[1],
                             id: data.activity_type_id[0],
-                        }]
+                        }],
                     ];
                 }
             }
@@ -94,7 +94,7 @@ function ActivityFactory({ Entity }) {
                         ['insert', {
                             id: data.create_uid[0],
                             partnerDisplayName: data.create_uid[1],
-                        }]
+                        }],
                     ];
                 }
             }
@@ -109,7 +109,7 @@ function ActivityFactory({ Entity }) {
                         ['insert', {
                             id: data.user_id[0],
                             partnerDisplayName: data.user_id[1],
-                        }]
+                        }],
                     ];
                 }
             }

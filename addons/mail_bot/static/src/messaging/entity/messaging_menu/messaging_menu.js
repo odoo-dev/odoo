@@ -13,11 +13,15 @@ registerInstancePatchEntity('MessagingMenu', 'mail_bot.messaging.entity.Messagin
      * @override
      */
     _updateCounter() {
-        let res = this._super();
-        if (this.env.messaging.isNotificationPermissionDefault()) {
-            res += 1;
+        let counter = this._super();
+        if (!this.messaging) {
+            // compute after delete
+            return counter;
         }
-        return res;
+        if (this.messaging.isNotificationPermissionDefault()) {
+            counter += 1;
+        }
+        return counter;
     },
 });
 

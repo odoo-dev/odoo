@@ -13,6 +13,7 @@ QUnit.module('entity', {}, function () {
 QUnit.module('Messaging', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();

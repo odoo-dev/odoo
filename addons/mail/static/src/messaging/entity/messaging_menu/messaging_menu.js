@@ -2,7 +2,7 @@ odoo.define('mail.messaging.entity.MessagingMenu', function (require) {
 'use strict';
 
 const { registerNewEntity } = require('mail.messaging.entityCore');
-const { attr } = require('mail.messaging.EntityField');
+const { attr, one2one } = require('mail.messaging.EntityField');
 
 function MessagingMenuFactory({ Entity }) {
 
@@ -55,8 +55,21 @@ function MessagingMenuFactory({ Entity }) {
                 thread.message_unread_counter > 0 &&
                 thread.model === 'mail.channel'
             );
-            return (
-                unreadChannels.length + (inboxMailbox ? inboxMailbox.counter : 0));
+            let counter = unreadChannels.length;
+            if (inboxMailbox) {
+                counter += inboxMailbox.counter;
+            }
+            if (!this.messaging) {
+                // compute after delete
+                return counter;
+            }
+            if (this.messaging.notificationGroupManager) {
+                counter += this.messaging.notificationGroupManager.groups.reduce(
+                    (total, group) => total + group.notifications.length,
+                    0
+                );
+            }
+            return counter;
         }
 
         /**
@@ -95,6 +108,9 @@ function MessagingMenuFactory({ Entity }) {
          */
         isOpen: attr({
             default: false,
+        }),
+        messaging: one2one('Messaging', {
+            inverse: 'messagingMenu',
         }),
     };
 

@@ -6,7 +6,7 @@
     @include o-mail-notification-list-item-layout();
 
     &:hover .o_ThreadPreview_markAsRead {
-        display: flex;
+        opacity: 1;
     }
 }
 
@@ -51,7 +51,7 @@
 }
 
 .o_ThreadPreview_markAsRead {
-    display: none;
+    display: flex;
     flex: 0 0 auto;
 }
 
@@ -109,10 +109,9 @@
 }
 
 .o_ThreadPreview_markAsRead {
-    opacity: 0.8;
+    opacity: 0;
 
     &:hover {
-        opacity: 1;
         color: gray('600');
     }
 }

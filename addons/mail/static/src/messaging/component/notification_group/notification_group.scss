@@ -1,0 +1,107 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_NotificationGroup {
+    @include o-mail-notification-list-item-layout();
+
+    &:hover .o_NotificationGroup_markAsRead {
+        // TODO SEB also mixin this
+        opacity: 1;
+    }
+}
+
+.o_NotificationGroup_content {
+    @include o-mail-notification-list-item-content-layout();
+}
+
+.o_NotificationGroup_core {
+    @include o-mail-notification-list-item-core-layout();
+}
+
+.o_NotificationGroup_coreItem {
+    @include o-mail-notification-list-item-core-item-layout();
+}
+
+.o_NotificationGroup_counter {
+    // TODO SEB also mixin this
+    margin: map-get($spacers, 0) map-get($spacers, 2);
+}
+
+.o_NotificationGroup_date {
+    // TODO SEB also mixin this
+    flex: 0 0 auto;
+}
+
+.o_NotificationGroup_header {
+    @include o-mail-notification-list-item-header-layout();
+}
+
+.o_NotificationGroup_image {
+    @include o-mail-notification-list-item-image-layout();
+}
+
+.o_NotificationGroup_imageContainer {
+    @include o-mail-notification-list-item-image-container-layout();
+}
+
+.o_NotificationGroup_inlineText {
+    @include o-mail-notification-list-item-inline-text-layout();
+    white-space: initial;
+
+    &.o-empty::before {
+        // TODO SEB also mixin this or remove
+        content: '\00a0'; // keep line-height as if it had content
+    }
+}
+
+.o_NotificationGroup_markAsRead {
+    // TODO SEB also mixin this
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.o_NotificationGroup_name {
+    @include o-mail-notification-list-item-name-layout();
+    white-space: nowrap;
+}
+
+.o_NotificationGroup_sidebar {
+    @include o-mail-notification-list-item-sidebar-layout();
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_NotificationGroup {
+    @include o-mail-notification-list-item-style();
+}
+
+.o_NotificationGroup_core {
+    @include o-mail-notification-list-item-core-style();
+}
+
+.o_NotificationGroup_counter {
+    @include o-mail-notification-list-item-bold-style();
+}
+
+.o_NotificationGroup_date {
+    @include o-mail-notification-list-item-bold-style();
+    // TODO SEB also mixin this
+    font-size: x-small;
+    color: $o-brand-primary;
+}
+
+.o_NotificationGroup_markAsRead {
+    // TODO SEB also mixin this
+    opacity: 0;
+
+    &:hover {
+        color: gray('600');
+    }
+}
+
+.o_NotificationGroup_name {
+    @include o-mail-notification-list-item-bold-style();
+}

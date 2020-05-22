@@ -332,6 +332,15 @@
     }
 }
 
+.o_Message_notificationIconContainer {
+    color: gray('600');
+    cursor: pointer;
+
+    &.o-error {
+        color: $red;
+    }
+}
+
 .o_Message_sidebarCommands {
     opacity: 0;
 }

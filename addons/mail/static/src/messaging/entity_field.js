@@ -428,9 +428,17 @@ class EntityField {
             const newVal = [];
             for (const otherEntity of entity[relationName]) {
                 const otherField = otherEntity.constructor.fields[relatedFieldName];
-                const v = otherField.get(otherEntity);
-                if (v) {
-                    newVal.push(v);
+                const otherValue = otherField.get(otherEntity);
+                if (otherValue) {
+                    if (otherValue instanceof Array) {
+                        // avoid nested array if otherField is x2many too
+                        // TODO IMP task-2261221
+                        for (const v of otherValue) {
+                            newVal.push(v);
+                        }
+                    } else {
+                        newVal.push(otherValue);
+                    }
                 }
             }
             if (this.fieldType === 'relation') {
@@ -604,7 +612,7 @@ class EntityField {
             }
             const OtherEntity = this.env.entities[this.to];
             const otherEntity = OtherEntity.get(valueItem);
-            const otherField = otherEntity.constructor.fields[this.inverse];
+            const otherField = OtherEntity.fields[this.inverse];
             otherField.write(otherEntity, [
                 ...new Set(otherField.read(otherEntity).concat([entity.localId]))
             ]);
@@ -633,7 +641,7 @@ class EntityField {
                 // prev Entity has already been deleted.
                 return;
             }
-            const otherField = otherEntity.constructor.fields[this.inverse];
+            const otherField = OtherEntity.fields[this.inverse];
             otherField.write(otherEntity, otherField.read(otherEntity).filter(
                 valueItem => valueItem !== entity.localId
             ));
@@ -642,7 +650,7 @@ class EntityField {
             }
         }
         const otherEntity = OtherEntity.get(value);
-        const otherField = otherEntity.constructor.fields[this.inverse];
+        const otherField = OtherEntity.fields[this.inverse];
         otherField.write(otherEntity, otherField.read(otherEntity).concat([entity.localId]));
     }
 
@@ -669,7 +677,7 @@ class EntityField {
             }
             const OtherEntity = this.env.entities[this.to];
             const otherEntity = OtherEntity.get(valueItem);
-            const otherField = otherEntity.constructor.fields[this.inverse];
+            const otherField = OtherEntity.fields[this.inverse];
             otherField.write(otherEntity, entity.localId);
         }
     }
@@ -688,14 +696,14 @@ class EntityField {
         const OtherEntity = this.env.entities[this.to];
         if (prevValue) {
             const otherEntity = OtherEntity.get(prevValue);
-            const otherField = otherEntity.constructor.fields[this.inverse];
+            const otherField = OtherEntity.fields[this.inverse];
             otherField.write(otherEntity, undefined);
             if (this.isCausal) {
                 otherEntity.delete();
             }
         }
         const otherEntity = OtherEntity.get(value);
-        const otherField = otherEntity.constructor.fields[this.inverse];
+        const otherField = OtherEntity.fields[this.inverse];
         otherField.write(otherEntity, entity.localId);
     }
 
@@ -754,7 +762,11 @@ class EntityField {
         const OtherEntity = this.env.entities[this.to];
         for (const valueItem of value) {
             const otherEntity = OtherEntity.get(valueItem);
-            const otherField = otherEntity.constructor.fields[this.inverse];
+            if (!otherEntity) {
+                // Other entity has been deleted.
+                continue;
+            }
+            const otherField = OtherEntity.fields[this.inverse];
             otherField.write(otherEntity, otherField.read(otherEntity).filter(
                 valueItem => valueItem !== entity.localId
             ));
@@ -780,6 +792,10 @@ class EntityField {
         if (prevValue) {
             const OtherEntity = this.env.entities[this.to];
             const prevEntity = OtherEntity.get(prevValue);
+            if (!prevEntity) {
+                // Previous entity has been deleted.
+                return;
+            }
             prevEntity.update({
                 [this.inverse]: [['unlink', entity.localId]],
             });
@@ -815,7 +831,7 @@ class EntityField {
                     // may be deleted from causality...
                     continue;
                 }
-                const otherField = otherEntity.constructor.fields[this.inverse];
+                const otherField = OtherEntity.fields[this.inverse];
                 otherField.write(otherEntity, undefined);
                 if (this.isCausal) {
                     otherEntity.delete();
@@ -846,7 +862,7 @@ class EntityField {
                 // (e.g. unlinking one of its reverse relation was causal)
                 return;
             }
-            const otherField = otherEntity.constructor.fields[this.inverse];
+            const otherField = OtherEntity.fields[this.inverse];
             otherField.write(otherEntity, undefined);
         }
     }

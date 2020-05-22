@@ -1112,17 +1112,15 @@ class Message(models.Model):
         Notifications hold the information about each recipient of a message: if
         the message was successfully sent or if an exception or bounce occurred.
         """
-        return {
-            message.id: {
-                'message_id': message.id,
-                'model_name': message.env['ir.model']._get(message.model).display_name,
-                'res_id': message.res_id,
-                'model': message.model,
-                'last_message_date': message.date,
-                'message_type': message.message_type,
-                'notifications': message.notification_ids._filtered_for_web_client()._notification_format(),
-            } for message in self
-        }
+        return [{
+            'id': message.id,
+            'res_id': message.res_id,
+            'model': message.model,
+            'res_model_name': message.env['ir.model']._get(message.model).display_name,
+            'date': message.date,
+            'message_type': message.message_type,
+            'notifications': message.notification_ids._filtered_for_web_client()._notification_format(),
+        } for message in self]
 
     def _notify_message_notification_update(self):
         """Send bus notifications to update status of notifications in the web

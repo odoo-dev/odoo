@@ -2,7 +2,7 @@ odoo.define('mail.messaging.entity.Partner', function (require) {
 'use strict';
 
 const { registerNewEntity } = require('mail.messaging.entityCore');
-const { attr, many2many, one2one } = require('mail.messaging.EntityField');
+const { attr, many2many, one2many, one2one } = require('mail.messaging.EntityField');
 
 const utils = require('web.utils');
 
@@ -229,10 +229,16 @@ function PartnerFactory({ Entity }) {
             default: "",
         }),
         email: attr(),
+        failureNotifications: one2many('Notification', {
+            related: 'messagesAsAuthor.failureNotifications',
+        }),
         id: attr(),
         im_status: attr(),
         memberThreads: many2many('Thread', {
             inverse: 'members',
+        }),
+        messagesAsAuthor: one2many('Message', {
+            inverse: 'author',
         }),
         model: attr({
             default: 'res.partner',

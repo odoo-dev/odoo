@@ -2,6 +2,7 @@ odoo.define('mail.messaging.entity.MessagingNotificationHandler', function (requ
 'use strict';
 
 const { registerNewEntity } = require('mail.messaging.entityCore');
+const { one2one } = require('mail.messaging.EntityField');
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 
@@ -255,8 +256,8 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 return this._handleNotificationPartnerAuthor(data);
             } else if (type === 'deletion') {
                 return this._handleNotificationPartnerDeletion(data);
-            } else if (type === 'mail_failure') {
-                return this._handleNotificationPartnerMailFailure(data.elements);
+            } else if (type === 'message_notification_update') {
+                return this._handleNotificationPartnerMessageNotificationUpdate(data.elements);
             } else if (type === 'mark_as_read') {
                 return this._handleNotificationPartnerMarkAsRead(data);
             } else if (type === 'moderator') {
@@ -358,13 +359,31 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 }
                 message.delete();
             }
+            // deleting message might have deleted notifications, force recompute
+            this.messaging.notificationGroupManager.computeGroups();
+            // manually force recompute of counter (after computing the groups)
+            this.messaging.messagingMenu.update();
         }
 
         /**
          * @private
-         * @param {Object[]} elements
+         * @param {Object} data
          */
-        _handleNotificationPartnerMailFailure(elements) {}
+        _handleNotificationPartnerMessageNotificationUpdate(data) {
+            for (const messageData of data) {
+                const message = this.env.entities.Message.insert(
+                    this.env.entities.Message.convertData(messageData)
+                );
+                // implicit: failures are sent by the server as notification
+                // only if the current partner is author of the message
+                if (!message.author && this.messaging.currentPartner) {
+                    message.update({ author: [['link', this.messaging.currentPartner]] });
+                }
+            }
+            this.messaging.notificationGroupManager.computeGroups();
+            // manually force recompute of counter (after computing the groups)
+            this.messaging.messagingMenu.update();
+        }
 
         /**
          * @private
@@ -551,6 +570,12 @@ function MessagingNotificationHandlerFactory({ Entity }) {
     }
 
     MessagingNotificationHandler.entityName = 'MessagingNotificationHandler';
+
+    MessagingNotificationHandler.fields = {
+        messaging: one2one('Messaging', {
+            inverse: 'notificationHandler',
+        }),
+    };
 
     return MessagingNotificationHandler;
 }

@@ -2,16 +2,22 @@
 <odoo>
     <template id="assets_backend" name="iap assets" inherit_id="web.assets_backend">
         <xpath expr="." position="inside">
-            <script type="text/javascript" src="/snailmail/static/src/js/mail_failure.js"></script>
-            <script type="text/javascript" src="/snailmail/static/src/js/message.js"></script>
-            <script type="text/javascript" src="/snailmail/static/src/js/systray_messaging_menu.js"></script>
-            <script type="text/javascript" src="/snailmail/static/src/js/thread_widget.js"></script>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/component/message/message.js"/>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/component/notification_group/notification_group.js"/>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/component/snailmail_error_dialog/snailmail_error_dialog.js"/>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/component/snailmail_notification_popover/snailmail_notification_popover.js"/>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/entity/message/message.js"/>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/entity/messaging/messaging.js"/>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/entity/notification_group/notification_group.js"/>
+
+            <link rel="stylesheet" type="text/scss" href="/snailmail/static/src/messaging/component/snailmail_notification_popover/snailmail_notification_popover.scss"/>
         </xpath>
     </template>
 
     <template id="qunit_suite" name="snailmail_tests" inherit_id="web.qunit_suite_tests">
         <xpath expr="." position="inside">
-            <script type="text/javascript" src="/snailmail/static/tests/chatter_snailmail_tests.js"></script>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/component/message/message_tests.js"/>
+            <script type="text/javascript" src="/snailmail/static/src/messaging/component/notification_list/notification_list_notification_group_tests.js"/>
         </xpath>
     </template>
 </odoo>

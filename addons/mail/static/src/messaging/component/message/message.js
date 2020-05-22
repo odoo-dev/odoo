@@ -6,6 +6,7 @@ const components = {
     ModerationBanDialog: require('mail.messaging.component.ModerationBanDialog'),
     ModerationDiscardDialog: require('mail.messaging.component.ModerationDiscardDialog'),
     ModerationRejectDialog: require('mail.messaging.component.ModerationRejectDialog'),
+    NotificationPopover: require('mail.messaging.component.NotificationPopover'),
     PartnerImStatusIcon: require('mail.messaging.component.PartnerImStatusIcon'),
 };
 const useStore = require('mail.messaging.component_hook.useStore');
@@ -65,11 +66,16 @@ class Message extends Component {
                     ? message.isChecked(thread, threadStringifiedDomain)
                     : false,
                 message: message ? message.__state : undefined,
+                notifications: message ? message.notifications.map(notif => notif.__state) : [],
                 originThread: originThread ? originThread.__state : undefined,
                 partnerRoot: partnerRoot ? partnerRoot.__state : undefined,
                 thread: thread ? thread.__state : undefined,
                 threadViewer: threadViewer ? threadViewer.__state : undefined,
             };
+        }, {
+            compareDepth: {
+                notifications: 1,
+            },
         });
         /**
          * Reference to the content of the message.
@@ -84,7 +90,13 @@ class Message extends Component {
          * regular time.
          */
         this._intervalId = undefined;
+        this._constructor();
     }
+
+    /**
+     * Allows patching constructor.
+     */
+    _constructor() {}
 
     mounted() {
         this._insertReadMoreLess($(this._contentRef.el));
@@ -459,6 +471,14 @@ class Message extends Component {
             id: this.message.author.id,
             model: this.message.author.model,
         });
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickFailure(ev) {
+        this.message.openResendAction();
     }
 
     /**

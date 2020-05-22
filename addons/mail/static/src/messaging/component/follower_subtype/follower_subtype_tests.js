@@ -18,6 +18,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('FollowerSubtype', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createFollowerSubtypeComponent = async ({ follower, followerSubtype }) => {
             const FollowerSubtypeComponent = components.FollowerSubtype;
             FollowerSubtypeComponent.env = this.env;
@@ -27,6 +28,7 @@ QUnit.module('FollowerSubtype', {
             });
             await this.component.mount(this.widget.el);
         };
+
         this.start = async params => {
             let { env, widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,

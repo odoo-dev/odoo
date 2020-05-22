@@ -156,12 +156,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         return this._emailFrom;
     },
     /**
-     * @override
-     */
-    getNotifications() {
-        return Object.values(this._notifications);
-    },
-    /**
      * Get the ID of the channel that this message originates from.
      * If this message does not originate from a channel, returns `-1`.
      *
@@ -331,14 +325,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         this._threadIDs = _.without(this._threadIDs, threadID);
     },
     /**
-     * Sets notifications based on data from the server.
-     *
-     * @param {Object} notifications
-     */
-    setNotifications(notifications) {
-        this._notifications = notifications;
-    },
-    /**
      * State whether this message should display the subject
      *
      * @return {boolean}
@@ -497,7 +483,6 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
      * @param {string} [data.subject]
      */
     _setInitialData(data) {
-        this._notifications = data.notifications || {};
         this._documentModel = data.model;
         this._documentName = data.record_name;
         this._documentID = data.res_id;

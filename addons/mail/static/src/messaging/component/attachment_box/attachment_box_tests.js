@@ -22,6 +22,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('AttachmentBox', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createAttachmentBoxComponent = async (thread, otherProps) => {
             const AttachmentBoxComponent = components.AttachmentBox;
             AttachmentBoxComponent.env = this.env;
@@ -30,6 +31,7 @@ QUnit.module('AttachmentBox', {
             }, otherProps));
             await this.component.mount(this.widget.el);
         };
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();

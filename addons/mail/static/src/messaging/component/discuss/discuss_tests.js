@@ -19,6 +19,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('Discuss', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();

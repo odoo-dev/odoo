@@ -27,7 +27,6 @@ function MessagingFactory({ Entity }) {
                 res_id: id,
             });
             this.messagingMenu.close();
-            this.chatWindowManager.closeAll();
         }
 
         /**
@@ -93,10 +92,6 @@ function MessagingFactory({ Entity }) {
          * Start messaging and related entities.
          */
         async start() {
-            this.update({
-                initializer: [['create']],
-                notificationHandler: [['create']],
-            });
             this._handleGlobalWindowFocus = this._handleGlobalWindowFocus.bind(this);
             this.env.call('bus_service', 'on', 'window_focus', null, this._handleGlobalWindowFocus);
             await this.async(() => this.initializer.start());
@@ -133,12 +128,14 @@ function MessagingFactory({ Entity }) {
 
     Messaging.fields = {
         attachmentViewer: one2one('AttachmentViewer', {
+            autocreate: true,
             isCausal: true,
         }),
         cannedResponses: attr({
             default: {},
         }),
         chatWindowManager: one2one('ChatWindowManager', {
+            autocreate: true,
             inverse: 'messaging',
             isCausal: true,
         }),
@@ -148,15 +145,19 @@ function MessagingFactory({ Entity }) {
         currentPartner: one2one('Partner'),
         currentUser: one2one('User'),
         device: one2one('Device', {
+            autocreate: true,
             isCausal: true,
         }),
         dialogManager: one2one('DialogManager', {
+            autocreate: true,
             isCausal: true,
         }),
         discuss: one2one('Discuss', {
+            autocreate: true,
             isCausal: true,
         }),
         initializer: one2one('MessagingInitializer', {
+            autocreate: true,
             inverse: 'messaging',
             isCausal: true,
         }),
@@ -164,12 +165,21 @@ function MessagingFactory({ Entity }) {
             default: false,
         }),
         locale: one2one('Locale', {
+            autocreate: true,
             isCausal: true,
         }),
         messagingMenu: one2one('MessagingMenu', {
+            autocreate: true,
+            inverse: 'messaging',
+            isCausal: true,
+        }),
+        notificationGroupManager: one2one('NotificationGroupManager', {
+            autocreate: true,
             isCausal: true,
         }),
         notificationHandler: one2one('MessagingNotificationHandler', {
+            autocreate: true,
+            inverse: 'messaging',
             isCausal: true,
         }),
         outOfFocusUnreadMessageCounter: attr({

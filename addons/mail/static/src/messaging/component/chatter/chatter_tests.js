@@ -18,6 +18,7 @@ QUnit.module('component', {}, function () {
 QUnit.module('Chatter', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.createChatterComponent = async ({ chatter }, otherProps) => {
             const ChatterComponent = components.Chatter;
             ChatterComponent.env = this.env;
@@ -28,6 +29,7 @@ QUnit.module('Chatter', {
             await this.component.mount(this.widget.el);
             await afterNextRender();
         };
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();

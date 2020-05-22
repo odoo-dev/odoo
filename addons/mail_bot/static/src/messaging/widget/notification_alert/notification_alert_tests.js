@@ -17,6 +17,7 @@ QUnit.module('widget', {}, function () {
 QUnit.module('NotificationAlert', {
     beforeEach() {
         utilsBeforeEach(this);
+
         this.start = async params => {
             let { widget } = await start(Object.assign({
                 data: this.data,

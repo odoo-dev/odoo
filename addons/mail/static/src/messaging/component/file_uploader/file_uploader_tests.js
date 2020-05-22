@@ -22,6 +22,7 @@ QUnit.module('FileUploader', {
     beforeEach() {
         utilsBeforeEach(this);
         this.components = [];
+
         this.createFileUploaderComponent = async props => {
             const FileUploaderComponent = components.FileUploader;
             FileUploaderComponent.env = this.env;
@@ -33,6 +34,7 @@ QUnit.module('FileUploader', {
             this.components.push(fileUploader);
             return fileUploader;
         };
+
         this.start = async params => {
             if (this.widget) {
                 this.widget.destroy();

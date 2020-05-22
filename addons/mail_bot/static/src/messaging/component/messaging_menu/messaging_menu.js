@@ -17,7 +17,7 @@ patch(components.MessagingMenu, 'mail_bot.messaging.component.MessagingMenu', {
      * @private
      */
     _onOdoobotRequestClicked() {
-        const device = this.env.messaging.device;
+        const device = this.messagingMenu.messaging.device;
         if (!device.isMobile) {
             this.messagingMenu.close();
         }

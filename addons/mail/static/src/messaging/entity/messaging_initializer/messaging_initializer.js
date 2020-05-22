@@ -38,16 +38,6 @@ function MessagingInitializerFactory({ Entity }) {
                 name: this.env._t("History"),
             });
 
-            this.messaging.update({
-                attachmentViewer: [['create']],
-                chatWindowManager: [['create']],
-                device: [['create']],
-                dialogManager: [['create']],
-                discuss: [['create']],
-                locale: [['create']],
-                messagingMenu: [['create']],
-            });
-
             const device = this.messaging.device;
             device.start();
             const context = Object.assign({
@@ -226,9 +216,19 @@ function MessagingInitializerFactory({ Entity }) {
          * @param {Object} mailFailuresData
          */
         _initMailFailures(mailFailuresData) {
-            for (const data of Object.values(mailFailuresData)) {
-                // TODO
+            for (const messageData of mailFailuresData) {
+                const message = this.env.entities.Message.insert(
+                    this.env.entities.Message.convertData(messageData)
+                );
+                // implicit: failures are sent by the server at initialization
+                // only if the current partner is author of the message
+                if (!message.author && this.messaging.currentPartner) {
+                    message.update({ author: [['link', this.messaging.currentPartner]] });
+                }
             }
+            this.messaging.notificationGroupManager.computeGroups();
+            // manually force recompute of counter (after computing the groups)
+            this.messaging.messagingMenu.update();
         }
 
         /**

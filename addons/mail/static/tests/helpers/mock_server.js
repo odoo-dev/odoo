@@ -306,6 +306,9 @@ MockServer.include({
         if (args.method === 'channel_fetch_preview') {
             return Promise.resolve(this._mockChannelFetchPreview(args));
         }
+        if (args.method === 'channel_fold') {
+            return;
+        }
         if (args.method === 'channel_minimize') {
             return Promise.resolve();
         }

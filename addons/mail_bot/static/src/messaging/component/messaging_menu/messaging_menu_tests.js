@@ -13,8 +13,9 @@ QUnit.module('mail_bot', {}, function () {
 QUnit.module('messaging', {}, function () {
 QUnit.module('component', {}, function () {
 QUnit.module('MessagingMenu', {
-    beforeEach: function () {
+    beforeEach() {
         utilsBeforeEach(this);
+
         this.start = async params => {
             let { widget } = await utilsStart(Object.assign({}, params, {
                 data: this.data,
@@ -23,7 +24,7 @@ QUnit.module('MessagingMenu', {
             this.widget = widget;
         };
     },
-    afterEach: function () {
+    afterEach() {
         utilsAfterEach(this);
         if (this.widget) {
             this.widget.destroy();
@@ -52,7 +53,7 @@ QUnit.test('rendering with OdooBot has a request (default)', async function (ass
 
     assert.ok(
         document.querySelector('.o_MessagingMenu_counter'),
-        "should display a notification counter next to the messaging menu"
+        "should display a notification counter next to the messaging menu for OdooBot request"
     );
     assert.strictEqual(
         document.querySelector('.o_MessagingMenu_counter').textContent,
