@@ -106,10 +106,7 @@ function ChatterFactory({ Entity }) {
          * @returns {boolean}
          */
         _computeIsDisabled() {
-            if (!this.threadId) {
-                return true;
-            }
-            return this.isDisabled;
+            return !this.threadId;
         }
 
         /**
