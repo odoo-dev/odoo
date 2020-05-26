@@ -57,32 +57,14 @@ MailManager.include({
         if (params.data && params.data.info === 'typing_status') {
             // typing notification is no longer supported by mail manager
             return;
-        } else if (params.data && params.data.info === 'channel_fetched') {
-            this._handleChannelFetchedNotification(params.channelID, params.data);
-        } else if (params.data && params.data.info === 'channel_seen') {
-            this._handleChannelSeenNotification(params.channelID, params.data);
+        } else if (params.data && params.data.info === 'channel_fetched' || params.data.info === 'channel_seen') {
+            /*
+               Disable old support (this whole method should be deleted at the end)
+               Needed to that way as still receiving channel_fetched and channel_seen notifications.
+             */
+            return;
         } else {
             this._handleChannelMessageNotification(params.data);
-        }
-    },
-    /**
-     * Called when a channel has been fetched, and the server responses with the
-     * last message fetched. Useful in order to track last message fetched.
-     *
-     * @private
-     * @param {integer} channelID
-     * @param {Object} data
-     * @param {string} data.info 'channel_fetched'
-     * @param {integer} data.last_message_id
-     * @param {integer} data.partner_id
-     */
-    _handleChannelFetchedNotification: function (channelID, data) {
-        var channel = this.getChannel(channelID);
-        if (!channel) {
-            return;
-        }
-        if (channel.hasSeenFeature()) {
-            channel.updateSeenPartnersInfo(data);
         }
     },
     /**
@@ -115,33 +97,6 @@ MailManager.include({
                 incrementUnread: notify,
             });
         });
-    },
-    /**
-     * Called when a channel has been seen, and the server responses with the
-     * last message seen. Useful in order to track last message seen.
-     *
-     * @private
-     * @param {integer} channelID
-     * @param {Object} data
-     * @param {string} data.info 'channel_seen'
-     * @param {integer} data.last_message_id
-     * @param {integer} data.partner_id
-     */
-    _handleChannelSeenNotification: function (channelID, data) {
-        var channel = this.getChannel(channelID);
-        if (!channel) {
-            return;
-        }
-        if (channel.hasSeenFeature()) {
-            channel.updateSeenPartnersInfo(data);
-        }
-        if (session.partner_id !== data.partner_id) {
-            return;
-        }
-        channel.setLastSeenMessageID(data.last_message_id);
-        if (channel.hasUnreadMessages()) {
-            channel.resetUnreadCounter();
-        }
     },
      /**
      * On message becoming a need action (pinned to inbox)
@@ -193,27 +148,6 @@ MailManager.include({
         });
     },
     /**
-     * Called when receiving a multi_user_channel seen notification. Only
-     * the current user is notified. This must be handled as if this is a
-     * channel seen notification.
-     *
-     * Note that this is a 'res.partner' notification because only the current
-     * user is notified on channel seen. This is a consequence from disabling
-     * the seen feature on multi_user_channel, because we still need to get
-     * the last seen message ID in order to display the "New Messages" separator
-     * in Discuss.
-     *
-     * @private
-     * @param {Object} data
-     * @param {integer} data.channel_id
-     * @param {string} data.info 'channel_seen'
-     * @param {integer} data.last_message_id
-     * @param {integer} data.partner_id
-     */
-    _handlePartnerChannnelSeenNotification: function (data) {
-        this._handleChannelSeenNotification(data.channel_id, data);
-    },
-    /**
      * On receiving a notification that is specific to a user
      *
      * @private
@@ -225,8 +159,6 @@ MailManager.include({
             this._handlePartnerActivityUpdateNotification(data);
         } else if (data.type === 'user_connection') {
             this._handlePartnerUserConnectionNotification(data);
-        } else if (data.info === 'channel_seen') {
-            this._handlePartnerChannnelSeenNotification(data);
         } else if (data.type === 'simple_notification') {
             var title = _.escape(data.title), message = _.escape(data.message);
             data.warning ? this.do_warn(title, message, data.sticky) : this.do_notify(title, message, data.sticky);

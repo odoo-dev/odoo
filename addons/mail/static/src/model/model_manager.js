@@ -648,7 +648,7 @@ class ModelManager {
                         break;
                 }
             }
-            if (!Model.modelName) {
+            if (!Model.hasOwnProperty('modelName')) {
                 throw new Error(`Missing static property "modelName" on Model class "${Model.name}".`);
             }
             if (generatedNames.includes(Model.modelName)) {

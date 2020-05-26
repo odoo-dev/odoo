@@ -98,6 +98,7 @@ function factory(dependencies) {
         async _handleNotificationChannel(data) {
             const {
                 channelId,
+                id,
                 info,
                 is_typing,
                 last_message_id,
@@ -105,9 +106,15 @@ function factory(dependencies) {
             } = data;
             switch (info) {
                 case 'channel_fetched':
-                    return; // disabled seen notification feature
+                    return this._handleNotificationChannelFetched({
+                        id,
+                        channelId,
+                        last_message_id,
+                        partner_id,
+                    });
                 case 'channel_seen':
                     return this._handleNotificationChannelSeen({
+                        id,
                         channelId,
                         last_message_id,
                         partner_id,
@@ -121,6 +128,47 @@ function factory(dependencies) {
                 default:
                     return this._handleNotificationChannelMessage(data);
             }
+        }
+
+        /**
+         * @private
+         * @param {Object} param0
+         * @param {integer} param0.channelId
+         * @param {integer} param0.id
+         * @param {integer} param0.last_message_id
+         * @param {integer} param0.partner_id
+         */
+        async _handleNotificationChannelFetched({
+            id,
+            channelId,
+            last_message_id,
+            partner_id,
+        }) {
+            const channel = this.env.models['mail.thread'].find(thread =>
+                thread.id === channelId && thread.model === 'mail.channel'
+            );
+            if (!channel) {
+                // for example seen from another browser, the current one has no
+                // knowledge of the channel
+                return;
+            }
+            channel.update({
+                partnerSeenInfos: [['insert',
+                    {
+                        lastFetchedMessage: [['insert', {id: last_message_id}]],
+                        id,
+                        partner: [['insert', {id: partner_id}]],
+                    }
+                ]],
+                messageSeenIndicators: [['insert',
+                    {
+                        id: this.env.models['mail.message_seen_indicator'].computeId(last_message_id, channel.id),
+                        message: [['insert', {id: last_message_id}]],
+                    }
+                ]],
+            });
+            // FIXME force the computing of message values (cf task-2261221)
+            this.env.models['mail.message_seen_indicator'].recomputeFetchedValues(channel);
         }
 
         /**
@@ -181,40 +229,67 @@ function factory(dependencies) {
             if (!isOdooFocused) {
                 this._notifyNewChannelMessageWhileOutOfFocus({ channel, message });
             }
+            if (channel.model === 'mail.channel') {
+                channel.markAsFetched();
+            }
             channel.update({ message_unread_counter: channel.message_unread_counter + 1 });
             // manually force recompute of counter
             this.messaging.messagingMenu.update();
         }
 
         /**
+         * Called when a channel has been seen, and the server responses with the
+         * last message seen. Useful in order to track last message seen.
+         *
          * @private
          * @param {Object} param0
          * @param {integer} param0.channelId
+         * @param {integer} param0.id
          * @param {integer} param0.last_message_id
          * @param {integer} param0.partner_id
          */
         async _handleNotificationChannelSeen({
             channelId,
+            id,
             last_message_id,
             partner_id,
         }) {
-            const currentPartner = this.env.messaging.currentPartner;
-            if (currentPartner.id !== partner_id) {
-                return;
-            }
             const channel = this.env.models['mail.thread'].find(thread =>
-                thread.id === channelId &&
-                thread.model === 'mail.channel'
+                thread.id === channelId && thread.model === 'mail.channel'
             );
             if (!channel) {
                 // for example seen from another browser, the current one has no
                 // knowledge of the channel
                 return;
             }
-            channel.update({
-                message_unread_counter: 0,
-                seen_message_id: last_message_id,
-            });
+            const lastMessage = this.env.models['mail.message'].insert({id: last_message_id});
+            const updateData = {
+                partnerSeenInfos: [['insert',
+                    {
+                        id,
+                        lastFetchedMessage: [['link', lastMessage]],
+                        lastSeenMessage: [['link', lastMessage]],
+                        partner: [['insert', {id: partner_id}]],
+                    }],
+                ],
+                messageSeenIndicators: [['insert',
+                    {
+                        id: this.env.models['mail.message_seen_indicator'].computeId(last_message_id, channel.id),
+                        message: [['link', lastMessage]],
+                    }
+                ]],
+            };
+            if (this.env.messaging.currentPartner.id === partner_id) {
+                Object.assign(updateData, {
+                    message_unread_counter: 0,
+                    seen_message_id: last_message_id,
+                });
+            }
+            channel.update(updateData);
+            // FIXME force the computing of thread values (cf task-2261221)
+            this.env.models['mail.thread'].computeLastCurrentPartnerMessageSeenByEveryone(channel);
+            // FIXME force the computing of message values (cf task-2261221)
+            this.env.models['mail.message_seen_indicator'].recomputeSeenValues(channel);
             // manually force recompute of counter
             this.messaging.messagingMenu.update();
         }

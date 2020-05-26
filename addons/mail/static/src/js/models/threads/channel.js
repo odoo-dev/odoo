@@ -329,35 +329,6 @@ var Channel = SearchableThread.extend({
         return [['channel_ids', 'in', [this._id]]];
     },
     /**
-     * Marks this channel as read.
-     * The last seen message will be the last message.
-     * Resolved with the last seen message, only for non-mailbox channels
-     *
-     * @override
-     * @private
-     * @returns {Promise} resolved when message has been marked as read
-     */
-    _markAsRead: function () {
-        var superDef = this._super.apply(this, arguments);
-        var seenDef = this._notifySeen();
-        return Promise.all([superDef, seenDef]);
-    },
-    /**
-     * @private
-     * @returns {$.Promise<integer>} resolved with ID of last seen message
-     */
-    _notifySeen: function () {
-        var self = this;
-        return this._rpc({
-            model: 'mail.channel',
-            method: 'channel_seen',
-            args: [[this._id]],
-        }, { shadow: true }).then(function (lastSeenMessageID) {
-            self._lastSeenMessageID = lastSeenMessageID;
-            return lastSeenMessageID;
-        });
-    },
-    /**
      * Prepare and send a message to the server on this channel.
      *
      * @override

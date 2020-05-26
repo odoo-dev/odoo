@@ -3,6 +3,7 @@ odoo.define('mail/static/src/components/message/message.js', function (require) 
 
 const components = {
     AttachmentList: require('mail/static/src/components/attachment_list/attachment_list.js'),
+    MessageSeenIndicator: require('mail/static/src/components/message_seen_indicator/message_seen_indicator.js'),
     ModerationBanDialog: require('mail/static/src/components/moderation_ban_dialog/moderation_ban_dialog.js'),
     ModerationDiscardDialog: require('mail/static/src/components/moderation_discard_dialog/moderation_discard_dialog.js'),
     ModerationRejectDialog: require('mail/static/src/components/moderation_reject_dialog/moderation_reject_dialog.js'),

@@ -170,15 +170,19 @@
     &:hover, &.o-clicked {
 
         .o_Message_command {
-            opacity: 1;
+            display: flex;
         }
 
         .o_Message_commands {
-            opacity: 1;
+            display: flex;
         }
 
         .o_Message_sidebarItem.o-message-squashed {
-            opacity: 1;
+            display: flex;
+        }
+
+        .o_Message_seenIndicator.o-message-squashed {
+            display: none;
         }
     }
 
@@ -210,11 +214,11 @@
     &.o-starred {
 
         .o_Message_commandStar {
-            opacity: 1;
+            display: flex;
         }
 
         .o_Message_commands {
-            opacity: 1;
+            display: flex;
         }
     }
 }
@@ -232,7 +236,7 @@
     color: gray('400');
 
     &:not(.o-mobile) {
-        opacity: 0;
+        display: none;
 
         &:hover {
             filter: brightness(0.8);
@@ -281,7 +285,7 @@
 }
 
 .o_Message_headerCommands:not(.o-mobile) {
-    opacity: 0;
+    display: none;
 }
 
 .o_Message_originThread {
@@ -342,9 +346,9 @@
 }
 
 .o_Message_sidebarCommands {
-    opacity: 0;
+    display: none;
 }
 
 .o_Message_sidebarItem.o-message-squashed {
-    opacity: 0;
+    display: none;
 }

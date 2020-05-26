@@ -49,6 +49,9 @@
                                 />
                             </t>
                         </div>
+                        <t t-if="message.isCurrentPartnerAuthor and threadViewer and threadViewer.thread">
+                            <MessageSeenIndicator class="o_Message_seenIndicator o-message-squashed" messageLocalId="message.localId" threadLocalId="threadViewer.thread.localId"/>
+                        </t>
                     </t>
                 </div>
                 <div class="o_Message_core">
@@ -72,6 +75,9 @@
                             <div class="o_Message_date o_Message_headerDate" t-att-class="{ 'o-message-selected': props.isSelected }" t-att-title="datetime">
                                 - <t t-esc="state.timeElapsed"/>
                             </div>
+                            <t t-if="message.isCurrentPartnerAuthor and threadViewer and threadViewer.thread">
+                                <MessageSeenIndicator class="o_Message_seenIndicator" messageLocalId="message.localId" threadLocalId="threadViewer.thread.localId"/>
+                            </t>
                             <t t-if="hasDifferentOriginThread">
                                 <div class="o_Message_originThread" t-att-class="{ 'o-message-selected': props.isSelected }">
                                     <t t-if="message.originThread.model === 'mail.channel'">

@@ -189,6 +189,16 @@ function factory(dependencies) {
                     this.env.models['mail.message'].convertData(data))
                 ]],
             });
+            if (this.thread) {
+                this.thread.update({
+                    messageSeenIndicators: [['insert', messagesData.map(messageData => {
+                        return {
+                            id: this.env.models['mail.message_seen_indicator'].computeId(messageData.id, this.thread.id),
+                            message: [['insert', { id: messageData.id }]],
+                        };
+                    })]],
+                });
+            }
             for (const viewer of this.thread.viewers) {
                 viewer.handleThreadCacheLoaded(this);
             }

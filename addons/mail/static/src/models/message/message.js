@@ -376,6 +376,18 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
+        _computeIsCurrentPartnerAuthor() {
+            return (
+                this.author &&
+                this.messagingCurrentPartner &&
+                this.messagingCurrentPartner === this.author
+            );
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
         _computeIsModeratedByCurrentPartner() {
             return (
                 this.moderation_status === 'pending_moderation' &&
@@ -398,7 +410,7 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {mail.messaging.entity.Messaging}
+         * @returns {mail.messaging}
          */
         _computeMessaging() {
             return [['link', this.env.messaging]];
@@ -478,6 +490,14 @@ function factory(dependencies) {
             dependencies: ['isModeratedByCurrentPartner'],
         }),
         id: attr(),
+        isCurrentPartnerAuthor: attr({
+            compute: '_computeIsCurrentPartnerAuthor',
+            default: false,
+            dependencies: [
+                'author',
+                'messagingCurrentPartner',
+            ],
+        }),
         isModeratedByCurrentPartner: attr({
             compute: '_computeIsModeratedByCurrentPartner',
             default: false,
@@ -513,6 +533,9 @@ function factory(dependencies) {
         message_type: attr(),
         messaging: many2one('mail.messaging', {
             compute: '_computeMessaging',
+        }),
+        messagingCurrentPartner: many2one('mail.partner', {
+            related: 'messaging.currentPartner',
         }),
         messagingInbox: many2one('mail.thread', {
             related: 'messaging.inbox',

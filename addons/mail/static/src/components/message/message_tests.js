@@ -25,8 +25,7 @@ QUnit.module('message_tests.js', {
             this.component = new MessageComponent(null, Object.assign({
                 messageLocalId: message.localId,
             }, otherProps));
-            await this.component.mount(this.widget.el);
-            await afterNextRender();
+            await afterNextRender(() => this.component.mount(this.widget.el));
         };
 
         this.start = async params => {
@@ -344,6 +343,346 @@ QUnit.test('Notification Error', async function (assert) {
     assert.verifySteps(
         ['do_action'],
         "should do an action to display the resend email dialog"
+    );
+});
+
+QUnit.test("'channel_fetch' notification received is correctly handled", async function (assert) {
+    assert.expect(3);
+
+    await this.start();
+    const currentPartner = this.env.models['mail.partner'].create({
+        id: this.env.session.partner_id,
+        display_name: "Demo User",
+    });
+    const thread = this.env.models['mail.thread'].create({
+        id: 11,
+        members: [
+            [['link', currentPartner]],
+            [['insert', { id: 11, display_name: "Recipient" }]]
+        ],
+        model: 'mail.channel',
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({ thread: [['link', thread]] });
+    const message = this.env.models['mail.message'].create({
+        author: [['link', currentPartner]],
+        body: "<p>Test</p>",
+        id: 100,
+        threadCaches: [['link', thread.mainCache]],
+    });
+
+    await this.createMessageComponent(message, { threadViewerLocalId: threadViewer.localId });
+
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "should display a message component"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        "message component should not have any check (V) as message is not yet received"
+    );
+
+    // Simulate received channel fetched notification
+    const notifications = [
+        [['myDB', 'mail.channel', 11], {
+            info: 'channel_fetched',
+            last_message_id: 100,
+            partner_id: 11,
+        }],
+    ];
+    await afterNextRender(() => {
+        this.widget.call('bus_service', 'trigger', 'notification', notifications);
+    });
+
+    assert.containsOnce(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        "message seen indicator component should only contain one check (V) as message is just received"
+    );
+});
+
+QUnit.test("'channel_seen' notification received is correctly handled", async function (assert) {
+    assert.expect(3);
+
+    await this.start();
+    const currentPartner = this.env.models['mail.partner'].create({
+        id: this.env.session.partner_id,
+        display_name: "Demo User",
+    });
+    const thread = this.env.models['mail.thread'].create({
+        id: 11,
+        members: [
+            [['link', currentPartner]],
+            [['insert', { id: 11, display_name: "Recipient" }]]
+        ],
+        model: 'mail.channel',
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({ thread: [['link', thread]] });
+    const message = this.env.models['mail.message'].create({
+        author: [['link', currentPartner]],
+        body: "<p>Test</p>",
+        id: 100,
+        threadCaches: [['link', thread.mainCache]],
+    });
+    await this.createMessageComponent(message, { threadViewerLocalId: threadViewer.localId });
+
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "should display a message component"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        "message component should not have any check (V) as message is not yet received"
+    );
+
+    // Simulate received channel seen notification
+    const notifications = [
+        [['myDB', 'mail.channel', 11], {
+            info: 'channel_seen',
+            last_message_id: 100,
+            partner_id: 11,
+        }],
+    ];
+    await afterNextRender(() => {
+        this.widget.call('bus_service', 'trigger', 'notification', notifications);
+    });
+    assert.containsN(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        2,
+        "message seen indicator component should contain two checks (V) as message is seen"
+    );
+});
+
+QUnit.test("'channel_fetch' notification then 'channel_seen' received  are correctly handled", async function (assert) {
+    assert.expect(4);
+
+    await this.start();
+    const currentPartner = this.env.models['mail.partner'].create({
+        id: this.env.session.partner_id,
+        display_name: "Demo User",
+    });
+    const thread = this.env.models['mail.thread'].create({
+        id: 11,
+        members: [
+            [['link', currentPartner]],
+            [['insert', { id: 11, display_name: "Recipient" }]]
+        ],
+        model: 'mail.channel',
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({ thread: [['link', thread]] });
+    const message = this.env.models['mail.message'].create({
+        author: [['link', currentPartner]],
+        body: "<p>Test</p>",
+        id: 100,
+        threadCaches: [['link', thread.mainCache]],
+    });
+    await this.createMessageComponent(message, { threadViewerLocalId: threadViewer.localId });
+
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "should display a message component"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        "message component should not have any check (V) as message is not yet received"
+    );
+
+    // Simulate received channel fetched notification
+    let notifications = [
+        [['myDB', 'mail.channel', 11], {
+            info: 'channel_fetched',
+            last_message_id: 100,
+            partner_id: 11,
+        }],
+    ];
+    await afterNextRender(() => {
+        this.widget.call('bus_service', 'trigger', 'notification', notifications);
+    });
+    assert.containsOnce(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        "message seen indicator component should only contain one check (V) as message is just received"
+    );
+
+    // Simulate received channel seen notification
+    notifications = [
+        [['myDB', 'mail.channel', 11], {
+            info: 'channel_seen',
+            last_message_id: 100,
+            partner_id: 11,
+        }],
+    ];
+    await afterNextRender(() => {
+        this.widget.call('bus_service', 'trigger', 'notification', notifications);
+    });
+    assert.containsN(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        2,
+        "message seen indicator component should contain two checks (V) as message is now seen"
+    );
+});
+
+QUnit.test('do not show messaging seen indicator if not authored by me', async function (assert) {
+    assert.expect(2);
+
+    await this.start();
+    const author = this.env.models['mail.partner'].create({
+        id: 100,
+        display_name: "Demo User"
+    });
+    const thread = this.env.models['mail.thread'].create({
+        id: 11,
+        partnerSeenInfos: [['create', [
+            {
+                lastFetchedMessage: [['insert', {id: 100}]],
+                partner: [['insert', {id: this.env.session.partner_id}]],
+            },
+            {
+                lastFetchedMessage: [['insert', {id: 100}]],
+                partner: [['link', author]],
+            },
+        ]]],
+        model: 'mail.channel',
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({ thread: [['link', thread]] });
+    const message = this.env.models['mail.message'].create({
+        author: [['link', author]],
+        body: "<p>Test</p>",
+        id: 100,
+        threadCaches: [['link', thread.mainCache]],
+    });
+    await this.createMessageComponent(message, { threadViewerLocalId: threadViewer.localId });
+
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "should display a message component"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_Message_seenIndicator',
+        "message component should not have any message seen indicator"
+    );
+});
+
+QUnit.test('do not show messaging seen indicator if before last seen by all message', async function (assert) {
+    assert.expect(3);
+
+    await this.start({debug: true});
+    const currentPartner = this.env.models['mail.partner'].create({
+        id: this.env.session.partner_id,
+        display_name: "Demo User",
+    });
+    const thread = this.env.models['mail.thread'].create({
+        id: 11,
+        messageSeenIndicators: [['insert', {
+            id: this.env.models['mail.message_seen_indicator'].computeId(99, 11),
+            message: [['insert', {id: 99}]],
+        }]],
+        model: 'mail.channel',
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({ thread: [['link', thread]] });
+    const lastSeenMessage = this.env.models['mail.message'].create({
+        author: [['link', currentPartner]],
+        body: "<p>You already saw me</p>",
+        id: 100,
+        threadCaches: [['link', thread.mainCache]],
+    });
+    const message = this.env.models['mail.message'].create({
+        author: [['link', currentPartner]],
+        body: "<p>Test</p>",
+        id: 99,
+        threadCaches: [['link', thread.mainCache]],
+    });
+    thread.update({
+       partnerSeenInfos: [['create', [
+            {
+                lastSeenMessage: [['link', lastSeenMessage]],
+                partner: [['link', currentPartner]],
+            },
+            {
+                lastSeenMessage: [['link', lastSeenMessage]],
+                partner: [['insert', {id: 100}]],
+            },
+        ]]],
+    });
+    await this.createMessageComponent(message, { threadViewerLocalId: threadViewer.localId });
+
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "should display a message component"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message_seenIndicator',
+        "message component should have a message seen indicator"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        "message component should not have any check (V)"
+    );
+});
+
+QUnit.test('only show messaging seen indicator if authored by me, after last seen by all message', async function (assert) {
+    assert.expect(3);
+
+    await this.start();
+    const currentPartner = this.env.models['mail.partner'].create({
+        id: this.env.session.partner_id,
+        display_name: "Demo User"
+    });
+    const thread = this.env.models['mail.thread'].create({
+        id: 11,
+        partnerSeenInfos: [['create', [
+            {
+                lastSeenMessage: [['insert', {id: 100}]],
+                partner: [['link', currentPartner]],
+            },
+            {
+                partner: [['insert', {id: 100}]],
+                lastFetchedMessage: [['insert', {id: 100}]],
+                lastSeenMessage: [['insert', {id: 99}]],
+            },
+        ]]],
+        messageSeenIndicators: [['insert', {
+            id: this.env.models['mail.message_seen_indicator'].computeId(100, 11),
+            message: [['insert', {id: 100}]],
+        }]],
+        model: 'mail.channel',
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({ thread: [['link', thread]] });
+    const message = this.env.models['mail.message'].create({
+        author: [['link', currentPartner]],
+        body: "<p>Test</p>",
+        id: 100,
+        threadCaches: [['link', thread.mainCache]],
+    });
+    await this.createMessageComponent(message, { threadViewerLocalId: threadViewer.localId });
+
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "should display a message component"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message_seenIndicator',
+        "message component should have a message seen indicator"
+    );
+    assert.containsN(
+        document.body,
+        '.o_MessageSeenIndicator_icon',
+        2,
+        "message component should have two checks (V)"
     );
 });
 

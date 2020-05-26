@@ -97,6 +97,7 @@
         'static/src/components/message/message.xml',
         'static/src/components/message_author_prefix/message_author_prefix.xml',
         'static/src/components/message_list/message_list.xml',
+        'static/src/components/message_seen_indicator/message_seen_indicator.xml',
         'static/src/components/messaging_menu/messaging_menu.xml',
         'static/src/components/mobile_messaging_navbar/mobile_messaging_navbar.xml',
         'static/src/components/moderation_ban_dialog/moderation_ban_dialog.xml',

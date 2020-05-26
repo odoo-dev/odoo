@@ -114,6 +114,19 @@ function factory(dependencies) {
 
         /**
          * @static
+         * @param {mail.thread} [thread] the concerned thread
+         */
+        static computeLastCurrentPartnerMessageSeenByEveryone(thread = undefined) {
+            const threads = thread ? [thread] : this.env.models['mail.thread'].all();
+            threads.map(localThread => {
+                localThread.update({
+                    lastCurrentPartnerMessageSeenByEveryone: localThread._computeLastCurrentPartnerMessageSeenByEveryone(),
+                });
+            });
+        }
+
+        /**
+         * @static
          * @param {Object} data
          * @return {Object}
          */
@@ -162,9 +175,6 @@ function factory(dependencies) {
             if ('seen_message_id' in data) {
                 data2.seen_message_id = data.seen_message_id;
             }
-            if ('seen_partners_info' in data) {
-                data2.seen_partners_info = data.seen_partners_info;
-            }
             if ('uuid' in data) {
                 data2.uuid = data.uuid;
             }
@@ -188,6 +198,48 @@ function factory(dependencies) {
                             this.env.models['mail.partner'].convertData(memberData)
                         )],
                     ];
+                }
+            }
+            if ('seen_partners_info' in data) {
+                if (!data.seen_partners_info) {
+                    data2.partnerSeenInfos = [['unlink-all']];
+                } else {
+                    data2.partnerSeenInfos = [
+                        ['insert-and-replace',
+                            data.seen_partners_info.map(
+                                ({ fetched_message_id, id, partner_id, seen_message_id}) => {
+                                    return {
+                                        id,
+                                        lastFetchedMessage: [seen_message_id ? ['insert', {id: seen_message_id}] : ['unlink-all']],
+                                        lastSeenMessage: [fetched_message_id ? ['insert', {id: fetched_message_id}] : ['unlink-all']],
+                                        partner: [['insert', {id: partner_id}]],
+                                    };
+                                })
+                        ]
+                    ];
+                    if (data.id || this.id) {
+                        const messageIds = data.seen_partners_info.reduce((currentSet, { fetched_message_id, seen_message_id}) => {
+                            if (fetched_message_id) {
+                                currentSet.add(fetched_message_id);
+                            }
+                            if (seen_message_id) {
+                                currentSet.add(seen_message_id);
+                            }
+                            return currentSet;
+                        }, new Set());
+                        if (messageIds.size > 0) {
+                            data2.messageSeenIndicators = [
+                                ['insert',
+                                    [...messageIds].map(messageId => {
+                                       return {
+                                           id: this.env.models['mail.message_seen_indicator'].computeId(messageId, data.id || this.id),
+                                           message: [['insert', {id: messageId}]],
+                                       };
+                                    })
+                                ]
+                            ];
+                        }
+                    }
                 }
             }
 
@@ -369,6 +421,17 @@ function factory(dependencies) {
          */
         loadNewMessages() {
             this.mainCache.loadNewMessages();
+        }
+
+        /**
+         * Mark the specified conversation as fetched.
+         */
+        async markAsFetched() {
+            await this.async(() => this.env.rpc({
+                model: 'mail.channel',
+                method: 'channel_fetched',
+                args: [[this.id]],
+            }, { shadow: true }));
         }
 
         /**
@@ -749,6 +812,45 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {mail.message}
+         */
+        _computeLastCurrentPartnerMessageSeenByEveryone() {
+            if (!this.partnerSeenInfos || !this.mainCacheOrderedMessages) {
+                return [['unlink-all']];
+            }
+            const otherPartnerSeenInfos =
+                this.partnerSeenInfos.filter(partnerSeenInfo =>
+                    partnerSeenInfo.partner !== this.messagingCurrentPartner);
+            if (otherPartnerSeenInfos.length === 0) {
+                return [['unlink-all']];
+            }
+
+            const otherPartnersLastSeenMessageIds =
+                otherPartnerSeenInfos.map(partnerSeenInfo =>
+                    partnerSeenInfo.lastSeenMessage ? partnerSeenInfo.lastSeenMessage.id : 0
+                );
+            if(otherPartnersLastSeenMessageIds.length === 0) {
+                return [['unlink-all']];
+            }
+            const lastMessageSeenByAllId = Math.min(
+                ...otherPartnersLastSeenMessageIds
+            );
+            const currentPartnerOrderedSeenMessages =
+                this.mainCacheOrderedMessages.filter(message =>
+                    message.author === this.messagingCurrentPartner &&
+                    message.id <= lastMessageSeenByAllId);
+
+            if (
+                !currentPartnerOrderedSeenMessages ||
+                currentPartnerOrderedSeenMessages.length === 0
+            ) {
+                return [['unlink-all']];
+            }
+            return [['replace', currentPartnerOrderedSeenMessages.slice().pop()]];
+        }
+
+        /**
+         * @private
          * @returns {mail.message|undefined}
          */
         _computeLastNeedactionMessage() {
@@ -1106,6 +1208,14 @@ function factory(dependencies) {
         is_moderator: attr({
             default: false,
         }),
+        lastCurrentPartnerMessageSeenByEveryone: many2one('mail.message', {
+            compute: '_computeLastCurrentPartnerMessageSeenByEveryone',
+            dependencies: [
+                'partnerSeenInfos',
+                'mainCacheOrderedMessages',
+                'messagingCurrentPartner',
+            ],
+        }),
         lastMessage: many2one('mail.message', {
             related: 'mainCache.lastMessage',
         }),
@@ -1119,6 +1229,9 @@ function factory(dependencies) {
         }),
         mainCacheMessages: many2many('mail.message', {
             related: 'mainCache.messages',
+        }),
+        mainCacheOrderedMessages: many2many('mail.message', {
+            related: 'mainCache.orderedMessages',
         }),
         mass_mailing: attr({
             default: false,
@@ -1138,6 +1251,10 @@ function factory(dependencies) {
                 'mainCacheMessages',
                 'originThreadMessages',
             ],
+        }),
+        messageSeenIndicators: one2many('mail.message_seen_indicator', {
+            inverse: 'thread',
+            isCausal: true,
         }),
         messaging: many2one('mail.messaging', {
             compute: '_computeMessaging',
@@ -1187,6 +1304,10 @@ function factory(dependencies) {
         originThreadMessages: one2many('mail.message', {
             inverse: 'originThread',
         }),
+        partnerSeenInfos: one2many('mail.thread_partner_seen_info', {
+            inverse: 'thread',
+            isCausal: true,
+        }),
         /**
          * Determine if there is a pending fold state change, which is a change
          * of fold state requested by the client but not yet confirmed by the
@@ -1198,7 +1319,6 @@ function factory(dependencies) {
         pendingFoldState: attr(),
         public: attr(),
         seen_message_id: attr(),
-        seen_partners_info: attr(),
         /**
          * Determine the last fold state known by the server, which is the fold
          * state displayed after initialization or when the last pending

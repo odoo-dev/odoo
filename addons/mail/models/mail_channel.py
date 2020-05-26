@@ -597,6 +597,7 @@ class Channel(models.Model):
             partner_ids = channel_partners.mapped('partner_id').ids
             info['members'] = [partner_infos[partner] for partner in partner_ids]
             info['seen_partners_info'] = [{
+                'id': cp.id,
                 'partner_id': cp.partner_id.id,
                 'fetched_message_id': cp.fetched_message_id.id,
                 'seen_message_id': cp.seen_message_id.id,
@@ -731,6 +732,7 @@ class Channel(models.Model):
                 'fetched_message_id': last_message_id,
             })
             data = {
+                'id': channel_partner.id,
                 'info': 'channel_seen',
                 'last_message_id': last_message_id,
                 'partner_id': self.env.user.partner_id.id,
@@ -760,6 +762,7 @@ class Channel(models.Model):
                 'fetched_message_id': last_message_id,
             })
             data = {
+                'id': channel_partner.id,
                 'info': 'channel_fetched',
                 'last_message_id': last_message_id,
                 'partner_id': self.env.user.partner_id.id,
