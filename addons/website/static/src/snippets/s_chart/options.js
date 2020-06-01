@@ -118,6 +118,9 @@ options.registry.InnerChart = options.Class.extend({
             this._setDefaultSelectedInput();
             await this._reloadGraph();
         }
+        if (params.attributeName === 'minValue' || params.attributeName === 'maxValue') {
+            await this._computeTicksMinMaxValue();
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -147,6 +150,41 @@ options.registry.InnerChart = options.Class.extend({
             }
         }
         return this._super(...arguments);
+    },
+    /**
+     * maintaining the gape between the scale axis for the auto fit behaviour if we used min/max config
+     *
+     * @private
+     */
+    _computeTicksMinMaxValue: function () {
+        const dataset = this.$target[0].dataset;
+        let minValue = parseInt(dataset.minValue);
+        let maxValue = parseInt(dataset.maxValue);
+        if (!isNaN(maxValue)) {
+            // for reversing a min max value when min value is greater than max value
+            if (maxValue < minValue) {
+                maxValue = minValue;
+                minValue = parseInt(dataset.maxValue);
+            } else if (maxValue === minValue) {
+                // to maintaining a chart if min value and max value are same for positive and negative number
+                minValue < 0 ? (maxValue = 0, minValue = 2 * minValue) : (minValue = 0, maxValue = 2 * maxValue);
+            }
+        } else {
+            // find max value from each row/column data
+            const datasets = JSON.parse(dataset.data).datasets || [];
+            const dataValue = _.flatten(datasets.map(el => el.data.map(data => {
+                return !isNaN(parseInt(data)) ? parseInt(data) : 0;
+            })));
+            // for managing range of axis when max value does not given and min value is greater than chart data value
+            if (minValue >= Math.max(...dataValue)) {
+                maxValue = minValue;
+                minValue = 0;
+            }
+        }
+        this.$target.attr({
+            'data-ticks-min': minValue,
+            'data-ticks-max': maxValue
+        });
     },
     /**
      * Sets and reloads the data on the canvas if it has changed.
