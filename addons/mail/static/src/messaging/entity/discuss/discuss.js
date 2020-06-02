@@ -2,7 +2,7 @@ odoo.define('mail.messaging.entity.Discuss', function (require) {
 'use strict';
 
 const { registerNewEntity } = require('mail.messaging.entityCore');
-const { attr, one2many, one2one } = require('mail.messaging.EntityField');
+const { attr, many2one, one2many, one2one } = require('mail.messaging.EntityField');
 
 function DiscussFactory({ Entity }) {
 
@@ -377,7 +377,7 @@ function DiscussFactory({ Entity }) {
         sidebarQuickSearchValue: attr({
             default: "",
         }),
-        thread: one2one('Thread', {
+        thread: many2one('Thread', {
             related: 'threadViewer.thread',
         }),
         threadId: attr({

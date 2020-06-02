@@ -372,13 +372,11 @@ const DiscussWidget = AbstractAction.extend({
     },
     /**
      * @private
-     * @param {OdooEvent} ev
-     * @param {Array} ev.data.domain
+     * @param {Object} searchQuery
      */
-    _onSearch(ev) {
-        ev.stopPropagation();
+    _onSearch: function (searchQuery) {
         this.discuss.threadViewer.update({
-            stringifiedDomain: JSON.stringify(ev.data.domain),
+            stringifiedDomain: JSON.stringify(searchQuery.domain),
         });
     },
 });
