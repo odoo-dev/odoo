@@ -181,6 +181,8 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 this._notifyNewChannelMessageWhileOutOfFocus({ channel, message });
             }
             channel.update({ message_unread_counter: channel.message_unread_counter + 1 });
+            // manually force recompute of counter
+            this.messaging.messagingMenu.update();
         }
 
         /**
@@ -203,10 +205,17 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 thread.id === channelId &&
                 thread.model === 'mail.channel'
             );
+            if (!channel) {
+                // for example seen from another browser, the current one has no
+                // knowledge of the channel
+                return;
+            }
             channel.update({
                 message_unread_counter: 0,
                 seen_message_id: last_message_id,
             });
+            // manually force recompute of counter
+            this.messaging.messagingMenu.update();
         }
 
         /**
@@ -232,6 +241,8 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 const mainThreadCache = thread.mainCache;
                 mainThreadCache.update({ messages: [['link', message]] });
             }
+            // manually force recompute of counter
+            this.messaging.messagingMenu.update();
         }
 
         /**
@@ -298,44 +309,35 @@ function MessagingNotificationHandlerFactory({ Entity }) {
          * @param {string} data.uuid
          */
         _handleNotificationPartnerChannel(data) {
-            const {
-                channel_type,
-                id,
-                info,
-                is_minimized,
-                name,
-                state: channelState,
-            } = data;
-            if (channel_type !== 'channel' || channelState !== 'open') {
-                return;
-            }
+            const convertedData = this.env.entities.Thread.convertData(data);
+
             let channel = this.env.entities.Thread.find(thread =>
-                thread.id === id &&
+                thread.id === convertedData.id &&
                 thread.model === 'mail.channel'
             );
+            const wasCurrentPartnerMember = channel && channel.members.includes(this.env.messaging.currentPartner);
+
+            channel = this.env.entities.Thread.insert(Object.assign(
+                { isPinned: true },
+                convertedData,
+            ));
+
             if (
-                !is_minimized &&
-                info !== 'creation' &&
-                (
-                    !channel ||
-                    !channel.members.includes(this.env.messaging.currentPartner)
-                )
+                channel.channel_type === 'channel' &&
+                data.info !== 'creation' &&
+                !wasCurrentPartnerMember
             ) {
                 this.env.do_notify(
                     this.env._t("Invitation"),
                     _.str.sprintf(
                         this.env._t("You have been invited to: %s"),
-                        name
+                        channel.name
                     )
                 );
             }
-            if (!channel) {
-                channel = this.env.entities.Thread.create(Object.assign(
-                    {},
-                    this.env.entities.Thread.convertData(data),
-                    { isPinned: true }
-                ));
-            }
+            // a new thread with unread messages could have been added
+            // manually force recompute of counter
+            this.messaging.messagingMenu.update();
         }
 
         /**
@@ -388,10 +390,10 @@ function MessagingNotificationHandlerFactory({ Entity }) {
         /**
          * @private
          * @param {Object} param0
-         * @param {integer[]} [param0.channel_ids=[]]
+         * @param {integer[]} [param0.channel_ids
          * @param {integer[]} [param0.message_ids=[]]
          */
-        _handleNotificationPartnerMarkAsRead({ channel_ids = [], message_ids = [] }) {
+        _handleNotificationPartnerMarkAsRead({ channel_ids, message_ids = [] }) {
             const inboxMailbox = this.env.entities.Thread.find(thread =>
                 thread.id === 'inbox' &&
                 thread.model === 'mail.box'
@@ -401,20 +403,40 @@ function MessagingNotificationHandlerFactory({ Entity }) {
                 thread.model === 'mail.box'
             );
             const mainHistoryThreadCache = historyMailbox.mainCache;
+
+            // 1. move messages from inbox to history
             for (const cache of inboxMailbox.caches) {
                 const messages = message_ids
                     .map(id => this.env.entities.Message.find(message => message.id === id))
                     .filter(message => !!message);
                 cache.update({ messages: [['unlink', messages]] });
+                // TODO FIXME cannot update other caches of history since the
+                // messages in them depend on the search domain
                 mainHistoryThreadCache.update({ messages: [['link', messages]] });
             }
-            const channels = this.env.entities.Thread.all(thread =>
-                thread.model === 'mail.channel'
-            );
+
+            // 2. remove "needaction" from channels
+            let channels;
+            if (channel_ids) {
+                channels = channel_ids
+                    .map(id => this.env.entities.Thread.find(thread =>
+                        thread.id === id &&
+                        thread.model === 'mail.channel'
+                    ))
+                    .filter(thread => !!thread);
+            } else {
+                // flux specific: channel_ids unset means "mark all as read"
+                channels = this.env.entities.Thread.all(thread =>
+                    thread.model === 'mail.channel'
+                );
+            }
             for (const channel of channels) {
                 channel.update({ message_needaction_counter: 0 });
             }
             inboxMailbox.update({ counter: inboxMailbox.counter - message_ids.length });
+
+            // manually force recompute of counter
+            this.messaging.messagingMenu.update();
         }
 
         /**
@@ -433,6 +455,8 @@ function MessagingNotificationHandlerFactory({ Entity }) {
             if (moderationMailbox) {
                 moderationMailbox.update({ counter: moderationMailbox.counter + 1 });
             }
+            // manually force recompute of counter
+            this.messaging.messagingMenu.update();
         }
 
         /**
@@ -464,13 +488,18 @@ function MessagingNotificationHandlerFactory({ Entity }) {
         }
 
         /**
+         * On receiving a transient message, i.e. a message which does not come
+         * from a member of the channel. Usually a log message, such as one
+         * generated from a command with ('/').
+         *
          * @private
          * @param {Object} data
          */
         _handleNotificationPartnerTransientMessage(data) {
+            const convertedData = this.env.entities.Message.convertData(data);
             const messageIds = this.env.entities.Message.all().map(message => message.id);
             const partnerRoot = this.env.messaging.partnerRoot;
-            this.env.entities.Message.create(Object.assign({}, data, {
+            this.env.entities.Message.create(Object.assign(convertedData, {
                 author: [['link', partnerRoot]],
                 id: (messageIds ? Math.max(...messageIds) : 0) + 0.01,
                 isTransient: true,

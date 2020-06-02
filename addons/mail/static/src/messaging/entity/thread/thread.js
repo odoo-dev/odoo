@@ -572,6 +572,9 @@ function ThreadFactory({ Entity }) {
                 this.notifyFoldStateToServer();
             }
 
+            // TODO FIXME prevent to open/close a channel on mobile when you
+            // open/close it on desktop (task-2267593)
+
             // chat window
             if (this.foldState !== 'closed' && this.chatWindows.length === 0) {
                 this.env.messaging.chatWindowManager.openThread(this);

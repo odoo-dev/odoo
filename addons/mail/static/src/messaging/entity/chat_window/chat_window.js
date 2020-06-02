@@ -155,6 +155,9 @@ function ChatWindowFactory({ Entity }) {
          * @returns {integer}
          */
         _computeVisibleOffset() {
+            if (!this.manager) {
+                return 0;
+            }
             const visible = this.manager.visual.visible;
             const index = visible.findIndex(visible => visible._chatWindow === this.localId);
             if (index === -1) {
