@@ -79,13 +79,12 @@ return AbstractWebClient.extend({
         this.set_title();
 
         return this.menu_dp.add(this.instanciate_menu_widgets()).then(function () {
-            $(window).bind('hashchange', self.on_hashchange);
-
             // If the url's state is empty, we execute the user's home action if there is one (we
             // show the first app if not)
+            let prom;
             var state = $.bbq.getState(true);
             if (_.keys(state).length === 1 && _.keys(state)[0] === "cids") {
-                return self.menu_dp.add(self._rpc({
+                prom = self.menu_dp.add(self._rpc({
                         model: 'res.users',
                         method: 'read',
                         args: [session.uid, ["action_id"]],
@@ -101,8 +100,11 @@ return AbstractWebClient.extend({
                         }
                     });
             } else {
-                return self.on_hashchange();
+                prom = self.on_hashchange();
             }
+            return prom.then(() => {
+                $(window).bind('hashchange', self.on_hashchange);
+            });
         });
     },
 
@@ -127,7 +129,7 @@ return AbstractWebClient.extend({
     // --------------------------------------------------------------
     // URL state handling
     // --------------------------------------------------------------
-    on_hashchange: function (event) {
+    on_hashchange: function (ev) {
         if (this._ignore_hashchange) {
             this._ignore_hashchange = false;
             return Promise.resolve();
