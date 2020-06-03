@@ -811,12 +811,14 @@ function ThreadFactory({ Entity }) {
                 this._forceNotifyNextCurrentPartnerTypingStatus ||
                 isTyping !== this._currentPartnerLastNotifiedIsTyping
             ) {
-                await this.async(() => this.env.rpc({
-                    model: 'mail.channel',
-                    method: 'notify_typing',
-                    args: [this.id],
-                    kwargs: { is_typing: isTyping },
-                }, { shadow: true }));
+                if (this.model === 'mail.channel') {
+                    await this.async(() => this.env.rpc({
+                        model: 'mail.channel',
+                        method: 'notify_typing',
+                        args: [this.id],
+                        kwargs: { is_typing: isTyping },
+                    }, { shadow: true }));
+                }
                 if (isTyping && this._currentPartnerLongTypingTimer.isRunning) {
                     this._currentPartnerLongTypingTimer.reset();
                 }
