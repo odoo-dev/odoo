@@ -50,14 +50,18 @@ function ChatWindowFactory({ Entity }) {
         }
 
         focusNextVisibleUnfoldedChatWindow() {
-            const nextVisibleUnfoldedChatWindow = this._cycleNextVisibleUnfoldedChatWindow();
-            nextVisibleUnfoldedChatWindow.focus();
+            const nextVisibleUnfoldedChatWindow = this._getNextVisibleUnfoldedChatWindow();
+            if (nextVisibleUnfoldedChatWindow) {
+                nextVisibleUnfoldedChatWindow.focus();
+            }
         }
 
         focusPreviousVisibleUnfoldedChatWindow() {
             const previousVisibleUnfoldedChatWindow =
-                this._cycleNextVisibleUnfoldedChatWindow({ reverse: true });
-            previousVisibleUnfoldedChatWindow.focus();
+                this._getNextVisibleUnfoldedChatWindow({ reverse: true });
+            if (previousVisibleUnfoldedChatWindow) {
+                previousVisibleUnfoldedChatWindow.focus();
+            }
         }
 
         /**
@@ -175,13 +179,10 @@ function ChatWindowFactory({ Entity }) {
          * @private
          * @param {Object} [param0={}]
          * @param {boolean} [param0.reverse=false]
+         * @returns {mail.messaging.entity.ChatWindow|undefined}
          */
-        _cycleNextVisibleUnfoldedChatWindow({ reverse = false } = {}) {
+        _getNextVisibleUnfoldedChatWindow({ reverse = false } = {}) {
             const orderedVisible = this.manager.allOrderedVisible;
-            if (orderedVisible.length <= 1) {
-                return;
-            }
-
             /**
              * Return index of next visible chat window of a given visible chat
              * window index. The direction of "next" chat window depends on
@@ -209,7 +210,7 @@ function ChatWindowFactory({ Entity }) {
                 nextIndex = _getNextIndex(nextIndex);
                 nextToFocus = orderedVisible[nextIndex];
             }
-            nextToFocus.focus();
+            return nextToFocus;
         }
 
         /**

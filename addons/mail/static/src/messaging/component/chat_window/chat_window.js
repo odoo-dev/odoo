@@ -130,9 +130,9 @@ class ChatWindow extends Component {
      * @private
      */
     _update() {
-        if (this.chatWindow.doIsFocus) {
+        if (this.chatWindow.isDoFocus) {
             this._focus();
-            this.chatWindow.update({ doIsFocus: false });
+            this.chatWindow.update({ isDoFocus: false });
         }
         if (this.props.isDocked) {
             this._applyVisibleOffset();

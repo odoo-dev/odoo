@@ -10,7 +10,10 @@ const {
     start: utilsStart,
 } = require('mail.messaging.testUtils');
 
-const { file: { createFile } } = require('web.test_utils');
+const {
+    file: { createFile },
+    dom: { triggerEvent },
+} = require('web.test_utils');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('messaging', {}, function () {
@@ -1011,6 +1014,113 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
             }"]
         `).classList.contains('o-focused'),
         "chat window of channel 3 should have focus"
+    );
+});
+
+QUnit.test('chat window: switch on TAB', async function (assert) {
+    assert.expect(10);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 1,
+                name: "channel1",
+            }, {
+                channel_type: "channel",
+                id: 2,
+                name: "channel2",
+            }],
+        },
+    });
+    await this.start();
+
+    await afterNextRender(() =>
+        document.querySelector(`.o_MessagingMenu_toggler`).click()
+    );
+    await afterNextRender(() =>
+        document.querySelector(`
+            .o_MessagingMenu_dropdownMenu
+            .o_NotificationList_preview[data-thread-local-id="${
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 1 &&
+                    thread.model === 'mail.channel'
+                ).localId
+            }"]`
+        ).click()
+    );
+
+    assert.containsOnce(document.body, '.o_ChatWindow', "Only 1 chatWindow must be opened");
+    const chatWindow = document.querySelector('.o_ChatWindow');
+    assert.strictEqual(
+        chatWindow.querySelector('.o_ChatWindowHeader_name').textContent,
+        'channel1',
+        "The name of the only chatWindow should be 'channel1' (channel with ID 1)"
+    );
+    assert.strictEqual(
+        chatWindow.querySelector('.o_ComposerTextInput_textarea'),
+        document.activeElement,
+        "The chatWindow composer must have focus"
+    );
+
+    await afterNextRender(() =>
+        triggerEvent(
+            chatWindow.querySelector('.o_ChatWindow .o_ComposerTextInput_textarea'),
+            'keydown',
+            { key: 'Tab' },
+        )
+    );
+    assert.strictEqual(
+        chatWindow.querySelector('.o_ChatWindow .o_ComposerTextInput_textarea'),
+        document.activeElement,
+        "The chatWindow composer still has focus"
+    );
+
+    await afterNextRender(() =>
+        document.querySelector(`.o_MessagingMenu_toggler`).click()
+    );
+    await afterNextRender(() =>
+        document.querySelector(`
+            .o_MessagingMenu_dropdownMenu
+            .o_NotificationList_preview[data-thread-local-id="${
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 2 &&
+                    thread.model === 'mail.channel'
+                ).localId
+            }"]`
+        ).click()
+    );
+
+    assert.containsN(document.body, '.o_ChatWindow', 2, "2 chatWindows must be opened");
+    const chatWindows = document.querySelectorAll('.o_ChatWindow');
+    assert.strictEqual(
+        chatWindows[0].querySelector('.o_ChatWindowHeader_name').textContent,
+        'channel1',
+        "The name of the 1st chatWindow should be 'channel1' (channel with ID 1)"
+    );
+    assert.strictEqual(
+        chatWindows[1].querySelector('.o_ChatWindowHeader_name').textContent,
+        'channel2',
+        "The name of the 2nd chatWindow should be 'channel2' (channel with ID 2)"
+    );
+    assert.strictEqual(
+        chatWindows[1].querySelector('.o_ComposerTextInput_textarea'),
+        document.activeElement,
+        "The 2nd chatWindow composer must have focus (channel with ID 2)"
+    );
+
+    await afterNextRender(() =>
+        triggerEvent(
+            chatWindows[1].querySelector('.o_ComposerTextInput_textarea'),
+            'keydown',
+            { key: 'Tab' },
+        )
+    );
+    assert.containsN(document.body, '.o_ChatWindow', 2, "2 chatWindows should still be opened");
+    assert.strictEqual(
+        chatWindows[0].querySelector('.o_ComposerTextInput_textarea'),
+        document.activeElement,
+        "The 1st chatWindow composer must have focus (channel with ID 1)"
     );
 });
 
