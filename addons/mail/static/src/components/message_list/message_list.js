@@ -314,6 +314,10 @@ class MessageList extends Component {
      * @param {Object} hint
      */
     async _adjustFromChangeOfThreadCache(hint) {
+        if (!this.props.hasScrollAdjust) {
+            this.threadViewer.markComponentHintProcessed(hint);
+            return;
+        }
         const threadCache = this.threadViewer.threadCache;
         if (!threadCache.isLoaded) {
             return;
@@ -344,6 +348,10 @@ class MessageList extends Component {
      * @param {integer} hint.messageId
      */
     async _adjustFromCurrentPartnerJustPostedMessage(hint) {
+        if (!this.props.hasScrollAdjust) {
+            this.threadViewer.markComponentHintProcessed(hint);
+            return;
+        }
         const threadCache = this.threadViewer.threadCache;
         const { messageId } = hint;
         if (threadCache.isLoaded) {
@@ -360,7 +368,7 @@ class MessageList extends Component {
      * @param {Object} hint
      */
     _adjustFromMoreMessagesLoaded(hint) {
-        if (!this._willPatchSnapshot) {
+        if (!this._willPatchSnapshot || !this.props.hasScrollAdjust) {
             this.threadViewer.markComponentHintProcessed(hint);
             return;
         }
@@ -507,6 +515,7 @@ Object.assign(MessageList, {
         haveMessagesAuthorRedirect: Boolean,
         haveMessagesMarkAsReadIcon: Boolean,
         haveMessagesReplyIcon: Boolean,
+        hasScrollAdjust: Boolean,
         order: {
             type: String,
             validate: prop => ['asc', 'desc'].includes(prop),

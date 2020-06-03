@@ -271,6 +271,9 @@ function factory(dependencies) {
         hasThread: attr({
             default: true,
         }),
+        hasScrollAdjust: attr({
+            default: false,
+        }),
         hasTopbarCloseButton: attr({
             default: false,
         }),
