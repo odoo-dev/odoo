@@ -61,16 +61,10 @@ function factory(dependencies) {
             }
             if ('moderation_status' in data) {
                 data2.moderation_status = data.moderation_status;
-                const moderationMailbox = this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'moderation' &&
-                    thread.model === 'mail.box'
-                );
+                const moderationMailbox = this.env.messaging.moderation;
                 if (moderationMailbox && data.moderation_status !== 'pending') {
                     data2.threadCaches.push(['unlink', moderationMailbox.mainCache]);
                 }
-            }
-            if ('module_icon' in data) {
-                data2.module_icon = data.module_icon;
             }
             if ('subject' in data) {
                 data2.subject = data.subject;
@@ -125,10 +119,7 @@ function factory(dependencies) {
                 data2.threadCaches.push(['replace', channelList.map(channel => channel.mainCache)]);
             }
             if ('history_partner_ids' in data) {
-                const history = this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'history' &&
-                    thread.model === 'mail.box'
-                );
+                const history = this.env.messaging.history;
                 if (data.history_partner_ids.includes(this.env.messaging.currentPartner.id)) {
                     data2.threadCaches.push(['link', history.mainCache]);
                 } else {
@@ -146,13 +137,13 @@ function factory(dependencies) {
                 if ('res_model_name' in data && data.res_model_name) {
                     originThreadData.model_name = data.res_model_name;
                 }
+                if ('module_icon' in data) {
+                    originThreadData.moduleIcon = data.module_icon;
+                }
                 data2.originThread = [['insert', originThreadData]];
             }
             if ('needaction_partner_ids' in data) {
-                const inbox = this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                );
+                const inbox = this.env.messaging.inbox;
                 if (data.needaction_partner_ids.includes(this.env.messaging.currentPartner.id)) {
                     data2.threadCaches.push(['link', inbox.mainCache]);
                 } else {
@@ -165,10 +156,7 @@ function factory(dependencies) {
                 )]];
             }
             if ('starred_partner_ids' in data) {
-                const starred = this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                );
+                const starred = this.env.messaging.starred;
                 if (data.starred_partner_ids.includes(this.env.messaging.currentPartner.id)) {
                     data2.threadCaches.push(['link', starred.mainCache]);
                 } else {
@@ -190,6 +178,26 @@ function factory(dependencies) {
                 model: 'mail.message',
                 method: 'mark_all_as_read',
                 kwargs: { domain },
+            });
+        }
+
+        /**
+         * Mark provided messages as read. Messages that have been marked as
+         * read are acknowledged by server with response as longpolling
+         * notification of following format:
+         *
+         * [[dbname, 'res.partner', partnerId], { type: 'mark_as_read' }]
+         *
+         * @see mail.messaging.entity.MessagingNotificationHandler:_handleNotificationPartnerMarkAsRead()
+         *
+         * @static
+         * @param {mail.messaging.entity.Message[]} messages
+         */
+        static async markAsRead(messages) {
+            await this.env.rpc({
+                model: 'mail.message',
+                method: 'set_message_done',
+                args: [[messages.map(message => message.id)]]
             });
         }
 
@@ -378,6 +386,26 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {boolean}
+         */
+        _computeIsNeedaction() {
+            const inbox = this.env.messaging.inbox;
+            if (!inbox) {
+                return false;
+            }
+            return this.allThreads.includes(inbox);
+        }
+
+        /**
+         * @private
+         * @returns {mail.messaging.entity.Messaging}
+         */
+        _computeMessaging() {
+            return [['link', this.env.messaging]];
+        }
+
+        /**
+         * @private
          * @returns {string}
          */
         _computePrettyBody() {
@@ -440,14 +468,14 @@ function factory(dependencies) {
             default: moment(),
         }),
         email_from: attr(),
+        failureNotifications: one2many('mail.notification', {
+            compute: '_computeFailureNotifications',
+            dependencies: ['notificationsStatus'],
+        }),
         hasCheckbox: attr({
             compute: '_computeHasCheckbox',
             default: false,
             dependencies: ['isModeratedByCurrentPartner'],
-        }),
-        failureNotifications: one2many('mail.notification', {
-            compute: '_computeFailureNotifications',
-            dependencies: ['notificationsStatus'],
         }),
         id: attr(),
         isModeratedByCurrentPartner: attr({
@@ -458,6 +486,14 @@ function factory(dependencies) {
                 'originThread',
                 'originThreadIsModeratedByCurrentPartner',
             ],
+        }),
+        isNeedaction: attr({
+            compute: '_computeIsNeedaction',
+            dependencies: [
+                'allThreads',
+                'messagingInbox',
+            ],
+            default: false,
         }),
         isTemporary: attr({
             default: false,
@@ -475,8 +511,13 @@ function factory(dependencies) {
             default: false,
         }),
         message_type: attr(),
+        messaging: many2one('mail.messaging', {
+            compute: '_computeMessaging',
+        }),
+        messagingInbox: many2one('mail.thread', {
+            related: 'messaging.inbox',
+        }),
         moderation_status: attr(),
-        module_icon: attr(),
         notifications: one2many('mail.notification', {
             inverse: 'message',
             isCausal: true,
@@ -485,7 +526,9 @@ function factory(dependencies) {
             default: [],
             related: 'notifications.notification_status',
         }),
-        originThread: many2one('mail.thread'),
+        originThread: many2one('mail.thread', {
+            inverse: 'originThreadMessages',
+        }),
         originThreadIsModeratedByCurrentPartner: attr({
             default: false,
             related: 'originThread.isModeratedByCurrentPartner',

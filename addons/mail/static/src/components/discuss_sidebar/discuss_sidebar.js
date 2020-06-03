@@ -61,16 +61,16 @@ class DiscussSidebar extends Component {
         return this.env.models['mail.thread']
             .all(thread => thread.isPinned && thread.model === 'mail.box')
             .sort((mailbox1, mailbox2) => {
-                if (mailbox1.id === 'inbox') {
+                if (mailbox1 === this.env.messaging.inbox) {
                     return -1;
                 }
-                if (mailbox2.id === 'inbox') {
+                if (mailbox2 === this.env.messaging.inbox) {
                     return 1;
                 }
-                if (mailbox1.id === 'starred') {
+                if (mailbox1 === this.env.messaging.starred) {
                     return -1;
                 }
-                if (mailbox2.id === 'starred') {
+                if (mailbox2 === this.env.messaging.starred) {
                     return 1;
                 }
                 const mailbox1Name = mailbox1.displayName;

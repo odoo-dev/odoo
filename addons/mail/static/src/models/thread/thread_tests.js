@@ -40,14 +40,8 @@ QUnit.test('inbox & starred mailboxes', async function (assert) {
     assert.expect(10);
 
     await this.start();
-    const mailboxInbox = this.env.models['mail.thread'].find(thread =>
-        thread.id === 'inbox' &&
-        thread.model === 'mail.box'
-    );
-    const mailboxStarred = this.env.models['mail.thread'].find(thread =>
-        thread.id === 'starred' &&
-        thread.model === 'mail.box'
-    );
+    const mailboxInbox = this.env.messaging.inbox;
+    const mailboxStarred = this.env.messaging.starred;
     assert.ok(mailboxInbox, "should have mailbox inbox");
     assert.ok(mailboxStarred, "should have mailbox starred");
     assert.strictEqual(mailboxInbox.model, 'mail.box');

@@ -149,10 +149,7 @@ QUnit.test('basic rendering: sidebar', async function (assert) {
         document.querySelectorAll(`
             .o_DiscussSidebar_groupMailbox
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
         `).length,
         1,
@@ -162,10 +159,7 @@ QUnit.test('basic rendering: sidebar', async function (assert) {
         document.querySelectorAll(`
             .o_DiscussSidebar_groupMailbox
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
         `).length,
         1,
@@ -175,10 +169,7 @@ QUnit.test('basic rendering: sidebar', async function (assert) {
         document.querySelectorAll(`
             .o_DiscussSidebar_groupMailbox
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'history' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.history.localId
             }"]
         `).length,
         1,
@@ -264,10 +255,7 @@ QUnit.test('sidebar: basic mailbox rendering', async function (assert) {
     const inbox = document.querySelector(`
         .o_DiscussSidebar_groupMailbox
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.inbox.localId
         }"]
     `);
     assert.strictEqual(
@@ -298,10 +286,7 @@ QUnit.test('sidebar: basic mailbox rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).length,
@@ -317,10 +302,7 @@ QUnit.test('sidebar: default active inbox', async function (assert) {
     const inbox = document.querySelector(`
         .o_DiscussSidebar_groupMailbox
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.inbox.localId
         }"]
     `);
     assert.ok(
@@ -338,10 +320,7 @@ QUnit.test('sidebar: change item', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
         `).classList.contains('o-item-active'),
@@ -350,10 +329,7 @@ QUnit.test('sidebar: change item', async function (assert) {
     assert.notOk(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
         `).classList.contains('o-item-active'),
@@ -362,20 +338,14 @@ QUnit.test('sidebar: change item', async function (assert) {
 
     document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'starred' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.starred.localId
         }"]
     `).click();
     await afterNextRender();
     assert.notOk(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
         `).classList.contains('o-item-active'),
@@ -384,10 +354,7 @@ QUnit.test('sidebar: change item', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
         `).classList.contains('o-item-active'),
@@ -404,10 +371,7 @@ QUnit.test('sidebar: inbox with counter', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).length,
@@ -417,10 +381,7 @@ QUnit.test('sidebar: inbox with counter', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).textContent,
@@ -1033,10 +994,7 @@ QUnit.test('default thread rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
         `).length,
         1,
@@ -1045,10 +1003,7 @@ QUnit.test('default thread rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
         `).length,
         1,
@@ -1057,10 +1012,7 @@ QUnit.test('default thread rendering', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'history' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.history.localId
             }"]
         `).length,
         1,
@@ -1081,10 +1033,7 @@ QUnit.test('default thread rendering', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
         `).classList.contains('o-active'),
         "inbox mailbox should be active thread"
@@ -1105,20 +1054,14 @@ QUnit.test('default thread rendering', async function (assert) {
 
     document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'starred' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.starred.localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
         `).classList.contains('o-active'),
         "starred mailbox should be active thread"
@@ -1139,20 +1082,14 @@ QUnit.test('default thread rendering', async function (assert) {
 
     document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'history' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.history.localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'history' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.history.localId
             }"]
         `).classList.contains('o-active'),
         "history mailbox should be active thread"
@@ -1246,10 +1183,7 @@ QUnit.test('default select thread in discuss params', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
         `).classList.contains('o-item-active'),
@@ -1270,10 +1204,7 @@ QUnit.test('auto-select thread in discuss context', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_activeIndicator
         `).classList.contains('o-item-active'),
@@ -2740,10 +2671,7 @@ QUnit.test('basic control panel rendering', async function (assert) {
 
     document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'starred' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.starred.localId
         }"]
     `).click();
     await afterNextRender();
@@ -2848,10 +2776,7 @@ QUnit.test('inbox: mark all messages as read', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).textContent,
@@ -2887,10 +2812,7 @@ QUnit.test('inbox: mark all messages as read', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).length,
@@ -2979,10 +2901,7 @@ QUnit.test('starred: unstar all', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).textContent,
@@ -3005,10 +2924,7 @@ QUnit.test('starred: unstar all', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).length,
@@ -3088,10 +3004,7 @@ QUnit.test('toggle_star message', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).length,
@@ -3120,10 +3033,7 @@ QUnit.test('toggle_star message', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).textContent,
@@ -3147,10 +3057,7 @@ QUnit.test('toggle_star message', async function (assert) {
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'starred' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.starred.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).length,
@@ -3623,10 +3530,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
         `),
         "should have inbox in sidebar"
@@ -3634,10 +3538,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
         `).classList.contains('o-active'),
         "inbox should be current discuss thread"
@@ -3645,10 +3546,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     assert.notOk(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `),
@@ -3678,10 +3576,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `),
@@ -3690,10 +3585,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).textContent,
@@ -3729,10 +3621,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
             .o_DiscussSidebarItem_counter
         `).textContent,
@@ -4116,10 +4005,7 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'history' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.history.localId
             }"]
         `).classList.contains('o-active'),
         "History mailbox should be active thread"
@@ -4132,20 +4018,14 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
 
     document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.inbox.localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
         `).classList.contains('o-active'),
         "Inbox mailbox should be active thread"
@@ -4166,10 +4046,7 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'inbox' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.inbox.localId
             }"]
         `).classList.contains('o-active'),
         "Inbox mailbox should still be active after mark as read"
@@ -4182,20 +4059,14 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
 
     document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'history' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.history.localId
         }"]
     `).click();
     await afterNextRender();
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'history' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.history.localId
             }"]
         `).classList.contains('o-active'),
         "History mailbox should be active"
@@ -4301,10 +4172,7 @@ QUnit.test('all messages in "Inbox" in "History" after marked all as read', asyn
 
     document.querySelector(`
         .o_DiscussSidebarItem[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'history' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.history.localId
         }"]
     `).click();
     await clickHistoryDef;
@@ -4723,20 +4591,14 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].find(thread =>
-                    thread.id === 'moderation' &&
-                    thread.model === 'mail.box'
-                ).localId
+                this.env.messaging.moderation.localId
             }"]
         `),
         "should display the moderation box"
     );
     const mailboxCounter = document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'moderation' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.moderation.localId
         }"]
         .o_DiscussSidebarItem_counter
     `);
@@ -4753,10 +4615,7 @@ QUnit.test('moderation: moderated channel with pending moderation message', asyn
     // 1. go to moderation mailbox
     document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'moderation' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.moderation.localId
         }"]
     `).click();
     await afterNextRender();
@@ -5028,10 +4887,7 @@ QUnit.test('moderation: accept pending moderation message', async function (asse
     // 1. go to moderation box
     const moderationBox = document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'moderation' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.moderation.localId
         }"]
     `);
     assert.ok(
@@ -5164,10 +5020,7 @@ QUnit.test('moderation: reject pending moderation message (reject with explanati
     // 1. go to moderation box
     const moderationBox = document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'moderation' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.moderation.localId
         }"]
     `);
     assert.ok(
@@ -5325,10 +5178,7 @@ QUnit.test('moderation: discard pending moderation message (reject without expla
     // 1. go to moderation box
     const moderationBox = document.querySelector(`
         .o_DiscussSidebar_item[data-thread-local-id="${
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'moderation' &&
-                thread.model === 'mail.box'
-            ).localId
+            this.env.messaging.moderation.localId
         }"]
     `);
     assert.ok(

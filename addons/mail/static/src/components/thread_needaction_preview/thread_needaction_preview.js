@@ -1,4 +1,4 @@
-odoo.define('mail/static/src/components/thread_preview/thread_preview.js', function (require) {
+odoo.define('mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js', function (require) {
 'use strict';
 
 const components = {
@@ -11,7 +11,7 @@ const mailUtils = require('mail.utils');
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-class ThreadPreview extends Component {
+class ThreadNeedactionPreview extends Component {
 
     /**
      * @override
@@ -21,24 +21,25 @@ class ThreadPreview extends Component {
         useStore(props => {
             const thread = this.env.models['mail.thread'].get(props.threadLocalId);
             const mainThreadCache = thread ? thread.mainCache : undefined;
-            let lastMessageAuthor;
-            let lastMessage;
+            let lastNeedactionMessageAuthor;
+            let lastNeedactionMessage;
+            let threadCorrespondent;
             if (thread) {
-                const orderedMessages = mainThreadCache.orderedMessages;
-                lastMessage = orderedMessages[orderedMessages.length - 1];
+                lastNeedactionMessage = mainThreadCache.lastNeedactionMessage;
+                threadCorrespondent = thread.correspondent;
             }
-            if (lastMessage) {
-                lastMessageAuthor = lastMessage.author;
+            if (lastNeedactionMessage) {
+                lastNeedactionMessageAuthor = lastNeedactionMessage.author;
             }
             return {
                 isDeviceMobile: this.env.messaging.device.isMobile,
-                lastMessage: lastMessage ? lastMessage.__state : undefined,
-                lastMessageAuthor: lastMessageAuthor
-                    ? lastMessageAuthor.__state
+                lastNeedactionMessage: lastNeedactionMessage ? lastNeedactionMessage.__state : undefined,
+                lastNeedactionMessageAuthor: lastNeedactionMessageAuthor
+                    ? lastNeedactionMessageAuthor.__state
                     : undefined,
                 thread: thread ? thread.__state : undefined,
-                threadCorrespondent: thread && thread.correspondent
-                    ? thread.correspondent.__state
+                threadCorrespondent: threadCorrespondent
+                    ? threadCorrespondent.__state
                     : undefined,
             };
         });
@@ -59,10 +60,16 @@ class ThreadPreview extends Component {
      * @returns {string}
      */
     image() {
+        if (this.thread.moduleIcon) {
+            return this.thread.moduleIcon;
+        }
         if (this.thread.correspondent) {
             return `/web/image/res.partner/${this.thread.correspondent.id}/image_128`;
         }
-        return `/web/image/mail.channel/${this.thread.id}/image_128`;
+        if (this.thread.model === 'mail.channel') {
+            return `/web/image/mail.channel/${this.thread.id}/image_128`;
+        }
+        return '/mail/static/src/img/smiley/avatar.jpg';
     }
 
     /**
@@ -70,11 +77,11 @@ class ThreadPreview extends Component {
      *
      * @returns {string}
      */
-    get inlineLastMessageBody() {
-        if (!this.thread.lastMessage) {
+    get inlineLastNeedactionMessageBody() {
+        if (!this.thread.lastNeedactionMessage) {
             return '';
         }
-        return mailUtils.parseAndTransform(this.thread.lastMessage.prettyBody, mailUtils.inline);
+        return mailUtils.htmlToTextContentInline(this.thread.lastNeedactionMessage.prettyBody);
     }
 
     /**
@@ -106,19 +113,19 @@ class ThreadPreview extends Component {
      * @param {MouseEvent} ev
      */
     _onClickMarkAsRead(ev) {
-        this.thread.markAsSeen();
+        this.thread.markNeedactionMessagesAsRead();
     }
 
 }
 
-Object.assign(ThreadPreview, {
+Object.assign(ThreadNeedactionPreview, {
     components,
     props: {
         threadLocalId: String,
     },
-    template: 'mail.ThreadPreview',
+    template: 'mail.ThreadNeedactionPreview',
 });
 
-return ThreadPreview;
+return ThreadNeedactionPreview;
 
 });

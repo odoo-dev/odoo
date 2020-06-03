@@ -233,10 +233,12 @@ QUnit.test('chat window: basic rendering', async function (assert) {
             return this._super(...arguments);
         },
     });
-    document.querySelector(`.o_MessagingMenu_toggler`).click();
-    await afterNextRender();
-    document.querySelector(`.o_MessagingMenu_dropdownMenu .o_NotificationList_preview`).click();
-    await afterNextRender();
+    await afterNextRender(() =>
+        document.querySelector(`.o_MessagingMenu_toggler`).click()
+    );
+    await afterNextRender(() =>
+        document.querySelector(`.o_NotificationList_preview`).click()
+    );
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatWindow`).length,
         1,

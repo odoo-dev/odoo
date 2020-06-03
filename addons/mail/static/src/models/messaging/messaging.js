@@ -155,6 +155,14 @@ function factory(dependencies) {
             autocreate: true,
             isCausal: true,
         }),
+        /**
+         * Mailbox History.
+         */
+        history: one2one('mail.thread'),
+        /**
+         * Mailbox Inbox.
+         */
+        inbox: one2one('mail.thread'),
         initializer: one2one('mail.messaging_initializer', {
             autocreate: true,
             inverse: 'messaging',
@@ -172,6 +180,10 @@ function factory(dependencies) {
             inverse: 'messaging',
             isCausal: true,
         }),
+        /**
+         * Mailbox Moderation.
+         */
+        moderation: one2one('mail.thread'),
         notificationGroupManager: one2one('mail.notification_group_manager', {
             autocreate: true,
             isCausal: true,
@@ -186,6 +198,10 @@ function factory(dependencies) {
         }),
         partnerRoot: many2one('mail.partner'),
         publicPartner: many2one('mail.partner'),
+        /**
+         * Mailbox Starred.
+         */
+        starred: one2one('mail.thread'),
     };
 
     Messaging.modelName = 'mail.messaging';

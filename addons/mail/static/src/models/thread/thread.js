@@ -390,6 +390,15 @@ function factory(dependencies) {
         }
 
         /**
+         * Mark all needaction messages of this thread as read.
+         */
+        async markNeedactionMessagesAsRead() {
+            await this.async(() =>
+                this.env.models['mail.message'].markAsRead(this.needactionMessages)
+            );
+        }
+
+        /**
          * Notify server the fold state of this thread. Useful for cross-tab
          * and cross-device chat window state synchronization.
          *
@@ -417,6 +426,12 @@ function factory(dependencies) {
             const device = this.env.messaging.device;
             const discuss = this.env.messaging.discuss;
             const messagingMenu = this.env.messaging.messagingMenu;
+            if (!['mail.box', 'mail.channel'].includes(this.model)) {
+                this.env.messaging.openDocument({
+                    id: this.id,
+                    model: this.model,
+                });
+            }
             if (
                 (!device.isMobile && discuss.isOpen) ||
                 (device.isMobile && this.model === 'mail.box')
@@ -734,6 +749,21 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {mail.message|undefined}
+         */
+        _computeLastNeedactionMessage() {
+            const orderedNeedactionMessages = this.needactionMessages.sort(
+                (m1, m2) => m1.id < m2.id ? -1 : 1
+            );
+            const {
+                length: l,
+                [l - 1]: lastNeedactionMessage,
+            } = orderedNeedactionMessages;
+            return [['replace', lastNeedactionMessage]];
+        }
+
+        /**
+         * @private
          * @returns {mail.thread_cache}
          */
         _computeMainCache() {
@@ -742,10 +772,27 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {mail.message[]}
+         */
+        _computeMessages() {
+            const allMessages = this.mainCacheMessages.concat(this.originThreadMessages);
+            return [['replace', allMessages]];
+        }
+
+        /**
+         * @private
          * @returns {mail.messaging}
          */
         _computeMessaging() {
             return [['link', this.env.messaging]];
+        }
+
+        /**
+         * @private
+         * @returns {mail.message[]}
+         */
+        _computeNeedactionMessages() {
+            return [['replace', this.messages.filter(message => message.isNeedaction)]];
         }
 
         /**
@@ -1062,9 +1109,16 @@ function factory(dependencies) {
         lastMessage: many2one('mail.message', {
             related: 'mainCache.lastMessage',
         }),
+        lastNeedactionMessage: many2one('mail.message', {
+            compute: '_computeLastNeedactionMessage',
+            dependencies: ['needactionMessages'],
+        }),
         mainCache: one2one('mail.thread_cache', {
             compute: '_computeMainCache',
             dependencies: ['caches'],
+        }),
+        mainCacheMessages: many2many('mail.message', {
+            related: 'mainCache.messages',
         }),
         mass_mailing: attr({
             default: false,
@@ -1078,6 +1132,13 @@ function factory(dependencies) {
         message_unread_counter: attr({
             default: 0,
         }),
+        messages: many2many('mail.message', {
+            compute: '_computeMessages',
+            dependencies: [
+                'mainCacheMessages',
+                'originThreadMessages',
+            ],
+        }),
         messaging: many2one('mail.messaging', {
             compute: '_computeMessaging',
         }),
@@ -1089,7 +1150,12 @@ function factory(dependencies) {
         moderation: attr({
             default: false,
         }),
+        moduleIcon: attr(),
         name: attr(),
+        needactionMessages: many2many('mail.message', {
+            compute: '_computeNeedactionMessages',
+            dependencies: ['messages'],
+        }),
         /**
          * Ordered typing members on this thread, excluding the current partner.
          */
@@ -1116,6 +1182,9 @@ function factory(dependencies) {
             default: [],
         }),
         originThreadAttachments: one2many('mail.attachment', {
+            inverse: 'originThread',
+        }),
+        originThreadMessages: one2many('mail.message', {
             inverse: 'originThread',
         }),
         /**

@@ -37,6 +37,14 @@
     }
 }
 
+@mixin o-mail-notification-list-item-counter-layout() {
+    margin: map-get($spacers, 0) map-get($spacers, 2);
+}
+
+@mixin o-mail-notification-list-item-date-layout() {
+    flex: 0 0 auto;
+}
+
 @mixin o-mail-notification-list-item-header-layout {
     display: flex;
     margin-bottom: map-get($spacers, 1);
@@ -57,9 +65,19 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &.o-empty::before {
+        content: '\00a0'; // keep line-height as if it had content
+    }
+}
+
+@mixin o-mail-notification-list-item-mark-as-read-layout() {
+    display: flex;
+    flex: 0 0 auto;
 }
 
 @mixin o-mail-notification-list-item-name-layout {
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 
@@ -119,6 +137,20 @@ $o-mail-notification-list-item-muted-hover-background-color:
 
 @mixin o-mail-notification-list-item-core-style {
     color: gray('500');
+}
+
+@mixin o-mail-notification-list-item-date-style() {
+    @include o-mail-notification-list-item-bold-style();
+    font-size: x-small;
+    color: $o-brand-primary;
+}
+
+@mixin o-mail-notification-list-item-mark-as-read-style() {
+    opacity: 0;
+
+    &:hover {
+        color: gray('600');
+    }
 }
 
 @mixin o-mail-notification-list-item-hover-partner-im-status-icon-style {

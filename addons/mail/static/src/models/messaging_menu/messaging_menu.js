@@ -34,7 +34,16 @@ function factory(dependencies) {
         /**
          * Toggle whether the messaging menu is open or not.
          */
-        toggleOpen() {
+        async toggleOpen() {
+            if (!this.isOpen) {
+                const inbox = this.env.messaging.inbox;
+                if (!inbox.mainCache.isLoaded && !inbox.mainCache.isLoading) {
+                    // populate some needaction messages on threads.
+                    // FIXME: await necessary due to bug in tests without it
+                    // see task-id 2275999
+                    await this.async(() => inbox.mainCache.loadMessages());
+                }
+            }
             this.update({ isOpen: !this.isOpen });
         }
 
@@ -47,10 +56,10 @@ function factory(dependencies) {
          * @returns {integer}
          */
         _updateCounter() {
-            const inboxMailbox = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            );
+            if (!this.env.messaging) {
+                return 0;
+            }
+            const inboxMailbox = this.env.messaging.inbox;
             const unreadChannels = this.env.models['mail.thread'].all(thread =>
                 thread.message_unread_counter > 0 &&
                 thread.model === 'mail.channel'

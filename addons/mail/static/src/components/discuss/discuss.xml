@@ -60,8 +60,8 @@
                 hasMessageCheckbox="true"
                 hasSquashCloseMessages="discuss.thread.model !== 'mail.box'"
                 haveMessagesAuthorRedirect="discuss.thread.channel_type !== 'chat'"
-                haveMessagesMarkAsReadIcon="discuss.thread.model === 'mail.box' and discuss.thread.id === 'inbox'"
-                haveMessagesReplyIcon="discuss.thread.model === 'mail.box' and discuss.thread.id === 'inbox'"
+                haveMessagesMarkAsReadIcon="discuss.thread === env.messaging.inbox"
+                haveMessagesReplyIcon="discuss.thread === env.messaging.inbox"
                 selectedMessageLocalId="
                     discuss.replyingToMessage and
                     discuss.replyingToMessage.localId"

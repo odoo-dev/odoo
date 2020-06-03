@@ -185,10 +185,7 @@ const DiscussWidget = AbstractAction.extend({
         // Mark All Read
         if (
             this.discuss.thread &&
-            this.discuss.thread === this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            )
+            this.discuss.thread === this.env.messaging.inbox
         ) {
             this.$buttons
                 .find('.o_widget_Discuss_controlPanelButtonMarkAllRead')
@@ -202,10 +199,7 @@ const DiscussWidget = AbstractAction.extend({
         // Unstar All
         if (
             this.discuss.thread &&
-            this.discuss.thread === this.env.models['mail.thread'].find(thread =>
-                thread.id === 'starred' &&
-                thread.model === 'mail.box'
-            )
+            this.discuss.thread === this.env.messaging.starred
         ) {
             this.$buttons
                 .find('.o_unstar_all')

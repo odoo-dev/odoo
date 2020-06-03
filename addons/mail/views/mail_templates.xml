@@ -135,6 +135,7 @@
                 <script type="text/javascript" src="/mail/static/src/components/notification_popover/notification_popover.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_icon/thread_icon.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_preview/thread_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_typing_icon/thread_typing_icon.js"></script>
@@ -234,6 +235,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_popover/notification_popover.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_icon/thread_icon.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_preview/thread_preview.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_typing_icon/thread_typing_icon.scss"/>

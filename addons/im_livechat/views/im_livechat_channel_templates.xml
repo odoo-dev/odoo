@@ -13,6 +13,7 @@
                 <script type="text/javascript" src="/im_livechat/static/src/components/discuss_sidebar/discuss_sidebar.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/src/components/discuss_sidebar_item/discuss_sidebar_item.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/src/components/notification_list/notification_list.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/components/thread_needaction_preview/thread_needaction_preview.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/src/components/thread_preview/thread_preview.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/src/models/messaging_initializer/messaging_initializer.js"></script>
                 <script type="text/javascript" src="/im_livechat/static/src/models/messaging_notification_handler/messaging_notification_handler.js"></script>
