@@ -23,11 +23,11 @@
 }
 
 .o_ThreadPreview_counter {
-    margin: map-get($spacers, 0) map-get($spacers, 2);
+    @include o-mail-notification-list-item-counter-layout();
 }
 
 .o_ThreadPreview_date {
-    flex: 0 0 auto;
+    @include o-mail-notification-list-item-date-layout();
 }
 
 .o_ThreadPreview_header {
@@ -44,20 +44,14 @@
 
 .o_ThreadPreview_inlineText {
     @include o-mail-notification-list-item-inline-text-layout();
-
-    &.o-empty::before {
-        content: '\00a0'; // keep line-height as if it had content
-    }
 }
 
 .o_ThreadPreview_markAsRead {
-    display: flex;
-    flex: 0 0 auto;
+    @include o-mail-notification-list-item-mark-as-read-layout();
 }
 
 .o_ThreadPreview_name {
     @include o-mail-notification-list-item-name-layout();
-    white-space: nowrap;
 }
 
 .o_ThreadPreview_partnerImStatusIcon {
@@ -99,9 +93,7 @@
 }
 
 .o_ThreadPreview_date {
-    @include o-mail-notification-list-item-bold-style();
-    font-size: x-small;
-    color: $o-brand-primary;
+    @include o-mail-notification-list-item-date-style();
 
     &.o-muted {
         color: gray('500');
@@ -109,11 +101,7 @@
 }
 
 .o_ThreadPreview_markAsRead {
-    opacity: 0;
-
-    &:hover {
-        color: gray('600');
-    }
+    @include o-mail-notification-list-item-mark-as-read-style();
 }
 
 .o_ThreadPreview_name {

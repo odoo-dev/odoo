@@ -57,7 +57,7 @@ class NotificationGroup extends Component {
     _onClick(ev) {
         const markAsRead = this._markAsReadRef.el;
         if (markAsRead && markAsRead.contains(ev.target)) {
-            // handled in `_onClickFailureDiscard`
+            // handled in `_onClickMarkAsRead`
             return;
         }
         this.group.openDocuments();
@@ -67,7 +67,7 @@ class NotificationGroup extends Component {
      * @private
      * @param {MouseEvent} ev
      */
-    _onClickFailureDiscard(ev) {
+    _onClickMarkAsRead(ev) {
         this.group.openCancelAction();
     }
 

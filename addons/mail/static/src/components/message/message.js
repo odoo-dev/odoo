@@ -235,11 +235,7 @@ class Message extends Component {
      * @returns {boolean}
      */
     get isStarred() {
-        const starredMailbox = this.env.models['mail.thread'].find(thread =>
-            thread.id === 'starred' &&
-            thread.model === 'mail.box'
-        );
-        return this.message.allThreads.includes(starredMailbox);
+        return this.message.allThreads.includes(this.env.messaging.starred);
     }
 
     /**

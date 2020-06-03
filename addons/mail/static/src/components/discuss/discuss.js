@@ -73,7 +73,7 @@ class Discuss extends Component {
         }
         if (
             this.discuss.thread &&
-            this.discuss.thread.id === 'inbox' &&
+            this.discuss.thread === this.env.messaging.inbox &&
             this._lastThreadCache === this.discuss.threadViewer.threadCache.localId &&
             this._lastThreadCounter > 0 && this.discuss.thread.counter === 0
         ) {

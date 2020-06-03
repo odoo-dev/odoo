@@ -69,14 +69,8 @@ QUnit.test('create', async function (assert) {
         originThread: [['link', thread]],
         threadCaches: [['link', [
             thread.mainCache,
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            ).mainCache,
-            this.env.models['mail.thread'].find(thread =>
-                thread.id === 'starred' &&
-                thread.model === 'mail.box'
-            ).mainCache,
+            this.env.messaging.inbox.mainCache,
+            this.env.messaging.starred.mainCache,
         ]]],
     });
 
@@ -108,15 +102,9 @@ QUnit.test('create', async function (assert) {
         ))
     );
     // from partnerId being in needaction_partner_ids
-    assert.ok(message.allThreads.includes(this.env.models['mail.thread'].find(thread =>
-        thread.id === 'inbox' &&
-        thread.model === 'mail.box'
-    )));
+    assert.ok(message.allThreads.includes(this.env.messaging.inbox));
     // from partnerId being in starred_partner_ids
-    assert.ok(message.allThreads.includes(this.env.models['mail.thread'].find(thread =>
-        thread.id === 'starred' &&
-        thread.model === 'mail.box'
-    )));
+    assert.ok(message.allThreads.includes(this.env.messaging.starred));
     const attachment = this.env.models['mail.attachment'].find(attachment => attachment.id === 750);
     assert.ok(attachment);
     assert.strictEqual(attachment.filename, "test.txt");

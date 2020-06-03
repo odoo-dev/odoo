@@ -242,7 +242,7 @@ class MessagingMenu extends Component {
      * @private
      * @param {CustomEvent} ev
      * @param {Object} ev.detail
-     * @param {string} ev.detail.thread
+     * @param {mail.thread} ev.detail.thread
      */
     _onSelectThread(ev) {
         ev.stopPropagation();

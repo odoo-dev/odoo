@@ -10,8 +10,15 @@
             </t>
             <t t-else="">
                 <t t-foreach="notifications" t-as="notification" t-key="notification.uniqueId">
-                    <t t-if="notification.type === 'thread'">
+                    <t t-if="notification.type === 'thread' and notification.thread">
                         <ThreadPreview
+                            class="o_NotificationList_preview"
+                            t-att-class="{ 'o-mobile': env.messaging.device.isMobile }"
+                            threadLocalId="notification.thread.localId"
+                        />
+                    </t>
+                    <t t-if="notification.type === 'thread_needaction' and notification.thread">
+                        <ThreadNeedactionPreview
                             class="o_NotificationList_preview"
                             t-att-class="{ 'o-mobile': env.messaging.device.isMobile }"
                             threadLocalId="notification.thread.localId"

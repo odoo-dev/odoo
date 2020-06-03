@@ -7,25 +7,25 @@
                 <!-- No result messages -->
                 <t t-if="threadViewer.messages.length === 0">
                     <div class="o_MessageList_empty o_MessageList_item">
-                        <t t-if="threadViewer.thread.model === 'mail.box' and threadViewer.thread.id === 'inbox'">
+                        <t t-if="threadViewer.thread === env.messaging.inbox">
                             <div class="o_MessageList_emptyTitle">
                                 Congratulations, your inbox is empty
                             </div>
                             New messages appear here.
                         </t>
-                        <t t-elif="threadViewer.thread.model === 'mail.box' and threadViewer.thread.id === 'starred'">
+                        <t t-elif="threadViewer.thread === env.messaging.starred">
                             <div class="o_MessageList_emptyTitle">
                                 No starred messages
                             </div>
                             You can mark any message as 'starred', and it shows up in this mailbox.
                         </t>
-                        <t t-elif="threadViewer.thread.model === 'mail.box' and threadViewer.thread.id === 'history'">
+                        <t t-elif="threadViewer.thread === env.messaging.history">
                             <div class="o_MessageList_emptyTitle o-neutral-face-icon">
                                 No history messages
                             </div>
                             Messages marked as read will appear in the history.
                         </t>
-                        <t t-elif="threadViewer.thread.model === 'mail.box' and threadViewer.thread.id === 'moderation'">
+                        <t t-elif="threadViewer.thread === env.messaging.moderation">
                             <div class="o_MessageList_emptyTitle">
                                 You have no messages to moderate.
                             </div>

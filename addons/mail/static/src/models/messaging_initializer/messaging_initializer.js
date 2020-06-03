@@ -19,23 +19,25 @@ function factory(dependencies) {
         async start() {
             await this.async(() => this.env.session.is_bound);
 
-            this.env.models['mail.thread'].create({
-                id: 'inbox',
-                isPinned: true,
-                model: 'mail.box',
-                name: this.env._t("Inbox"),
-            });
-            this.env.models['mail.thread'].create({
-                id: 'starred',
-                isPinned: true,
-                model: 'mail.box',
-                name: this.env._t("Starred"),
-            });
-            this.env.models['mail.thread'].create({
-                id: 'history',
-                isPinned: true,
-                model: 'mail.box',
-                name: this.env._t("History"),
+            this.messaging.update({
+                history: [['create', {
+                    id: 'history',
+                    isPinned: true,
+                    model: 'mail.box',
+                    name: this.env._t("History"),
+                }]],
+                inbox: [['create', {
+                    id: 'inbox',
+                    isPinned: true,
+                    model: 'mail.box',
+                    name: this.env._t("Inbox"),
+                }]],
+                starred: [['create', {
+                    id: 'starred',
+                    isPinned: true,
+                    model: 'mail.box',
+                    name: this.env._t("Starred"),
+                }]],
             });
 
             const device = this.messaging.device;
@@ -183,23 +185,17 @@ function factory(dependencies) {
             needaction_inbox_counter,
             starred_counter,
         }) {
-            const inbox = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            );
-            const starred = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'starred' &&
-                thread.model === 'mail.box'
-            );
-            inbox.update({ counter: needaction_inbox_counter });
-            starred.update({ counter: starred_counter });
+            this.env.messaging.inbox.update({ counter: needaction_inbox_counter });
+            this.env.messaging.starred.update({ counter: starred_counter });
             if (is_moderator) {
-                this.env.models['mail.thread'].create({
-                    counter: moderation_counter,
-                    id: 'moderation',
-                    isPinned: true,
-                    model: 'mail.box',
-                    name: this.env._t("Moderation"),
+                this.messaging.update({
+                    moderation: [['create', {
+                        counter: moderation_counter,
+                        id: 'moderation',
+                        isPinned: true,
+                        model: 'mail.box',
+                        name: this.env._t("Moderation"),
+                    }]],
                 });
             }
         }

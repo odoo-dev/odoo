@@ -145,13 +145,13 @@ function factory(dependencies) {
             const thread = this.thread;
             if (thread.model === 'mail.channel') {
                 return domain.concat([['channel_ids', 'in', [thread.id]]]);
-            } else if (thread.model === 'mail.box' && thread.id === 'inbox') {
+            } else if (thread === this.env.messaging.inbox) {
                 return domain.concat([['needaction', '=', true]]);
-            } else if (thread.model === 'mail.box' && thread.id === 'starred') {
+            } else if (thread === this.env.messaging.starred) {
                 return domain.concat([['starred', '=', true]]);
-            } else if (thread.model === 'mail.box' && thread.id === 'history') {
+            } else if (thread === this.env.messaging.history) {
                 return domain.concat([['needaction', '=', false]]);
-            } else if (thread.model === 'mail.box' && thread.id === 'moderation') {
+            } else if (thread === this.env.messaging.moderation) {
                 return domain.concat([['need_moderation', '=', true]]);
             } else {
                 return domain.concat([['model', '=', thread.model], ['res_id', '=', thread.id]]);

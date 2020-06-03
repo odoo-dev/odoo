@@ -3,6 +3,7 @@ odoo.define('mail/static/src/components/notification_list/notification_list.js',
 
 const components = {
     NotificationGroup: require('mail/static/src/components/notification_group/notification_group.js'),
+    ThreadNeedactionPreview: require('mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js'),
     ThreadPreview: require('mail/static/src/components/thread_preview/thread_preview.js'),
 };
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
@@ -37,13 +38,7 @@ class NotificationList extends Component {
      */
     get notifications() {
         const { notifications } = this.storeProps;
-        return notifications.map(notification =>
-            notification.type === 'thread'
-                ? Object.assign({}, notification, {
-                    thread: this.env.models['mail.thread'].get(notification.uniqueId),
-                })
-                : notification
-        );
+        return notifications;
     }
 
     //--------------------------------------------------------------------------
@@ -69,7 +64,39 @@ class NotificationList extends Component {
      */
     _useStoreSelector(props) {
         const threads = this._useStoreSelectorThreads(props);
-        let notifications = threads
+        let threadNeedactionNotifications = [];
+        if (props.filter === 'all') {
+            // threads with needactions
+            threadNeedactionNotifications = this.env.models['mail.thread']
+                .all(t => t.model !== 'mail.box' && t.needactionMessages.length > 0)
+                .sort((t1, t2) => {
+                    if (t1.needactionMessages.length > 0 && t2.needactionMessages.length === 0) {
+                        return -1;
+                    }
+                    if (t1.needactionMessages.length === 0 && t2.needactionMessages.length > 0) {
+                        return 1;
+                    }
+                    if (t1.lastNeedactionMessage && t2.lastNeedactionMessage) {
+                        return t1.lastNeedactionMessage.date.isBefore(t2.lastNeedactionMessage.date) ? 1 : -1;
+                    }
+                    if (t1.lastNeedactionMessage) {
+                        return -1;
+                    }
+                    if (t2.lastNeedactionMessage) {
+                        return 1;
+                    }
+                    return t1.id < t2.id ? -1 : 1;
+                })
+                .map(thread => {
+                    return {
+                        thread,
+                        type: 'thread_needaction',
+                        uniqueId: thread.localId + '_needaction',
+                    };
+                });
+        }
+        // thread notifications
+        const threadNotifications = threads
             .sort((t1, t2) => {
                 if (t1.message_unread_counter > 0 && t2.message_unread_counter === 0) {
                     return -1;
@@ -90,10 +117,12 @@ class NotificationList extends Component {
             })
             .map(thread => {
                 return {
+                    thread,
                     type: 'thread',
                     uniqueId: thread.localId,
                 };
             });
+        let notifications = threadNeedactionNotifications.concat(threadNotifications);
         if (props.filter === 'all') {
             const notificationGroups = this.env.messaging.notificationGroupManager.groups;
             notifications = Object.values(notificationGroups)
@@ -123,16 +152,16 @@ class NotificationList extends Component {
             return this.env.models['mail.thread']
                 .all(thread => thread.isPinned && thread.model === 'mail.box')
                 .sort((mailbox1, mailbox2) => {
-                    if (mailbox1.id === 'inbox') {
+                    if (mailbox1 === this.env.messaging.inbox) {
                         return -1;
                     }
-                    if (mailbox2.id === 'inbox') {
+                    if (mailbox2 === this.env.messaging.inbox) {
                         return 1;
                     }
-                    if (mailbox1.id === 'starred') {
+                    if (mailbox1 === this.env.messaging.starred) {
                         return -1;
                     }
-                    if (mailbox2.id === 'starred') {
+                    if (mailbox2 === this.env.messaging.starred) {
                         return 1;
                     }
                     const mailbox1Name = mailbox1.displayName;

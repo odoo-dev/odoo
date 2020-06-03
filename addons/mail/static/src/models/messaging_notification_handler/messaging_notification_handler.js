@@ -155,10 +155,7 @@ function factory(dependencies) {
                     message.moderation_status !== 'pending_moderation' &&
                     oldMessageWasModeratedByCurrentPartner
                 ) {
-                    const moderation = this.env.models['mail.thread'].find(thread =>
-                        thread.id === 'moderation' &&
-                        thread.model === 'mail.box'
-                    );
+                    const moderation = this.env.messaging.moderation;
                     moderation.update({ counter: moderation.counter - 1 });
                 }
                 return;
@@ -267,10 +264,7 @@ function factory(dependencies) {
             const message = this.env.models['mail.message'].insert(
                 this.env.models['mail.message'].convertData(data)
             );
-            const inboxMailbox = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            );
+            const inboxMailbox = this.env.messaging.inbox;
             inboxMailbox.update({ counter: inboxMailbox.counter + 1 });
             for (const thread of message.allThreads) {
                 if (
@@ -390,10 +384,7 @@ function factory(dependencies) {
          * @param {integer[]} param0.messag_ids
          */
         _handleNotificationPartnerDeletion({ message_ids }) {
-            const moderationMailbox = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'moderation' &&
-                thread.model === 'mail.box'
-            );
+            const moderationMailbox = this.env.messaging.moderation;
             for (const id of message_ids) {
                 const message = this.env.models['mail.message'].find(message => message.id === id);
                 if (
@@ -438,14 +429,8 @@ function factory(dependencies) {
          * @param {integer[]} [param0.message_ids=[]]
          */
         _handleNotificationPartnerMarkAsRead({ channel_ids, message_ids = [] }) {
-            const inboxMailbox = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'inbox' &&
-                thread.model === 'mail.box'
-            );
-            const historyMailbox = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'history' &&
-                thread.model === 'mail.box'
-            );
+            const inboxMailbox = this.env.messaging.inbox;
+            const historyMailbox = this.env.messaging.history;
             const mainHistoryThreadCache = historyMailbox.mainCache;
 
             // 1. move messages from inbox to history
@@ -492,10 +477,7 @@ function factory(dependencies) {
             this.env.models['mail.message'].insert(
                 this.env.models['mail.message'].convertData(data)
             );
-            const moderationMailbox = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'moderation' &&
-                thread.model === 'mail.box'
-            );
+            const moderationMailbox = this.env.messaging.moderation;
             if (moderationMailbox) {
                 moderationMailbox.update({ counter: moderationMailbox.counter + 1 });
             }
@@ -510,10 +492,7 @@ function factory(dependencies) {
          * @param {boolean} param0.starred
          */
         _handleNotificationPartnerToggleStar({ message_ids = [], starred }) {
-            const starredMailbox = this.env.models['mail.thread'].find(thread =>
-                thread.id === 'starred' &&
-                thread.model === 'mail.box'
-            );
+            const starredMailbox = this.env.messaging.starred;
             for (const messageId of message_ids) {
                 const message = this.env.models['mail.message'].find(message =>
                     message.id === messageId
