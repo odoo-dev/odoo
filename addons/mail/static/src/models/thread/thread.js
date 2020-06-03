@@ -290,9 +290,11 @@ function factory(dependencies) {
             }, { shadow: true });
             for (const preview of messagePreviews) {
                 const messageData = preview.last_message;
-                this.env.models['mail.message'].insert(
-                    this.env.models['mail.message'].convertData(messageData)
-                );
+                if (messageData) {
+                    this.env.models['mail.message'].insert(
+                        this.env.models['mail.message'].convertData(messageData)
+                    );
+                }
             }
         }
 
