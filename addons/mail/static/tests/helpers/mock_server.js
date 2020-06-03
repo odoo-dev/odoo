@@ -31,22 +31,24 @@ MockServer.include({
      * @private
      * @return {Object[]} list of channels previews
      */
-    _mockChannelFetchPreview: function (args) {
-        var self = this;
-        var ids = args.args[0]; // list of channel IDs to fetch preview
-        var model = args.model;
-        var channels = this._getRecords(model, [['id', 'in', ids]]);
-        var previews = _.map(channels, function (channel) {
-            var channelMessages = _.filter(self.data['mail.message'].records, function (message) {
-                return _.contains(message.channel_ids, channel.id);
-            });
-            var lastMessage = _.max(channelMessages, function (message) {
-                return message.id;
-            });
-            channel.last_message = lastMessage;
+    _mockChannelFetchPreview(args) {
+        const ids = args.args[0]; // list of channel IDs to fetch preview
+        const model = args.model;
+        const channels = this._getRecords(model, [['id', 'in', ids]]);
+        return channels.map(channel => {
+            if (!channel.last_message) {
+                const channelMessages = this.data['mail.message'].records.filter(
+                    message => message.channel_ids.includes(channel.id)
+                );
+                if (channelMessages.length > 0) {
+                    const lastMessageId = Math.max(...channelMessages.map(message => message.id));
+                    channel.last_message = channelMessages.find(
+                        message => message.id === lastMessageId
+                    );
+                }
+            }
             return channel;
         });
-        return previews;
     },
 
     /**

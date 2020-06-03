@@ -845,6 +845,107 @@ QUnit.test('open 2 different chat windows: enough screen width', async function 
     );
 });
 
+QUnit.test('open 2 chat windows: check shift operations are available', async function (assert) {
+    assert.expect(9);
+
+    const channel = {
+        channel_type: "channel",
+        id: 20,
+        name: "General",
+    };
+    const chat = {
+        channel_type: "chat",
+        direct_partner: [{
+            id: 7,
+            name: "Demo",
+        }],
+        id: 10,
+    };
+    this.data['mail.channel'].records = [channel, chat];
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [channel],
+            channel_direct_message: [chat],
+        },
+    });
+    await this.start();
+    await afterNextRender(() => {
+        document.querySelector('.o_MessagingMenu_toggler').click();
+    });
+    await afterNextRender(() => {
+        document.querySelectorAll('.o_MessagingMenu_dropdownMenu .o_NotificationList_preview')[0].click();
+    });
+    await afterNextRender(() => {
+        document.querySelector('.o_MessagingMenu_toggler').click();
+    });
+    await afterNextRender(() => {
+        document.querySelectorAll('.o_MessagingMenu_dropdownMenu .o_NotificationList_preview')[1].click();
+    });
+
+    assert.containsN(
+        document.body,
+        '.o_ChatWindow',
+        2,
+        "should have opened 2 chat windows"
+    );
+    assert.containsOnce(
+        document.querySelectorAll('.o_ChatWindow')[0],
+        '.o_ChatWindowHeader_commandShiftLeft',
+        "first chat window should be allowed to shift left"
+    );
+    assert.containsNone(
+        document.querySelectorAll('.o_ChatWindow')[0],
+        '.o_ChatWindowHeader_commandShiftRight',
+        "first chat window should not be allowed to shift right"
+    );
+    assert.containsNone(
+        document.querySelectorAll('.o_ChatWindow')[1],
+        '.o_ChatWindowHeader_commandShiftLeft',
+        "second chat window should not be allowed to shift left"
+    );
+    assert.containsOnce(
+        document.querySelectorAll('.o_ChatWindow')[1],
+        '.o_ChatWindowHeader_commandShiftRight',
+        "second chat window should be allowed to shift right"
+    );
+
+    const initialFirstChatWindowThreadLocalId =
+        document.querySelectorAll('.o_ChatWindow')[0].dataset.threadLocalId;
+    const initialSecondChatWindowThreadLocalId =
+        document.querySelectorAll('.o_ChatWindow')[1].dataset.threadLocalId;
+    await afterNextRender(() => {
+        document.querySelectorAll('.o_ChatWindow')[0]
+            .querySelector(':scope .o_ChatWindowHeader_commandShiftLeft')
+            .click();
+    });
+    assert.strictEqual(
+        document.querySelectorAll('.o_ChatWindow')[0].dataset.threadLocalId,
+        initialSecondChatWindowThreadLocalId,
+        "First chat window should be second after it has been shift left"
+    );
+    assert.strictEqual(
+        document.querySelectorAll('.o_ChatWindow')[1].dataset.threadLocalId,
+        initialFirstChatWindowThreadLocalId,
+        "Second chat window should be first after the first has been shifted left"
+    );
+
+    await afterNextRender(() => {
+        document.querySelectorAll('.o_ChatWindow')[1]
+            .querySelector(':scope .o_ChatWindowHeader_commandShiftRight')
+            .click();
+    });
+    assert.strictEqual(
+        document.querySelectorAll('.o_ChatWindow')[0].dataset.threadLocalId,
+        initialFirstChatWindowThreadLocalId,
+        "First chat window should be back at first place after being shifted left then right"
+    );
+    assert.strictEqual(
+        document.querySelectorAll('.o_ChatWindow')[1].dataset.threadLocalId,
+        initialSecondChatWindowThreadLocalId,
+        "Second chat window should be back at second place after first one has been shifted left then right"
+    );
+});
+
 QUnit.test('open 3 different chat windows: not enough screen width', async function (assert) {
     /**
      * computation uses following info:

@@ -101,11 +101,12 @@ function factory(dependencies) {
             if (!this.manager) {
                 return false;
             }
-            const index = this.manager.allOrderedVisible.findIndex(visible => visible === this);
+            const allVisible = this.manager.allOrderedVisible;
+            const index = allVisible.findIndex(visible => visible === this);
             if (index === -1) {
                 return false;
             }
-            return index > 0;
+            return index < allVisible.length - 1;
         }
 
         /**
@@ -116,12 +117,11 @@ function factory(dependencies) {
             if (!this.manager) {
                 return false;
             }
-            const allVisible = this.manager.allOrderedVisible;
-            const index = allVisible.findIndex(visible => visible === this);
+            const index = this.manager.allOrderedVisible.findIndex(visible => visible === this);
             if (index === -1) {
                 return false;
             }
-            return index < allVisible.length - 1;
+            return index > 0;
         }
 
         /**
