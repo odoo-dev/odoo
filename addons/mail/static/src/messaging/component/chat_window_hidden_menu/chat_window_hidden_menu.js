@@ -17,10 +17,13 @@ class ChatWindowHiddenMenu extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
+            const chatWindowManager = this.env.messaging.chatWindowManager;
+            const device = this.env.messaging.device;
+            const locale = this.env.messaging.locale;
             return {
-                chatWindowManager: this.env.messaging.chatWindowManager,
-                device: this.env.messaging.device,
-                localeTextDirection: this.env.messaging.locale.textDirection,
+                chatWindowManager: chatWindowManager ? chatWindowManager.__state : undefined,
+                device: device ? device.__state : undefined,
+                localeTextDirection: locale ? locale.textDirection : undefined,
             };
         });
         this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);
@@ -29,6 +32,10 @@ class ChatWindowHiddenMenu extends Component {
          * browser screen height.
          */
         this._listRef = useRef('list');
+        /**
+         * The intent of the toggle button depends on the last rendered state.
+         */
+        this._wasMenuOpen;
     }
 
     mounted() {
@@ -54,6 +61,7 @@ class ChatWindowHiddenMenu extends Component {
     _apply() {
         this._applyListHeight();
         this._applyOffset();
+        this._wasMenuOpen = this.env.messaging.chatWindowManager.isHiddenMenuOpen;
     }
 
     /**
@@ -100,8 +108,11 @@ class ChatWindowHiddenMenu extends Component {
      * @param {MouseEvent} ev
      */
     _onClickToggle(ev) {
-        ev.stopPropagation();
-        this.env.messaging.chatWindowManager.toggleHiddenMenu();
+        if (this._wasMenuOpen) {
+            this.env.messaging.chatWindowManager.closeHiddenMenu();
+        } else {
+            this.env.messaging.chatWindowManager.openHiddenMenu();
+        }
     }
 
     /**
@@ -111,7 +122,10 @@ class ChatWindowHiddenMenu extends Component {
      * @param {mail.messaging.entity.ChatWindow} ev.detail.chatWindow
      */
     _onClickedChatWindow(ev) {
-        ev.detail.chatWindow.makeVisible();
+        const chatWindow = ev.detail.chatWindow;
+        chatWindow.makeVisible();
+        chatWindow.unfold();
+        chatWindow.focus();
         this.env.messaging.chatWindowManager.closeHiddenMenu();
     }
 

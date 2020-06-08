@@ -136,7 +136,7 @@ function ThreadFactory({ Entity }) {
                 data2.id = data.id;
             }
             if ('is_minimized' in data && 'state' in data) {
-                data2.foldState = data.is_minimized ? data.state : 'closed';
+                data2.serverFoldState = data.is_minimized ? data.state : 'closed';
             }
             if ('is_moderator' in data) {
                 data2.is_moderator = data.is_moderator;
@@ -388,6 +388,8 @@ function ThreadFactory({ Entity }) {
         /**
          * Notify server the fold state of this thread. Useful for cross-tab
          * and cross-device chat window state synchronization.
+         *
+         * Only makes sense if pendingFoldState is set to the desired value.
          */
         async notifyFoldStateToServer() {
             await this.async(() => this.env.rpc({
@@ -395,7 +397,7 @@ function ThreadFactory({ Entity }) {
                 method: 'channel_fold',
                 kwargs: {
                     uuid: this.uuid,
-                    state: this.foldState,
+                    state: this.pendingFoldState,
                 }
             }, { shadow: true }));
         }
@@ -404,10 +406,10 @@ function ThreadFactory({ Entity }) {
          * Open provided thread, either in discuss app or as a chat window.
          *
          * @param {Object} param0
-         * @param {string} [param0.chatWindowMode]
+         * @param {string} [param0.chatWindowMode='last_visible']
          * @param {boolean} [param0.resetDiscussDomain=false]
          */
-        open({ chatWindowMode, resetDiscussDomain = false } = {}) {
+        open({ chatWindowMode = 'last_visible', resetDiscussDomain = false } = {}) {
             const device = this.env.messaging.device;
             const discuss = this.env.messaging.discuss;
             const messagingMenu = this.env.messaging.messagingMenu;
@@ -691,6 +693,14 @@ function ThreadFactory({ Entity }) {
 
         /**
          * @private
+         * @returns {string}
+         */
+        _computeFoldState() {
+            return this.pendingFoldState || this.serverFoldState;
+        }
+
+        /**
+         * @private
          * @returns {boolean}
          */
         _computeIsCurrentPartnerFollowing() {
@@ -855,20 +865,38 @@ function ThreadFactory({ Entity }) {
          * @override
          */
         _updateAfter(previous) {
+            if (this.model !== 'mail.channel') {
+                // fold state only makes sense on channels
+                return;
+            }
             if (
-                this.model === 'mail.channel' &&
-                previous.foldState &&
-                this.foldState !== previous.foldState
+                this.pendingFoldState &&
+                previous.pendingFoldState !== this.pendingFoldState
             ) {
                 this.notifyFoldStateToServer();
+            }
+            if (
+                this.serverFoldState === this.pendingFoldState
+            ) {
+                this.update({ pendingFoldState: undefined });
             }
 
             // TODO FIXME prevent to open/close a channel on mobile when you
             // open/close it on desktop (task-2267593)
 
             // chat window
+            if (previous.foldState === this.foldState) {
+                // avoid updating chatWindows when not changing foldState
+                // important to avoid issues when thread is in progress of being
+                // opened, because the foldState is updated only at the end of
+                // the process
+                return;
+            }
             if (this.foldState !== 'closed' && this.chatWindows.length === 0) {
-                this.env.messaging.chatWindowManager.openThread(this);
+                // condition to avoid crash during destroy
+                if (this.env.messaging.chatWindowManager) {
+                    this.env.messaging.chatWindowManager.openThread(this);
+                }
             }
             if (this.foldState === 'closed' && this.chatWindows.length > 0) {
                 for (const chatWindow of this.chatWindows) {
@@ -883,6 +911,7 @@ function ThreadFactory({ Entity }) {
         _updateBefore() {
             return {
                 foldState: this.foldState,
+                pendingFoldState: this.pendingFoldState,
             };
         }
 
@@ -975,8 +1004,21 @@ function ThreadFactory({ Entity }) {
                 'name',
             ],
         }),
+        /**
+         * Determine the fold state of the channel on the web client.
+         *
+         * If there is a pending fold state change, it is immediately applied on
+         * the interface to avoid a feeling of unresponsiveness. Otherwise the
+         * last known fold state of the server is used.
+         *
+         * This field must be considered read only.
+         */
         foldState: attr({
-            default: 'closed',
+            compute: '_computeFoldState',
+            dependencies: [
+                'pendingFoldState',
+                'serverFoldState',
+            ],
         }),
         followersPartner: many2many('Partner', {
             related: 'followers.partner',
@@ -1071,9 +1113,30 @@ function ThreadFactory({ Entity }) {
         originThreadAttachments: one2many('Attachment', {
             inverse: 'originThread',
         }),
+        /**
+         * Determine if there is a pending fold state change, which is a change
+         * of fold state requested by the client but not yet confirmed by the
+         * server.
+         *
+         * This field can be updated to immediately change the fold state on the
+         * interface and to notify the server of the new state.
+         */
+        pendingFoldState: attr(),
         public: attr(),
         seen_message_id: attr(),
         seen_partners_info: attr(),
+        /**
+         * Determine the last fold state known by the server, which is the fold
+         * state displayed after initialization or when the last pending
+         * fold state change was confirmed by the server.
+         *
+         * This field should be considered read only in most situations. Only
+         * the code handling fold state change from the server should typically
+         * update it.
+         */
+        serverFoldState: attr({
+            default: 'closed',
+        }),
         /**
          * Members that are currently typing something in the composer of this
          * thread, including current partner.

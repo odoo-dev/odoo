@@ -18,6 +18,7 @@
                     hasCloseAsBackButton="props.hasCloseAsBackButton"
                     isExpandable="props.isExpandable"
                     t-on-o-clicked="_onClickedHeader"
+                    t-ref="header"
                 />
                 <t t-if="chatWindow.thread">
                     <ThreadViewer

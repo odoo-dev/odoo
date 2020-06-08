@@ -8,20 +8,6 @@ function ChatWindowFactory({ Entity }) {
 
     class ChatWindow extends Entity {
 
-        /**
-         * @override
-         */
-        delete() {
-            if (this.manager) {
-                this.manager.unregister(this);
-            }
-            const thread = this.thread;
-            super.delete();
-            if (thread) {
-                thread.update({ foldState: 'closed' });
-            }
-        }
-
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
@@ -30,7 +16,11 @@ function ChatWindowFactory({ Entity }) {
          * Close this chat window.
          */
         close() {
+            const thread = this.thread;
             this.delete();
+            if (thread) {
+                thread.update({ pendingFoldState: 'closed' });
+            }
         }
 
         expand() {
@@ -43,10 +33,7 @@ function ChatWindowFactory({ Entity }) {
          * Programmatically auto-focus an existing chat window.
          */
         focus() {
-            this.update({
-                isDoFocus: true,
-                isFocused: true,
-            });
+            this.update({ isDoFocus: true });
         }
 
         focusNextVisibleUnfoldedChatWindow() {
@@ -61,6 +48,14 @@ function ChatWindowFactory({ Entity }) {
                 this._getNextVisibleUnfoldedChatWindow({ reverse: true });
             if (previousVisibleUnfoldedChatWindow) {
                 previousVisibleUnfoldedChatWindow.focus();
+            }
+        }
+
+        fold() {
+            if (this.thread) {
+                this.thread.update({ pendingFoldState: 'folded' });
+            } else {
+                this.update({ _isFolded: true });
             }
         }
 
@@ -86,13 +81,11 @@ function ChatWindowFactory({ Entity }) {
             this.manager.shiftRight(this);
         }
 
-        toggleFold() {
+        unfold() {
             if (this.thread) {
-                this.thread.update({
-                    foldState: this.thread.foldState === 'folded' ? 'open' : 'folded',
-                });
+                this.thread.update({ pendingFoldState: 'open' });
             } else {
-                this.update({ _isFolded: !this._isFolded });
+                this.update({ _isFolded: false });
             }
         }
 
@@ -163,7 +156,7 @@ function ChatWindowFactory({ Entity }) {
                 return 0;
             }
             const visible = this.manager.visual.visible;
-            const index = visible.findIndex(visible => visible._chatWindow === this.localId);
+            const index = visible.findIndex(visible => visible.chatWindowLocalId === this.localId);
             if (index === -1) {
                 return 0;
             }

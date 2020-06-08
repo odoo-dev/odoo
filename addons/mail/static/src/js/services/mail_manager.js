@@ -1071,31 +1071,6 @@ var MailManager =  AbstractService.extend({
         });
     },
     /**
-     * Update the channels with the mail data fetched from server, including
-     * public, private, DM, livechat, etc.
-     *
-     * @private
-     * @param {Object} data
-     * @param {Object} [data.channel_slots] contains the data of channels to
-     *   update, which are grouped by channel type by key of the object
-     *   (e.g. list of public channel data are stored in 'channel_channel')
-     * @param {Object[]} [data.channel_slots[i] list of data of channel of type
-     *   `i`
-     * @returns {Promise}
-     */
-    _updateChannelsFromServer: function (data) {
-        var self = this;
-        var proms = [];
-        const options = {};
-
-        _.each(data.channel_slots, function (channels) {
-            _.each(channels, function (channel) {
-                proms.push(self._addChannel(channel, options));
-            });
-        });
-        return Promise.all(proms);
-    },
-    /**
      * Update commands from mail data fetched from the server
      *
      * @private
@@ -1115,19 +1090,15 @@ var MailManager =  AbstractService.extend({
      * @param {Array<Object[]>} result.mention_partner_suggestions list of
      *   suggestions.
      * @param {integer} result.menu_id the menu ID of discuss app
-     * @returns {Promise}
      */
     _updateInternalStateFromServer: function (result) {
         // commands are needed for channel instantiation
         this._updateCommandsFromServer(result);
-        var prom = this._updateChannelsFromServer(result);
         this._updateMailboxesFromServer(result);
         this._updateCannedResponsesFromServer(result);
 
         this._mentionPartnerSuggestions = result.mention_partner_suggestions;
         this._discussMenuID = result.menu_id;
-
-        return prom;
     },
     /**
      * Update the mailboxes with mail data fetched from server, namely 'Inbox',

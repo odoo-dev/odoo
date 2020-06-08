@@ -321,6 +321,7 @@ class EntityField {
                         this._setRelationLink(entity, val[1]);
                         break;
                     case 'replace':
+                        // TODO IMP replace should not unlink-all (task-2270780)
                         this._setRelationUnlink(entity, null);
                         this._setRelationLink(entity, val[1]);
                         break;
@@ -492,6 +493,33 @@ class EntityField {
     }
 
     /**
+     * Converts given value to expected format for x2many processing, which is
+     * an array of localId.
+     *
+     * @private
+     * @param {string|mail.messaging.entity.Entity|<mail.messaging.entity.Entity|string>[]} newValue
+     * @returns {string[]}
+     */
+    _setRelationConvertX2ManyValue(newValue) {
+        if (newValue instanceof Array) {
+            return newValue.map(v => this._setRelationConvertX2OneValue(v));
+        }
+        return [this._setRelationConvertX2OneValue(newValue)];
+    }
+
+    /**
+     * Converts given value to expected format for x2one processing, which is
+     * a localId.
+     *
+     * @private
+     * @param {string|mail.messaging.entity.Entity} newValue
+     * @returns {string}
+     */
+    _setRelationConvertX2OneValue(newValue) {
+        return newValue instanceof this.env.entities.Entity ? newValue.localId : newValue;
+    }
+
+    /**
      * Set on this relational field in 'create' mode. Basically data provided
      * during set on this relational field contain data to create new entities,
      * which themselves must be linked to entity of this field by means of
@@ -551,6 +579,11 @@ class EntityField {
      * @param {Object|Object[]} data
      */
     _setRelationInsertAndReplace(entity, data) {
+        // unlink must be done before insert:
+        // because unlink might trigger delete due to causality and new data
+        // shouldn't be deleted just after being inserted
+        // TODO IMP insert-and-replace should not unlink-all (task-2270780)
+        this._setRelationUnlink(entity, null);
         const OtherEntity = this.env.entities[this.to];
         let other;
         if (['one2one', 'many2one'].includes(this.relationType)) {
@@ -562,7 +595,6 @@ class EntityField {
                 other = OtherEntity.insert(data);
             }
         }
-        this._setRelationUnlink(entity, null);
         this._setRelationLink(entity, other);
     }
 
@@ -573,6 +605,10 @@ class EntityField {
      * @param {string|string[]|mail.messaging.entity.Entity|mail.messaging.entity.Entity[]} newValue
      */
     _setRelationLink(entity, newValue) {
+        if (!entity.constructor.get(entity)) {
+            // current entity may be deleted due to causality
+            return;
+        }
         switch (this.relationType) {
             case 'many2many':
                 this._setRelationLinkMany2Many(entity, newValue);
@@ -597,25 +633,33 @@ class EntityField {
      * @param {string|mail.messaging.entity.Entity|<mail.messaging.entity.Entity|string>[]} newValue
      */
     _setRelationLinkMany2Many(entity, newValue) {
-        const prevValue = this.read(entity);
-        const value = newValue instanceof Array
-            ? newValue.map(e => e instanceof this.env.entities.Entity ? e.localId : e)
-            : [newValue instanceof this.env.entities.Entity ? newValue.localId : newValue];
-        if (value.every(valueItem => prevValue.includes(valueItem))) {
-            // Do not alter relations if unchanged.
-            return;
-        }
-        this.write(entity, [...new Set(this.read(entity).concat(value))]);
-        for (const valueItem of value) {
-            if (prevValue.includes(valueItem)) {
+        // convert newValue to array of localId
+        const newLocalIds = this._setRelationConvertX2ManyValue(newValue);
+        const OtherEntity = this.env.entities[this.to];
+
+        for (const newLocalId of newLocalIds) {
+            // read in loop to catch potential changes from previous iteration
+            const prevLocalIds = this.read(entity);
+
+            // other entity already linked, avoid linking twice
+            if (prevLocalIds.includes(newLocalId)) {
                 continue;
             }
-            const OtherEntity = this.env.entities[this.to];
-            const otherEntity = OtherEntity.get(valueItem);
-            const otherField = OtherEntity.fields[this.inverse];
-            otherField.write(otherEntity, [
-                ...new Set(otherField.read(otherEntity).concat([entity.localId]))
-            ]);
+
+            const newOtherEntity = OtherEntity.get(newLocalId);
+            // other entity may be deleted due to causality, avoid linking
+            // deleted entities
+            if (!newOtherEntity) {
+                continue;
+            }
+
+            // link other entity to current entity
+            this.write(entity, prevLocalIds.concat([newLocalId]));
+
+            // link current entity to other entity
+            newOtherEntity.update({
+                [this.inverse]: [['link', entity]],
+            });
         }
     }
 
@@ -627,31 +671,43 @@ class EntityField {
      * @param {string|mail.messaging.entity.Entity} newValue
      */
     _setRelationLinkMany2One(entity, newValue) {
-        const prevValue = this.read(entity);
-        const value = newValue instanceof this.env.entities.Entity ? newValue.localId : newValue;
-        if (value === this.read(entity)) {
-            // Do not alter relations if unchanged.
+        // convert newValue to localId
+        const newLocalId = this._setRelationConvertX2OneValue(newValue);
+        const OtherEntity = this.env.entities[this.to];
+        const prevLocalId = this.read(entity);
+
+        // other entity already linked, avoid linking twice
+        if (prevLocalId === newLocalId) {
             return;
         }
-        this.write(entity, value);
-        const OtherEntity = this.env.entities[this.to];
-        if (prevValue) {
-            const otherEntity = OtherEntity.get(prevValue);
-            if (!otherEntity) {
-                // prev Entity has already been deleted.
-                return;
-            }
-            const otherField = OtherEntity.fields[this.inverse];
-            otherField.write(otherEntity, otherField.read(otherEntity).filter(
-                valueItem => valueItem !== entity.localId
-            ));
-            if (this.isCausal) {
-                otherEntity.delete();
-            }
+
+        // unlink previous other entity from current entity
+        this.write(entity, undefined);
+
+        const prevOtherEntity = OtherEntity.get(prevLocalId);
+        // there may be no previous other entity or the previous other entity
+        // may be deleted due to causality
+        if (prevOtherEntity) {
+            // unlink current entity from previous other entity
+            prevOtherEntity.update({
+                [this.inverse]: [['unlink', entity]],
+            });
         }
-        const otherEntity = OtherEntity.get(value);
-        const otherField = OtherEntity.fields[this.inverse];
-        otherField.write(otherEntity, otherField.read(otherEntity).concat([entity.localId]));
+
+        const newOtherEntity = OtherEntity.get(newLocalId);
+        // other entity may be deleted due to causality, avoid linking
+        // deleted entities
+        if (!newOtherEntity) {
+            return;
+        }
+
+        // link other entity to current entity
+        this.write(entity, newLocalId);
+
+        // link current entity to other entity
+        newOtherEntity.update({
+            [this.inverse]: [['link', entity]],
+        });
     }
 
     /**
@@ -662,23 +718,33 @@ class EntityField {
      * @param {string|mail.messaging.entity.Entity|<string|mail.messaging.entity.Entity>[]} newValue
      */
     _setRelationLinkOne2Many(entity, newValue) {
-        const prevValue = this.read(entity);
-        const value = newValue instanceof Array
-            ? newValue.map(e => e instanceof this.env.entities.Entity ? e.localId: e)
-            : [newValue instanceof this.env.entities.Entity ? newValue.localId : newValue];
-        if (value.every(valueItem => prevValue.includes(valueItem))) {
-            // Do not alter relations if unchanged.
-            return;
-        }
-        this.write(entity, [...new Set(this.read(entity).concat(value))]);
-        for (const valueItem of value) {
-            if (prevValue.includes(valueItem)) {
+        // convert newValue to array of localId
+        const newLocalIds = this._setRelationConvertX2ManyValue(newValue);
+        const OtherEntity = this.env.entities[this.to];
+
+        for (const newLocalId of newLocalIds) {
+            // read in loop to catch potential changes from previous iteration
+            const prevLocalIds = this.read(entity);
+
+            // other entity already linked, avoid linking twice
+            if (prevLocalIds.includes(newLocalId)) {
                 continue;
             }
-            const OtherEntity = this.env.entities[this.to];
-            const otherEntity = OtherEntity.get(valueItem);
-            const otherField = OtherEntity.fields[this.inverse];
-            otherField.write(otherEntity, entity.localId);
+
+            const newOtherEntity = OtherEntity.get(newLocalId);
+            // other entity may be deleted due to causality, avoid linking
+            // deleted entities
+            if (!newOtherEntity) {
+                continue;
+            }
+
+            // link other entity to current entity
+            this.write(entity, prevLocalIds.concat([newLocalId]));
+
+            // link current entity to other entity
+            newOtherEntity.update({
+                [this.inverse]: [['link', entity]],
+            });
         }
     }
 
@@ -690,21 +756,47 @@ class EntityField {
      * @param {string|mail.messaging.entity.Entity} value
      */
     _setRelationLinkOne2One(entity, newValue) {
-        const prevValue = this.read(entity);
-        const value = newValue instanceof this.env.entities.Entity ? newValue.localId : newValue;
-        this.write(entity, value);
+        // convert newValue to localId
+        const newLocalId = this._setRelationConvertX2OneValue(newValue);
+        const prevLocalId = this.read(entity);
         const OtherEntity = this.env.entities[this.to];
-        if (prevValue) {
-            const otherEntity = OtherEntity.get(prevValue);
-            const otherField = OtherEntity.fields[this.inverse];
-            otherField.write(otherEntity, undefined);
+
+        // other entity already linked, avoid linking twice
+        if (prevLocalId === newLocalId) {
+            return;
+        }
+
+        // unlink previous other entity from current entity
+        this.write(entity, undefined);
+
+        const prevOtherEntity = OtherEntity.get(prevLocalId);
+        // there may be no previous other entity or the previous other entity
+        // may be deleted due to causality
+        if (prevOtherEntity) {
+            // unlink current entity from previous other entity
+            prevOtherEntity.update({
+                [this.inverse]: [['unlink', entity]],
+            });
+            // apply causality
             if (this.isCausal) {
-                otherEntity.delete();
+                prevOtherEntity.delete();
             }
         }
-        const otherEntity = OtherEntity.get(value);
-        const otherField = OtherEntity.fields[this.inverse];
-        otherField.write(otherEntity, entity.localId);
+
+        const newOtherEntity = OtherEntity.get(newLocalId);
+        // other entity may be deleted due to causality, avoid linking deleted
+        // entities
+        if (!newOtherEntity) {
+            return;
+        }
+
+        // link other entity to current entity
+        this.write(entity, newLocalId);
+
+        // link current entity to other entity
+        newOtherEntity.update({
+            [this.inverse]: [['link', entity]],
+        });
     }
 
     /**
@@ -716,8 +808,7 @@ class EntityField {
      */
     _setRelationUnlink(entity, newValue) {
         if (!entity.constructor.get(entity)) {
-            // Entity has already been deleted.
-            // (e.g. unlinking one of its reverse relation was causal)
+            // current entity may be deleted due to causality
             return;
         }
         switch (this.relationType) {
@@ -744,34 +835,34 @@ class EntityField {
      * @param {string|mail.messaging.entity.Entity|<string|mail.messaging.entity.Entity>[]|null} newValue
      */
     _setRelationUnlinkMany2Many(entity, newValue) {
-        if (!entity.constructor.get(entity)) {
-            // Entity has already been deleted.
-            // (e.g. unlinking one of its reverse relation was causal)
-            return;
-        }
-        const value = newValue === null
+        // convert newValue to array of localId, null is considered unlink all
+        const otherLocalIds = newValue === null
             ? [...this.read(entity)]
-            : newValue instanceof Array
-            ? newValue.map(e => e instanceof this.env.entities.Entity ? e.localId: e)
-            : [newValue instanceof this.env.entities.Entity ? newValue.localId : newValue];
-        this.write(entity,
-            this.read(entity).filter(
-                valueItem => !value.includes(valueItem)
-            )
-        );
+            : this._setRelationConvertX2ManyValue(newValue);
         const OtherEntity = this.env.entities[this.to];
-        for (const valueItem of value) {
-            const otherEntity = OtherEntity.get(valueItem);
-            if (!otherEntity) {
-                // Other entity has been deleted.
+
+        for (const otherLocalId of otherLocalIds) {
+            // read in loop to catch potential changes from previous iteration
+            const prevLocalIds = this.read(entity);
+
+            // other entity already unlinked, avoid useless processing
+            if (!prevLocalIds.includes(otherLocalId)) {
                 continue;
             }
-            const otherField = OtherEntity.fields[this.inverse];
-            otherField.write(otherEntity, otherField.read(otherEntity).filter(
-                valueItem => valueItem !== entity.localId
+
+            // unlink other entity from current entity
+            this.write(entity, prevLocalIds.filter(
+                localId => localId !== otherLocalId
             ));
-            if (this.isCausal) {
-                otherEntity.delete();
+
+            const otherEntity = OtherEntity.get(otherLocalId);
+            // other entity may be deleted due to causality, avoid useless
+            // processing
+            if (otherEntity) {
+                // unlink current entity from other entity
+                otherEntity.update({
+                    [this.inverse]: [['unlink', entity]],
+                });
             }
         }
     }
@@ -783,21 +874,24 @@ class EntityField {
      * @param {mail.messaging.entity.Entity} entity
      */
     _setRelationUnlinkMany2One(entity) {
-        if (!entity.constructor.get(entity)) {
-            // Entity has already been deleted.
-            // (e.g. unlinking one of its reverse relation was causal)
+        const otherLocalId = this.read(entity);
+        const OtherEntity = this.env.entities[this.to];
+
+        // other entity already unlinked, avoid useless processing
+        if (!otherLocalId) {
             return;
         }
-        const prevValue = this.read(entity);
-        if (prevValue) {
-            const OtherEntity = this.env.entities[this.to];
-            const prevEntity = OtherEntity.get(prevValue);
-            if (!prevEntity) {
-                // Previous entity has been deleted.
-                return;
-            }
-            prevEntity.update({
-                [this.inverse]: [['unlink', entity.localId]],
+
+        // unlink other entity from current entity
+        this.write(entity, undefined);
+
+        const otherEntity = OtherEntity.get(otherLocalId);
+        // other entity may be deleted due to causality, avoid useless
+        // processing
+        if (otherEntity) {
+            // unlink current entity from other entity
+            otherEntity.update({
+                [this.inverse]: [['unlink', entity]],
             });
         }
     }
@@ -811,31 +905,34 @@ class EntityField {
      *   if null, unlink all items in the relation of provided entity.
      */
     _setRelationUnlinkOne2Many(entity, newValue) {
-        if (!entity.constructor.get(entity)) {
-            // Entity has already been deleted.
-            // (e.g. unlinking one of its reverse relation was causal)
-            return;
-        }
-        const prevValue = this.read(entity);
-        const value = newValue === null
+        // convert newValue to array of localId, null is considered unlink all
+        const otherLocalIds = newValue === null
             ? [...this.read(entity)]
-            : newValue instanceof Array
-            ? newValue.map(e => e instanceof this.env.entities.Entity ? e.localId: e)
-            : [newValue instanceof this.env.entities.Entity ? newValue.localId : newValue];
-        this.write(entity, this.read(entity).filter(valueItem => !value.includes(valueItem)));
-        if (prevValue) {
-            const OtherEntity = this.env.entities[this.to];
-            for (const valueItem of value) {
-                const otherEntity = OtherEntity.get(valueItem);
-                if (!otherEntity) {
-                    // may be deleted from causality...
-                    continue;
-                }
-                const otherField = OtherEntity.fields[this.inverse];
-                otherField.write(otherEntity, undefined);
-                if (this.isCausal) {
-                    otherEntity.delete();
-                }
+            : this._setRelationConvertX2ManyValue(newValue);
+        const OtherEntity = this.env.entities[this.to];
+
+        for (const otherLocalId of otherLocalIds) {
+            // read in loop to catch potential changes from previous iteration
+            const prevLocalIds = this.read(entity);
+
+            // other entity already unlinked, avoid useless processing
+            if (!prevLocalIds.includes(otherLocalId)) {
+                continue;
+            }
+
+            // unlink other entity from current entity
+            this.write(entity, prevLocalIds.filter(
+                localId => localId !== otherLocalId
+            ));
+
+            const otherEntity = OtherEntity.get(otherLocalId);
+            // other entity may be deleted due to causality, avoid useless
+            // processing
+            if (otherEntity) {
+                // unlink current entity from other entity
+                otherEntity.update({
+                    [this.inverse]: [['unlink', entity]],
+                });
             }
         }
     }
@@ -847,23 +944,25 @@ class EntityField {
      * @param {mail.messaging.entity.Entity} entity
      */
     _setRelationUnlinkOne2One(entity) {
-        if (!entity.constructor.get(entity)) {
-            // Entity has already been deleted.
-            // (e.g. unlinking one of its reverse relation was causal)
+        const otherLocalId = this.read(entity);
+        const OtherEntity = this.env.entities[this.to];
+
+        // other entity already unlinked, avoid useless processing
+        if (!otherLocalId) {
             return;
         }
-        const prevValue = this.read(entity);
+
+        // unlink other entity from current entity
         this.write(entity, undefined);
-        const OtherEntity = this.env.entities[this.to];
-        if (prevValue) {
-            const otherEntity = OtherEntity.get(prevValue);
-            if (!otherEntity) {
-                // Entity has already been deleted.
-                // (e.g. unlinking one of its reverse relation was causal)
-                return;
-            }
-            const otherField = OtherEntity.fields[this.inverse];
-            otherField.write(otherEntity, undefined);
+
+        const otherEntity = OtherEntity.get(otherLocalId);
+        // other entity may be deleted due to causality, avoid useless
+        // processing
+        if (otherEntity) {
+            // unlink current entity from other entity
+            otherEntity.update({
+                [this.inverse]: [['unlink', entity]],
+            });
         }
     }
 

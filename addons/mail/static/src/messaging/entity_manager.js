@@ -270,9 +270,9 @@ class EntityManager {
                 } else {
                     this._isHandlingToUpdateAfters = true;
                     // process one update after
-                    const [entity, previous] = this._toUpdateAfters.pop();
-                    if (this.classes.Entity.get(entity)) {
-                        entity._updateAfter(previous);
+                    const [entityToUpdate, previous] = this._toUpdateAfters.pop();
+                    if (this.classes.Entity.get(entityToUpdate)) {
+                        entityToUpdate._updateAfter(previous);
                     }
                     this._isHandlingToUpdateAfters = false;
                 }
@@ -377,6 +377,9 @@ class EntityManager {
                     }
                     if (!Entities[field.to]) {
                         throw new Error(`Relational field "${Entity.entityName}/${fieldName}" targets to unknown entity name "${field.to}".`);
+                    }
+                    if (field.isCausal && !(['one2many', 'one2one'].includes(field.relationType))) {
+                        throw new Error(`Relational field "${Entity.entityName}/${fieldName}" has "isCausal" true with a relation of type "${field.relationType}" but "isCausal" is only supported for "one2many" and "one2one".`);
                     }
                 }
                 // 3. Computed field.
@@ -898,17 +901,18 @@ class EntityManager {
      * @param {Object} data
      */
     _updateDirect(entity, data) {
-        const previous = entity._updateBefore();
+        const existing = this._toUpdateAfters.find(entry => entry[0] === entity);
+        if (!existing) {
+            // queue updateAfter before calling field.set to ensure previous
+            // contains the value at the start of update cycle
+            this._toUpdateAfters.push([entity, entity._updateBefore()]);
+        }
         for (const [k, v] of Object.entries(data)) {
             const field = entity.constructor.fields[k];
             if (!field) {
                 throw new Error(`Cannot create/update entity with data unrelated to a field. (entity name: "${entity.constructor.entityName}", non-field attempted update: "${k}")`);
             }
             field.set(entity, v);
-        }
-        const existing = this._toUpdateAfters.find(entry => entry[0] === entity);
-        if (!existing) {
-            this._toUpdateAfters.push([entity, previous]);
         }
     }
 
