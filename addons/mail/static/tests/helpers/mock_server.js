@@ -143,16 +143,24 @@ MockServer.include({
      */
     _mockInitMessaging: function () {
         return _.defaults(this.initMessagingData || {}, {
-            'channel_slots': [],
-            'commands': [],
-            'mail_failures': [],
-            'mention_partner_suggestions': [],
-            'menu_id': false,
-            'needaction_inbox_counter': 0,
-            'partner_root': [2, "OdooBot"],
-            'public_partner': [4, "Public user"],
-            'shortcodes': [],
-            'starred_counter': 0,
+            channel_slots: [],
+            commands: [],
+            mail_failures: [],
+            mention_partner_suggestions: [],
+            menu_id: false,
+            needaction_inbox_counter: 0,
+            partner_root: {
+                active: false,
+                display_name: "OdooBot",
+                id: 2,
+            },
+            public_partner: {
+                active: false,
+                display_name: "Public user",
+                id: 4,
+            },
+            shortcodes: [],
+            starred_counter: 0,
         });
     },
     /**

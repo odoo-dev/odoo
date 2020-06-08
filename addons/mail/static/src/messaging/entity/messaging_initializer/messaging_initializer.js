@@ -245,8 +245,16 @@ function MessagingInitializerFactory({ Entity }) {
          */
         _initPartners({
             moderation_channel_ids = [],
-            partner_root: [partnerRootId, partnerRootDisplayName],
-            public_partner: [publicPartnerId, publicPartnerDisplayName],
+            partner_root: {
+                active: partnerRootIsActive,
+                display_name: partnerRootDisplayName,
+                id: partnerRootId,
+            },
+            public_partner: {
+                active: publicPartnerIsActive,
+                display_name: publicPartnerDisplayName,
+                id: publicPartnerId,
+            },
         }) {
             this.messaging.update({
                 currentPartner: [['insert', {
@@ -258,10 +266,12 @@ function MessagingInitializerFactory({ Entity }) {
                 }]],
                 currentUser: [['insert', { id: this.env.session.uid }]],
                 partnerRoot: [['insert', {
+                    active: partnerRootIsActive,
                     display_name: partnerRootDisplayName,
                     id: partnerRootId,
                 }]],
                 publicPartner: [['insert', {
+                    active: publicPartnerIsActive,
                     display_name: publicPartnerDisplayName,
                     id: publicPartnerId,
                 }]],

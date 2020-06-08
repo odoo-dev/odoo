@@ -68,7 +68,11 @@ QUnit.test('livechat: public website visitor is typing', async function (assert)
                 }],
             }],
         },
-        public_partner: [7, "Public Partner"],
+        public_partner: {
+            active: false,
+            display_name: "Public Partner",
+            id: 7,
+        },
     });
     await this.start({
         env: {
