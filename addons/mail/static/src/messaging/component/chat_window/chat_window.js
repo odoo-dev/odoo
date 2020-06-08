@@ -27,6 +27,11 @@ class ChatWindow extends Component {
             };
         });
         /**
+         * Reference of the header of the chat window.
+         * Useful to prevent click on header from wrongly focusing the window.
+         */
+        this._chatWindowHeaderRef = useRef('header');
+        /**
          * Reference of the autocomplete input (new_message chat window only).
          * Useful when focusing this chat window, which consists of focusing
          * this input.
@@ -39,7 +44,6 @@ class ChatWindow extends Component {
          * it has one!
          */
         this._threadRef = useRef('thread');
-
         // the following are passed as props to children
         this._onAutocompleteSelect = this._onAutocompleteSelect.bind(this);
         this._onAutocompleteSource = this._onAutocompleteSource.bind(this);
@@ -104,7 +108,10 @@ class ChatWindow extends Component {
      * @private
      */
     _focus() {
-        this.chatWindow.update({ isFocused: true });
+        this.chatWindow.update({
+            isDoFocus: false,
+            isFocused: true,
+        });
         if (!this.chatWindow.thread) {
             this._inputRef.comp.focus();
         } else {
@@ -130,9 +137,12 @@ class ChatWindow extends Component {
      * @private
      */
     _update() {
+        if (!this.chatWindow) {
+            // chat window is being deleted
+            return;
+        }
         if (this.chatWindow.isDoFocus) {
             this._focus();
-            this.chatWindow.update({ isDoFocus: false });
         }
         if (this.props.isDocked) {
             this._applyVisibleOffset();
@@ -203,16 +213,15 @@ class ChatWindow extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        ev.stopPropagation();
-        const chatWindow = this.chatWindow;
-        if (chatWindow.isFocused && !chatWindow.isFolded) {
+        const chatWindowHeader = this._chatWindowHeaderRef.el;
+        if (chatWindowHeader && chatWindowHeader.contains(ev.target)) {
+            // handled in _onClickedHeader
             return;
         }
-        if (chatWindow.isFolded) {
-            chatWindow.update({ isFocused: true });
-        } else {
-            chatWindow.focus();
+        if (this.chatWindow.isFocused) {
+            return;
         }
+        this.chatWindow.focus();
     }
 
     /**
@@ -227,7 +236,12 @@ class ChatWindow extends Component {
         if (this.env.messaging.device.isMobile) {
             return;
         }
-        this.chatWindow.toggleFold();
+        if (this.chatWindow.isFolded) {
+            this.chatWindow.unfold();
+            this.chatWindow.focus();
+        } else {
+            this.chatWindow.fold();
+        }
     }
 
     /**
@@ -247,12 +261,17 @@ class ChatWindow extends Component {
      * @private
      */
     _onFocusout() {
-        this.chatWindow.update({ isFocused: false });
-        if (!this.chatWindow.thread) {
+        if (this._inputRef.comp) {
             this._inputRef.comp.focusout();
-        } else {
+        }
+        if (this._threadRef.comp) {
             this._threadRef.comp.focusout();
         }
+        if (!this.chatWindow) {
+            // ignore focus out due to entity being deleted
+            return;
+        }
+        this.chatWindow.update({ isFocused: false });
     }
 
     /**

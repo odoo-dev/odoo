@@ -897,18 +897,20 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     });
 
     // open, from systray menu, chat windows of channels with Id 1, 2, then 3
-    document.querySelector(`.o_MessagingMenu_toggler`).click();
-    await afterNextRender();
-    document.querySelector(`
-        .o_MessagingMenu_dropdownMenu
-        .o_NotificationList_preview[data-thread-local-id="${
-            this.env.entities.Thread.find(thread =>
-                thread.id === 1 &&
-                thread.model === 'mail.channel'
-            ).localId
-        }"]
-    `).click();
-    await afterNextRender();
+    await afterNextRender(() =>
+        document.querySelector(`.o_MessagingMenu_toggler`).click()
+    );
+    await afterNextRender(() =>
+        document.querySelector(`
+            .o_MessagingMenu_dropdownMenu
+            .o_NotificationList_preview[data-thread-local-id="${
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 1 &&
+                    thread.model === 'mail.channel'
+                ).localId
+            }"]
+        `).click()
+    );
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatWindow`).length,
         1,
@@ -925,18 +927,20 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
         "messaging menu should be hidden"
     );
 
-    document.querySelector(`.o_MessagingMenu_toggler`).click();
-    await afterNextRender();
-    document.querySelector(`
-        .o_MessagingMenu_dropdownMenu
-        .o_NotificationList_preview[data-thread-local-id="${
-            this.env.entities.Thread.find(thread =>
-                thread.id === 2 &&
-                thread.model === 'mail.channel'
-            ).localId
-        }"]
-    `).click();
-    await afterNextRender();
+    await afterNextRender(() =>
+        document.querySelector(`.o_MessagingMenu_toggler`).click()
+    );
+    await afterNextRender(() =>
+        document.querySelector(`
+            .o_MessagingMenu_dropdownMenu
+            .o_NotificationList_preview[data-thread-local-id="${
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 2 &&
+                    thread.model === 'mail.channel'
+                ).localId
+            }"]
+        `).click()
+    );
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatWindow`).length,
         2,
@@ -953,18 +957,20 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
         "messaging menu should be hidden"
     );
 
-    document.querySelector(`.o_MessagingMenu_toggler`).click();
-    await afterNextRender();
-    document.querySelector(`
-        .o_MessagingMenu_dropdownMenu
-        .o_NotificationList_preview[data-thread-local-id="${
-            this.env.entities.Thread.find(thread =>
-                thread.id === 3 &&
-                thread.model === 'mail.channel'
-            ).localId
-        }"]
-    `).click();
-    await afterNextRender();
+    await afterNextRender(() =>
+        document.querySelector(`.o_MessagingMenu_toggler`).click()
+    );
+    await afterNextRender(() =>
+        document.querySelector(`
+            .o_MessagingMenu_dropdownMenu
+            .o_NotificationList_preview[data-thread-local-id="${
+                this.env.entities.Thread.find(thread =>
+                    thread.id === 3 &&
+                    thread.model === 'mail.channel'
+                ).localId
+            }"]
+        `).click()
+    );
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatWindow`).length,
         2,

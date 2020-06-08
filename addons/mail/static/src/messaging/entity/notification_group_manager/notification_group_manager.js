@@ -51,7 +51,11 @@ function NotificationGroupManagerFactory({ Entity }) {
                     date,
                     res_id,
                 });
-                groups.push(group);
+                // avoid linking the same group twice when adding a notification
+                // to an existing group
+                if (!groups.includes(group)) {
+                    groups.push(group);
+                }
             });
             this.update({ groups: [['link', groups]] });
         }
