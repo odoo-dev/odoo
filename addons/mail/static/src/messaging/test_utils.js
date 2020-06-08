@@ -456,8 +456,16 @@ function beforeEach(self) {
             moderation_counter: 0,
             moderation_channel_ids: [],
             needaction_inbox_counter: 0,
-            partner_root: [2, "OdooBot"],
-            public_partner: [4, "Public"],
+            partner_root: {
+                active: false,
+                display_name: "OdooBot",
+                id: 2,
+            },
+            public_partner: {
+                active: false,
+                display_name: "Public user",
+                id: 4,
+            },
             shortcodes: [],
             starred_counter: 0,
         },

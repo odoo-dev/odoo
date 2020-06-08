@@ -90,7 +90,7 @@ function PartnerFactory({ Entity }) {
                 'i'
             );
             const currentPartner = this.env.messaging.currentPartner;
-            for (const partner of this.all()) {
+            for (const partner of this.all(partner => partner.active)) {
                 if (partners.length < limit) {
                     if (
                         partner !== currentPartner &&
@@ -225,6 +225,9 @@ function PartnerFactory({ Entity }) {
     Partner.entityName = 'Partner';
 
     Partner.fields = {
+        active: attr({
+            default: true,
+        }),
         correspondentThreads: one2many('Thread', {
             inverse: 'correspondent',
         }),
