@@ -207,8 +207,12 @@ var Wysiwyg = Widget.extend({
                             target: params.isNewWindow ? '_blank' : '',
                         };
                         await this.editor.execCommand('link', linkParams);
-                        await this.editor.execCommand('addClassToLink', {
-                            classes: params.classes,
+                        await this.editor.execCustomCommand(async () => {
+                            const nodes = params.context.range.targetedNodes(this.editor.InlineNode);
+                            const links = nodes.map(node => node.modifiers.find(this.editor.LinkFormat)).filter(f => f);
+                            for (const link of links) {
+                                link.modifiers.get(this.editor.Attributes).set('class', params.classes);
+                            }
                         });
                     });
                 resolve();
