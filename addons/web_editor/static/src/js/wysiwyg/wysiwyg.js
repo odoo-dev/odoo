@@ -187,7 +187,7 @@ var Wysiwyg = Widget.extend({
 
     openLinkDialog() {
         return new Promise(async (resolve) => {
-            const linkInfo = await this.editor.execCommand('getLinkInfo');
+            const linkInfo = await this.editor.execCommand('dom.getLinkInfo');
             var linkDialog = new weWidgets.LinkDialog(this,
                 {
                     props: {
@@ -334,7 +334,7 @@ var Wysiwyg = Widget.extend({
     },
 
     _saveAllViewsBlocks: async function (views) {
-        const structureNodes = await this.editor.execCommand('getStructures');
+        const structureNodes = await this.editor.execCommand('dom.getStructures');
         const promises = [];
         for (const structureNode of structureNodes) {
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
@@ -356,7 +356,7 @@ var Wysiwyg = Widget.extend({
     },
 
     _saveCoverPropertiesBlocks: async function (editable) {
-        var el = this.editor.execCommand('getRecordCover');
+        var el = this.editor.execCommand('dom.getRecordCover');
         if (!el) {
             console.warn('no getRecordCover found');
             return;
