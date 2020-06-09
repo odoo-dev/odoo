@@ -1687,7 +1687,11 @@ const SnippetOptionWidget = Widget.extend({
      */
     selectDataAttribute: async function (previewMode, widgetValue, params) {
         const value = await this._selectAttributeHelper(widgetValue, params);
-        await this.editorCommands.setAttribute(this.$target[0], `data-${params.attributeName}`, value);
+        await this.editor.execCommand('dom.setAttribute', {
+            domNode: this.$target[0],
+            name: `data-${params.attributeName}`,
+            value: value,
+        });
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -1701,7 +1705,11 @@ const SnippetOptionWidget = Widget.extend({
      */
     selectAttribute: async function (previewMode, widgetValue, params) {
         const value = await this._selectAttributeHelper(widgetValue, params);
-        await this.editorCommands.setAttribute(this.$target[0], params.attributeName, value);
+        await this.editor.execCommand('dom.setAttribute', {
+            domNode: this.$target[0],
+            name: params.attributeName,
+            value: value,
+        });
     },
     /**
      * Default option method which allows to select a value and set it on the

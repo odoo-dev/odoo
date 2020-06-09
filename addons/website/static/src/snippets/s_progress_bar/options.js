@@ -81,7 +81,11 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
                 replacedText
             );
             await this.editorCommands.setStyle($progressBar[0], 'width', value + "%");
-            await this.editorCommands.setAttribute($progressBar[0], 'aria-valuenow', '' + value);
+            await this.editor.execCommand('dom.setAttribute', {
+                domNode: $progressBar[0],
+                name: 'aria-valuenow',
+                value: '' + value,
+            });
         });
             const $progressBar = this.$target.find('.progress-bar');
     },
