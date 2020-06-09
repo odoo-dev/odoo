@@ -22,10 +22,10 @@ $.extend($.expr[':'], {
     o_editable: function (node, i, m) {
         while (node) {
             if (node.className && _.isString(node.className)) {
-                if (node.className.indexOf('o_not_editable')!==-1 ) {
+                if (node.className.indexOf('o_not_editable') !== -1) {
                     return false;
                 }
-                if (node.className.indexOf('o_editable')!==-1 ) {
+                if (node.className.indexOf('o_editable') !== -1) {
                     return true;
                 }
             }
@@ -319,7 +319,9 @@ var SnippetEditor = Widget.extend({
             const childs = this.snippetMenu.getChildsSnippetBlock(this.$snippetBlock);
             for (const child of childs) {
                 const snippetEditor = $(child).data('snippet-editor');
-                if (snippetEditor) snippetEditor.destroy();
+                if (snippetEditor) {
+snippetEditor.destroy();
+}
             }
             $parent.trigger('content_changed');
         });
@@ -982,7 +984,7 @@ var SnippetsMenu = Widget.extend({
             }
             this._activateSnippet($snippet);
 
-        })
+        });
 
 
         // Adapt overlay covering when the window is resized / content changes
@@ -1090,7 +1092,7 @@ var SnippetsMenu = Widget.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    afterRender: function() {
+    afterRender: function () {
         this.snippetEditors = this.snippetEditors.filter(x=>!x.isDestroyed());
         for (const editor of this.snippetEditors) {
             if (!editor.vNode) continue;
@@ -1585,7 +1587,7 @@ var SnippetsMenu = Widget.extend({
             return $target;
         };
         globalSelector.is = function ($from) {
-            console.log("from2", $from.get())
+            console.log("from2", $from.get());
             for (var i = 0, len = selectors.length; i < len; i++) {
                 if (selectors[i].is($from)) {
                     return true;
@@ -1747,7 +1749,10 @@ var SnippetsMenu = Widget.extend({
                 };
                 isEnabled = (cache[k]['drop-near'] || cache[k]['drop-in']);
             });
-            await this.editorCommands.toggleClass(snippetDraggable, 'o_disabled', !isEnabled);
+            await this.editor.execCommand(isEnabled ? 'dom.removeClass' : 'dom.addClass', {
+                domNode: snippetDraggable,
+                class: 'o_disabled',
+             });
         }
     },
     /**
@@ -1882,7 +1887,7 @@ var SnippetsMenu = Widget.extend({
 
                         await self._callForEachChildSnippet($(domNode), function (editor) {
                             return editor.buildSnippet();
-                        })
+                        });
 
                         $snippetToInsert.trigger('content_changed');
                         return self._updateInvisibleDOM();

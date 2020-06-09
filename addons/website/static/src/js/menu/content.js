@@ -37,7 +37,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
         var length_url = serverUrl.length;
         var serverUrlTrunc = serverUrl;
         if (length_url > 30) {
-            serverUrlTrunc = serverUrl.slice(0,14) + '..' + serverUrl.slice(-14);
+            serverUrlTrunc = serverUrl.slice(0, 14) + '..' + serverUrl.slice(-14);
         }
         this.serverUrl = serverUrl;
         this.serverUrlTrunc = serverUrlTrunc;
@@ -129,7 +129,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
                 }
             });
             dep_text = dep_text.join(', ');
-            self.$('#dependencies_redirect').html(qweb.render('website.show_page_dependencies', { dependencies: dependencies, dep_text: dep_text }));
+            self.$('#dependencies_redirect').html(qweb.render('website.show_page_dependencies', {dependencies: dependencies, dep_text: dep_text}));
             self.$('#dependencies_redirect [data-toggle="popover"]').popover({
                 container: 'body',
             });
@@ -168,7 +168,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
             minDate: moment({y: 1900}),
             maxDate: moment().add(200, 'y'),
             calendarWeeks: true,
-            icons : {
+            icons: {
                 time: 'fa fa-clock-o',
                 date: 'fa fa-calendar',
                 next: 'fa fa-chevron-right',
@@ -176,9 +176,9 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
                 up: 'fa fa-chevron-up',
                 down: 'fa fa-chevron-down',
             },
-            locale : moment.locale(),
-            format : time.getLangDatetimeFormat(),
-            widgetPositioning : {
+            locale: moment.locale(),
+            format: time.getLangDatetimeFormat(),
+            widgetPositioning: {
                 horizontal: 'auto',
                 vertical: 'top',
             },
@@ -348,8 +348,7 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
         var datetime = moment(value, time.getLangDatetimeFormat(), true);
         if (datetime.isValid()) {
             return time.datetime_to_str(datetime.toDate());
-        }
-        else {
+        } else {
             return false;
         }
     },
@@ -797,7 +796,10 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         header_color: async function (value, wysiwyg) {
             await wysiwyg.execBatch(async () => {
                 await wysiwyg.editorCommands.removeClasses($('#wrapwrap > header')[0], [this.value]);
-                await wysiwyg.editorCommands.addClasses($('#wrapwrap > header')[0], [value]);
+                await this.editor.execCustomCommand('dom.addClass', {
+                    domNode: $('#wrapwrap > header')[0],
+                    class: value,
+                });
             });
         },
     },
@@ -1022,7 +1024,7 @@ var PageManagement = Widget.extend({
 
     _onPagePropertiesButtonClick: function (ev) {
         var moID = $(ev.currentTarget).data('id');
-        var dialog = new PagePropertiesDialog(this,moID, {'fromPageManagement': true}).open();
+        var dialog = new PagePropertiesDialog(this, moID, {'fromPageManagement': true}).open();
         return dialog;
     },
     _onClonePageButtonClick: function (ev) {
@@ -1090,7 +1092,7 @@ function _clonePage(pageId) {
             title: _t("Duplicate Page"),
             $content: $(qweb.render('website.duplicate_page_action_dialog')),
             confirm_callback: function () {
-                var new_page_name =  this.$('#page_name').val();
+                var new_page_name = this.$('#page_name').val();
                 return self._rpc({
                     model: 'website.page',
                     method: 'clone_page',

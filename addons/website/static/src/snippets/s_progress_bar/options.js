@@ -32,10 +32,10 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
                     this.$target.find('.progress-bar')[0], $('<div/>', {
                         class: 'progress',
                     })[0].outerHTML);
-                await this.editorCommands.addClasses(
-                    this.$target.find('.progress-bar span')[0],
-                    ['s_progress_bar_text']
-                )
+                await this.editor.execCustomCommand('dom.addClass', {
+                    domNode: this.$target.find('.progress-bar span')[0],
+                    class: 's_progress_bar_text',
+                });
             }
 
             await this.editorCommands.remove($text[0].childNodes[0]);
@@ -70,7 +70,7 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
             const $progressBarText = this.$target.find('.s_progress_bar_text');
             // Target precisely the XX% not only XX to not replace wrong element
             // eg 'Since 1978 we have completed 45%' <- don't replace 1978
-            const previousProgressChildNodes = $progressBarText[0].childNodes[0]
+            const previousProgressChildNodes = $progressBarText[0].childNodes[0];
             $progressBarText.text($progressBarText.text().replace(/[0-9]+%/, value + '%'));
             const replacedText = $progressBarText[0].outerHTML;
             await this.editorCommands.replace(

@@ -36,7 +36,7 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                             descriptionEl.outerHTML
                         );
                     }
-                };
+                }
             } else {
                 for (const el of $dishes.toArray()) {
                     const $description = $(el).find('.s_product_catalog_dish_description');
@@ -44,9 +44,12 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                         await this.editorCommands.remove($description[0]);
                     } else {
                         this.hasDescription = true;
-                        await this.editorCommands.addClasses($description[0], ['d-none']);
+                        await this.editor.execCustomCommand('dom.addClass', {
+                            domNode: $description[0],
+                            class: 'd-none',
+                        });
                     }
-                };
+                }
             }
         });
     },

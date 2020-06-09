@@ -1665,7 +1665,10 @@ const SnippetOptionWidget = Widget.extend({
                 }
             }
             if (widgetValue) {
-                await this.editorCommands.addClasses(this.$target[0], widgetValue.trim().split(/\s+/g));
+                await this.editor.execCommand('dom.addClass', {
+                    domNode: this.$target[0],
+                    class: widgetValue,
+                });
             }
         });
     },
@@ -1735,21 +1738,30 @@ const SnippetOptionWidget = Widget.extend({
                     // to add it (and adding the potential extra class) then leave.
                     const classes = ['o_cc', `o_cc${widgetValue}`];
                     if (params.extraClass) {
-                        classes.push(params.extraClass)
-                    };
-                    await this.editorCommands.addClasses(this.$target[0], classes);
+                        classes.push(params.extraClass);
+                    }
+                    await this.editor.execCustomCommand('dom.addClass', {
+                        domNode: this.$target[0],
+                        class: classes,
+                    });
                     return;
                 }
 
                 if (params.colorNames.includes(widgetValue)) {
                     const originalCSSValue = window.getComputedStyle(this.$target[0])[cssProps[0]];
                     const className = params.colorPrefix + widgetValue;
-                    await this.editorCommands.addClasses(this.$target[0], [className]);
+                    await this.editor.execCustomCommand('dom.addClass', {
+                        domNode: this.$target[0],
+                        class: className,
+                    });
                     if (originalCSSValue !== window.getComputedStyle(this.$target[0])[cssProps[0]]) {
                         // If applying the class did indeed changed the css
                         // property we are editing, nothing more has to be done.
                         // (except adding the extra class)
-                        await this.editorCommands.addClasses(this.$target[0], [className]);
+                        await this.editor.execCustomCommand('dom.addClass', {
+                            domNode: this.$target[0],
+                            class: className,
+                        });
                         return;
                     }
                     // Otherwise, it means that class probably does not exist,
@@ -1788,7 +1800,7 @@ const SnippetOptionWidget = Widget.extend({
                 }
             }
 
-            const styles =  window.getComputedStyle(this.$target[0]);
+            const styles = window.getComputedStyle(this.$target[0]);
             let hasUserValue = false;
             for (let i = cssProps.length - 1; i > 0; i--) {
                 hasUserValue = await applyCSS.call(this, cssProps[i], values.pop(), styles) || hasUserValue;
@@ -2284,7 +2296,9 @@ const SnippetOptionWidget = Widget.extend({
                     const $fakeTarget = () => $(this.$(params.applyTo)[i]);
                     // In case the call of `methodName` removed an element that matched the
                     // `params.applyTo`, break.
-                    if (!$fakeTarget()) break;
+                    if (!$fakeTarget()) {
+break;
+}
 
                     // We use a function to retrieve the value as the "original" $fakeTarget might
                     // have been replaced by the jabberwock editor.
@@ -2313,7 +2327,7 @@ const SnippetOptionWidget = Widget.extend({
             value = value.split(params.saveUnit).join('');
         }
         if (params.extraClass) {
-            await this.editorCommands.toggleClass(this.$target[0], params.extraClass, params.defaultValue !== value)
+            await this.editorCommands.toggleClass(this.$target[0], params.extraClass, params.defaultValue !== value);
         }
         return value;
     },
@@ -3168,7 +3182,10 @@ registry.background = SnippetOptionWidget.extend({
 
         if (widgetValue) {
             await this.editorCommands.setStyle(this.$target[0], 'background-image', `url('${widgetValue}')`);
-            await this.editorCommands.addClasses(this.$target[0], ['oe_img_bg']);
+            await this.editor.execCustomCommand('dom.addClass', {
+                domNode: this.$target[0],
+                class: 'oe_img_bg',
+            });
         } else {
             await this.editorCommands.setStyle(this.$target[0], 'background-image', '');
             await this.editorCommands.removeClasses(this.$target[0], ['oe_img_bg']);
