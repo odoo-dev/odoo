@@ -15,10 +15,10 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     display: async function (previewMode, widgetValue, params) {
-        await this.editorCommands.toggleClass(
-            this.$target.find('.s_blockquote_icon')[0],
-            widgetValue !== 'classic'
-        );
+        await this.editor.execCommand(widgetValue === 'classic' ? 'dom.removeClass' : 'dom.addClass', {
+            domNode: this.$target.find('.s_blockquote_icon')[0],
+            class: 'd-none',
+        });
         // todo: remove this when the jabberwock editor support miminum dom modification.
         const getContent = () => this.$target.find('.s_blockquote_content');
         await this.editorCommands.remove(getContent().find('.quote_char')[0]);
@@ -31,8 +31,14 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
         }
 
         // Text style
-        await this.editorCommands.toggleClass(getContent()[0], 'text-center', widgetValue === 'cover');
-        await this.editorCommands.toggleClass(getContent()[0], 'font-italic', widgetValue !== 'classic');
+        await this.editor.execCommand(widgetValue === 'cover' ? 'dom.addClass' : 'dom.removeClass', {
+            domNode: getContent()[0],
+            class: 'text-center',
+        });
+        await this.editor.execCommand(widgetValue === 'classic' ? 'dom.removeClass' : 'dom.addClass', {
+            domNode: getContent()[0],
+            class: 'font-italic',
+        });
 
         // Bg Img
         if (widgetValue === 'cover') {
@@ -49,14 +55,21 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
         // recreate all elements.
         // todo: remove this when the jabberwock editor support miminum dom modification.
         const getFooter = () => this.$target.find('footer');
-        await this.editorCommands.toggleClass(getFooter()[0], 'text-white', widgetValue === 'cover');
+        await this.editor.execCommand(widgetValue === 'cover' ? 'dom.addClass' : 'dom.removeClass', {
+            domNode: [getFooter()[0], this.$target[0]],
+            class: 'text-white',
+        });
         // $footer.toggleClass('text-white', widgetValue === 'cover');
-        await this.editorCommands.toggleClass(this.$target[0], 'text-white', widgetValue === 'cover');
         // this.$target.toggleClass('text-white', widgetValue === 'cover');
-        await this.editorCommands.toggleClass(getFooter()[0], 'd-none', widgetValue === 'minimalist');
+        await this.editor.execCommand(widgetValue === 'minimalist' ? 'dom.addClass' : 'dom.removeClass', {
+            domNode: getFooter()[0],
+            class: 'd-none',
+        });
         // $footer.toggleClass('d-none', widgetValue === 'minimalist');
-        await this.editorCommands.toggleClass(
-            this.$target.find('.s_blockquote_avatar')[0], 'd-none', widgetValue !== 'classic');
+        await this.editor.execCommand(widgetValue === 'classic' ? 'dom.removeClass' : 'dom.addClass', {
+            domNode: this.$target.find('.s_blockquote_avatar')[0],
+            class: 'd-none',
+        });
         // this.$target.find('.s_blockquote_avatar')
         //     .toggleClass('d-none', widgetValue !== 'classic');
     },

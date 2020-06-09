@@ -129,22 +129,35 @@ snippetOptions.registry.NavTabsStyle = snippetOptions.SnippetOptionWidget.extend
         await this.wysiwyg.execBatch(async ()=> {
             const $nav = this.$target.find('.s_tabs_nav:first .nav');
             const isPills = widgetValue === 'pills';
-            for (const nav of $nav) {
-                await this.editorCommands.toggleClass( nav, 'nav-tabs', !isPills);
-                await this.editorCommands.toggleClass( nav, 'card-header-tabs', !isPills);
-                await this.editorCommands.toggleClass( nav, 'nav-pills', isPills);
-            }
+            await this.editor.execCommand(isPills ? 'dom.removeClass' : 'dom.addClass', {
+                domNode: $nav,
+                class: 'nav-tabs card-header-tabs',
+            });
+            await this.editor.execCommand(isPills ? 'dom.addClass' : 'dom.removeClass', {
+                domNode: $nav,
+                class: 'nav-pills',
+            });
             // $nav.toggleClass('nav-tabs card-header-tabs', !isPills);
             // $nav.toggleClass('nav-pills', isPills);
             const firstTab = this.$target.find('.s_tabs_nav:first')[0];
-            await this.editorCommands.toggleClass( firstTab, 'card-header', !isPills);
-            await this.editorCommands.toggleClass( firstTab, 'mb-3', isPills);
+            await this.editor.execCommand(isPills ? 'dom.removeClass' : 'dom.addClass', {
+                domNode: firstTab,
+                class: 'card-header',
+            });
+            await this.editor.execCommand(isPills ? 'dom.addClass' : 'dom.removeClass', {
+                domNode: firstTab,
+                class: 'mb-3',
+            });
             // this.$target.find('.s_tabs_nav:first').toggleClass('card-header', !isPills).toggleClass('mb-3', isPills);
-            await this.editorCommands.toggleClass( this.$target[0], 'card', !isPills);
+            await this.editor.execCommand(isPills ? 'dom.removeClass' : 'dom.addClass', {
+                domNode: this.$target[0],
+                class: 'card',
+            });
             // this.$target.toggleClass('card', !isPills);
-            await this.editorCommands.toggleClass(
-                this.$target.find('.s_tabs_content:first')[0],
-                'card-body', !isPills);
+            await this.editor.execCommand(isPills ? 'dom.removeClass' : 'dom.addClass', {
+                domNode: this.$target.find('.s_tabs_content:first')[0],
+                class: 'card-body',
+            });
             // this.$target.find('.s_tabs_content:first').toggleClass('card-body', !isPills);
         });
     },

@@ -1749,7 +1749,7 @@ const SnippetOptionWidget = Widget.extend({
                     if (params.extraClass) {
                         classes.push(params.extraClass);
                     }
-                    await this.editor.execCustomCommand('dom.addClass', {
+                    await this.editor.execCommand('dom.addClass', {
                         domNode: this.$target[0],
                         class: classes,
                     });
@@ -1829,7 +1829,10 @@ const SnippetOptionWidget = Widget.extend({
             }
 
             if (params.extraClass) {
-                await this.editorCommands.toggleClass(this.$target[0], params.extraClass, hasUserValue);
+                await this.editor.execCommand(hasUserValue ? 'dom.addClass' : 'dom.removeClass', {
+                    domNode: this.$target[0],
+                    class: params.extraClass,
+                });
             }
         });
     },
@@ -2340,7 +2343,10 @@ break;
             value = value.split(params.saveUnit).join('');
         }
         if (params.extraClass) {
-            await this.editorCommands.toggleClass(this.$target[0], params.extraClass, params.defaultValue !== value);
+            await this.editor.execCommand(params.defaultValue === value ? 'dom.removeClass' : 'dom.addClass', {
+                domNode: this.$target[0],
+                class: params.extraClass,
+            });
         }
         return value;
     },
@@ -3334,7 +3340,10 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      */
     backgroundType: async function (previewMode, widgetValue, params) {
         await this.wysiwyg.execBatch(async ()=> {
-            await this.editorCommands.toggleClass(this.$target[0], 'o_bg_img_opt_repeat', widgetValue === 'repeat-pattern');
+            await this.editor.execCommand(widgetValue === 'repeat-pattern' ? 'dom.addClass' : 'dom.removeClass', {
+                domNode: this.$target[0],
+                class: 'o_bg_img_opt_repeat',
+            });
             await this.editorCommands.setStyle(this.$target[0], 'background-position', '');
             await this.editorCommands.setStyle(this.$target[0], 'background-size', '');
         });

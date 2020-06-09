@@ -791,7 +791,10 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     }),
     pageOptionsSetValueCallbacks: {
         header_overlay: async function (value, wysiwyg) {
-            await wysiwyg.editorCommands.toggleClass($('#wrapwrap')[0], 'o_header_overlay', value);
+            await this.editor.execCommand(value ? 'dom.addClass' : 'dom.removeClass', {
+                domNode: $('#wrapwrap')[0],
+                class: 'o_header_overlay',
+            });
         },
         header_color: async function (value, wysiwyg) {
             await this.wysiwyg.execBatch(async () => {

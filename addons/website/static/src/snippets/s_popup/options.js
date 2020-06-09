@@ -63,15 +63,27 @@ snippetOptions.registry.SnippetPopup = snippetOptions.SnippetOptionWidget.extend
     setLayout: async function (previewMode, widgetValue, params) {
         const isModal = widgetValue === 'modal';
         const isTop = widgetValue === 'fixedTop';
-        await this.wysiwyg.execBatch(async ()=>{
-            await this.editorCommands.toggleClass(this.$target[0], 's_popup_fixed', !isModal)
-            await this.editorCommands.toggleClass(this.$target[0], 's_popup_fixed_top', !isTop)
-            await this.editorCommands.toggleClass(this.$target[0], 's_popup_center', isModal)
-            await this.editorCommands.toggleClass(this.$target[0], 'modal', isModal)
-            await this.editorCommands.toggleClass(
-                this.$target.find('.s_popup_frame')[0], 'modal', isModal);
-            await this.editorCommands.toggleClass(
-                this.$target.find('.s_popup_content')[0], 'modal-content', isModal);
+        await this.wysiwyg.execBatch(async () => {
+            await this.editor.execCommand(isModal ? 'dom.removeClass' : 'dom.addClass', {
+                domNode: this.$target[0],
+                class: 's_popup_fixed',
+            });
+            await this.editor.execCommand(isTop ? 'dom.removeClass' : 'dom.addClass', {
+                domNode: this.$target[0],
+                class: 's_popup_fixed_top',
+            });
+            await this.editor.execCommand(isModal ? 'dom.addClass' : 'dom.removeClass', {
+                domNode: this.$target[0],
+                class: ['s_popup_center', 'modal'],
+            });
+            await this.editor.execCommand(isModal ? 'dom.addClass' : 'dom.removeClass', {
+                domNode: this.$target.find('.s_popup_frame')[0],
+                class: 'modal',
+            });
+            await this.editor.execCommand(isModal ? 'dom.addClass' : 'dom.removeClass', {
+                domNode: this.$target.find('.s_popup_content')[0],
+                class: 'modal-content',
+            });
         });
     },
 

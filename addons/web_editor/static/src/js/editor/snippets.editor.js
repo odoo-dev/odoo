@@ -429,7 +429,7 @@ snippetEditor.destroy();
             [this.$snippetBlock[0], 'AFTER'],
             $clonedContent[0].outerHTML
         );
-        const jwEditor = this.options.wysiwyg.editor;
+        const jwEditor = this.wysiwyg.editor;
         const dom = jwEditor.plugins.get(this.JWEditorLib.Dom);
         const $clone = $(dom.domMap.toDom(vNode)[0][0]);
 
@@ -893,11 +893,12 @@ var SnippetsMenu = Widget.extend({
         this.$editor = options.$el;
         this.$body = this.$editor.closest('body');
 
-        this.editorCommands = this.options.wysiwyg.editorCommands;
+        this.wysiwyg = options.wysiwyg;
+        this.editorCommands = this.wysiwyg.editorCommands;
 
         this.JWEditorLib = options.JWEditorLib;
         if (this.JWEditorLib) {
-            const jwEditor = this.options.wysiwyg.editor;
+            const jwEditor = this.wysiwyg.editor;
             const layout = jwEditor.plugins.get(this.JWEditorLib.Layout);
             this.layoutEngine = layout.engines.dom;
             this.nodeToEditor = new Map();
@@ -1095,8 +1096,12 @@ var SnippetsMenu = Widget.extend({
     afterRender: function () {
         this.snippetEditors = this.snippetEditors.filter(x=>!x.isDestroyed());
         for (const editor of this.snippetEditors) {
-            if (!editor.vNode) continue;
-            if (!this.layoutEngine.getDomNodes(editor.vNode)) debugger;
+            if (!editor.vNode) {
+continue;
+}
+            if (!this.layoutEngine.getDomNodes(editor.vNode)) {
+debugger;
+}
 
             const $snippetBlock = $(this.layoutEngine.getDomNodes(editor.vNode)[0][0]);
             editor.$snippetBlock = $snippetBlock;
@@ -1106,7 +1111,9 @@ var SnippetsMenu = Widget.extend({
         // setTarget access the $snippetBlock of the editor that would not
         // be set otherwise.
         for (const editor of this.snippetEditors) {
-            if (!editor.vNode) continue;
+            if (!editor.vNode) {
+continue;
+}
             for (const key in editor.snippetOptionInstances) {
                 const $snippetBlock = $(this.layoutEngine.getDomNodes(editor.vNode)[0][0]);
                 editor.snippetOptionInstances[key].setTarget($snippetBlock);
@@ -1114,7 +1121,7 @@ var SnippetsMenu = Widget.extend({
         }
         // debugger
         // let currentNode = this.includedSnippetNodes[0];
-        // const jwEditor = this.options.wysiwyg.editor;
+        // const jwEditor = this.wysiwyg.editor;
         // const dom = jwEditor.plugins.get(JWEditorLib.Dom);
         // while (currentNode) {
         //     currentNode = this.includedSnippetNodes.shift();
@@ -1749,10 +1756,10 @@ var SnippetsMenu = Widget.extend({
                 };
                 isEnabled = (cache[k]['drop-near'] || cache[k]['drop-in']);
             });
-            await this.editor.execCommand(isEnabled ? 'dom.removeClass' : 'dom.addClass', {
+            await this.wysiwyg.editor.execCommand(isEnabled ? 'dom.removeClass' : 'dom.addClass', {
                 domNode: snippetDraggable,
                 class: 'o_disabled',
-             });
+            });
         }
     },
     /**
@@ -1877,7 +1884,7 @@ var SnippetsMenu = Widget.extend({
 
                     _.defer(async () => {
                         self.trigger_up('snippet_dropped', {$target: $snippetToInsert});
-                        const jwEditor = self.options.wysiwyg.editor;
+                        const jwEditor = self.wysiwyg.editor;
                         const vNodes = await self.insertSnippet($snippetToInsert);
                         const layout = jwEditor.plugins.get(self.JWEditorLib.Layout);
                         const domLayout = layout.engines.dom;
@@ -2288,7 +2295,7 @@ var SnippetsMenu = Widget.extend({
      * - an ancestor of `element` is in vDocument
      */
     _getVNodeRange(element) {
-        const layout = this.options.wysiwyg.editor.plugins.get(this.JWEditorLib.Layout);
+        const layout = this.wysiwyg.editor.plugins.get(this.JWEditorLib.Layout);
         const domLayout = layout.engines.dom;
 
         let currentNode = element.nextSibling;
@@ -2322,7 +2329,7 @@ var SnippetsMenu = Widget.extend({
 
     insertSnippet: async function ($snippet) {
         const rangePoint = this._getVNodeRange($snippet[0]);
-        const result = await this.options.wysiwyg.editor.execCommand('insertHtml', {
+        const result = await this.wysiwyg.editor.execCommand('insertHtml', {
             html: $snippet[0].outerHTML,
             rangePoint: rangePoint,
         });

@@ -1763,7 +1763,10 @@ snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     async setShadow(previewMode, widgetValue, params) {
-        await this.editorCommands.toggleClass(this.$target[0], params.shadowClass, !!widgetValue);
+        await this.editor.execCommand(widgetValue ? 'dom.addClass' : 'dom.removeClass', {
+            domNode: this.$target[0],
+            class: params.shadowClass,
+        });
         if (widgetValue) {
             const inset = widgetValue === 'inset' ? widgetValue : '';
             const values = this.$target.css('box-shadow').replace('inset', '') + ` ${inset}`;
