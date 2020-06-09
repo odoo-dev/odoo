@@ -1770,9 +1770,18 @@ snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
         if (widgetValue) {
             const inset = widgetValue === 'inset' ? widgetValue : '';
             const values = this.$target.css('box-shadow').replace('inset', '') + ` ${inset}`;
-            await this.editorCommands.setStyle(this.$target[0], 'box-shadow', values, true);
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'box-shadow',
+                value: values,
+                important: true,
+            });
         } else {
-            await this.editorCommands.setStyle(this.$target[0], 'box-shadow', '');
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'box-shadow',
+                value: '',
+            });
         }
     },
 
@@ -1890,14 +1899,22 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
     background: async function (previewMode, widgetValue, params) {
         if (widgetValue === '') {
             await this.wysiwyg.execBatch(async ()=> {
-                await this.editorCommands.setStyle(this.$image[0], 'background-image', '');
+                await this.editor.execCommand('dom.setStyle', {
+                    domNode: this.$image[0],
+                    name: 'background-image',
+                    value: '',
+                });
                 await this.editor.execCommand('dom.removeClass', {
                     domNode: this.$target[0],
                     class: 'o_record_has_cover',
                 });
             });
         } else {
-            await this.editorCommands.setStyle(this.$image[0], 'background-image', `url('${widgetValue}')`);
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$image[0],
+                name: 'background-image',
+                value: `url('${widgetValue}')`,
+            });
             const $defaultSizeBtn = this.$el.find('.o_record_cover_opt_size_default');
             $defaultSizeBtn.click();
             $defaultSizeBtn.closest('we-select').click();

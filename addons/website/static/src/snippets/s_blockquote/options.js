@@ -42,12 +42,32 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
 
         // Bg Img
         if (widgetValue === 'cover') {
-            await this.editorCommands.setStyle(this.$target[0], 'background-image', widgetValue === "url('/web/image/website.s_parallax_default_image')");
-            await this.editorCommands.setStyle(this.$target[0], 'background-position', "50%");
-            await this.editorCommands.setStyle(getContent()[0], 'background-color', "rgba(0, 0, 0, 0.5)");
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-image',
+                value: '' + widgetValue === "url('/web/image/website.s_parallax_default_image')",
+            });
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-position',
+                value: '50%',
+            });
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-color',
+                value: 'rgba(0, 0, 0, 0.5)',
+            });
         } else {
-            await this.editorCommands.setStyle(this.$target[0], 'background-image', "unset");
-            await this.editorCommands.setStyle(getContent()[0], 'background-color', "unset");
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-image',
+                value: 'unset',
+            });
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: getContent()[0],
+                name: 'background-color',
+                value: 'unset',
+            });
         }
 
         // Blockquote Footer

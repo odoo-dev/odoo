@@ -1731,7 +1731,11 @@ const SnippetOptionWidget = Widget.extend({
             for (const cssProp of cssProps) {
                 // Always reset the inline style first to not put inline style on an
                 // element which already have this style through css stylesheets.
-                await this.editorCommands.setStyle(this.$target[0], cssProp, '');
+                await this.editor.execCommand('dom.setStyle', {
+                    domNode: this.$target[0],
+                    name: cssProp,
+                    value: '',
+                });
             }
             if (params.extraClass) {
                 await this.editor.execCommand('dom.removeClass', {
@@ -1830,7 +1834,12 @@ const SnippetOptionWidget = Widget.extend({
 
             async function applyCSS(cssProp, cssValue, styles) {
                 if (!weUtils.areCssValuesEqual(styles[cssProp], cssValue)) {
-                    await this.editorCommands.setStyle(this.$target[0], cssProp, cssValue, true);
+                    await this.editor.execCommand('dom.setStyle', {
+                        domNode: this.$target[0],
+                        name: cssProp,
+                        value: cssValue,
+                        important: true,
+                    });
                     return true;
                 }
                 return false;
@@ -3208,13 +3217,21 @@ registry.background = SnippetOptionWidget.extend({
         }
 
         if (widgetValue) {
-            await this.editorCommands.setStyle(this.$target[0], 'background-image', `url('${widgetValue}')`);
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-image',
+                value: `url('${widgetValue}')`,
+            });
             await this.editor.execCommand('dom.addClass', {
                 domNode: this.$target[0],
                 class: 'oe_img_bg',
             });
         } else {
-            await this.editorCommands.setStyle(this.$target[0], 'background-image', '');
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-image',
+                value: '',
+            });
             await this.editor.execCommand('dom.removeClass', {
                 domNode: this.$target[0],
                 class: 'oe_img_bg',
@@ -3352,8 +3369,16 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
                 domNode: this.$target[0],
                 class: 'o_bg_img_opt_repeat',
             });
-            await this.editorCommands.setStyle(this.$target[0], 'background-position', '');
-            await this.editorCommands.setStyle(this.$target[0], 'background-size', '');
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-position',
+                value: '',
+            });
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-size',
+                value: '',
+            });
         });
     },
     /**
@@ -3424,7 +3449,11 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         this.$overlayBackground = this.$overlayContent.find('.o_overlay_background');
 
         this.$backgroundOverlay.on('click', '.o_btn_apply', async () => {
-            await this.editorCommands.setStyle(this.$target[0], 'background-position', this.$bgDragger.css('background-position'));
+            await this.editor.execCommand('dom.setStyle', {
+                domNode: this.$target[0],
+                name: 'background-position',
+                value: this.$bgDragger.css('background-position'),
+            });
             this._toggleBgOverlay(false);
         });
         this.$backgroundOverlay.on('click', '.o_btn_discard', () => {
