@@ -35,7 +35,7 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
                     this.$target.find('.progress-bar')[0], $('<div/>', {
                         class: 'progress',
                     })[0].outerHTML);
-                await this.editor.execCustomCommand('dom.addClass', {
+                await this.editor.execCommand('dom.addClass', {
                     domNode: this.$target.find('.progress-bar span')[0],
                     class: 's_progress_bar_text',
                 });

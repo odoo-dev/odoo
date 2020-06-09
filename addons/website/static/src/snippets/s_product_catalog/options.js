@@ -47,7 +47,7 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                         await this.editorCommands.remove($description[0]);
                     } else {
                         this.hasDescription = true;
-                        await this.editor.execCustomCommand('dom.addClass', {
+                        await this.editor.execCommand('dom.addClass', {
                             domNode: $description[0],
                             class: 'd-none',
                         });

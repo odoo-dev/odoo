@@ -1759,7 +1759,7 @@ const SnippetOptionWidget = Widget.extend({
                 if (params.colorNames.includes(widgetValue)) {
                     const originalCSSValue = window.getComputedStyle(this.$target[0])[cssProps[0]];
                     const className = params.colorPrefix + widgetValue;
-                    await this.editor.execCustomCommand('dom.addClass', {
+                    await this.editor.execCommand('dom.addClass', {
                         domNode: this.$target[0],
                         class: className,
                     });
@@ -1767,7 +1767,7 @@ const SnippetOptionWidget = Widget.extend({
                         // If applying the class did indeed changed the css
                         // property we are editing, nothing more has to be done.
                         // (except adding the extra class)
-                        await this.editor.execCustomCommand('dom.addClass', {
+                        await this.editor.execCommand('dom.addClass', {
                             domNode: this.$target[0],
                             class: className,
                         });
@@ -3195,7 +3195,7 @@ registry.background = SnippetOptionWidget.extend({
 
         if (widgetValue) {
             await this.editorCommands.setStyle(this.$target[0], 'background-image', `url('${widgetValue}')`);
-            await this.editor.execCustomCommand('dom.addClass', {
+            await this.editor.execCommand('dom.addClass', {
                 domNode: this.$target[0],
                 class: 'oe_img_bg',
             });

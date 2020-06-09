@@ -799,7 +799,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                     domNode: $('#wrapwrap > header')[0],
                     class: this.value,
                 });
-                await this.editor.execCustomCommand('dom.addClass', {
+                await this.editor.execCommand('dom.addClass', {
                     domNode: $('#wrapwrap > header')[0],
                     class: value,
                 });
