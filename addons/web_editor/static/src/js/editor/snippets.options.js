@@ -1661,7 +1661,10 @@ const SnippetOptionWidget = Widget.extend({
         await this.wysiwyg.execBatch(async ()=> {
             for (const classNames of params.possibleValues) {
                 if (classNames) {
-                    await this.editorCommands.removeClasses(this.$target[0], classNames.trim().split(/\s+/g));
+                    await this.editor.execCommand('dom.removeClass', {
+                        domNode: this.$target[0],
+                        class: classNames,
+                    });
                 }
             }
             if (widgetValue) {
@@ -1723,7 +1726,10 @@ const SnippetOptionWidget = Widget.extend({
                 await this.editorCommands.setStyle(this.$target[0], cssProp, '');
             }
             if (params.extraClass) {
-                await this.editorCommands.removeClasses(this.$target[0], [params.extraClass]);
+                await this.editor.execCommand('dom.removeClass', {
+                    domNode: this.$target[0],
+                    class: params.extraClass,
+                });
             }
 
             // Only allow to use a color name as a className if we know about the
@@ -1731,7 +1737,10 @@ const SnippetOptionWidget = Widget.extend({
             // (otherwise we suppose that we should use the actual related color).
             if (params.colorNames && params.colorPrefix) {
                 const classes = weUtils.computeColorClasses(params.colorNames, params.colorPrefix);
-                await this.editorCommands.removeClasses(this.$target[0], classes);
+                await this.editor.execCommand('dom.removeClass', {
+                    domNode: this.$target[0],
+                    class: classes,
+                });
 
                 if (weUtils.isColorCombinationName(widgetValue)) {
                     // Those are the special color combinations classes. Just have
@@ -1762,12 +1771,16 @@ const SnippetOptionWidget = Widget.extend({
                             domNode: this.$target[0],
                             class: className,
                         });
-                        return;
+                    } else {
+                        // Otherwise, it means that class probably does not
+                        // exist, we remove it and continue. Especially useful
+                        // for some prefixes which only work with some color
+                        // names but not all.
+                        await this.editor.execCommand('dom.removeClass', {
+                            domNode: this.$target[0],
+                            class: className,
+                        });
                     }
-                    // Otherwise, it means that class probably does not exist,
-                    // we remove it and continue. Especially useful for some
-                    // prefixes which only work with some color names but not all.
-                    await this.editorCommands.removeClasses(this.$target[0], [className]);
                 }
             }
 
@@ -3188,7 +3201,10 @@ registry.background = SnippetOptionWidget.extend({
             });
         } else {
             await this.editorCommands.setStyle(this.$target[0], 'background-image', '');
-            await this.editorCommands.removeClasses(this.$target[0], ['oe_img_bg']);
+            await this.editor.execCommand('dom.removeClass', {
+                domNode: this.$target[0],
+                class: 'oe_img_bg',
+            });
         }
 
         if (previewMode === 'reset') {

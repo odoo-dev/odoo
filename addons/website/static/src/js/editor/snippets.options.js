@@ -533,7 +533,7 @@ snippetOptions.registry.BackgroundOptimize.include({
 snippetOptions.registry.background.include({
     background: async function (previewMode, widgetValue, params) {
         if (previewMode === 'reset' && this.videoSrc) {
-            return this._setBgVideo(false, this.videoSrc)
+            return this._setBgVideo(false, this.videoSrc);
         }
 
         const _super = this._super.bind(this);
@@ -1763,7 +1763,7 @@ snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     async setShadow(previewMode, widgetValue, params) {
-        await this.editorCommands.toggleClass(this.$target[0], params.shadowClass, !!widgetValue)
+        await this.editorCommands.toggleClass(this.$target[0], params.shadowClass, !!widgetValue);
         if (widgetValue) {
             const inset = widgetValue === 'inset' ? widgetValue : '';
             const values = this.$target.css('box-shadow').replace('inset', '') + ` ${inset}`;
@@ -1888,7 +1888,10 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
         if (widgetValue === '') {
             await this.wysiwyg.execBatch(async ()=> {
                 await this.editorCommands.setStyle(this.$image[0], 'background-image', '');
-                await this.editorCommands.removeClasses(this.$taget[0], ['o_record_has_cover']);
+                await this.editor.execCommand('dom.removeClass', {
+                    domNode: this.$target[0],
+                    class: 'o_record_has_cover',
+                });
             });
         } else {
             await this.editorCommands.setStyle(this.$image[0], 'background-image', `url('${widgetValue}')`);
@@ -2035,21 +2038,21 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
         switch (widgetValue) {
             case 'prev':
                 await this.wysiwyg.execBatch(async ()=> {
-                    await this.editorCommands.moveBefore(this.$target.prev()[0], this.$target[0])
+                    await this.editorCommands.moveBefore(this.$target.prev()[0], this.$target[0]);
                     if (isNavItem) {
                         const $tabPane = getTabPane();
                         // todo: check if it work
-                        await this.editorCommands.moveBefore($tabPane.prev()[0], $tabPane[0])
+                        await this.editorCommands.moveBefore($tabPane.prev()[0], $tabPane[0]);
                     }
                 });
                 break;
             case 'next':
                 await this.wysiwyg.execBatch(async ()=> {
 
-                    await this.editorCommands.moveAfter(this.$target.next()[0], this.$target[0])
+                    await this.editorCommands.moveAfter(this.$target.next()[0], this.$target[0]);
                     if (isNavItem) {
                         const $tabPane = getTabPane();
-                        await this.editorCommands.moveAfter($tabPane.next()[0], $tabPane[0])
+                        await this.editorCommands.moveAfter($tabPane.next()[0], $tabPane[0]);
                     }
                 });
                 break;
@@ -2108,7 +2111,7 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
                 const arrow = document.createElement('i');
                 arrow.classList.add('fa', 'fa-angle-down', 'fa-3x');
                 // todo: remove this nbsp when the problem with empty inline will be fixed.
-                arrow.innerHTML = "&nbsp;"
+                arrow.innerHTML = "&nbsp;";
                 anchor.appendChild(arrow);
                 this.$buttonTemplate = $(anchor);
             }

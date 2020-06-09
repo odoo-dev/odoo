@@ -794,8 +794,11 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             await wysiwyg.editorCommands.toggleClass($('#wrapwrap')[0], 'o_header_overlay', value);
         },
         header_color: async function (value, wysiwyg) {
-            await wysiwyg.execBatch(async () => {
-                await wysiwyg.editorCommands.removeClasses($('#wrapwrap > header')[0], [this.value]);
+            await this.wysiwyg.execBatch(async () => {
+                await this.editor.execCommand('dom.removeClass', {
+                    domNode: $('#wrapwrap > header')[0],
+                    class: this.value,
+                });
                 await this.editor.execCustomCommand('dom.addClass', {
                     domNode: $('#wrapwrap > header')[0],
                     class: value,

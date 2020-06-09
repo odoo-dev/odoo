@@ -27,7 +27,10 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
             // todo: Test this.
             if (this.$target.hasClass('progress')) {
                 this.$target.removeClass('progress');
-                await this.editorCommands.removeClasses(this.$target[0], ['progress']);
+                await this.editor.execCommand('dom.removeClass', {
+                    domNode: this.$target[0],
+                    class: 'progress',
+                });
                 await this.editorCommands.wrap(
                     this.$target.find('.progress-bar')[0], $('<div/>', {
                         class: 'progress',
