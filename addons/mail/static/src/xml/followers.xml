@@ -4,7 +4,7 @@
     <!--
         Followers, actions and subtypes in a record.
     -->
-    <t t-name="mail.Followers">
+    <t t-name="mail.legacy.Followers">
         <div class="o_followers btn-group">
             <div class="o_followers_title_box btn-group">
                 <button class="btn btn-link" title="Dropdown menu - Followers"
@@ -29,7 +29,7 @@
     <!--
         Partner or channel following the record
     -->
-    <t t-name="mail.Followers.partner">
+    <t t-name="mail.legacy.Followers.partner">
         <div role="menuitem" t-attf-class="dropdown-item o_partner {{ !record.is_active ? 'o_inactive': '' }}">
             <a class="o_mail_redirect text-truncate"
                 href="#"
@@ -58,7 +58,7 @@
     <!--
         'Add followers' and 'Add channels' buttons
     -->
-    <t t-name="mail.Followers.add_more">
+    <t t-name="mail.legacy.Followers.add_more">
         <t t-if="widget.isEditable">
             <a href="#" role="menuitem" class="dropdown-item o_add_follower">Add Followers</a>
             <a href="#" role="menuitem" class="dropdown-item o_add_follower_channel">Add Channels</a>
@@ -69,7 +69,7 @@
     <!--
         Message subtypes of a follower subscription
     -->
-    <t t-name="mail.Followers.subtype">
+    <t t-name="mail.legacy.Followers.subtype">
         <div role="menuitem" class="o_subtype dropdown-item">
             <div class="custom-control custom-checkbox">
                 <input type="checkbox"
@@ -86,7 +86,7 @@
             <i t-if="display_warning" class="fa fa-warning text-warning" role="img" aria-label="Warning" title="Warning"/>
         </div>
     </t>
-    <t t-name="mail.Followers.subtypes.warning">
+    <t t-name="mail.legacy.Followers.subtypes.warning">
         <span class="text-warning">
             <i class="fa fa-warning"/> Be careful with channels following internal notifications
         </span>

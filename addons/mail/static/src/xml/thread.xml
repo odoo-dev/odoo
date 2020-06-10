@@ -327,14 +327,14 @@
                     <t t-if="message.hasAttachments()">
                         <div t-if="message.hasImageAttachments()" class="o_attachments_previews">
                             <t t-foreach="message.getImageAttachments()" t-as="attachment">
-                                <t t-call="mail.AttachmentPreview">
+                                <t t-call="mail.legacy.AttachmentPreview">
                                     <t t-set="isDeletable" t-value="options.hasMessageAttachmentDeletable"/>
                                 </t>
                             </t>
                         </div>
                         <div t-if="message.hasNonImageAttachments()" class="o_attachments_list">
                             <t t-foreach="message.getNonImageAttachments()" t-as="attachment">
-                                <t t-call="mail.Attachment">
+                                <t t-call="mail.legacy.Attachment">
                                     <t t-set="isDeletable" t-value="options.hasMessageAttachmentDeletable"/>
                                 </t>
                             </t>
@@ -421,10 +421,10 @@
     <!--
         @param {Array} attachments
     -->
-    <t t-name="mail.composer.Attachments">
+    <t t-name="mail.legacy.composer.Attachments">
         <div t-if="attachments.length > 0" class="o_attachments o_attachments_list">
             <t t-foreach="attachments" t-as='attachment'>
-                <t t-call="mail.Attachment">
+                <t t-call="mail.legacy.Attachment">
                      <t t-set="editable" t-value="true"/>
                 </t>
             </t>
@@ -438,7 +438,7 @@
         @param {string} attachment.url
         @param {boolean} [isDeletable=false]
     -->
-    <t t-name="mail.AttachmentPreview">
+    <t t-name="mail.legacy.AttachmentPreview">
         <div class="o_attachment" t-att-title="attachment.name">
             <div class="o_attachment_wrap">
                 <div class="o_image_box">
@@ -467,7 +467,7 @@
           Some changes are required in that case, such as "delete" button is not visible (pretty unlink is used instead).
         @param {boolean} [isDeletable=false]
     -->
-    <t t-name="mail.Attachment">
+    <t t-name="mail.legacy.Attachment">
         <t t-set="type" t-value="attachment.mimetype and attachment.mimetype.split('/').shift()"/>
         <div t-attf-class="o_attachment #{ editable ? 'o_attachment_editable' : '' } #{attachment.upload ? 'o_attachment_uploading' : ''}" t-att-title="attachment.name">
             <div class="o_attachment_wrap">

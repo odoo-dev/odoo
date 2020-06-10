@@ -3,7 +3,7 @@ odoo.define('im_support.systray_tests', function (require) {
 
 var imSupportTestUtils = require('im_support.test_utils');
 
-const { getMailServices } = require('mail.messaging.testUtils');
+const { getMailServices } = require('mail/static/src/utils/test_utils.js');
 var MessagingMenu = require('mail.systray.MessagingMenu');
 
 var testUtils = require('web.test_utils');

@@ -17,7 +17,7 @@ var QWeb = core.qweb;
 var _t = core._t;
 
 var BasicComposer = Widget.extend({
-    template: "mail.Composer",
+    template: "mail.legacy.Composer",
     events: {
         'change input.o_input_file': '_onAttachmentChange',
         'click .o_attachment_delete': '_onAttachmentDelete',
@@ -496,7 +496,7 @@ var BasicComposer = Widget.extend({
      * @private
      */
     _renderAttachments: function () {
-        this._$attachmentsList.html(QWeb.render('mail.composer.Attachments', {
+        this._$attachmentsList.html(QWeb.render('mail.legacy.composer.Attachments', {
             attachments: this.get('attachment_ids'),
         }));
     },
@@ -663,7 +663,7 @@ var BasicComposer = Widget.extend({
      */
     _onEmojiButtonClick: function () {
         if (!this._$emojisContainer) { // lazy rendering
-            this._$emojisContainer = $(QWeb.render('mail.Composer.emojis', {
+            this._$emojisContainer = $(QWeb.render('mail.legacy.Composer.emojis', {
                 emojis: emojis,
             }));
         }
