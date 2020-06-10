@@ -2,7 +2,7 @@ odoo.define('mail.discuss_test', function (require) {
 "use strict";
 
 const Discuss = require('mail.Discuss');
-const { getMailServices } = require('mail.messaging.testUtils');
+const { getMailServices } = require('mail/static/src/utils/test_utils.js');
 var mailTestUtils = require('mail.testUtils');
 
 var testUtils = require('web.test_utils');

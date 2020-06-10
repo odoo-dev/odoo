@@ -1,7 +1,7 @@
 odoo.define('im_support.test_utils', function (require) {
 "use strict";
 
-const { MockMailService } = require('mail.messaging.testUtils');
+const { MockMailService } = require('mail/static/src/utils/test_utils.js');
 var supportSession = require('im_support.SupportSession');
 
 var testUtils = require('web.test_utils');

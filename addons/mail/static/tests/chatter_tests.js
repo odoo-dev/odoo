@@ -1,7 +1,7 @@
 odoo.define('mail.chatter_tests', function (require) {
 "use strict";
 
-const { getMailServices } = require('mail.messaging.testUtils');
+const { getMailServices } = require('mail/static/src/utils/test_utils.js');
 
 var FormView = require('web.FormView');
 var ListView = require('web.ListView');

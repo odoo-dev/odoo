@@ -6,7 +6,7 @@ odoo.define('im_support.systray_no_support_tests', function (require) {
  * on the webclient when the support is not available.
  */
 
-const { getMailServices, MockMailService } = require('mail.messaging.testUtils');
+const { getMailServices, MockMailService } = require('mail/static/src/utils/test_utils.js');
 var MessagingMenu = require('mail.systray.MessagingMenu');
 
 var testUtils = require('web.test_utils');

@@ -169,7 +169,7 @@ var RenameConversationDialog = Dialog.extend({
 });
 
 var Discuss = AbstractAction.extend({
-    contentTemplate: 'mail.discuss',
+    contentTemplate: 'mail.legacy.discuss',
     custom_events: _.extend({}, AbstractAction.prototype.custom_events, {
         discard_extended_composer: '_onDiscardExtendedComposer',
     }),
@@ -546,7 +546,7 @@ var Discuss = AbstractAction.extend({
      * @private
      */
     _renderButtons: function () {
-        this.$buttons = $(QWeb.render('mail.discuss.ControlButtons', { debug: config.isDebug() }));
+        this.$buttons = $(QWeb.render('mail.legacy.discuss.ControlButtons', { debug: config.isDebug() }));
         this.$buttons.find('button').css({display:'inline-block'});
         this.$buttons
             .on('click', '.o_mail_discuss_button_invite', this._onInviteButtonClicked.bind(this))
@@ -560,7 +560,7 @@ var Discuss = AbstractAction.extend({
     _renderSidebar: function () {
         var channels = this.call('mail_service', 'getChannels');
         channels = this._sortChannels(channels);
-        var $sidebar = $(QWeb.render('mail.discuss.Sidebar', {
+        var $sidebar = $(QWeb.render('mail.legacy.discuss.Sidebar', {
             activeThreadID: this._thread ? this._thread.getID() : undefined,
             inbox: this.call('mail_service', 'getMailbox', 'inbox'),
             channels: channels,
@@ -584,7 +584,7 @@ var Discuss = AbstractAction.extend({
         });
         channels = this._sortChannels(channels);
         this.$('.o_mail_discuss_sidebar_channels').html(
-            QWeb.render('mail.discuss.SidebarChannels', {
+            QWeb.render('mail.legacy.discuss.SidebarChannels', {
                 activeThreadID: this._thread ? this._thread.getID() : undefined,
                 channels: channels,
                 displayQuickSearch: channels.length >= this.options.channelQuickSearchThreshold,
@@ -596,7 +596,7 @@ var Discuss = AbstractAction.extend({
      */
     _renderSidebarMailboxes: function () {
         this.$('.o_mail_discuss_sidebar_mailboxes').html(
-            QWeb.render('mail.discuss.SidebarMailboxes', {
+            QWeb.render('mail.legacy.discuss.SidebarMailboxes', {
                 activeThreadID: this._thread ? this._thread.getID() : undefined,
                 inbox: this.call('mail_service', 'getMailbox', 'inbox'),
             })
@@ -1117,7 +1117,7 @@ var Discuss = AbstractAction.extend({
         this._thread.postMessage(messageData, options)
             .then(function () {
                 if (self._selectedMessage) {
-                    self._renderSnackbar('mail.discuss.MessageSentSnackbar', {
+                    self._renderSnackbar('mail.legacy.discuss.MessageSentSnackbar', {
                         documentName: self._selectedMessage.getDocumentName()
                     }, 5000);
                     self._unselectMessage();
