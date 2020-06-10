@@ -780,6 +780,65 @@ QUnit.test('open chat window from preview', async function (assert) {
     );
 });
 
+QUnit.test('no code injection in message body preview', async function (assert) {
+    assert.expect(5);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 1,
+                name: "General",
+            }],
+        },
+    });
+
+    this.data['mail.channel'].records = [{
+        id: 1,
+        name: "general",
+        channel_type: "channel",
+        channel_message_ids: [1],
+    }];
+    this.data['mail.message'].records = [{
+        id: 1,
+        author_id: [1, 'Georges'],
+        body: "<p><em>&shoulnotberaised</em><script>throw new Error('CodeInjectionError');</script></p>",
+        channel_ids: [1],
+    }];
+
+    await this.start();
+
+    await afterNextRender(() => {
+        document.querySelector(`.o_MessagingMenu_toggler`).click();
+    });
+    assert.containsOnce(
+        document.body,
+        '.o_MessagingMenu_dropdownMenu .o_ThreadPreview',
+        "should display a preview",
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_ThreadPreview_core',
+        "preview should have core in content",
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_ThreadPreview_inlineText',
+        "preview should have inline text in core of content",
+    );
+    assert.strictEqual(
+        document.querySelector('.o_ThreadPreview_inlineText')
+            .textContent.replace(/\s/g, ""),
+        "Georges:&shoulnotberaisedthrownewError('CodeInjectionError');",
+        "should display correct uninjected last message inline content"
+    );
+    assert.containsNone(
+        document.querySelector('.o_ThreadPreview_inlineText'),
+        'script',
+        "last message inline content should not have any code injection"
+    );
+});
+
 });
 });
 });

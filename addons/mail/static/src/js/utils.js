@@ -5,6 +5,15 @@ var core = require('web.core');
 
 var _t = core._t;
 
+/**
+ * WARNING: this is not enough to unescape potential XSS contained in htmlString, transformFunction
+ * should handle it or it should be handled after/before calling parseAndTransform. So if the result
+ * of this function is used in a t-raw, be very careful.
+ *
+ * @param {string} htmlString
+ * @param {function} transformFunction
+ * @returns {string}
+ */
 function parseAndTransform(htmlString, transformFunction) {
     var openToken = "OPEN" + Date.now();
     var string = htmlString.replace(/&lt;/g, openToken);

@@ -74,7 +74,7 @@ class ThreadPreview extends Component {
         if (!this.thread.lastMessage) {
             return '';
         }
-        return mailUtils.parseAndTransform(this.thread.lastMessage.prettyBody, mailUtils.inline);
+        return mailUtils.htmlToTextContentInline(this.thread.lastMessage.prettyBody);
     }
 
     /**
