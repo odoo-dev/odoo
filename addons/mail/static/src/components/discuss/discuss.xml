@@ -103,18 +103,4 @@
         </t>
     </t>
 
-    <!--
-        @param {string} searchVal
-    -->
-    <t t-name="mail.Discuss.AutocompleteChannelPrivateItem" owl="1">
-        <strong>Create <em><span class="fa fa-lock"/><t t-esc="searchVal"/></em></strong>
-    </t>
-
-    <!--
-        @param {string} searchVal
-    -->
-    <t t-name="mail.Discuss.AutocompleteChannelPublicItem" owl="1">
-        <strong>Create <em><span class="fa fa-hashtag"/><t t-esc="searchVal"/></em></strong>
-    </t>
-
 </templates>
