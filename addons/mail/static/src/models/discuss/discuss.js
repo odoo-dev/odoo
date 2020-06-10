@@ -4,6 +4,8 @@ odoo.define('mail/static/src/models/discuss.discuss.js', function (require) {
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
 const { attr, many2one, one2many, one2one } = require('mail/static/src/model/model_field.js');
 
+const { escape } = owl.utils;
+
 function factory(dependencies) {
 
     class Discuss extends dependencies['mail.model'] {
@@ -64,7 +66,8 @@ function factory(dependencies) {
          * @param {function} res
          */
         async handleAddChannelAutocompleteSource(req, res) {
-            const value = _.escape(req.term);
+            const value = req.term;
+            const escapedValue = escape(value);
             this.update({ addingChannelValue: value });
             const result = await this.async(() => this.env.rpc({
                 model: 'mail.channel',
@@ -72,26 +75,27 @@ function factory(dependencies) {
                 args: [value],
             }));
             const items = result.map(data => {
-                let escapedName = _.escape(data.name);
+                let escapedName = escape(data.name);
                 return Object.assign(data, {
                     label: escapedName,
                     value: escapedName
                 });
             });
-            // AKU FIXME
+            // XDU FIXME could use a component but be careful with owl's
+            // renderToString https://github.com/odoo/owl/issues/708
             items.push({
-                label: this.env.qweb.renderToString(
-                    'mail.Discuss.AutocompleteChannelPublicItem',
-                    { searchVal: value }
+                label: _.str.sprintf(
+                    `<strong>${this.env._t('Create %s')}</strong>`,
+                    `<em><span class="fa fa-hashtag"/>${escapedValue}</em>`,
                 ),
-                value,
+                escapedValue,
                 special: 'public'
             }, {
-                label: this.env.qweb.renderToString(
-                    'mail.Discuss.AutocompleteChannelPrivateItem',
-                    { searchVal: value }
+                label: _.str.sprintf(
+                    `<strong>${this.env._t('Create %s')}</strong>`,
+                    `<em><span class="fa fa-lock"/>${escapedValue}</em>`,
                 ),
-                value,
+                escapedValue,
                 special: 'private'
             });
             res(items);
@@ -127,7 +131,7 @@ function factory(dependencies) {
          * @param {function} res
          */
         handleAddChatAutocompleteSource(req, res) {
-            const value = _.escape(req.term);
+            const value = escape(req.term);
             this.env.models['mail.partner'].imSearch({
                 callback: partners => {
                     const suggestions = partners.map(partner => {
