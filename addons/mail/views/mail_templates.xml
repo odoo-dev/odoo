@@ -89,6 +89,9 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/kanban_view.scss"/>
 
                 <!-- owl -->
+                <script type="text/javascript" src="/mail/static/src/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone.js"></script>
+                <script type="text/javascript" src="/mail/static/src/component_hooks/use_refs/use_refs.js"></script>
+                <script type="text/javascript" src="/mail/static/src/component_hooks/use_store/use_store.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/activity/activity.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/activity_box/activity_box.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover.js"></script>
@@ -134,15 +137,13 @@
                 <script type="text/javascript" src="/mail/static/src/components/notification_list/notification_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/notification_popover/notification_popover.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/partner_mention_suggestion/partner_mention_suggestion.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_icon/thread_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_preview/thread_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_typing_icon/thread_typing_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_viewer/thread_viewer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_refs/use_refs.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_store/use_store.js"></script>
                 <script type="text/javascript" src="/mail/static/src/messaging_env.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_core.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_errors.js"></script>
@@ -234,6 +235,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_list/notification_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_popover/notification_popover.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/partner_mention_suggestion/partner_mention_suggestion.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_icon/thread_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_preview/thread_preview.scss"/>
@@ -269,6 +271,7 @@
                 <script type="text/javascript" src="/mail/static/tests/activity_tests.js"></script>
 
                 <!-- owl -->
+                <script type="text/javascript" src="/mail/static/src/component_hooks/use_store/use_store_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/activity/activity_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/attachment/attachment_tests.js"></script>
@@ -285,13 +288,13 @@
                 <script type="text/javascript" src="/mail/static/src/components/follower_subtype/follower_subtype_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/message/message_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/messaging_menu/messaging_menu_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/notification_list/notification_list_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/notification_list/notification_list_notification_group_tests.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/notification_list/notification_list_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon_tests.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/partner_mention_suggestion/partner_mention_suggestion_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_icon/thread_icon_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_viewer/thread_viewer_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_store/use_store_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/attachment/attachment_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/message/message_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/messaging/messaging_tests.js"></script>

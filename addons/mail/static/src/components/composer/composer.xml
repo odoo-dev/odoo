@@ -60,8 +60,8 @@
                             'o_Composer_textInput-mobile': env.messaging.device.isMobile,
                         }"
                         composerLocalId="composer.localId"
+                        hasMentionSuggestionsBelowPosition="props.hasMentionSuggestionsBelowPosition"
                         hasSendOnEnterEnabled="props.hasTextInputSendOnEnterEnabled"
-                        t-on-o-input-composer-text-input="_onInputTextInput"
                         t-on-o-keydown-enter="_onTextInputKeydownEnter"
                         t-on-paste="_onPasteTextInput"
                         t-ref="textInput"

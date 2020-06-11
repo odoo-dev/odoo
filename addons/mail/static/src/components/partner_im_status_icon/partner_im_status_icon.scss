@@ -15,6 +15,12 @@
     transform: scale(1.5);
 }
 
+.o-background {
+    transform: scale(1);
+    margin-inline-end: map-get($spacers, 1);
+    margin-top: 2px;
+}
+
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------

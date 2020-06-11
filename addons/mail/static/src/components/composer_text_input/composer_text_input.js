@@ -3,6 +3,10 @@ odoo.define('mail/static/src/components/composer_text_input/composer_text_input.
 
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
+const components = {
+    PartnerMentionSuggestion: require('mail/static/src/components/partner_mention_suggestion/partner_mention_suggestion.js'),
+};
+
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
@@ -61,30 +65,17 @@ class ComposerTextInput extends Component {
         return this.env.models['mail.composer'].get(this.props.composerLocalId);
     }
 
-    focus() {
-        this._textareaRef.el.focus();
-    }
-
     focusout() {
         this.saveStateInStore();
         this._textareaRef.el.blur();
     }
 
     /**
-     * Returns textarea current content.
-     *
-     * @returns {string}
-     */
-    getContent() {
-        return this._textareaRef.el.value;
-    }
-
-    /**
      * Saves the composer text input state in store
      */
     saveStateInStore() {
-        this.composer.saveTextInput({
-            textInputContent: this.getContent(),
+        this.composer.update({
+            textInputContent: this._getContent(),
             textInputCursorStart: this._getSelectionStart(),
             textInputCursorEnd: this._getSelectionEnd(),
         });
@@ -93,6 +84,16 @@ class ComposerTextInput extends Component {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+
+    /**
+     * Returns textarea current content.
+     *
+     * @private
+     * @returns {string}
+     */
+    _getContent() {
+        return this._textareaRef.el.value;
+    }
 
     /**
      * Returns selection end position.
@@ -122,7 +123,7 @@ class ComposerTextInput extends Component {
      * @returns {boolean}
      */
     _isEmpty() {
-        return this.getContent() === "";
+        return this._getContent() === "";
     }
 
     /**
@@ -137,6 +138,10 @@ class ComposerTextInput extends Component {
             this.composer.textInputCursorEnd
         );
         this._updateHeight();
+        if (this.composer.isDoFocus) {
+            this._textareaRef.el.focus();
+            this.composer.update({ isDoFocus: false });
+        }
     }
 
     /**
@@ -162,7 +167,7 @@ class ComposerTextInput extends Component {
         }
         this._textareaLastInputValue = this._textareaRef.el.value;
         this._updateHeight();
-        this.trigger('o-input-composer-text-input');
+        this.saveStateInStore();
     }
 
     /**
@@ -171,13 +176,22 @@ class ComposerTextInput extends Component {
      */
     _onKeydownTextarea(ev) {
         switch (ev.key) {
+            // UP, DOWN, TAB: prevent moving cursor if navigation in mention suggestions
+            case 'ArrowUp':
+            case 'PageUp':
+            case 'ArrowDown':
+            case 'PageDown':
+            case 'Home':
+            case 'End':
+            case 'Tab':
+                if (this.composer.hasSuggestedPartners) {
+                    // We use preventDefault here to avoid keys native actions but actions are handled in keyUp
+                    ev.preventDefault();
+                }
+                break;
+            // ENTER: submit the message only if the dropdown mention proposition is not displayed
             case 'Enter':
                 this._onKeydownTextareaEnter(ev);
-                break;
-            case 'Escape':
-                this._onKeydownTextareaEscape(ev);
-                break;
-            default:
                 break;
         }
     }
@@ -187,38 +201,128 @@ class ComposerTextInput extends Component {
      * @param {KeyboardEvent} ev
      */
     _onKeydownTextareaEnter(ev) {
-        if (!this.props.hasSendOnEnterEnabled) {
-            return;
+        if (this.composer.hasSuggestedPartners) {
+            ev.preventDefault();
+        } else {
+            if (!this.props.hasSendOnEnterEnabled) {
+                return;
+            }
+            if (ev.shiftKey) {
+                return;
+            }
+            if (this.env.messaging.device.isMobile) {
+                return;
+            }
+            this.trigger('o-keydown-enter');
+            ev.preventDefault();
         }
-        if (ev.shiftKey) {
-            return;
+    }
+
+    /**
+     * Key events management is performed in a Keyup to avoid intempestive RPC calls
+     *
+     * @private
+     * @param {KeyboardEvent} ev
+     */
+    _onKeyupTextarea(ev) {
+        switch (ev.key) {
+            // ESCAPE: close mention suggestions
+            case 'Escape':
+                this._onKeyupTextareaEscape(ev);
+                break;
+            // ENTER, HOME, END, UP, DOWN, PAGE UP, PAGE DOWN, TAB: check if navigation in mention suggestions
+            case 'Enter':
+                if (this.composer.hasSuggestedPartners) {
+                    if (this.composer.activeSuggestedPartner) {
+                        this.composer.insertMentionedPartner(this.composer.activeSuggestedPartner);
+                        this.composer.closeMentionSuggestions();
+                        this.composer.focus();
+                    }
+                }
+                break;
+            case 'ArrowUp':
+            case 'PageUp':
+                if (this.composer.hasSuggestedPartners) {
+                    this.composer.setPreviousSuggestedPartnerActive();
+                }
+                break;
+            case 'ArrowDown':
+            case 'PageDown':
+                if (this.composer.hasSuggestedPartners) {
+                    this.composer.setNextSuggestedPartnerActive();
+                }
+                break;
+            case 'Home':
+                if (this.composer.hasSuggestedPartners) {
+                    this.composer.setFirstSuggestedPartnerActive();
+                }
+                break;
+            case 'End':
+                if (this.composer.hasSuggestedPartners) {
+                    this.composer.setLastSuggestedPartnerActive();
+                }
+                break;
+            case 'Tab':
+                if (this.composer.hasSuggestedPartners) {
+                    if (ev.shiftKey) {
+                        this.composer.setPreviousSuggestedPartnerActive();
+                    } else {
+                        this.composer.setNextSuggestedPartnerActive();
+                    }
+                }
+                break;
+            // Otherwise, check if a mention is typed
+            default:
+                this.saveStateInStore();
+                this.composer._detectDelimiter();
         }
-        if (this.env.messaging.device.isMobile) {
-            return;
-        }
-        this.trigger('o-keydown-enter');
-        ev.preventDefault();
     }
 
     /**
      * @private
      * @param {KeyboardEvent} ev
      */
-    _onKeydownTextareaEscape(ev) {
-        if (!this._isEmpty()) {
-            return;
+    _onKeyupTextareaEscape(ev) {
+        if (this.composer.hasSuggestedPartners) {
+            this.composer.closeMentionSuggestions();
+        } else {
+            if (!this._isEmpty()) {
+                return;
+            }
+            this.composer.discard();
         }
-        this.composer.discard();
-        ev.preventDefault();
+    }
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onPartnerMentionSuggestionClicked(ev) {
+        this.composer.insertMentionedPartner(ev.detail.partner);
+        this.composer.closeMentionSuggestions();
+        this.composer.focus();
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onPartnerMentionSuggestionMouseOver(ev) {
+        this.composer.update({
+            activeSuggestedPartner: [['link', ev.detail.partner]],
+        });
     }
 
 }
 
 Object.assign(ComposerTextInput, {
+    components,
     defaultProps: {
-        hasSendOnEnterEnabled: true
+        hasMentionSuggestionsBelowPosition: false,
+        hasSendOnEnterEnabled: true,
     },
     props: {
+        hasMentionSuggestionsBelowPosition: Boolean,
         hasSendOnEnterEnabled: Boolean,
         composerLocalId: String,
     },

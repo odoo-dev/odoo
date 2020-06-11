@@ -106,6 +106,7 @@
         'static/src/components/notification_list/notification_list.xml',
         'static/src/components/notification_popover/notification_popover.xml',
         'static/src/components/partner_im_status_icon/partner_im_status_icon.xml',
+        'static/src/components/partner_mention_suggestion/partner_mention_suggestion.xml',
         'static/src/components/thread_icon/thread_icon.xml',
         'static/src/components/thread_needaction_preview/thread_needaction_preview.xml',
         'static/src/components/thread_preview/thread_preview.xml',

@@ -37,8 +37,12 @@ class PartnerImStatusIcon extends Component {
 }
 
 Object.assign(PartnerImStatusIcon, {
+    defaultProps: {
+        hasBackground: true
+    },
     props: {
         partnerLocalId: String,
+        hasBackground: Boolean,
     },
     template: 'mail.PartnerImStatusIcon',
 });

@@ -115,7 +115,7 @@ class Composer extends Component {
         if (this.env.messaging.device.isMobile) {
             this.el.scrollIntoView();
         }
-        this._textInputRef.comp.focus();
+        this.composer.focus();
     }
 
     /**
@@ -225,7 +225,7 @@ class Composer extends Component {
 
         const context = {
             // default_parent_id: this.id,
-            default_body: mailUtils.escapeAndCompactTextContent(this._textInputRef.comp.getContent()),
+            default_body: mailUtils.escapeAndCompactTextContent(this.composer.textInputContent),
             default_attachment_ids: attachmentIds,
             // default_partner_ids: partnerIds,
             default_is_log: this.props.isLog,
@@ -263,16 +263,11 @@ class Composer extends Component {
      * Called when clicking on "send" button.
      *
      * @private
-     * @param {MouseEvent} ev
      */
-    _onClickSend(ev) {
-        if (
-            !this.composer.textInputContent &&
-            this.composer.attachments.length === 0
-        ) {
+    _onClickSend() {
+        if (!this.composer.canPostMessage) {
             return;
         }
-        ev.stopPropagation();
         this._postMessage();
     }
 
@@ -303,14 +298,7 @@ class Composer extends Component {
         ev.stopPropagation();
         this._textInputRef.comp.saveStateInStore();
         this.composer.insertIntoTextInput(ev.detail.unicode);
-        this._textInputRef.comp.focus();
-    }
-
-    /**
-     * @private
-     */
-    _onInputTextInput() {
-        this._textInputRef.comp.saveStateInStore();
+        this.composer.focus();
     }
 
     /**
@@ -326,15 +314,9 @@ class Composer extends Component {
 
     /**
      * @private
-     * @param {CustomEvent} ev
      */
-    _onTextInputKeydownEnter(ev) {
-        ev.stopPropagation();
-        // TODO SEB this is the same code as _onClickSend
-        if (
-            !this.composer.textInputContent &&
-            this.composer.attachments.length === 0
-        ) {
+    _onTextInputKeydownEnter() {
+        if (!this.composer.canPostMessage) {
             return;
         }
         this._postMessage();
@@ -372,6 +354,10 @@ Object.assign(Composer, {
         hasCurrentPartnerAvatar: Boolean,
         hasDiscardButton: Boolean,
         hasFollowers: Boolean,
+        hasMentionSuggestionsBelowPosition: {
+            type: Boolean,
+            optional: true,
+        },
         hasSendButton: Boolean,
         hasTextInputSendOnEnterEnabled: Boolean,
         hasThreadName: Boolean,
