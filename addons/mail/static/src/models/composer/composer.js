@@ -19,6 +19,13 @@ function factory(dependencies) {
         // Public
         //----------------------------------------------------------------------
 
+        closeCannedResponseSuggestions() {
+            this.update({
+                activeSuggestedCannedResponse: [['unlink']],
+                suggestedCannedResponses: [['unlink-all']],
+            });
+        }
+
         closeMentionSuggestions() {
             this.update({
                 activeSuggestedPartner: [['unlink']],
@@ -42,6 +49,27 @@ function factory(dependencies) {
 
         focus() {
             this.update({ isDoFocus: true });
+        }
+
+        /**
+         * @param {mail.canned_response} cannedResponse
+         */
+        insertCannedResponse(cannedResponse) {
+            const cursorPosition = this.textInputCursorStart;
+            const textLeft = this.textInputContent.substring(
+                0,
+                this.textInputContent.substring(0, cursorPosition).lastIndexOf(':')
+            );
+            const textRight = this.textInputContent.substring(
+                cursorPosition,
+                this.textInputContent.length
+            );
+            const cannedResponseSubstitution = cannedResponse.substitution;
+            this.update({
+                textInputContent: textLeft + cannedResponseSubstitution + ' ' + textRight,
+                textInputCursorEnd: textLeft.length + cannedResponseSubstitution.length + 1,
+                textInputCursorStart: textLeft.length + cannedResponseSubstitution.length + 1,
+            });
         }
 
         /**
@@ -207,12 +235,33 @@ function factory(dependencies) {
             }
         }
 
+        setFirstSuggestedCannedResponseActive() {
+            if (!this.suggestedCannedResponses[0]) {
+                return;
+            }
+            this.update({
+                activeSuggestedCannedResponse: [['link', this.suggestedCannedResponses[0]]],
+            });
+        }
+
         setFirstSuggestedPartnerActive() {
             if (!this.allSuggestedPartners[0]) {
                 return;
             }
             this.update({
                 activeSuggestedPartner: [['link', this.allSuggestedPartners[0]]],
+            });
+        }
+
+        setLastSuggestedCannedResponseActive() {
+            if (this.suggestedCannedResponses.length === 0) {
+                return;
+            }
+            this.update({
+                activeSuggestedCannedResponse: [[
+                    'link',
+                    this.suggestedCannedResponses[this.suggestedCannedResponses.length - 1]
+                ]],
             });
         }
 
@@ -226,6 +275,27 @@ function factory(dependencies) {
                     this.allSuggestedPartners[this.allSuggestedPartners.length - 1]
                 ]],
             });
+        }
+
+        setNextSuggestedCannedResponseActive() {
+            if (this.suggestedCannedResponses.length === 0) {
+                return;
+            }
+            const activeSuggestedCannedResponseIndex = this.suggestedCannedResponses.findIndex(
+                suggestedCannedResponse => suggestedCannedResponse === this.activeSuggestedCannedResponse
+            );
+            if (activeSuggestedCannedResponseIndex !== this.suggestedCannedResponses.length - 1) {
+                this.update({
+                    activeSuggestedCannedResponse: [[
+                        'link',
+                        this.suggestedCannedResponses[activeSuggestedCannedResponseIndex + 1]
+                    ]],
+                });
+            } else {
+                this.update({
+                    activeSuggestedCannedResponse: [['link', this.suggestedCannedResponses[0]]],
+                });
+            }
         }
 
         setNextSuggestedPartnerActive() {
@@ -245,6 +315,34 @@ function factory(dependencies) {
             } else {
                 this.update({
                     activeSuggestedPartner: [['link', this.allSuggestedPartners[0]]],
+                });
+            }
+        }
+
+        setPreviousSuggestedCannedResponseActive() {
+            if (this.suggestedCannedResponses.length === 0) {
+                return;
+            }
+            const activeSuggestedCannedResponseIndex = this.suggestedCannedResponses.findIndex(
+                suggestedCannedResponse => suggestedCannedResponse === this.activeSuggestedCannedResponse
+            );
+            if (activeSuggestedCannedResponseIndex === -1) {
+                this.update({
+                    activeSuggestedCannedResponse: [['link', this.suggestedCannedResponses[0]]]
+                });
+            } else if (activeSuggestedCannedResponseIndex !== 0) {
+                this.update({
+                    activeSuggestedCannedResponse: [[
+                        'link',
+                        this.suggestedCannedResponses[activeSuggestedCannedResponseIndex - 1]
+                    ]],
+                });
+            } else {
+                this.update({
+                    activeSuggestedCannedResponse: [[
+                        'link',
+                        this.suggestedCannedResponses[this.suggestedCannedResponses.length - 1]
+                    ]],
                 });
             }
         }
@@ -315,6 +413,14 @@ function factory(dependencies) {
          * @private
          * @return {boolean}
          */
+        _computeHasSuggestedCannedResponses() {
+            return this.suggestedCannedResponses.length > 0;
+        }
+
+        /**
+         * @private
+         * @return {boolean}
+         */
         _computeHasSuggestedPartners() {
             return this.allSuggestedPartners.length > 0;
         }
@@ -354,6 +460,15 @@ function factory(dependencies) {
                 this._getSuggestedPartners(mentionKeyword);
             } else {
                 this.closeMentionSuggestions();
+            }
+        }
+
+        _detectDelimiterCannedResponse() {
+            const mentionKeyword = this._validateMentionKeyword(':', false);
+            if (mentionKeyword !== false) {
+                this._getSuggestedCannedResponses(mentionKeyword);
+            } else {
+                this.closeCannedResponseSuggestions();
             }
         }
 
@@ -473,10 +588,32 @@ function factory(dependencies) {
             }
         }
 
+        _getSuggestedCannedResponses(mentionKeyword) {
+            this.update({
+                suggestedCannedResponses: [[
+                    'replace',
+                    this.env.messaging.cannedResponses.filter(
+                        cannedResponse => cannedResponse.source.includes(mentionKeyword)
+                    )
+                ]],
+            });
+
+            if (this.suggestedCannedResponses[0]) {
+                this.update({
+                    activeSuggestedCannedResponse: [['link', this.suggestedCannedResponses[0]]],
+                });
+            } else {
+                this.update({
+                    activeSuggestedCannedResponse: [['unlink']],
+                });
+            }
+        }
+
         /**
          * @private
          */
         _reset() {
+            this.closeCannedResponseSuggestions();
             this.closeMentionSuggestions();
             this.update({
                 attachments: [['unlink-all']],
@@ -528,6 +665,7 @@ function factory(dependencies) {
     }
 
     Composer.fields = {
+        activeSuggestedCannedResponse: many2one('mail.canned_response'),
         activeSuggestedPartner: many2one('mail.partner'),
         allSuggestedPartners: many2many('mail.partner', {
             compute: '_computeAllSuggestedPartners',
@@ -554,6 +692,13 @@ function factory(dependencies) {
                 'mainSuggestedPartners',
             ],
         }),
+        hasSuggestedCannedResponses: attr({
+            compute: '_computeHasSuggestedCannedResponses',
+            dependencies: [
+                'suggestedCannedResponses',
+            ],
+            default: false,
+        }),
         hasSuggestedPartners: attr({
             compute: '_computeHasSuggestedPartners',
             dependencies: [
@@ -569,6 +714,7 @@ function factory(dependencies) {
             compute: '_computeMentionedPartners',
             dependencies: ['textInputContent'],
         }),
+        suggestedCannedResponses: many2many('mail.canned_response'),
         textInputContent: attr({
             default: "",
         }),
