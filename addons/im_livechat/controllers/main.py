@@ -33,10 +33,7 @@ class LivechatController(http.Controller):
     def load_templates(self, **kwargs):
         base_url = request.httprequest.base_url
         templates = [
-            'mail/static/src/xml/abstract_thread_window.xml',
-            'mail/static/src/xml/discuss.xml',
-            'mail/static/src/xml/thread.xml',
-            'im_livechat/static/src/xml/im_livechat.xml',
+            'im_livechat/static/src/legacy/public_livechat.xml',
         ]
         return [tools.file_open(tmpl, 'rb').read() for tmpl in templates]
 
