@@ -68,6 +68,15 @@ function factory(dependencies) {
         }
 
         /**
+         * @param {mail.message} message
+         */
+        messageSeen(message) {
+            if (!this.lastVisibleMessage || this.lastVisibleMessage.id < message.id) {
+                this.update({ lastVisibleMessage: [['replace', message]] });
+            }
+        }
+
+        /**
          * @param {string} scrollTop
          */
         saveThreadCacheScrollPositionsAsInitial(scrollTop) {
@@ -94,6 +103,24 @@ function factory(dependencies) {
                 return [];
             }
             return [['replace', this.thread.cache(this.stringifiedDomain)]];
+        }
+
+        /**
+         * Not a real field, used to trigger `thread.markAsSeen` when one of
+         * the dependencies changes.
+         *
+         * @private
+         * @returns {boolean}
+         */
+        _computeThreadShouldBeSetAsSeen() {
+            // FIXME condition should be "thread viewer is active"
+            // See task-2277543
+            const lastMessageIsVisible = this.lastVisibleMessage &&
+                this.lastVisibleMessage === this.lastMessage;
+            if (lastMessageIsVisible && this.hasComposerFocus && this.thread) {
+                this.thread.markAsSeen();
+            }
+            return true;
         }
 
         /**
@@ -171,7 +198,7 @@ function factory(dependencies) {
             }
 
             if (
-                this.thread && this.threadCache.isLoading &&
+                this.thread && this.threadCache && this.threadCache.isLoading &&
                 !this.isShowingLoading && !this._isPreparingLoading
             ) {
                 this._prepareLoading();
@@ -218,6 +245,16 @@ function factory(dependencies) {
         componentHintList: attr({
             default: [],
         }),
+        composer: many2one('mail.composer', {
+            related: 'thread.composer',
+        }),
+        hasComposerFocus: attr({
+            related: 'composer.hasFocus',
+        }),
+        lastMessage: many2one('mail.message', {
+            related: 'threadCache.lastMessage',
+        }),
+        lastVisibleMessage: many2one('mail.message'),
         messages: many2many('mail.message', {
             related: 'threadCache.messages',
         }),
@@ -257,6 +294,19 @@ function factory(dependencies) {
         }),
         uncheckedMessages: many2many('mail.message', {
             related: 'threadCache.uncheckedMessages',
+        }),
+        /**
+         * Not a real field, used to trigger `thread.markAsSeen` when one of
+         * the dependencies changes.
+         */
+        _threadShouldBeSetAsSeen: attr({
+            compute: '_computeThreadShouldBeSetAsSeen',
+            dependencies: [
+                'hasComposerFocus',
+                'lastVisibleMessage',
+                'threadCache',
+                'lastMessage',
+            ],
         }),
     };
 
