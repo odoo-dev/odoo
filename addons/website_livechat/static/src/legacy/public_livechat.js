@@ -1,9 +1,9 @@
-odoo.define('website_livechat.livechat_request', function (require) {
+odoo.define('website_livechat.legacy.website_livechat.livechat_request', function (require) {
 "use strict";
 
 var utils = require('web.utils');
 var session = require('web.session');
-var LivechatButton = require('im_livechat.im_livechat').LivechatButton;
+var LivechatButton = require('im_livechat.legacy.im_livechat.im_livechat').LivechatButton;
 
 
 LivechatButton.include({
