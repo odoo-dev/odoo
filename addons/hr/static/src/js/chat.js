@@ -22,8 +22,7 @@ odoo.define('hr.employee_chat', function (require) {
                 var $chat_button = self.$el.find('.o_employee_chat_btn');
                 if (self.state.context.uid === self.state.data.user_id.res_id) { // Hide the button for yourself
                     $chat_button.hide();
-                }
-                else {
+                } else {
                     $chat_button.off('click').on('click', self._onOpenChat.bind(self));
                 }
             });
@@ -34,7 +33,7 @@ odoo.define('hr.employee_chat', function (require) {
             return this._super();
         },
 
-        _onOpenChat: function(ev) {
+        _onOpenChat: function (ev) {
             ev.preventDefault();
             ev.stopImmediatePropagation();
             this.trigger_up('open_chat', {
@@ -54,7 +53,10 @@ odoo.define('hr.employee_chat', function (require) {
 
         _onOpenChat: function (ev) {
             const env = this.call('messaging', 'getEnv');
-            env.models['mail.partner'].fromId(ev.data.partner_id).openChat();
+            const partner = env.models['mail.partner'].insert({
+                id: ev.data.partner_id,
+            });
+            partner.openChat();
         },
     });
 
@@ -82,7 +84,11 @@ odoo.define('hr.employee_chat', function (require) {
         }),
 
         _onOpenChat: function (ev) {
-            this.call('mail_service', 'openDMChatWindow', ev.data.partner_id);
+            const env = this.call('messaging', 'getEnv');
+            const partner = env.models['mail.partner'].insert({
+                id: ev.data.partner_id,
+            });
+            partner.openChat();
         },
     });
 

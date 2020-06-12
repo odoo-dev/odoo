@@ -14,45 +14,13 @@
 
                 <!-- Services -->
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/services/mail_document_thread_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_notification_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/services/mail_window_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/services/mail_service.js"></script>
-                <!-- Models -->
-                    <!-- messages -->
-                    <script type="text/javascript" src="/mail/static/src/js/models/messages/abstract_message.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/messages/message.js"></script>
-                    <!-- threads -->
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/abstract_thread.js"></script>
-                        <!-- channels -->
-                        <script type="text/javascript" src="/mail/static/src/js/models/threads/channel.js"></script>
-                        <script type="text/javascript" src="/mail/static/src/js/models/threads/multi_user_channel.js"></script>
-                        <script type="text/javascript" src="/mail/static/src/js/models/threads/two_user_channel.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/create_mode_document_thread.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/dm_chat.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/document_thread.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/livechat.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/mailbox.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/searchable_thread.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/threads/thread.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/utils/timer.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/utils/timers.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/models/utils/cc_throttle_function.js"></script>
                 <!-- Widgets -->
-                    <!-- thread windows -->
-                    <script type="text/javascript" src="/mail/static/src/js/thread_windows/abstract_thread_window.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/thread_windows/thread_window.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/discuss.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/document_viewer.js"></script>
-                    <!-- composers -->
-                    <script type="text/javascript" src="/mail/static/src/js/composers/basic_composer.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/composers/extended_composer.js"></script>
-                    <script type="text/javascript" src="/mail/static/src/js/composers/mention_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/basic_view.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/thread_widget.js"></script>
                 <!-- systray -->
                 <script type="text/javascript" src="/mail/static/src/js/systray/systray_activity_menu.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/systray/systray_messaging_menu.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/tours/mail.js"></script>
                 <!-- tools -->
                 <script type="text/javascript" src="/mail/static/src/js/tools/debug_manager.js"></script>
@@ -74,9 +42,10 @@
                 <script type="text/javascript" src="/mail/static/src/js/text_emojis_fields.js"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/emojis.scss"/>
                 <!-- Others -->
+
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/variables.scss"/>
+
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/discuss.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/abstract_thread_window.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/thread_window.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/composer.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/thread.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/systray.scss"/>
@@ -193,7 +162,6 @@
                 <script type="text/javascript" src="/mail/static/src/widgets/form_renderer/form_renderer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/widgets/messaging_menu/messaging_menu.js"></script>
 
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/variables.scss"/>
                 <!-- notification_list_item.scss contains variables/mixins, it must be positioned before sub-components of NotificationList -->
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_list/notification_list_item.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity/activity.scss"/>
@@ -252,16 +220,13 @@
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/mail/static/src/utils/test_utils.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/helpers/mock_server.js"></script>
-                <script type="text/javascript" src="/mail/static/tests/helpers/test_utils.js"></script>
             </xpath>
         </template>
 
         <template id="qunit_suite" name="mail_tests" inherit_id="web.qunit_suite_tests">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/mail/static/tests/document_thread_window_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/chatter_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/mail_utils_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/tests/discuss_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/document_viewer_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/many2one_avatar_user_tests.js"></script>
                 <!-- systray -->

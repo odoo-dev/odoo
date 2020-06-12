@@ -672,7 +672,7 @@ QUnit.test('chat window: state conservation on toggle home menu', async function
     );
 });
 
-QUnit.test('open 2 different chat windows: enough screen width', async function (assert) {
+QUnit.test('open 2 different chat windows: enough screen width [REQUIRE FOCUS]', async function (assert) {
     /**
      * computation uses following info:
      * ([mocked] global window width: @see `mail/static/src/utils/test_utils.js:start()` method)

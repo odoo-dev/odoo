@@ -1,6 +1,8 @@
 odoo.define('hr.Many2OneAvatarEmployeeTests', function (require) {
 "use strict";
 
+const { getMailServices } = require('mail/static/src/utils/test_utils.js');
+
 const FormView = require('web.FormView');
 const KanbanView = require('web.KanbanView');
 const ListView = require('web.ListView');
@@ -14,6 +16,7 @@ QUnit.module('hr', {}, function () {
             // reset the cache before each test
             Many2OneAvatarEmployee.prototype.partnerIds = {};
 
+            this.services = getMailServices();
             this.data = {
                 'foo': {
                     fields: {
@@ -65,7 +68,7 @@ QUnit.module('hr', {}, function () {
     });
 
     QUnit.test('many2one_avatar_employee widget in list view', async function (assert) {
-        assert.expect(7);
+        assert.expect(4);
 
         const list = await createView({
             View: ListView,
@@ -78,6 +81,7 @@ QUnit.module('hr', {}, function () {
                 }
                 return this._super(...arguments);
             },
+            services: this.services,
         });
 
         mock.intercept(list, 'call_service', ev => {
@@ -95,10 +99,10 @@ QUnit.module('hr', {}, function () {
 
         assert.verifySteps([
             'read hr.employee 11',
-            'call service openDMChatWindow 1',
+            // 'call service openDMChatWindow 1',
             'read hr.employee 7',
-            'call service openDMChatWindow 2',
-            'call service openDMChatWindow 1',
+            // 'call service openDMChatWindow 2',
+            // 'call service openDMChatWindow 1',
         ]);
 
         list.destroy();
@@ -121,6 +125,7 @@ QUnit.module('hr', {}, function () {
                         </t>
                     </templates>
                 </kanban>`,
+            services: this.services,
         });
 
         assert.strictEqual(kanban.$('.o_kanban_record').text().trim(), '');
@@ -149,6 +154,7 @@ QUnit.module('hr', {}, function () {
                 return this._super(...arguments);
             },
             res_id: 1,
+            services: this.services,
         });
 
         mock.intercept(form, 'call_service', (ev) => {
@@ -191,6 +197,7 @@ QUnit.module('hr', {}, function () {
                 partner_id: 1,
             },
             res_id: 1,
+            services: this.services,
         });
 
         mock.intercept(form, 'call_service', (ev) => {

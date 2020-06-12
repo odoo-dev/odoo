@@ -52,12 +52,9 @@
         'static/src/xml/activity_view.xml',
         'static/src/xml/composer.xml',
         'static/src/xml/discuss.xml',
-        'static/src/xml/followers.xml',
         'static/src/xml/many2one_avatar_user.xml',
         'static/src/xml/systray.xml',
         'static/src/xml/thread.xml',
-        'static/src/xml/abstract_thread_window.xml',
-        'static/src/xml/thread_window.xml',
         'static/src/xml/web_kanban_activity.xml',
         'static/src/xml/text_emojis.xml',
 

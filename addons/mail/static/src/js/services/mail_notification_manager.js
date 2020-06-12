@@ -2,10 +2,7 @@ odoo.define('mail.Manager.Notification', function (require) {
 "use strict";
 
 /**
- * Mail Notification Manager
- *
- * This part of the mail manager is responsible for receiving notifications on
- * the longpoll bus, which are data received from the server.
+ * Deprecated legacy code still kept for compatibility of activity menu.
  */
 var MailManager = require('mail.Manager');
 
@@ -51,10 +48,6 @@ MailManager.include({
 
     /**
      * Notification handlers
-     * Sometimes, the web client receives unsubscribe notification and an extra
-     * notification on that channel.  This is then followed by an attempt to
-     * rejoin the channel that we just left.  The next few lines remove the
-     * extra notification to prevent that situation to occur.
      *
      * @private
      * @param {Array} notifs

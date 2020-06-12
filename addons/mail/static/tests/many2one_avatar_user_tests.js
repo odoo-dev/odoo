@@ -1,6 +1,8 @@
 odoo.define('mail.Many2OneAvatarUserTests', function (require) {
 "use strict";
 
+const { getMailServices } = require('mail/static/src/utils/test_utils.js');
+
 const FormView = require('web.FormView');
 const KanbanView = require('web.KanbanView');
 const ListView = require('web.ListView');
@@ -14,6 +16,7 @@ QUnit.module('mail', {}, function () {
             // reset the cache before each test
             Many2OneAvatarUser.prototype.partnerIds = {};
 
+            this.services = getMailServices();
             this.data = {
                 'foo': {
                     fields: {
@@ -65,7 +68,7 @@ QUnit.module('mail', {}, function () {
     });
 
     QUnit.test('many2one_avatar_user widget in list view', async function (assert) {
-        assert.expect(8);
+        assert.expect(5);
 
         const list = await createView({
             View: ListView,
@@ -78,6 +81,7 @@ QUnit.module('mail', {}, function () {
                 }
                 return this._super(...arguments);
             },
+            services: this.services,
         });
 
         mock.intercept(list, 'call_service', ev => {
@@ -102,10 +106,10 @@ QUnit.module('mail', {}, function () {
         assert.verifySteps([
             'open record',
             'read res.users 11',
-            'call service openDMChatWindow 1',
+            // 'call service openDMChatWindow 1',
             'read res.users 7',
-            'call service openDMChatWindow 2',
-            'call service openDMChatWindow 1',
+            // 'call service openDMChatWindow 2',
+            // 'call service openDMChatWindow 1',
         ]);
 
         list.destroy();
@@ -125,6 +129,7 @@ QUnit.module('mail', {}, function () {
                 }
                 return this._super(...arguments);
             },
+            services: this.services,
             session: {
                 uid: 23,
             },
@@ -169,6 +174,7 @@ QUnit.module('mail', {}, function () {
                         </t>
                     </templates>
                 </kanban>`,
+            services: this.services,
         });
 
         assert.strictEqual(kanban.$('.o_kanban_record').text().trim(), '');

@@ -22,9 +22,9 @@ var LIVECHAT_COOKIE_HISTORY = 'im_livechat_history';
 var HISTORY_LIMIT = 15;
 
 var RATING_TO_EMOJI = {
-    "10":"😊",
-    "5":"😐",
-    "1":"😞"
+    "10": "😊",
+    "5": "😐",
+    "1": "😞"
 };
 
 // History tracking
@@ -39,11 +39,11 @@ if (!_.contains(urlHistory, page)) {
     while (urlHistory.length > HISTORY_LIMIT) {
         urlHistory.shift();
     }
-    utils.set_cookie(LIVECHAT_COOKIE_HISTORY, JSON.stringify(urlHistory), 60*60*24); // 1 day cookie
+    utils.set_cookie(LIVECHAT_COOKIE_HISTORY, JSON.stringify(urlHistory), 60 * 60 * 24); // 1 day cookie
 }
 
 var LivechatButton = Widget.extend({
-    className:'openerp o_livechat_button d-print-none',
+    className: 'openerp o_livechat_button d-print-none',
     custom_events: {
         'close_chat_window': '_onCloseChatWindow',
         'post_message_chat_window': '_onPostMessageChatWindow',
@@ -75,7 +75,7 @@ var LivechatButton = Widget.extend({
         var cookie = utils.get_cookie('im_livechat_session');
         var ready;
         if (!cookie) {
-            ready = session.rpc('/im_livechat/init', {channel_id: this.options.channel_id})
+            ready = session.rpc('/im_livechat/init', { channel_id: this.options.channel_id })
                 .then(function (result) {
                     if (!result.available_for_me) {
                         return Promise.reject();
@@ -84,7 +84,7 @@ var LivechatButton = Widget.extend({
                 });
         } else {
             var channel = JSON.parse(cookie);
-            ready = session.rpc('/mail/chat_history', {uuid: channel.uuid, limit: 100})
+            ready = session.rpc('/mail/chat_history', { uuid: channel.uuid, limit: 100 })
                 .then(function (history) {
                     self._history = history;
                 });
@@ -100,7 +100,7 @@ var LivechatButton = Widget.extend({
             var autoPopupCookie = utils.get_cookie('im_livechat_auto_popup');
             if (!autoPopupCookie || JSON.parse(autoPopupCookie)) {
                 this._autoPopupTimeout =
-                    setTimeout(this._openChat.bind(this), this._rule.auto_popup_timer*1000);
+                    setTimeout(this._openChat.bind(this), this._rule.auto_popup_timer * 1000);
             }
         }
         this.call('bus_service', 'onNotification', this, this._onNotification);
@@ -169,7 +169,7 @@ var LivechatButton = Widget.extend({
      * @private
      * @param {Array} notification
      */
-    _handleNotification: function  (notification){
+    _handleNotification: function (notification) {
         if (this._livechat && (notification[0] === this._livechat.getUUID())) {
             if (notification[1]._type === 'history_command') { // history request
                 var cookie = utils.get_cookie(LIVECHAT_COOKIE_HISTORY);
@@ -219,10 +219,10 @@ var LivechatButton = Widget.extend({
         } else {
             this._messages = []; // re-initialize messages cache
             def = session.rpc('/im_livechat/get_session', {
-                channel_id : this.options.channel_id,
-                anonymous_name : this.options.default_username,
+                channel_id: this.options.channel_id,
+                anonymous_name: this.options.default_username,
                 previous_operator_id: this._get_previous_operator_id(),
-            }, {shadow: true});
+            }, { shadow: true });
         }
         def.then(function (livechatData) {
             if (!livechatData || !livechatData.operator_pid) {
@@ -244,20 +244,20 @@ var LivechatButton = Widget.extend({
                     self.call('bus_service', 'addChannel', self._livechat.getUUID());
                     self.call('bus_service', 'startPolling');
 
-                    utils.set_cookie('im_livechat_session', JSON.stringify(self._livechat.toData()), 60*60);
-                    utils.set_cookie('im_livechat_auto_popup', JSON.stringify(false), 60*60);
+                    utils.set_cookie('im_livechat_session', JSON.stringify(self._livechat.toData()), 60 * 60);
+                    utils.set_cookie('im_livechat_auto_popup', JSON.stringify(false), 60 * 60);
                     if (livechatData.operator_pid[0]) {
                         // livechatData.operator_pid contains a tuple (id, name)
                         // we are only interested in the id
                         var operatorPidId = livechatData.operator_pid[0];
-                        var oneWeek = 7*24*60*60;
+                        var oneWeek = 7 * 24 * 60 * 60;
                         utils.set_cookie('im_livechat_previous_operator_pid', operatorPidId, oneWeek);
                     }
                 });
             }
         }).then(function () {
             self._openingChat = false;
-        }).guardedCatch(function() {
+        }).guardedCatch(function () {
             self._openingChat = false;
         });
     }, 200, true),
@@ -293,7 +293,7 @@ var LivechatButton = Widget.extend({
         };
         this._chatWindow = new WebsiteLivechatWindow(this, this._livechat, options);
         return this._chatWindow.appendTo($('body')).then(function () {
-            var cssProps = {bottom: 0};
+            var cssProps = { bottom: 0 };
             cssProps[_t.database.parameters.direction === 'rtl' ? 'left' : 'right'] = 0;
             self._chatWindow.$el.css(cssProps);
             self.$el.hide();
@@ -318,7 +318,7 @@ var LivechatButton = Widget.extend({
     _sendMessage: function (message) {
         var self = this;
         return session
-            .rpc('/mail/chat_post', {uuid: this._livechat.getUUID(), message_content: message.content})
+            .rpc('/mail/chat_post', { uuid: this._livechat.getUUID(), message_content: message.content })
             .then(function (messageId) {
                 if (!messageId) {
                     self.displayNotification({
@@ -343,7 +343,7 @@ var LivechatButton = Widget.extend({
                 body: this.options.default_message,
                 channel_ids: [this._livechat.getID()],
                 date: time.datetime_to_str(new Date()),
-            }, {prepend: true});
+            }, { prepend: true });
         }
     },
 
@@ -398,7 +398,7 @@ var LivechatButton = Widget.extend({
      */
     _onSaveChatWindow: function (ev) {
         ev.stopPropagation();
-        utils.set_cookie('im_livechat_session', JSON.stringify(this._livechat.toData()), 60*60);
+        utils.set_cookie('im_livechat_session', JSON.stringify(this._livechat.toData()), 60 * 60);
     },
     /**
      * @private
@@ -455,7 +455,7 @@ var Feedback = Widget.extend({
             reason: reason,
         };
         this.dp.add(session.rpc('/im_livechat/feedback', args)).then(function () {
-            var emoji = RATING_TO_EMOJI[self.rating] || "??" ;
+            var emoji = RATING_TO_EMOJI[self.rating] || "??";
             var content = _.str.sprintf(_t("Rating: %s"), emoji);
             if (reason) {
                 content += " \n" + reason;
@@ -500,7 +500,7 @@ var Feedback = Widget.extend({
     _onClickSmiley: function (ev) {
         this.rating = parseInt($(ev.currentTarget).data('value'));
         this.$('.o_livechat_rating_choices img').removeClass('selected');
-        this.$('.o_livechat_rating_choices img[data-value="'+this.rating+'"]').addClass('selected');
+        this.$('.o_livechat_rating_choices img[data-value="' + this.rating + '"]').addClass('selected');
 
         // only display textearea if bad smiley selected
         if (this.rating !== 5) {
@@ -754,7 +754,7 @@ var AbstractMessage = require('im_livechat.legacy.mail.model.AbstractMessage');
  *
  * @see im_livechat.legacy.mail.model.AbstractMessage for more information.
  */
-var WebsiteLivechatMessage =  AbstractMessage.extend({
+var WebsiteLivechatMessage = AbstractMessage.extend({
 
     /**
      * @param {im_livechat.legacy.im_livechat.im_livechat.LivechatButton} parent
@@ -831,7 +831,7 @@ var LivechatWindow = AbstractThreadWindow.extend({
      * @param {string} [options.headerBackgroundColor]
      * @param {string} [options.titleColor]
      */
-    init(parent, thread, options={}) {
+    init(parent, thread, options = {}) {
         this._super.apply(this, arguments);
         this._thread = thread;
     },
@@ -1167,7 +1167,7 @@ var ThreadTypingMixin = {
         // something, so that they do not assume we stopped typing
         // something.
         this._myselfLongTypingTimer = new Timer({
-            duration: 50*1000,
+            duration: 50 * 1000,
             onTimeout: this._onMyselfLongTypingTimeout.bind(this),
         });
 
@@ -1177,7 +1177,7 @@ var ThreadTypingMixin = {
         // typing something, due to making no changes on the composer for
         // some time.
         this._myselfTypingInactivityTimer = new Timer({
-            duration: 5*1000,
+            duration: 5 * 1000,
             onTimeout: this._onMyselfTypingInactivityTimeout.bind(this),
         });
 
@@ -1187,7 +1187,7 @@ var ThreadTypingMixin = {
         // internally indexed by partnerID. The current user is ignored in
         // this list of timers.
         this._othersTypingTimers = new Timers({
-            duration: 60*1000,
+            duration: 60 * 1000,
             onTimeout: this._onOthersTypingTimeout.bind(this),
         });
 
@@ -1199,7 +1199,7 @@ var ThreadTypingMixin = {
         // else: he must notify immediately that he is typing something,
         // instead of waiting for the throttle internal timer.
         this._throttleNotifyMyselfTyping = CCThrottleFunction({
-            duration: 2.5*1000,
+            duration: 2.5 * 1000,
             func: this._onNotifyMyselfTyping.bind(this),
         });
 
@@ -1507,7 +1507,7 @@ var _t = core._t;
  * and this module should not leak outside of the backend, hence the use of
  * mail.model.AbstractMessage as a work-around.
  */
-var AbstractMessage =  Class.extend({
+var AbstractMessage = Class.extend({
 
     /**
      * @param {Widget} parent
@@ -1961,19 +1961,11 @@ var _t = core._t;
 
 /**
  * This is an abstract widget for rendering thread windows.
- *
- * It contains logic that are shared between mail.ThreadWindow and
- * im_livechat.WebsiteLivechatWindow.
- *
- * The reason for having two different implementation of thread windows is
- * that mail.ThreadWindow makes use of mail.Manager, which is used in the
- * backend, while im_livechat.WebsiteLivechatWindow must work without this
- * mail service.
+ * AbstractThreadWindow is kept for legacy reasons. 
  */
 var AbstractThreadWindow = Widget.extend({
     template: 'im_livechat.legacy.mail.AbstractThreadWindow',
     custom_events: {
-        escape_pressed: '_onEscapePressed',
         document_viewer_closed: '_onDocumentViewerClose',
     },
     events: {
@@ -2036,7 +2028,7 @@ var AbstractThreadWindow = Widget.extend({
         this._threadWidget = new ThreadWidget(this, options);
 
         // animate the (un)folding of thread windows
-        this.$el.css({transition: 'height ' + this.FOLD_ANIMATION_DURATION + 'ms linear'});
+        this.$el.css({ transition: 'height ' + this.FOLD_ANIMATION_DURATION + 'ms linear' });
         if (this.isFolded()) {
             this.$el.css('height', this.HEIGHT_FOLDED);
         } else if (this.options.autofocus) {
@@ -2252,7 +2244,7 @@ var AbstractThreadWindow = Widget.extend({
             }
         }
         var height = this.isFolded() ? this.HEIGHT_FOLDED : this.HEIGHT_OPEN;
-        this.$el.css({height: height});
+        this.$el.css({ height: height });
     },
 
     //--------------------------------------------------------------------------
@@ -2403,14 +2395,6 @@ var AbstractThreadWindow = Widget.extend({
      */
     _onDocumentViewerClose: function () {
         this._focusInput();
-    },
-    /**
-     * @private
-     */
-    _onEscapePressed: function () {
-        if (!this.isFolded()) {
-            this.close();
-        }
     },
     /**
      * Called when typing something on the composer of this thread window.
@@ -2812,7 +2796,6 @@ var time = require('web.time');
 var Widget = require('web.Widget');
 
 var QWeb = core.qweb;
-var _t = core._t;
 var _lt = core._lt;
 
 var ORDER = {
@@ -3001,7 +2984,7 @@ var ThreadWidget = Widget.extend({
         }));
 
         _.each(messages, function (message) {
-            var $message = self.$('.o_thread_message[data-message-id="'+ message.getID() +'"]');
+            var $message = self.$('.o_thread_message[data-message-id="' + message.getID() + '"]');
             $message.find('.o_mail_timestamp').data('date', message.getDate());
 
             self._insertReadMore($message);
@@ -3014,7 +2997,7 @@ var ThreadWidget = Widget.extend({
         if (!this._updateTimestampsInterval) {
             this.updateTimestampsInterval = setInterval(function () {
                 self._updateTimestamps();
-            }, 1000*60);
+            }, 1000 * 60);
         }
 
         this._renderMessageNotificationPopover(messages);
@@ -3045,9 +3028,9 @@ var ThreadWidget = Widget.extend({
      * @return {boolean}
      */
     isAtBottom: function () {
-        var fullHeight         = this.el.scrollHeight;
-        var topHiddenHeight    = this.$el.scrollTop();
-        var visibleHeight      = this.$el.outerHeight();
+        var fullHeight = this.el.scrollHeight;
+        var topHiddenHeight = this.$el.scrollTop();
+        var visibleHeight = this.$el.outerHeight();
         var bottomHiddenHeight = fullHeight - topHiddenHeight - visibleHeight;
         return bottomHiddenHeight < 5;
     },
@@ -3513,8 +3496,8 @@ var DocumentViewer = Widget.extend({
         'click .o_zoom_reset': '_onZoomReset',
         'click .o_close_btn, .o_viewer_img_wrapper': '_onClose',
         'click .o_print_btn': '_onPrint',
-        'DOMMouseScroll .o_viewer_content': '_onScroll',    // Firefox
-        'mousewheel .o_viewer_content': '_onScroll',        // Chrome, Safari, IE
+        'DOMMouseScroll .o_viewer_content': '_onScroll', // Firefox
+        'mousewheel .o_viewer_content': '_onScroll', // Chrome, Safari, IE
         'keydown': '_onKeydown',
         'keyup': '_onKeyUp',
         'mousedown .o_viewer_img': '_onStartDrag',
@@ -3541,11 +3524,11 @@ var DocumentViewer = Widget.extend({
                 }
                 if (match[1] === 'youtu') {
                     var youtube_array = attachment.url.split('/');
-                    var youtube_token = youtube_array[youtube_array.length-1];
+                    var youtube_token = youtube_array[youtube_array.length - 1];
                     if (youtube_token.indexOf('watch') !== -1) {
                         youtube_token = youtube_token.split('v=')[1];
-                        var amp = youtube_token.indexOf('&')
-                        if (amp !== -1){
+                        var amp = youtube_token.indexOf('&');
+                        if (amp !== -1) {
                             youtube_token = youtube_token.substring(0, amp);
                         }
                     }
@@ -3554,7 +3537,7 @@ var DocumentViewer = Widget.extend({
                 return true;
             }
         });
-        this.activeAttachment = _.findWhere(attachments, {id: activeAttachmentID});
+        this.activeAttachment = _.findWhere(attachments, { id: activeAttachmentID });
         this.modelName = 'ir.attachment';
         this._reset();
     },
@@ -3566,7 +3549,7 @@ var DocumentViewer = Widget.extend({
         this.$el.modal('show');
         this.$el.on('hidden.bs.modal', _.bind(this._onDestroy, this));
         this.$('.o_viewer_img').on("load", _.bind(this._onImageLoaded, this));
-        this.$('[data-toggle="tooltip"]').tooltip({delay: 0});
+        this.$('[data-toggle="tooltip"]').tooltip({ delay: 0 });
         return this._super.apply(this, arguments);
     },
     /**
@@ -3622,7 +3605,7 @@ var DocumentViewer = Widget.extend({
             widget: this
         }));
         this.$('.o_viewer_img').on("load", _.bind(this._onImageLoaded, this));
-        this.$('[data-toggle="tooltip"]').tooltip({delay: 0});
+        this.$('[data-toggle="tooltip"]').tooltip({ delay: 0 });
         this._reset();
     },
     /**
@@ -3632,7 +3615,7 @@ var DocumentViewer = Widget.extend({
      * @param {float} scale
      * @param {float} angle
      */
-    _getTransform: function(scale, angle) {
+    _getTransform: function (scale, angle) {
         return 'scale3d(' + scale + ', ' + scale + ', 1) rotate(' + angle + 'deg)';
     },
     /**
@@ -3702,7 +3685,7 @@ var DocumentViewer = Widget.extend({
             var $zoomer = this.$('.o_viewer_zoomer');
             var top = $image.prop('offsetHeight') * this.scale > $zoomer.height() ? e.clientY - this.dragStartY : 0;
             var left = $image.prop('offsetWidth') * this.scale > $zoomer.width() ? e.clientX - this.dragStartX : 0;
-            $zoomer.css("transform", "translate3d("+ left +"px, " + top + "px, 0)");
+            $zoomer.css("transform", "translate3d(" + left + "px, " + top + "px, 0)");
             $image.css('cursor', 'move');
         }
     },
@@ -3741,7 +3724,7 @@ var DocumentViewer = Widget.extend({
      * @private
      * @param {KeyEvent} e
      */
-    _onKeydown: function (e){
+    _onKeydown: function (e) {
         switch (e.which) {
             case $.ui.keyCode.RIGHT:
                 e.preventDefault();

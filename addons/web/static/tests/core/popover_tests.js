@@ -1,7 +1,6 @@
 odoo.define('web.popover_tests', function (require) {
     'use strict';
 
-    const webEnv = require('web.env');
     const makeTestEnvironment = require('web.test_env');
     const Popover = require('web.Popover');
     const testUtils = require('web.test_utils');
