@@ -75,10 +75,6 @@
         <span t-if="widget.isMobile()">
             <a href="#" class="o_thread_window_close fa fa-1x fa-arrow-left" aria-label="Close chat window" title="Close chat window"/>
         </span>
-        <div t-if="thread and thread.getType() === 'dm_chat'" class="o_thread_window_avatar">
-            <img alt="" t-att-src="'/web/image/res.partner/' + thread.getDirectPartnerID() + '/image_128'"/>
-            <t t-call="im_livechat.legacy.mail.UserStatus"/>
-        </div>
         <span class="o_thread_window_title">
             <t t-esc="title"/>
             <span t-if="unreadCounter"> (<t t-esc="unreadCounter"/>)</span>
@@ -101,38 +97,6 @@
         </span>
     </t>
 
-    <!-- Mobile templates -->
-    <t t-name="im_livechat.legacy.mail.discuss_mobile">
-        <div class="o_mail_discuss">
-            <div class="o_mail_discuss_mobile_mailboxes_buttons">
-                <button type="button" class="btn btn-primary d-inline d-md-none o_mailbox_inbox_item" title="Inbox" data-type="mailbox_inbox">
-                    Inbox
-                </button>
-                <button type="button" class="btn btn-secondary d-inline d-md-none o_mailbox_inbox_item" title="Starred" data-type="mailbox_starred">
-                    Starred
-                </button>
-                <button type="button" class="btn btn-secondary d-inline d-md-none o_mailbox_inbox_item" title="History" data-type="mailbox_history">
-                    History
-                </button>
-            </div>
-            <div class="o_mail_discuss_content"/>
-            <div class="o_mail_mobile_tabs">
-                <div class="o_mail_mobile_tab" data-type="mailbox_inbox">
-                    <span class="fa fa-inbox"/>
-                    <span class="o_tab_title">Inbox</span>
-                </div>
-                <div class="o_mail_mobile_tab" data-type="dm_chat">
-                    <span class="fa fa-user"/>
-                    <span class="o_tab_title">Chat</span>
-                </div>
-                <div class="o_mail_mobile_tab" data-type="multi_user_channel">
-                    <span class="fa fa-users"/>
-                    <span class="o_tab_title">Channels</span>
-                </div>
-            </div>
-        </div>
-    </t>
-
     <!--
         @param {mail.model.AbstractThread} thread
         @param {Object} options
@@ -145,13 +109,6 @@
         <t t-if="thread.hasMessages({ 'domain': options.domain || [] })">
             <t t-call="im_livechat.legacy.mail.widget.Thread.Content"/>
         </t>
-        <t t-elif="options.displayEmptyThread">
-            <t t-call="im_livechat.legacy.mail.widget.Thread.Empty" />
-        </t>
-        <div t-elif="options.displayNoMatchFound" class="o_mail_no_content">
-            <div class="o_thread_title">No matches found</div>
-            <div>No message matches your search. Try to change your search filters.</div>
-        </div>
     </t>
 
     <!-- Rendering of thread when messaging not yet ready -->
@@ -249,30 +206,6 @@
             </body>
         </html>
     </t>
-
-    <!--
-        When a thread is empty
-
-        @param {mail.model.Thread} thread
-    -->
-    <div t-name="im_livechat.legacy.mail.widget.Thread.Empty" class="o_mail_no_content">
-        <t t-if="thread.getID() === 'mailbox_inbox'">
-            <div class="o_thread_title">Congratulations, your inbox is empty</div>
-            <div>New messages appear here.</div>
-        </t>
-        <t t-if="thread.getID() === 'mailbox_starred'">
-            <div class="o_thread_title">No starred messages</div>
-            <div>You can mark any message as 'starred', and it shows up in this mailbox.</div>
-        </t>
-        <t t-if="thread.getID() === 'mailbox_history'">
-            <div class="o_thread_title o_neutral_face_icon">No history messages</div>
-            <div>Messages marked as read will appear in the history.</div>
-        </t>
-        <t t-if="thread.getID() === 'mailbox_moderation'">
-            <div class="o_thread_title">You have no message to moderate</div>
-            <div>Pending moderation messages appear here.</div>
-        </t>
-    </div>
 
     <!--
         @param {mail.model.AbstractThread} thread
@@ -425,7 +358,6 @@
             </div>
             <div class="o_thread_message_core">
                 <p t-if="displayAuthorMessages[message.getID()]" class="o_mail_info text-muted">
-                    <input t-if="message.needsModeration() and message.needsModerationByUser() and options.displayModerationCommands" type="checkbox" class="moderation_checkbox" t-att-data-message-id="message.getID()"/>
                     <t t-if="message.isNote()">
                         Note by
                     </t>
@@ -459,19 +391,12 @@
                     </span>
                     <span t-attf-class="o_thread_icons">
                         <t t-if="thread.hasSeenFeature()" t-call="im_livechat.legacy.mail.widget.Thread.Message.SeenIcon"/>
-                        <i t-if="options.displayStars and !message.isSystemNotification() and !message.needsModeration()"
-                            t-att-class="'fa fa-lg o_thread_icon o_thread_message_star ' + (message.isStarred() ? 'fa-star' : 'fa-star-o')"
-                            t-att-data-message-id="message.getID()" title="Mark as Todo" role="img" aria-label="Mark as Todo"/>
                        <i t-if="message.isLinkedToDocumentThread() and options.displayReplyIcons"
                            class="fa fa-reply o_thread_icon o_thread_message_reply"
                            t-att-data-message-id="message.getID()" title="Reply" role="img" aria-label="Reply"/>
                         <i t-if="message.isNeedaction() and options.displayMarkAsRead"
                            class="fa fa-check o_thread_icon o_thread_message_needaction"
                            t-att-data-message-id="message.getID()" title="Mark as Read" role="img" aria-label="Mark as Read"/>
-
-                        <t t-if="message.needsModeration() and message.originatesFromChannel()">
-                            <t t-call="im_livechat.legacy.mail.MessageModeration"/>
-                        </t>
                     </span>
                 </p>
                 <div class="o_thread_message_content">
@@ -586,34 +511,6 @@
             </span>
             <span name="partner_name" t-esc="notification.partner_name"/>
         </div>
-    </t>
-    <!--
-        @param {mail.model.Message} message
-        @param {Object} options
-        @param {boolean} [options.displayModerationCommands]
-    -->
-    <t t-name="im_livechat.legacy.mail.MessageModeration">
-        <i t-if="message.isMyselfAuthor()" class="text-danger" title="Your message is pending moderation"><b>Pending moderation</b></i>
-        <t t-elif="message.needsModerationByUser()">
-            <t t-if="options.displayModerationCommands" t-call="im_livechat.legacy.mail.MessageModerationDecision"/>
-            <i t-else="" class="text-danger" title="Open Channel in Discuss to moderate"><b>Pending moderation</b></i>
-        </t>
-    </t>
-
-    <!--
-        @param {mail.model.Message} message
-    -->
-    <t t-name="im_livechat.legacy.mail.MessageModerationDecision">
-        <i class="o_thread_icon ml4 o_thread_message_moderation text-success"
-           t-att-data-message-id="message.getID()" data-decision="accept" title="Accept"><b>Accept |</b></i>
-        <i class="o_thread_icon ml4 o_thread_message_moderation text-danger"
-           t-att-data-message-id="message.getID()" data-decision="reject" title="Remove message with explanation"><b>Reject |</b></i>
-        <i class="o_thread_icon ml4 o_thread_message_moderation text-danger"
-           t-att-data-message-id="message.getID()" data-decision="discard" title="Remove message without explanation"><b>Discard |</b></i>
-        <i class="o_thread_icon ml4 o_thread_message_moderation text-success"
-           t-att-data-message-id="message.getID()" data-decision="allow" title="Add this email address to white list of people"><b>Always Allow |</b></i>
-        <i class="o_thread_icon ml4 o_thread_message_moderation text-danger"
-           t-att-data-message-id="message.getID()" data-decision="ban" title="Ban this email address"><b>Ban</b></i>
     </t>
 
     <t t-name="im_livechat.legacy.mail.MessagesSeparator">

@@ -12,6 +12,8 @@ const {
     start: utilsStart,
 } = require('mail/static/src/utils/test_utils.js');
 
+const Bus = require('web.Bus');
+
 QUnit.module('sms', {}, function () {
 QUnit.module('components', {}, function () {
 QUnit.module('message', {}, function () {
@@ -122,23 +124,22 @@ QUnit.test('Notification Sent', async function (assert) {
 QUnit.test('Notification Error', async function (assert) {
     assert.expect(8);
 
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action,
-                    'sms.sms_resend_action',
-                    "action should be the one to resend sms"
-                );
-                assert.strictEqual(
-                    ev.data.options.additional_context.default_mail_message_id,
-                    10,
-                    "action should have correct message id"
-                );
-            },
-        },
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action,
+            'sms.sms_resend_action',
+            "action should be the one to resend sms"
+        );
+        assert.strictEqual(
+            payload.options.additional_context.default_mail_message_id,
+            10,
+            "action should have correct message id"
+        );
     });
+
+    await this.start({ env: { bus } });
     const message = this.env.models['mail.message'].create({
         id: 10,
         message_type: 'sms',

@@ -9,14 +9,12 @@ const AbstractService = require('web.AbstractService');
 const { bus, serviceRegistry } = require('web.core');
 
 const DialogService = AbstractService.extend({
-    dependencies: ['messaging'],
     /**
      * @override {web.AbstractService}
      */
     start() {
         this._super(...arguments);
         this._webClientReady = false;
-        this.env = this.call('messaging', 'getEnv');
         this._listenHomeMenu();
     },
     /**
@@ -57,7 +55,6 @@ const DialogService = AbstractService.extend({
             this.component = undefined;
         }
         const DialogManagerComponent = components.DialogManager;
-        DialogManagerComponent.env = this.env;
         this.component = new DialogManagerComponent(null);
         const parentNode = this._getParentNode();
         await this.component.mount(parentNode);

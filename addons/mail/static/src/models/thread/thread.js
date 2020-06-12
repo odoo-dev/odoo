@@ -271,7 +271,7 @@ function factory(dependencies) {
         }) {
             const device = this.env.messaging.device;
             // TODO FIX: potential duplicate chat task-2276490
-            const data = await this.env.rpc({
+            const data = await this.env.services.rpc({
                 model: 'mail.channel',
                 method: type === 'chat' ? 'channel_get' : 'channel_create',
                 args: type === 'chat' ? [[partnerId]] : [name, publicStatus],
@@ -306,7 +306,7 @@ function factory(dependencies) {
             if (channel && channel.isPinned) {
                 return;
             }
-            const data = await this.env.rpc({
+            const data = await this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'channel_join_and_get_info',
                 args: [[channelId]]
@@ -334,7 +334,7 @@ function factory(dependencies) {
                 }
                 return list;
             }, []);
-            const messagePreviews = await this.env.rpc({
+            const messagePreviews = await this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'channel_fetch_preview',
                 args: [channelIds],
@@ -381,7 +381,7 @@ function factory(dependencies) {
          * with these attachments, which are used by attachment box in the chatter.
          */
         async fetchAttachments() {
-            const attachmentsData = await this.async(() => this.env.rpc({
+            const attachmentsData = await this.async(() => this.env.services.rpc({
                 model: 'ir.attachment',
                 method: 'search_read',
                 domain: [
@@ -403,7 +403,7 @@ function factory(dependencies) {
          * Add current user to provided thread's followers.
          */
         async follow() {
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: this.model,
                 method: 'message_subscribe',
                 args: [[this.id]],
@@ -426,7 +426,7 @@ function factory(dependencies) {
          * Mark the specified conversation as fetched.
          */
         async markAsFetched() {
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'channel_fetched',
                 args: [[this.id]],
@@ -441,7 +441,7 @@ function factory(dependencies) {
                 return;
             }
             if (this.model === 'mail.channel') {
-                const seen_message_id = await this.async(() => this.env.rpc({
+                const seen_message_id = await this.async(() => this.env.services.rpc({
                     model: 'mail.channel',
                     method: 'channel_seen',
                     args: [[this.id]]
@@ -467,7 +467,7 @@ function factory(dependencies) {
          * Only makes sense if pendingFoldState is set to the desired value.
          */
         async notifyFoldStateToServer() {
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'channel_fold',
                 kwargs: {
@@ -516,17 +516,22 @@ function factory(dependencies) {
         openExpanded() {
             const discuss = this.env.messaging.discuss;
             if (['mail.channel', 'mail.box'].includes(this.model)) {
-                this.env.do_action('mail.action_new_discuss', {
-                    clear_breadcrumbs: false,
-                    active_id: discuss.threadToActiveId(this),
-                    on_reverse_breadcrumb: () => discuss.close(),
+                this.env.bus.trigger('do-action', {
+                    action: 'mail.action_new_discuss',
+                    options: {
+                        clear_breadcrumbs: false,
+                        active_id: discuss.threadToActiveId(this),
+                        on_reverse_breadcrumb: () => discuss.close(),
+                    },
                 });
             } else {
-                this.env.do_action({
-                    type: 'ir.actions.act_window',
-                    res_model: this.model,
-                    views: [[false, 'form']],
-                    res_id: this.id,
+                this.env.bus.trigger('do-action', {
+                    action: {
+                        type: 'ir.actions.act_window',
+                        res_model: this.model,
+                        views: [[false, 'form']],
+                        res_id: this.id,
+                    },
                 });
             }
         }
@@ -550,13 +555,13 @@ function factory(dependencies) {
          */
         async refreshFollowers() {
             // FIXME Do that with only one RPC (see task-2243180)
-            const [{ message_follower_ids: followerIds }] = await this.async(() => this.env.rpc({
+            const [{ message_follower_ids: followerIds }] = await this.async(() => this.env.services.rpc({
                 model: this.model,
                 method: 'read',
                 args: [this.id, ['message_follower_ids']],
             }));
             if (followerIds && followerIds.length > 0) {
-                const { followers } = await this.async(() => this.env.rpc({
+                const { followers } = await this.async(() => this.env.services.rpc({
                     route: '/mail/read_followers',
                     params: {
                         follower_ids: followerIds,
@@ -644,7 +649,7 @@ function factory(dependencies) {
          */
         async rename(newName) {
             if (this.channel_type === 'chat') {
-                await this.async(() => this.env.rpc({
+                await this.async(() => this.env.services.rpc({
                     model: 'mail.channel',
                     method: 'channel_set_custom_name',
                     args: [this.id],
@@ -720,13 +725,13 @@ function factory(dependencies) {
          */
         async unsubscribe() {
             if (this.channel_type === 'mail.channel') {
-                return this.async(() => this.env.rpc({
+                return this.async(() => this.env.services.rpc({
                     model: 'mail.channel',
                     method: 'action_unfollow',
                     args: [[this.id]]
                 }));
             }
-            return this.async(() => this.env.rpc({
+            return this.async(() => this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'channel_pin',
                 args: [this.uuid, false]
@@ -977,7 +982,7 @@ function factory(dependencies) {
                 isTyping !== this._currentPartnerLastNotifiedIsTyping
             ) {
                 if (this.model === 'mail.channel') {
-                    await this.async(() => this.env.rpc({
+                    await this.async(() => this.env.services.rpc({
                         model: 'mail.channel',
                         method: 'notify_typing',
                         args: [this.id],
@@ -1011,8 +1016,11 @@ function factory(dependencies) {
                     mail_invite_follower_channel_only,
                 },
             };
-            this.env.do_action(action, {
-                on_close: () => this.refreshFollowers(),
+            this.env.bus.trigger('do-action', {
+                action,
+                options: {
+                    on_close: () => this.refreshFollowers(),
+                },
             });
         }
 

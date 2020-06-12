@@ -12,6 +12,8 @@ const {
     start: utilsStart,
 } = require('mail/static/src/utils/test_utils.js');
 
+const Bus = require('web.Bus');
+
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
 QUnit.module('message', {}, function () {
@@ -288,23 +290,22 @@ QUnit.test('Notification Sent', async function (assert) {
 QUnit.test('Notification Error', async function (assert) {
     assert.expect(8);
 
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action,
-                    'mail.mail_resend_message_action',
-                    "action should be the one to resend email"
-                );
-                assert.strictEqual(
-                    ev.data.options.additional_context.mail_message_to_resend,
-                    10,
-                    "action should have correct message id"
-                );
-            },
-        },
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action,
+            'mail.mail_resend_message_action',
+            "action should be the one to resend email"
+        );
+        assert.strictEqual(
+            payload.options.additional_context.mail_message_to_resend,
+            10,
+            "action should have correct message id"
+        );
     });
+
+    await this.start({ env: { bus } });
     const message = this.env.models['mail.message'].create({
         id: 10,
         message_type: 'email',
@@ -575,7 +576,7 @@ QUnit.test('do not show messaging seen indicator if not authored by me', async f
 QUnit.test('do not show messaging seen indicator if before last seen by all message', async function (assert) {
     assert.expect(3);
 
-    await this.start({debug: true});
+    await this.start();
     const currentPartner = this.env.models['mail.partner'].create({
         id: this.env.session.partner_id,
         display_name: "Demo User",

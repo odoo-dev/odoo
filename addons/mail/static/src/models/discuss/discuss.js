@@ -4,8 +4,6 @@ odoo.define('mail/static/src/models/discuss.discuss.js', function (require) {
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
 const { attr, many2one, one2many, one2one } = require('mail/static/src/model/model_field.js');
 
-const { escape } = owl.utils;
-
 function factory(dependencies) {
 
     class Discuss extends dependencies['mail.model'] {
@@ -67,15 +65,15 @@ function factory(dependencies) {
          */
         async handleAddChannelAutocompleteSource(req, res) {
             const value = req.term;
-            const escapedValue = escape(value);
+            const escapedValue = owl.utils.escape(value);
             this.update({ addingChannelValue: value });
-            const result = await this.async(() => this.env.rpc({
+            const result = await this.async(() => this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'channel_search_to_join',
                 args: [value],
             }));
             const items = result.map(data => {
-                let escapedName = escape(data.name);
+                let escapedName = owl.utils.escape(data.name);
                 return Object.assign(data, {
                     label: escapedName,
                     value: escapedName
@@ -131,7 +129,7 @@ function factory(dependencies) {
          * @param {function} res
          */
         handleAddChatAutocompleteSource(req, res) {
-            const value = escape(req.term);
+            const value = owl.utils.escape(req.term);
             this.env.models['mail.partner'].imSearch({
                 callback: partners => {
                     const suggestions = partners.map(partner => {

@@ -9,6 +9,8 @@ const InvitePartnerDialog = require('mail/static/src/widgets/discuss_invite_part
 const AbstractAction = require('web.AbstractAction');
 const { action_registry, qweb } = require('web.core');
 
+const { Component } = owl;
+
 const DiscussWidget = AbstractAction.extend({
     template: 'mail.widgets.Discuss',
     hasControlPanel: true,
@@ -60,7 +62,7 @@ const DiscussWidget = AbstractAction.extend({
      */
     async willStart() {
         await this._super(...arguments);
-        this.env = this.call('messaging', 'getEnv');
+        this.env = Component.env;
         const initActiveId = this.options.active_id ||
             (this.action.context && this.action.context.active_id) ||
             (this.action.params && this.action.params.default_active_id) ||
@@ -91,7 +93,6 @@ const DiscussWidget = AbstractAction.extend({
             return;
         }
         const DiscussComponent = components.Discuss;
-        DiscussComponent.env = this.env;
         this.component = new DiscussComponent();
         this._pushStateActionManagerEventListener = ev => {
             ev.stopPropagation();

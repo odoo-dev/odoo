@@ -37,7 +37,7 @@ QUnit.test('rendering with OdooBot has a request (default)', async function (ass
 
     await this.start({
         env: {
-            window: {
+            browser: {
                 Notification: {
                     permission: 'default',
                 },
@@ -80,7 +80,7 @@ QUnit.test('rendering without OdooBot has a request (denied)', async function (a
 
     await this.start({
         env: {
-            window: {
+            browser: {
                 Notification: {
                     permission: 'denied',
                 },
@@ -114,7 +114,7 @@ QUnit.test('rendering without OdooBot has a request (accepted)', async function 
 
     await this.start({
         env: {
-            window: {
+            browser: {
                 Notification: {
                     permission: 'granted',
                 },
@@ -148,7 +148,7 @@ QUnit.test('respond to notification prompt (denied)', async function (assert) {
 
     await this.start({
         env: {
-            window: {
+            browser: {
                 Notification: {
                     permission: 'default',
                     async requestPermission() {

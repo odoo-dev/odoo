@@ -1,8 +1,6 @@
 odoo.define('mail.chatter_tests', function (require) {
 "use strict";
 
-const { getMailServices } = require('mail/static/src/utils/test_utils.js');
-
 var FormView = require('web.FormView');
 var ListView = require('web.ListView');
 var testUtils = require('web.test_utils');
@@ -20,7 +18,6 @@ QUnit.module('Chatter', {
         _.debounce = _.identity;
         _.throttle = _.identity;
 
-        this.services = getMailServices();
         this.data = {
             'res.partner': {
                 fields: {

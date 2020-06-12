@@ -34,7 +34,7 @@ function factory(dependencies) {
          * Called when messaging is started.
          */
         start() {
-            // TODO FIXME Not using this.env.window because it's proxified, and
+            // TODO FIXME Not using this.env.browser because it's proxified, and
             // addEventListener does not work on proxified window. task-2234596
             window.addEventListener('resize', this._onResize);
         }
@@ -48,8 +48,8 @@ function factory(dependencies) {
          */
         _refresh() {
             this.update({
-                globalWindowInnerHeight: this.env.window.innerHeight,
-                globalWindowInnerWidth: this.env.window.innerWidth,
+                globalWindowInnerHeight: this.env.browser.innerHeight,
+                globalWindowInnerWidth: this.env.browser.innerWidth,
                 isMobile: this.env.device.isMobile,
             });
         }

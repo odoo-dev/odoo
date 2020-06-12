@@ -120,7 +120,7 @@ function factory() {
          */
         async async(func) {
             return new Promise((resolve, reject) => {
-                func().then(result => {
+                Promise.resolve(func()).then(result => {
                     if (this.constructor.get(this)) {
                         resolve(result);
                     } else {

@@ -32,7 +32,7 @@ class NotificationAlert extends Component {
         if (!this.env.isMessagingInitialized()) {
             return false;
         }
-        const windowNotification = this.env.window.Notification;
+        const windowNotification = this.env.browser.Notification;
         return (
             windowNotification &&
             windowNotification.permission !== "granted" &&

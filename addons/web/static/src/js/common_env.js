@@ -29,6 +29,16 @@ odoo.define("web.commonEnv", function (require) {
     // Build the basic env
     const env = {
         _t,
+        browser: Object.assign({}, window, {
+            clearInterval: window.clearInterval.bind(window),
+            clearTimeout: window.clearTimeout.bind(window),
+            Date: window.Date,
+            fetch: (window.fetch || (() => { })).bind(window),
+            Notification: window.Notification,
+            requestAnimationFrame: window.requestAnimationFrame.bind(window),
+            setInterval: window.setInterval.bind(window),
+            setTimeout: window.setTimeout.bind(window),
+        }),
         bus,
         device,
         isDebug,
@@ -78,7 +88,6 @@ odoo.define("web.commonEnv", function (require) {
             },
         },
         session,
-        window: window,
     };
 
 

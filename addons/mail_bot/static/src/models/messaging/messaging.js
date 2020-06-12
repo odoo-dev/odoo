@@ -12,7 +12,7 @@ registerInstancePatchModel('mail.messaging', 'mail_bot/static/src/models/messagi
      * @returns {boolean}
      */
     isNotificationPermissionDefault() {
-        const windowNotification = this.env.window.Notification;
+        const windowNotification = this.env.browser.Notification;
         return windowNotification
             ? windowNotification.permission === 'default'
             : false;

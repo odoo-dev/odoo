@@ -3,21 +3,21 @@ odoo.define('mail/static/src/utils/test_utils.js', function (require) {
 
 const BusService = require('bus.BusService');
 
-const { addMessagingToEnv } = require('mail/static/src/messaging_env.js');
+const {
+    addMessagingToEnv,
+    addTimeControlToEnv,
+} = require('mail/static/src/env/test_env.js');
 const ChatWindowService = require('mail/static/src/services/chat_window_service/chat_window_service.js');
 const DialogService = require('mail/static/src/services/dialog_service/dialog_service.js');
-const MessagingService = require('mail/static/src/services/messaging_service/messaging_service.js');
+const { nextTick } = require('mail/static/src/utils/utils.js');
 const DiscussWidget = require('mail/static/src/widgets/discuss/discuss.js');
 const MessagingMenuWidget = require('mail/static/src/widgets/messaging_menu/messaging_menu.js');
-var MailService = require('mail.Service');
 
 const AbstractStorageService = require('web.AbstractStorageService');
-const Class = require('web.Class');
-const { delay } = require('web.concurrency');
 const NotificationService = require('web.NotificationService');
 const RamStorage = require('web.RamStorage');
-const makeTestEnvironment = require('web.test_env');
 const {
+    createActionManager,
     createView,
     makeTestPromise,
     mock: {
@@ -28,166 +28,11 @@ const {
 } = require('web.test_utils');
 const Widget = require('web.Widget');
 
+const { Component } = owl;
+
 //------------------------------------------------------------------------------
 // Private
 //------------------------------------------------------------------------------
-
-const MockMailService = Class.extend({
-    bus_service() {
-        return BusService.extend({
-            _beep() {}, // Do nothing
-            _poll() {}, // Do nothing
-            _registerWindowUnload() {}, // Do nothing
-            isOdooFocused() {
-                return true;
-            },
-            updateOption() {},
-        });
-    },
-    chat_window(isDebug = false) {
-        return ChatWindowService.extend({
-            _getParentNode() {
-                return document.querySelector(isDebug ? 'body' : '#qunit-fixture');
-            },
-            _listenHomeMenu: () => {},
-        });
-    },
-    dialog(isDebug = false) {
-        return DialogService.extend({
-            _getParentNode() {
-                return document.querySelector(isDebug ? 'body' : '#qunit-fixture');
-            },
-            _listenHomeMenu: () => {},
-        });
-    },
-    local_storage() {
-        return AbstractStorageService.extend({ storage: new RamStorage() });
-    },
-    mail_service() {
-        // TODO FIXME: legacy service to remove before merging messaging
-        return MailService.extend();
-    },
-    /**
-     * @param {Object} [env={}]
-     * @param {Object} [env.session]
-     * @param {Object} [param1={}]
-     * @param {boolean} [param1.hasTimeControl=false]
-     */
-    messaging(env = {}, { hasTimeControl = false } = {}) {
-        const _t = s => s;
-        _t.database = {
-            parameters: { direction: 'ltr' },
-        };
-        if (hasTimeControl) {
-            if (!env.window) {
-                env.window = {};
-            }
-            // list of timeout ids that have timed out.
-            let timedOutIds = [];
-            // key: timeoutId, value: func + remaining duration
-            const timeouts = new Map();
-            Object.assign(env.window, {
-                clearTimeout: id => {
-                    timeouts.delete(id);
-                    timedOutIds = timedOutIds.filter(i => i !== id);
-                },
-                setTimeout: (func, duration) => {
-                    const timeoutId = _.uniqueId('timeout_');
-                    const timeout = {
-                        id: timeoutId,
-                        isTimedOut: false,
-                        func,
-                        duration,
-                    };
-                    timeouts.set(timeoutId, timeout);
-                    if (duration === 0) {
-                        timedOutIds.push(timeoutId);
-                        timeout.isTimedOut = true;
-                    }
-                    return timeoutId;
-                },
-            });
-            if (!env.testUtils) {
-                env.testUtils = {};
-            }
-            Object.assign(env.testUtils, {
-                advanceTime: async duration => {
-                    await nextTick();
-                    for (const id of timeouts.keys()) {
-                        const timeout = timeouts.get(id);
-                        if (timeout.isTimedOut) {
-                            continue;
-                        }
-                        timeout.duration = Math.max(timeout.duration - duration, 0);
-                        if (timeout.duration === 0) {
-                            timedOutIds.push(id);
-                        }
-                    }
-                    while (timedOutIds.length > 0) {
-                        const id = timedOutIds.shift();
-                        const timeout = timeouts.get(id);
-                        timeouts.delete(id);
-                        timeout.func();
-                        await nextTick();
-                    }
-                    await nextTick();
-                },
-            });
-        }
-        const testEnv = makeTestEnvironment(Object.assign(env, {
-            _t: env._t || _t,
-            session: Object.assign({
-                is_bound: Promise.resolve(),
-                name: 'Admin',
-                partner_display_name: 'Your Company, Admin',
-                partner_id: 3,
-                uid: 2,
-                url: s => s,
-            }, env.session),
-        }));
-        // Avoid waiting on window load in addMessagingToEnv because files are
-        // already loaded when running tests.
-        testEnv.generateModelsImmediately = true;
-        const messagingCreatedPromise = addMessagingToEnv(testEnv);
-        // Disable features that would interfere with tests.
-        Object.assign(testEnv, {
-            autofetchPartnerImStatus: false,
-            disableAnimation: true,
-            loadingBaseDelayDuration: 0,
-        });
-        return MessagingService.extend({
-            env: testEnv,
-            messagingCreatedPromise,
-            shouldRaiseRecordDeletedError: true,
-        });
-    },
-    notification() {
-        return NotificationService.extend();
-    },
-    getServices({
-        env = {},
-        hasChatWindow = false,
-        hasLegacyMail = false,
-        hasTimeControl = false,
-        isDebug = false,
-    } = {}) {
-        const services = {
-            bus_service: this.bus_service(),
-            local_storage: this.local_storage(),
-            notification: this.notification(),
-        };
-        if (hasLegacyMail) {
-            services.mail_service = this.mail_service();
-        } else {
-            services.dialog = this.dialog(isDebug);
-            services.messaging = this.messaging(env, { hasTimeControl });
-        }
-        if (hasChatWindow) {
-            services.chat_window = this.chat_window(isDebug);
-        }
-        return services;
-    },
-});
 
 /**
  * Create a fake object 'dataTransfer', linked to some files,
@@ -221,12 +66,12 @@ function _useChatWindow(callbacks) {
         destroy: prevDestroy,
     } = callbacks;
     return Object.assign({}, callbacks, {
-        mount: prevMount.concat(({ widget }) => {
+        mount: prevMount.concat(() => {
             // trigger mounting of chat window manager
-            widget.call('chat_window', '_onWebClientReady');
+            Component.env.services['chat_window']._onWebClientReady();
         }),
-        destroy: prevDestroy.concat(({ widget }) => {
-            widget.call('chat_window', 'destroy');
+        destroy: prevDestroy.concat(() => {
+            Component.env.services['chat_window'].destroy();
         }),
     });
 }
@@ -246,12 +91,12 @@ function _useDialog(callbacks) {
         destroy: prevDestroy,
     } = callbacks;
     return Object.assign({}, callbacks, {
-        mount: prevMount.concat(({ widget }) => {
+        mount: prevMount.concat(() => {
             // trigger mounting of dialog manager
-            widget.call('dialog', '_onWebClientReady');
+            Component.env.services['dialog']._onWebClientReady();
         }),
-        destroy: prevDestroy.concat(({ widget }) => {
-            widget.call('dialog', 'destroy');
+        destroy: prevDestroy.concat(() => {
+            Component.env.services['dialog'].destroy();
         }),
     });
 }
@@ -269,7 +114,6 @@ function _useDiscuss(callbacks) {
     const {
         init: prevInit,
         mount: prevMount,
-        destroy: prevDestroy,
         return: prevReturn,
     } = callbacks;
     let discussWidget;
@@ -296,9 +140,6 @@ function _useDiscuss(callbacks) {
                 discussWidget.on_attach_callback();
             }
         }),
-        destroy: prevDestroy.concat(({ widget }) => {
-            widget.call('chat_window', 'destroy');
-        }),
         return: prevReturn.concat(result => {
             Object.assign(result, { discussWidget });
         }),
@@ -317,7 +158,6 @@ function _useDiscuss(callbacks) {
 function _useMessagingMenu(callbacks) {
     const {
         mount: prevMount,
-        destroy: prevDestroy,
         return: prevReturn,
     } = callbacks;
     let messagingMenuWidget;
@@ -327,31 +167,10 @@ function _useMessagingMenu(callbacks) {
             await messagingMenuWidget.appendTo($(selector));
             messagingMenuWidget.on_attach_callback();
         }),
-        destroy: prevDestroy.concat(({ widget }) => {
-            widget.call('chat_window', 'destroy');
-        }),
         return: prevReturn.concat(result => {
             Object.assign(result, { messagingMenuWidget });
         }),
     });
-}
-
-//------------------------------------------------------------------------------
-// Public
-//------------------------------------------------------------------------------
-
-/**
- * @param {Object} [param0={}]
- * @param {boolean} [param0.env]
- * @param {boolean} [param0.hasChatWindow]
- * @param {boolean} [param0.hasLegacyMail]
- * @param {boolean} [param0.hasTimeControl]
- * @param {boolean} [param0.isDebug]
- * @param {Object} [param0.session]
- * @returns {Object}
- */
-function getMailServices({ env, hasChatWindow, hasLegacyMail, hasTimeControl, isDebug, session } = {}) {
-    return new MockMailService().getServices({ env, hasChatWindow, hasLegacyMail, hasTimeControl, isDebug, session });
 }
 
 //------------------------------------------------------------------------------
@@ -368,14 +187,6 @@ function nextAnimationFrame() {
     return new Promise(function (resolve) {
         setTimeout(() => requestAnimationFrame(() => resolve()));
     });
-}
-
-/**
- * Wait a task tick, so that anything in micro-task queue that can be processed
- * is processed.
- */
-async function nextTick() {
-    await delay(0);
 }
 
 /**
@@ -748,15 +559,17 @@ async function pause() {
  *   2nd positional argument.
  * @param {Object} [param0.env={}]
  * @param {function} [param0.mockRPC]
+ * @param {boolean} [param0.hasActionManager=false] if set, use
+ *   createActionManager.
  * @param {boolean} [param0.hasChatWindow=false] if set, mount chat window
  *   service.
  * @param {boolean} [param0.hasDiscuss=false] if set, mount discuss app.
  * @param {boolean} [param0.hasMessagingMenu=false] if set, mount messaging
  *   menu.
  * @param {boolean} [param0.hasTimeControl=false] if set, all flow of time
- *   in `env.setTimeout` are fully controlled by test itself.
- *     @see advanceTime() function returned by this function to advance time
- *       with this mode.
+ *   with `env.browser.setTimeout` are fully controlled by test itself.
+ *     @see addTimeControlToEnv that adds `advanceTime` function in
+ *     `env.testUtils`.
  * @param {boolean} [param0.hasView=false] if set, use createView to create a
  *   view instead of a generic widget.
  * @param {string} [param0.model] makes only sense when `param0.hasView` is set:
@@ -781,6 +594,7 @@ async function start(param0 = {}) {
         return: [],
     };
     const {
+        hasActionManager = false,
         hasChatWindow = false,
         hasDialog = false,
         hasDiscuss = false,
@@ -789,10 +603,11 @@ async function start(param0 = {}) {
         hasView = false,
         waitUntilMessagingInitialized = true,
     } = param0;
-    delete param0.fullTimeoutControl;
+    delete param0.hasActionManager;
     delete param0.hasChatWindow;
     delete param0.hasDiscuss;
     delete param0.hasMessagingMenu;
+    delete param0.hasTimeControl;
     delete param0.hasView;
     if (hasChatWindow) {
         callbacks = _useChatWindow(callbacks);
@@ -812,20 +627,49 @@ async function start(param0 = {}) {
         destroy: destroyCallbacks,
         return: returnCallbacks,
     } = callbacks;
-    const {
-        debug = false,
-        env,
-    } = param0;
-    const {
-        services = getMailServices({ env, hasChatWindow, hasTimeControl, isDebug: debug, session: param0.session }),
-    } = param0;
+    const { debug = false } = param0;
     initCallbacks.forEach(callback => callback(param0));
-    const kwargs = Object.assign({
-        archs: { 'mail.message,false,search': '<search/>' },
-        debug,
-        services,
-    }, param0);
+
+    let env = addMessagingToEnv(param0.env, { debug });
+    if (hasTimeControl) {
+        env = addTimeControlToEnv(env);
+    }
+
+    const services = Object.assign({}, {
+        bus_service: BusService.extend({
+            _beep() {}, // Do nothing
+            _poll() {}, // Do nothing
+            _registerWindowUnload() {}, // Do nothing
+            isOdooFocused() {
+                return true;
+            },
+            updateOption() {},
+        }),
+        chat_window: ChatWindowService.extend({
+            _getParentNode() {
+                return document.querySelector(debug ? 'body' : '#qunit-fixture');
+            },
+            _listenHomeMenu: () => {},
+        }),
+        dialog: DialogService.extend({
+            _getParentNode() {
+                return document.querySelector(debug ? 'body' : '#qunit-fixture');
+            },
+            _listenHomeMenu: () => {},
+        }),
+        local_storage: AbstractStorageService.extend({ storage: new RamStorage() }),
+        notification: NotificationService.extend(),
+    }, param0.services);
+
+    const kwargs = Object.assign({}, param0, {
+        archs: Object.assign({}, {
+            'mail.message,false,search': '<search/>'
+        }, param0.archs),
+        debug: param0.debug || false,
+        services: Object.assign({}, services, param0.services),
+    }, { env });
     let widget;
+    let mockServer; // only in basic mode
     const selector = debug ? 'body' : '#qunit-fixture';
     if (hasView) {
         widget = await createView(kwargs);
@@ -836,10 +680,19 @@ async function start(param0 = {}) {
                 legacyUnpatch(widget);
             }
         });
+    } else if (hasActionManager) {
+        widget = await createActionManager(kwargs);
+        legacyPatch(widget, {
+            destroy() {
+                this._super(...arguments);
+                destroyCallbacks.forEach(callback => callback({ widget }));
+                legacyUnpatch(widget);
+            }
+        });
     } else {
         const Parent = Widget.extend({ do_push_state() {} });
         const parent = new Parent();
-        addMockEnvironment(parent, kwargs);
+        mockServer = await addMockEnvironment(parent, kwargs);
         widget = new Widget(parent);
         await widget.appendTo($(selector));
         Object.assign(widget, {
@@ -851,12 +704,50 @@ async function start(param0 = {}) {
         });
     }
 
-    const testEnv = widget.call('messaging', 'getEnv');
-    const result = { env: testEnv, widget };
+    const testEnv = Component.env;
+
+    /**
+     * Components cannot use web.bus, because they cannot use
+     * EventDispatcherMixin, and webclient cannot easily access env.
+     * Communication between webclient and components by core.bus
+     * (usable by webclient) and messagingBus (usable by components), which
+     * the messaging service acts as mediator since it can easily use both
+     * kinds of buses.
+     */
+    testEnv.bus.on(
+        'hide_home_menu',
+        null,
+        () => testEnv.messagingBus.trigger('hide_home_menu')
+    );
+    testEnv.bus.on(
+        'show_home_menu',
+        null,
+        () => testEnv.messagingBus.trigger('show_home_menu')
+    );
+    testEnv.bus.on(
+        'will_hide_home_menu',
+        null,
+        () => testEnv.messagingBus.trigger('will_hide_home_menu')
+    );
+    testEnv.bus.on(
+        'will_show_home_menu',
+        null,
+        () => testEnv.messagingBus.trigger('will_show_home_menu')
+    );
+    testEnv.modelManager.start(testEnv);
+    /**
+     * Create the messaging singleton record.
+     */
+    testEnv.messaging = testEnv.models['mail.messaging'].create();
+    testEnv.messaging.start().then(() =>
+        testEnv.messagingInitializedDeferred.resolve()
+    );
+
+    const result = { env: testEnv, mockServer, widget };
 
     if (waitUntilMessagingInitialized) {
         // env key only accessible after MessagingService has started
-        await testEnv.messagingInitializedPromise;
+        await testEnv.messagingInitializedDeferred;
     }
 
     if (mountCallbacks.length > 0) {
@@ -953,9 +844,7 @@ return {
     beforeEach,
     dragenterFiles,
     dropFiles,
-    getMailServices,
     inputFiles,
-    MockMailService,
     nextAnimationFrame,
     nextTick,
     pasteFiles,

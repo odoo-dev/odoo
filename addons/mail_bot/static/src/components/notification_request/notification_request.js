@@ -54,7 +54,7 @@ class NotificationRequest extends Component {
         // manually force recompute because the permission is not in the store
         this.env.messaging.messagingMenu.update();
         if (value !== 'granted') {
-            this.env.call('bus_service', 'sendNotification',
+            this.env.services['bus_service'].sendNotification(
                 this.env._t("Permission denied"),
                 this.env._t("Odoo will not have the permission to send native notifications on this device.")
             );
@@ -69,7 +69,7 @@ class NotificationRequest extends Component {
      * @private
      */
     _onClick() {
-        const windowNotification = this.env.window.Notification;
+        const windowNotification = this.env.browser.Notification;
         const def = windowNotification && windowNotification.requestPermission();
         if (def) {
             def.then(this._handleResponseNotificationPermission.bind(this));

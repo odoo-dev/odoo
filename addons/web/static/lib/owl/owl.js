@@ -92,8 +92,7 @@
         }
         notifyCB() { }
         observe(value, parent) {
-            if (value === null || typeof value !== "object" || value instanceof Date || value instanceof Promise) {
-                // Cannot use `then` on proxified promises: https://github.com/odoo/owl/issues/677
+            if (value === null || typeof value !== "object" || value instanceof Date) {
                 // fun fact: typeof null === 'object'
                 return value;
             }
@@ -3236,10 +3235,6 @@
             tasks = tasks.filter((task) => {
                 if (task.fiber.isCompleted) {
                     task.callback();
-                    return false;
-                }
-                // Do not wait for a task linked to a destroyed component https://github.com/odoo/owl/issues/685
-                if (task.fiber.component && task.fiber.component.__owl__.isDestroyed) {
                     return false;
                 }
                 if (task.fiber.counter === 0) {

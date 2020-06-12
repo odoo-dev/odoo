@@ -1,6 +1,7 @@
 odoo.define('mail/static/src/utils/utils.js', function (require) {
 'use strict';
 
+const { delay } = require('web.concurrency');
 const {
     patch: webUtilsPatch,
     unpatch: webUtilsUnpatch,
@@ -11,6 +12,14 @@ const {
 //------------------------------------------------------------------------------
 
 const classPatchMap = new WeakMap();
+
+/**
+ * Wait a task tick, so that anything in micro-task queue that can be processed
+ * is processed.
+ */
+async function nextTick() {
+    await delay(0);
+}
 
 /**
  * Inspired by web.utils:patch utility function
@@ -108,6 +117,7 @@ function unpatchInstanceMethods(Class, patchName) {
 //------------------------------------------------------------------------------
 
 return {
+    nextTick,
     patchClassMethods,
     patchInstanceMethods,
     unpatchClassMethods,

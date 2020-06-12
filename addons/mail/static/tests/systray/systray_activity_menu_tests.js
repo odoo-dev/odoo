@@ -1,7 +1,7 @@
 odoo.define('mail.systray.ActivityMenuTests', function (require) {
 "use strict";
 
-const { getMailServices } = require('mail/static/src/utils/test_utils.js');
+const { start } = require('mail/static/src/utils/test_utils.js');
 var ActivityMenu = require('mail.systray.ActivityMenu');
 
 var testUtils = require('web.test_utils');
@@ -9,7 +9,6 @@ var testUtils = require('web.test_utils');
 QUnit.module('mail', {}, function () {
 QUnit.module('ActivityMenu', {
     beforeEach: function () {
-        this.services = getMailServices({ hasLegacyMail: true });
         this.data = {
             'mail.activity.menu': {
                 fields: {
@@ -83,28 +82,26 @@ QUnit.module('ActivityMenu', {
 QUnit.test('activity menu widget: menu with no records', async function (assert) {
     assert.expect(1);
 
-    var activityMenu = new ActivityMenu();
-    await testUtils.mock.addMockEnvironment(activityMenu, {
-            services: this.services,
-            mockRPC: function (route, args) {
-                if (args.method === 'systray_get_activities') {
-                    return Promise.resolve([]);
-                }
-                return this._super(route, args);
-            },
-        });
+    const { widget } = await start({
+        mockRPC: function (route, args) {
+            if (args.method === 'systray_get_activities') {
+                return Promise.resolve([]);
+            }
+            return this._super(route, args);
+        },
+    });
+    const activityMenu = new ActivityMenu(widget);
     await activityMenu.appendTo($('#qunit-fixture'));
     await testUtils.nextTick();
     assert.containsOnce(activityMenu, '.o_no_activity');
-    activityMenu.destroy();
+    widget.destroy();
 });
 
 QUnit.test('activity menu widget: activity menu with 3 records', async function (assert) {
     assert.expect(10);
     var self = this;
-    var activityMenu = new ActivityMenu();
-    await testUtils.mock.addMockEnvironment(activityMenu, {
-        services: this.services,
+
+    const { widget } = await start({
         mockRPC: function (route, args) {
             if (args.method === 'systray_get_activities') {
                 return Promise.resolve(self.data['mail.activity.menu']['records']);
@@ -112,6 +109,7 @@ QUnit.test('activity menu widget: activity menu with 3 records', async function 
             return this._super(route, args);
         },
     });
+    var activityMenu = new ActivityMenu(widget);
     await activityMenu.appendTo($('#qunit-fixture'));
     await testUtils.nextTick();
     assert.hasClass(activityMenu.$el, 'o_mail_systray_item', 'should be the instance of widget');
@@ -157,15 +155,14 @@ QUnit.test('activity menu widget: activity menu with 3 records', async function 
     await testUtils.dom.click(activityMenu.$('.dropdown-toggle'));
     await testUtils.dom.click(activityMenu.$(".o_mail_systray_dropdown_items > div[data-model_name='Issue']"));
 
-    activityMenu.destroy();
+    widget.destroy();
 });
 
 QUnit.test('activity menu widget: activity view icon', async function (assert) {
     assert.expect(12);
     var self = this;
-    var activityMenu = new ActivityMenu();
-    await testUtils.mock.addMockEnvironment(activityMenu, {
-        services: this.services,
+
+    const { widget } = await start({
         session: this.session,
         mockRPC: function (route, args) {
             if (args.method === 'systray_get_activities') {
@@ -174,6 +171,7 @@ QUnit.test('activity menu widget: activity view icon', async function (assert) {
             return this._super(route, args);
         },
     });
+    var activityMenu = new ActivityMenu(widget);
     await activityMenu.appendTo($('#qunit-fixture'));
     await testUtils.nextTick();
     assert.containsN(activityMenu, '.o_mail_activity_action', 2,
@@ -218,7 +216,7 @@ QUnit.test('activity menu widget: activity view icon', async function (assert) {
         'do_action:mail.mail_activity_type_view_tree'
     ]);
 
-    activityMenu.destroy();
+    widget.destroy();
 });
 });
 });

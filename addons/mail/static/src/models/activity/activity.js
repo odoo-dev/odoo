@@ -17,7 +17,7 @@ function factory(dependencies) {
          * Delete the record from database and locally.
          */
         async deleteServerRecord() {
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: 'mail.activity',
                 method: 'unlink',
                 args: [[this.id]],
@@ -135,13 +135,14 @@ function factory(dependencies) {
                 },
                 res_id: this.id,
             };
-            this.env.do_action(action, {
-                on_close: () => this.fetchAndUpdate(),
+            this.env.bus.trigger('do-action', {
+                action,
+                options: { on_close: () => this.fetchAndUpdate() },
             });
         }
 
         async fetchAndUpdate() {
-            const [data] = await this.async(() => this.env.rpc({
+            const [data] = await this.async(() => this.env.services.rpc({
                 model: 'mail.activity',
                 method: 'activity_format',
                 args: [this.id],
@@ -159,7 +160,7 @@ function factory(dependencies) {
          */
         async markAsDone({ attachments = [], feedback = false }) {
             const attachmentIds = attachments.map(attachment => attachment.id);
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: 'mail.activity',
                 method: 'action_feedback',
                 args: [[this.id]],
@@ -181,7 +182,7 @@ function factory(dependencies) {
          * @returns {Object}
          */
         async markAsDoneAndScheduleNext({ feedback }) {
-            const action = await this.async(() => this.env.rpc({
+            const action = await this.async(() => this.env.services.rpc({
                 model: 'mail.activity',
                 method: 'action_feedback_schedule_next',
                 args: [[this.id]],
@@ -192,11 +193,14 @@ function factory(dependencies) {
                 this.chatter.refresh();
             }
             this.delete();
-            this.env.do_action(action, {
-                on_close: () => {
-                    if (chatter) {
-                        chatter.refreshActivities();
-                    }
+            this.env.bus.trigger('do-action', {
+                action,
+                options: {
+                    on_close: () => {
+                        if (chatter) {
+                            chatter.refreshActivities();
+                        }
+                    },
                 },
             });
         }

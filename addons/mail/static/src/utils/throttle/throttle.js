@@ -267,7 +267,7 @@ class Throttle {
         const coolingDownDeferred = makeDeferred();
         this._coolingDownDeferred = coolingDownDeferred;
         this._isCoolingDown = true;
-        const cooldownTimeoutId = this.env.window.setTimeout(
+        const cooldownTimeoutId = this.env.browser.setTimeout(
             () => coolingDownDeferred.resolve(),
             this._duration
         );
@@ -284,7 +284,7 @@ class Throttle {
                 unexpectedError = error;
             }
         } finally {
-            this.env.window.clearTimeout(cooldownTimeoutId);
+            this.env.browser.clearTimeout(cooldownTimeoutId);
             this._coolingDownDeferred = undefined;
             this._isCoolingDown = false;
         }

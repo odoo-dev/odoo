@@ -16,10 +16,13 @@ registerInstancePatchModel('mail.notification_group', 'sms/static/src/models/not
      */
     openCancelAction() {
         if (this.notification_type === 'sms') {
-            this.env.do_action('sms.sms_cancel_action', {
-                additional_context: {
-                    default_model: this.res_model,
-                    unread_counter: this.notifications.length,
+            this.env.bus.trigger('do-action', {
+                action: 'sms.sms_cancel_action',
+                options: {
+                    additional_context: {
+                        default_model: this.res_model,
+                        unread_counter: this.notifications.length,
+                    },
                 },
             });
         }
@@ -35,14 +38,16 @@ registerInstancePatchModel('mail.notification_group', 'sms/static/src/models/not
      */
     _openDocuments() {
         if (this.notification_type === 'sms') {
-            this.env.do_action({
-                name: this.env._t("SMS Failures"),
-                type: 'ir.actions.act_window',
-                view_mode: 'kanban,list,form',
-                views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
-                target: 'current',
-                res_model: this.res_model,
-                domain: [['message_has_sms_error', '=', true]],
+            this.env.bus.trigger('do-action', {
+                action: {
+                    name: this.env._t("SMS Failures"),
+                    type: 'ir.actions.act_window',
+                    view_mode: 'kanban,list,form',
+                    views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+                    target: 'current',
+                    res_model: this.res_model,
+                    domain: [['message_has_sms_error', '=', true]],
+                },
             });
         }
         return this._super(...arguments);

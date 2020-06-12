@@ -51,12 +51,12 @@ function factory(dependencies) {
 
         async refreshActivities() {
             // A bit "extreme", may be improved
-            const [{ activity_ids: newActivityIds }] = await this.async(() => this.env.rpc({
+            const [{ activity_ids: newActivityIds }] = await this.async(() => this.env.services.rpc({
                 model: this.thread.model,
                 method: 'read',
                 args: [this.thread.id, ['activity_ids']]
             }));
-            const activitiesData = await this.async(() => this.env.rpc({
+            const activitiesData = await this.async(() => this.env.services.rpc({
                 model: 'mail.activity',
                 method: 'activity_format',
                 args: [newActivityIds]

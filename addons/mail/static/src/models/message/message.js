@@ -174,7 +174,7 @@ function factory(dependencies) {
          * @param {Array[]} domain
          */
         static async markAllAsRead(domain) {
-            await this.env.rpc({
+            await this.env.services.rpc({
                 model: 'mail.message',
                 method: 'mark_all_as_read',
                 kwargs: { domain },
@@ -188,13 +188,13 @@ function factory(dependencies) {
          *
          * [[dbname, 'res.partner', partnerId], { type: 'mark_as_read' }]
          *
-         * @see mail.messaging.entity.MessagingNotificationHandler:_handleNotificationPartnerMarkAsRead()
+         * @see mail.messaging_notification_handler:_handleNotificationPartnerMarkAsRead()
          *
          * @static
-         * @param {mail.messaging.entity.Message[]} messages
+         * @param {mail.message[]} messages
          */
         static async markAsRead(messages) {
-            await this.env.rpc({
+            await this.env.services.rpc({
                 model: 'mail.message',
                 method: 'set_message_done',
                 args: [messages.map(message => message.id)]
@@ -215,7 +215,7 @@ function factory(dependencies) {
          */
         static async moderate(messages, decision, kwargs) {
             const messageIds = messages.map(message => message.id);
-            await this.env.rpc({
+            await this.env.services.rpc({
                 model: 'mail.message',
                 method: 'moderate',
                 args: [messageIds, decision],
@@ -237,7 +237,7 @@ function factory(dependencies) {
          * Unstar all starred messages of current user.
          */
         static async unstarAll() {
-            await this.env.rpc({
+            await this.env.services.rpc({
                 model: 'mail.message',
                 method: 'unstar_all',
             });
@@ -264,7 +264,7 @@ function factory(dependencies) {
          * partner Inbox.
          */
         async markAsRead() {
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: 'mail.message',
                 method: 'set_message_done',
                 args: [[this.id]]
@@ -289,9 +289,12 @@ function factory(dependencies) {
          * Opens the view that allows to resend the message in case of failure.
          */
         openResendAction() {
-            this.env.do_action('mail.mail_resend_message_action', {
-                additional_context: {
-                    mail_message_to_resend: this.id,
+            this.env.bus.trigger('do-action', {
+                action: 'mail.mail_resend_message_action',
+                options: {
+                    additional_context: {
+                        mail_message_to_resend: this.id,
+                    },
                 },
             });
         }
@@ -331,7 +334,7 @@ function factory(dependencies) {
          * Toggle the starred status of the provided message.
          */
         async toggleStar() {
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: 'mail.message',
                 method: 'toggle_message_starred',
                 args: [[this.id]]

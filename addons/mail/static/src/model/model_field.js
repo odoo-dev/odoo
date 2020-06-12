@@ -252,9 +252,9 @@ class ModelField {
     }
 
     /**
-     * Get the messaging env.
+     * Get the env with messaging.
      *
-     * @returns {mail/static/src/messaging_env.js}
+     * @returns {mail/static/src/env/env.js}
      */
     get env() {
         return this.modelManager.env;

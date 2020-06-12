@@ -221,12 +221,13 @@ class Discuss extends Component {
      * @private
      */
     _onReplyingToMessageMessagePosted() {
-        this.env.do_notify(
-            _.str.sprintf(
+        this.env.services['notification'].notify({
+            message: _.str.sprintf(
                 this.env._t(`Message posted on "%s"`),
                 owl.utils.escape(this.discuss.replyingToMessage.originThread.displayName)
-            )
-        );
+            ),
+            type: 'warning',
+        });
         this.discuss.clearReplyingToMessage();
     }
 

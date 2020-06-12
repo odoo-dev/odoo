@@ -73,7 +73,7 @@ function factory(dependencies) {
             } else {
                 args.push([this.channel.id]);
             }
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: this.followedThread.model,
                 method: 'message_unsubscribe',
                 args
@@ -94,7 +94,7 @@ function factory(dependencies) {
          * Show (editable) list of subtypes of this follower.
          */
         async showSubtypes() {
-            const subtypesData = await this.async(() => this.env.rpc({
+            const subtypesData = await this.async(() => this.env.services.rpc({
                 route: '/mail/read_subscription_data',
                 params: { follower_id: this.id },
             }));
@@ -139,7 +139,7 @@ function factory(dependencies) {
                 } else {
                     kwargs.channel_ids = [this.channel.id];
                 }
-                await this.async(() => this.env.rpc({
+                await this.async(() => this.env.services.rpc({
                     model: this.followedThread.model,
                     method: 'message_subscribe',
                     args: [[this.followedThread.id]],

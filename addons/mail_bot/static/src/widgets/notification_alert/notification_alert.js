@@ -28,9 +28,7 @@ const NotificationAlert = Widget.extend(WidgetAdapterMixin, {
      */
     async start() {
         this._super(...arguments);
-        const env = this.call('messaging', 'getEnv');
 
-        NotificationAlertWrapper.env = env;
         this.component = new NotificationAlertWrapper(
             this,
             components.NotificationAlert,

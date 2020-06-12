@@ -78,7 +78,7 @@ function factory(dependencies) {
          * Remove this attachment globally.
          */
         async remove() {
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: 'ir.attachment',
                 method: 'unlink',
                 args: [this.id],

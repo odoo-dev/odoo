@@ -12,6 +12,8 @@ const {
     start: utilsStart,
 } = require('mail/static/src/utils/test_utils.js');
 
+const Bus = require('web.Bus');
+
 QUnit.module('snailmail', {}, function () {
 QUnit.module('components', {}, function () {
 QUnit.module('message', {}, function () {
@@ -488,23 +490,22 @@ QUnit.test('Trial Error', async function (assert) {
 QUnit.test('Format Error', async function (assert) {
     assert.expect(8);
 
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action,
-                    'snailmail.snailmail_letter_format_error_action',
-                    "action should be the one for format error"
-                );
-                assert.strictEqual(
-                    ev.data.options.additional_context.message_id,
-                    10,
-                    "action should have correct message id"
-                );
-            },
-        },
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action,
+            'snailmail.snailmail_letter_format_error_action',
+            "action should be the one for format error"
+        );
+        assert.strictEqual(
+            payload.options.additional_context.message_id,
+            10,
+            "action should have correct message id"
+        );
     });
+
+    await this.start({ env: { bus } });
     const message = this.env.models['mail.message'].create({
         id: 10,
         message_type: 'snailmail',
@@ -550,22 +551,23 @@ QUnit.test('Format Error', async function (assert) {
 QUnit.test('Missing Required Fields', async function (assert) {
     assert.expect(9);
 
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action,
+            'snailmail.snailmail_letter_missing_required_fields_action',
+            "action should be the one for missing fields"
+        );
+        assert.strictEqual(
+            payload.options.additional_context.letter_id,
+            22, // should be the same as the id returned by search
+            "action should have correct letter id"
+        );
+    });
+
     await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action,
-                    'snailmail.snailmail_letter_missing_required_fields_action',
-                    "action should be the one for missing fields"
-                );
-                assert.strictEqual(
-                    ev.data.options.additional_context.letter_id,
-                    22, // should be the same as the id returned by search
-                    "action should have correct letter id"
-                );
-            },
-        },
+        env: { bus },
         async mockRPC(route, args) {
             if (args.model === 'snailmail.letter' && args.method === 'search') {
                 assert.step('search');

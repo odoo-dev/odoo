@@ -11,6 +11,8 @@ const {
     start: utilsStart,
 } = require('mail/static/src/utils/test_utils.js');
 
+const Bus = require('web.Bus');
+
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
 QUnit.module('follower_list_menu', {}, function () {
@@ -131,38 +133,39 @@ QUnit.test('click on "add followers" button', async function (assert) {
     assert.expect(18);
 
     const followerIds = [];
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('action:open_view');
+        assert.strictEqual(
+            payload.action.context.default_res_model,
+            'res.partner',
+            "'The 'add followers' action should contain thread model in context'"
+        );
+        assert.notOk(
+            payload.action.context.mail_invite_follower_channel_only,
+            "The 'add followers' action should not be restricted to channels only"
+        );
+        assert.strictEqual(
+            payload.action.context.default_res_id,
+            100,
+            "The 'add followers' action should contain thread id in context"
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            'mail.wizard.invite',
+            "The 'add followers' action should be a wizard invite of mail module"
+        );
+        assert.strictEqual(
+            payload.action.type,
+            "ir.actions.act_window",
+            "The 'add followers' action should be of type 'ir.actions.act_window'"
+        );
+        followerIds.push(1);
+        payload.options.on_close();
+    });
+
     await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('action:open_view');
-                assert.strictEqual(
-                    ev.data.action.context.default_res_model,
-                    'res.partner',
-                    "'The 'add followers' action should contain thread model in context'"
-                );
-                assert.notOk(
-                    ev.data.action.context.mail_invite_follower_channel_only,
-                    "The 'add followers' action should not be restricted to channels only"
-                );
-                assert.strictEqual(
-                    ev.data.action.context.default_res_id,
-                    100,
-                    "The 'add followers' action should contain thread id in context"
-                );
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    'mail.wizard.invite',
-                    "The 'add followers' action should be a wizard invite of mail module"
-                );
-                assert.strictEqual(
-                    ev.data.action.type,
-                    "ir.actions.act_window",
-                    "The 'add followers' action should be of type 'ir.actions.act_window'"
-                );
-                followerIds.push(1);
-                ev.data.options.on_close();
-            },
-        },
+        env: { bus },
         async mockRPC(route, args) {
             if (route.includes('web/image/')) {
                 return;
@@ -262,38 +265,38 @@ QUnit.test('click on "add channels" button', async function (assert) {
     assert.expect(18);
 
     const followerIds = [];
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('action:open_view');
+        assert.strictEqual(
+            payload.action.context.default_res_model,
+            'res.partner',
+            "'The 'add channels' action should contain thread model in context'"
+        );
+        assert.ok(
+            payload.action.context.mail_invite_follower_channel_only,
+            "The 'add channels' action should be restricted to channels only"
+        );
+        assert.strictEqual(
+            payload.action.context.default_res_id,
+            100,
+            "The 'add channels' action should contain thread id in context"
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            'mail.wizard.invite',
+            "The 'add channels' action should be a wizard invite of mail module"
+        );
+        assert.strictEqual(
+            payload.action.type,
+            "ir.actions.act_window",
+            "The 'add channels' action should be of type 'ir.actions.act_window'"
+        );
+        followerIds.push(1);
+        payload.options.on_close();
+    });
     await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('action:open_view');
-                assert.strictEqual(
-                    ev.data.action.context.default_res_model,
-                    'res.partner',
-                    "'The 'add channels' action should contain thread model in context'"
-                );
-                assert.ok(
-                    ev.data.action.context.mail_invite_follower_channel_only,
-                    "The 'add channels' action should be restricted to channels only"
-                );
-                assert.strictEqual(
-                    ev.data.action.context.default_res_id,
-                    100,
-                    "The 'add channels' action should contain thread id in context"
-                );
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    'mail.wizard.invite',
-                    "The 'add channels' action should be a wizard invite of mail module"
-                );
-                assert.strictEqual(
-                    ev.data.action.type,
-                    "ir.actions.act_window",
-                    "The 'add channels' action should be of type 'ir.actions.act_window'"
-                );
-                followerIds.push(1);
-                ev.data.options.on_close();
-            },
-        },
+        env: { bus },
         async mockRPC(route, args) {
             if (route.includes('web/image/')) {
                 return;

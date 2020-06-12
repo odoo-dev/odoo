@@ -28,7 +28,7 @@ function factory(dependencies) {
             this.update({ isLoading: true });
             let messagesData = [];
             if (!this.thread.isTemporary) {
-                messagesData = await this.async(() => this.env.rpc({
+                messagesData = await this.async(() => this.env.services.rpc({
                     model: 'mail.message',
                     method: 'message_fetch',
                     args: [domain],
@@ -50,7 +50,7 @@ function factory(dependencies) {
                 ...this.messages.map(message => message.id)
             );
             domain = [['id', '<', minMessageId]].concat(domain);
-            const messagesData = await this.async(() => this.env.rpc({
+            const messagesData = await this.async(() => this.env.services.rpc({
                 model: 'mail.message',
                 method: 'message_fetch',
                 args: [domain],
@@ -81,7 +81,7 @@ function factory(dependencies) {
             this.update({ isLoading: true });
             const messageFetchKwargs = this._getFetchMessagesKwargs();
             messageFetchKwargs.limit = false;
-            const messagesData = await this.async(() => this.env.rpc({
+            const messagesData = await this.async(() => this.env.services.rpc({
                 model: 'mail.message',
                 method: 'message_fetch',
                 args: [domain],

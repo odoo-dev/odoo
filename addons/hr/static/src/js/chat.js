@@ -11,6 +11,8 @@ odoo.define('hr.employee_chat', function (require) {
     var KanbanRenderer = require('web.KanbanRenderer');
     var KanbanRecord = require('web.KanbanRecord');
 
+    const { Component } = owl;
+
     // CHAT MIXIN
     var ChatMixin = {
         /**
@@ -52,7 +54,7 @@ odoo.define('hr.employee_chat', function (require) {
         }),
 
         _onOpenChat: function (ev) {
-            const env = this.call('messaging', 'getEnv');
+            const env = Component.env;
             const partner = env.models['mail.partner'].insert({
                 id: ev.data.partner_id,
             });
@@ -84,7 +86,7 @@ odoo.define('hr.employee_chat', function (require) {
         }),
 
         _onOpenChat: function (ev) {
-            const env = this.call('messaging', 'getEnv');
+            const env = Component.env;
             const partner = env.models['mail.partner'].insert({
                 id: ev.data.partner_id,
             });

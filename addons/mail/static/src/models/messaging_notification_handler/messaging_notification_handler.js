@@ -6,6 +6,8 @@ const { one2one } = require('mail/static/src/model/model_field.js');
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 
+const { Component } = owl;
+
 function factory(dependencies) {
 
     class MessagingNotificationHandler extends dependencies['mail.model'] {
@@ -14,8 +16,8 @@ function factory(dependencies) {
          * @override
          */
         delete() {
-            this.env.call('bus_service', 'off', 'notification');
-            this.env.call('bus_service', 'stopPolling');
+            this.env.services['bus_service'].off('notification');
+            this.env.services['bus_service'].stopPolling();
             super.delete();
         }
 
@@ -28,8 +30,8 @@ function factory(dependencies) {
          * the current users. This includes pinned channels for instance.
          */
         start() {
-            this.env.call('bus_service', 'onNotification', null, notifs => this._handleNotifications(notifs));
-            this.env.call('bus_service', 'startPolling');
+            this.env.services.bus_service.onNotification(null, notifs => this._handleNotifications(notifs));
+            this.env.services.bus_service.startPolling();
         }
 
         //----------------------------------------------------------------------
@@ -246,7 +248,7 @@ function factory(dependencies) {
             }
 
             // In all other cases: update counter and notify if out of focus.
-            const isOdooFocused = this.env.call('bus_service', 'isOdooFocused');
+            const isOdooFocused = this.env.services['bus_service'].isOdooFocused();
             if (!isOdooFocused) {
                 this._notifyNewChannelMessageWhileOutOfFocus({ channel, message });
             }
@@ -388,12 +390,7 @@ function factory(dependencies) {
                 type,
             } = data;
             if (type === 'activity_updated') {
-                /**
-                 * data.activity_created
-                 * data.activity_deleted
-                 */
-                console.warn('activity_updated not handled', data);
-                return; // disabled
+                Component.env.bus.trigger('activity_updated', data);
             } else if (type === 'author') {
                 return this._handleNotificationPartnerAuthor(data);
             } else if (type === 'deletion') {
@@ -407,11 +404,12 @@ function factory(dependencies) {
             } else if (type === 'simple_notification') {
                 const escapedTitle = owl.utils.escape(data.title);
                 const escapedMessage = owl.utils.escape(data.message);
-                if (data.warning) {
-                    this.env.do_warn(escapedTitle, escapedMessage, data.sticky);
-                } else {
-                    this.env.do_notify(escapedTitle, escapedMessage, data.sticky);
-                }
+                this.env.services['notification'].notify({
+                    message: escapedMessage,
+                    sticky: data.sticky,
+                    title: escapedTitle,
+                    type: data.warning ? 'warning' : 'danger',
+                });
             } else if (type === 'toggle_star') {
                 return this._handleNotificationPartnerToggleStar(data);
             } else if (info === 'transient_message') {
@@ -469,13 +467,14 @@ function factory(dependencies) {
                 data.info !== 'creation' &&
                 !wasCurrentPartnerMember
             ) {
-                this.env.do_notify(
-                    this.env._t("Invitation"),
-                    _.str.sprintf(
+                this.env.services['notification'].notify({
+                    message: _.str.sprintf(
                         this.env._t("You have been invited to: %s"),
                         owl.utils.escape(channel.name)
-                    )
-                );
+                    ),
+                    title: this.env._t("Invitation"),
+                    type: 'warning',
+                });
             }
             // a new thread with unread messages could have been added
             // manually force recompute of counter
@@ -661,7 +660,11 @@ function factory(dependencies) {
                     owl.utils.escape(channel.name)
                 );
             }
-            this.env.do_notify(this.env._t("Unsubscribed"), message);
+            this.env.services['notification'].notify({
+                message,
+                title: this.env._t("Unsubscribed"),
+                type: 'warning',
+            });
             channel.update({ isPinned: false });
         }
 
@@ -673,7 +676,7 @@ function factory(dependencies) {
          * @param {string} param0.title
          */
         _handleNotificationPartnerUserConnection({ message, partner_id, title }) {
-            this.env.call('bus_service', 'sendNotification', title, message);
+            this.env.services['bus_service'].sendNotification(title, message);
             const partner = this.env.models['mail.partner'].insert({
                 id: partner_id,
             });
@@ -714,12 +717,12 @@ function factory(dependencies) {
                 }
             }
             const notificationContent = message.prettyBody.substr(0, PREVIEW_MSG_MAX_SIZE);
-            this.env.call('bus_service', 'sendNotification', notificationTitle, notificationContent);
+            this.env.services['bus_service'].sendNotification(notificationTitle, notificationContent);
             messaging.update({ outOfFocusUnreadMessageCounter: messaging.outOfFocusUnreadMessageCounter + 1 });
             const titlePattern = messaging.outOfFocusUnreadMessageCounter === 1
                 ? this.env._t("%d Message")
                 : this.env._t("%d Messages");
-            this.env.trigger_up('set_title_part', {
+            this.env.bus.trigger('set_title_part', {
                 part: '_chat',
                 title: _.str.sprintf(titlePattern, messaging.outOfFocusUnreadMessageCounter),
             });

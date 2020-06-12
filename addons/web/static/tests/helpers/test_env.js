@@ -28,6 +28,15 @@ odoo.define('web.test_env', async function (require) {
         };
         const defaultEnv = {
             _t: env._t || Object.assign((s => s), { database }),
+            browser: Object.assign({
+                setTimeout: window.setTimeout.bind(window),
+                clearTimeout: window.clearTimeout.bind(window),
+                setInterval: window.setInterval.bind(window),
+                clearInterval: window.clearInterval.bind(window),
+                requestAnimationFrame: window.requestAnimationFrame.bind(window),
+                Date: window.Date,
+                fetch: (window.fetch || (() => { })).bind(window),
+            }, env.browser),
             bus: env.bus || new Bus(),
             device: Object.assign({ isMobile: false }, env.device),
             isDebug: env.isDebug || (() => false),
@@ -57,18 +66,6 @@ odoo.define('web.test_env', async function (require) {
                 },
                 url: session.url,
             }, env.session),
-            window: Object.assign({
-                clearTimeout: (...args) => window.clearTimeout(...args),
-                innerHeight: 1080,
-                innerWidth: 1920,
-                Notification: {
-                    permission: 'denied',
-                    async requestPermission() {
-                        return this.permission;
-                    },
-                },
-                setTimeout: (...args) => window.setTimeout(...args),
-            }, env.window),
         };
         return Object.assign(env, defaultEnv);
     }

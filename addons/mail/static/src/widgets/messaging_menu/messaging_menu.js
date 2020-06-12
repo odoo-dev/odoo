@@ -23,13 +23,6 @@ const MessagingMenu = Widget.extend({
     /**
      * @override
      */
-    async willStart() {
-        await this._super(...arguments);
-        this.env = this.call('messaging', 'getEnv');
-    },
-    /**
-     * @override
-     */
     destroy() {
         if (this.component) {
             this.component.destroy();
@@ -38,7 +31,6 @@ const MessagingMenu = Widget.extend({
     },
     async on_attach_callback() {
         const MessagingMenuComponent = components.MessagingMenu;
-        MessagingMenuComponent.env = this.env;
         this.component = new MessagingMenuComponent(null);
         await this.component.mount(this.el);
         // unwrap

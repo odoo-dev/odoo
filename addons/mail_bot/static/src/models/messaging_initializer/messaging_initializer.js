@@ -14,7 +14,7 @@ registerInstancePatchModel('mail.messaging_initializer', 'mail_bot/static/src/mo
     _showOdoobotTimeout() {
         setTimeout(() => {
             this.env.session.odoobot_initialized = true;
-            this.env.rpc({
+            this.env.services.rpc({
                 model: 'mail.channel',
                 method: 'init_odoobot',
             });

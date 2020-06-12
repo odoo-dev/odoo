@@ -91,7 +91,7 @@ class Timer {
      * when this timer is running.
      */
     clear() {
-        this.env.window.clearTimeout(this._timeoutId);
+        this.env.browser.clearTimeout(this._timeoutId);
         this.isRunning = false;
         if (!this._timeoutDeferred) {
             return;
@@ -122,7 +122,7 @@ class Timer {
         this.isRunning = true;
         const timeoutDeferred = makeDeferred();
         this._timeoutDeferred = timeoutDeferred;
-        const timeoutId = this.env.window.setTimeout(
+        const timeoutId = this.env.browser.setTimeout(
             () => {
                 this.isRunning = false;
                 timeoutDeferred.resolve(this._onTimeout());
@@ -144,7 +144,7 @@ class Timer {
                 throw error;
             }
         } finally {
-            this.env.window.clearTimeout(timeoutId);
+            this.env.browser.clearTimeout(timeoutId);
             this._timeoutDeferred = undefined;
             this.isRunning = false;
         }

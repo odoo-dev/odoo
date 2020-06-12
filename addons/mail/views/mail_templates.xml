@@ -12,10 +12,6 @@
                 <script type="text/javascript" src="/mail/static/src/js/many2many_tags_email.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/many2one_avatar_user.js"></script>
 
-                <!-- Services -->
-                <script type="text/javascript" src="/mail/static/src/js/services/mail_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/services/mail_notification_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/services/mail_service.js"></script>
                 <!-- Widgets -->
                 <script type="text/javascript" src="/mail/static/src/js/document_viewer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/basic_view.js"></script>
@@ -54,7 +50,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/activity_view.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/kanban_view.scss"/>
 
-                <!-- owl -->
+                <script type="text/javascript" src="/mail/static/src/bugfix/bugfix.js"></script>
                 <script type="text/javascript" src="/mail/static/src/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone.js"></script>
                 <script type="text/javascript" src="/mail/static/src/component_hooks/use_refs/use_refs.js"></script>
                 <script type="text/javascript" src="/mail/static/src/component_hooks/use_store/use_store.js"></script>
@@ -111,7 +107,7 @@
                 <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_typing_icon/thread_typing_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_viewer/thread_viewer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/messaging_env.js"></script>
+                <script type="text/javascript" src="/mail/static/src/env/env.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_core.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_errors.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_field.js"></script>
@@ -152,7 +148,6 @@
                 <script type="text/javascript" src="/mail/static/src/models/user/user.js"></script>
                 <script type="text/javascript" src="/mail/static/src/services/chat_window_service/chat_window_service.js"></script>
                 <script type="text/javascript" src="/mail/static/src/services/dialog_service/dialog_service.js"></script>
-                <script type="text/javascript" src="/mail/static/src/services/messaging_service/messaging_service.js"></script>
                 <script type="text/javascript" src="/mail/static/src/utils/deferred/deferred.js"></script>
                 <script type="text/javascript" src="/mail/static/src/utils/throttle/throttle.js"></script>
                 <script type="text/javascript" src="/mail/static/src/utils/timer/timer.js"></script>
@@ -164,6 +159,7 @@
 
                 <!-- notification_list_item.scss contains variables/mixins, it must be positioned before sub-components of NotificationList -->
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_list/notification_list_item.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/bugfix/bugfix.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity/activity.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity_box/activity_box.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover.scss"/>
@@ -218,6 +214,7 @@
 
         <template id="tests_assets" name="mail_tests_assets" inherit_id="web.tests_assets">
             <xpath expr="." position="inside">
+                <script type="text/javascript" src="/mail/static/src/env/test_env.js"></script>
                 <script type="text/javascript" src="/mail/static/src/utils/test_utils.js"></script>
                 <script type="text/javascript" src="/mail/static/tests/helpers/mock_server.js"></script>
             </xpath>
@@ -236,7 +233,7 @@
                 <!-- activity view -->
                 <script type="text/javascript" src="/mail/static/tests/activity_tests.js"></script>
 
-                <!-- owl -->
+                <script type="text/javascript" src="/mail/static/src/bugfix/bugfix_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/component_hooks/use_store/use_store_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/activity/activity_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover_tests.js"></script>

@@ -707,7 +707,7 @@ QUnit.test('open 2 different chat windows: enough screen width [REQUIRE FOCUS]',
     });
     await this.start({
         env: {
-            window: {
+            browser: {
                 innerHeight: 1080,
                 innerWidth: 1920,
             },
@@ -986,7 +986,7 @@ QUnit.test('open 3 different chat windows: not enough screen width', async funct
     });
     await this.start({
         env: {
-            window: {
+            browser: {
                 innerHeight: 900,
                 innerWidth: 900,
             },

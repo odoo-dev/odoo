@@ -12,7 +12,7 @@ function factory(dependencies) {
          * @override
          */
         delete() {
-            this.env.call('bus_service', 'off', 'window_focus', null, this._handleGlobalWindowFocus);
+            this.env.services['bus_service'].off('window_focus', null, this._handleGlobalWindowFocus);
             super.delete();
         }
 
@@ -28,11 +28,13 @@ function factory(dependencies) {
          * @param {string} param0.model
          */
         openDocument({ id, model }) {
-            this.env.do_action({
-                type: 'ir.actions.act_window',
-                res_model: model,
-                views: [[false, 'form']],
-                res_id: id,
+            this.env.bus.trigger('do-action', {
+                action: {
+                    type: 'ir.actions.act_window',
+                    res_model: model,
+                    views: [[false, 'form']],
+                    res_id: id,
+                },
             });
             this.messagingMenu.close();
         }
@@ -103,7 +105,7 @@ function factory(dependencies) {
          */
         async start() {
             this._handleGlobalWindowFocus = this._handleGlobalWindowFocus.bind(this);
-            this.env.call('bus_service', 'on', 'window_focus', null, this._handleGlobalWindowFocus);
+            this.env.services['bus_service'].on('window_focus', null, this._handleGlobalWindowFocus);
             await this.async(() => this.initializer.start());
             this.notificationHandler.start();
             this.update({ isInitialized: true });
@@ -118,7 +120,7 @@ function factory(dependencies) {
          */
         _handleGlobalWindowFocus() {
             this.update({ outOfFocusUnreadMessageCounter: 0 });
-            this.env.trigger_up('set_title_part', {
+            this.env.bus.trigger('set_title_part', {
                 part: '_chat',
             });
         }

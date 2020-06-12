@@ -157,12 +157,14 @@ class DiscussSidebarItem extends Component {
      */
     _onClickSettings(ev) {
         ev.stopPropagation();
-        return this.env.do_action({
-            type: 'ir.actions.act_window',
-            res_model: this.thread.model,
-            res_id: this.thread.id,
-            views: [[false, 'form']],
-            target: 'current'
+        return this.env.bus.trigger('do-action', {
+            action: {
+                type: 'ir.actions.act_window',
+                res_model: this.thread.model,
+                res_id: this.thread.id,
+                views: [[false, 'form']],
+                target: 'current'
+            },
         });
     }
 

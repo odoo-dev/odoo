@@ -21,7 +21,6 @@ FormRenderer.include({
     init(parent, state, params) {
         this._super(...arguments);
         this.chatterFields = params.chatterFields;
-        this.env = this.call('messaging', 'getEnv');
         this.mailFields = params.mailFields;
         this._chatterContainerComponent = undefined;
         /**
@@ -160,7 +159,6 @@ FormRenderer.include({
     async _renderView() {
         await this._super(...arguments);
         if (this._hasChatter()) {
-            ChatterContainerWrapperComponent.env = this.env;
             if (!this._chatterContainerComponent) {
                 this._makeChatterContainerComponent();
             } else {

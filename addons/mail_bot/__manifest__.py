@@ -20,7 +20,7 @@
         'data/mailbot_demo.xml',
     ],
     'qweb': [
-        'views/discuss.xml',
+        'static/src/bugfix/bugfix.xml',
         'static/src/components/messaging_menu/messaging_menu.xml',
         'static/src/components/notification_alert/notification_alert.xml',
         'static/src/components/notification_list/notification_list.xml',

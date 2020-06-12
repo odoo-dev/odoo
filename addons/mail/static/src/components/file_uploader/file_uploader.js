@@ -138,7 +138,10 @@ class FileUploader extends Component {
         for (const fileData of filesData) {
             const { error, filename, id, mimetype, name, size } = fileData;
             if (error || !id) {
-                this.env.do_warn(owl.utils.escape(error));
+                this.env.services['notification'].notify({
+                    type: 'danger',
+                    message: owl.utils.escape(error),
+                });
                 const relatedTemporaryAttachments = this.env.models['mail.attachment']
                     .find(attachment =>
                         attachment.filename === filename &&

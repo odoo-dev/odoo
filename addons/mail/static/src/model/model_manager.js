@@ -37,13 +37,10 @@ class ModelManager {
         this.DEPENDENT_INNER_SEPARATOR = DEPENDENT_INNER_SEPARATOR;
 
         /**
-         * The messaging env.
+         * The messaging env. It is passed on start(), due to the way mocking
+         * of OWL env in tests work...
          */
-        this.env = env;
-        /**
-         * Contains all models. key is model name, and value is the model.
-         */
-        this.models = {};
+        this.env = undefined;
 
         /**
          * Whether this is currently handling an "update after" on a record.
@@ -85,11 +82,12 @@ class ModelManager {
      * Called when all JS modules that register or patch models have been
      * done. This launches generation of models.
      */
-    start() {
+    start(env) {
+        this.env = env;
         /**
          * Generate the models.
          */
-        this.models = this._generateModels();
+        Object.assign(this.env.models, this._generateModels());
     }
 
     //--------------------------------------------------------------------------
@@ -240,7 +238,7 @@ class ModelManager {
             return undefined;
         }
         const record = this._records[
-            recordOrLocalId instanceof this.models['mail.model']
+            recordOrLocalId instanceof this.env.models['mail.model']
                 ? recordOrLocalId.localId
                 : recordOrLocalId
         ];
@@ -909,7 +907,7 @@ class ModelManager {
             const key = this._toComputeFields.keys().next().value;
             const [recordLocalId, fieldName] = key.split(COMPUTE_RECORD_FIELD_INNER_SEPARATOR);
             this._toComputeFields.delete(key);
-            const record = this.models['mail.model'].get(recordLocalId);
+            const record = this.env.models['mail.model'].get(recordLocalId);
             if (record) {
                 const Model = record.constructor;
                 const field = Model.fields[fieldName];

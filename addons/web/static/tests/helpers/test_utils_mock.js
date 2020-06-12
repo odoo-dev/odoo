@@ -91,7 +91,7 @@ async function _getMockedOwlEnv(params, mockServer) {
             },
         }, params.env.dataManager),
         services: Object.assign(services, params.env.services),
-        session: params.session || {},
+        session: params.env.session || params.session || {},
     });
 
     // deploy services into the env

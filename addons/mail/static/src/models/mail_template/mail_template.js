@@ -30,12 +30,15 @@ function factory(dependencies) {
                     force_email: true,
                 },
             };
-            this.env.do_action(action, {
-                on_close: () => {
-                    if (activity.chatter) {
-                        activity.chatter.refresh();
-                    }
-                }
+            this.env.bus.trigger('do-action', {
+                action,
+                options: {
+                    on_close: () => {
+                        if (activity.chatter) {
+                            activity.chatter.refresh();
+                        }
+                    },
+                },
             });
         }
 
@@ -43,7 +46,7 @@ function factory(dependencies) {
          * @param {mail.activity} activity
          */
         async send(activity) {
-            await this.async(() => this.env.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: activity.res_model,
                 method: 'activity_send_mail',
                 args: [[activity.res_id], this.id],

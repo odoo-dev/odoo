@@ -91,10 +91,13 @@ class ChatterTopbar extends Component {
             },
             res_id: false,
         };
-        return this.env.do_action(action, {
-            // A bit "extreme", could be improved:
-            // normally only an activity is created (no update nor delete)
-            on_close: () => this.chatter.refreshActivities(),
+        return this.env.bus.trigger('do-action', {
+            action,
+            options: {
+                // A bit "extreme", could be improved:
+                // normally only an activity is created (no update nor delete)
+                on_close: () => this.chatter.refreshActivities(),
+            },
         });
     }
 

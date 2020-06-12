@@ -143,7 +143,7 @@ function factory(dependencies) {
                     command,
                     subtype_xmlid: 'mail.mt_comment'
                 });
-                messageId = await this.async(() => this.env.rpc({
+                messageId = await this.async(() => this.env.services.rpc({
                     model: 'mail.channel',
                     method: command ? 'execute_command' : 'message_post',
                     args: [thread.id],
@@ -162,13 +162,13 @@ function factory(dependencies) {
                     subtype_id,
                     subtype_xmlid: isLog ? 'mail.mt_note' : 'mail.mt_comment',
                 });
-                messageId = await this.async(() => this.env.rpc({
+                messageId = await this.async(() => this.env.services.rpc({
                     model: thread.model,
                     method: 'message_post',
                     args: [thread.id],
                     kwargs: postData
                 }));
-                const [messageData] = await this.async(() => this.env.rpc({
+                const [messageData] = await this.async(() => this.env.services.rpc({
                     model: 'mail.message',
                     method: 'message_format',
                     args: [[messageId]]
@@ -434,7 +434,7 @@ function factory(dependencies) {
          * @param {string} mentionKeyword
          */
         async _getSuggestedPartners(mentionKeyword) {
-            const mentions = await this.async(() => this.env.rpc(
+            const mentions = await this.async(() => this.env.services.rpc(
                 {
                     model: 'res.partner',
                     method: 'get_mention_suggestions',

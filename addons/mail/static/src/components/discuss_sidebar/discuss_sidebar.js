@@ -252,12 +252,14 @@ class DiscussSidebar extends Component {
      */
     _onClickChannelTitle(ev) {
         ev.stopPropagation();
-        return this.env.do_action({
-            name: this.env._t("Public Channels"),
-            type: 'ir.actions.act_window',
-            res_model: 'mail.channel',
-            views: [[false, 'kanban'], [false, 'form']],
-            domain: [['public', '!=', 'private']]
+        return this.env.bus.trigger('do-action', {
+            action: {
+                name: this.env._t("Public Channels"),
+                type: 'ir.actions.act_window',
+                res_model: 'mail.channel',
+                views: [[false, 'kanban'], [false, 'form']],
+                domain: [['public', '!=', 'private']]
+            },
         });
     }
 

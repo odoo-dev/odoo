@@ -14,6 +14,7 @@ const {
 } = require('mail/static/src/utils/test_utils.js');
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
+const Bus = require('web.Bus');
 const { date_to_str } = require('web.time');
 
 const { Component, tags: { xml } } = owl;
@@ -552,36 +553,41 @@ QUnit.test('activity with mail template layout', async function (assert) {
 QUnit.test('activity with mail template: preview mail', async function (assert) {
     assert.expect(10);
 
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action.context.default_res_id,
-                    42,
-                    'Action should have the activity res id as default res id in context');
-                assert.strictEqual(
-                    ev.data.action.context.default_model,
-                    'res.partner',
-                    'Action should have the activity res model as default model in context');
-                assert.ok(
-                    ev.data.action.context.default_use_template,
-                    'Action should have true as default use_template in context');
-                assert.strictEqual(
-                    ev.data.action.context.default_template_id,
-                    1,
-                    'Action should have the selected mail template id as default template id in context');
-                assert.strictEqual(
-                    ev.data.action.type,
-                    "ir.actions.act_window",
-                    'Action should be of type "ir.actions.act_window"');
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    "mail.compose.message",
-                    'Action should have "mail.compose.message" as res_model');
-            },
-        },
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action.context.default_res_id,
+            42,
+            'Action should have the activity res id as default res id in context'
+        );
+        assert.strictEqual(
+            payload.action.context.default_model,
+            'res.partner',
+            'Action should have the activity res model as default model in context'
+        );
+        assert.ok(
+            payload.action.context.default_use_template,
+            'Action should have true as default use_template in context'
+        );
+        assert.strictEqual(
+            payload.action.context.default_template_id,
+            1,
+            'Action should have the selected mail template id as default template id in context'
+        );
+        assert.strictEqual(
+            payload.action.type,
+            "ir.actions.act_window",
+            'Action should be of type "ir.actions.act_window"'
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            "mail.compose.message",
+            'Action should have "mail.compose.message" as res_model'
+        );
     });
+
+    await this.start({ env: { bus } });
     const activity = this.env.models['mail.activity'].create({
         mailTemplates: [['insert', {
             id: 1,
@@ -726,33 +732,37 @@ QUnit.test('activity click on mark as done', async function (assert) {
 QUnit.test('activity click on edit', async function (assert) {
     assert.expect(9);
 
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action.context.default_res_id,
-                    42,
-                    'Action should have the activity res id as default res id in context');
-                assert.strictEqual(
-                    ev.data.action.context.default_res_model,
-                    'res.partner',
-                    'Action should have the activity res model as default res model in context');
-                assert.strictEqual(
-                    ev.data.action.type,
-                    "ir.actions.act_window",
-                    'Action should be of type "ir.actions.act_window"');
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    "mail.activity",
-                    'Action should have "mail.activity" as res_model');
-                assert.strictEqual(
-                    ev.data.action.res_id,
-                    12,
-                    'Action should have activity id as res_id');
-            },
-        },
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action.context.default_res_id,
+            42,
+            'Action should have the activity res id as default res id in context'
+        );
+        assert.strictEqual(
+            payload.action.context.default_res_model,
+            'res.partner',
+            'Action should have the activity res model as default res model in context'
+        );
+        assert.strictEqual(
+            payload.action.type,
+            "ir.actions.act_window",
+            'Action should be of type "ir.actions.act_window"'
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            "mail.activity",
+            'Action should have "mail.activity" as res_model'
+        );
+        assert.strictEqual(
+            payload.action.res_id,
+            12,
+            'Action should have activity id as res_id'
+        );
     });
+
+    await this.start({ env: { bus } });
     const activity = this.env.models['mail.activity'].create({
         canWrite: true,
         id: 12,
@@ -782,7 +792,6 @@ QUnit.test('activity click on edit', async function (assert) {
 QUnit.test('activity edition', async function (assert) {
     assert.expect(14);
 
-    const self = this;
     this.data['mail.activity'].records = [{
         can_write: true,
         icon: 'fa-times',
@@ -790,40 +799,40 @@ QUnit.test('activity edition', async function (assert) {
         res_id: 42,
         res_model: 'res.partner',
     }];
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action.context.default_res_id,
-                    42,
-                    'Action should have the activity res id as default res id in context'
-                );
-                assert.strictEqual(
-                    ev.data.action.context.default_res_model,
-                    'res.partner',
-                    'Action should have the activity res model as default res model in context'
-                );
-                assert.strictEqual(
-                    ev.data.action.type,
-                    'ir.actions.act_window',
-                    'Action should be of type "ir.actions.act_window"'
-                );
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    'mail.activity',
-                    'Action should have "mail.activity" as res_model'
-                );
-                assert.strictEqual(
-                    ev.data.action.res_id,
-                    12,
-                    'Action should have activity id as res_id'
-                );
-                self.data['mail.activity'].records[0].icon = 'fa-check';
-                ev.data.options.on_close();
-            },
-        },
+
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action.context.default_res_id,
+            42,
+            'Action should have the activity res id as default res id in context'
+        );
+        assert.strictEqual(
+            payload.action.context.default_res_model,
+            'res.partner',
+            'Action should have the activity res model as default res model in context'
+        );
+        assert.strictEqual(
+            payload.action.type,
+            'ir.actions.act_window',
+            'Action should be of type "ir.actions.act_window"'
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            'mail.activity',
+            'Action should have "mail.activity" as res_model'
+        );
+        assert.strictEqual(
+            payload.action.res_id,
+            12,
+            'Action should have activity id as res_id'
+        );
+        this.data['mail.activity'].records[0].icon = 'fa-check';
+        payload.options.on_close();
     });
+
+    await this.start({ env: { bus } });
     const activity = this.env.models['mail.activity'].create(
         this.env.models['mail.activity'].convertData(
             this.data['mail.activity'].records[0]

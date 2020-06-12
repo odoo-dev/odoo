@@ -245,7 +245,7 @@ class Composer extends Component {
             target: 'new',
             context: context,
         };
-        await this.env.do_action(action);
+        await this.env.bus.trigger('do-action', { action });
         this.trigger('o-full-composer-opened');
     }
 

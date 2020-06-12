@@ -1,16 +1,18 @@
 odoo.define('mail/static/src/components/discuss/discuss_tests.js', function (require) {
 'use strict';
 
+const BusService = require('bus.BusService');
+
 const {
     afterEach: utilsAfterEach,
     afterNextRender,
     beforeEach: utilsBeforeEach,
-    getMailServices,
     inputFiles,
     pause,
     start: utilsStart,
 } = require('mail/static/src/utils/test_utils.js');
 
+const Bus = require('web.Bus');
 const { makeTestPromise, file: { createFile } } = require('web.test_utils');
 
 QUnit.module('mail', {}, function () {
@@ -3786,7 +3788,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
         "should display a notification after posting reply"
     );
     assert.strictEqual(
-        document.querySelector('.o_notification_title').textContent,
+        document.querySelector('.o_notification_content').textContent,
         "Message posted on \"Refactoring\"",
         "notification should tell that message has been posted to the record 'Refactoring'"
     );
@@ -4205,7 +4207,7 @@ QUnit.test('all messages in "Inbox" in "History" after marked all as read', asyn
 });
 
 QUnit.test('receive new channel message: out of odoo focus (notification, channel)', async function (assert) {
-    assert.expect(7);
+    assert.expect(4);
 
     Object.assign(this.data.initMessaging, {
         channel_slots: {
@@ -4217,25 +4219,24 @@ QUnit.test('receive new channel message: out of odoo focus (notification, channe
             }],
         },
     });
-    const services = getMailServices();
-    services.bus_service = services.bus_service.extend({
-        isOdooFocused: () => false,
+    const bus = new Bus();
+    bus.on('set_title_part', null, payload => {
+        assert.step('set_title_part');
+        assert.strictEqual(payload.part, '_chat');
+        assert.strictEqual(payload.title, "1 Message");
     });
+
     await this.start({
-        intercepts: {
-            /**
-             * @param {OdooEvent} ev
-             * @param {Object} ev.data
-             * @param {string} ev.data.part
-             * @param {string} ev.data.title
-             */
-            set_title_part(ev) {
-                assert.step('set_title_part');
-                assert.strictEqual(ev.data.part, '_chat');
-                assert.strictEqual(ev.data.title, "1 Message");
-            },
+        env: { bus },
+        services: {
+            bus_service: BusService.extend({
+                _beep() {}, // Do nothing
+                _poll() {}, // Do nothing
+                _registerWindowUnload() {}, // Do nothing
+                isOdooFocused: () => false,
+                updateOption() {},
+            }),
         },
-        services,
     });
 
     // simulate receiving a new message with odoo focused
@@ -4254,25 +4255,10 @@ QUnit.test('receive new channel message: out of odoo focus (notification, channe
     this.widget.call('bus_service', 'trigger', 'notification', notifications);
     await afterNextRender();
     assert.verifySteps(['set_title_part']);
-    assert.strictEqual(
-        document.querySelectorAll('.o_notification').length,
-        1,
-        "should display notification when out of focus"
-    );
-    assert.strictEqual(
-        document.querySelector(`.o_notification_title`).textContent,
-        "Demo User from General",
-        "should display author name and origin channel name as notification title"
-    );
-    assert.strictEqual(
-        document.querySelector(`.o_notification_content`).textContent,
-        "Test",
-        "should display message body as notification content"
-    );
 });
 
 QUnit.test('receive new channel message: out of odoo focus (notification, chat)', async function (assert) {
-    assert.expect(7);
+    assert.expect(4);
 
     Object.assign(this.data.initMessaging, {
         channel_slots: {
@@ -4287,25 +4273,24 @@ QUnit.test('receive new channel message: out of odoo focus (notification, chat)'
             }],
         },
     });
-    const services = getMailServices();
-    services.bus_service = services.bus_service.extend({
-        isOdooFocused: () => false,
+    const bus = new Bus();
+    bus.on('set_title_part', null, payload => {
+        assert.step('set_title_part');
+        assert.strictEqual(payload.part, '_chat');
+        assert.strictEqual(payload.title, "1 Message");
     });
+
     await this.start({
-        intercepts: {
-            /**
-             * @param {OdooEvent} ev
-             * @param {Object} ev.data
-             * @param {string} ev.data.part
-             * @param {string} ev.data.title
-             */
-            set_title_part(ev) {
-                assert.step('set_title_part');
-                assert.strictEqual(ev.data.part, '_chat');
-                assert.strictEqual(ev.data.title, "1 Message");
-            },
+        env: { bus },
+        services: {
+            bus_service: BusService.extend({
+                _beep() {}, // Do nothing
+                _poll() {}, // Do nothing
+                _registerWindowUnload() {}, // Do nothing
+                isOdooFocused: () => false,
+                updateOption() {},
+            }),
         },
-        services,
     });
 
     // simulate receiving a new message with odoo focused
@@ -4324,21 +4309,6 @@ QUnit.test('receive new channel message: out of odoo focus (notification, chat)'
     this.widget.call('bus_service', 'trigger', 'notification', notifications);
     await afterNextRender();
     assert.verifySteps(['set_title_part']);
-    assert.strictEqual(
-        document.querySelectorAll('.o_notification').length,
-        1,
-        "should display notification when out of focus"
-    );
-    assert.strictEqual(
-        document.querySelector(`.o_notification_title`).textContent,
-        "Demo User",
-        "should display author name as notification title"
-    );
-    assert.strictEqual(
-        document.querySelector(`.o_notification_content`).textContent,
-        "Test",
-        "should display message body as notification content"
-    );
 });
 
 QUnit.test('receive new channel messages: out of odoo focus (tab title)', async function (assert) {
@@ -4364,34 +4334,33 @@ QUnit.test('receive new channel messages: out of odoo focus (tab title)', async 
             }],
         },
     });
-    const services = getMailServices();
-    services.bus_service = services.bus_service.extend({
-        isOdooFocused: () => false,
+    const bus = new Bus();
+    bus.on('set_title_part', null, payload => {
+        step++;
+        assert.step('set_title_part');
+        assert.strictEqual(payload.part, '_chat');
+        if (step === 1) {
+            assert.strictEqual(payload.title, "1 Message");
+        }
+        if (step === 2) {
+            assert.strictEqual(payload.title, "2 Messages");
+        }
+        if (step === 3) {
+            assert.strictEqual(payload.title, "3 Messages");
+        }
     });
+
     await this.start({
-        intercepts: {
-            /**
-             * @param {OdooEvent} ev
-             * @param {Object} ev.data
-             * @param {string} ev.data.part
-             * @param {string} ev.data.title
-             */
-            set_title_part(ev) {
-                step++;
-                assert.step('set_title_part');
-                assert.strictEqual(ev.data.part, '_chat');
-                if (step === 1) {
-                    assert.strictEqual(ev.data.title, "1 Message");
-                }
-                if (step === 2) {
-                    assert.strictEqual(ev.data.title, "2 Messages");
-                }
-                if (step === 3) {
-                    assert.strictEqual(ev.data.title, "3 Messages");
-                }
-            },
+        env: { bus },
+        services: {
+            bus_service: BusService.extend({
+                _beep() {}, // Do nothing
+                _poll() {}, // Do nothing
+                _registerWindowUnload() {}, // Do nothing
+                isOdooFocused: () => false,
+                updateOption() {},
+            }),
         },
-        services,
     });
 
     // simulate receiving a new message in general with odoo focused

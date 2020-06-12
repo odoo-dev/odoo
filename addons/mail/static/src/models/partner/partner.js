@@ -101,7 +101,7 @@ function factory(dependencies) {
                 }
             }
             if (!partners.length) {
-                const partnersData = await this.env.rpc(
+                const partnersData = await this.env.services.rpc(
                     {
                         model: 'res.partner',
                         method: 'im_search',
@@ -126,7 +126,7 @@ function factory(dependencies) {
         }
 
         async checkIsUser() {
-            const userIds = await this.async(() => this.env.rpc({
+            const userIds = await this.async(() => this.env.services.rpc({
                 model: 'res.users',
                 method: 'search',
                 args: [[['partner_id', '=', this.id]]],
@@ -171,7 +171,7 @@ function factory(dependencies) {
             if (!toFetchPartnersLocalIds.length) {
                 return;
             }
-            const dataList = await this.env.rpc({
+            const dataList = await this.env.services.rpc({
                 route: '/longpolling/im_status',
                 params: {
                     partner_ids: toFetchPartnersLocalIds.map(partnerLocalId =>

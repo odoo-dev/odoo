@@ -13,6 +13,8 @@ const {
     start: utilsStart,
 } = require('mail/static/src/utils/test_utils.js');
 
+const Bus = require('web.Bus');
+
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
 QUnit.module('notification_list', {}, function () {
@@ -147,28 +149,27 @@ QUnit.test('mark as read', async function (assert) {
         res_id: 31,
         res_model_name: "Channel",
     }];
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action,
-                    'mail.mail_resend_cancel_action',
-                    "action should be the one to cancel email"
-                );
-                assert.strictEqual(
-                    ev.data.options.additional_context.default_model,
-                    'mail.channel',
-                    "action should have the group model as default_model"
-                );
-                assert.strictEqual(
-                    ev.data.options.additional_context.unread_counter,
-                    1,
-                    "action should have the group notification length as unread_counter"
-                );
-            },
-        },
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action,
+            'mail.mail_resend_cancel_action',
+            "action should be the one to cancel email"
+        );
+        assert.strictEqual(
+            payload.options.additional_context.default_model,
+            'mail.channel',
+            "action should have the group model as default_model"
+        );
+        assert.strictEqual(
+            payload.options.additional_context.unread_counter,
+            1,
+            "action should have the group notification length as unread_counter"
+        );
     });
+
+    await this.start({ env: { bus } });
     await this.createNotificationListComponent();
 
     assert.containsOnce(
@@ -218,33 +219,32 @@ QUnit.test('grouped notifications by document', async function (assert) {
         res_id: 31,
         res_model_name: "Partner",
     }];
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action.type,
-                    'ir.actions.act_window',
-                    "action should have the type act_window"
-                );
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    'res.partner',
-                    "action should have the group model as res_model"
-                );
-                assert.strictEqual(
-                    JSON.stringify(ev.data.action.views),
-                    JSON.stringify([[false, 'form']]),
-                    "action should have form view"
-                );
-                assert.strictEqual(
-                    ev.data.action.res_id,
-                    31,
-                    "action should have the group res_id as res_id"
-                );
-            },
-        },
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action.type,
+            'ir.actions.act_window',
+            "action should have the type act_window"
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            'res.partner',
+            "action should have the group model as res_model"
+        );
+        assert.strictEqual(
+            JSON.stringify(payload.action.views),
+            JSON.stringify([[false, 'form']]),
+            "action should have form view"
+        );
+        assert.strictEqual(
+            payload.action.res_id,
+            31,
+            "action should have the group res_id as res_id"
+        );
     });
+
+    await this.start({ env: { bus } });
     await this.createNotificationListComponent();
 
     assert.containsOnce(
@@ -305,48 +305,47 @@ QUnit.test('grouped notifications by document model', async function (assert) {
         res_id: 32, // key element of this test: a different res_id
         res_model_name: "Partner",
     }];
-    await this.start({
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action.name,
-                    "Mail Failures",
-                    "action should have 'Mail Failures' as name",
-                );
-                assert.strictEqual(
-                    ev.data.action.type,
-                    'ir.actions.act_window',
-                    "action should have the type act_window"
-                );
-                assert.strictEqual(
-                    ev.data.action.view_mode,
-                    'kanban,list,form',
-                    "action should have 'kanban,list,form' as view_mode"
-                );
-                assert.strictEqual(
-                    JSON.stringify(ev.data.action.views),
-                    JSON.stringify([[false, 'kanban'], [false, 'list'], [false, 'form']]),
-                    "action should have correct views"
-                );
-                assert.strictEqual(
-                    ev.data.action.target,
-                    'current',
-                    "action should have 'current' as target"
-                );
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    'res.partner',
-                    "action should have the group model as res_model"
-                );
-                assert.strictEqual(
-                    JSON.stringify(ev.data.action.domain),
-                    JSON.stringify([['message_has_error', '=', true]]),
-                    "action should have 'message_has_error' as domain"
-                );
-            },
-        },
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action.name,
+            "Mail Failures",
+            "action should have 'Mail Failures' as name",
+        );
+        assert.strictEqual(
+            payload.action.type,
+            'ir.actions.act_window',
+            "action should have the type act_window"
+        );
+        assert.strictEqual(
+            payload.action.view_mode,
+            'kanban,list,form',
+            "action should have 'kanban,list,form' as view_mode"
+        );
+        assert.strictEqual(
+            JSON.stringify(payload.action.views),
+            JSON.stringify([[false, 'kanban'], [false, 'list'], [false, 'form']]),
+            "action should have correct views"
+        );
+        assert.strictEqual(
+            payload.action.target,
+            'current',
+            "action should have 'current' as target"
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            'res.partner',
+            "action should have the group model as res_model"
+        );
+        assert.strictEqual(
+            JSON.stringify(payload.action.domain),
+            JSON.stringify([['message_has_error', '=', true]]),
+            "action should have 'message_has_error' as domain"
+        );
     });
+
+    await this.start({ env: { bus } });
     await this.createNotificationListComponent();
 
     assert.containsOnce(

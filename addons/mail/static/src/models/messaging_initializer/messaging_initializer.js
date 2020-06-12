@@ -46,7 +46,7 @@ function factory(dependencies) {
                 isMobile: device.isMobile,
             }, this.env.session.user_context);
             const discuss = this.messaging.discuss;
-            const data = await this.async(() => this.env.rpc({
+            const data = await this.async(() => this.env.services.rpc({
                 route: '/mail/init_messaging',
                 params: { context: context }
             }));

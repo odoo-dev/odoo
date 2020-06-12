@@ -12,6 +12,8 @@ const {
     start: utilsStart,
 } = require('mail/static/src/utils/test_utils.js');
 
+const Bus = require('web.Bus');
+
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
 QUnit.module('follower', {}, function () {
@@ -158,32 +160,33 @@ QUnit.test('base rendering editable', async function (assert) {
 QUnit.test('click on channel follower details', async function (assert) {
     assert.expect(7);
 
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action.res_id,
+            1,
+            "The redirect action should redirect to the right res id (1)"
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            'mail.channel',
+            "The redirect action should redirect to the right res model (mail.channel)"
+        );
+        assert.strictEqual(
+            payload.action.type,
+            "ir.actions.act_window",
+            "The redirect action should be of type 'ir.actions.act_window'"
+        );
+    });
+
     await this.start({
+        env: { bus },
         async mockRPC(route, args) {
             if (route === 'web/image/mail.channel/1/image_128') {
                 return;
             }
             return this._super(...arguments);
-        },
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action.res_id,
-                    1,
-                    "The redirect action should redirect to the right res id (1)"
-                );
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    'mail.channel',
-                    "The redirect action should redirect to the right res model (mail.channel)"
-                );
-                assert.strictEqual(
-                    ev.data.action.type,
-                    "ir.actions.act_window",
-                    "The redirect action should be of type 'ir.actions.act_window'"
-                );
-            },
         },
     });
     const thread = this.env.models['mail.thread'].create({
@@ -219,32 +222,33 @@ QUnit.test('click on channel follower details', async function (assert) {
 QUnit.test('click on partner follower details', async function (assert) {
     assert.expect(7);
 
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action.res_id,
+            3,
+            "The redirect action should redirect to the right res id (3)"
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            'res.partner',
+            "The redirect action should redirect to the right res model (res.partner)"
+        );
+        assert.strictEqual(
+            payload.action.type,
+            "ir.actions.act_window",
+            "The redirect action should be of type 'ir.actions.act_window'"
+        );
+    });
+
     await this.start({
+        env: { bus },
         async mockRPC(route, args) {
             if (route === 'web/image/res.partner/3/image_128') {
                 return;
             }
             return this._super(...arguments);
-        },
-        intercepts: {
-            do_action(ev) {
-                assert.step('do_action');
-                assert.strictEqual(
-                    ev.data.action.res_id,
-                    3,
-                    "The redirect action should redirect to the right res id (3)"
-                );
-                assert.strictEqual(
-                    ev.data.action.res_model,
-                    'res.partner',
-                    "The redirect action should redirect to the right res model (res.partner)"
-                );
-                assert.strictEqual(
-                    ev.data.action.type,
-                    "ir.actions.act_window",
-                    "The redirect action should be of type 'ir.actions.act_window'"
-                );
-            },
         },
     });
     const thread = this.env.models['mail.thread'].create({

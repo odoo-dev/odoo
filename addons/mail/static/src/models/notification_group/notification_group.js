@@ -18,10 +18,13 @@ function factory(dependencies) {
         openCancelAction() {
             const device = this.env.messaging.device;
             if (this.notification_type === 'email') {
-                this.env.do_action('mail.mail_resend_cancel_action', {
-                    additional_context: {
-                        default_model: this.res_model,
-                        unread_counter: this.notifications.length,
+                this.env.bus.trigger('do-action', {
+                    action: 'mail.mail_resend_cancel_action',
+                    options: {
+                        additional_context: {
+                            default_model: this.res_model,
+                            unread_counter: this.notifications.length,
+                        },
                     },
                 });
             }
@@ -73,14 +76,16 @@ function factory(dependencies) {
         _openDocuments() {
             const device = this.env.messaging.device;
             if (this.notification_type === 'email') {
-                this.env.do_action({
-                    name: this.env._t("Mail Failures"),
-                    type: 'ir.actions.act_window',
-                    view_mode: 'kanban,list,form',
-                    views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
-                    target: 'current',
-                    res_model: this.res_model,
-                    domain: [['message_has_error', '=', true]],
+                this.env.bus.trigger('do-action', {
+                    action: {
+                        name: this.env._t("Mail Failures"),
+                        type: 'ir.actions.act_window',
+                        view_mode: 'kanban,list,form',
+                        views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+                        target: 'current',
+                        res_model: this.res_model,
+                        domain: [['message_has_error', '=', true]],
+                    },
                 });
             }
             if (!device.isMobile) {
