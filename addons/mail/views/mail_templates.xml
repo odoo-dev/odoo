@@ -48,8 +48,6 @@
                     <script type="text/javascript" src="/mail/static/src/js/composers/basic_composer.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/composers/extended_composer.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/composers/mention_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/form_controller.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/basic_model.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/basic_view.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/thread_widget.js"></script>
                 <!-- systray -->
