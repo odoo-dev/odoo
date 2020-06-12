@@ -288,7 +288,7 @@ QUnit.test('list activity widget with exception', async function (assert) {
         },
     });
 
-    assert.containsOnce(list, '.o_activity_color_today.text-warning.fa-warning.fa-clock-o');
+    assert.containsOnce(list, '.o_activity_color_today.text-warning.fa-warning');
     assert.strictEqual(list.$('.o_activity_summary').text(), 'Warning');
 
     assert.verifySteps(['/web/dataset/search_read']);
