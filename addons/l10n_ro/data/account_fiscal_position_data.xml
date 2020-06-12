@@ -13,7 +13,7 @@
 
     <record id="fiscal_position_template_11" model="account.fiscal.position.template">
         <field name="name">Regim National</field>
-        <field name="country_group_id" ref="base.europe"/>
+        <field name="country_id" ref="base.ro"/>
         <field name="auto_apply" eval="True"/>
         <field name="sequence">11</field>
         <field name="chart_template_id" ref="ro_chart_template"/>
@@ -21,6 +21,8 @@
 
     <record id="fiscal_position_template_2" model="account.fiscal.position.template">
         <field name="name">Regim Taxare Inversa</field>
+        <field name="country_id" ref="base.ro"/>
+        <field name="vat_required" eval="True"/>
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">12</field>
     </record>
@@ -28,6 +30,7 @@
     <record id="fiscal_position_template_8" model="account.fiscal.position.template">
         <field name="name">Regim TVA la Incasare</field>
         <field name="vat_required" eval="True"/>
+        <field name="country_id" ref="base.ro"/>
         <field name="sequence">13</field>
         <field name="chart_template_id" ref="ro_chart_template"/>
     </record>
@@ -51,14 +54,14 @@
     <record id="fiscal_position_template_51" model="account.fiscal.position.template">
         <field name="name">Regim Scutite - cu drept de deducere</field>
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="note">Pozitia se refera atat la livrari / achizitii intracomunitare cat si extracomunitare care beneficiaza de scutire</field>
+        <field name="note">Pozitia se refera atat la livrari / achizitii intracomunitare cat si extracomunitare cu drept de deducere</field>
         <field name="sequence">16</field>
     </record>
 
     <record id="fiscal_position_template_52" model="account.fiscal.position.template">
         <field name="name">Regim Scutite - fara drept de deducere</field>
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="note">Pozitia se refera atat la livrari / achizitii intracomunitare cat si extracomunitare care beneficiaza de scutire</field>
+        <field name="note">Pozitia se refera atat la livrari / achizitii intracomunitare cat si extracomunitare fara drept de deducere</field>
         <field name="sequence">17</field>
     </record>
 
