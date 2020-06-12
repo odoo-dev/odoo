@@ -197,7 +197,7 @@ function factory(dependencies) {
             await this.env.rpc({
                 model: 'mail.message',
                 method: 'set_message_done',
-                args: [[messages.map(message => message.id)]]
+                args: [messages.map(message => message.id)]
             });
         }
 

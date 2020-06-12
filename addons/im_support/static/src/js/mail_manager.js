@@ -233,20 +233,9 @@ MailManager.include({
      * @param {Object[]} notifications
      */
     _onSupportNotification: function (notifications) {
-        var self = this;
         if (notifications && notifications.length) {
             this._setPollTimeout();
         }
-        _.each(notifications, function (notification) {
-            if (notification[1]._type === 'history_command') {
-                // ignore history requests
-                return;
-            }
-            var messageData = _.extend(notification[1], {
-                channel_ids: [self.supportChannelUUID],
-            });
-            self._handleChannelNotification({ data: messageData });
-        });
     },
 });
 

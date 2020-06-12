@@ -79,7 +79,7 @@ function factory(dependencies) {
                     case 'res.partner':
                         return this._handleNotificationPartner(Object.assign({}, data));
                     default:
-                        console.warn(`[messaging store] Unhandled notification "${model}"`);
+                        console.warn(`mail.messaging_notification_handler: Unhandled notification "${model}"`);
                         return;
                 }
             });
@@ -182,22 +182,34 @@ function factory(dependencies) {
          */
         async _handleNotificationChannelMessage(param0) {
             const channelId = param0.channelId;
-            const data = Object.assign({}, param0);
-            delete data.channelId;
-            const {
-                author_id: [authorPartnerId] = [],
-                channel_ids,
-            } = data;
-            if (channel_ids.length === 1) {
-                await this.async(() => this.env.models['mail.thread'].joinChannel(channel_ids[0]));
-            }
-            let message = this.env.models['mail.message'].find(message =>
-                message.id === data.id
+            const convertedData = this.env.models['mail.message'].convertData(param0);
+
+            const oldMessage = this.env.models['mail.message'].find(message =>
+                message.id === convertedData.id
             );
-            if (message) {
-                const oldMessageModerationStatus = message.moderation_status;
-                const oldMessageWasModeratedByCurrentPartner = message.isModeratedByCurrentPartner;
-                message.update(this.env.models['mail.message'].convertData(data));
+            // locally save old value, as insert would overwrite them
+            const oldMessageModerationStatus = (
+                oldMessage && oldMessage.moderation_status
+            );
+            const oldMessageWasModeratedByCurrentPartner = (
+                oldMessage && oldMessage.isModeratedByCurrentPartner
+            );
+
+            const message = this.env.models['mail.message'].insert(convertedData);
+
+            // join the corresponding channel if necessary
+            const channel = this.env.models['mail.thread'].find(thread =>
+                thread.id === channelId &&
+                thread.model === 'mail.channel'
+            );
+            if (!channel || !channel.isPinned) {
+                this.env.models['mail.thread'].joinChannel(channelId);
+            }
+
+            // If the message was already known: nothing else should be done,
+            // except if it was pending moderation by the current partner, then
+            // decrement the moderation counter.
+            if (oldMessage) {
                 if (
                     oldMessageModerationStatus === 'pending_moderation' &&
                     message.moderation_status !== 'pending_moderation' &&
@@ -208,23 +220,32 @@ function factory(dependencies) {
                 }
                 return;
             }
-            message = this.env.models['mail.message'].create(
-                this.env.models['mail.message'].convertData(data)
-            );
-            for (const thread of message.allThreads) {
-                if (thread.model === 'mail.channel') {
-                    const mainThreadCache = thread.mainCache;
-                    mainThreadCache.update({ messages: [['link', message]] });
-                }
-            }
-            const currentPartner = this.env.messaging.currentPartner;
-            if (authorPartnerId === currentPartner.id) {
+
+            // If the current partner is author, do nothing else.
+            if (message.author === this.env.messaging.currentPartner) {
                 return;
             }
-            const channel = this.env.models['mail.thread'].find(thread =>
-                thread.id === channelId &&
-                thread.model === 'mail.channel'
-            );
+
+            // If the channel wasn't known, joining the channel already updated
+            // the counter.
+            if (!channel) {
+                return;
+            }
+
+            // Message from mailing channel should not make a notification in
+            // Odoo for users with notification "Handled by Email".
+            // Channel has been marked as read server-side in this case, so
+            // it should not display a notification by incrementing the
+            // unread counter.
+            if (
+                channel &&
+                channel.mass_mailing &&
+                this.env.session.notification_type === 'email'
+            ) {
+                return;
+            }
+
+            // In all other cases: update counter and notify if out of focus.
             const isOdooFocused = this.env.call('bus_service', 'isOdooFocused');
             if (!isOdooFocused) {
                 this._notifyNewChannelMessageWhileOutOfFocus({ channel, message });
@@ -383,6 +404,14 @@ function factory(dependencies) {
                 return this._handleNotificationPartnerMarkAsRead(data);
             } else if (type === 'moderator') {
                 return this._handleNotificationPartnerModerator(data);
+            } else if (type === 'simple_notification') {
+                const escapedTitle = owl.utils.escape(data.title);
+                const escapedMessage = owl.utils.escape(data.message);
+                if (data.warning) {
+                    this.env.do_warn(escapedTitle, escapedMessage, data.sticky);
+                } else {
+                    this.env.do_notify(escapedTitle, escapedMessage, data.sticky);
+                }
             } else if (type === 'toggle_star') {
                 return this._handleNotificationPartnerToggleStar(data);
             } else if (info === 'transient_message') {
@@ -444,7 +473,7 @@ function factory(dependencies) {
                     this.env._t("Invitation"),
                     _.str.sprintf(
                         this.env._t("You have been invited to: %s"),
-                        channel.name
+                        owl.utils.escape(channel.name)
                     )
                 );
             }
@@ -462,14 +491,15 @@ function factory(dependencies) {
             const moderationMailbox = this.env.messaging.moderation;
             for (const id of message_ids) {
                 const message = this.env.models['mail.message'].find(message => message.id === id);
-                if (
-                    message &&
-                    message.moderation_status === 'pending_moderation' &&
-                    message.originThread.isModeratedByCurrentPartner
-                ) {
-                    moderationMailbox.update({ counter: moderationMailbox.counter - 1 });
+                if (message) {
+                    if (
+                        message.moderation_status === 'pending_moderation' &&
+                        message.originThread.isModeratedByCurrentPartner
+                    ) {
+                        moderationMailbox.update({ counter: moderationMailbox.counter - 1 });
+                    }
+                    message.delete();
                 }
-                message.delete();
             }
             // deleting message might have deleted notifications, force recompute
             this.messaging.notificationGroupManager.computeGroups();
@@ -623,12 +653,12 @@ function factory(dependencies) {
                 const correspondent = channel.correspondent;
                 message = _.str.sprintf(
                     this.env._t("You unpinned your conversation with <b>%s</b>."),
-                    correspondent.name
+                    owl.utils.escape(correspondent.name)
                 );
             } else {
                 message = _.str.sprintf(
                     this.env._t("You unsubscribed from <b>%s</b>."),
-                    channel.name
+                    owl.utils.escape(channel.name)
                 );
             }
             this.env.do_notify(this.env._t("Unsubscribed"), message);
@@ -644,11 +674,10 @@ function factory(dependencies) {
          */
         _handleNotificationPartnerUserConnection({ message, partner_id, title }) {
             this.env.call('bus_service', 'sendNotification', title, message);
-            this.env.models['mail.thread'].createChannel({
-                autoselect: true,
-                partnerId: partner_id,
-                type: 'chat',
+            const partner = this.env.models['mail.partner'].insert({
+                id: partner_id,
             });
+            partner.openChat();
         }
 
         /**
@@ -673,15 +702,15 @@ function factory(dependencies) {
                         env: this.env,
                         thread: channel,
                     });
-                    const channelName = _.escape(channel.displayName);
+                    const channelName = owl.utils.escape(channel.displayName);
                     const channelNameWithIcon = channelIcon + channelName;
                     notificationTitle = _.str.sprintf(
                         this.env._t("%s from %s"),
-                        _.escape(authorName),
+                        owl.utils.escape(authorName),
                         channelNameWithIcon
                     );
                 } else {
-                    notificationTitle = _.escape(authorName);
+                    notificationTitle = owl.utils.escape(authorName);
                 }
             }
             const notificationContent = message.prettyBody.substr(0, PREVIEW_MSG_MAX_SIZE);

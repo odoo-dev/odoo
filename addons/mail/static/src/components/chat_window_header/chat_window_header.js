@@ -17,9 +17,11 @@ class ChatWindowHeader extends Component {
         super(...args);
         useStore(props => {
             const chatWindow = this.env.models['mail.chat_window'].get(props.chatWindowLocalId);
+            const thread = chatWindow && chatWindow.thread;
             return {
                 chatWindow: chatWindow ? chatWindow.__state : undefined,
                 isDeviceMobile: this.env.messaging.device.isMobile,
+                thread: thread ? thread.__state : undefined,
             };
         });
     }

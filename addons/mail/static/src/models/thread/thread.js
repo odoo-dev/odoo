@@ -270,6 +270,7 @@ function factory(dependencies) {
             type,
         }) {
             const device = this.env.messaging.device;
+            // TODO FIX: potential duplicate chat task-2276490
             const data = await this.env.rpc({
                 model: 'mail.channel',
                 method: type === 'chat' ? 'channel_get' : 'channel_create',
@@ -280,10 +281,9 @@ function factory(dependencies) {
                     }),
                 }
             });
-            const thread = this.create(Object.assign(
-                {},
-                this.convertData(data),
-                { isPinned: true }
+            const thread = this.insert(Object.assign(
+                { isPinned: true },
+                this.convertData(data)
             ));
             if (autoselect) {
                 thread.open({ chatWindowMode: autoselectChatWindowMode });
@@ -311,10 +311,9 @@ function factory(dependencies) {
                 method: 'channel_join_and_get_info',
                 args: [[channelId]]
             });
-            const thread = this.create(Object.assign(
-                {},
-                this.convertData(data),
-                { isPinned: true }
+            const thread = this.insert(Object.assign(
+                { isPinned: true },
+                this.convertData(data)
             ));
             if (autoselect) {
                 thread.open({ resetDiscussDomain: true });

@@ -224,7 +224,7 @@ class Discuss extends Component {
         this.env.do_notify(
             _.str.sprintf(
                 this.env._t(`Message posted on "%s"`),
-                this.discuss.replyingToMessage.originThread.displayName
+                owl.utils.escape(this.discuss.replyingToMessage.originThread.displayName)
             )
         );
         this.discuss.clearReplyingToMessage();
