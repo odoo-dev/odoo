@@ -427,6 +427,15 @@ function factory(dependencies) {
          * @param {Object} data.message
          */
         _handleNotificationPartnerAuthor(data) {
+            // the message is not linked to the moderated channel on the
+            // server, therefore this message has not this channel in
+            // channel_ids. Here, just to show this message in the channel
+            // visually, it links this message to the channel
+            const channel = this.env.models['mail.thread'].insert({
+                model: data.message.model,
+                id: data.message.res_id,
+            });
+            data.message.channel_ids.push(channel.id);
             this.env.models['mail.message'].insert(
                 this.env.models['mail.message'].convertData(data.message)
             );
@@ -576,11 +585,22 @@ function factory(dependencies) {
          * @param {Object} param0.message
          */
         _handleNotificationPartnerModerator({ message: data }) {
-            this.env.models['mail.message'].insert(
+            // the message is not linked to the moderated channel on the
+            // server, therefore this message has not this channel in
+            // channel_ids. Here, just to show this message in the channel
+            // visually, it links this message to the channel.
+            // also need to link it to moderation channel
+            const channel = this.env.models['mail.thread'].insert({
+                model: data.model,
+                id: data.res_id,
+            });
+            data.channel_ids.push(channel.id);
+            const message = this.env.models['mail.message'].insert(
                 this.env.models['mail.message'].convertData(data)
             );
             const moderationMailbox = this.env.messaging.moderation;
             if (moderationMailbox) {
+                message.update({ threadCaches: [['link', moderationMailbox.mainCache]] });
                 moderationMailbox.update({ counter: moderationMailbox.counter + 1 });
             }
             // manually force recompute of counter
