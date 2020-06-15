@@ -724,18 +724,12 @@ function factory(dependencies) {
          * Unsubscribe current user from provided channel.
          */
         async unsubscribe() {
-            if (this.channel_type === 'mail.channel') {
-                return this.async(() => this.env.services.rpc({
-                    model: 'mail.channel',
-                    method: 'action_unfollow',
-                    args: [[this.id]]
-                }));
-            }
-            return this.async(() => this.env.services.rpc({
+            await this.async(() => this.env.services.rpc({
                 model: 'mail.channel',
-                method: 'channel_pin',
-                args: [this.uuid, false]
+                method: 'execute_command',
+                args: [[this.id], 'leave']
             }));
+            this.update({isDoPinOperation: 'unpin'});
         }
 
         //----------------------------------------------------------------------
@@ -1164,6 +1158,9 @@ function factory(dependencies) {
                 'custom_channel_name',
                 'name',
             ],
+        }),
+        isDoPinOperation: attr({
+            default: false,
         }),
         /**
          * Determine the fold state of the channel on the web client.

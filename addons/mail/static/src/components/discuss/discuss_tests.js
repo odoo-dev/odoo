@@ -421,6 +421,181 @@ QUnit.test('sidebar: add channel', async function (assert) {
     );
 });
 
+QUnit.test('sidebar: unpin channel', async function (assert) {
+    assert.expect(15);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 20,
+                name: "General",
+            }],
+        },
+    });
+
+    await this.start({
+        async mockRPC(route, args) {
+            if (route === '/web/dataset/call_kw/mail.channel/execute_command') {
+                assert.deepEqual(args.args[0], [20], "The right id is sent to the server to remove");
+                assert.strictEqual(args.args[1], 'leave', "The right command is sent to the server");
+                return Promise.resolve();
+            }
+            return this._super(...arguments);
+        },
+    });
+
+    assert.containsOnce(
+        document.body,
+        '.o_Discuss_content .o_Discuss_thread[data-thread-local-id="mail.thread_mail.box_inbox"]',
+        "The inbox is displayed"
+    );
+
+    assert.containsOnce(document.body, '.o_DiscussSidebar_list .o_DiscussSidebarItem', "1 channel is present");
+    assert.strictEqual(
+        document.querySelector(`.o_DiscussSidebar_list .o_DiscussSidebarItem .o_DiscussSidebarItem_name`).textContent,
+        'General',
+        "The channel name is 'General'"
+    );
+
+    await afterNextRender(() =>
+        document.querySelector('.o_DiscussSidebar_list .o_DiscussSidebarItem').click()
+    );
+
+    assert.containsOnce(
+        document.body,
+        `.o_Discuss_content .o_Discuss_thread[data-thread-local-id="${
+            this.env.models['mail.thread'].find(thread =>
+                thread.id === 20 &&
+                thread.model === 'mail.channel'
+            ).localId
+         }"]`,
+         "The channel general is displayed"
+    );
+
+    await afterNextRender(() =>
+        document.querySelector('.o_DiscussSidebarItem_commandLeave').click()
+    );
+    assert.containsNone(document.body, '.o_DiscussSidebar_list .o_DiscussSidebarItem', "The channel must have been removed");
+    assert.containsOnce(
+        document.body,
+        '.o_Discuss_content .o_Discuss_thread[data-thread-local-id="mail.thread_mail.box_inbox"]',
+        "The inbox is displayed"
+    );
+
+    // the server confirms the unpin through the longpolling
+    const notifConfirmUnpin = [
+        ["dbName","res.partner",1],
+        {"id":20,"name":"General","state":"open","channel_type":"channel","public":"public","info":"unsubscribe"}
+    ];
+    await afterNextRender(() =>
+        this.env.services.bus_service.trigger('notification', [notifConfirmUnpin])
+    );
+    assert.containsNone(document.body, '.o_DiscussSidebar_list .o_DiscussSidebarItem', "The channel still is not in the sidebar");
+    assert.containsOnce(
+        document.body,
+        '.o_Discuss_content .o_Discuss_thread[data-thread-local-id="mail.thread_mail.box_inbox"]',
+        "The inbox is displayed"
+    );
+
+    // Some other tab has closed a chatwindow that displayed this channel
+    // Or it is our tab while closing an hypothetical chatWindow during the unpin process
+    const notifConfirmFold = [
+        ["dbName","res.partner",1],
+        {"id":20,"name":"General","state":"closed", "is_minimized": false, "channel_type":"channel","public":"public"}
+    ];
+    try {
+        await afterNextRender(
+            () => {
+                return this.env.services.bus_service.trigger('notification', [notifConfirmFold])
+            },
+            100 // we wait a bit, but we know it is gonna fail
+        );
+    } catch (e) {
+        // Normally there is nothing to do since the channel is already closed and destroyed
+        assert.strictEqual(e.message, "Timeout: the render didn't start.");
+    }
+    assert.containsNone(document.body, '.o_DiscussSidebar_list .o_DiscussSidebarItem', "The channel still is not in the sidebar");
+    assert.containsOnce(
+        document.body,
+        '.o_Discuss_content .o_Discuss_thread[data-thread-local-id="mail.thread_mail.box_inbox"]',
+        "The inbox is displayed"
+    );
+    // Some other tab has opened a chatwindow that displays this channel
+    const notifConfirmUnFold = [
+        ["dbName","res.partner",1],
+        {"id":20,"name":"General","state":"open","channel_type":"channel","public":"public"}
+    ];
+    await afterNextRender(() =>
+        this.env.services.bus_service.trigger('notification', [notifConfirmUnFold])
+    );
+    assert.containsOnce(document.body, '.o_DiscussSidebar_list .o_DiscussSidebarItem', "The channel has been brought back in the sidebar");
+    assert.containsOnce(
+        document.body,
+        '.o_Discuss_content .o_Discuss_thread[data-thread-local-id="mail.thread_mail.box_inbox"]',
+        "The inbox is displayed"
+    );
+});
+
+QUnit.test('sidebar: unpin channel from bus', async function (assert) {
+    assert.expect(6);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 20,
+                name: "General",
+            }],
+        },
+    });
+
+    await this.start();
+
+    assert.containsOnce(
+        document.body,
+        '.o_Discuss_content .o_Discuss_thread[data-thread-local-id="mail.thread_mail.box_inbox"]',
+        "The inbox is displayed"
+    );
+    assert.containsOnce(document.body, '.o_DiscussSidebar_list .o_DiscussSidebarItem', "1 channel is present");
+    assert.strictEqual(
+        document.querySelector(`.o_DiscussSidebar_list .o_DiscussSidebarItem .o_DiscussSidebarItem_name`).textContent,
+        'General',
+        "The channel name is 'General'"
+    );
+
+    await afterNextRender(() =>
+        document.querySelector('.o_DiscussSidebar_list .o_DiscussSidebarItem').click()
+    );
+
+    assert.containsOnce(
+        document.body,
+        `.o_Discuss_content .o_Discuss_thread[data-thread-local-id="${
+            this.env.models['mail.thread'].find(thread =>
+                thread.id === 20 &&
+                thread.model === 'mail.channel'
+            ).localId
+         }"]`,
+         "The channel general is displayed"
+    );
+
+    const notif = [
+        ["dbName","res.partner",1],
+        {"id":20,"name":"General","state":"open","channel_type":"channel","public":"public","info":"unsubscribe"}
+    ];
+    await afterNextRender(() =>
+        this.env.services.bus_service.trigger('notification', [notif])
+    );
+
+    assert.containsOnce(
+        document.body,
+        '.o_Discuss_content .o_Discuss_thread[data-thread-local-id="mail.thread_mail.box_inbox"]',
+        "The inbox is displayed"
+    );
+    assert.containsNone(document.body, '.o_DiscussSidebar_list .o_DiscussSidebarItem', "The channel must have been removed");
+});
+
+
 QUnit.test('sidebar: basic channel rendering', async function (assert) {
     assert.expect(14);
 

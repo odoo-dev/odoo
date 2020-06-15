@@ -89,6 +89,7 @@ class DiscussSidebar extends Component {
             .all(thread =>
                 thread.channel_type === 'chat' &&
                 thread.isPinned &&
+                thread.isDoPinOperation !== 'unpin' &&
                 thread.model === 'mail.channel'
             )
             .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);
@@ -112,6 +113,7 @@ class DiscussSidebar extends Component {
             .all(thread =>
                 thread.channel_type === 'channel' &&
                 thread.isPinned &&
+                thread.isDoPinOperation !== 'unpin' &&
                 thread.model === 'mail.channel'
             )
             .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);

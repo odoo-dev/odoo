@@ -68,9 +68,22 @@ class Discuss extends Component {
 
     patched() {
         this.trigger('o-update-control-panel');
-        if (this.discuss.thread) {
+        if (this.discuss.thread &&
+            this.discuss.thread.isPinned &&
+            this.discuss.thread.isDoPinOperation !== 'unpin'
+        ) {
             this.trigger('o-push-state-action-manager');
+        } else {
+            const [ model , id ] = this.discuss.defaultInitActiveId.split('_');
+            const defaultThread = this.env.models['mail.thread'].find(thread =>
+                thread.id === id && thread.model === model
+            );
+            this.discuss.threadViewer.update({
+                stringifiedDomain: '[]',
+                thread: [['link', defaultThread]],
+            });
         }
+
         if (
             this.discuss.thread &&
             this.discuss.thread === this.env.messaging.inbox &&

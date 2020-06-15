@@ -455,12 +455,25 @@ function factory(dependencies) {
                 channel.members.includes(this.env.messaging.currentPartner)
             );
 
-            channel = this.env.models['mail.thread'].insert(Object.assign(
-                { isPinned: true },
-                convertedData,
-            ));
+            if (channel) {
+                if (!channel.isPinned && convertedData.serverFoldState === 'closed') {
+                    channel.delete();
+                    this.messaging.messagingMenu.update();
+                    return;
+                }
+                channel.update(Object.assign(
+                    { isDoPinOperation: false , isPinned: true },
+                    convertedData
+                ));
+            } else if (convertedData.serverFoldState !== 'closed') {
+                channel = this.env.models['mail.thread'].insert(Object.assign(
+                    { isPinned: true },
+                    convertedData,
+                ));
+            }
 
             if (
+                channel &&
                 channel.channel_type === 'channel' &&
                 data.info !== 'creation' &&
                 !wasCurrentPartnerMember
@@ -658,12 +671,19 @@ function factory(dependencies) {
                     owl.utils.escape(channel.name)
                 );
             }
+            channel.update({ isPinned: false , isDoPinOperation: false });
+            if (channel.chatWindows.length) {
+                for (const cw of channel.chatWindows) {
+                    cw.close();
+                }
+            } else {
+                channel.delete();
+            }
             this.env.services['notification'].notify({
                 message,
                 title: this.env._t("Unsubscribed"),
                 type: 'warning',
             });
-            channel.update({ isPinned: false });
         }
 
         /**
