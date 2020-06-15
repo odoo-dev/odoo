@@ -1,22 +1,19 @@
-odoo.define('mail_bot/static/src/models/messaging/messaging.js', function (require) {
-'use strict';
+odoo.define("mail_bot/static/src/models/messaging/messaging.js", function (require) {
+    "use strict";
 
-const { registerInstancePatchModel } = require('mail/static/src/model/model_core.js');
+    const { registerInstancePatchModel } = require("mail/static/src/model/model_core.js");
 
-registerInstancePatchModel('mail.messaging', 'mail_bot/static/src/models/messaging/messaging.js', {
-    //----------------------------------------------------------------------
-    // Public
-    //----------------------------------------------------------------------
+    registerInstancePatchModel("mail.messaging", "mail_bot/static/src/models/messaging/messaging.js", {
+        //----------------------------------------------------------------------
+        // Public
+        //----------------------------------------------------------------------
 
-    /**
-     * @returns {boolean}
-     */
-    isNotificationPermissionDefault() {
-        const windowNotification = this.env.browser.Notification;
-        return windowNotification
-            ? windowNotification.permission === 'default'
-            : false;
-    },
-});
-
+        /**
+         * @returns {boolean}
+         */
+        isNotificationPermissionDefault() {
+            const windowNotification = this.env.browser.Notification;
+            return windowNotification ? windowNotification.permission === "default" : false;
+        },
+    });
 });

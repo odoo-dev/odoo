@@ -4,7 +4,7 @@
  * versions of Odoo. Any module that is defined in this file should be isolated
  * in its own file in master.
  */
-odoo.define('hr_holidays/static/src/bugfix/bugfix.js', function (require) {
-'use strict';
+odoo.define("hr_holidays/static/src/bugfix/bugfix.js", function (require) {
+    "use strict";
 
 });

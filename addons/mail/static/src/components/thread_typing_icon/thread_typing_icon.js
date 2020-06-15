@@ -1,32 +1,31 @@
-odoo.define('mail/static/src/components/thread_typing_icon/thread_typing_icon.js', function (require) {
-'use strict';
+odoo.define("mail/static/src/components/thread_typing_icon/thread_typing_icon.js", function (require) {
+    "use strict";
 
-const { Component } = owl;
+    const { Component } = owl;
 
-class ThreadTypingIcon extends Component {}
+    class ThreadTypingIcon extends Component {}
 
-Object.assign(ThreadTypingIcon, {
-    defaultProps: {
-        animation: 'none',
-        size: 'small',
-    },
-    props: {
-        animation: {
-            type: String,
-            validate: prop => ['bounce', 'none', 'pulse'].includes(prop),
+    Object.assign(ThreadTypingIcon, {
+        defaultProps: {
+            animation: "none",
+            size: "small",
         },
-        size: {
-            type: String,
-            validate: prop => ['small', 'medium'].includes(prop),
+        props: {
+            animation: {
+                type: String,
+                validate: (prop) => ["bounce", "none", "pulse"].includes(prop),
+            },
+            size: {
+                type: String,
+                validate: (prop) => ["small", "medium"].includes(prop),
+            },
+            title: {
+                type: String,
+                optional: true,
+            },
         },
-        title: {
-            type: String,
-            optional: true,
-        }
-    },
-    template: 'mail.ThreadTypingIcon',
-});
+        template: "mail.ThreadTypingIcon",
+    });
 
-return ThreadTypingIcon;
-
+    return ThreadTypingIcon;
 });

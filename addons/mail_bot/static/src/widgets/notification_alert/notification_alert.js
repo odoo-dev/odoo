@@ -1,45 +1,40 @@
-odoo.define('mail_bot/static/src/widgets/notification_alert/notification_alert.js', function (require) {
-"use strict";
+odoo.define("mail_bot/static/src/widgets/notification_alert/notification_alert.js", function (require) {
+    "use strict";
 
-const components = {
-    NotificationAlert: require('mail_bot/static/src/components/notification_alert/notification_alert.js'),
-};
+    const components = {
+        NotificationAlert: require("mail_bot/static/src/components/notification_alert/notification_alert.js"),
+    };
 
-const { ComponentWrapper, WidgetAdapterMixin } = require('web.OwlCompatibility');
+    const { ComponentWrapper, WidgetAdapterMixin } = require("web.OwlCompatibility");
 
-const Widget = require('web.Widget');
-const widgetRegistry = require('web.widget_registry');
+    const Widget = require("web.Widget");
+    const widgetRegistry = require("web.widget_registry");
 
-class NotificationAlertWrapper extends ComponentWrapper {}
+    class NotificationAlertWrapper extends ComponentWrapper {}
 
-// -----------------------------------------------------------------------------
-// Display Notification alert on user preferences form view
-// -----------------------------------------------------------------------------
-const NotificationAlert = Widget.extend(WidgetAdapterMixin, {
-    /**
-     * @override
-     */
-    init() {
-        this._super(...arguments);
-        this.component = undefined;
-    },
-    /**
-     * @override
-     */
-    async start() {
-        await this._super(...arguments);
+    // -----------------------------------------------------------------------------
+    // Display Notification alert on user preferences form view
+    // -----------------------------------------------------------------------------
+    const NotificationAlert = Widget.extend(WidgetAdapterMixin, {
+        /**
+         * @override
+         */
+        init() {
+            this._super(...arguments);
+            this.component = undefined;
+        },
+        /**
+         * @override
+         */
+        async start() {
+            await this._super(...arguments);
 
-        this.component = new NotificationAlertWrapper(
-            this,
-            components.NotificationAlert,
-            {}
-        );
-        await this.component.mount(this.el);
-    },
-});
+            this.component = new NotificationAlertWrapper(this, components.NotificationAlert, {});
+            await this.component.mount(this.el);
+        },
+    });
 
-widgetRegistry.add('notification_alert', NotificationAlert);
+    widgetRegistry.add("notification_alert", NotificationAlert);
 
-return NotificationAlert;
-
+    return NotificationAlert;
 });

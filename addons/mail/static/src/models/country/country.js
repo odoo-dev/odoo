@@ -1,23 +1,21 @@
-odoo.define('mail/static/src/models/country/country.js', function (require) {
-'use strict';
+odoo.define("mail/static/src/models/country/country.js", function (require) {
+    "use strict";
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr } = require('mail/static/src/model/model_field.js');
+    const { registerNewModel } = require("mail/static/src/model/model_core.js");
+    const { attr } = require("mail/static/src/model/model_field.js");
 
-function factory(dependencies) {
+    function factory(dependencies) {
+        class Country extends dependencies["mail.model"] {}
 
-    class Country extends dependencies['mail.model'] {}
+        Country.fields = {
+            id: attr(),
+            name: attr(),
+        };
 
-    Country.fields = {
-        id: attr(),
-        name: attr(),
-    };
+        Country.modelName = "mail.country";
 
-    Country.modelName = 'mail.country';
+        return Country;
+    }
 
-    return Country;
-}
-
-registerNewModel('mail.country', factory);
-
+    registerNewModel("mail.country", factory);
 });
