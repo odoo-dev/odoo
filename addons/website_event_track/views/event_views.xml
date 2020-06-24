@@ -6,7 +6,7 @@
         <field name="model">event.type</field>
         <field name="inherit_id" ref="website_event.event_type_view_form_inherit_website"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@name='event_type_visibility_website']/div[hasclass('o_setting_right_pane')]" position='inside'>
+            <xpath expr="//div[@name='website_menu']" position='after'>
                 <div class="row mt16" attrs="{'invisible': [('website_menu', '=', False)]}">
                     <label class="col-lg-4" for="website_track"/> <field name="website_track"/>
                 </div>
@@ -33,6 +33,7 @@
                         <field name="track_count" string="Tracks" widget="statinfo"/>
                     </button>
                     <button name="%(event_sponsor_action_from_event)d"
+                            id="wetrack_stat_btn_sponsor"
                             type="action"
                             class="oe_stat_button"
                             icon="fa-black-tie">
