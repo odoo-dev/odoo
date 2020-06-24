@@ -297,7 +297,8 @@
             id="menu_event_track_tag"
             action="action_event_track_tag"
             parent="event.menu_event_configuration"
-            groups="base.group_no_one"/>
+            groups="base.group_no_one"
+            sequence="35"/>
 
         <!-- EVENTS TRACK STAGES-->
         <record id="event_track_stage_view_search" model="ir.ui.view">
