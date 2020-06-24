@@ -3,4 +3,5 @@
 
 from . import event_track_partner
 from . import event_track
+from . import event_track_tag
 from . import res_partner
