@@ -18,6 +18,7 @@
         'views/event_event_views.xml',
         'views/event_registration_views.xml',
         'views/website_visitor_views.xml',
+        'views/event_templates_event.xml',
     ],
     'demo': [
         'data/website_visitor_demo.xml',
