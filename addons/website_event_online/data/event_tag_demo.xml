@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="event.event_tag_category_3_tag_1" model="event.tag">
+        <field name="color">6</field>
+    </record>
+</odoo>

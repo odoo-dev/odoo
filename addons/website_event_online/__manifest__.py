@@ -14,9 +14,13 @@
         'website_event'
     ],
     'data': [
+        'views/assets.xml',
+        'views/event_event_views.xml',
+        'views/event_tag_views.xml',
         'views/event_templates_event.xml',
     ],
     'demo': [
+        'data/event_tag_demo.xml',
     ],
     'application': False,
     'installable': True,
