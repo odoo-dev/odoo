@@ -148,6 +148,13 @@
         <field name="cover_properties">{"background-image": "none", "background-color": "secondary", "opacity": ""}</field>
     </record>
 
+    <record id="event.event_7" model="event.event">
+        <field name="website_menu">True</field>
+        <field name="website_published">True</field>
+        <field name="subtitle">Our newest collection will be revealed online! Interact with us on our live streams!</field>
+        <field name="cover_properties">{"background-image": "url('/website_event/static/src/img/event_cover_7.jpg')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0.4"}</field>
+    </record>
+
     <record id="base.res_partner_1" model="res.partner">
         <field name="is_published">True</field>
     </record>
