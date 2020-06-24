@@ -14,6 +14,7 @@
         'website_event'
     ],
     'data': [
+        'views/event_templates_event.xml',
     ],
     'demo': [
     ],
