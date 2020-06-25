@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="wishlist_widget">
+    <div class="o_track_wishlist ml-2">
+        <t t-set="on_user_wishlist" t-value="request.env.user.partner_id in track.wishlist_partner_ids"/>
+        <t t-set="wishlisted_by_default" t-value="track.wishlisted_by_default and not request.env.user._is_public() and event.is_participating"/>
+        <i t-att-class="'fa fa-star%s%s' % ('' if on_user_wishlist or wishlisted_by_default else '-o', ' o_wishlist_locked' if wishlisted_by_default else '')"
+           t-att-data-track-id="track.id"
+           t-att-data-wishlisted="bool(on_user_wishlist)"></i>
+    </div>
+</template>
+
+</odoo>

@@ -1,0 +1,15 @@
+.o_track_wishlist {
+    font-size: x-large;
+    i {
+        cursor: pointer;
+        &.o_wishlist_locked {
+            cursor: not-allowed;
+        }
+        &.fa-star-o {
+            color: grey;
+        }
+        &.fa-star {
+            color: gold;
+        }
+    }
+}
