@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="event_exhibitor" name="Event Exhibitor">
+    <t t-call="website_event.layout">
+        <div class="o_wesponsor_index o_wesponsor_index_bg">
+            <!-- Drag/Drop Area -->
+            <div id="oe_structure_wesponsor_index_1" class="oe_structure"/>
+            <!-- Content -->
+            <div class="o_wesponsor_exhibitor_container container pb-3">
+                <div class="row mb-5">
+                    <t t-call="website_event_track_exhibitor.exhibitor_display"/>
+                </div>
+            </div>
+            <!-- Drag/Drop Area -->
+            <div id="oe_structure_wesponsor_index_2" class="oe_structure"/>
+        </div>
+    </t>
+</template>
+
+<!-- CONTENT: MAIN TEMPLATES -->
+
+<!-- Exhibitors Main Display -->
+<template id="exhibitor_display" name="Exhibitors Main Display">
+    <div class="col-12 col-md-4 col-lg-3 o_wesponsor_exhibitor_aside">
+        <div class="row bg-white pt-3">
+            <div class="col-12">
+                <h5 class="m-0">Other exhibitors</h5>
+                <hr class="mt-2 pb-1 mb-1"/>
+            </div>
+            <ul class="col-12 list-unstyled">
+                <li t-foreach="sponsors_other" t-as="sponsor_other">
+                    <div t-attf-class="d-flex mb-3 align-items-center">
+                        <img class="mr-2"
+                            style="max-height: 24px;"
+                            t-att-src="website.image_url(sponsor_other.partner_id.country_id, 'image')"
+                            t-att-alt="sponsor_other.partner_id.country_id.name"/>
+                        <div class="flex-grow-1">
+                            <a t-att-href="sponsor_other.website_url" t-esc="sponsor_other.name"/>
+                            <br />
+                            <small class="text-muted" t-esc="sponsor_other.subtitle"/>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-12 col-md-8 col-lg-9">
+        <div t-if="not sponsor.is_event_live" class="row ml-3 mt-3 alert alert-warning">
+            <p class="col-12 my-0">
+                Starting in
+                <span t-esc="sponsor.event_start_remaining"
+                    t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
+            </p>
+        </div>
+        <div class="row bg-white pt-3 ml-3">
+            <div class="col-12">
+                <h5 class="m-0" t-esc="sponsor.name"/>
+                <hr class="mt-2 pb-1 mb-1"/>
+            </div>
+            <div class="col-12">
+                <p class="alert alert-warning">
+                    Include here jitsi stuff
+                </p>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>

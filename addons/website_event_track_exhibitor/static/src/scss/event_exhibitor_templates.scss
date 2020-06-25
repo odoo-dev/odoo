@@ -1,0 +1,35 @@
+.o_wesponsor_index {
+    // Main page layouting
+    &.o_wesponsor_index_bg {
+        @if (color('body') == $o-portal-default-body-bg) {
+            @extend .bg-200;
+        }
+    }
+
+    // Specific exhibitor display
+    .o_wesponsor_exhibitor_container {
+
+        // Left panel: other exhibitors
+        .o_wesponsor_exhibitor_aside {
+            border: 1px solid $border-color;
+
+            @include media-breakpoint-up(md) {
+                border-top-width: 0;
+            }
+        }
+    }
+
+    // Sponsor card
+    .o_wesponsor_card {
+        .o_wesponsor_card_header_badge {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: $card-spacer-y $card-spacer-x;
+            text-align: right;
+        }
+        &.o_wesponsor_card_unpublished {
+            opacity: 0.5;
+        }
+    }
+}
