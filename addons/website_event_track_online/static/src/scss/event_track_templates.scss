@@ -1,0 +1,44 @@
+/*
+ * EVENT TOOL: REMINDER WIDGET
+ */
+.o_wevent_event .o_wetrack_js_reminder {
+    i {
+        &.fa-bell {
+            color: gold;
+        }
+        &.fa-bell-o {
+            color: white
+        }
+    }
+
+    &.o_wetrack_reminder_light {
+        padding: 0.25em 0em 0.25em 0.5em;
+        transition: margin-right .3s ease;
+        span {
+            display:none;
+        }
+        i {
+            margin: 0em 0.5em;
+            cursor: pointer;
+        }
+        &:hover {
+            background: grey;
+            width: fit-content;
+            height: fit-content;
+            span {
+                display:inline;
+            }
+            margin-right: 0.5em;
+        }
+    }
+    &:not(.o_wetrack_reminder_light) {
+        padding: 0.25rem 0.50rem;
+        background: grey;
+        width: fit-content;
+        height: fit-content;
+        cursor: pointer;
+        span {
+            min-width: 70px;
+        }
+    }
+}
