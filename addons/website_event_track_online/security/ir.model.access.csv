@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+event_track_partner_access_all,event.track.partner.access.all,model_event_track_partner,,0,0,0,0
+event_track_partner_access_manager,event.track.partner.access.manager,model_event_track_partner,event.group_event_manager,1,1,1,1
