@@ -14,8 +14,13 @@
         'website_event_track_online',
     ],
     'data': [
+        'views/assets.xml',
+        'views/event_track_templates.xml',
+        'views/event_track_templates_track.xml',
+        'views/event_track_views.xml',
     ],
     'demo': [
+        'data/event_track_demo.xml',
     ],
     'application': False,
     'installable': True,

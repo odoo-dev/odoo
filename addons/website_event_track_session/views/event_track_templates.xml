@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="tracks" inherit_id="website_event_track.tracks">
+    <!-- New main layout -->
+    <xpath expr="//div[@id='oe_structure_website_event_track_tracks_1']" position="before">
+        <div class="o_wesession_index o_wesession_index_bg">
+            <!-- Topbar -->
+            <t t-call="website_event_track_session.session_topbar"/>
+            <!-- Drag/Drop Area -->
+            <div id="oe_structure_wesession_index_1" class="oe_structure"/>
+            <!-- Content -->
+            <div class="o_wesession_container container">
+                <div class="row">
+                    <t t-call="website_event_track_session.tracks_search"/>
+                </div>
+                <div class="row my-5">
+                    <t t-call="website_event_track_session.tracks_display"/>
+                </div>
+            </div>
+            <!-- Drag/Drop Area -->
+            <div id="oe_structure_wesession_index_2" class="oe_structure"/>
+        </div>
+    </xpath>
+    <!-- Reset existing template as nothing to keep -->
+    <xpath expr="//div[@id='oe_structure_website_event_track_tracks_1']" position="replace"/>
+    <xpath expr="//section" position="replace"/>
+    <xpath expr="//div[@id='oe_structure_website_event_track_tracks_2']" position="replace"/>
+</template>
+
+<!-- CONTENT: MAIN TEMPLATES -->
+
+<!-- Tracks Main Display -->
+<template id="tracks_display" name="Tracks Cards and List">
+    <!-- No tracks -->
+    <t t-if="not tracks">
+        <div class="col-12">
+            <div class="h2 mb-3">No events found.</div>
+            <div class="alert alert-info text-center" groups="event.group_event_manager">
+                <p class="m-0">Schedule some tracks to get started !</p>
+            </div>
+        </div>
+    </t>
+    <!-- Cards -->
+    <div class="col-12" t-call="website_event_track_session.tracks_display_cards"/>
+    <!-- List -->
+    <div class="col-12" t-call="website_event_track_session.tracks_display_list"/>
+</template>
+
+<!-- Tracks: Cards-based display -->
+<template id="tracks_display_cards" name="Tracks List">
+    <div class="row mb-5">
+        <div class="col-12" t-if="tracks_live">
+            <h5 class="m-0 text-danger">Live Now</h5>
+            <hr class="mt-2 pb-1 mb-1"/>
+        </div>
+        <div t-foreach="tracks_live" t-as="track" class="col-md-6 col-lg-3 mb-4">
+            <t t-call="website_event_track_session.track_card"/>
+        </div>
+        <div class="col-12" t-if="tracks_soon">
+            <h5 class="m-0 text-danger">Coming soon ...</h5>
+            <hr class="mt-2 pb-1 mb-1"/>
+        </div>
+        <div t-foreach="tracks_soon" t-as="track" class="col-md-6 col-lg-3 mb-4">
+            <t t-call="website_event_track_session.track_card"/>
+        </div>
+    </div>
+</template>
+
+<template id="track_card" name="Track Card">
+    <a t-att-href="'/event/%s/track/%s' % (slug(track.event_id), slug(track))" class="text-decoration-none">
+        <article t-att-class="'h-100 card border-0 shadow-sm o_wesession_track_card %s' % ('o_wesession_track_card_unpublished' if not track.is_published else '')"
+            itemscope="itemscope" itemtype="http://schema.org/Event">
+            <div class="h-100 row no-gutters">
+                <header class="overflow-hidden bg-secondary col-12 rounded-top">
+                    <t t-set="course_image" t-value="website.image_url(track, 'image')"/>
+
+                    <small class="o_wesession_track_card_header_badge bg-success">
+                        <i class="fa fa-check mr-2"/>Wishlisted
+                    </small>
+
+                    <div t-if="track.image" class="card-img-top"
+                        t-attf-style="padding-top: 50%; background-image: url(#{course_image}); background-size: cover; background-position:center"/>
+                    <div t-else="" class="o_wslides_gradient card-img-top position-relative"
+                        style="padding-top: 50%; opacity: 0.8">
+                        <i class="fa fa-graduation-cap fa-2x mr-3 mb-3 position-absolute text-white-75" style="right:0; bottom: 0"/>
+                    </div>
+                </header>
+                <div class="col-12">
+                    <main class="card-body">
+                        <!-- Title -->
+                        <h5 class="card-title mt-0 mb-0 text-truncate">
+                            <span t-field="track.name" itemprop="name"/>
+                        </h5>
+                        <!-- Tags> -->
+                        <t t-foreach="track.tag_ids" t-as="tag">
+                            <span t-att-class="'badge o_tag_color_%s %s' % (tag.color, 'badge-primary' if tag in search_tags else 'badge-light')"
+                                t-esc="tag.name"/>
+                        </t>
+                    </main>
+                </div>
+                <!-- Footer -->
+                <footer class="small align-self-end w-100 card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <!-- Organizer -->
+                        <span t-if="track.partner_id" class="text-muted text-truncate" t-field="track.partner_id" itemprop="performer"/>
+                        <!-- Starts -->
+                        <span class="text-muted ml-auto" t-field="track.track_start_remaining" itemprop="duration"
+                            t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
+                    </div>
+                </footer>
+            </div>
+        </article>
+    </a>
+</template>
+
+<!-- Tracks: List-based display -->
+<template id="tracks_display_list" name="Tracks List">
+    <div class="o_wesession_list row mb-5">
+        <div class="col-12">
+            <h5 class="m-0">Talks</h5>
+            <hr class="mt-2 pb-1 mb-1"/>
+        </div>
+        <ul class="list-unstyled col-12">
+            <li class="o_wesession_list_item row bg-white shadow-sm border-bottom-0 py-2">
+                <span class="col-md-4">Topic</span>
+                <div class="col-md-2">Tags</div>
+                <span class="col-md-2">Speaker</span>
+                <span class="col-md-1">Duration</span>
+                <span class="col-md-3">Starts</span>
+            </li>
+            <t t-foreach="tracks" t-as="track">
+               <li class="o_wesession_list_item row bg-white-50 border-top-0 py-2">
+                    <a t-att-href="track.website_url" class="col-md-4" t-esc="track.name"/>
+                    <div class="col-md-2">
+                        <t t-foreach="track.tag_ids" t-as="tag">
+                            <t t-call="website_event_track_session.track_tag_badge"/>
+                        </t>
+                    </div>
+                    <span class="col-md-2" t-esc="track.partner_id.name"/>
+                    <span class="col-md-1" t-esc="track.duration"
+                        t-options="{'widget': 'duration', 'digital': False, 'unit': 'minute', 'round': 'minute'}"/>
+                    <span class="col-md-3 d-flex align-items-top">
+                        <span class="o_wesession_tracks_list_duration">
+                            <span t-if="track.is_track_live and not track.is_track_done"
+                                class="badge badge-primary">Live
+                            </span>
+                            <span t-elif="not track.is_track_done"
+                                t-esc="track.track_start_remaining"
+                                t-options="{'widget': 'duration', 'digital': False, 'unit': 'minute', 'round': 'minute', 'format': 'short'}"/>
+                            <span t-else="" calss="badge badge-light">Done</span>
+                        </span>
+                    </span>
+                </li>
+            </t>
+        </ul>
+    </div>
+</template>
+
+<!-- TOPBAR: BASE NAVIGATION -->
+
+<!-- Main topbar -->
+<template id="session_topbar"
+    name="Tracks Tools">
+    <nav class="navbar navbar-light border-top shadow-sm d-print-none">
+        <div class="container">
+            <div class="row d-flex justify-content-between w-100 mr-0">
+                <div class="col-lg-8 col-sm-12">
+                    <ul class="o_wevent_index_topbar_filters nav"/>
+                </div>
+                <div class="col-lg-3 col-sm-12 d-flex align-items-center flex-wrap px16">
+                    <t t-call="website_event.events_search_box">
+                        <t t-set="_searches" t-value="searches"/>
+                        <t t-set="_placeholder" t-value="'Search a talk ...'"/>
+                        <t t-set="clear_link" t-value="'/event/%s/track' % (slug(event))"/>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </nav>
+</template>
+
+<!-- Topbar: optional tags filters -->
+<template id="session_topbar_tag"
+    inherit_id="website_event_track_session.session_topbar"
+    name="Filter by Tags"
+    active="True"
+    customize_show="True">
+    <xpath expr="//ul[hasclass('o_wevent_index_topbar_filters')]" position="inside">
+        <t t-foreach="tag_categories" t-as="tag_category">
+            <li t-if="tag_category.tag_ids" class="nav-item dropdown mr-2 my-1">
+                <a href="#" role="button" class="btn dropdown-toggle" data-toggle="dropdown">
+                    <i class="fa fa-folder-open"/>
+                    <t t-esc="tag_category.name"/>
+                </a>
+                <div class="dropdown-menu">
+                    <t t-foreach="tag_category.tag_ids" t-as="tag">
+                        <a t-att-href="'/event/%s/track?%s' % (
+                                slug(event),
+                                keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))
+                            )"
+                            t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if tag in search_tags else ''}">
+                            <t t-esc="tag.name"/>
+                        </a>
+                    </t>
+                </div>
+            </li>
+        </t>
+    </xpath>
+</template>
+
+<!-- Searched tags -->
+<template id="tracks_search" name="Tracks: search tags">
+    <div class="d-flex align-items-center mt16">
+        <t t-foreach="search_tags" t-as="tag">
+            <span class="align-items-baseline border d-inline-flex pl-2 rounded ml16 mb-2 bg-white">
+                <i class="fa fa-tag mr-2 text-muted"/>
+                <t t-esc="tag.display_name"/>
+                <a t-att-href="'/event?%s' % keep_query('*', tags=str((search_tags - tag).ids))" class="btn border-0 py-1">&#215;</a>
+            </span>
+        </t>
+    </div>
+</template>
+
+<!-- MISC OPTIONS -->
+
+<!-- Tracks List: Wishlist -->
+<template id="tracks_wishlist"
+    name="Wishlist"
+    inherit_id="website_event_track_session.tracks_display_list"
+    active="True"
+    customize_show="True">
+    <xpath expr="//span[hasclass('o_wesession_tracks_list_duration')]" position="after">
+        <t t-call="website_event_track_online.track_widget_wishlist_button"/>
+    </xpath>
+</template>
+
+<!-- MISC TOOLS -->
+
+<template id="track_tag_badge" name="Track: Tag Badge Link">
+    <a t-att-href="'/event/%s/track?%s'% (
+            slug(event),
+            keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))
+        )"
+        t-att-class="'badge o_tag_color_%s %s' % (tag.color, 'badge-primary' if tag in search_tags else 'badge-light')"
+        t-esc="tag.name"/>
+</template>
+
+</odoo>
