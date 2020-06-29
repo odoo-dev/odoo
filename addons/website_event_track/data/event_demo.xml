@@ -5,6 +5,11 @@
         <field name="website_track">True</field>
         <field name="website_track_proposal">True</field>
     </record>
+    <record id="event.event_7" model="event.event">
+        <field name="website_menu">True</field>
+        <field name="website_track">True</field>
+        <field name="website_track_proposal">True</field>
+    </record>
 
     <record id="event_track_tag1" model="event.track.tag">
         <field name="name">Consumers</field>
