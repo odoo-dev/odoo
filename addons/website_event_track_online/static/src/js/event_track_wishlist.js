@@ -6,14 +6,10 @@ var _t = core._t;
 var publicWidget = require('web.public.widget');
 
 publicWidget.registry.websiteEventTrackWishlist = publicWidget.Widget.extend({
-    selector: '.o_track_wishlist',
+    selector: '.o_wetrack_js_wishlist',
     events: {
         'click i:not(.o_wishlist_locked)': '_onWishlistToggleClick',
     },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
 
     /**
      * @override
@@ -23,6 +19,10 @@ publicWidget.registry.websiteEventTrackWishlist = publicWidget.Widget.extend({
         this._super.apply(this, arguments);
         this._onWishlistToggleClick = _.debounce(this._onWishlistToggleClick, 500, true);
     },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //-------------------------------------------------------------------------
 
     /**
      * @private
@@ -37,26 +37,18 @@ publicWidget.registry.websiteEventTrackWishlist = publicWidget.Widget.extend({
         }
 
         this._rpc({
-            route: '/event/track/wishlist/toggle',
+            route: '/event/track/toggle_wishlist',
             params: {
                 track_id: $trackStar.data('trackId'),
-                active: !this.wishlisted
+                set_wishlisted: !this.wishlisted
             },
         }).then(function (result) {
-            if (result.error) {
-                if (result.error === 'need_login') {
-                    self.displayNotification({
-                        type: 'info',
-                        title: _t('Please login'),
-                        message: _.str.sprintf(_t('Please <a href="/web/login?redirect=%s">login</a> to add this talk to your wishlist.'), document.URL),
-                    });
-                } else if (result.error === 'need_registration') {
-                    self.displayNotification({
-                        type: 'info',
-                        title: _t('Please register'),
-                        message: _.str.sprintf(_t('Please <a href="/event/%s/register">register to this event</a> to add this talk to your wishlist.'), result.eventUrlName),
-                    });
-                }
+            if (result.error && result.error === 'ignored') {
+                self.displayNotification({
+                    type: 'info',
+                    title: _t('Please login'),
+                    message: _.str.sprintf(_t('Unknown issue, please retry')),
+                });
             } else if (result.wishlisted) {
                 self.wishlisted = true;
                 $trackStar.addClass('fa-star').removeClass('fa-star-o');
