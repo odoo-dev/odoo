@@ -31,6 +31,10 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         '''/event/<model("event.event"):event>/track/tag/<model("event.track.tag"):tag>'''
     ], type='http', auth="public", website=True, sitemap=False)
     def event_tracks(self, event, tag=None, **searches):
+        return request.render("website_event_track.tracks",
+            self._prepare_event_track_values(event, tag, **searches))
+
+    def _prepare_event_track_values(self, event, tag=None, **searches):
         #  or (tag and tag.color == 0)
         if not event.can_access_from_current_website():
             raise NotFound()
@@ -66,10 +70,10 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         today_now = datetime.now(utc).replace(microsecond=0).date()
         tracks_live = tracks.filtered(lambda track: track.is_track_live)
         tracks_soon = tracks.filtered(lambda track: not track.is_track_live and track.date == today_now)
-        tracks = sorted(tracks, key=lambda track: track.is_track_done)
+        tracks = tracks.sorted(lambda track: track.is_track_done)
 
         # return render
-        values = {
+        return {
             # event information
             'event': event,
             'main_object': event,
@@ -82,7 +86,6 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             'search_tags': search_tags,
             'tag_categories': tag_categories,
         }
-        return request.render("website_event_track.tracks", values)
 
     # ------------------------------------------------------------
     # FRONTEND FORM
@@ -115,6 +118,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         tracks_other = request.env['event.track'].sudo().search(search_domain_base)
 
         values = {
+            'hostname': request.httprequest.host.split(':')[0],
             # event information
             'event': event,
             'main_object': event,

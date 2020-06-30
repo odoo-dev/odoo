@@ -28,6 +28,9 @@ class EventTrack(models.Model):
     is_track_live = fields.Boolean(
         'Is Track Live', compute='_compute_track_time_data',
         help="Track has started and is ongoing.")
+    is_track_upcoming = fields.Boolean(
+        'Is Track Upcoming', compute='_compute_track_time_data',
+        help="Track is upcoming.")
     is_track_done = fields.Boolean(
         'Is Track Done', compute='_compute_track_time_data',
         help="Track is finished.")
@@ -65,6 +68,7 @@ class EventTrack(models.Model):
         for track in self:
             date_begin_utc = utc.localize(track.date, is_dst=False)
             date_end_utc = utc.localize(track.date_end, is_dst=False)
+            track.is_track_upcoming = date_begin_utc >= now
             track.is_track_live = date_begin_utc <= now <= date_end_utc
             track.is_track_done = now > date_end_utc
             if date_begin_utc >= now:
