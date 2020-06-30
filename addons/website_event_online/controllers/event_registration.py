@@ -8,18 +8,16 @@ from odoo.http import request
 class WebsiteEventOnlineController(WebsiteEventController):
 
     def _create_attendees_from_registration_post(self, event, registration_data):
+        """ Override registration data to try to set a visitor (from request) and
+        a partner (if visitor linked to a user for example). Purpose is to gather
+        as much informations as possible, notably to ease future communications. """
         visitor_sudo = request.env['website.visitor']._get_visitor_from_request(force_create=True)
+        visitor_sudo._update_visitor_last_visit()
 
-        if visitor_sudo and registration_data:
-            # update visitor info
-            visitor_values = {
-                "name": registration_data[0]["name"],
-                "email": registration_data[0]["email"]
-            }
-            if not visitor_sudo.mobile:
-                visitor_values['mobile'] = registration_data[0]["phone"]
-            visitor_sudo.write(visitor_values)
+        if visitor_sudo:
+            for info in registration_data:
+                info['visitor_id'] = visitor_sudo.id
+                if not info.get('partner_id') and visitor_sudo.partner_id:
+                    info['partner_id'] = visitor_sudo.partner_id.id
 
-            # update registration info
-            registration_data[0]["visitor_id"] = visitor_sudo.id
         return super(WebsiteEventOnlineController, self)._create_attendees_from_registration_post(event, registration_data)
