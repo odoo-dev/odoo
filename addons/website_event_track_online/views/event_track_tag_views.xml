@@ -8,6 +8,13 @@
                 <sheet>
                     <group>
                         <field name="name"/>
+                        <field name="tag_ids" context="{'default_category_id': active_id}">
+                            <tree string="Tags" editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                                <field name="color" widget="color_picker"/>
+                            </tree>
+                        </field>
                     </group>
                 </sheet>
             </form>
@@ -21,7 +28,7 @@
             <tree string="Track Tags Category">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
-                <field name="tag_ids" widget="many2many_tags"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
             </tree>
         </field>
     </record>
@@ -31,13 +38,6 @@
         <field name="res_model">event.track.tag.category</field>
         <field name="view_mode">tree,form</field>
     </record>
-
-    <menuitem string="Track Tag Categories"
-        id="event_track_tag_category_menu"
-        action="event_track_tag_category_action"
-        parent="event.menu_event_configuration"
-        groups="base.group_no_one"
-        sequence="30"/>
 
     <record id="event_track_tag_view_form" model="ir.ui.view">
         <field name="name">event.track.tag.view.form.inherit.online</field>
