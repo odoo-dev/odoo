@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<div t-name="website_event_track_live.website_event_track_suggestion"
+    class="owevent_track_suggestion position-absolute w-100"
+    t-attf-style="background-image: url('#{widget.suggestion.imageSrc}');">
+    <div class="h-100 w-100 p-4 d-flex flex-column align-items-center owevent_track_suggestion_content">
+        <div class="h1 text-white" t-esc="widget.currentTrack.name"/>
+        <div>
+            <button class="btn btn-secondary owevent_track_suggestion_replay">
+                <i class="fa fa-rotate-left mr-1"/>
+                <span>Replay Video</span>
+            </button>
+        </div>
+        <div class="flex-grow-1 pb-5 d-flex flex-column align-items-center justify-content-center">
+            <div class="owevent_track_suggestion_up_next">
+                Up Next
+            </div>
+            <div class="h3 text-white" t-esc="widget.suggestion.name"/>
+            <div class="h4 text-white" t-esc="widget.suggestion.speakerName"/>
+            <div>
+                <a t-att-href="widget.suggestion.trackUrl"
+                    class="btn btn-primary">
+                    <i class="fa fa-step-forward"/>
+                    <span>Next Track</span>
+                    <span class="owevent_track_suggestion_timer_text pl-2 bl-1 ml-2">30</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</templates>

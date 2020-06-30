@@ -1,0 +1,28 @@
+.o_wesession_track_aside_tab_chat {
+    height: 70vh;
+}
+
+#o_wevent_youtube_iframe_container {
+    height: 85vh;
+}
+
+.owevent_track_suggestion {
+    background-color: #888888;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    height: 85vh;
+    top: 0px;
+    left: 0px;
+
+    .owevent_track_suggestion_content {
+        background-color: rgba(0,0,0,.4);
+
+        .owevent_track_suggestion_up_next {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .owevent_track_suggestion_timer_text {
+            border-left: solid 1px;
+        }
+    }
+}
