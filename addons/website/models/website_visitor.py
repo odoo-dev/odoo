@@ -165,13 +165,16 @@ class WebsiteVisitor(models.Model):
         # This function can be called in json with mobile app.
         # In case of mobile app, no uid is set on the jsonRequest env.
         # In case of multi db, _env is None on request, and request.env unbound.
+        print('_get_visitor_from_request')
         if not request:
             return None
         Visitor = self.env['website.visitor'].sudo()
         visitor = Visitor
         access_token = request.httprequest.cookies.get('visitor_uuid')
+        print('\taccess_token', access_token)
         if access_token:
             visitor = Visitor.with_context(active_test=False).search([('access_token', '=', access_token)])
+            print('\tfound visitor', visitor)
             # Prefetch access_token and other fields. Since access_token has a restricted group and we access
             # a non restricted field (partner_id) first it is not fetched and will require an additional query to be retrieved.
             visitor.access_token
@@ -239,6 +242,41 @@ class WebsiteVisitor(models.Model):
             vals['partner_id'] = self.env.user.partner_id.id
             vals['name'] = self.env.user.partner_id.name
         return self.sudo().create(vals)
+
+    def _link_to_partner(self, partner, update_values=None):
+        """ Link self to a partner. This method is meant to be overridden in order
+        to propagate, if necessary, partner information to sub records.
+
+        :param partner: partner to set on self
+        """
+        vals = {'name': partner.name}
+        if update_values:
+            vals.update(update_values)
+        self.write(vals)
+
+    def _link_to_visitor(self, target, unlink=False):
+        """ Link self visitors to target visitors, because they are linked to the
+        same identity. Purpose is mainly to propagate partner identity to sub
+        records to ease database update.
+
+        :param target: main visitor, target of link process;
+        :param update_values: optional values to update visitors to link;
+        :param unlink: if False, archive self; if True, unlink them;
+        """
+        # Link tracked page to target
+        if target.partner_id:
+            self._link_to_partner(target.partner_id)
+        self.website_track_ids.write({'visitor_id': target.id})
+
+        if unlink:
+            self.unlink()
+        else:
+            self.write({
+                'partner_id': False,
+                'active': False,
+            })
+
+        return target
 
     def _cron_archive_visitors(self):
         one_week_ago = datetime.now() - timedelta(days=7)
