@@ -16,7 +16,7 @@ class ExhibitorController(WebsiteEventTrackController):
         search_domain_base = [
             ('event_id', '=', event.id),
         ]
-        if not request.env.user.has_group('event.event_manager'):
+        if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([search_domain_base, [('is_published', '=', True)]])
         return search_domain_base
 
@@ -26,23 +26,39 @@ class ExhibitorController(WebsiteEventTrackController):
 
     @http.route(['/event/<model("event.event"):event>/exhibitors'], type='http', auth="public", website=True, sitemap=False)
     def event_exhibitors(self, event, **searches):
-        #  or (tag and tag.color == 0)
         if not event.can_access_from_current_website():
             raise NotFound()
 
+        return request.render(
+            "website_event_track_exhibitor.event_exhibitors",
+            self._event_exhibitors_get_values(event, **searches)
+        )
+
+    def _event_exhibitors_get_values(self, event, **searches):
         # init and process search terms
         searches.setdefault('search', '')
         searches.setdefault('countries', '')
         searches.setdefault('sponsorhips', '')
         search_domain_base = self._get_event_sponsors_base_domain(event)
-        search_countries = self._get_search_countries(searches['countries'])
-        search_sponsorhips = self._get_search_sponsorships(searches['sponsorhips'])
         search_domain = search_domain_base
+
+        # search on content
+        if searches.get('search'):
+            search_domain = expression.AND([
+                search_domain,
+                [('name', 'ilike', searches['search'])]
+            ])
+
+        # search on countries
+        search_countries = self._get_search_countries(searches['countries'])
         if search_countries:
             search_domain = expression.AND([
                 search_domain,
                 [('partner_id.country_id', 'in', search_countries.ids)]
             ])
+
+        # search on sponsor types
+        search_sponsorhips = self._get_search_sponsorships(searches['sponsorhips'])
         if search_sponsorhips:
             search_domain = expression.AND([
                 search_domain,
@@ -69,7 +85,8 @@ class ExhibitorController(WebsiteEventTrackController):
                 'sponsors': sponsors,
             }) for sponsor_category, sponsors in sponsor_categories.items()]
 
-        values = {
+        # return rendering values
+        return {
             # event information
             'event': event,
             'main_object': event,
@@ -80,8 +97,9 @@ class ExhibitorController(WebsiteEventTrackController):
             'search_sponsorhips': search_sponsorhips,
             'sponsor_types': sponsor_types,
             'sponsor_countries': sponsor_countries,
+            # environment
+            'hostname': request.httprequest.host.split(':')[0],
         }
-        return request.render("website_event_track_exhibitor.event_exhibitors", values)
 
     # ------------------------------------------------------------
     # FRONTEND FORM

@@ -126,7 +126,7 @@
                 <t t-foreach="sponsor_countries" t-as="sponsor_country">
                     <a t-att-href="'/event/%s/exhibitors?%s' % (
                             slug(event),
-                            keep_query('*', tags=str((search_countries - sponsor_country).ids if sponsor_country in search_countries else (sponsor_country | search_countries).ids))
+                            keep_query('*', countries=str((search_countries - sponsor_country).ids if sponsor_country in search_countries else (sponsor_country | search_countries).ids))
                         )"
                         t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if sponsor_country in search_countries else ''}">
                         <t t-esc="sponsor_country.name"/>
@@ -152,7 +152,7 @@
                 <t t-foreach="sponsor_types" t-as="sponsor_type">
                     <a t-att-href="'/event/%s/exhibitors?%s' % (
                             slug(event),
-                            keep_query('*', tags=str((search_sponsorhips - sponsor_type).ids if sponsor_type in search_sponsorhips else (sponsor_type | search_sponsorhips).ids))
+                            keep_query('*', sponsorhips=str((search_sponsorhips - sponsor_type).ids if sponsor_type in search_sponsorhips else (sponsor_type | search_sponsorhips).ids))
                         )"
                         t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if sponsor_type in search_sponsorhips else ''}">
                         <t t-esc="sponsor_type.name"/>
@@ -166,11 +166,11 @@
 <!-- Searched tags -->
 <template id="exhibitors_search" name="Exhibitors: search terms">
     <div class="d-flex align-items-center mt16">
-        <t t-foreach="search_tags" t-as="tag">
+        <t t-foreach="search_countries" t-as="country">
             <span class="align-items-baseline border d-inline-flex pl-2 rounded ml16 mb-2 bg-white">
                 <i class="fa fa-tag mr-2 text-muted"/>
-                <t t-esc="tag.display_name"/>
-                <a t-att-href="'/event?%s' % keep_query('*', tags=str((search_tags - tag).ids))" class="btn border-0 py-1">&#215;</a>
+                <t t-esc="country.display_name"/>
+                <a t-att-href="'/event?%s' % keep_query('*', tags=str((search_countries - country).ids))" class="btn border-0 py-1">&#215;</a>
             </span>
         </t>
     </div>
