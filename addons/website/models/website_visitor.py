@@ -165,16 +165,13 @@ class WebsiteVisitor(models.Model):
         # This function can be called in json with mobile app.
         # In case of mobile app, no uid is set on the jsonRequest env.
         # In case of multi db, _env is None on request, and request.env unbound.
-        print('_get_visitor_from_request')
         if not request:
             return None
         Visitor = self.env['website.visitor'].sudo()
         visitor = Visitor
         access_token = request.httprequest.cookies.get('visitor_uuid')
-        print('\taccess_token', access_token)
         if access_token:
             visitor = Visitor.with_context(active_test=False).search([('access_token', '=', access_token)])
-            print('\tfound visitor', visitor)
             # Prefetch access_token and other fields. Since access_token has a restricted group and we access
             # a non restricted field (partner_id) first it is not fetched and will require an additional query to be retrieved.
             visitor.access_token
