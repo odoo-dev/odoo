@@ -1373,6 +1373,130 @@
         ]"/>
     </record>
 
+    <record id="tvati_extra" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">35</field>
+        <field name="name">TVA Extracomunitara 0%</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extra5" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">35</field>
+        <field name="name">TVA Extracomunitara 5%</field>
+        <field name="amount">5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd111')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd111')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extra9" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">35</field>
+        <field name="name">TVA Extracomunitara 9%</field>
+        <field name="amount">9</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd101')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd101')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extra19" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">35</field>
+        <field name="name">TVA Extracomunitara 19%</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd91')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd91')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
     <record id="tvati_intrap0b" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">66</field>
@@ -1785,6 +1909,379 @@
                 'account_id': ref('pcg_4427'),
                 'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd22'),
                                           ref('account_tax_report_ro_tva_rd221')],
+            }),
+        ]"/>
+    </record>
+
+    <!-- Extracomunitara -->
+    <record id="tvati_extrap0b" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">66</field>
+        <field name="name">TVA Extracomunitara Achizitii 0% - Bunuri</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_0_non_eu"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [],
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extrap5b" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">65</field>
+        <field name="name">TVA Extracomunitara Achizitii 5% - Bunuri</field>
+        <field name="amount">5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_5_non_eu"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd123'),
+                                         ref('account_tax_report_ro_baza_rd273')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd123')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd273')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd123'),
+                                          ref('account_tax_report_ro_baza_rd273')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd273')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd123')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extrap9b" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">64</field>
+        <field name="name">TVA Extracomunitara Achizitii 9% - Bunuri</field>
+        <field name="amount">9</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_9_non_eu"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd122'),
+                                         ref('account_tax_report_ro_baza_rd272')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd122')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd272')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd122'),
+                                          ref('account_tax_report_ro_baza_rd272')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd272')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd122')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extrap19b" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">63</field>
+        <field name="name">TVA Extracomunitara Achizitii 19% - Bunuri</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_19_non_eu"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd121'),
+                                         ref('account_tax_report_ro_baza_rd271')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd121')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd271')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd121'),
+                                         ref('account_tax_report_ro_baza_rd271')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd271')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd121')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extrap0s" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">70</field>
+        <field name="name">TVA Extracomunitara Achizitii 0% - Servicii</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_0_non_eu"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd123'),
+                                         ref('account_tax_report_ro_baza_rd122'),
+                                         ref('account_tax_report_ro_baza_rd121')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'plus_report_line_ids': [],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd123'),
+                                         ref('account_tax_report_ro_baza_rd122'),
+                                         ref('account_tax_report_ro_baza_rd121')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'minus_report_line_ids': [],
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extrap5s" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">69</field>
+        <field name="name">TVA Extracomunitara Achizitii 5% - Servicii</field>
+        <field name="amount">5</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_5_non_eu"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd123'),
+                                         ref('account_tax_report_ro_baza_rd273')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd123')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd273')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd123'),
+                                         ref('account_tax_report_ro_baza_rd273')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd273')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd123')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extrap9s" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">68</field>
+        <field name="name">TVA Extracomunitara Achizitii 9% - Servicii</field>
+        <field name="amount">9</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_9_non_eu"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd122'),
+                                         ref('account_tax_report_ro_baza_rd272')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd122')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd272')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd122'),
+                                         ref('account_tax_report_ro_baza_rd272')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd272')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd122')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="tvati_extrap19s" model="account.tax.template">
+        <field name="chart_template_id" ref="ro_chart_template"/>
+        <field name="sequence">67</field>
+        <field name="name">TVA Extracomunitara Achizitii 19% - Servicii</field>
+        <field name="amount">19</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_19_non_eu"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'plus_report_line_ids': [ref('account_tax_report_ro_baza_rd121'),
+                                         ref('account_tax_report_ro_baza_rd271')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd121')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd271')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'minus_report_line_ids': [ref('account_tax_report_ro_baza_rd121'),
+                                         ref('account_tax_report_ro_baza_rd271')],
+            }),
+            (0,0, {
+                'factor_percent': -100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4426'),
+                'plus_report_line_ids': [ref('account_tax_report_ro_tva_rd271')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('pcg_4427'),
+                'minus_report_line_ids': [ref('account_tax_report_ro_tva_rd121')],
             }),
         ]"/>
     </record>

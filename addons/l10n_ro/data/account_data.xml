@@ -33,6 +33,18 @@
         <record id="tax_group_tva_19_eu" model="account.tax.group">
             <field name="name">TVA 19% EU</field>
         </record>
+        <record id="tax_group_tva_0_non_eu" model="account.tax.group">
+            <field name="name">TVA 0% Non EU</field>
+        </record>
+        <record id="tax_group_tva_5_non_eu" model="account.tax.group">
+            <field name="name">TVA 5% Non EU</field>
+        </record>
+        <record id="tax_group_tva_9_non_eu" model="account.tax.group">
+            <field name="name">TVA 9% Non EU</field>
+        </record>
+        <record id="tax_group_tva_19_non_eu" model="account.tax.group">
+            <field name="name">TVA 19% Non EU</field>
+        </record>
         <record id="tax_group_tva_ned" model="account.tax.group">
             <field name="name">TVA Nedeductibil</field>
         </record>
