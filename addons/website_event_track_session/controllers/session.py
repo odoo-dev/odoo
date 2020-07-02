@@ -18,7 +18,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         search_domain_base = [
             ('event_id', '=', event.id),
         ]
-        if not request.env.user.has_group('event.event_manager'):
+        if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([search_domain_base, [('is_published', '=', True)]])
         return search_domain_base
 
@@ -31,15 +31,31 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         '''/event/<model("event.event"):event>/track/tag/<model("event.track.tag"):tag>'''
     ], type='http', auth="public", website=True, sitemap=False)
     def event_tracks(self, event, tag=None, **searches):
-        #  or (tag and tag.color == 0)
         if not event.can_access_from_current_website():
             raise NotFound()
 
+        return request.render(
+            "website_event_track.tracks",
+            self._event_tracks_get_values(event, tag=tag, **searches)
+        )
+
+    def _event_tracks_get_values(self, event, tag=None, **searches):
         # init and process search terms
         searches.setdefault('search', '')
         searches.setdefault('tags', '')
         search_domain = self._get_event_tracks_base_domain(event)
+
+        # search on content
+        if searches.get('search'):
+            search_domain = expression.AND([
+                search_domain,
+                [('name', 'ilike', searches['search'])]
+            ])
+
+        # search on tags
         search_tags = self._get_search_tags(searches['tags'])
+        if not search_tags and tag:  # backward compatibility
+            search_tags = tag
         if search_tags:
             # Example: You filter on age: 10-12 and activity: football.
             # Doing it this way allows to only get events who are tagged "age: 10-12" AND "activity: football".
@@ -63,13 +79,12 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         tag_categories = request.env['event.track.tag.category'].sudo().search([])
 
         # organize categories for display: live, soon, ...
-        today_now = datetime.now(utc).replace(microsecond=0).date()
         tracks_live = tracks.filtered(lambda track: track.is_track_live)
-        tracks_soon = tracks.filtered(lambda track: not track.is_track_live and track.date == today_now)
-        tracks = sorted(tracks, key=lambda track: track.is_track_done)
+        tracks_soon = tracks.filtered(lambda track: not track.is_track_live and track.is_track_soon)
+        tracks = tracks.sorted(lambda track: track.is_track_done)
 
-        # return render
-        values = {
+        # return rendering values
+        return {
             # event information
             'event': event,
             'main_object': event,
@@ -79,17 +94,19 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             'tracks_soon': tracks_soon,
             # search information
             'searches': searches,
+            'search_key': searches['search'],
             'search_tags': search_tags,
             'tag_categories': tag_categories,
+            # environment
+            'hostname': request.httprequest.host.split(':')[0],
         }
-        return request.render("website_event_track.tracks", values)
 
     # ------------------------------------------------------------
     # FRONTEND FORM
     # ------------------------------------------------------------
 
     @http.route(['/event/<model("event.event"):event>/track/<model("event.track"):track>'], type='http', auth="public", website=True, sitemap=False)
-    def event_exhibitor(self, event, track):
+    def event_track(self, event, track):
         if not event.can_access_from_current_website():
             raise NotFound()
 
@@ -117,10 +134,12 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         values = {
             # event information
             'event': event,
-            'main_object': event,
+            'main_object': track,
             'track': track,
             # sidebar
             'tracks_other': tracks_other,
+            # environment
+            'hostname': request.httprequest.host.split(':')[0],
         }
         return request.render("website_event_track_session.event_track_main", values)
 
