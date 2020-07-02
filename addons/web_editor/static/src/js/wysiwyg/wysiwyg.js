@@ -1,6 +1,7 @@
 odoo.define('web_editor.wysiwyg', function (require) {
 'use strict';
 var Dialog = require('web.Dialog');
+var config = require('web.config');
 var Widget = require('web.Widget');
 var JWEditorLib = require('web_editor.jabberwock');
 var SnippetsMenu = require('web_editor.snippet.editor').SnippetsMenu;
@@ -141,8 +142,9 @@ var Wysiwyg = Widget.extend({
                 discardButton: this.options.discardButton,
                 template: this.options.template,
             });
-
-            this.editor.load(JWEditorLib.DevTools);
+            if(config.isDebug()) { //debug mode
+                this.editor.load(JWEditorLib.DevTools);
+            }
             await this.editor.start();
             this._bindAfterStart();
 
