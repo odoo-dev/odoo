@@ -29,7 +29,7 @@ class WebsiteVisitor(models.Model):
     @api.depends('event_track_visitor_ids.track_id')
     def _compute_event_tracks(self):
         results = self.env['event.track.visitor'].read_group(
-            [('visitor_id', 'in', self.ids)],
+            [('visitor_id', 'in', self.ids), ('is_wishlisted', '=', True)],
             ['visitor_id', 'track_id:array_agg'],
             ['visitor_id']
         )
@@ -43,7 +43,8 @@ class WebsiteVisitor(models.Model):
             raise NotImplementedError("Unsupported 'Not In' operation on track wishlist visitors")
 
         track_visitors = self.env['event.track.visitor'].sudo().search([
-            ('track_id', operator, operand)
+            ('track_id', operator, operand),
+            ('is_wishlisted', '=', True)
         ])
         return [('id', 'in', track_visitors.visitor_id.ids)]
 
@@ -53,7 +54,7 @@ class WebsiteVisitor(models.Model):
         # child one as child should not have track visitors (moved to the parent)
         all_visitors = self + self.parent_id
         results = self.env['event.track.visitor'].read_group(
-            [('visitor_id', 'in', all_visitors.ids)],
+            [('visitor_id', 'in', all_visitors.ids), ('is_wishlisted', '=', True)],
             ['visitor_id', 'track_id:array_agg'],
             ['visitor_id']
         )
@@ -71,7 +72,8 @@ class WebsiteVisitor(models.Model):
             raise NotImplementedError("Unsupported 'Not In' operation on track wishlist visitors")
 
         track_visitors = self.env['event.track.visitor'].sudo().search([
-            ('track_id', operator, operand)
+            ('track_id', operator, operand),
+            ('is_wishlisted', '=', True)
         ])
         if track_visitors:
             visitors = track_visitors.visitor_id

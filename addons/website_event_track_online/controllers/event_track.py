@@ -5,7 +5,6 @@ from werkzeug.exceptions import Forbidden, NotFound
 
 from odoo import exceptions, http
 from odoo.http import request
-from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.website_event_track.controllers.main import WebsiteEventTrackController
 
 
@@ -39,10 +38,8 @@ class WebsiteEventTrackOnlineController(WebsiteEventTrackController):
 
         visitor_sudo = request.env['website.visitor']._get_visitor_from_request(force_create=True)
         visitor_sudo._update_visitor_last_visit()
-        print('visitor_sudo', visitor_sudo.partner_id, visitor_sudo.name, visitor_sudo.email, request.env.user)
 
         event_track_partner = track_sudo._get_event_track_visitors(visitor_sudo, force_create=set_wishlisted)
-        print('event_track_partner', event_track_partner, event_track_partner.visitor_id)
         if not event_track_partner or event_track_partner.is_wishlisted == set_wishlisted:  # ignore if new state = old state
             return {'error': 'ignored'}
 

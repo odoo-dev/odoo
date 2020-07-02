@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.osv import expression
 
 
 class Track(models.Model):
@@ -42,22 +43,33 @@ class Track(models.Model):
         elif self.env.user._is_public():
             wishlisted = self.env['event.track.visitor'].sudo().search([
                 ('track_id', 'in', self.ids),
-                ('visitor_id', '=', current_visitor.id)
+                ('visitor_id', '=', current_visitor.id),
+                ('is_wishlisted', '=', True)
             ]).track_id
             for track in self:
                 track.is_wishlisted = track in wishlisted
         else:
-            wishlisted = self.env['event.track.visitor'].sudo().search([
-                ('track_id', 'in', self.ids),
-                ('partner_id', '=', self.env.user.partner_id.id)
-            ]).track_id
+            if current_visitor:
+                domain = [
+                    '|',
+                    ('partner_id', '=', self.env.user.partner_id.id),
+                    ('visitor_id', '=', current_visitor.id)
+                ]
+            else:
+                domain = [('partner_id', '=', self.env.user.partner_id.id)]
+            wishlisted = self.env['event.track.visitor'].sudo().search(
+                expression.AND([
+                    domain,
+                    ['&', ('track_id', 'in', self.ids), ('is_wishlisted', '=', True)]
+                ])
+            ).track_id
             for track in self:
                 track.is_wishlisted = track in wishlisted
 
     @api.depends('event_track_visitor_ids.visitor_id')
     def _compute_wishlist_track_visitors(self):
         results = self.env['event.track.visitor'].read_group(
-            [('track_id', 'in', self.ids)],
+            [('track_id', 'in', self.ids), ('is_wishlisted', '=', True)],
             ['track_id', 'visitor_id:array_agg'],
             ['track_id']
         )
@@ -71,7 +83,8 @@ class Track(models.Model):
             raise NotImplementedError("Unsupported 'Not In' operation on track wishlist visitors")
 
         track_visitors = self.env['event.track.visitor'].sudo().search([
-            ('visitor_id', operator, operand)
+            ('visitor_id', operator, operand),
+            ('is_wishlisted', '=', True)
         ])
         return [('id', 'in', track_visitors.track_id.ids)]
 
