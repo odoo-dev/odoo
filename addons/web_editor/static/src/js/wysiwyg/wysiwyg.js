@@ -717,5 +717,21 @@ var Wysiwyg = Widget.extend({
     _bindAfterStart() {},
 });
 
+$.fn.extend({
+    selectContent: function () {
+        if (this.length) {
+            let node = this[0];
+            const range = new Range();
+            range.setStartBefore(node);
+            range.setEndAfter(node);
+
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+        return this;
+    },
+});
+
 return Wysiwyg;
 });

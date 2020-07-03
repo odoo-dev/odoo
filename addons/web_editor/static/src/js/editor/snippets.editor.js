@@ -1208,9 +1208,12 @@ var SnippetsMenu = Widget.extend({
         // Auto-selects text elements with a specific class and remove this
         // on text changes
         this.$document.on('click.snippets_menu', '.o_default_snippet_text', function (ev) {
-            $(ev.target).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
-            $(ev.target).selectContent();
-            $(ev.target).removeClass('o_default_snippet_text');
+            const $target = $(ev.target);
+            $target.closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
+            $target.removeClass('o_default_snippet_text');
+            // Because of the Jabberwock Lib implementation and the way it capture the click event.
+            // We have to trigger the selection on the next tick to make it work.
+            setTimeout($target.selectContent.bind($target));
         });
 
         const $autoFocusEls = $('.o_we_snippet_autofocus');
@@ -1839,6 +1842,9 @@ var SnippetsMenu = Widget.extend({
             this.$el.detach();
         }
 
+        // Register the text nodes that needs to be auto-selected on click
+        this._registerDefaultTexts();
+
         // Remove branding from template
         _.each($html.find('[data-oe-model], [data-oe-type]'), function (el) {
             for (var k = 0; k < el.attributes.length; k++) {
@@ -2087,6 +2093,26 @@ var SnippetsMenu = Widget.extend({
                 }
             },
         });
+    },
+    /**
+     * Adds the 'o_default_snippet_text' class on nodes which contain only
+     * non-empty text nodes. Those nodes are then auto-selected by the editor
+     * when they are clicked.
+     *
+     * @private
+     * @param {jQuery} [$in] - the element in which to search, default to the
+     *                       snippet bodies in the menu
+     */
+    _registerDefaultTexts: function ($in) {
+        if ($in === undefined) {
+            $in = this.$snippets.find('.oe_snippet_body');
+        }
+
+        $in.find('*').addBack()
+            .contents()
+            .filter(function () {
+                return this.nodeType === 3 && this.textContent.match(/\S/);
+            }).parent().addClass('o_default_snippet_text');
     },
     /**
      * Changes the content of the left panel and selects a tab.

@@ -261,7 +261,10 @@ publicWidget.registry.websiteSaleCurrency = publicWidget.Widget.extend({
      * @private
      */
     _onCurrencyValueClick: function (ev) {
-        $(ev.currentTarget).selectContent();
+        const $target = $(ev.currentTarget);
+        // Because of the Jabberwock Lib implementation and the way it capture the click event.
+        // We have to trigger the selection on the next tick to make it work.
+        setTimeout($target.selectContent.bind($target));
     },
 });
 
