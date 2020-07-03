@@ -41,7 +41,7 @@ $-editor-messages-margin-x: 2%;
 
     &.oe_structure.oe_empty, &[data-oe-type=html], .oe_structure.oe_empty {
         // todo: check how to manage it with jabberwock as we add a <BR> on empty elements
-        &:empty {
+        &:empty, &.oe_blank_wrap {
             @extend %o-editor-messages;
             &.oe_structure_small {
                 padding: 15px 0px;

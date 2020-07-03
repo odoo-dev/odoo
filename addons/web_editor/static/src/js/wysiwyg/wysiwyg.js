@@ -157,6 +157,24 @@ var Wysiwyg = Widget.extend({
 
             this.editorHelpers = this.editor.plugins.get(JWEditorLib.DomHelpers);
 
+            // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
+            const emptyClass = "oe_blank_wrap";
+            const targetNode = this.editorEditable.querySelector("#wrap");
+            if(targetNode) {
+                let mutationCallback = function () {
+                    if (targetNode.textContent.trim() === '') {
+                        targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+                        targetNode.classList.add(emptyClass);
+                    } else {
+                        targetNode.classList.remove(emptyClass);
+                    }
+                };
+                const observer = new MutationObserver(mutationCallback);
+                observer.observe(targetNode, {childList: true});
+                // force check at editor startup
+                mutationCallback();
+            }
+
             // todo: handle megamenu
 
             if (this.options.snippets) {
