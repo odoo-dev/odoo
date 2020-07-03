@@ -62,7 +62,7 @@ class ExhibitorController(WebsiteEventTrackController):
         if search_sponsorhips:
             search_domain = expression.AND([
                 search_domain,
-                [('sonsor_type_id', 'in', search_sponsorhips.ids)]
+                [('sponsor_type_id', 'in', search_sponsorhips.ids)]
             ])
         print('search_domain', search_domain)
         print('search_domain_base', search_domain_base)
