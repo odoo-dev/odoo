@@ -17,6 +17,11 @@ class WebsiteVisitor(models.Model):
     event_registration_count = fields.Integer(
         '# Registrations', compute='_compute_event_registration_count',
         groups="event.group_event_user")
+    event_wchildren_ids = fields.Many2many(
+        'event.event', string="Events (incl. duplicates)",
+        compute="_compute_event_wchildren_ids", compute_sudo=True,
+        search="_search_event_wchildren_ids",
+        groups="event.group_event_user")
 
     @api.depends('event_registration_ids')
     def _compute_event_registration_count(self):
@@ -43,6 +48,36 @@ class WebsiteVisitor(models.Model):
                 visitor.email = next((reg.email for reg in linked_registrations if reg.email), False)
             if not visitor.mobile:
                 visitor.mobile = next((reg.mobile or reg.phone for reg in linked_registrations if reg.mobile or reg.phone), False)
+
+    @api.depends('parent_id', 'event_registration_ids')
+    def _compute_event_wchildren_ids(self):
+        # include parent's registrations in a visitor o2m field. We don't add
+        # child one as child should not have registrations (moved to the parent)
+        for visitor in self:
+            all_registrations = visitor.event_registration_ids | visitor.parent_id.event_registration_ids
+            visitor.event_wchildren_ids = all_registrations.mapped('event_id')
+
+    def _search_event_wchildren_ids(self, operator, operand):
+        """ Search visitors with terms on events within their event registrations. E.g. [('event_wchildren_ids',
+        'in', [1, 2])] should return visitors having a registration on events 1, 2 as
+        well as their children for notification purpose. """
+        if operator == "not in":
+            raise NotImplementedError("Unsupported 'Not In' operation on visitors registrations")
+
+        all_registrations = self.env['event.registration'].sudo().search([
+            ('event_id', operator, operand)
+        ])
+        if all_registrations:
+            # search children, even archived one, to contact them
+            visitors = all_registrations.with_context(active_test=False).mapped('visitor_id')
+            children = self.env['website.visitor'].with_context(
+                active_test=False
+            ).sudo().search([('parent_id', 'in', visitors.ids)])
+            visitor_ids = (visitors + children).ids
+        else:
+            visitor_ids = []
+
+        return [('id', 'in', visitor_ids)]
 
     def _link_to_visitor(self, target, keep_unique=True):
         """ Override linking process to link registrations to the final visitor. """
