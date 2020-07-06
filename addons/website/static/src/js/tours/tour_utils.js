@@ -132,9 +132,9 @@ function changeBackgroundColor(position = "bottom") {
     };
 }
 
-function choseBackgroundColor(position = "bottom") {
+function choseBackgroundColor(color, position = "bottom") {
     return {
-        trigger: ".o_we_customize_panel .o_we_so_color_palette button[data-color='beta']",
+        trigger: `.o_we_customize_panel .o_we_so_color_palette button[data-color='${color}']`,
         content: _t("Now, <b>click</b> on this color to change the background color."),
         position: position,
         run: "click",
