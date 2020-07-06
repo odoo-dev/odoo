@@ -24,7 +24,6 @@
 <template id="event_track_main_display" name="Track Main Display">
     <div class="col-12 col-md-4 col-lg-3 o_wesession_track_aside">
         <div class="row bg-white pt-3">
-            <span t-esc="track.website_cta_start_remaining"/>
             <div class="col-12" t-if="track.website_cta">
                 <a t-att-href="track.website_cta_url"
                     class="btn btn-primary w-100">
@@ -82,6 +81,11 @@
 
 <template id="event_track_description" name="Track Description">
     <div class="col-12 col-md-6">
+        <p t-if="track.track_start_remaining" class="alert alert-warning">
+            Starting in
+            <span t-esc="track.track_start_remaining"
+                t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
+        </p>
         <div class="d-flew align-items-bottom">
             <h5 class="m-0" t-esc="track.name"/>
             <span class="text-muted ml-auto">
@@ -117,11 +121,6 @@
         </div>
     </div>
     <div class="col-12">
-        <p class="alert alert-warning">
-            Starting in
-            <span t-esc="track.track_start_remaining"
-                t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
-        </p>
         <div t-field="track.description" class="oe_no_empty"/>
         <h5 class="m-0">About the speaker</h5>
         <hr class="mt-2 pb-1 mb-1"/>

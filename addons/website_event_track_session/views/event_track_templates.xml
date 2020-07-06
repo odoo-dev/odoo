@@ -41,7 +41,7 @@
         <div class="container">
             <div class="row d-flex justify-content-between w-100 mr-0">
                 <div class="col-lg-8 col-sm-12">
-                    <ul class="o_wevent_index_topbar_filters nav"/>
+                    <ul class="o_wesession_topbar_filters o_wevent_index_topbar_filters nav"/>
                 </div>
                 <div class="col-lg-3 col-sm-12 d-flex align-items-center flex-wrap px16">
                     <t t-call="website_event.events_search_box">
@@ -62,7 +62,7 @@
     name="Filter by Tags"
     active="True"
     customize_show="True">
-    <xpath expr="//ul[hasclass('o_wevent_index_topbar_filters')]" position="inside">
+    <xpath expr="//ul[hasclass('o_wesession_topbar_filters')]" position="inside">
         <t t-foreach="tag_categories" t-as="tag_category">
             <li t-if="tag_category.tag_ids" class="nav-item dropdown mr-2 my-1">
                 <a href="#" role="button" class="btn dropdown-toggle" data-toggle="dropdown">
@@ -91,7 +91,7 @@
     name="Allow Wishlists"
     active="True"
     customize_show="True">
-    <xpath expr="//ul[hasclass('o_wevent_index_topbar_filters')]" position="inside">
+    <xpath expr="//ul[hasclass('o_wesession_topbar_filters')]" position="inside">
     </xpath>
 </template>
 
@@ -211,7 +211,7 @@
                     </div>
                     <div t-else="" class="o_wesession_gradient card-img-top position-relative"
                         style="padding-top: 50%;">
-                        <span t-fi="option_tracks_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
+                        <span t-if="option_tracks_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
                             <t t-call="website_event_track_online.track_widget_wishlist_star"/>
                         </span>
                         <i class="fa fa-calendar fa-2x mx-2 mb-3 position-absolute text-white-75" style="right:0; bottom: 0;"/>
