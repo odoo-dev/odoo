@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
+from random import randint
 from werkzeug.exceptions import NotFound, Forbidden
 
 from odoo import exceptions, http
@@ -64,8 +65,6 @@ class ExhibitorController(WebsiteEventTrackController):
                 search_domain,
                 [('sponsor_type_id', 'in', search_sponsorhips.ids)]
             ])
-        print('search_domain', search_domain)
-        print('search_domain_base', search_domain_base)
 
         # fetch data to display; use sudo to allow reading partner info, be sure domain is correct
         event = event.with_context(tz=event.date_tz or 'UTC')
@@ -93,6 +92,7 @@ class ExhibitorController(WebsiteEventTrackController):
             'sponsor_categories': sponsor_categories,
             # search information
             'searches': searches,
+            'search_key': searches['search'],
             'search_countries': search_countries,
             'search_sponsorhips': search_sponsorhips,
             'sponsor_types': sponsor_types,
@@ -116,6 +116,12 @@ class ExhibitorController(WebsiteEventTrackController):
             raise Forbidden()
         sponsor = sponsor.sudo()
 
+        return request.render(
+            "website_event_track_exhibitor.event_exhibitor_main",
+            self._event_exhibitor_get_values(event, sponsor)
+        )
+
+    def _event_exhibitor_get_values(self, event, sponsor):
         # search for exhibitor list
         search_domain_base = self._get_event_sponsors_base_domain(event)
         search_domain_base = expression.AND([
@@ -125,7 +131,13 @@ class ExhibitorController(WebsiteEventTrackController):
         sponsors_other = request.env['event.sponsor'].sudo().search(search_domain_base)
         current_country = sponsor.partner_id.country_id
 
-        values = {
+        sponsors_other = sponsors_other.sorted(key=lambda sponsor: (
+            sponsor.partner_id.country_id == current_country,
+            -1 * sponsor.sponsor_type_id.sequence,
+            randint(0, 20)
+        ), reverse=True)
+
+        return {
             # event information
             'event': event,
             'main_object': event,
@@ -133,7 +145,6 @@ class ExhibitorController(WebsiteEventTrackController):
             # sidebar
             'sponsors_other': sponsors_other,
         }
-        return request.render("website_event_track_exhibitor.event_exhibitor", values)
 
     # ------------------------------------------------------------
     # TOOLS

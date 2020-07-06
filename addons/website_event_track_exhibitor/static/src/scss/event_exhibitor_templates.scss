@@ -1,12 +1,49 @@
 .o_wesponsor_index {
-    // Main page layouting
+
+    /*
+     * COMMON
+     */
+
+    .o_wesponsor_gradient {
+        background-image: linear-gradient(120deg, #875A7B, darken(#875A7B, 10%));
+        opacity: 0.8;
+    }
+
+    // BG color
     &.o_wesponsor_index_bg {
         @if (color('body') == $o-portal-default-body-bg) {
             @extend .bg-200;
         }
     }
 
-    // Specific exhibitor display
+    /*
+     * MAIN PAGE: LIST
+     */
+
+    // Sponsor card
+    .o_wesponsor_card {
+        .card-body {
+            padding: 1rem;
+        }
+        .card-footer {
+            padding: 0.75rem 1rem;
+        }
+        .o_wesponsor_card_header_badge {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: $card-spacer-y $card-spacer-x;
+            text-align: right;
+        }
+        &.o_wesponsor_card_unpublished {
+            opacity: 0.8;
+        }
+    }
+
+    /*
+     * EXHIBITOR PAGE
+     */
+
     .o_wesponsor_exhibitor_container {
 
         // Left panel: other exhibitors
@@ -16,20 +53,21 @@
             @include media-breakpoint-up(md) {
                 border-top-width: 0;
             }
-        }
-    }
 
-    // Sponsor card
-    .o_wesponsor_card {
-        .o_wesponsor_card_header_badge {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: $card-spacer-y $card-spacer-x;
-            text-align: right;
-        }
-        &.o_wesponsor_card_unpublished {
-            opacity: 0.5;
+            // Navigation: keel layout simple
+            .o_wesession_track_aside_nav {
+                .nav-link {
+                    background-color: transparent;
+                    border: 0;
+                    border-bottom: 1px solid $border-color;
+                    color: $gray-600;
+
+                    &.active {
+                        border-bottom: 1px solid $gray-800;
+                        color: $gray-800;
+                    }
+                }
+            }
         }
     }
 }
