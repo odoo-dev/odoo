@@ -14,10 +14,13 @@ class Event(models.Model):
 
     # live information
     is_ongoing = fields.Boolean(
-        'Is Ongoing', compute='_compute_start_data', search='_search_is_ongoing',
+        'Is Ongoing', compute='_compute_time_data', search='_search_is_ongoing',
         help="Whether event has begun")
+    is_done = fields.Boolean(
+        'Is Event Done', compute='_compute_time_data',
+        help="Event is finished")
     start_remaining = fields.Integer(
-        'Remaining before start', compute='_compute_start_data',
+        'Remaining before start', compute='_compute_time_data',
         help="Remaining time before event starts (hours)")
     hour_from = fields.Float('Opening hour', default=8.0)
     hour_to = fields.Float('End hour', default=18.0)
@@ -25,7 +28,7 @@ class Event(models.Model):
         'Within opening hours', compute='_compute_is_is_opening_hours')
 
     @api.depends('date_begin', 'date_end')
-    def _compute_start_data(self):
+    def _compute_time_data(self):
         """ Compute start and remaining time. Do everything in UTC as we compute only
         time deltas here. """
         now_utc = utc.localize(fields.Datetime.now().replace(microsecond=0))
@@ -33,6 +36,7 @@ class Event(models.Model):
             date_begin_utc = utc.localize(event.date_begin, is_dst=False)
             date_end_utc = utc.localize(event.date_end, is_dst=False)
             event.is_ongoing = date_begin_utc <= now_utc <= date_end_utc
+            event.is_done = now_utc > date_end_utc
             if date_begin_utc >= now_utc:
                 td = date_begin_utc - now_utc
                 event.event_start_remaining = int(td.total_seconds() / 60)
