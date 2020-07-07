@@ -8,4 +8,4 @@ class EventRegistration(models.Model):
     _name = 'event.registration'
     _inherit = ['event.registration']
 
-    visitor_id = fields.Many2one('website.visitor', string='Visitor')
+    visitor_id = fields.Many2one('website.visitor', string='Visitor', ondelete='set null')
