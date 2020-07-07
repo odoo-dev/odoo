@@ -18,6 +18,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/assets.xml',
+        'views/event_sponsor_views.xml',
         'views/event_track_templates_wishlist.xml',
         'views/event_track_templates.xml',
         'views/event_track_views.xml',
@@ -27,6 +28,7 @@
         'views/event_menus.xml',
     ],
     'demo': [
+        'data/event_sponsor_demo.xml',
         'data/event_track_demo.xml',
         'data/event_track_visitor_demo.xml',
     ],

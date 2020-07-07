@@ -38,7 +38,7 @@ class Sponsor(models.Model):
 
     @api.depends('partner_id')
     def _compute_image_512(self):
-        self._synchronize_with_partner('phone_512')
+        self._synchronize_with_partner('image_512')
 
     def _synchronize_with_partner(self, fname):
         """ Synchronize with partner if not set. Setting a value does not write
