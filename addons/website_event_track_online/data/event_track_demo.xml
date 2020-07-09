@@ -3,15 +3,67 @@
 
     <record id="website_event_track.event_7_track_1" model="event.track">
         <field name="wishlisted_by_default" eval="True"/>
+        <field name="partner_id" ref="base.res_partner_address_15"/>
+        <field name="color">1</field>
+    </record>
+    <record id="website_event_track.event_7_track_2" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_28"/>
+        <field name="color">2</field>
+    </record>
+    <record id="website_event_track.event_7_track_3" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_16"/>
+        <field name="color">3</field>
     </record>
     <record id="website_event_track.event_7_track_4" model="event.track">
         <field name="wishlisted_by_default" eval="True"/>
+        <field name="partner_id" ref="base.res_partner_address_15"/>
+        <field name="color">4</field>
+    </record>
+    <record id="website_event_track.event_7_track_5" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_28"/>
+        <field name="color">5</field>
     </record>
     <record id="website_event_track.event_7_track_6" model="event.track">
         <field name="wishlisted_by_default" eval="True"/>
+        <field name="partner_id" ref="base.res_partner_address_15"/>
+        <field name="color">6</field>
+    </record>
+    <record id="website_event_track.event_7_track_7" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_3"/>
+        <field name="color">7</field>
+    </record>
+    <record id="website_event_track.event_7_track_8" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_4"/>
+        <field name="color">8</field>
+    </record>
+    <record id="website_event_track.event_7_track_l3_1" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_31"/>
+        <field name="color">9</field>
+    </record>
+    <record id="website_event_track.event_7_track_l3_2" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_3"/>
+        <field name="color">10</field>
     </record>
     <record id="website_event_track.event_7_track_10" model="event.track">
         <field name="wishlisted_by_default" eval="True"/>
+        <field name="partner_id" ref="base.res_partner_address_28"/>
+        <field name="color">11</field>
+    </record>
+    <record id="website_event_track.event_7_track_11" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_16"/>
+        <field name="color">1</field>
+    </record>
+    <record id="website_event_track.event_7_track_12" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_15"/>
+        <field name="color">2</field>
+    </record>
+    <record id="website_event_track.event_7_track_13" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_16"/>
+        <field name="color">3</field>
+    </record>
+    <record id="website_event_track.event_7_track_14" model="event.track">
+        <field name="partner_id" ref="base.res_partner_address_31"/>
+        <field name="color">4</field>
     </record>
 
 </data></odoo>
