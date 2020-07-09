@@ -28,4 +28,49 @@
     </xpath>
 </template>
 
+<template id="event_countdown">
+    <t t-call="website_event.layout">
+        <section class="s_title pt48 pb48" data-vcss="001" data-snippet="s_title">
+            <div class="container">
+                <h1><t t-esc="event.name"/> starts in</h1>
+            </div>
+        </section>
+        <section class="s_countdown pt48 pb48"
+            data-display="dhms" data-end-action="redirect" data-size="275"
+            t-att-data-end-time="datetime.datetime.now().timestamp() + int(remaining_time)"
+            t-att-data-redirect-url="redirect_url"
+            data-layout="circle" data-layout-background="none"
+            data-progress-bar-style="surrounded" data-progress-bar-weight="thin"
+            data-text-color="alpha" data-layout-background-color="400" data-progress-bar-color="alpha">
+            <div class="container">
+                <div class="s_countdown_canvas_wrapper text-center"/>
+            </div>
+        </section>
+    </t>
+</template>
+
+<template id="display_timer" name="Display Timer Widget">
+    <t t-set="start_countdown_display" t-value="bool(start_countdown_text) or start_countdown_display"/>
+    <t t-set="start_countdown_time" t-value="datetime.datetime.now().timestamp() + int(start_remaining_time)"/>
+
+    <div class="o_display_timer"
+         t-att-data-display-class="display_class"
+         t-att-data-end-countdown-time="datetime.datetime.now().timestamp() + int(end_remaining_time)"
+         t-att-data-start-countdown-time="start_countdown_time"
+         t-att-data-start-countdown-display="start_countdown_display"
+         t-att-data-start-countdown-text="start_countdown_text"
+         t-att-data-end-countdown-text="end_countdown_text">
+        <t t-set="remaining_time" t-value="start_remaining_time if start_remaining_time else end_remaining_time"/>
+        <span class="o_display_timer_countdown d-flex justify-content-center">
+            <span class="o_countdown_text pr-1" t-esc="start_countdown_text if start_countdown_text else end_countdown_text if not start_countdown_display else ''"/>
+            <div t-if="int(remaining_time) > 86400"
+             class="o_countdown_metric_container"><span class="o_countdown_remaining o_timer_days pr-1">0</span><span class="o_countdown_metric pr-1">days</span></div>
+            <div t-if="int(remaining_time) > 3600"
+                 class="o_countdown_metric_container"><span class="o_countdown_remaining o_timer_hours">00</span><span class="o_countdown_metric">:</span></div>
+            <div class="o_countdown_metric_container"><span class="o_countdown_remaining o_timer_minutes">00</span><span class="o_countdown_metric">:</span></div>
+            <div class="o_countdown_metric_container"><span class="o_countdown_remaining o_timer_seconds">00</span><span class="o_countdown_metric"></span></div>
+        </span>
+    </div>
+</template>
+
 </odoo>

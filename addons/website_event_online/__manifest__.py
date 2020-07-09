@@ -23,6 +23,7 @@
         'views/event_templates_event.xml',
     ],
     'demo': [
+        'data/event_demo.xml',
         'data/website_visitor_demo.xml',
         'data/event_registration_demo.xml',
         'data/event_tag_demo.xml',

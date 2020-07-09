@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="event.event_7" model="event.event">
+            <field name="show_countdown" eval="True"/>
+        </record>
+    </data>
+</odoo>

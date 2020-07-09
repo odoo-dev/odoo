@@ -20,6 +20,9 @@
             <xpath expr="//field[@name='tag_ids']" position="attributes">
                 <attribute name="options">{'color_field': 'color', 'no_quick_create': True}</attribute>
             </xpath>
+            <xpath expr="//field[@name='address_id']" position="before">
+                <field name="show_countdown"/>
+            </xpath>
         </field>
     </record>
 

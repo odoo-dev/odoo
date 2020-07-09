@@ -24,12 +24,24 @@
 <template id="event_track_main_display" name="Track Main Display">
     <div class="col-12 col-md-4 col-lg-3 o_wesession_track_aside">
         <div class="row bg-white pt-3">
-            <span t-esc="track.website_cta_start_remaining"/>
             <div class="col-12" t-if="track.website_cta">
-                <a t-att-href="track.website_cta_url"
-                    class="btn btn-primary w-100">
-                    <span t-esc="track.website_cta_title"/>
-                </a>
+                <t t-set="cta_coundown" t-value="bool(track.website_cta_start_remaining)"/>
+                <div t-if="cta_coundown" class="text-center w-100 btn btn-primary d-none">
+                    <t t-call="website_event_online.display_timer">
+                        <t t-set="start_remaining_time" t-value="int(track.track_start_remaining)"/>
+                        <t t-set="start_countdown_text" t-value="'Talk starts in'"/>
+                        <t t-set="start_countdown_display" t-value="True"/>
+                        <t t-set="end_remaining_time" t-value="int(track.website_cta_start_remaining)"/>
+                        <t t-set="end_countdown_text" t-value="'Magic happens in'"/>
+                        <t t-set="display_class" t-value="'.o_event_cta_action'"/>
+                    </t>
+                </div>
+                <div t-att-class="'o_event_cta_action %s' % ('d-none' if cta_coundown else '')">
+                    <a t-att-href="track.website_cta_url"
+                        class="btn btn-primary w-100">
+                        <span t-esc="track.website_cta_title"/>
+                    </a>
+                </div>
                 <hr class="mt-2 pb-1 mb-1"/>
             </div>
             <div class="col-12">
@@ -59,7 +71,7 @@
                                             <small t-elif="track_other.track_start_remaining"
                                                 class="badge badge-light">
                                                 In <span t-esc="track_other.track_start_remaining"
-                                                    t-options="{'widget': 'duration', 'digital': False, 'unit': 'minute', 'round': 'minute', 'format': 'narrow'}"/>
+                                                    t-options="{'widget': 'duration', 'digital': False, 'unit': 'second', 'round': 'minute', 'format': 'narrow'}"/>
                                             </small>
 
                                         </div>
@@ -120,7 +132,7 @@
         <p class="alert alert-warning">
             Starting in
             <span t-esc="track.track_start_remaining"
-                t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
+                t-options="{'widget': 'duration', 'digital': True, 'unit': 'second', 'round': 'minute'}"/>
         </p>
         <div t-field="track.description" class="oe_no_empty"/>
         <h5 class="m-0">About the speaker</h5>

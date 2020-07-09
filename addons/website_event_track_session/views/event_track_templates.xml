@@ -174,7 +174,7 @@
                         <span t-elif="not track.is_track_done">
                             In
                             <span t-esc="track.track_start_remaining"
-                             t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'minute', 'round': 'minute'}"/>
+                             t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'second', 'round': 'minute'}"/>
                          </span>
                         <span t-else="" class="badge badge-success">Done</span>
                         <span class="ml-auto"
@@ -240,11 +240,11 @@
                         <span class="text-muted ml-auto">
                             <t t-if="track.is_track_upcoming &gt; 0">In
                                 <span class="text-muted ml-auto" t-field="track.track_start_remaining" itemprop="duration"
-                                    t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'minute', 'round': 'minute'}"/>
+                                    t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'second', 'round': 'minute'}"/>
                             </t>
                             <t t-else="">
                                 <span class="text-muted ml-auto" t-field="track.track_start_relative" itemprop="duration"
-                                    t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'minute', 'round': 'minute'}"/>
+                                    t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'second', 'round': 'minute'}"/>
                                 ago
                             </t>
                         </span>

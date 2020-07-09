@@ -40,17 +40,17 @@ class EventTrack(models.Model):
         help="Track is finished")
     track_start_remaining = fields.Integer(
         'Minutes before track starts', compute='_compute_track_time_data',
-        help="Remaining time before track starts (minutes)")
+        help="Remaining time before track starts (seconds)")
     track_start_relative = fields.Integer(
         'Minutes compare to track start', compute='_compute_track_time_data',
-        help="Relative time compared to track start (minutes)")
+        help="Relative time compared to track start (seconds)")
     # time information for CTA
     is_website_cta_live = fields.Boolean(
         'Is CTA Live', compute='_compute_cta_time_data',
         help="CTA button is available")
-    website_cta_start_remaining = fields.Boolean(
+    website_cta_start_remaining = fields.Integer(
         'Minutes before CTA starts', compute='_compute_cta_time_data',
-        help="Remaining time before CTA starts (minutes)")
+        help="Remaining time before CTA starts (seconds)")
 
     @api.depends('event_id.date_begin', 'event_id.date_end')
     def _compute_event_time_data(self):
@@ -81,10 +81,10 @@ class EventTrack(models.Model):
             track.is_track_upcoming = date_begin_utc > now
             track.is_track_done = date_end_utc <= now
             if date_begin_utc >= now:
-                track.track_start_relative = int((date_begin_utc - now).total_seconds() / 60)
+                track.track_start_relative = int((date_begin_utc - now).total_seconds())
                 track.track_start_remaining = track.track_start_relative
             else:
-                track.track_start_relative = int((now- date_begin_utc).total_seconds() / 60)
+                track.track_start_relative = int((now- date_begin_utc).total_seconds())
                 track.track_start_remaining = 0
 
     @api.depends('date', 'date_end', 'website_cta', 'website_cta_delay')
@@ -102,6 +102,6 @@ class EventTrack(models.Model):
             track.is_cta_live = date_begin_utc <= now <= date_end_utc
             if date_begin_utc >= now:
                 td = date_begin_utc - now
-                track.website_cta_start_remaining = int(td.total_seconds() / 60)
+                track.website_cta_start_remaining = int(td.total_seconds())
             else:
                 track.website_cta_start_remaining = 0
