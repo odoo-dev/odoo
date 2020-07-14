@@ -21,8 +21,8 @@ var tour = require('web_tour.tour');
 
 
 var initTourSteps = [{
-    content: 'Go on Online TestEvent page',
-    trigger: 'a[href*="/event"]:contains("Online TestEvent"):first',
+    content: 'Go on Online Reveal page',
+    trigger: 'a[href*="/event"]:contains("Online Reveal"):first',
 }];
 
 var browseSessionsSteps = [{

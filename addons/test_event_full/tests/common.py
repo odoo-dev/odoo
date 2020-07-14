@@ -137,15 +137,15 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, EventDtPatc
             'color': 8,
         })
         self.event_location_demo = self.env['res.partner'].create({
-            'name': 'TestEvent Location Address',
+            'name': 'TOpenWood Headquarters Test',
             'is_company': True,
-            'street': 'Deboulonneur Street',
+            'street': 'Rue Antoine Dansaert 188',
             'city': 'Brussels',
             'zip': '1000',
             'country_id': self.env.ref('base.be').id,
         })
         self.event = self.env['event.event'].create({
-            'name': 'Online TestEvent',
+            'name': 'Online Reveal TestEvent',
             'auto_confirm': True,
             'stage_id': self.env.ref('event.event_stage_booked').id,
             'address_id': self.event_location_demo.id,
@@ -167,6 +167,10 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, EventDtPatc
                     'seats_max': 10,
                 })
             ],
+            # activate menus
+            'website_track': True,
+            'menu_exhibitor': True,
+            'meeting_room_menu': True,
         })
 
         self.event_customer = self.env['res.partner'].create({
