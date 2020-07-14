@@ -31,6 +31,15 @@
         <field name="country_id" ref="base.us"/>
     </record>
 
+    <record id="res_partner_location_3" model="res.partner">
+        <field name="name">OpenWood Headquarters</field>
+        <field name="is_company">1</field>
+        <field name="street">Rue Antoine Dansaert 188</field>
+        <field name="city">Brussels</field>
+        <field name="zip">1000</field>
+        <field name="country_id" ref="base.be"/>
+    </record>
+
     <!-- SPONSORS / OTHER COUNTRIES -->
     <record id="res_partner_event_1" model="res.partner">
         <field name="name">Bloem GmbH</field>

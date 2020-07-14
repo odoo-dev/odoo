@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="website_event_track.event_track_stage2" model="event.track.stage">
+        <field name="color">0</field>
+    </record>
+
     <record id="event_track_tag1" model="event.track.tag">
         <field name="name">Consumers</field>
         <field name="color">1</field>
@@ -45,13 +49,13 @@
     </record>
 
     <record id="event_track_location_online_0" model="event.track.location">
-        <field name="name">Trees</field>
+        <field name="name">Wood</field>
     </record>
     <record id="event_track_location_online_1" model="event.track.location">
         <field name="name">Furniture</field>
     </record>
     <record id="event_track_location_online_2" model="event.track.location">
-        <field name="name">HowTo</field>
+        <field name="name">Customer Rooms</field>
     </record>
 
 </odoo>
