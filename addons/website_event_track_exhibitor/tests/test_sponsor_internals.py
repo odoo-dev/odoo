@@ -24,7 +24,7 @@ class TestSponsorData(TestEventTrackOnlineCommon):
         we have to take into account Europe/Brussels offset """
         event = self.env['event.event'].browse(self.event_0.id)
         sponsor = self.env['event.sponsor'].browse(self.sponsor_0.id)
-        event.invalidate_cache(fnames=['is_in_opening_hours', 'is_ongoing'])
+        event.invalidate_cache(fnames=['is_ongoing'])
         self.assertTrue(sponsor.is_in_opening_hours)
         self.assertTrue(event.is_ongoing)
 

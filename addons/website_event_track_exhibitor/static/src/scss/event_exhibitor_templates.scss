@@ -1,3 +1,8 @@
+.o_wevent_hide_sponsors .container.mt32.mb16.d-print-none {
+    // Not a very accurate way to target the 'sponsors' block -> improve in master
+    display: none;
+}
+
 .o_wesponsor_index {
 
     /*
@@ -48,23 +53,33 @@
         }
 
         // Display connect block on hover on large devices only
-        .o_wesponsor_js_connect {
-            display: none;
+        .o_wesponsor_connect_button {
+            z-index: 1;
             position: absolute !important;
             right: 0;
-            top: 40%;
+            top: 0;
+            padding-top: 30%;
             margin-left: auto;
             margin-right: auto;
             width: 100%;
+            height: 100%;
             text-align: center;
+            background-color: rgba(0,0,0,0);
+
+            a {
+                display: none;
+            }
         }
 
         @include media-breakpoint-up(md) {
-            :hover .o_wesponsor_js_connect {
-                display: inline-block;
-            }
-            &:hover {
-                opacity: 0.8;
+            :hover .o_wesponsor_connect_button {
+                cursor: pointer;
+                transition: background-color .2s linear;
+                background-color: rgba(0,0,0,.1);
+
+                a {
+                    display: inline-block;
+                }
             }
         }
     }

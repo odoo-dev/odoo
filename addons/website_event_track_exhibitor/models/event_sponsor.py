@@ -7,6 +7,7 @@ from pytz import timezone, utc
 from odoo import api, fields, models
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.resource.models.resource import float_to_time
+from odoo.tools import is_html_empty
 from odoo.tools.translate import html_translate
 
 
@@ -45,7 +46,9 @@ class EventSponsor(models.Model):
 
     @api.depends('partner_id')
     def _compute_website_description(self):
-        self._synchronize_with_partner('website_description')
+        for sponsor in self:
+            if is_html_empty(sponsor.website_description):
+                sponsor.website_description = sponsor.partner_id.website_description
 
     @api.depends('event_id.is_ongoing', 'hour_from', 'hour_to', 'event_id.date_begin', 'event_id.date_end')
     def _compute_is_in_opening_hours(self):

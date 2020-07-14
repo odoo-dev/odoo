@@ -2,6 +2,8 @@
 <odoo>
 
 <template id="event_exhibitor_main" name="Event Exhibitor">
+    <t t-set="no_header" t-value="option_widescreen"/>
+    <t t-set="no_footer" t-value="option_widescreen"/>
     <t t-call="website_event.layout">
         <div class="o_wesponsor_index o_wesponsor_index_bg">
             <!-- Options -->

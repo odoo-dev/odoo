@@ -29,7 +29,7 @@
                                 <span class="badge badge-primary ml-2"
                                     t-esc="widget.sponsorData.sponsor_type_name"/>
                             </div>
-                            <span class="text-muted" t-esc="widget.sponsorData.subtitle"/>
+                            <span class="text-muted" t-if="widget.sponsorData.subtitle" t-esc="widget.sponsorData.subtitle"/>
                             <span t-if="widget.sponsorData.website">
                                 <i class="fa fa-home mr-2"/><a t-att-href="widget.sponsorData.website"><span t-esc="widget.sponsorData.website"/></a>
                             </span>
@@ -46,7 +46,7 @@
                             t-att-alt="widget.sponsorData.country_name"/>
                     </div>
                 </div>
-                <span class="col-12" t-raw="widget.sponsorData.website_description"/>
+                <span class="col-12" t-if="widget.sponsorData.website_description" t-raw="widget.sponsorData.website_description"/>
             </div>
             <div>
             </div>

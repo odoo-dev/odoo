@@ -25,7 +25,7 @@ class EventEvent(models.Model):
 
     # ------------------------------------------------------------
     # WEBSITE MENU MANAGEMENT
-    # -----------------------------------------------------------
+    # ------------------------------------------------------------
 
     def toggle_menu_exhibitor(self, val):
         self.menu_exhibitor = val

@@ -1,12 +1,8 @@
 odoo.define('website_event_track_exhibitor.event_exhibitor_connect', function (require) {
 'use strict';
 
-var core = require('web.core');
 var Dialog = require('web.Dialog');
 var publicWidget = require('web.public.widget');
-
-var QWeb = core.qweb;
-var _t = core._t;
 
 var ExhibitorConnectClosedDialog = Dialog.extend({
     events: _.extend({}, Dialog.prototype.events, {
@@ -25,6 +21,7 @@ var ExhibitorConnectClosedDialog = Dialog.extend({
             size: 'medium',
             renderHeader: false,
             renderFooter: false,
+            backdrop: true,
         });
         this.sponsorId = options.sponsorId;
         this._super(parent, options);
@@ -52,7 +49,7 @@ var ExhibitorConnectClosedDialog = Dialog.extend({
      */
     _fetchSponsor: function () {
         let self = this;
-        let rpcPremise = this._rpc({
+        let rpcPromise = this._rpc({
             model: 'event.sponsor',
             method: 'read',
             args: [
@@ -82,15 +79,12 @@ var ExhibitorConnectClosedDialog = Dialog.extend({
             }
             return Promise.resolve();
         });
-        return rpcPremise;
+        return rpcPromise;
     },
 });
 
 
 publicWidget.registry.eventExhibitorConnect = publicWidget.Widget.extend({
-    events: {
-        'click a': '_onConnectClick',
-    },
     selector: '.o_wesponsor_js_connect',
     xmlDependencies: ['/website_event_track_exhibitor/static/src/xml/event_exhibitor_connect.xml'],
 
@@ -108,9 +102,12 @@ publicWidget.registry.eventExhibitorConnect = publicWidget.Widget.extend({
      * @public
      */
     start: function () {
-        this._super(...arguments);
-        this.eventIsOngoing = this.$el.data('eventIsOngoing') || false;
-        this.sponsorIsOngoing = this.$el.data('sponsorIsOngoing') || false;
+        var self = this;
+        return this._super(...arguments).then(function () {
+            self.eventIsOngoing = self.$el.data('eventIsOngoing') || false;
+            self.sponsorIsOngoing = self.$el.data('sponsorIsOngoing') || false;
+            self.$el.on('click', self._onConnectClick.bind(self));
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -124,10 +121,13 @@ publicWidget.registry.eventExhibitorConnect = publicWidget.Widget.extend({
      * of redirecting on the sponsor view;
      */
     _onConnectClick: function (ev) {
+        ev.stopPropagation();
+        ev.preventDefault();
+
         if (this.eventIsOngoing && ! this.sponsorIsOngoing) {
-            ev.stopPropagation();
-            ev.preventDefault();
             return this._openClosedDialog();
+        } else {
+            document.location = this.$el.data('sponsorUrl');
         }
     },
 

@@ -90,6 +90,7 @@ class ExhibitorController(WebsiteEventTrackController):
             'event': event,
             'main_object': event,
             'sponsor_categories': sponsor_categories,
+            'hide_sponsors': True,
             # search information
             'searches': searches,
             'search_key': searches['search'],
@@ -140,15 +141,19 @@ class ExhibitorController(WebsiteEventTrackController):
             randint(0, 20)
         ), reverse=True)
 
+        option_widescreen = options.get('widescreen', False)
+        option_widescreen = bool(option_widescreen) if option_widescreen != '0' else False
+
         return {
             # event information
             'event': event,
-            'main_object': event,
+            'main_object': sponsor,
             'sponsor': sponsor,
+            'hide_sponsors': True,
             # sidebar
             'sponsors_other': sponsors_other,
             # options
-            'option_widescreen': options.get('widescreen', False),
+            'option_widescreen': option_widescreen,
             'option_can_edit': request.env.user.has_group('event.group_event_manager'),
         }
 
