@@ -69,7 +69,8 @@ class Track(models.Model):
     def _compute_is_reminder_on(self):
         current_visitor = self.env['website.visitor']._get_visitor_from_request(force_create=False)
         if self.env.user._is_public() and not current_visitor:
-            self.is_reminder_on = False
+            for track in self:
+                track.is_reminder_on = track.wishlisted_by_default
         else:
             if self.env.user._is_public():
                 domain = [('visitor_id', '=', current_visitor.id)]

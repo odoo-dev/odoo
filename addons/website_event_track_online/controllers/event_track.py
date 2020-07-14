@@ -5,10 +5,9 @@ from werkzeug.exceptions import Forbidden, NotFound
 
 from odoo import exceptions, http
 from odoo.http import request
-from odoo.addons.website_event_track.controllers.main import WebsiteEventTrackController
 
 
-class WebsiteEventTrackOnlineController(WebsiteEventTrackController):
+class WebsiteEventTrackController(http.Controller):
 
     def _can_access_track(self, track_id):
         track = request.env['event.track'].browse(track_id).exists()
@@ -55,5 +54,8 @@ class WebsiteEventTrackOnlineController(WebsiteEventTrackController):
                 return {'error': 'ignored'}
             event_track_partner.is_blacklisted = not set_reminder_on
 
-        return {'reminderOn': set_reminder_on}
+        result = {'reminderOn': set_reminder_on}
+        if request.httprequest.cookies.get('visitor_uuid', '') != visitor_sudo.access_token:
+            result['visitor_uuid'] = visitor_sudo.access_token
 
+        return result
