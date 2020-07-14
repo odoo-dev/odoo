@@ -107,10 +107,11 @@
                 <div t-if="cta_coundown" class="text-center w-100 btn btn-primary d-none">
                     <t t-call="website_event_online.display_timer_widget">
                         <t t-set="pre_remaining_time" t-value="int(track.track_start_remaining)"/>
-                        <t t-set="pre_countdown_text" t-value="'Talk starts in'"/>
-                        <t t-set="pre_countdown_display" t-value="True"/>
+                        <!--<t t-set="pre_countdown_text" t-value="'Talk starts in'"/>-->
+                        <t t-set="pre_countdown_display" t-value="bool(False)"/>
                         <t t-set="main_remaining_time" t-value="int(track.website_cta_start_remaining)"/>
-                        <t t-set="main_countdown_text" t-value="'Magic happens in'"/>
+                        <!--<t t-set="main_countdown_text" t-value="'Magic happens in'"/>-->
+                        <t t-set="main_countdown_display" t-value="bool(False)"/>
                         <t t-set="display_class" t-value="'.o_event_cta_action'"/>
                     </t>
                 </div>

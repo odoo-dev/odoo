@@ -18,7 +18,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             ('event_id', '=', event.id),
         ]
         if not request.env.user.has_group('event.group_event_user'):
-            search_domain_base = expression.AND([search_domain_base, [('is_published', '=', True)]])
+            search_domain_base = expression.AND([search_domain_base, [('is_accepted', '=', True)]])
         return search_domain_base
 
     # ------------------------------------------------------------
@@ -74,13 +74,13 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
 
         # fetch data to display
         event = event.with_context(tz=event.date_tz or 'UTC')
-        tracks = request.env['event.track'].search(search_domain, order='date asc')
+        tracks_sudo = request.env['event.track'].sudo().search(search_domain, order='date asc')
         tag_categories = request.env['event.track.tag.category'].sudo().search([])
 
         # organize categories for display: live, soon, ...
-        tracks_live = tracks.filtered(lambda track: track.is_track_live)
-        tracks_soon = tracks.filtered(lambda track: not track.is_track_live and track.is_track_soon)
-        tracks = tracks.sorted(lambda track: track.is_track_done)
+        tracks_sudo_live = tracks_sudo.filtered(lambda track: track.is_published and track.is_track_live)
+        tracks_sudo_soon = tracks_sudo.filtered(lambda track: track.is_published and not track.is_track_live and track.is_track_soon)
+        tracks_sudo = tracks_sudo.sorted(lambda track: track.is_track_done)
 
         # return rendering values
         return {
@@ -88,9 +88,9 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             'event': event,
             'main_object': event,
             # tracks display information
-            'tracks': tracks,
-            'tracks_live': tracks_live,
-            'tracks_soon': tracks_soon,
+            'tracks': tracks_sudo,
+            'tracks_live': tracks_sudo_live,
+            'tracks_soon': tracks_sudo_soon,
             # search information
             'searches': searches,
             'search_key': searches['search'],
@@ -99,6 +99,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             # environment
             'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
+            'user_event_manager': request.env.user.has_group('event.group_event_manager'),
         }
 
     # ------------------------------------------------------------
@@ -126,7 +127,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         search_domain_base = self._get_event_tracks_base_domain(event)
         search_domain_base = expression.AND([
             search_domain_base,
-            [('id', '!=', track.id)]
+            ['&', ('is_published', '=', True), ('id', '!=', track.id)]
         ])
         tracks_other = request.env['event.track'].sudo().search(search_domain_base)
 

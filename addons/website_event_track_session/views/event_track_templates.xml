@@ -158,7 +158,16 @@
             </li>
             <t t-foreach="tracks" t-as="track">
                <li class="o_wesession_list_item row bg-white-50 border-top-0 py-2">
-                    <a t-att-href="track.website_url" class="col-md-4" t-esc="track.name"/>
+                    <span class="col-md-4">
+                        <a t-att-href="track.website_url"
+                            t-if="track.is_published or user_event_manager"
+                            t-esc="track.name"/>
+                        <t t-else="" t-esc="track.name"/>
+                        <span t-if="not track.is_published and user_event_manager"
+                            class="badge badge-danger">
+                            Unpublished
+                        </span>
+                    </span>
                     <div class="col-md-2">
                         <t t-foreach="track.tag_ids" t-as="tag">
                             <t t-call="website_event_track_session.track_tag_badge_link"/>
