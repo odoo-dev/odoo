@@ -21,9 +21,11 @@
     'demo': ['data/website_event_meet_demo.xml'],
     'data': [
         'security/ir.model.access.csv',
+        'security/security.xml',
         'views/assets.xml',
         'views/event_templates.xml',
         'views/event_meeting_room_views.xml',
+        'views/event_meet_template_meet.xml',
         'views/event_views.xml',
         'views/event_type_views.xml',
     ],

@@ -20,8 +20,8 @@
         <field name="arch" type="xml">
             <form string="Meeting Room">
                 <header>
-                    <button class="oe_highlight" name="action_join" string="Join the room" type="object" attrs="{'invisible': [('room_active', '=', False)]}"/>
-                    <field name="room_active" invisible="1"/>
+                    <button class="oe_highlight"
+                        name="action_join" string="Join the room" type="object"/>
                 </header>
                 <sheet>
                     <label for="name"/>
@@ -64,7 +64,7 @@
                 <field name="summary"/>
                 <field name="target_audience"/>
                 <field name="is_pinned"/>
-                <field name="room_active"/>
+                <field name="is_published"/>
                 <field name="room_participant_count"/>
                 <field name="room_max_capacity"/>
                 <field name="room_lang_id"/>
@@ -81,7 +81,7 @@
                 <field name="summary" string="Summary"/>
                 <field name="target_audience" string="Audience"/>
                 <field name="event_id" string="Event"/>
-                <filter domain="[('room_active', '=', False)]" name="archived" string="Archived"/>
+                <filter domain="[('is_published', '=', False)]" name="filter_unpublished" string="Unpublished"/>
                 <group expand="0" string="Group By">
                     <filter string="Event" name="groupby_event" domain="[]" context="{'group_by': 'event_id'}"/>
                 </group>

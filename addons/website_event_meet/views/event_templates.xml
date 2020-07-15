@@ -54,12 +54,8 @@
                     <t t-esc="meeting_room.target_audience or 'participant(s)'"/>
                 </h4>
                 <div class="d-flex flex-row justify-content-between mt-3">
-                    <t t-call="website_jitsi.chat_room_join_button">
-                        <t t-set="room_name" t-value="meeting_room.room_name"/>
-                        <t t-set="chat_room_id" t-value="meeting_room.chat_room_id.id"/>
-                        <t t-set="auto_open" t-value="int(open_room_id == meeting_room.id)"/>
-                        <t t-set="check_full" t-value="int(not is_event_manager)"/>
-                    </t>
+                    <a t-attf-href="/event/#{ slug(event) }/meeting_room/#{ slug(meeting_room) }"
+                       class="btn btn-primary">Join the room</a>
                     <div class="d-inline border p-2 bg-secondary" t-esc="meeting_room.room_lang_id.name"/>
                 </div>
             </div>

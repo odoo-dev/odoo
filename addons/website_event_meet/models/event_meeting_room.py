@@ -11,13 +11,26 @@ class EventMeetingRoom(models.Model):
     _name = "event.meeting.room"
     _description = "Event Meeting Room"
     _order = "is_pinned DESC, id"
-    _inherit = {"chat.room.mixin"}
+    _inherit = [
+        'chat.room.mixin',
+        'website.published.mixin',
+    ]
 
-    name = fields.Char("Topic", required=True, size=50)
-    event_id = fields.Many2one("event.event", "Event", required=True)
+    name = fields.Char("Topic", required=True, translate=True)
+    active = fields.Boolean('Active', default=True)
+    event_id = fields.Many2one("event.event", string="Event", required=True, ondelete="cascade")
     is_pinned = fields.Boolean("Is pinned")
-    summary = fields.Char("Summary", size=200)
-    target_audience = fields.Char("Audience", required=True, size=30)
+    summary = fields.Char("Summary")
+    target_audience = fields.Char("Audience", required=True, translate=True)
+
+    @api.model_create_multi
+    def create(self, values_list):
+        for values in values_list:
+            values["chat_room_id"] = values.get(
+                "chat_room_id",
+                self.env["chat.room"].create({}).id,
+            )
+        return super(EventMeetingRoom, self).create(values_list)
 
     def action_join(self):
         """Join the meeting room on the frontend side."""
@@ -27,12 +40,3 @@ class EventMeetingRoom(models.Model):
             "type": "ir.actions.act_url",
             "url": url,
         }
-
-    @api.model
-    def create(self, vals):
-        vals["room_active"] = True
-        vals["chat_room_id"] = vals.get(
-            "chat_room_id",
-            self.env["chat.room"].create({}).id,
-        )
-        return super(EventMeetingRoom, self).create(vals)

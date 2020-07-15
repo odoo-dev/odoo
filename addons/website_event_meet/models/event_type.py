@@ -7,4 +7,4 @@ from odoo import fields, models
 class EventType(models.Model):
     _inherit = "event.type"
 
-    website_meeting_room = fields.Boolean("Website Meeting Room", help="Display community tab on website")
+    meeting_room_menu = fields.Boolean("Website Meeting Room", help="Display community tab on website")

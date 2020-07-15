@@ -22,9 +22,9 @@ class EventMailScheduler(models.Model):
     def run(self, autocommit=False):
         self.env["event.meeting.room"].sudo().search([
             ("is_pinned", "=", False),
-            ("room_active", "=", True),
+            ("active", "=", True),
             ("room_participant_count", "=", 0),
             ("room_last_activity", "<", fields.Datetime.now() - self._DELAY_CLEAN),
-        ]).room_active = False
+        ]).active = False
 
         return super(EventMailScheduler, self).run(autocommit=autocommit)

@@ -40,7 +40,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
                     await this._rpc({
                         model: 'event.meeting.room',
                         method: 'write',
-                        args: [this.meetingRoomId, {room_active: false}],
+                        args: [this.meetingRoomId, {active: false}],
                         context: this.context,
                     });
 

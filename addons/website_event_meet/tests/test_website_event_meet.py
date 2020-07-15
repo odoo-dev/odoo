@@ -16,7 +16,6 @@ class TestWebsiteEventMeet(TestEventCommon):
         meeting_room = new_meeting_room_form.save()
 
         self.assertTrue(meeting_room.chat_room_id)
-        self.assertTrue(meeting_room.chat_room_id.active)
         self.assertEqual(meeting_room.chat_room_id.max_capacity, "20")
 
     def test_meeting_room_copy(self):

@@ -10,27 +10,13 @@ class Event(models.Model):
 
     meeting_room_ids = fields.One2many("event.meeting.room", "event_id", string="Meeting rooms")
     meeting_room_count = fields.Integer("Room count", compute="_compute_meeting_room_count")
-    website_meeting_room = fields.Boolean(
-        "Website Community",
-        help="Display community tab on website",
-        compute="_compute_website_meeting_room",
-        readonly=False,
-        store=True,
-    )
+    meeting_room_menu = fields.Boolean(
+        "Website Community", compute="_compute_meeting_room_menu",
+        readonly=False, store=True,
+        help="Display community tab on website")
     meeting_room_menu_ids = fields.One2many(
-        "website.event.menu",
-        "event_id",
-        string="Event Community Menus",
-        domain=[("menu_type", "=", "meeting_room")],
-    )
-
-    @api.depends("event_type_id", "website_meeting_room")
-    def _compute_website_meeting_room(self):
-        for event in self:
-            if event.event_type_id and event.event_type_id != event._origin.event_type_id:
-                event.website_meeting_room = event.event_type_id.website_meeting_room
-            elif not event.website_meeting_room:
-                event.website_meeting_room = False
+        "website.event.menu", "event_id", string="Event Community Menus",
+        domain=[("menu_type", "=", "meeting_room")])
 
     @api.depends("meeting_room_ids")
     def _compute_meeting_room_count(self):
@@ -48,35 +34,30 @@ class Event(models.Model):
         for event in self:
             event.meeting_room_count = meeting_room_count.get(event.id, 0)
 
+    @api.depends("event_type_id", "meeting_room_menu")
+    def _compute_meeting_room_menu(self):
+        for event in self:
+            if event.event_type_id and event.event_type_id != event._origin.event_type_id:
+                event.meeting_room_menu = event.event_type_id.meeting_room_menu
+            elif not event.meeting_room_menu:
+                event.meeting_room_menu = False
+
+    # ------------------------------------------------------------
+    # WEBSITE MENU MANAGEMENT
+    # ------------------------------------------------------------
+
+    def _get_menu_update_fields(self):
+        update_fields = super(Event, self)._get_menu_update_fields()
+        update_fields += ['meeting_room_menu']
+        return update_fields
+
     def _update_website_menus(self, split_to_update=None):
         super(Event, self)._update_website_menus(split_to_update=split_to_update)
-
         for event in self:
-            if event.website_meeting_room and not event.meeting_room_menu_ids:
-                # add the community menu
-                menu = super(Event, event)._create_menu(
-                    sequence=1,
-                    name=_("Community"),
-                    url="/event/%s/meeting_rooms" % slug(self),
-                    xml_id=False,
-                )
-                event.env["website.event.menu"].create(
-                    {
-                        "menu_id": menu.id,
-                        "event_id": event.id,
-                        "menu_type": "meeting_room",
-                    }
-                )
-            elif not event.website_meeting_room:
-                # remove the community menu
-                event.meeting_room_menu_ids.mapped("menu_id").unlink()
+            if not split_to_update or event in split_to_update.get('meeting_room_menu'):
+                event._update_website_menu_entry('meeting_room_menu', 'meeting_room_menu_ids', '_get_meet_menu_entries')
 
-    def write(self, vals):
-        community_event = self.filtered(lambda e: e.website_meeting_room)
-        no_community_event = self.filtered(lambda e: not e.website_meeting_room)
-
-        super(Event, self).write(vals)
-
-        update_events = community_event.filtered(lambda e: not e.website_meeting_room)
-        update_events |= no_community_event.filtered(lambda e: e.website_meeting_room)
-        update_events._update_website_menus()
+    def _get_meet_menu_entries(self):
+        self.ensure_one()
+        res = [(_('Community'), '/event/%s/meeting_rooms' % slug(self), False, 70, 'meeting_room', False)]
+        return res

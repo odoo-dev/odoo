@@ -18,29 +18,47 @@ EventSpecificOptions.include({
         this._super.apply(this, arguments);
     },
 
-    _initCheckbox: async function () {
-        let data = await this._rpc({
-            model: this.modelName,
-            method: 'read',
-            args: [[this.eventId], ['website_url', 'website_meeting_room']],
-        });
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
 
-        if (data[0]['website_meeting_room']) {
-            this.$displayCommunityInput.attr('checked', 'checked');
-        }
-        this.eventUrl = data[0]['website_url'];
+    _onDisplayCommunityChange: function () {
+        var checkboxValue = this.$displayCommunityInput.is(':checked');
+        this._toggleDisplayCommunity(checkboxValue);
     },
 
-    _onDisplayCommunityChange: async function () {
-        let checkboxValue = this.$displayCommunityInput.is(':checked');
-        await this._toggleDisplayCommunity(checkboxValue);
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    _getCheckboxFields: function () {
+        var fields = this._super();
+        fields = _.union(fields, ['meeting_room_menu']);
+        return fields;
+    },
+
+    _getCheckboxFieldMatch: function (checkboxField) {
+        if (checkboxField === 'meeting_room_menu') {
+            return this.$displayCommunityInput;
+        }
+        return this._super(checkboxField);
+    },
+
+    _initCheckboxCallback: function (rpcData) {
+        this._super(rpcData);
+        if (rpcData[0]['meeting_room_menu']) {
+            var submenuInput = this._getCheckboxFieldMatch('meeting_room_menu');
+            submenuInput.attr('checked', 'checked');
+        }
     },
 
     _toggleDisplayCommunity: async function (val) {
         await this._rpc({
             model: this.modelName,
             method: 'write',
-            args: [[this.eventId], {website_meeting_room: val}],
+            args: [[this.eventId], {
+                meeting_room_menu: val
+            }],
         });
 
         this._reloadEventPage();
