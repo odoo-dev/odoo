@@ -10,7 +10,7 @@
             <div id="oe_structure_wesession_track_index_1" class="oe_structure"/>
             <!-- Content -->
             <div t-att-class="'o_wesession_track_container %s' % ('container pb-3' if not option_widescreen else 'pb-3')">
-                <div class="row mb-5">
+                <div class="row mx-0 mb-5">
                     <t t-call="website_event_track_session.event_track_aside"/>
                     <t t-call="website_event_track_session.event_track_content"/>
                 </div>
@@ -26,15 +26,16 @@
 <!-- ============================================================ -->
 
 <template id="event_track_content" name="Track: Main Description">
-    <div t-att-class="'col-12 o_wesession_track_main %s' % ('col-md-9 col-lg-10' if option_widescreen else 'col-md-8 col-lg-9')">
-        <div class="bg-white pt-3">
-            <!-- LIVE INFORMATIONS -->
-            <div t-if="not track.event_id.is_ongoing" class="mx-3 mt-3 alert alert-warning">
+    <div name="o_wesession_track_main"
+        t-att-class="'col-12 o_wesession_track_main bg-white p-0 %s' % ('col-md-9 col-lg-10' if option_widescreen else 'col-md-8 col-lg-9')">
+        <!-- LIVE INFORMATIONS -->
+        <div t-if="not track.event_id.is_ongoing" class="pt-3">
+            <div class="mx-3 alert alert-warning">
                 Event <span t-esc="track.event_id.name" class="font-weight-bold"/>
                 <span t-if="track.event_id.start_today">
                     starts in
                     <span t-esc="track.event_id.start_remaining"
-                        t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
+                        t-options="{'widget': 'duration', 'digital': False, 'unit': 'minute', 'round': 'minute'}"/>
                 </span>
                 <span class="my-0" t-else="track.event_id.start_today">
                     starts at
@@ -42,54 +43,59 @@
                         t-options="{'format': 'long'}"/>
                 </span>
             </div>
-            <div t-elif="track_start_remaining" class="mx-3 mt-3 alert alert-warning">
+        </div>
+        <div t-elif="track.track_start_remaining" class="pt-3">
+            <div class="mx-3 alert alert-warning">
                 Starting in
                 <span t-esc="track.track_start_remaining"
-                    t-options="{'widget': 'duration', 'digital': True, 'unit': 'second', 'round': 'minute'}"/>
+                    t-options="{'widget': 'duration', 'digital': False, 'unit': 'second', 'round': 'minute'}"/>
             </div>
-            <!-- TRACK DESCRIPTION -->
-            <div class="mx-3 o_wesession_track_main_description">
+        </div>
+        <!-- TRACK DESCRIPTION -->
+        <div class="mx-3 pt-3 o_wesession_track_main_description">
+            <div class="d-flex justify-content-between">
                 <span class="h4" t-esc="track.name"/>
-                <div class="text-muted">
-                    <span t-field="track.date"
-                        t-options='{"hide_seconds":"True", "format": "short"}'/>
-                    -
-                    <span t-field="track.date_end"
-                        t-options='{"hide_seconds":"True", "format": "short"}'/>
-                    <t t-if="event.date_tz">(<span t-field="event.date_tz"/>)</t>
-                    ( <span t-field="track.duration"
-                        t-options='{"widget": "duration", "unit": "hour", "round": "minute"}'/>
-                    )
-                </div>
-                <div class="text-muted" t-if="track.location_id">
-                    <strong>Location:</strong><span t-field="track.location_id"/>
-                </div>
-                <hr class="mt-2 pb-1 mb-1"/>
+                <t t-call="website_event_track_online.track_widget_reminder"/>
+            </div>
+            <div class="text-muted">
+                <span t-field="track.date"
+                    t-options='{"hide_seconds":"True", "format": "short"}'/>
+                -
+                <span t-field="track.date_end"
+                    t-options='{"hide_seconds":"True", "format": "short"}'/>
+                <t t-if="event.date_tz">(<span t-field="event.date_tz"/>)</t>
+                ( <span t-field="track.duration"
+                    t-options='{"widget": "duration", "unit": "hour", "round": "minute"}'/>
+                )
+            </div>
+            <div class="text-muted" t-if="track.location_id">
+                <strong>Location:</strong><span t-field="track.location_id"/>
+            </div>
+            <hr class="mt-2 pb-1 mb-1"/>
 
-                <!-- ABOUT AUTHOR -->
-                <div class="row mt-2">
-                    <div class="col-md-2">
-                        <span t-if="track.image" t-field="track.image" t-options="{'widget': 'image', 'class': 'rounded-circle'}"/>
-                        <span t-else="" t-field="track.partner_id.sudo().image_128" t-options='{"widget": "image", "class": "rounded-circle"}'/>
-                    </div>
-                    <div class="col-md-10 d-flex flex-column">
-                        <span t-field="track.partner_name" class="font-weight-bold mb-2"/>
-                        <span class="mb-2" t-if="track.partner_id.website">
-                            <i class="fa fa-home mr-2"/><a t-att-href="track.partner_id.website"><span t-field="track.partner_id.website"/></a>
-                        </span>
-                        <span class="mb-2" t-if="track.partner_email">
-                            <i class="fa fa-envelope mr-2"/><a t-att-mailto="track.partner_email"><span t-field="track.partner_email"/></a>
-                        </span>
-                        <div t-if="not is_html_empty(track.partner_biography)"
-                            t-field="track.partner_biography" class="oe_no_empty"/>
-                        <div t-else=""
-                            t-field="track.partner_id.website_description" class="oe_no_empty"/>
-                    </div>
+            <!-- ABOUT AUTHOR -->
+            <div class="row mt-2">
+                <div class="col-md-2">
+                    <span t-if="track.image" t-field="track.image" t-options="{'widget': 'image', 'class': 'rounded-circle'}"/>
+                    <span t-else="" t-field="track.partner_id.sudo().image_128" t-options='{"widget": "image", "class": "rounded-circle"}'/>
                 </div>
-                <hr class="mt-2 pb-1 mb-1"/>
-                <div class="d-flew">
-                    <div t-field="track.description" class="oe_no_empty"/>
+                <div class="col-md-10 d-flex flex-column">
+                    <span t-field="track.partner_name" class="font-weight-bold mb-2"/>
+                    <span class="mb-2" t-if="track.partner_id.website">
+                        <i class="fa fa-home mr-2"/><a t-att-href="track.partner_id.website"><span t-field="track.partner_id.website"/></a>
+                    </span>
+                    <span class="mb-2" t-if="track.partner_email">
+                        <i class="fa fa-envelope mr-2"/><a t-att-mailto="track.partner_email"><span t-field="track.partner_email"/></a>
+                    </span>
+                    <div t-if="not is_html_empty(track.partner_biography)"
+                        t-field="track.partner_biography" class="oe_no_empty"/>
+                    <div t-else=""
+                        t-field="track.partner_id.website_description" class="oe_no_empty"/>
                 </div>
+            </div>
+            <hr class="mt-2 pb-1 mb-1"/>
+            <div class="d-flew">
+                <div t-field="track.description" class="oe_no_empty"/>
             </div>
         </div>
     </div>
