@@ -99,3 +99,29 @@ class WebsiteVisitor(models.Model):
             self.active = False
 
         return res
+
+    def _get_visitor_from_request(self, force_create=False):
+        """ When fetching visitor, now that duplicates are linked to a main visitor
+        instead of unlinked, you may have more collisions issues with cookie being
+        set after a de-connection for example.
+
+        In base method, visitor associated to a partner in case of public user is
+        not taken into account. It is considered as desynchronized cookie. Here
+        we also discard if the visitor has a main visitor whose partner is set
+        (aka wrong after logout partner). """
+        visitor = super(WebsiteVisitor, self)._get_visitor_from_request(force_create=force_create)
+
+        # also check that visitor parent partner is not different from user's one (indicates duplicate due to invalid or wrong cookie)
+        if visitor and not self.env.user._is_public():
+            if not visitor.partner_id and visitor.parent_id.partner_id:
+                visitor = self.env['website.visitor'].sudo().with_context(active_test=False).search(
+                    [('partner_id', '=', self.env.user.partner_id.id)]
+                )
+        # also check that visitor parent partner is not linked to a partner (indicates duplicate due to invalid / wrong cookie)
+        if visitor and self.env.user._is_public() and visitor.parent_id.partner_id:
+            visitor = self.env['website.visitor'].sudo()
+
+        if not visitor and force_create:
+            visitor = self._create_visitor()
+
+        return visitor
