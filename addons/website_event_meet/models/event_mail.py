@@ -16,7 +16,7 @@ class EventMailScheduler(models.Model):
 
     _inherit = "event.mail"
 
-    _DELAY_CLEAN = datetime.timedelta(hours=48)
+    _DELAY_CLEAN = datetime.timedelta(hours=4)
 
     @api.model
     def run(self, autocommit=False):
