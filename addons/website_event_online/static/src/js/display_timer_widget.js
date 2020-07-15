@@ -27,6 +27,7 @@ publicWidget.registry.displayTimerWidget = publicWidget.Widget.extend({
 
             self.mainCountdownTime = self.options["mainCountdownTime"];
             self.mainCountdownText = self.options["mainCountdownText"];
+            self.mainCountdownDisplay = self.options["mainCountdownDisplay"];
 
             self.displayClass = self.options["displayClass"];
 
@@ -52,7 +53,9 @@ publicWidget.registry.displayTimerWidget = publicWidget.Widget.extend({
         var remainingPreSeconds = this.preCountdownTime - (now.getTime()/1000);
         if (remainingPreSeconds <= 1) {
             this.$('.o_countdown_text').text(this.mainCountdownText);
-            $(this.$el).parent().removeClass('d-none');
+            if (this.mainCountdownDisplay) {
+                $(this.$el).parent().removeClass('d-none');
+            }
             var remainingMainSeconds = this.mainCountdownTime - (now.getTime()/1000);
             if (remainingMainSeconds <= 1) {
                 clearInterval(this.interval);

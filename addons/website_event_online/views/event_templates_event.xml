@@ -37,6 +37,7 @@
          t-att-data-display-class="display_class"
          t-att-data-main-countdown-time="datetime.datetime.now().timestamp() + int(main_remaining_time)"
          t-att-data-main-countdown-text="main_countdown_text"
+         t-att-data-main-countdown-display="main_countdown_display"
          t-att-data-pre-countdown-time="pre_countdown_time"
          t-att-data-pre-countdown-display="pre_countdown_display"
          t-att-data-pre-countdown-text="pre_countdown_text">
