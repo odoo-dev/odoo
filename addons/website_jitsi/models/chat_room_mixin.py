@@ -15,11 +15,9 @@ class ChatRoomMixin(models.AbstractModel):
     _name = "chat.room.mixin"
     _description = "Chat Room Mixin"
 
-    chat_room_id = fields.Many2one("chat.room", "Chat Room", readonly=True, copy=False, ondelete="cascade")
-
-    # Chat room related fields
+    chat_room_id = fields.Many2one("chat.room", "Chat Room", readonly=True, copy=False, ondelete="set null")
+    # chat room related fields
     room_name = fields.Char("Room Name", related="chat_room_id.name")
-    room_active = fields.Boolean("Active Room", related="chat_room_id.active", readonly=False)
     room_is_full = fields.Boolean("Room Is Full", related="chat_room_id.is_full")
     room_lang_id = fields.Many2one("res.lang", "Language", related="chat_room_id.lang_id", readonly=False)
     room_max_capacity = fields.Selection(string="Max capacity", related="chat_room_id.max_capacity", readonly=False, required=True)

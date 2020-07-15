@@ -21,28 +21,22 @@ class ChatRoom(models.Model):
 
     name = fields.Char(
         "Room Name", required=True, copy=False,
-        default=lambda self: "odoo-room-%s" % str(uuid.uuid4())[:8],
-    )
-    active = fields.Boolean(default=True)
-
+        default=lambda self: "odoo-room-%s" % str(uuid.uuid4())[:8])
     is_full = fields.Boolean("Full", compute="_compute_full")
     lang_id = fields.Many2one(
         "res.lang", "Language",
-        default=lambda self: self.env["res.lang"].search([("code", "=", self.env.user.lang)], limit=1),
-    )
+        default=lambda self: self.env["res.lang"].search([("code", "=", self.env.user.lang)], limit=1))
     max_capacity = fields.Selection(
-        [("4", "4"), ("8", "8"), ("12", "12"), ("16", "16"), ("20", "20"), ("no_limit", "No limit")],
-        "Max capacity", default="8", required=True,
-    )
+        [("4", "4"), ("8", "8"), ("12", "12"), ("16", "16"),
+         ("20", "20"), ("no_limit", "No limit")], string="Max capacity",
+        default="8", required=True)
     participant_count = fields.Integer("Participant count", default=0, copy=False)
-
     # reporting fields
     last_activity = fields.Datetime("Last activity", readonly=True, default=lambda self: fields.Datetime.now(), copy=False)
     last_joined = fields.Datetime("Last joined", readonly=True, default=lambda self: fields.Datetime.now(), copy=False)
     max_participant_reached = fields.Integer(
         "Max participant reached", readonly=True, copy=False,
-        help="Maximum number of participant reached in the room at the same time",
-    )
+        help="Maximum number of participant reached in the room at the same time")
 
     @api.depends("max_capacity", "participant_count")
     def _compute_full(self):

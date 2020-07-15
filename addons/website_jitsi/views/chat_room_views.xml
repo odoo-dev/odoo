@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="website_jitsi.chat_room_action" model="ir.actions.act_window">
-        <field name="name">Chat Room</field>
-        <field name="res_model">chat.room</field>
-        <field name="view_mode">tree,form</field>
-    </record>
     <record id="chat_room_view_search" model="ir.ui.view">
         <field name="name">chat.room.search</field>
         <field name="model">chat.room</field>
@@ -14,6 +9,7 @@
             </search>
         </field>
     </record>
+
     <record id="chat_room_view_form" model="ir.ui.view">
         <field name="name">chat.room.form</field>
         <field name="model">chat.room</field>
@@ -26,7 +22,6 @@
                     </h1>
                     <group>
                         <group>
-                            <field name="active"/>
                             <field name="is_full"/>
                             <field name="lang_id" options="{'no_create': True}"/>
                             <field name="participant_count"/>
@@ -46,13 +41,13 @@
             </form>
         </field>
     </record>
+
     <record id="chat_room_view_tree" model="ir.ui.view">
         <field name="name">chat.room.tree</field>
         <field name="model">chat.room</field>
         <field name="arch" type="xml">
             <tree string="Chat Room">
                 <field name="name"/>
-                <field name="active"/>
                 <field name="is_full"/>
                 <field name="lang_id"/>
                 <field name="participant_count"/>
@@ -60,4 +55,17 @@
             </tree>
         </field>
     </record>
+
+    <record id="chat_room_action" model="ir.actions.act_window">
+        <field name="name">Chat Rooms</field>
+        <field name="res_model">chat.room</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Chat Rooms"
+        id="chat_room_menu"
+        sequence="50"
+        action="chat_room_action"
+        parent="website.menu_website_global_configuration"
+        groups="base.group_no_one"/>
 </odoo>
