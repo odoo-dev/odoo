@@ -59,6 +59,7 @@
                             <t t-set="auto_open" t-value="1"/>
                             <t t-set="attach_to" t-value="'#o_wemeet_jitsi_iframe'"/>
                             <t t-set="check_full" t-value="option_can_edit"/>
+                            <t t-set="default_username" t-value="default_username"/>
                         </t>
                     </div>
                 </t>

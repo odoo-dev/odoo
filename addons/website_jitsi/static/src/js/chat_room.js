@@ -26,6 +26,7 @@ publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
         // query selector of the element on which we attach the Jitsi iframe
         // if not defined, the widget will pop in a modal instead
         this.attachTo = this.$el.data('attach-to') || false;
+        this.defaultUsername = this.$el.data('default-username') || false;
 
         if (this.autoOpen) {
             await this._onChatRoomClick();
@@ -139,6 +140,10 @@ publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
       */
     _joinJitsiRoom: async function ($parentNode) {
         let jitsiRoom = await this._createJitsiRoom(this.roomName, $parentNode);
+
+        if (this.defaultUsername) {
+            jitsiRoom.executeCommand("displayName", this.defaultUsername);
+        }
 
         let timeoutCall = null;
         const updateParticipantCount = (joined) => {

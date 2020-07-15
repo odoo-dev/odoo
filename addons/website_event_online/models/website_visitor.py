@@ -125,3 +125,15 @@ class WebsiteVisitor(models.Model):
             visitor = self._create_visitor()
 
         return visitor
+
+    def _get_attendee_name(self):
+        """Return the name of the current attendee."""
+        # TDE FIXME: remove this with proper registration update
+        self.ensure_one()
+        if self.event_registration_ids:
+            if self.name:
+                return self.name
+            else:
+                # TODO: normally the name must always be set if there's at least
+                # one registration
+                return self.event_registration_ids[0].name

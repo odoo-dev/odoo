@@ -57,6 +57,8 @@ class WebsiteEventMeetController(http.Controller):
         meeting_rooms = request.env['event.meeting.room'].sudo().search(search_domain)
         meeting_rooms = meeting_rooms.sorted(lambda m: (m.is_pinned, m.room_last_joined, m.id), reverse=True)
 
+        visitor = request.env['website.visitor']._get_visitor_from_request()
+
         return {
             # event information
             "event": event.sudo(),
@@ -66,6 +68,7 @@ class WebsiteEventMeetController(http.Controller):
             "current_lang": request.env["res.lang"].browse(int(lang)) if lang else False,
             "available_languages": meeting_rooms_all.mapped("room_lang_id"),
             "default_lang_code": request.env.user.lang,
+            "default_username": visitor._get_attendee_name() if visitor else None,
             "open_room_id": int(open_room_id) if open_room_id else None,
             # environment
             "is_event_manager": request.env.user.has_group("event.group_event_manager"),
