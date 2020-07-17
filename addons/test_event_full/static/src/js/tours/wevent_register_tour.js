@@ -92,7 +92,7 @@ tour.register('wevent_register', {
         browseTalksSteps,
         discoverTalkSteps('What This Event Is All About', true, true),
         browseTalksSteps,
-        discoverTalkSteps('Live Testimonial', false, false, true),
+        // discoverTalkSteps('Live Testimonial', false, false, true),
         browseMeetSteps,
         registerSteps
     )
