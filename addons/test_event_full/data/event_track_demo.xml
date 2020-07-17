@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Location 3 -->
+    <record id="event_7_track_test_1" model="event.track">
+        <field name="name">Live Track (TEST)</field>
+        <field name="event_id" ref="event.event_7"/>
+        <field name="stage_id" ref="website_event_track.event_track_stage3"/>
+        <field name="location_id" ref="website_event_track.event_track_location_online_2"/>
+        <field name="date" eval="DateTime.now() - timedelta(minutes=30)"></field>
+        <field name="duration">1</field>
+        <field name="tag_ids" eval="[(4, ref('website_event_track.event_track_tag1')), (4, ref('website_event_track.event_track_tag12'))]"/>
+        <field name="is_published" eval="True"/>
+        <field name="user_id" ref="base.user_admin"/>
+        <field name="partner_id" ref="base.res_partner_address_31"/>
+    </record>
+</odoo>

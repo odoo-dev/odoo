@@ -19,6 +19,18 @@ var tour = require('web_tour.tour');
  *
  */
 
+// _discoverTalkSteps: function (talkName) {
+//     return [{
+//         content: 'Go on "What This Event Is All About" Keynote talk',
+//         trigger: 'a:contains("What This Event Is All About")',
+//     }, {
+//         content: "Check Reminder is on (Keynote)",
+//         trigger: 'div.o_wetrack_js_reminder i.fa-bell',
+//         extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
+//         run: function () {}, // it's a check
+//     }]
+// }
+
 
 var initTourSteps = [{
     content: 'Go on Online Reveal page',
@@ -29,8 +41,37 @@ var browseTalksSteps = [{
     content: 'Browse Talks',
     trigger: 'a:contains("Talks")',
 }, {
-    content: 'Go on "What This Event Is All About" talk',
+    content: 'Go on "What This Event Is All About" Keynote talk',
     trigger: 'a:contains("What This Event Is All About")',
+}, {
+    content: "Check Reminder is on (Keynote)",
+    trigger: 'div.o_wetrack_js_reminder i.fa-bell',
+    extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
+    run: function () {}, // it's a check
+}, {
+    content: 'Browse Talks',
+    trigger: 'a:contains("Talks")',
+}, {
+    content: 'Click on Live Track',
+    trigger: 'article span:contains("Live Track (TEST)")',
+    run: 'click'
+}, {
+    content: "Check Live Track content",
+    trigger: 'p:contains("Addison Olson works in IT sector")',
+    run: function () {}, // it's a check
+}, {
+    content: "Check Reminder is Off",
+    trigger: 'span.o_wetrack_js_reminder_text:contains("Set Reminder")',
+    run: function () {}, // it's a check
+}, {
+    content: "Set Reminder",
+    trigger: 'span.o_wetrack_js_reminder_text',
+    run: 'click',
+}, {
+    content: "Check Reminder is On",
+    trigger: 'div.o_wetrack_js_reminder i.fa-bell',
+    extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
+    run: function () {}, // it's a check
 }];
 
 var browseExhibitorsSteps = [{

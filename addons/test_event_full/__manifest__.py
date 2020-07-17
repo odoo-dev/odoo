@@ -22,6 +22,7 @@ It installs sale capabilities, front-end flow, eCommerce, questions, ...
         'views/assets.xml',
     ],
     'demo': [
+        'data/event_track_demo.xml',
     ],
     'installable': True,
 }
