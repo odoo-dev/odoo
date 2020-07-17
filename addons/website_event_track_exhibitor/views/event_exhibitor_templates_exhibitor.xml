@@ -44,7 +44,6 @@
         </div>
         <div class="mx-3">
             <div t-if="sponsor.chat_room_id" class="d-flex flex-column mb-3">
-                <div id="o_wsponsor_jitsi_iframe"/>
                 <t t-if="sponsor.room_is_full">
                     <div class="mt-4 col-12 alert alert-warning text-center" role="alert">
                         <span>Oops! This room is full</span><br />Come back later to have a chat with us!

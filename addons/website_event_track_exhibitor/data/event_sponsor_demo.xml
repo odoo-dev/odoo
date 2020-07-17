@@ -6,7 +6,7 @@
         <field name="max_capacity">8</field>
     </record>
     <record id="event_7_sponsor_1_chat_room" model="chat.room">
-        <field name="name">Meet-Bloem</field>
+        <field name="name">Meet-Deco-Addict</field>
         <field name="max_capacity">12</field>
     </record>
     <record id="event_7_sponsor_2_chat_room" model="chat.room">
@@ -38,6 +38,14 @@
         <field name="subtitle">You won't believe this sponsor</field>
     </record>
     <record id="website_event_track.event_7_sponsor_5" model="event.sponsor">
+        <field name="is_published" eval="True"/>
+        <field name="subtitle">Honestly we are good</field>
+    </record>
+    <record id="website_event_track.event_7_sponsor_6" model="event.sponsor">
+        <field name="is_published" eval="True"/>
+        <field name="subtitle">You won't believe this sponsor</field>
+    </record>
+    <record id="website_event_track.event_7_sponsor_7" model="event.sponsor">
         <field name="is_published" eval="True"/>
         <field name="subtitle">Honestly we are good</field>
     </record>
