@@ -4,78 +4,73 @@ odoo.define('test_event_full.tour.register', function (require) {
 var tour = require('web_tour.tour');
 
 /**
- * The purpose of this tour is to check the whole certification flow:
- *
- * -> student (= demo user) checks 'on payment' course content
- * -> clicks on "buy course"
- * -> is redirected to webshop on the product page
- * -> buys the course
- * -> fails 3 times, exhausting his attempts
- * -> is removed to the members of the course
- * -> buys the course again
- * -> succeeds the certification
- * -> has the course marked as completed
- * -> has the certification in his user profile
- *
+ * TALKS STEPS
  */
 
-// _discoverTalkSteps: function (talkName) {
-//     return [{
-//         content: 'Go on "What This Event Is All About" Keynote talk',
-//         trigger: 'a:contains("What This Event Is All About")',
-//     }, {
-//         content: "Check Reminder is on (Keynote)",
-//         trigger: 'div.o_wetrack_js_reminder i.fa-bell',
-//         extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
-//         run: function () {}, // it's a check
-//     }]
-// }
+var discoverTalkSteps = function (talkName, fromList, reminderOn, toggleReminder) {
+    var steps;
+    if (fromList) {
+        steps = [{
+            content: 'Go on "' + talkName + '" talk in List',
+            trigger: 'a:contains("' + talkName + '")',
+        }];
+    }
+    else {
+        steps = [{
+            content: 'Click on Live Track',
+            trigger: 'article span:contains("' + talkName + '")',
+            run: 'click'
+        }];
+    }
+    if (reminderOn) {
+        steps = steps.concat([{
+            content: "Check Reminder is on",
+            trigger: 'div.o_wetrack_js_reminder i.fa-bell',
+            extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
+            run: function () {}, // it's a check
+        }]);
+    }
+    else {
+        steps = steps.concat([{
+            content: "Check Reminder is Off",
+            trigger: 'span.o_wetrack_js_reminder_text:contains("Set Reminder")',
+            run: function () {}, // it's a check
+        }]);
+        if (toggleReminder) {
+            steps = steps.concat([{
+                content: "Set Reminder",
+                trigger: 'span.o_wetrack_js_reminder_text',
+                run: 'click',
+            }, {
+                content: "Check Reminder is On",
+                trigger: 'div.o_wetrack_js_reminder i.fa-bell',
+                extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
+                run: function () {}, // it's a check
+            }]);
+        }
+    }
+    return steps;
+};
 
 
-var initTourSteps = [{
-    content: 'Go on Online Reveal page',
-    trigger: 'a[href*="/event"]:contains("Online Reveal"):first',
-}];
+/**
+ * MAIN STEPS
+ */
+
+var initTourSteps = function (eventName) {
+    return [{
+        content: 'Go on "' + eventName + '" page',
+        trigger: 'a[href*="/event"]:contains("' + eventName + '"):first',
+    }];
+};
 
 var browseTalksSteps = [{
     content: 'Browse Talks',
     trigger: 'a:contains("Talks")',
-}, {
-    content: 'Go on "What This Event Is All About" Keynote talk',
-    trigger: 'a:contains("What This Event Is All About")',
-}, {
-    content: "Check Reminder is on (Keynote)",
-    trigger: 'div.o_wetrack_js_reminder i.fa-bell',
-    extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
-    run: function () {}, // it's a check
-}, {
-    content: 'Browse Talks',
-    trigger: 'a:contains("Talks")',
-}, {
-    content: 'Click on Live Track',
-    trigger: 'article span:contains("Live Track (TEST)")',
-    run: 'click'
-}, {
-    content: "Check Live Track content",
-    trigger: 'p:contains("Addison Olson works in IT sector")',
-    run: function () {}, // it's a check
-}, {
-    content: "Check Reminder is Off",
-    trigger: 'span.o_wetrack_js_reminder_text:contains("Set Reminder")',
-    run: function () {}, // it's a check
-}, {
-    content: "Set Reminder",
-    trigger: 'span.o_wetrack_js_reminder_text',
-    run: 'click',
-}, {
-    content: "Check Reminder is On",
-    trigger: 'div.o_wetrack_js_reminder i.fa-bell',
-    extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
-    run: function () {}, // it's a check
 }];
 
 var browseExhibitorsSteps = [{
-    content: 'Browse Talks',
+    content: 'Browse Exhibitors',
     trigger: 'a:contains("Exhibitors")',
 }];
 
@@ -93,9 +88,11 @@ tour.register('wevent_register', {
     url: '/event',
     test: true
 }, [].concat(
-        initTourSteps,
+        initTourSteps('Online Reveal'),
         browseTalksSteps,
-        browseExhibitorsSteps,
+        discoverTalkSteps('What This Event Is All About', true, true),
+        browseTalksSteps,
+        discoverTalkSteps('Live Testimonial', false, false, true),
         browseMeetSteps,
         registerSteps
     )
