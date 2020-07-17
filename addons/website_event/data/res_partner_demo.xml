@@ -102,6 +102,36 @@
 </section></div></field>
     </record>
 
+    <record id="base.res_partner_10" model="res.partner">
+        <field name="is_published">True</field>
+        <field name="website_short_description">The Jackson Group brings honesty and seriousness to wood industry while helping customers deal with trees, flowers and fungi.</field>
+        <field name="website_description" type="html">
+<div><section class="s_three_columns bg-200 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Columns">
+    <div class="container">
+        <div class="row d-flex align-items-stretch">
+            <div class="col-lg-6 s_col_no_bgcolor pt16 pb16">
+                <div class="card bg-white h-100">
+                    <img class="card-img-top" src="/web/image/website.s_three_columns_default_image_1" alt=""/>
+                    <div class="card-body">
+                        <h3 class="card-title o_default_snippet_text">Feature One</h3>
+                        <p class="card-text o_default_snippet_text">Adapt these three columns to fit your design need. To duplicate, delete or move columns, select the column and use the top icons to perform your action.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 s_col_no_bgcolor pt16 pb16">
+                <div class="card bg-white h-100">
+                    <img class="card-img-top" src="/web/image/website.s_three_columns_default_image_2" alt=""/>
+                    <div class="card-body">
+                        <h3 class="card-title o_default_snippet_text">Feature Two</h3>
+                        <p class="card-text o_default_snippet_text">To add a fourth column, reduce the size of these three columns using the right icon of each block. Then, duplicate one of the columns to create a new one as a copy.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section></div></field>
+    </record>
+
     <record id="base.res_partner_12" model="res.partner">
         <field name="is_published">True</field>
         <field name="website_short_description">Azure Interior brings honesty and seriousness to wood industry while helping customers deal with trees, flowers and fungi.</field>
@@ -159,6 +189,32 @@
                 Brandon works in IT sector <b>since 10 years</b>. He is known
                 notably for selling mouse traps. With that trick he cut
                 IT budget by almost half within the last 2 years.
+            </p>
+        </field>
+    </record>
+
+    <!-- 17-18: children of 10 (Jackson Group) -->
+    <record id="base.res_partner_address_17" model="res.partner">
+        <field name="is_published" eval="True"/>
+        <field name="website">http://jackson.group.example.com</field>
+        <field name="website_description" type="xml">
+            <p>
+                Toni Rhodes works in IT sector <b>since 10 years</b>. He is known
+                notably for selling mouse traps. With that trick he cut
+                IT budget by almost half within the last 2 years.
+                Famous Managing Partner.
+            </p>
+        </field>
+    </record>
+    <record id="base.res_partner_address_18" model="res.partner">
+        <field name="is_published" eval="True"/>
+        <field name="website">http://jackson.group.example.com</field>
+        <field name="website_description" type="xml">
+            <p>
+                Gordon Owens works in IT sector <b>since 10 years</b>. He is known
+                notably for selling mouse traps. With that trick he cut
+                IT budget by almost half within the last 2 years.
+                Famous Senior Consultant.
             </p>
         </field>
     </record>

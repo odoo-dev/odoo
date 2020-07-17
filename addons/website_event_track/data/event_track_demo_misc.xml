@@ -48,14 +48,14 @@
         <field name="name">Bruyère</field>
     </record>
 
-    <record id="event_track_location_online_0" model="event.track.location">
-        <field name="name">Wood</field>
-    </record>
     <record id="event_track_location_online_1" model="event.track.location">
-        <field name="name">Furniture</field>
+        <field name="name">RD and Sales</field>
     </record>
     <record id="event_track_location_online_2" model="event.track.location">
-        <field name="name">Customer Rooms</field>
+        <field name="name">Furniture</field>
+    </record>
+    <record id="event_track_location_online_3" model="event.track.location">
+        <field name="name">Live with Customers</field>
     </record>
 
 </odoo>
