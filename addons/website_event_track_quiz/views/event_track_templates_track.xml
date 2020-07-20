@@ -30,8 +30,8 @@
         <div t-if="track.quiz_id and show_quiz" class="o_quiz_js_quiz_container o_quiz_main px-2 pb-4 mb-2 col-12 bg-white" t-att-data-object-id="track.id">
             <t t-call="website_event_track_quiz.quiz_content">
                 <t t-set="track" t-value="track"/>
-                <t t-set="quiz_completed" t-value="visitor.quiz_completed"/>
-                <t t-set="quiz_points" t-value="visitor.quiz_points"/>
+                <t t-set="quiz_completed" t-value="track_visitor.quiz_completed"/>
+                <t t-set="quiz_points" t-value="track_visitor.quiz_points"/>
             </t>
         </div>
         <div t-if="track.quiz_id and not show_quiz" class="d-flex justify-content-end px-2 pb-2 mt-2 mb-2 mr-3">

@@ -33,24 +33,12 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
     def _event_track_get_values(self, event, track, **options):
         values = super(WebsiteEventTrackQuiz, self)._event_track_get_values(event, track)
         if 'quiz' in options:
+            track_visitor, visitor = track._find_track_visitor(force_create=True)
             values.update({
                 'show_quiz': True,
-                'visitor': track._find_track_visitor(force_create=True)
+                'track_visitor': track_visitor
             })
         return values
-
-    def _find_track_visitor(self, track, force_create=False):
-        partner = request.env.user.partner_id
-        track_visitor = request.env['event.track.visitor'].sudo().search([('track_id', '=', track.id), ('partner_id', '=', request.env.user.partner_id.id)]) or request.env['website.visitor']._get_visitor_from_request(force_create=False)
-        if force_create and not track_visitor:
-            values = {
-                'partner_id': partner.id,
-                'quiz_completed': False,
-                'quiz_points': 0,
-                'track_id': track.id
-            }
-            track_visitor = request.env['event.track.visitor'].sudo().create(values)
-        return track_visitor
 
     def _get_quiz_answers_details(self, track, answer_ids):
         all_questions = request.env['event.quiz.question'].sudo().search([('quiz_id', '=', track.quiz_id.id)])
@@ -70,14 +58,12 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
 
     @http.route('/event_track/quiz/submit', type="json", auth="public", website=True)
     def event_track_quiz_submit(self, event_id, track_id, answer_ids):
-        if request.website.is_public_user():
-            return {'error': 'public_user'}
         fetch_res = self._fetch_track(event_id, track_id)
         if fetch_res.get('error'):
             return fetch_res
         track = fetch_res['track']
 
-        event_track_visitor = track._find_track_visitor(force_create=True)
+        event_track_visitor, visitor_sudo = track._find_track_visitor(force_create=True)
 
         if event_track_visitor.quiz_completed:
             return {'error': 'track_quiz_done'}
@@ -89,7 +75,7 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
             'quiz_points': answers_details['points'],
         })
 
-        return {
+        result = {
             'answers': {
                 answer.question_id.id: {
                     'is_correct': answer.is_correct,
@@ -99,6 +85,9 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
             'quiz_completed': event_track_visitor.quiz_completed,
             'quiz_points': answers_details['points']
         }
+        if request.httprequest.cookies.get('visitor_uuid', '') != visitor_sudo.access_token:
+            result['visitor_uuid'] = visitor_sudo.access_token
+        return result
 
     @http.route('/event_track/quiz/reset', type="json", auth="user", website=True)
     def quiz_reset(self, event_id, track_id):
@@ -106,7 +95,7 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
         if fetch_res.get('error'):
             return fetch_res
         track = fetch_res['track']
-        event_track_visitor = track._find_track_visitor(force_create=True)
+        event_track_visitor, unused = track._find_track_visitor(force_create=True)
         event_track_visitor.write({
             'quiz_completed': False,
             'quiz_points': 0,

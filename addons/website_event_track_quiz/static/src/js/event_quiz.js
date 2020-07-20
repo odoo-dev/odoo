@@ -5,6 +5,7 @@ odoo.define('website_event_track_quiz.event.quiz', function (require) {
     // var Dialog = require('web.Dialog');
     var core = require('web.core');
     var session = require('web.session');
+    var utils = require('web.utils');
 
     // var QuizFinishModal = require('website_event_track_quiz.quiz.finish');
 
@@ -51,7 +52,6 @@ odoo.define('website_event_track_quiz.event.quiz', function (require) {
                 this.quiz.questionsCount = quizData.questions.length;
             }
             this.isMember = data.isMember || false;
-            this.publicUser = session.is_website_user;
             this.userId = session.user_id;
             this.redirectURL = encodeURIComponent(document.URL);
         },
@@ -92,8 +92,6 @@ odoo.define('website_event_track_quiz.event.quiz', function (require) {
                 message = _t('All questions must be answered !');
             } else if (alertCode === 'quiz_done') {
                 message = _t('This quiz is already done. Retaking it is not possible.');
-            } else if (alertCode === 'public_user') {
-                message = _t('You must be logged to submit the quiz.');
             }
 
             this.displayNotification({
@@ -220,6 +218,9 @@ odoo.define('website_event_track_quiz.event.quiz', function (require) {
                     }
                     self._renderAnswersHighlightingAndComments();
                     self._renderValidationInfo();
+                    if (data.visitor_uuid) {
+                        utils.set_cookie('visitor_uuid', data.visitor_uuid);
+                    }
                 }
             });
         },
