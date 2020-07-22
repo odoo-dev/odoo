@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-from random import randint
 from werkzeug.exceptions import Forbidden, NotFound
 from werkzeug.utils import redirect
 
@@ -17,12 +16,11 @@ _logger = logging.getLogger(__name__)
 class WebsiteEventMeetController(http.Controller):
 
     def _get_event_rooms_base_domain(self, event):
-        search_domain_base = [
-            ('event_id', '=', event.id),
-        ]
-        if not request.env.user.has_group('event.group_event_user'):
-            search_domain_base = expression.AND([search_domain_base, [('is_published', '=', True)]])
+        search_domain_base = [('event_id', '=', event.id), ('is_published', '=', True)]
         return search_domain_base
+
+    def _MEETING_ROOMS_SORT(self, m):
+        return (m.is_pinned, m.room_last_joined, m.id)
 
     # ------------------------------------------------------------
     # MAIN PAGE
@@ -30,23 +28,21 @@ class WebsiteEventMeetController(http.Controller):
 
     @http.route(["/event/<model('event.event'):event>/meeting_rooms"], type="http",
                 auth="public", website=True, sitemap=True)
-    def event_meeting_rooms(self, event, lang=None, open_room_id=None):
+    def event_meeting_rooms(self, event, lang=None):
         """Display the meeting rooms of the event on the frontend side.
 
         :param event: event for which we display the meeting rooms
         :param lang: lang id used to perform a search
-        :param open_room_id: automatically open the meeting room given
         """
         if not event.can_access_from_current_website():
             raise Forbidden()
 
         return request.render(
             "website_event_meet.event_meet",
-            self._event_meeting_rooms_get_values(event, lang=lang, open_room_id=open_room_id)
+            self._event_meeting_rooms_get_values(event, lang=lang)
         )
 
-    def _event_meeting_rooms_get_values(self, event, lang=None, open_room_id=None):
-        # meeting_rooms = event.sudo().meeting_room_ids.filtered(lambda m: m.active)
+    def _event_meeting_rooms_get_values(self, event, lang=None):
         search_domain = self._get_event_rooms_base_domain(event)
         meeting_rooms_all = request.env['event.meeting.room'].sudo().search(search_domain)
         if lang:
@@ -55,7 +51,7 @@ class WebsiteEventMeetController(http.Controller):
                 [('room_lang_id', '=', int(lang))]
             ])
         meeting_rooms = request.env['event.meeting.room'].sudo().search(search_domain)
-        meeting_rooms = meeting_rooms.sorted(lambda m: (m.is_pinned, m.room_last_joined, m.id), reverse=True)
+        meeting_rooms = meeting_rooms.sorted(self._MEETING_ROOMS_SORT, reverse=True)
 
         visitor = request.env['website.visitor']._get_visitor_from_request()
 
@@ -67,9 +63,8 @@ class WebsiteEventMeetController(http.Controller):
             "meeting_rooms": meeting_rooms,
             "current_lang": request.env["res.lang"].browse(int(lang)) if lang else False,
             "available_languages": meeting_rooms_all.mapped("room_lang_id"),
-            "default_lang_code": request.env.user.lang,
+            "default_lang_code": request.context.get('lang', request.env.user.lang),
             "default_username": visitor._get_attendee_name() if visitor else None,
-            "open_room_id": int(open_room_id) if open_room_id else None,
             # environment
             "is_event_manager": request.env.user.has_group("event.group_event_manager"),
         }
@@ -90,7 +85,7 @@ class WebsiteEventMeetController(http.Controller):
         if not event or not event.can_access_from_current_website():
             raise Forbidden()
 
-        if not event.website_published or not lang or max_capacity == "no_limit":
+        if not event.website_published or not lang or max_capacity == "no_limit" or not event.meeting_room_allow_creation:
             raise Forbidden()
 
         _logger.info("New meeting room (%s) create by %s" % (name, request.httprequest.remote_addr))
@@ -104,10 +99,11 @@ class WebsiteEventMeetController(http.Controller):
                 "event_id": event.id,
                 "room_lang_id": lang.id,
                 "room_max_capacity": max_capacity,
+                "is_published": True,
             },
         )
 
-        return redirect("/event/%s/meeting_rooms?open_room_id=%i" % (slug(event), meeting_room.id))
+        return redirect(f"/event/{slug(event)}/meeting_room/{slug(meeting_room)}")
 
     @http.route(["/event/active_langs"], type="json", auth="public")
     def active_langs(self):
@@ -137,21 +133,20 @@ class WebsiteEventMeetController(http.Controller):
 
         return request.render(
             "website_event_meet.event_meet_main",
-            self._event_meet_get_values(event, meeting_room)
+            self._event_meet_get_values(event, meeting_room),
         )
 
     def _event_meet_get_values(self, event, meeting_room):
-        # search for exhibitor list
+        # search for meeting room list
         meeting_rooms_other = request.env['event.meeting.room'].sudo().search([
-            ('event_id', '=', event.id), ('id', '!=', meeting_room.id)
+            ('event_id', '=', event.id), ('id', '!=', meeting_room.id), ('is_published', '=', True),
         ])
-        current_lang = meeting_room.room_lang_id
 
-        meeting_rooms_other = meeting_rooms_other.sorted(key=lambda room: (
-            room.room_lang_id == current_lang,
-            room.is_pinned,
-            randint(0, 20)
-        ), reverse=True)
+        if not request.env.user.has_group("event.group_event_manager"):
+            # only the event manager can see meeting rooms which are full
+            meeting_rooms_other = meeting_rooms_other.filtered(lambda m: not m.room_is_full)
+
+        meeting_rooms_other = meeting_rooms_other.sorted(self._MEETING_ROOMS_SORT, reverse=True)
 
         return {
             # event information
@@ -162,5 +157,5 @@ class WebsiteEventMeetController(http.Controller):
             'meeting_rooms_other': meeting_rooms_other,
             # options
             'option_widescreen': True,
-            'option_can_edit': request.env.user.has_group('event.group_event_manager'),
+            'is_event_manager': request.env.user.has_group('event.group_event_manager'),
         }

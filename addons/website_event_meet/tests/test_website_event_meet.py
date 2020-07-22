@@ -6,7 +6,7 @@ from odoo.tests import Form
 
 
 class TestWebsiteEventMeet(TestEventCommon):
-    def test_meeting_room_form(self):
+    def test_meeting_room_create(self):
         """Test that the field of the mixin are automatically filled."""
         new_meeting_room_form = Form(self.env["event.meeting.room"])
         new_meeting_room_form.name = "Test name"
@@ -17,6 +17,18 @@ class TestWebsiteEventMeet(TestEventCommon):
 
         self.assertTrue(meeting_room.chat_room_id)
         self.assertEqual(meeting_room.chat_room_id.max_capacity, "20")
+
+        # Try to create a meeting room without filling the related field
+        # It must create the `chat.room` with the default value
+        meeting_room = self.env["event.meeting.room"].create({
+            "name": "Test 2",
+            "event_id": self.event_0.id,
+            "target_audience": "dev"
+        })
+
+        self.assertTrue(meeting_room.chat_room_id)
+        self.assertTrue(meeting_room.chat_room_id.name)
+        self.assertEqual(meeting_room.chat_room_id.max_capacity, "8")
 
     def test_meeting_room_copy(self):
         """Test the duplication of the meeting room."""

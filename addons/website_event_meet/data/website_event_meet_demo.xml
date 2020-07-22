@@ -36,6 +36,7 @@
         </record>
         <record id="event.event_7" model="event.event">
             <field name="meeting_room_menu" eval="True"/>
+            <field name="meeting_room_allow_creation" eval="True"/>
         </record>
     </data>
 </odoo>

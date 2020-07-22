@@ -9,15 +9,15 @@
                             <h2>Launch a new topic</h2>
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-left">Room Topic</label>
-                                <input class="form-control col-8" maxlength="50" name="name" placeholder="Room Topic" required="1"/>
+                                <input class="form-control col-8" maxlength="50" name="name" placeholder="e.g. Finance" required="1"/>
                             </div>
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-left">Short Summary</label>
-                                <input class="form-control col-8" maxlength="200" name="summary" placeholder="Short Summary" required="1"/>
+                                <input class="form-control col-8" maxlength="200" name="summary" placeholder="e.g. Let's talk about Corporate Finance" required="1"/>
                             </div>
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-left">Target People</label>
-                                <input class="form-control col-8" maxlength="30" name="audience" placeholder="Target People" required="1"/>
+                                <input class="form-control col-8" maxlength="30" name="audience" placeholder="e.g. CFOs &amp; Accountants" required="1"/>
                             </div>
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-left">Language</label>

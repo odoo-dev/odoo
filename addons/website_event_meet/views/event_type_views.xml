@@ -10,6 +10,9 @@
                 <div class="row mt16" attrs="{'invisible': [('website_menu', '=', False)]}">
                     <label class="col-lg-4" for="meeting_room_menu"/> <field name="meeting_room_menu"/>
                 </div>
+                <div class="row mt16" attrs="{'invisible': [('website_menu', '=', False)]}">
+                    <label class="col-lg-4" for="meeting_room_allow_creation"/> <field name="meeting_room_allow_creation"/>
+                </div>
             </xpath>
         </field>
     </record>
