@@ -32,12 +32,10 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
 
     def _event_track_get_values(self, event, track, **options):
         values = super(WebsiteEventTrackQuiz, self)._event_track_get_values(event, track)
-        if 'quiz' in options:
-            track_visitor, visitor = track._find_track_visitor(force_create=True)
-            values.update({
-                'show_quiz': True,
-                'track_visitor': track_visitor
-            })
+        track_visitor, visitor = track._find_track_visitor(force_create=True)
+        values.update({
+            'track_visitor': track_visitor
+        })
         return values
 
     def _get_quiz_answers_details(self, track, answer_ids):
