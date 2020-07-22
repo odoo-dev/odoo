@@ -22,8 +22,8 @@
 <!-- CONTENT: MAIN TEMPLATES -->
 <!-- ============================================================ -->
 
-<!-- Exhibitors Main Display -->
-<template id="meet_main" name="Exhibitors: Main Display">
+<!-- Meeting Rooms Main Display -->
+<template id="meet_main" name="Meeting Rooms: Main Display">
     <div class="mw-75 col-12 col-md-8">
         <h1 class="o_page_header mb-3 d-flex flex-row justify-content-between">
             <span>Join a room</span>
@@ -37,16 +37,19 @@
                 </div>
             </div>
         </h1>
-        <p>Choose a topic that interests you and start talking with the community.</p>
-        <p>Don't forget to setup your camera and microphone.</p>
+        <p>Choose a topic that interests you and start talking with the community. <br/> Don't forget to setup your camera and microphone.</p>
         <div class="d-flex flex-column justify-content-start align-items-start">
             <t t-as="meeting_room" t-call="website_event_meet.meeting_room_card" t-foreach="meeting_rooms">
                 <t t-set="meeting_room" t-value="meeting_room"/>
                 <t t-set="opened" t-value="int(meeting_room.id == open_room_id)"/>
             </t>
+            <div t-if="not meeting_rooms" class="m-auto text-center text-muted">
+                <h3 class="mt8">No Room Open</h3>
+                <p>Create one to get conversations going</p>
+            </div>
         </div>
     </div>
-    <div class="w-25 d-none d-md-block col-md-4">
+    <div t-if="event.meeting_room_allow_creation" class="w-25 d-none d-md-block col-md-4">
         <h1 class="o_page_header mb-3">Launch a new topic</h1>
         <p>Want to create your own discussion room ?</p>
         <p>Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic.</p>
@@ -59,6 +62,13 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="mt-4 col-12 alert alert-warning text-center" role="alert">
+                    <nav class="navbar navbar-default">
+                        <div class="container-fluid">
+                            <div class="navbar-header">
+                                <div class="o_wevent_meeting_room_card_menu"></div>
+                            </div>
+                        </div>
+                    </nav>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">&amp;times;</button>
                     <span>This room is not open right now!</span><br />
                     Join us here on the
@@ -79,40 +89,59 @@
             </div>
         </div>
     </div>
-    <div t-if="is_event_manager or not meeting_room.room_is_full" t-att-data-meeting-room-id="meeting_room.id" t-att-data-open-room="opened" t-att-data-is-event-manager="int(is_event_manager)" t-attf-class="card o_wevent_meeting_room_card w-100 m-2 bg-light">
+
+    <!-- Action to do when clicking on the card -->
+    <t t-if="event.is_ongoing or is_event_manager">
+        <!--During the event or if event manager-->
+        <t t-set="meeting_room_href" t-value="'/event/' + slug(event) + '/meeting_room/' + slug(meeting_room)"/>
+    </t>
+    <t t-elif="not event.is_ongoing and not event.is_participating">
+        <!--Pre-event, if not registered yet-->
+        <t t-set="meeting_room_href" t-value="'/event/' + slug(event) + '/register'"/>
+    </t>
+    <t t-else="">
+        <!--Pre-event, if registered but event not stared yet-->
+        <t t-set="meeting_room_href" t-value="'#'"/>
+        <t t-set="meeting_room_data_toggle" t-value="'modal'"/>
+        <t t-set="meeting_room_data_target" t-value="'.o_join_later_modal'"/>
+    </t>
+
+    <a t-if="is_event_manager or not meeting_room.room_is_full"
+        t-att-data-meeting-room-id="meeting_room.id"
+        t-att-data-open-room="opened"
+        t-att-data-is-event-manager="int(is_event_manager)"
+        t-attf-class="card o_wevent_meeting_room_card w-100 m-2 bg-light d-block text-decoration-none"
+        t-att-href="meeting_room_href"
+        t-att-data-toggle="meeting_room_data_toggle"
+        t-att-data-target="meeting_room_data_target">
         <div class="text-decoration-none w-100 h-100 p-4">
             <div class="o_wevent_meeting_room_corner_ribbon" t-if="meeting_room.room_is_full">Full</div>
-            <button t-if="is_event_manager and meeting_room.room_is_full" class="btn btn-danger float-right o_wevent_meeting_room_duplicate ml-1" type="button">Duplicate</button>
-            <button t-if="is_event_manager" class="btn btn-danger float-right o_wevent_meeting_room_delete" type="button">Close</button>
-            <h3><t t-esc="meeting_room.name"/> <t t-if="is_event_manager and meeting_room.is_pinned" t-esc="'(pinned)'"/></h3>
-            <h5 t-esc="meeting_room.summary"/>
-            <h4 class="m-0 row text-primary">
-                <b>&amp;#9900;&amp;nbsp;</b>
-                <span class="o_wevent_participant_count">
-                    <t t-esc="meeting_room.room_participant_count"/>&amp;nbsp;</span>
-                <t t-esc="meeting_room.target_audience or 'participant(s)'"/>
-            </h4>
+            <div t-if="is_event_manager" class="dropdown float-right dropleft">
+                <button class="btn py-0" data-toggle="dropdown"><h2>&#8942;</h2></button>
+                <div class="dropdown-menu">
+                    <div class="dropdown-item font-weight-bold disabled">Event Manager</div>
+                    <button class="dropdown-item btn btn-danger o_wevent_meeting_room_duplicate" type="button">Duplicate</button>
+                    <button class="dropdown-item btn btn-danger o_wevent_meeting_room_delete" type="button">Close</button>
+                </div>
+            </div>
+            <div class="row">
+                <button t-if="is_event_manager" t-attf-class="o_wevent_meeting_room_is_pinned btn #{'o_wevent_meeting_room_pinned' if meeting_room.is_pinned else ''}">
+                    <i class="fa fa-thumb-tack"/>
+                </button>
+                <h3 class="ml-3" t-esc="meeting_room.name"/>
+            </div>
+            <h5 t-esc="meeting_room.summary" class="text-muted"/>
             <div class="d-flex flex-row justify-content-between mt-3">
-                <!--During the event or if event manager-->
-                <a t-if="event.is_ongoing or is_event_manager"
-                   t-attf-href="/event/#{ slug(event) }/meeting_room/#{ slug(meeting_room) }"
-                   class="btn btn-primary">Join the room</a>
-                <!--Pre-event, if not registered yet-->
-                <a t-elif="not event.is_ongoing and not event.is_participating"
-                   t-attf-href="/event/#{ slug(event) }/register"
-                   class="btn btn-primary">Join the room</a>
-                <!--Pre-event, if registered but event not stared yet-->
-                <a t-else="not event.is_ongoing" href="#" data-toggle="modal" data-target=".o_join_later_modal"
-                   class="btn btn-primary">Join the room</a>
-
-
-
-                    <!--<button t-else="not event.is_ongoing"-->
-                       <!--class="btn btn-primary o_wemeet_join_later">Join the room</button>-->
+                <h4 class="m-0 row">
+                    <b>&amp;#9900;&amp;nbsp;</b>
+                    <span class="o_wevent_participant_count">
+                        <t t-esc="meeting_room.room_participant_count"/>&amp;nbsp;</span>
+                    <t t-esc="meeting_room.target_audience or 'participant(s)'"/>
+                </h4>
                 <div class="d-inline border p-2 bg-secondary" t-esc="meeting_room.room_lang_id.name"/>
             </div>
         </div>
-    </div>
+    </a>
 </template>
 
 </odoo>

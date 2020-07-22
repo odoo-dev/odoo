@@ -12,6 +12,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
     events: {
         'click .o_wevent_meeting_room_delete': '_onDeleteClick',
         'click .o_wevent_meeting_room_duplicate': '_onDuplicateClick',
+        'click .o_wevent_meeting_room_is_pinned': '_onPinClick',
     },
 
     start: function () {
@@ -40,7 +41,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
                     await this._rpc({
                         model: 'event.meeting.room',
                         method: 'write',
-                        args: [this.meetingRoomId, {active: false}],
+                        args: [this.meetingRoomId, {is_published: false}],
                         context: this.context,
                     });
 
@@ -76,6 +77,32 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
             },
         );
     },
+
+    /**
+      * Pin/unpin the room.
+      *
+      * @private
+      */
+    _onPinClick: async function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const pinnedButtonClass = "o_wevent_meeting_room_pinned";
+        const isPinned = event.currentTarget.classList.contains(pinnedButtonClass);
+
+        await this._rpc({
+            model: 'event.meeting.room',
+            method: 'write',
+            args: [this.meetingRoomId, {is_pinned: !isPinned}],
+            context: this.context,
+        });
+
+        if (isPinned) {
+            event.currentTarget.classList.remove(pinnedButtonClass);
+        } else {
+            event.currentTarget.classList.add(pinnedButtonClass);
+        }
+    }
 });
 
 return publicWidget.registry.websiteEventMeetingRoom;

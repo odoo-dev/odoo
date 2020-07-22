@@ -44,42 +44,37 @@
         </div>
         <div class="mx-3">
             <div class="d-flex flex-column mb-3">
-                <t t-if="meeting_room.room_is_full">
+                <t t-if="meeting_room.room_is_full and not is_event_manager">
                     <div class="mt-4 col-12 alert alert-warning text-center" role="alert">
                         <span>Oops! This room is full</span><br />Come back later to have a chat with us!
                     </div>
                 </t>
                 <t t-else="">
-                    <div id="o_wemeet_jitsi_iframe"/>
+                    <div id="o_wemeet_jitsi_iframe">
+                        <div class="o_wjitsi_chat_room_loading position-absolute w-100 text-center text-muted">
+                            <i class="fa fa-spin fa-spinner mr-3"/>
+                            <span>Loading your room...</span>
+                        </div>
+                    </div>
                     <div class="d-flex flex-row-reverse">
                         <t t-call="website_jitsi.chat_room_join_button">
                             <t t-set="_classes" t-value="'d-none'"/>
-                            <t t-set="room_name" t-value="meeting_room.name"/>
+                            <t t-set="room_name" t-value="meeting_room.room_name"/>
                             <t t-set="chat_room_id" t-value="meeting_room.chat_room_id.id"/>
                             <t t-set="auto_open" t-value="1"/>
                             <t t-set="attach_to" t-value="'#o_wemeet_jitsi_iframe'"/>
-                            <t t-set="check_full" t-value="option_can_edit"/>
+                            <t t-set="check_full" t-value="is_event_manager"/>
                             <t t-set="default_username" t-value="default_username"/>
                         </t>
                     </div>
                 </t>
             </div>
-            <span class="h5 mb-0">About <t t-esc="meeting_room.name"/></span>
+            <span class="h5 mb-0" t-esc="meeting_room.name"/>
+            <br/>
+            <span>A chat among <t t-esc="meeting_room.target_audience"/></span>
             <hr class="mt-2 pb-1 mb-1"/>
             <div class="row mt32">
-                <div class="col">
-                    <div class="d-flex align-items-top mb-3">
-                        <div class="d-flex flex-column">
-                            <div class="d-flex align-items-center">
-                                <h4 t-field="meeting_room.name" class="mb4"/>
-                            </div>
-                            <span t-if="meeting_room.target_audience">
-                                Audience: <span t-field="meeting_room.target_audience"/>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div t-field="meeting_room.summary" class="col-12 oe_no_empty"/>
+                <div t-field="meeting_room.summary" class="col-12 oe_no_empty mb-3"/>
             </div>
         </div>
     </div>
@@ -102,18 +97,17 @@
             <ul id="collapse_meet_room_aside" class="list-unstyled mx-2 collapse d-lg-block">
                 <li t-foreach="meeting_rooms_other" t-as="meeting_room_other">
                     <div class="d-flex mb-3">
-                        <!--Set lang flag here-->
-                        <!--<img class="mr-2"-->
-                            <!--style="max-width: 40px;"-->
-                            <!--t-att-src="website.image_url(meeting_room_other.room_lang_id.country_id, 'image')"-->
-                            <!--t-att-alt="sponsor_other.partner_id.country_id.name"/>-->
                         <div class="flex-grow-1">
                             <span class="d-flex align-items-top">
-                                <a t-attf-href="/event/#{ slug(event) }/meeting_room/#{ slug(meeting_room) }"><t t-esc="meeting_room_other.name"/></a>
+                                <a t-attf-href="/event/#{ slug(event) }/meeting_room/#{ slug(meeting_room_other) }"><t t-esc="meeting_room_other.name"/></a>
                             </span>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted"><i class="fa fa-globe"/> <t t-esc="meeting_room_other.room_lang_id.name"/></small>
-                                <small class="text-muted">Audience: <t t-esc="meeting_room_other.target_audience"/></small>
+                            <span class="text-muted" t-esc="meeting_room_other.summary"></span>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-muted">
+                                    <b>&amp;#9900;&amp;nbsp;</b>
+                                    <small><t t-esc="meeting_room_other.room_participant_count"/> <t t-esc="meeting_room_other.target_audience"/></small>
+                                </div>
+                                <small t-if="meeting_room_other.room_lang_id" class="text-muted"><i class="fa fa-globe"/> <t t-esc="meeting_room_other.room_lang_id.name"/></small>
                             </div>
                         </div>
                     </div>

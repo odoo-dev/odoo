@@ -27,6 +27,21 @@
     height: auto;
 }
 
+.o_wevent_meeting_room_is_pinned {
+    transition: 0.2s;
+    color: white;
+    -webkit-text-stroke: 1px $o-main-text-color;
+    -webkit-text-fill-color: transparent;
+
+    &:hover {
+        border: 1px solid $o-main-text-color;
+    }
+}
+
+.o_wevent_meeting_room_pinned {
+    -webkit-text-fill-color: $o-main-text-color;
+}
+
 .o_wevent_meeting_room_corner_ribbon {
     width: 200px;
     background: #e43;
