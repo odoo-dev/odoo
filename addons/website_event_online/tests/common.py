@@ -22,6 +22,10 @@ class EventDtPatcher(SavepointCase):
             'odoo.addons.event.models.event_event.fields.Datetime',
             wraps=FieldsDatetime
         )
+        cls.wevent_main_dt = patch(
+            'odoo.addons.website_event.controllers.main.fields.Datetime',
+            wraps=FieldsDatetime
+        )
         cls.event_online_dt = patch(
             'odoo.addons.website_event_online.models.event_event.fields.Datetime',
             wraps=FieldsDatetime
@@ -30,15 +34,25 @@ class EventDtPatcher(SavepointCase):
             'odoo.addons.event.models.event_event.fields.Date',
             wraps=FieldsDate
         )
+        cls.wevent_main_date = patch(
+            'odoo.addons.website_event.controllers.main.fields.Date',
+            wraps=FieldsDate
+        )
         cls.mock_event_dt = cls.event_dt.start()
+        cls.mock_wevent_main_dt = cls.wevent_main_dt.start()
         cls.mock_event_online_dt = cls.event_online_dt.start()
         cls.mock_event_date = cls.event_date.start()
+        cls.mock_wevent_main_date = cls.wevent_main_date.start()
         cls.mock_event_dt.now.return_value = cls.reference_now
+        cls.mock_wevent_main_dt.now.return_value = cls.reference_now
         cls.mock_event_online_dt.now.return_value = cls.reference_now
         cls.mock_event_date.today.return_value = cls.reference_today
+        cls.mock_wevent_main_date.today.return_value = cls.reference_today
         cls.addClassCleanup(cls.event_dt.stop)
+        cls.addClassCleanup(cls.wevent_main_dt.stop)
         cls.addClassCleanup(cls.event_online_dt.stop)
         cls.addClassCleanup(cls.event_date.stop)
+        cls.addClassCleanup(cls.wevent_main_date.stop)
 
 
 class TestEventOnlineCommon(TestEventCommon, EventDtPatcher):
