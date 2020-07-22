@@ -54,6 +54,18 @@ var discoverTalkSteps = function (talkName, fromList, reminderOn, toggleReminder
 
 
 /**
+ * TOOMS STEPS
+ */
+
+var discoverRoomSteps = function (roomName) {
+    var steps = [{
+        content: 'Go on "' + roomName + '" room in List',
+        trigger: 'a[title="Join ' + roomName + '"]',
+    }];
+    return steps;
+};
+
+/**
  * MAIN STEPS
  */
 
@@ -82,6 +94,31 @@ var browseMeetSteps = [{
 var registerSteps = [{
     content: 'Go on Register',
     trigger: 'li.btn-primary a:contains("Register")',
+}, {
+    content: "Select 2 units of 'Standard' ticket type",
+    extra_trigger: '#wrap:not(:has(a[href*="/event"]:contains("Conference for Architects")))',
+    trigger: 'select:eq(0)',
+    run: 'text 2',
+}, {
+    content: "Click on 'Register' button",
+    extra_trigger: 'select:eq(0):has(option:contains(2):propSelected)',
+    trigger: '.btn-primary:contains("Register")',
+    run: 'click',
+}, {
+    content: "Fill attendees details",
+    trigger: 'form[id="attendee_registration"] .btn:contains("Continue")',
+    run: function () {
+        $("input[name='1-name']").val("Raoulette Poiluchette");
+        $("input[name='1-phone']").val("0456112233");
+        $("input[name='1-email']").val("raoulette@example.com");
+        $("input[name='2-name']").val("Michel Tractopelle");
+        $("input[name='2-phone']").val("0456332211");
+        $("input[name='2-email']").val("michel@example.com");
+    },
+}, {
+    content: "Validate attendees details",
+    extra_trigger: "input[name='1-name'], input[name='2-name'], input[name='3-name']",
+    trigger: 'button:contains("Continue")',
 }];
 
 tour.register('wevent_register', {
@@ -92,9 +129,10 @@ tour.register('wevent_register', {
         browseTalksSteps,
         discoverTalkSteps('What This Event Is All About', true, true),
         browseTalksSteps,
-        // discoverTalkSteps('Live Testimonial', false, false, true),
+        discoverTalkSteps('Live Testimonial', false, false, true),
         browseMeetSteps,
-        registerSteps
+        discoverRoomSteps('Best wood for furniture'),
+        registerSteps,
     )
 );
 

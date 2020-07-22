@@ -136,25 +136,22 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, EventDtPatc
             'category_id': self.event_tag_category_1.id,
             'color': 8,
         })
-        self.event_location_demo = self.env['res.partner'].create({
-            'name': 'TOpenWood Headquarters Test',
-            'is_company': True,
-            'street': 'Rue Antoine Dansaert 188',
-            'city': 'Brussels',
-            'zip': '1000',
-            'country_id': self.env.ref('base.be').id,
-        })
+        self.env['event.event'].search(
+            [('name', 'like', '%Online Reveal%')]
+        ).write(
+            {'name': 'Do not click on me'}
+        )
         self.event = self.env['event.event'].create({
             'name': 'Online Reveal TestEvent',
             'auto_confirm': True,
             'stage_id': self.env.ref('event.event_stage_booked').id,
-            'address_id': self.event_location_demo.id,
+            'address_id': False,
             'user_id': self.user_demo.id,
             'tag_ids': [(4, self.event_tag_category_1_tag_1.id)],
-            # event if 8-18 in Europe/Brussels (DST) (first day: begins at 9, last day: ends at 15)
+            # event if 8-18 in Europe/Brussels (DST) (first day: begins at 7, last day: ends at 17)
             'date_tz': 'Europe/Brussels',
-            'date_begin': datetime.combine(self.reference_now, time(7, 0)) - timedelta(days=1),
-            'date_end': datetime.combine(self.reference_now, time(13, 0)) + timedelta(days=1),
+            'date_begin': datetime.combine(self.reference_now, time(5, 0)) - timedelta(days=1),
+            'date_end': datetime.combine(self.reference_now, time(15, 0)) + timedelta(days=1),
             # ticket informations
             'event_ticket_ids': [
                 (0, 0, {
@@ -168,6 +165,7 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, EventDtPatc
                 })
             ],
             # activate menus
+            'is_published': True,
             'website_menu': True,
             'website_track': True,
             'website_track_proposal': True,
@@ -181,6 +179,11 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, EventDtPatc
             'country_id': self.env.ref('base.be').id,
             'phone': '0485112233',
             'mobile': False,
+        })
+        self.event_speaker = self.env['res.partner'].create({
+            'name': 'Brandon Freeman',
+            'email': 'brandon.freeman55@example.com',
+            'phone': '(355)-687-3262',
         })
 
         # ------------------------------------------------------------
@@ -213,3 +216,47 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, EventDtPatc
             'event_id': self.event.id,
             'once_per_order': True,
         })
+
+        # ------------------------------------------------------------
+        # TRACKS
+        # ------------------------------------------------------------
+
+        self.track_0 = self.env['event.track'].create({
+            'name': 'What This Event Is All About',
+            'event_id': self.event.id,
+            'stage_id': self.env.ref('website_event_track.event_track_stage3').id,
+            'date': datetime.combine(self.reference_now, time(5, 0)),
+            'duration': 2,
+            'is_published': True,
+            'wishlisted_by_default': True,
+            'user_id': self.user_admin.id,
+            'partner_id': self.event_speaker.id,
+        })
+        self.track_1 = self.env['event.track'].create({
+            'name': 'Live Testimonial',
+            'event_id': self.event.id,
+            'stage_id': self.env.ref('website_event_track.event_track_stage3').id,
+            'date': self.reference_now - timedelta(minutes=30),
+            'duration': 0.75,
+            'is_published': True,
+            'user_id': self.user_admin.id,
+            'partner_id': self.event_speaker.id,
+        })
+
+        # ------------------------------------------------------------
+        # MEETING ROOMS
+        # ----------------------------------------------------------
+
+        self.env['event.meeting.room'].create({
+            'name': 'Best wood for furniture',
+            'summary': 'Let\'s talk about wood types for furniture',
+            'target_audience': 'wood expert(s)',
+            'is_pinned': True,
+            'website_published': True,
+            'event_id': self.event.id,
+            'room_lang_id': self.env.ref('base.lang_en').id,
+            'room_max_capacity': '12',
+            'room_participant_count': 9,
+        })
+
+        self.event.flush()
