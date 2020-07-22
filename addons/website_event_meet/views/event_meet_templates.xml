@@ -95,17 +95,16 @@
             <div class="d-flex flex-row justify-content-between mt-3">
                 <!--During the event or if event manager-->
                 <a t-if="event.is_ongoing or is_event_manager"
-                   t-attf-href="/event/#{ slug(event) }/meeting_room/#{ slug(meeting_room) }"
-                   class="btn btn-primary">Join the room</a>
+                    t-att-title="'Join %s' % meeting_room.name"
+                    t-attf-href="/event/#{ slug(event) }/meeting_room/#{ slug(meeting_room) }"
+                    class="btn btn-primary">Join the room</a>
                 <!--Pre-event, if not registered yet-->
                 <a t-elif="not event.is_ongoing and not event.is_participating"
-                   t-attf-href="/event/#{ slug(event) }/register"
-                   class="btn btn-primary">Join the room</a>
+                    t-attf-href="/event/#{ slug(event) }/register"
+                    class="btn btn-primary">Join the room</a>
                 <!--Pre-event, if registered but event not stared yet-->
                 <a t-else="not event.is_ongoing" href="#" data-toggle="modal" data-target=".o_join_later_modal"
-                   class="btn btn-primary">Join the room</a>
-
-
+                    class="btn btn-primary">Join the room</a>
 
                     <!--<button t-else="not event.is_ongoing"-->
                        <!--class="btn btn-primary o_wemeet_join_later">Join the room</button>-->

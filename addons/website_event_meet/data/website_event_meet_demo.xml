@@ -2,8 +2,8 @@
 <odoo>
     <data>
         <record id="event_meeting_room_0" model="event.meeting.room">
-            <field name="name">Which wood to choose ?</field>
-            <field name="summary">Let's talk about the different wood types.</field>
+            <field name="name">Best wood for furniture</field>
+            <field name="summary">Let's talk about wood types for furniture</field>
             <field name="target_audience">wood expert(s)</field>
             <field name="is_pinned" eval="True"/>
             <field name="website_published" eval="True"/>
