@@ -2,7 +2,7 @@
 <odoo>
 
 <template id="track_widget_reminder">
-    <div t-att-class="'o_wetrack_js_reminder btn mx-2 d-flex align-items-center rounded %s'
+    <div t-att-class="'o_wetrack_js_reminder btn ml-2 mb-2 d-flex align-items-center rounded %s'
                             % ('o_wetrack_reminder_light' if reminder_light else '')">
         <span class="o_wetrack_js_reminder_text text-white text-left">
             <t t-esc="'Set Reminder' if not track.is_reminder_on else 'Reminder On'"/>
