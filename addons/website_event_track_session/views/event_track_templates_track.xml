@@ -55,7 +55,9 @@
         <div class="mx-3 pt-3 o_wesession_track_main_description">
             <div class="d-flex justify-content-between">
                 <span class="h4" t-esc="track.name"/>
-                <t t-if="option_tracks_wishlist" t-call="website_event_track_online.track_widget_reminder"/>
+                <div class="o_we_track_action_buttons d-flex">
+                    <div class="o_we_track_reminder_button"><t t-if="option_tracks_wishlist" t-call="website_event_track_online.track_widget_reminder"/></div>
+                </div>
             </div>
             <div class="text-muted">
                 <span t-field="track.date"
