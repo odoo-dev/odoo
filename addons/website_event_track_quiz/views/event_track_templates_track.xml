@@ -34,7 +34,9 @@
                 <t t-set="quiz_points" t-value="track_visitor.quiz_points"/>
             </t>
         </div>
-        <div t-if="track.quiz_id and not show_quiz" class="d-flex justify-content-end px-2 pb-2 mt-2 mb-2 mr-3">
+    </xpath>
+    <xpath expr="//div[hasclass('o_we_track_reminder_button')]" position="before">
+        <div t-if="track.quiz_id and not show_quiz">
             <a class="btn btn-primary" t-attf-href="#{'%s?quiz=True' % (track.website_url)}">Take the Quiz</a>
         </div>
     </xpath>
