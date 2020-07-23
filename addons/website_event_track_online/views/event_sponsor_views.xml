@@ -1,5 +1,32 @@
 <?xml version="1.0"?>
 <odoo>
+    <record id="event_sponsor_view_search" model="ir.ui.view">
+        <field name="name">event.sponsor.view.search.inherit.online</field>
+        <field name="model">event.sponsor</field>
+        <field name="inherit_id" ref="website_event_track.event_sponsor_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="event_sponsor_view_tree" model="ir.ui.view">
+        <field name="name">event.sponsor.view.tree.inherit.online</field>
+        <field name="model">event.sponsor</field>
+        <field name="inherit_id" ref="website_event_track.event_sponsor_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="mobile"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="event_sponsor_view_form" model="ir.ui.view">
         <field name="name">event.sponsor.view.form.inherit.online</field>
         <field name="model">event.sponsor</field>
@@ -15,16 +42,16 @@
                 </div>
             </xpath>
             <xpath expr="//field[@name='event_id']" position="after">
-                <field name="partner_id"/>
+                <field name="partner_id" string="Customer"/>
             </xpath>
             <xpath expr="//field[@name='partner_email']" position="replace">
-                <field name="email" widget="email"/>
+                <field name="email" widget="email" string="Email"/>
             </xpath>
             <xpath expr="//field[@name='partner_phone']" position="replace">
-                <field name="phone" widget="phone" options="{'enable_sms': True}"/>
+                <field name="phone" widget="phone" string="Phone" options="{'enable_sms': True}"/>
             </xpath>
             <xpath expr="//field[@name='partner_mobile']" position="replace">
-                <field name="mobile" widget="phone" options="{'enable_sms': True}"/>
+                <field name="mobile" widget="phone" string="Mobile" options="{'enable_sms': True}"/>
             </xpath>
         </field>
     </record>
