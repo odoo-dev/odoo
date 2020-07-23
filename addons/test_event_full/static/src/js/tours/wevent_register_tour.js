@@ -19,7 +19,7 @@ var discoverTalkSteps = function (talkName, fromList, reminderOn, toggleReminder
         steps = [{
             content: 'Click on Live Track',
             trigger: 'article span:contains("' + talkName + '")',
-            run: 'click'
+            run: 'click',
         }];
     }
     if (reminderOn) {
@@ -54,42 +54,22 @@ var discoverTalkSteps = function (talkName, fromList, reminderOn, toggleReminder
 
 
 /**
- * TOOMS STEPS
+ * ROOMS STEPS
  */
 
 var discoverRoomSteps = function (roomName) {
     var steps = [{
         content: 'Go on "' + roomName + '" room in List',
-        trigger: 'a[title="Join ' + roomName + '"]',
+        trigger: 'a.o_wevent_meeting_room_card h3:contains("' + roomName + '")',
+        run: 'click',
     }];
     return steps;
 };
 
+
 /**
- * MAIN STEPS
+ * REGISTER STEPS
  */
-
-var initTourSteps = function (eventName) {
-    return [{
-        content: 'Go on "' + eventName + '" page',
-        trigger: 'a[href*="/event"]:contains("' + eventName + '"):first',
-    }];
-};
-
-var browseTalksSteps = [{
-    content: 'Browse Talks',
-    trigger: 'a:contains("Talks")',
-}];
-
-var browseExhibitorsSteps = [{
-    content: 'Browse Exhibitors',
-    trigger: 'a:contains("Exhibitors")',
-}];
-
-var browseMeetSteps = [{
-    content: 'Browse Meet',
-    trigger: 'a:contains("Community")',
-}];
 
 var registerSteps = [{
     content: 'Go on Register',
@@ -119,7 +99,35 @@ var registerSteps = [{
     content: "Validate attendees details",
     extra_trigger: "input[name='1-name'], input[name='2-name'], input[name='3-name']",
     trigger: 'button:contains("Continue")',
+    run: 'click',
 }];
+
+/**
+ * MAIN STEPS
+ */
+
+var initTourSteps = function (eventName) {
+    return [{
+        content: 'Go on "' + eventName + '" page',
+        trigger: 'a[href*="/event"]:contains("' + eventName + '"):first',
+    }];
+};
+
+var browseTalksSteps = [{
+    content: 'Browse Talks',
+    trigger: 'a:contains("Talks")',
+}];
+
+var browseExhibitorsSteps = [{
+    content: 'Browse Exhibitors',
+    trigger: 'a:contains("Exhibitors")',
+}];
+
+var browseMeetSteps = [{
+    content: 'Browse Meet',
+    trigger: 'a:contains("Community")',
+}];
+
 
 tour.register('wevent_register', {
     url: '/event',
