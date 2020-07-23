@@ -30,7 +30,7 @@ class QuizQuestion(models.Model):
     _description = "Content Quiz Question"
     _order = "quiz_id, sequence"
 
-    name = fields.Char("Question Name", required=True, translate=True)
+    name = fields.Char("Question", required=True, translate=True)
     sequence = fields.Integer("Sequence")
     quiz_id = fields.Many2one("event.quiz", "Quiz", required=True, ondelete='cascade')
     awarded_points = fields.Integer("Number of points", default=1)

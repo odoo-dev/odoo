@@ -3,4 +3,5 @@
 
 from . import event_track
 from . import event_track_visitor
+from . import event_type
 from . import event_quiz

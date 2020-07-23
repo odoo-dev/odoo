@@ -2,11 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import math
 
 from odoo import http
 from odoo.addons.website_event_track_session.controllers.session import WebsiteEventSessionController
 from odoo.exceptions import AccessError, UserError
 from odoo.http import request
+from odoo.osv import expression
+from odoo.addons.http_routing.models.ir_http import slug
 
 
 class WebsiteEventTrackQuiz(WebsiteEventSessionController):
@@ -19,7 +22,8 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
         values = super(WebsiteEventTrackQuiz, self)._event_track_page_get_values(event, track)
         track_visitor = track._get_event_track_visitors(force_create=True)
         values.update({
-            'track_visitor': track_visitor
+            'track_visitor': track_visitor,
+            'is_manager': request.env.user.has_group('event.group_event_manager')
         })
         return values
 
@@ -74,7 +78,7 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
         request.session['quiz_answers'] = json.dumps(session_quiz_answers)
 
     def _get_quiz_answers_details(self, track, answer_ids):
-        all_questions = request.env['event.quiz.question'].sudo().search([('quiz_id', '=', track.quiz_id.id)])
+        all_questions = request.env['event.quiz.question'].sudo().search([('quiz_id', '=', track.sudo().quiz_id.id)])
         user_answers = request.env['event.quiz.answer'].sudo().search([('id', 'in', answer_ids)])
 
         if user_answers.mapped('question_id') != all_questions:

@@ -45,10 +45,10 @@
             <form string="Quiz Question">
                 <sheet>
                     <div class="oe_edit_only">
-                        <label for="name" string="Question Name"/>
+                        <label for="name" string="Question"/>
                     </div>
                     <h1>
-                        <field name="name" default_focus="1" placeholder="Name"/>
+                        <field name="name" default_focus="1" placeholder="e.g. According to Douglas, what should you pay most attention to?"/>
                     </h1>
                     <group>
                         <field name="quiz_id"/>

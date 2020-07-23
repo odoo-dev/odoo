@@ -8,7 +8,8 @@
             t-att-data-event-id="track.event_id.id"
             t-att-data-completed="1 if quiz_completed else 0"
             t-att-data-quiz-attempts-count="quiz_attempts_count or 0"
-            t-att-data-quiz-points-gained="quiz_points">
+            t-att-data-quiz-points-gained="quiz_points"
+            t-att-data-is-manager="is_manager or 0">
             <t t-foreach="track.quiz_id.question_ids" t-as="question">
                 <t t-call="website_event_track_quiz.quiz_question"/>
             </t>
@@ -22,10 +23,6 @@
             <div class="row d-flex mb-2 mx-0">
                 <div class="h4">
                     <span t-esc="question['name']"/>
-                </div>
-                <div class="ml-auto o_quiz_js_quiz_edit_del" t-if="not quiz_completed" >
-                    <i class="o_quiz_js_quiz_icon o_quiz_js_quiz_edit_question fa fa-pencil-square-o p-1 text-muted"></i>
-                    <i class="o_quiz_js_quiz_icon o_quiz_js_quiz_delete_question fa fa-trash p-1 text-muted"></i>
                 </div>
             </div>
             <div class="list-group">

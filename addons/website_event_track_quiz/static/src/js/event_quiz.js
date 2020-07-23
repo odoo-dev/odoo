@@ -45,7 +45,8 @@ odoo.define('website_event_track_quiz.event.quiz', function (require) {
                 eventId: '',
                 completed: false,
                 isMember: false,
-                progressBar: false
+                progressBar: false,
+                isManager: false
             });
             this.quiz = quizData || false;
             if (this.quiz) {
