@@ -97,6 +97,7 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
             context: this.context,
         });
 
+        // TDE FIXME: addclass ?
         if (isPinned) {
             event.currentTarget.classList.remove(pinnedButtonClass);
         } else {

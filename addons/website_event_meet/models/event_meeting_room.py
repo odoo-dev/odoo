@@ -3,7 +3,7 @@
 
 from werkzeug.urls import url_join
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models, _
 from odoo.addons.http_routing.models.ir_http import slug
 
 
@@ -18,14 +18,13 @@ class EventMeetingRoom(models.Model):
 
     name = fields.Char("Topic", required=True, translate=True)
     active = fields.Boolean('Active', default=True)
+    is_published = fields.Boolean(copy=True)  # make the inherited field copyable
     event_id = fields.Many2one("event.event", string="Event", required=True, ondelete="cascade")
     is_pinned = fields.Boolean("Is pinned")
     summary = fields.Char("Summary")
     target_audience = fields.Char("Audience", translate=True)
 
-    # make the inherited field copyable
-    is_published = fields.Boolean(copy=True)
-
+    # TDE FIXME: merge with mixin code
     ROOM_CONFIG_FIELDS = {
         'room_name': 'name',
         'room_lang_id': 'lang_id',
@@ -35,6 +34,7 @@ class EventMeetingRoom(models.Model):
 
     @api.model_create_multi
     def create(self, values_list):
+        # TDE FIXME: merge with mixin code
         for values in values_list:
             if not values.get("chat_room_id"):
                 # be sure to always create a `chat.room` for each `event.meeting.room`

@@ -15,7 +15,7 @@ class Event(models.Model):
         readonly=False, store=True,
         help="Display community tab on website")
     meeting_room_allow_creation = fields.Boolean(
-        "Allow meeting room creation", compute="_compute_meeting_room_menu",
+        "Allow meeting room creation", compute="_compute_meeting_room_allow_creation",
         readonly=False, store=True,
         help="Let Visitors Create Rooms")
     meeting_room_menu_ids = fields.One2many(
@@ -43,12 +43,16 @@ class Event(models.Model):
         for event in self:
             if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.meeting_room_menu = event.event_type_id.meeting_room_menu
+            elif not event.meeting_room_menu:
+                event.meeting_room_menu = False
+
+    @api.depends("event_type_id", "meeting_room_menu", "meeting_room_allow_creation")
+    def _compute_meeting_room_allow_creation(self):
+        for event in self:
+            if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.meeting_room_allow_creation = event.event_type_id.meeting_room_allow_creation
-            else:
-                if not event.meeting_room_menu:
-                    event.meeting_room_menu = False
-                if not event.meeting_room_allow_creation:
-                    event.meeting_room_allow_creation = False
+            elif not event.meeting_room_menu or not event.meeting_room_allow_creation:
+                event.meeting_room_allow_creation = False
 
     # ------------------------------------------------------------
     # WEBSITE MENU MANAGEMENT

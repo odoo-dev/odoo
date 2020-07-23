@@ -19,8 +19,8 @@ class WebsiteEventMeetController(http.Controller):
         search_domain_base = [('event_id', '=', event.id), ('is_published', '=', True)]
         return search_domain_base
 
-    def _MEETING_ROOMS_SORT(self, m):
-        return (m.is_pinned, m.room_last_joined, m.id)
+    def _sort_event_rooms(self, room):
+        return (room.is_pinned, room.room_last_joined, room.id)
 
     # ------------------------------------------------------------
     # MAIN PAGE
@@ -51,7 +51,7 @@ class WebsiteEventMeetController(http.Controller):
                 [('room_lang_id', '=', int(lang))]
             ])
         meeting_rooms = request.env['event.meeting.room'].sudo().search(search_domain)
-        meeting_rooms = meeting_rooms.sorted(self._MEETING_ROOMS_SORT, reverse=True)
+        meeting_rooms = meeting_rooms.sorted(self._sort_event_rooms, reverse=True)
 
         visitor = request.env['website.visitor']._get_visitor_from_request()
 
@@ -146,7 +146,7 @@ class WebsiteEventMeetController(http.Controller):
             # only the event manager can see meeting rooms which are full
             meeting_rooms_other = meeting_rooms_other.filtered(lambda m: not m.room_is_full)
 
-        meeting_rooms_other = meeting_rooms_other.sorted(self._MEETING_ROOMS_SORT, reverse=True)
+        meeting_rooms_other = meeting_rooms_other.sorted(self._sort_event_rooms, reverse=True)
 
         return {
             # event information
