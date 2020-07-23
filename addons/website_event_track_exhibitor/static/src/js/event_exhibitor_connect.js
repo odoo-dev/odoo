@@ -55,7 +55,7 @@ var ExhibitorConnectClosedDialog = Dialog.extend({
             args: [
                 this.sponsorId,
                 ['name', 'subtitle', 'sponsor_type_id',
-                 'website', 'email', 'phone',
+                 'url', 'email', 'phone',
                  'website_description', 'website_image_url',
                  'hour_from', 'hour_to', 'is_in_opening_hours',
                  'country_id', 'country_flag_url',

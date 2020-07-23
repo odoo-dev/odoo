@@ -30,8 +30,8 @@
                                     t-esc="widget.sponsorData.sponsor_type_name"/>
                             </div>
                             <span class="text-muted" t-if="widget.sponsorData.subtitle" t-esc="widget.sponsorData.subtitle"/>
-                            <span t-if="widget.sponsorData.website">
-                                <i class="fa fa-home mr-2"/><a t-att-href="widget.sponsorData.website"><span t-esc="widget.sponsorData.website"/></a>
+                            <span t-if="widget.sponsorData.url">
+                                <i class="fa fa-home mr-2"/><a t-att-href="widget.sponsorData.url"><span t-esc="widget.sponsorData.url"/></a>
                             </span>
                             <span t-if="widget.sponsorData.email">
                                 <i class="fa fa-envelope mr-2"/><a t-att-mailto="widget.sponsorData.email"><span t-esc="widget.sponsorData.email"/></a>

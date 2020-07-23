@@ -16,6 +16,7 @@ class ExhibitorController(WebsiteEventTrackController):
     def _get_event_sponsors_base_domain(self, event):
         search_domain_base = [
             ('event_id', '=', event.id),
+            ('is_exhibitor', '=', True),
         ]
         if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([search_domain_base, [('is_published', '=', True)]])
@@ -39,7 +40,7 @@ class ExhibitorController(WebsiteEventTrackController):
         # init and process search terms
         searches.setdefault('search', '')
         searches.setdefault('countries', '')
-        searches.setdefault('sponsorhips', '')
+        searches.setdefault('sponsorships', '')
         search_domain_base = self._get_event_sponsors_base_domain(event)
         search_domain = search_domain_base
 
@@ -59,11 +60,11 @@ class ExhibitorController(WebsiteEventTrackController):
             ])
 
         # search on sponsor types
-        search_sponsorhips = self._get_search_sponsorships(searches['sponsorhips'])
-        if search_sponsorhips:
+        search_sponsorships = self._get_search_sponsorships(searches['sponsorships'])
+        if search_sponsorships:
             search_domain = expression.AND([
                 search_domain,
-                [('sponsor_type_id', 'in', search_sponsorhips.ids)]
+                [('sponsor_type_id', 'in', search_sponsorships.ids)]
             ])
 
         # fetch data to display; use sudo to allow reading partner info, be sure domain is correct
@@ -95,7 +96,7 @@ class ExhibitorController(WebsiteEventTrackController):
             'searches': searches,
             'search_key': searches['search'],
             'search_countries': search_countries,
-            'search_sponsorhips': search_sponsorhips,
+            'search_sponsorships': search_sponsorships,
             'sponsor_types': sponsor_types,
             'sponsor_countries': sponsor_countries,
             # environment

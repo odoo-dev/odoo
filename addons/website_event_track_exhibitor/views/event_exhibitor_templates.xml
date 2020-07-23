@@ -100,9 +100,9 @@
                 <t t-foreach="sponsor_types" t-as="sponsor_type">
                     <a t-att-href="'/event/%s/exhibitors?%s' % (
                             slug(event),
-                            keep_query('*', sponsorhips=str((search_sponsorhips - sponsor_type).ids if sponsor_type in search_sponsorhips else (sponsor_type | search_sponsorhips).ids))
+                            keep_query('*', sponsorships=str((search_sponsorships - sponsor_type).ids if sponsor_type in search_sponsorships else (sponsor_type | search_sponsorships).ids))
                         )"
-                        t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if sponsor_type in search_sponsorhips else ''}">
+                        t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if sponsor_type in search_sponsorships else ''}">
                         <t t-esc="sponsor_type.name"/>
                     </a>
                 </t>
@@ -215,13 +215,13 @@
                     class="btn border-0 py-1">&#215;</a>
             </span>
         </t>
-        <t t-foreach="search_sponsorhips" t-as="sponsorship">
+        <t t-foreach="search_sponsorships" t-as="sponsorship">
             <span class="align-items-baseline border d-inline-flex pl-2 rounded ml16 mb-2 bg-white">
                 <i class="fa fa-tag mr-2 text-muted"/>
                 <t t-esc="sponsorship.display_name"/>
                 <a t-att-href="'/event/%s/exhibitors?%s' % (
                     slug(event),
-                    keep_query('*', sponsorships=str((search_sponsorhips - sponsorship).ids)))"
+                    keep_query('*', sponsorships=str((search_sponsorships - sponsorship).ids)))"
                     class="btn border-0 py-1">&#215;</a>
             </span>
         </t>

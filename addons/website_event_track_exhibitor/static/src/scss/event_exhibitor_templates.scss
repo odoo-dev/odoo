@@ -87,5 +87,14 @@
         #o_wsponsor_jitsi_iframe {
             height: 85vh;
         }
+
+        .o_wesponsor_exhibitor_aside {
+
+            .o_wesponsor_aside_logo {
+                max-width: 40px;
+                object-fit: contain;
+                object-position: top;
+            }
+        }
     }
 }

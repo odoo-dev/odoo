@@ -15,6 +15,7 @@
         'website_jitsi',
     ],
     'data': [
+        'security/ir.model.access.csv',
         'security/security.xml',
         'views/assets.xml',
         'views/event_sponsor_views.xml',
