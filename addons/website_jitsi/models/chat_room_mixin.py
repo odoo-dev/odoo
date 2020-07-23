@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ChatRoomMixin(models.AbstractModel):
@@ -11,9 +11,14 @@ class ChatRoomMixin(models.AbstractModel):
     all the chat room logic at the same place, for all models.
     Embed chat room related fields prefixed with `room_`.
     """
-
     _name = "chat.room.mixin"
     _description = "Chat Room Mixin"
+    ROOM_CONFIG_FIELDS = [
+        ('room_name', 'name'),
+        ('room_lang_id', 'lang_id'),
+        ('room_max_capacity', 'max_capacity'),
+        ('room_participant_count', 'participant_count')
+    ]
 
     chat_room_id = fields.Many2one("chat.room", "Chat Room", readonly=True, copy=False, ondelete="set null")
     # chat room related fields
@@ -25,6 +30,21 @@ class ChatRoomMixin(models.AbstractModel):
     room_last_activity = fields.Datetime("Last activity", related="chat_room_id.last_activity")
     room_last_joined = fields.Datetime("Last joined", related="chat_room_id.last_joined")
     room_max_participant_reached = fields.Integer("Max participant reached", related="chat_room_id.max_participant_reached")
+
+    @api.model_create_multi
+    def create(self, values_list):
+        for values in values_list:
+            if any(values.get(fmatch[0]) for fmatch in self.ROOM_CONFIG_FIELDS) and not values.get('chat_room_id'):
+                room_values = dict((fmatch[1], values[fmatch[0]]) for fmatch in self.ROOM_CONFIG_FIELDS if values.get(fmatch[0]))
+                values['chat_room_id'] = self.env['chat.room'].create(room_values)
+        return super(ChatRoomMixin, self).create(values_list)
+
+    def write(self, values):
+        if any(values.get(fmatch[0]) for fmatch in self.ROOM_CONFIG_FIELDS):
+            for document in self.filtered(lambda doc: not doc.chat_room_id):
+                room_values = dict((fmatch[1], values[fmatch[0]]) for fmatch in self.ROOM_CONFIG_FIELDS if values.get(fmatch[0]))
+                document.chat_room_id = self.env['chat.room'].create(room_values)
+        return super(ChatRoomMixin, self).write(values)
 
     def copy(self, default=None):
         if self.chat_room_id:

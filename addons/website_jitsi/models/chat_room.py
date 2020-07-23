@@ -19,9 +19,12 @@ class ChatRoom(models.Model):
     _name = "chat.room"
     _description = "Chat Room"
 
+    def _default_name(self):
+        return "odoo-room-%s" % str(uuid.uuid4())[:8]
+
     name = fields.Char(
         "Room Name", required=True, copy=False,
-        default=lambda self: "odoo-room-%s" % str(uuid.uuid4())[:8])
+        default=lambda self: self._default_name())
     is_full = fields.Boolean("Full", compute="_compute_full")
     lang_id = fields.Many2one(
         "res.lang", "Language",
