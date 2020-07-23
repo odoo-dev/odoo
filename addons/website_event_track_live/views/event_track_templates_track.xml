@@ -11,7 +11,7 @@
 
 <!-- MAIN: ADD VIDEO -->
 <template id="event_track_content" inherit_id="website_event_track_session.event_track_content">
-    <xpath expr="//div[hasclass('o_wesession_track_main_description')]" position="before">
+    <xpath expr="//div[@name='o_wesession_track_main']//div" position="before">
         <t t-set="show_youtube_frame" t-value="track.youtube_video_url and (track.is_youtube_replay or track.is_track_soon or track.is_track_live or track.is_track_done)" />
         <div t-if="show_youtube_frame" class="flex-grow-1 o_wevent_event_track_live"
             t-att-data-track-id="track.id"
