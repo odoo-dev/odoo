@@ -1,10 +1,10 @@
 var onYouTubeIframeAPIReady;
 
-odoo.define('website_event_track.website_event_youtube_embed', function (require) {
+odoo.define('website_event_track_live.website_event_youtube_embed', function (require) {
 'use strict';
 
 var publicWidget = require('web.public.widget');
-var TrackSuggestionWidget = require('website_event_track.website_event_track_suggestion');
+var TrackSuggestionWidget = require('website_event_track_live.website_event_track_suggestion');
 
 var YOUTUBE_VIDEO_ENDED = 0;
 var YOUTUBE_VIDEO_PLAYING = 1;
@@ -52,6 +52,11 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
         });
     },
 
+    _onReplay: function () {
+        this.youtubePlayer.seekTo(0);
+        this.youtubePlayer.playVideo();
+    },
+
     /**
      * The 'fullscreenchange' event is probably a better fit but it is unfortunately
      * not triggered when Youtube enters fullscreen mode.
@@ -74,7 +79,7 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
         $(document.head).append($youtubeElement);
 
         onYouTubeIframeAPIReady = function () {
-            new YT.Player('o_wevent_youtube_iframe_container', {
+            self.youtubePlayer = new YT.Player('o_wevent_youtube_iframe_container', {
                 height: '100%',
                 width: '100%',
                 videoId: youtubeId,
@@ -98,7 +103,9 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
      */
     _showSuggestion: function () {
         if (this.nextSuggestion && !this.isFullScreen) {
-            new TrackSuggestionWidget(this, this.nextSuggestion).appendTo(this.$el);
+            var trackSuggestion = new TrackSuggestionWidget(this, this.nextSuggestion);
+            trackSuggestion.appendTo(this.$el);
+            trackSuggestion.on('replay', null, this._onReplay.bind(this));
         }
     }
 });

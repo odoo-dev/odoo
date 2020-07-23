@@ -7,34 +7,22 @@
 }
 
 .owevent_track_suggestion {
-    background-color: black;
+    background-color: #888888;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
     height: 85vh;
     top: 0px;
     left: 0px;
 
-    .owevent_track_suggestion_image {
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
-    }
+    .owevent_track_suggestion_content {
+        background-color: rgba(0,0,0,.4);
 
-    .owevent_track_suggestion_timer {
-        background-color: black;
-        border-radius: 5px;
-        color: white;
-        transition: background-color .3s linear, color .3s linear;
-
-        i {
-            display: none;
+        .owevent_track_suggestion_up_next {
+            color: rgba(255,255,255,0.7);
         }
 
-        &:hover {
-            background-color: white;
-            color: #333333;
-            cursor: pointer;
-
-            i {
-                display: inline-block;
-            }
+        .owevent_track_suggestion_timer_text {
+            border-left: solid 1px;
         }
     }
 }

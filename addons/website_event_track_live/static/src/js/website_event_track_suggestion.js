@@ -1,21 +1,27 @@
-odoo.define('website_event_track.website_event_track_suggestion', function (require) {
+odoo.define('website_event_track_live.website_event_track_suggestion', function (require) {
 'use strict';
 
-var publicWidget = require('web.public.widget');
+var Widget = require('web.Widget');
 
-publicWidget.registry.websiteEventTrackSuggestion = publicWidget.Widget.extend({
-    template: 'website_event_track_suggestion',
+var WebsiteEventTrackSuggestion = Widget.extend({
+    template: 'website_event_track_live.website_event_track_suggestion',
     xmlDependencies: ['/website_event_track_live/static/src/xml/website_event_track_live_templates.xml'],
     events: {
-        'click .owevent_track_suggestion_timer': '_onTimerClick'
+        'click .owevent_track_suggestion_replay': '_onReplayClick'
     },
 
     init: function (parent, options) {
         this._super(...arguments);
 
-        this.name = options.name;
-        this.trackUrl = options.website_url;
-        this.imageSrc = options.website_image_url;
+        this.currentTrack = {
+            'name': options.current_track.name,
+        };
+        this.suggestion = {
+            'name': options.suggestion.name,
+            'speakerName': options.suggestion.speaker_name,
+            'trackUrl': options.suggestion.website_url,
+            'imageSrc': options.suggestion.website_image_url,
+        };
     },
 
     start: function () {
@@ -30,9 +36,11 @@ publicWidget.registry.websiteEventTrackSuggestion = publicWidget.Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * If the user clicks on the timer, stop automatic redirect.
+     * If the user clicks on replay, remove this suggestion window and send an
+     * event to the parent so that it can rewind the video to the beginning.
      */
-    _onTimerClick: function () {
+    _onReplayClick: function () {
+        this.trigger_up('replay');
         clearInterval(this.timerInterval);
         this.destroy();
     },
@@ -50,11 +58,11 @@ publicWidget.registry.websiteEventTrackSuggestion = publicWidget.Widget.extend({
         }
 
         if (secondsLeft === 0) {
-            window.location = this.trackUrl;
+            window.location = this.suggestion.trackUrl;
         }
     }
 });
 
-return publicWidget.registry.websiteEventTrackSuggestion;
+return WebsiteEventTrackSuggestion;
 
 });
