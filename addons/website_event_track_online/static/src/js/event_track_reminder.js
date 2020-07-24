@@ -56,7 +56,7 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
                 var reminderText = self.reminderOn ? _t('Reminder On') : _t('Set Reminder');
                 self.$('.o_wetrack_js_reminder_text').text(reminderText);
                 self._updateDisplay();
-                var message = self.reminderOn ? _t('Talk added to your wishlist') : _t('Talk removed from your wishlist');
+                var message = self.reminderOn ? _t('Talk added to your Favorites') : _t('Talk removed from your Favorites');
                 self.displayNotification({
                     type: 'info',
                     title: message

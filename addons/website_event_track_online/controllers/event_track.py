@@ -16,20 +16,26 @@ class EventTrackOnlineController(WebsiteEventTrackController):
             tracks_sudo = tracks_sudo.filtered(lambda track: track.is_published or track.stage_id.is_accepted)
         return tracks_sudo
 
-    def _can_access_track(self, track_id):
+    def _fetch_track(self, track_id):
         track = request.env['event.track'].browse(track_id).exists()
         if not track:
             raise NotFound()
         try:
+            track.check_access_rights('read')
             track.check_access_rule('read')
         except exceptions.AccessError:
             raise Forbidden()
 
-        track_sudo = track.sudo()
-        if not track_sudo.event_id.can_access_from_current_website():
+        event = track.event_id
+        if not event.can_access_from_current_website():
             raise NotFound()
+        try:
+            event.check_access_rights('read')
+            event.check_access_rule('read')
+        except exceptions.AccessError:
+            raise Forbidden
 
-        return track_sudo
+        return track
 
     @http.route("/event/track/toggle_reminder", type="json", auth="public", website=True)
     def track_reminder_toggle(self, track_id, set_reminder_on):
@@ -43,16 +49,12 @@ class EventTrackOnlineController(WebsiteEventTrackController):
             if set_reminder_on = False, blacklist the track_partner
             otherwise, un-blacklist the track_partner
         """
-        track_sudo = self._can_access_track(track_id)
+        track = self._fetch_track(track_id)
+        force_create = set_reminder_on or track.wishlisted_by_default
+        event_track_partner = track._get_event_track_visitors(force_create=force_create)
+        visitor_sudo = event_track_partner.visitor_id
 
-        visitor_sudo = request.env['website.visitor']._get_visitor_from_request(force_create=True)
-        visitor_sudo._update_visitor_last_visit()
-
-        force_create = set_reminder_on or track_sudo.wishlisted_by_default
-
-        event_track_partner = track_sudo._get_event_track_visitors(visitor_sudo, force_create=force_create)
-
-        if not track_sudo.wishlisted_by_default:
+        if not track.wishlisted_by_default:
             if not event_track_partner or event_track_partner.is_wishlisted == set_reminder_on:  # ignore if new state = old state
                 return {'error': 'ignored'}
             event_track_partner.is_wishlisted = set_reminder_on

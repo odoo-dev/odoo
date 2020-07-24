@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="website_event_online.website_visitor_view_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='event_registration_count']" position="after">
-                <field name="event_track_count"/>
+                <field name="event_track_wishlisted_count"/>
             </xpath>
         </field>
     </record>
@@ -21,8 +21,8 @@
                 <button name="%(website_event_track_online.event_track_action_from_visitor)d"
                     type="action"
                     class="oe_stat_button" icon="fa-ticket"
-                    attrs="{'invisible': [('event_track_count', '=', 0)]}">
-                    <field name="event_track_count" widget="statinfo" string="Tracks"/>
+                    attrs="{'invisible': [('event_track_wishlisted_count', '=', 0)]}">
+                    <field name="event_track_wishlisted_count" widget="statinfo" string="Tracks"/>
                 </button>
             </xpath>
         </field>
@@ -34,14 +34,14 @@
         <field name="inherit_id" ref="website_event_online.website_visitor_view_kanban"/>
         <field name="arch" type="xml">
             <field name="page_ids" position="after">
-                <field name="event_track_count"/>
+                <field name="event_track_wishlisted_count"/>
             </field>
             <xpath expr="//div[@id='o_page_count']" position="after">
-                <div>Wishlisted Tracks<span class="float-right font-weight-bold"><field name="event_track_count"/></span></div>
+                <div>Wishlisted Tracks<span class="float-right font-weight-bold"><field name="event_track_wishlisted_count"/></span></div>
             </xpath>
             <xpath expr="//div[hasclass('w_visitor_kanban_actions_ungrouped')]" position="before">
                 <div class="col">
-                    <b><field name="event_track_count"/></b>
+                    <b><field name="event_track_wishlisted_count"/></b>
                     <div>Wishlisted Tracks</div>
                 </div>
             </xpath>
