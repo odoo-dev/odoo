@@ -20,6 +20,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         purpose. """
         search_domain_base = [
             ('event_id', '=', event.id),
+            ('date', '!=', False)
         ]
         if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([search_domain_base, [('is_accepted', '=', True)]])
