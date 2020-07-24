@@ -105,15 +105,13 @@ class Event(models.Model):
           * sequence: specific sequence of menu entry to be set on the menu;
           * menu_type: type of menu entry (used in inheriting modules to ease
             menu management; not used in this module in 13.3 due to technical
-            limitations;
-          * force_track: if xml_id: activate visitor tracking on that page.
-            Otherwise tracking is set on the template rendered by the URL;
+            limitations);
         """
         self.ensure_one()
         return [
-            (_('Introduction'), False, 'website_event.template_intro', 1, False, False),
-            (_('Location'), False, 'website_event.template_location', 50, False, False),
-            (_('Register'), '/event/%s/register' % slug(self), False, 100, False, False),
+            (_('Introduction'), False, 'website_event.template_intro', 1, False),
+            (_('Location'), False, 'website_event.template_location', 50, False),
+            (_('Register'), '/event/%s/register' % slug(self), False, 100, False),
         ]
 
     def _update_website_menus(self, split_to_update=None):
@@ -121,5 +119,5 @@ class Event(models.Model):
         super(Event, self)._update_website_menus(split_to_update=split_to_update)
         for event in self:
             if event.website_menu and (not split_to_update or event in split_to_update.get('website_menu')):
-                for name, url, xml_id, menu_sequence, menu_type, force_track in event._get_menu_entries_online():
-                    event._create_menu(menu_sequence, name, url, xml_id, menu_type=menu_type, force_track=force_track)
+                for name, url, xml_id, menu_sequence, menu_type in event._get_menu_entries_online():
+                    event._create_menu(menu_sequence, name, url, xml_id, menu_type=menu_type)

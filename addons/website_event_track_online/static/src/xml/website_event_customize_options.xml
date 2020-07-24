@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-    <t t-extend="website_event.customize_options">
-        <t t-jquery="a[name='display-website-menu']" t-operation="after">
-            <a href="#" name="display-agenda" class="dropdown-item" role="menuitem">
-                <label class="o_switch" for="display-agenda">
-                    <input id="display-agenda" type="checkbox"/>
-                    <span/>
-                    Display Agenda
-                </label>
-            </a>
+    <t t-name="website_event_track.customize_options" t-extend="website_event.customize_options">
+        <t t-jquery="a[name='display-showcase-talks']" t-operation="replace">
+        </t>
+        <t t-jquery="a[name='allow-talk-proposal']" t-operation="replace">
         </t>
     </t>
 
