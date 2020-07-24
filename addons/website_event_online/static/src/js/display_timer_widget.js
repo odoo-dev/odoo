@@ -54,13 +54,13 @@ publicWidget.registry.displayTimerWidget = publicWidget.Widget.extend({
         if (remainingPreSeconds <= 1) {
             this.$('.o_countdown_text').text(this.mainCountdownText);
             if (this.mainCountdownDisplay) {
-                $(this.$el).parent().removeClass('d-none');
+                $(this.$el).parent().removeClass('hidden');
             }
             var remainingMainSeconds = this.mainCountdownTime - (now.getTime()/1000);
             if (remainingMainSeconds <= 1) {
                 clearInterval(this.interval);
-                $(this.displayClass).removeClass('d-none');
-                $(this.$el).parent().addClass('d-none');
+                $(this.displayClass).removeClass('hidden');
+                $(this.$el).parent().addClass('hidden');
             } else {
                 this._updateCountdown(remainingMainSeconds);
             }
