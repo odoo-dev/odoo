@@ -71,7 +71,8 @@
                 </a>
                 <div class="dropdown-menu">
                     <t t-foreach="tag_category.tag_ids" t-as="tag">
-                        <a t-att-href="'/event/%s/track?%s' % (
+                        <a t-if="tag.track_ids and event.id in tag.track_ids.mapped('event_id').ids"
+                            t-att-href="'/event/%s/track?%s' % (
                                 slug(event),
                                 keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))
                             )"
