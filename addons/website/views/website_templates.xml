@@ -991,11 +991,6 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
         <input type="text" name="search" class="search-query form-control oe_search_box" t-att-placeholder="placeholder if placeholder else 'Search...'" t-att-value="search"/>
         <div class="input-group-append">
             <button type="submit" class="btn btn-primary oe_search_button" aria-label="Search" title="Search"><i class="fa fa-search"/></button>
-            <a t-if="clear_link" t-att-href="'%s' % clear_link"
-                class="btn btn-primary" role="button"
-                title="Clear filters" aria-label="Clear filters">
-                <i class="fa fa-eraser"/>
-            </a>
         </div>
     </div>
 </template>
