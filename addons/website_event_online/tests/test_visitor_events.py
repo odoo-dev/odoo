@@ -28,23 +28,23 @@ class TestVisitorEvents(TestEventCommon):
             })]
         }])
 
-        self.assertEqual(self.event_0, main_visitor.event_wchildren_ids)
-        self.assertEqual(event_1, child_visitor.event_wchildren_ids)
+        self.assertEqual(self.event_0, main_visitor.event_registered_ids)
+        self.assertEqual(event_1, child_visitor.event_registered_ids)
         self.assertEqual(
             main_visitor,
-            self.env['website.visitor'].search([('event_wchildren_ids', 'in', self.event_0.ids)])
+            self.env['website.visitor'].search([('event_registered_ids', 'in', self.event_0.ids)])
         )
         self.assertEqual(
             child_visitor,
-            self.env['website.visitor'].search([('event_wchildren_ids', 'in', event_1.ids)])
+            self.env['website.visitor'].search([('event_registered_ids', 'in', event_1.ids)])
         )
         child_visitor._link_to_visitor(main_visitor)
-        self.assertEqual(self.event_0 | event_1, main_visitor.event_wchildren_ids)
+        self.assertEqual(self.event_0 | event_1, main_visitor.event_registered_ids)
         self.assertEqual(
             main_visitor | child_visitor,
-            self.env['website.visitor'].with_context(active_test=False).search([('event_wchildren_ids', 'in', self.event_0.ids)])
+            self.env['website.visitor'].with_context(active_test=False).search([('event_registered_ids', 'in', self.event_0.ids)])
         )
         self.assertEqual(
             main_visitor | child_visitor,
-            self.env['website.visitor'].with_context(active_test=False).search([('event_wchildren_ids', 'in', event_1.ids)])
+            self.env['website.visitor'].with_context(active_test=False).search([('event_registered_ids', 'in', event_1.ids)])
         )

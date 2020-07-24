@@ -17,10 +17,10 @@ class WebsiteVisitor(models.Model):
     event_registration_count = fields.Integer(
         '# Registrations', compute='_compute_event_registration_count',
         groups="event.group_event_user")
-    event_wchildren_ids = fields.Many2many(
-        'event.event', string="Events (incl. duplicates)",
-        compute="_compute_event_wchildren_ids", compute_sudo=True,
-        search="_search_event_wchildren_ids",
+    event_registered_ids = fields.Many2many(
+        'event.event', string="Registered Events",
+        compute="_compute_event_registered_ids", compute_sudo=True,
+        search="_search_event_registered_ids",
         groups="event.group_event_user")
 
     @api.depends('event_registration_ids')
@@ -50,15 +50,15 @@ class WebsiteVisitor(models.Model):
                 visitor.mobile = next((reg.mobile or reg.phone for reg in linked_registrations if reg.mobile or reg.phone), False)
 
     @api.depends('parent_id', 'event_registration_ids')
-    def _compute_event_wchildren_ids(self):
+    def _compute_event_registered_ids(self):
         # include parent's registrations in a visitor o2m field. We don't add
         # child one as child should not have registrations (moved to the parent)
         for visitor in self:
             all_registrations = visitor.event_registration_ids | visitor.parent_id.event_registration_ids
-            visitor.event_wchildren_ids = all_registrations.mapped('event_id')
+            visitor.event_registered_ids = all_registrations.mapped('event_id')
 
-    def _search_event_wchildren_ids(self, operator, operand):
-        """ Search visitors with terms on events within their event registrations. E.g. [('event_wchildren_ids',
+    def _search_event_registered_ids(self, operator, operand):
+        """ Search visitors with terms on events within their event registrations. E.g. [('event_registered_ids',
         'in', [1, 2])] should return visitors having a registration on events 1, 2 as
         well as their children for notification purpose. """
         if operator == "not in":
@@ -125,15 +125,3 @@ class WebsiteVisitor(models.Model):
             visitor = self._create_visitor()
 
         return visitor
-
-    def _get_attendee_name(self):
-        """Return the name of the current attendee."""
-        # TDE FIXME: remove this with proper registration update
-        self.ensure_one()
-        if self.event_registration_ids:
-            if self.name:
-                return self.name
-            else:
-                # TODO: normally the name must always be set if there's at least
-                # one registration
-                return self.event_registration_ids[0].name
