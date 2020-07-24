@@ -19,6 +19,12 @@ class Track(models.Model):
         string="Speaker Image", compute="_compute_speaker_image",
         readonly=False, store=True,
         max_width=256, max_height=256)
+    # frontend description
+    color = fields.Integer('Color', related=False, store=True)
+    website_image = fields.Image(string="Website Image", max_width=1024, max_height=1024)
+    website_image_url = fields.Char(
+        string='Image URL', compute='_compute_website_image_url',
+        compute_sudo=True, store=False)
     # wishlist / visitors management
     event_track_visitor_ids = fields.One2many(
         'event.track.visitor', 'track_id', string="Track Visitors",
@@ -53,6 +59,16 @@ class Track(models.Model):
         for track in self:
             if not track.image:
                 track.image = track.partner_id.image_256
+
+    # FRONTEND DESCRIPTION
+
+    @api.depends('image', 'partner_id.image_256')
+    def _compute_website_image_url(self):
+        for track in self:
+            if track.website_image:
+                track.website_image_url = self.env['website'].image_url(track, 'website_image', size=1024)
+            else:
+                track.website_image_url = '/website_event_track/static/src/img/event_track_default_%d.jpeg' % (track.id % 2)
 
     # WISHLIST / VISITOR MANAGEMENT
 
