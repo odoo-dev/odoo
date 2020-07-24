@@ -12,18 +12,6 @@
         </field>
     </record>
 
-    <record id="website_visitor_action_from_track_wchildren" model="ir.actions.act_window">
-        <field name="name">Visitors Wishlist</field>
-        <field name="res_model">website.visitor</field>
-        <field name="view_mode">kanban,tree,form,graph</field>
-        <field name="domain">[('event_track_wchildren_ids', 'in', [active_id])]</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Wait for visitors to wishlist your tracks
-            </p>
-        </field>
-    </record>
-
     <record id="event_track_view_search" model="ir.ui.view">
         <field name="name">event.track.view.search.inherit.event.track.online</field>
         <field name="model">event.track</field>
@@ -65,16 +53,8 @@
                 <button name="%(website_event_track_online.website_visitor_action_from_track)d"
                         type="action"
                         class="oe_stat_button"
-                        icon="fa-star">
+                        icon="fa-bell">
                     <field name="wishlist_visitor_count" string="Wishlisted By" widget="statinfo"/>
-                </button>
-            </div>
-            <div name="button_box" position="inside">
-                <button name="%(website_event_track_online.website_visitor_action_from_track_wchildren)d"
-                        type="action"
-                        class="oe_stat_button"
-                        icon="fa-star">
-                    <span>WITH CHILDREN</span>
                 </button>
             </div>
         </field>
