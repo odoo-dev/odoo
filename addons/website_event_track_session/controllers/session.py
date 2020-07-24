@@ -6,13 +6,13 @@ from pytz import timezone, utc
 from werkzeug.exceptions import Forbidden, NotFound
 
 from odoo import exceptions, fields, http
-from odoo.addons.website_event_track.controllers.main import WebsiteEventTrackController
+from odoo.addons.website_event_track_online.controllers.event_track import EventTrackOnlineController
 from odoo.http import request
 from odoo.osv import expression
 from odoo.tools import is_html_empty
 
 
-class WebsiteEventSessionController(WebsiteEventTrackController):
+class WebsiteEventSessionController(EventTrackOnlineController):
 
     def _get_event_tracks_base_domain(self, event):
         """ Base domain for displaying tracks. Restrict to accepted tracks for
@@ -20,6 +20,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         purpose. """
         search_domain_base = [
             ('event_id', '=', event.id),
+            ('date', '!=', False)
         ]
         if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([search_domain_base, [('is_accepted', '=', True)]])
@@ -133,7 +134,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
 
     @http.route(['/event/<model("event.event"):event>/track/<model("event.track"):track>'],
                  type='http', auth="public", website=True, sitemap=False)
-    def event_track(self, event, track, **options):
+    def event_track_page(self, event, track, **options):
         if not event.can_access_from_current_website():
             raise NotFound()
 
@@ -144,18 +145,13 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
 
         return request.render(
             "website_event_track_session.event_track_main",
-            self._event_track_get_values(event, track, **options)
+            self._event_track_page_get_values(event, track, **options)
         )
 
-    def _event_track_get_values(self, event, track, **options):
+    def _event_track_page_get_values(self, event, track, **options):
         track = track.sudo()
 
         # search for tracks list
-        search_domain_base = self._get_event_tracks_base_domain(event)
-        search_domain_base = expression.AND([
-            search_domain_base,
-            ['&', ('is_published', '=', True), ('id', '!=', track.id)]
-        ])
         tracks_other = track._get_track_suggestions()
 
         option_widescreen = options.get('widescreen', False)
