@@ -51,10 +51,10 @@ class Event(models.Model):
           * public, no visitor: not participating as we have no information;
           * public and visitor: check visitor is linked to a registration. As
             visitors are merged on the top parent, current visitor check is
-            sufficient event for successive visits;
+            sufficient even for successive visits;
           * logged, no visitor: check partner is linked to a registration. Do
             not check the email as it is not really secure;
-          * logged ad visitor: check partner or visitor are linked to a
+          * logged as visitor: check partner or visitor are linked to a
             registration;
         """
         current_visitor = self.env['website.visitor']._get_visitor_from_request(force_create=False)
