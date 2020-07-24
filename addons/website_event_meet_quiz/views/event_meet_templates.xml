@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="aside_leaderboard" inherit_id="website_event_meet.meet_main">
+    <xpath expr="//*[hasclass('o_wevent_create_room_button')]" position="after">
+        <t t-if="top3_visitors" t-call="website_event_meet_quiz.small_leaderboard"/>
+    </xpath>
+</template>
+
+<template id="small_leaderboard" name='Small Leaderboard'>
+    <div class="row mt32">
+        <div class="col">
+            <a t-attf-href="#{'/event/%s/community/leaderboard' % (slug(event))}" class="float-right">View all</a>
+            <h5 class="m-0">Leaderboard</h5>
+            <hr class="mt-2 pt-2"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <t t-foreach="top3_visitors" t-as="visitor">
+                <t t-call="website_event_meet_quiz.visitor_quiz_points_card"/>
+            </t>
+        </div>
+    </div>
+</template>
+
+<template id='visitor_quiz_points_card' name="User Quick Quiz Points Card">
+    <div class="d-flex mb-3 align-items-center">
+        <b class="mr-2 text-muted" t-esc="visitor['position']"/>
+        <img class="rounded-circle float-left"
+            style="width: 32px; height: 32px; object-fit: cover;"
+            t-att-src="image_data_uri(visitor['visitor'].partner_image) if visitor['visitor'].partner_image else '/web/static/src/img/user_placeholder.jpg'"
+            t-att-alt="visitor['visitor'].name"/>
+        <div style="line-height:1.3">
+            <span class="font-weight-bold" t-esc="visitor['visitor'].name"/>
+            <div class="d-flex align-items-center">
+                <span class="text-500 mx-2">&#8226;</span>
+                <span class="badge badge-success"><t t-esc="visitor['points']"/> Points</span>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>
