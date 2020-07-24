@@ -80,7 +80,7 @@
             <div class="row mt-2">
                 <div class="float-left mx-3">
                     <span t-if="track.image" t-field="track.image" t-options="{'widget': 'image', 'class': 'rounded-circle'}"/>
-                    <span t-else="" t-field="track.partner_id.sudo().image_128" t-options='{"widget": "image", "class": "rounded-circle"}'/>
+                    <span t-elif="track.partner_id" t-field="track.partner_id.sudo().image_128" t-options='{"widget": "image", "class": "rounded-circle"}'/>
                 </div>
                 <div class="px-3 pt-2 d-flex flex-column">
                     <span t-field="track.partner_name" class="font-weight-bold mb-2"/>
