@@ -291,11 +291,18 @@ class Website(models.Model):
                 copy_menu(submenu, new_top_menu)
 
     @api.model
-    def new_page(self, name=False, add_menu=False, template='website.default_page', ispage=True, namespace=None, force_track=False):
+    def new_page(self, name=False, add_menu=False, template='website.default_page', ispage=True, namespace=None):
         """ Create a new website page, and assign it a xmlid based on the given one
             :param name : the name of the page
             :param template : potential xml_id of the page to create
             :param namespace : module part of the xml_id if none, the template module name is used
+
+            :return dict: containing
+              url: page url based on slugified name;
+              view_id: ID of the new ir ui view created based on template;
+              page_id: ID of the new website page (if ispage is set);
+              menu_id: ID of the new website menu (if ispage and add_menu);
+
         """
         if namespace:
             template_module = namespace
@@ -304,7 +311,12 @@ class Website(models.Model):
         page_url = '/' + slugify(name, max_length=1024, path=True)
         page_url = self.get_unique_path(page_url)
         page_key = slugify(name)
-        result = dict({'url': page_url, 'view_id': False})
+        result = {
+            'url': page_url,
+            'view_id': False,
+            'page_id': False,
+            'menu_id': False,
+        }
 
         if not name:
             name = 'Home'
@@ -314,34 +326,34 @@ class Website(models.Model):
         website_id = self._context.get('website_id')
         key = self.get_unique_key(page_key, template_module)
         view = template_record.copy({'website_id': website_id, 'key': key})
+        result['view_id'] = view.id
 
         view.with_context(lang=None).write({
             'arch': template_record.arch.replace(template, key),
             'name': name,
         })
-        if force_track:
-            view.write({'track': True})
 
         if view.arch_fs:
             view.arch_fs = False
 
         website = self.get_current_website()
         if ispage:
-            page = self.env['website.page'].create({
+            new_page = self.env['website.page'].create({
                 'url': page_url,
                 'website_id': website.id,  # remove it if only one website or not?
                 'view_id': view.id,
                 'track': True,
             })
-            result['view_id'] = view.id
-        if add_menu:
-            self.env['website.menu'].create({
+            result['page_id'] = new_page.id
+        if ispage and add_menu:
+            new_menu = self.env['website.menu'].create({
                 'name': name,
                 'url': page_url,
                 'parent_id': website.menu_id.id,
-                'page_id': page.id,
+                'page_id': new_page.id,
                 'website_id': website.id,
             })
+            result['menu_id'] = new_menu.id
         return result
 
     @api.model

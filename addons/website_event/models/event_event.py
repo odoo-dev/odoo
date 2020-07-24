@@ -146,7 +146,7 @@ class Event(models.Model):
                 for sequence, (name, url, xml_id) in enumerate(event._get_menu_entries()):
                     event._create_menu(sequence, name, url, xml_id)
 
-    def _create_menu(self, sequence, name, url, xml_id, menu_type=False, force_track=False):
+    def _create_menu(self, sequence, name, url, xml_id, menu_type=False):
         """ If url: create a website menu. Tracking visitors is decided on the
         template used by this route. If xml_id: create a new page, then link
         it to a menu.
@@ -155,8 +155,8 @@ class Event(models.Model):
           allowing more fine-grain tuning of menus. """
         if not url:
             self.env['ir.ui.view'].search([('name', '=', name + ' ' + self.name)]).unlink()
-            newpath = self.env['website'].sudo().new_page(name + ' ' + self.name, template=xml_id, ispage=False, force_track=force_track)['url']
-            url = "/event/" + slug(self) + "/page/" + newpath[1:]
+            page_result = self.env['website'].sudo().new_page(name + ' ' + self.name, template=xml_id, ispage=False)
+            url = "/event/" + slug(self) + "/page" + page_result['url']  # url contains starting "/"
         website_menu = self.env['website.menu'].sudo().create({
             'name': name,
             'url': url,

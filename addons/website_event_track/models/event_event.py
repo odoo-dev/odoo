@@ -114,19 +114,19 @@ class Event(models.Model):
             for sequence, menu_data in enumerate(getattr(self, method_name)()):
                 if len(menu_data) == 4:
                     (name, url, xml_id, menu_type) = menu_data
-                    menu_sequence, force_track = sequence, False
-                elif len(menu_data) == 6:
-                    (name, url, xml_id, menu_sequence, menu_type, force_track) = menu_data
-                new_menu = self._create_menu(menu_sequence, name, url, xml_id, menu_type=menu_type, force_track=force_track)
+                    menu_sequence = sequence
+                elif len(menu_data) == 5:
+                    (name, url, xml_id, menu_sequence, menu_type) = menu_data
+                new_menu = self._create_menu(menu_sequence, name, url, xml_id, menu_type=menu_type)
         elif not self[fname_bool]:
             self[fname_o2m].mapped('menu_id').unlink()
 
         return new_menu
 
-    def _create_menu(self, sequence, name, url, xml_id, menu_type=False, force_track=False):
+    def _create_menu(self, sequence, name, url, xml_id, menu_type=False):
         """ Override menu creation from website_event to link a website.event.menu
         to the newly create menu (either page and url). """
-        website_menu = super(Event, self)._create_menu(sequence, name, url, xml_id, menu_type=menu_type, force_track=force_track)
+        website_menu = super(Event, self)._create_menu(sequence, name, url, xml_id, menu_type=menu_type)
         if menu_type:
             self.env['website.event.menu'].create({
                 'menu_id': website_menu.id,
@@ -134,6 +134,9 @@ class Event(models.Model):
                 'menu_type': menu_type,
             })
         return website_menu
+
+    def _get_menu_type_field_matching(self):
+        return {'track_proposal': 'website_track_proposal'}
 
     def _get_track_menu_entries(self):
         """ Method returning menu entries to display on the website view of the
@@ -147,10 +150,9 @@ class Event(models.Model):
             website.event.menu;
         """
         self.ensure_one()
-        res = [
+        return [
             (_('Talks'), '/event/%s/track' % slug(self), False, 'track'),
             (_('Agenda'), '/event/%s/agenda' % slug(self), False, 'track')]
-        return res
 
     def _get_track_proposal_menu_entries(self):
         """ See website_event_track._get_track_menu_entries() """
