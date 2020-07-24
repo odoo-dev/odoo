@@ -11,11 +11,11 @@
     'website': 'https://www.odoo.com/page/events',
     'description': "",
     'depends': [
-        # STD-TODO: remove 'website_event_track'
-        # we just need it to be able to use 'website.event.menu'
-        # which is defined in 'website_event_track'
+        # STD-TODO: remove 'website_event_track_online' we just need it to be
+        # able to use 'website.event.menu' which is defined in 'website_event_track'
+        # as well as even form view defined in track_online
         'website_event_online',
-        'website_event_track',
+        'website_event_track_online',
         'website_jitsi',
     ],
     'demo': ['data/website_event_meet_demo.xml'],
@@ -26,7 +26,7 @@
         'views/event_meet_templates_list.xml',
         'views/event_meet_templates_page.xml',
         'views/event_meeting_room_views.xml',
-        'views/event_views.xml',
+        'views/event_event_views.xml',
         'views/event_type_views.xml',
     ],
     'application': False,

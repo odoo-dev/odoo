@@ -11,12 +11,10 @@ EventSpecificOptions.include({
 
     events: _.extend({}, EventSpecificOptions.prototype.events, {
         'change #allow-room-creation': '_onAllowRoomCreationChange',
-        'change #display-community': '_onDisplayCommunityChange',
     }),
 
     start: function () {
         this.$allowRoomCreationInput = this.$('#allow-room-creation');
-        this.$displayCommunityInput = this.$('#display-community');
         this._super.apply(this, arguments);
     },
 
@@ -29,25 +27,18 @@ EventSpecificOptions.include({
         this._toggleAllowRoomCreation(checkboxValue);
     },
 
-    _onDisplayCommunityChange: function () {
-        let checkboxValue = this.$displayCommunityInput.is(':checked');
-        this._toggleDisplayCommunity(checkboxValue);
-    },
-
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
     _getCheckboxFields: function () {
         let fields = this._super();
-        fields = _.union(fields, ['meeting_room_menu', 'meeting_room_allow_creation']);
+        fields = _.union(fields, ['meeting_room_allow_creation']);
         return fields;
     },
 
     _getCheckboxFieldMatch: function (checkboxField) {
-        if (checkboxField === 'meeting_room_menu') {
-            return this.$displayCommunityInput;
-        } else if (checkboxField === 'meeting_room_allow_creation') {
+        if (checkboxField === 'meeting_room_allow_creation') {
             return this.$allowRoomCreationInput;
         }
         return this._super(checkboxField);
@@ -55,10 +46,6 @@ EventSpecificOptions.include({
 
     _initCheckboxCallback: function (rpcData) {
         this._super(rpcData);
-        if (rpcData[0]['meeting_room_menu']) {
-            let submenuInput = this._getCheckboxFieldMatch('meeting_room_menu');
-            submenuInput.attr('checked', 'checked');
-        }
         if (rpcData[0]['meeting_room_allow_creation']) {
             let submenuInput = this._getCheckboxFieldMatch('meeting_room_allow_creation');
             submenuInput.attr('checked', 'checked');
@@ -71,18 +58,6 @@ EventSpecificOptions.include({
             method: 'write',
             args: [[this.eventId], {
                 meeting_room_allow_creation: val
-            }],
-        });
-
-        this._reloadEventPage();
-    },
-
-    _toggleDisplayCommunity: async function (val) {
-        await this._rpc({
-            model: this.modelName,
-            method: 'write',
-            args: [[this.eventId], {
-                meeting_room_menu: val
             }],
         });
 

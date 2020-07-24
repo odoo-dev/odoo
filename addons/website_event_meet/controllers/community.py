@@ -64,7 +64,7 @@ class WebsiteEventMeetController(http.Controller):
             "current_lang": request.env["res.lang"].browse(int(lang)) if lang else False,
             "available_languages": meeting_rooms_all.mapped("room_lang_id"),
             "default_lang_code": request.context.get('lang', request.env.user.lang),
-            "default_username": visitor._get_attendee_name() if visitor else None,
+            "default_username": visitor.display_name if visitor else None,
             # environment
             "is_event_manager": request.env.user.has_group("event.group_event_manager"),
         }
