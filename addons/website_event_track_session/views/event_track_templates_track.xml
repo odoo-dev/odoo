@@ -64,8 +64,13 @@
                 <span t-field="track.date"
                     t-options='{"hide_seconds":"True", "format": "short"}'/>
                 -
-                <span t-field="track.date_end"
-                    t-options='{"hide_seconds":"True", "format": "short"}'/>
+                <span t-if="track.date_end.date() != track.date.date()"
+                      t-field="track.date_end"
+                      t-options='{"hide_seconds":"True", "format": "short"}'/>
+                <span t-else=""
+                      t-field="track.date_end"
+                      t-options='{"hide_seconds":"True", "time_only": "True", "format": "short"}'/>
+
                 <t t-if="event.date_tz">(<span t-field="event.date_tz"/>)</t>
                 ( <span t-field="track.duration"
                     t-options='{"widget": "duration", "unit": "hour", "round": "minute"}'/>
