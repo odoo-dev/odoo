@@ -10,59 +10,28 @@ from odoo.http import request
 
 
 class WebsiteEventTrackQuiz(WebsiteEventSessionController):
-    def _fetch_track(self, event_id, track_id):
-        event = request.env['event.event'].browse(int(event_id)).exists()
-        if not event:
-            return {'error': 'event_wrong'}
-        try:
-            event.check_access_rights('read')
-            event.check_access_rule('read')
-        except AccessError:
-            return {'error': 'event_access'}
 
-        track = request.env['event.track'].browse(int(track_id)).exists()
-        if not track:
-            return {'error': 'track_wrong'}
-        try:
-            track.check_access_rights('read')
-            track.check_access_rule('read')
-        except AccessError:
-            return {'error': 'track_access'}
-        return {'track': track}
+    # ------------------------------------------------------------
+    # PAGE VIEW
+    # ------------------------------------------------------------
 
-    def _event_track_get_values(self, event, track, **options):
-        values = super(WebsiteEventTrackQuiz, self)._event_track_get_values(event, track)
-        track_visitor, visitor = track._find_track_visitor(force_create=True)
+    def _event_track_page_get_values(self, event, track, **options):
+        values = super(WebsiteEventTrackQuiz, self)._event_track_page_get_values(event, track)
+        track_visitor = track._get_event_track_visitors(force_create=True)
         values.update({
             'track_visitor': track_visitor
         })
         return values
 
-    def _get_quiz_answers_details(self, track, answer_ids):
-        all_questions = request.env['event.quiz.question'].sudo().search([('quiz_id', '=', track.quiz_id.id)])
-        user_answers = request.env['event.quiz.question.answer'].sudo().search([('id', 'in', answer_ids)])
-
-        if user_answers.mapped('question_id') != all_questions:
-            return {'error': 'quiz_incomplete'}
-
-        user_bad_answers = user_answers.filtered(lambda answer: not answer.is_correct)
-        user_good_answers = user_answers - user_bad_answers
-        return {
-            'user_bad_answers': user_bad_answers,
-            'user_good_answers': user_good_answers,
-            'user_answers': user_answers,
-            'points': sum([answer.awarded_points for answer in user_good_answers])
-        }
+    # QUIZZES IN PAGE
+    # ----------------------------------------------------------
 
     @http.route('/event_track/quiz/submit', type="json", auth="public", website=True)
     def event_track_quiz_submit(self, event_id, track_id, answer_ids):
-        fetch_res = self._fetch_track(event_id, track_id)
-        if fetch_res.get('error'):
-            return fetch_res
-        track = fetch_res['track']
+        track = self._fetch_track(track_id)
 
-        event_track_visitor, visitor_sudo = track._find_track_visitor(force_create=True)
-
+        event_track_visitor = track._get_event_track_visitors(force_create=True)
+        visitor_sudo = event_track_visitor.visitor_id
         if event_track_visitor.quiz_completed:
             return {'error': 'track_quiz_done'}
 
@@ -83,17 +52,15 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
             'quiz_completed': event_track_visitor.quiz_completed,
             'quiz_points': answers_details['points']
         }
-        if request.httprequest.cookies.get('visitor_uuid', '') != visitor_sudo.access_token:
+        if visitor_sudo and request.httprequest.cookies.get('visitor_uuid', '') != visitor_sudo.access_token:
             result['visitor_uuid'] = visitor_sudo.access_token
         return result
 
     @http.route('/event_track/quiz/reset', type="json", auth="user", website=True)
     def quiz_reset(self, event_id, track_id):
-        fetch_res = self._fetch_track(event_id, track_id)
-        if fetch_res.get('error'):
-            return fetch_res
-        track = fetch_res['track']
-        event_track_visitor, unused = track._find_track_visitor(force_create=True)
+        track = self._fetch_track(track_id)
+
+        event_track_visitor = track._get_event_track_visitors(force_create=True)
         event_track_visitor.write({
             'quiz_completed': False,
             'quiz_points': 0,
@@ -105,3 +72,19 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
         track_id = quiz_answers['track_id']
         session_quiz_answers[str(track_id)] = quiz_answers['quiz_answers']
         request.session['quiz_answers'] = json.dumps(session_quiz_answers)
+
+    def _get_quiz_answers_details(self, track, answer_ids):
+        all_questions = request.env['event.quiz.question'].sudo().search([('quiz_id', '=', track.quiz_id.id)])
+        user_answers = request.env['event.quiz.question.answer'].sudo().search([('id', 'in', answer_ids)])
+
+        if user_answers.mapped('question_id') != all_questions:
+            return {'error': 'quiz_incomplete'}
+
+        user_bad_answers = user_answers.filtered(lambda answer: not answer.is_correct)
+        user_good_answers = user_answers - user_bad_answers
+        return {
+            'user_bad_answers': user_bad_answers,
+            'user_good_answers': user_good_answers,
+            'user_answers': user_answers,
+            'points': sum([answer.awarded_points for answer in user_good_answers])
+        }
