@@ -64,8 +64,13 @@
                 <span t-field="track.date"
                     t-options='{"hide_seconds":"True", "format": "short"}'/>
                 -
-                <span t-field="track.date_end"
-                    t-options='{"hide_seconds":"True", "format": "short"}'/>
+                <span t-if="track.date_end.date() != track.date.date()"
+                      t-field="track.date_end"
+                      t-options='{"hide_seconds":"True", "format": "short"}'/>
+                <span t-else=""
+                      t-field="track.date_end"
+                      t-options='{"hide_seconds":"True", "time_only": "True", "format": "short"}'/>
+
                 <t t-if="event.date_tz">(<span t-field="event.date_tz"/>)</t>
                 ( <span t-field="track.duration"
                     t-options='{"widget": "duration", "unit": "hour", "round": "minute"}'/>
@@ -80,7 +85,7 @@
             <div class="row mt-2">
                 <div class="float-left mx-3">
                     <span t-if="track.image" t-field="track.image" t-options="{'widget': 'image', 'class': 'rounded-circle'}"/>
-                    <span t-else="" t-field="track.partner_id.sudo().image_128" t-options='{"widget": "image", "class": "rounded-circle"}'/>
+                    <span t-elif="track.partner_id" t-field="track.partner_id.sudo().image_128" t-options='{"widget": "image", "class": "rounded-circle"}'/>
                 </div>
                 <div class="px-3 pt-2 d-flex flex-column">
                     <span t-field="track.partner_name" class="font-weight-bold mb-2"/>
@@ -124,8 +129,8 @@
                         <t t-set="display_class" t-value="'.o_event_cta_action'"/>
                     </t>
                 </div>
-                <div t-att-class="'o_event_cta_action %s' % ('d-none' if cta_coundown else '')">
-                    <a t-att-href="track.website_cta_url"
+                <div t-att-class="'o_event_cta_action %s' % ('hidden' if cta_coundown else '')">
+                    <a target="_blank" t-att-href="track.website_cta_url"
                         class="btn btn-primary w-100 mb-3">
                         <span t-esc="track.website_cta_title"/>
                     </a>

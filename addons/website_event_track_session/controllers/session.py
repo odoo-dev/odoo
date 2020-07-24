@@ -20,6 +20,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         purpose. """
         search_domain_base = [
             ('event_id', '=', event.id),
+            ('date', '!=', False)
         ]
         if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([search_domain_base, [('is_accepted', '=', True)]])
@@ -151,11 +152,6 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         track = track.sudo()
 
         # search for tracks list
-        search_domain_base = self._get_event_tracks_base_domain(event)
-        search_domain_base = expression.AND([
-            search_domain_base,
-            ['&', ('is_published', '=', True), ('id', '!=', track.id)]
-        ])
         tracks_other = track._get_track_suggestions()
 
         option_widescreen = options.get('widescreen', False)

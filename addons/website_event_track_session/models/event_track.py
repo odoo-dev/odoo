@@ -50,12 +50,15 @@ class EventTrack(models.Model):
         UTC as we compute only time deltas here. """
         now_utc = utc.localize(fields.Datetime.now().replace(microsecond=0))
         for track in self:
-            date_begin_utc = utc.localize(track.date, is_dst=False)
-            date_end_utc = utc.localize(track.date_end, is_dst=False)
+            if track.date:
+                date_begin_utc = utc.localize(track.date, is_dst=False)
+                date_end_utc = utc.localize(track.date_end, is_dst=False)
+            else:
+                date_begin_utc = date_end_utc = now_utc
             track.is_track_live = date_begin_utc <= now_utc < date_end_utc
             track.is_track_soon = (date_begin_utc - now_utc).total_seconds() < 30*60 if date_begin_utc > now_utc else False
             track.is_track_upcoming = date_begin_utc > now_utc
-            track.is_track_done = date_end_utc <= now_utc
+            track.is_track_done = date_end_utc <= now_utc if track.date else False
             if date_begin_utc >= now_utc:
                 track.track_start_relative = int((date_begin_utc - now_utc).total_seconds())
                 track.track_start_remaining = track.track_start_relative

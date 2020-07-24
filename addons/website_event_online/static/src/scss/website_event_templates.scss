@@ -103,6 +103,10 @@
                         transform: rotate(90deg);
                     }
                 }
+
+                .o_event_cta_action.hidden {
+                    visibility: hidden;
+                }
             }
         }
     }

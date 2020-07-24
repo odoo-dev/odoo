@@ -6,13 +6,17 @@
         <field name="model">event.track</field>
         <field name="inherit_id" ref="website_event_track.view_event_track_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='speakers']" position="after">
-                <page string="Options" name="options">
+            <xpath expr="//page[@name='description']" position="after">
+                <page string="Interactivity" name="interactivity">
                     <group>
-                        <field name="website_cta"/>
-                        <field name="website_cta_title"/>
-                        <field name="website_cta_url"/>
-                        <field name="website_cta_delay"/>
+                        <group name="cta_button">
+                            <field name="website_cta"/>
+                            <field name="website_cta_title" placeholder="e.g. Get Yours Now!"
+                                   attrs="{'invisible': [('website_cta', '=', False)], 'required': [('website_cta', '=', True)]}"/>
+                            <field name="website_cta_url" placeholder="http://www.odoo.com/page/scale-up-business-game"
+                                   attrs="{'invisible': [('website_cta', '=', False)], 'required': [('website_cta', '=', True)]}"/>
+                            <field name="website_cta_delay" attrs="{'invisible': [('website_cta', '=', False)], 'required': [('website_cta', '=', True)]}"/>
+                        </group>
                     </group>
                 </page>
             </xpath>
