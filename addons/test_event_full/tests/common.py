@@ -169,7 +169,7 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, EventDtPatc
             'website_menu': True,
             'website_track': True,
             'website_track_proposal': True,
-            'menu_exhibitor': True,
+            'exhibitor_menu': True,
             'meeting_room_menu': True,
         })
 
