@@ -6,7 +6,7 @@ from odoo.addons.website_event_track_session.controllers.session import WebsiteE
 
 class WebsiteEventSessionLiveController(WebsiteEventSessionController):
 
-    def _event_track_get_values(self, event, track, **options):
+    def _event_track_page_get_values(self, event, track, **options):
         if 'widescreen' not in options:
             options['widescreen'] = bool(track.youtube_video_url)
-        return super(WebsiteEventSessionLiveController, self)._event_track_get_values(event, track, **options)
+        return super(WebsiteEventSessionLiveController, self)._event_track_page_get_values(event, track, **options)
