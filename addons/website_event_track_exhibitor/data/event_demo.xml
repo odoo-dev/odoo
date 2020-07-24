@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="event.event_7" model="event.event">
-        <field name="menu_exhibitor" eval="True"/>
+        <field name="exhibitor_menu" eval="True"/>
     </record>
 
 </odoo>

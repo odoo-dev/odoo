@@ -49,7 +49,6 @@
                         <t t-set="_searches" t-value="searches"/>
                         <t t-set="action" t-value="'/event/%s/exhibitors' % (slug(event))"/>
                         <t t-set="_placeholder" t-value="'Search an exhibitor ...'"/>
-                        <t t-set="clear_link" t-value="'/event/%s/exhibitors' % (slug(event))"/>
                     </t>
                 </div>
             </div>
