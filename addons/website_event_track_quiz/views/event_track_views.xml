@@ -5,13 +5,11 @@
         <field name="model">event.track</field>
         <field name="inherit_id" ref="website_event_track.view_event_track_form"/>
         <field name="arch" type="xml">
-            <page name="description" position="after">
-                <page string="Quiz">
-                    <group name="Quiz" string="Questions">
-                        <field name="quiz_id"/>
-                    </group>
-                </page>
-            </page>
+            <group name="cta_button" position="after">
+                <group name="Quiz">
+                    <field name="quiz_id"/>
+                </group>
+            </group>
         </field>
     </record>
 </odoo>
