@@ -555,17 +555,17 @@
     <record id="afptt_extracom_2" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvac_05"/>
-        <field name="tax_dest_id" ref="tvati_extra5"/>
+        <field name="tax_dest_id" ref="tvati_extra"/>
     </record>
     <record id="afptt_extracom_3" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvac_09"/>
-        <field name="tax_dest_id" ref="tvati_extra9"/>
+        <field name="tax_dest_id" ref="tvati_extra"/>
     </record>
     <record id="afptt_extracom_4" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvac_19"/>
-        <field name="tax_dest_id" ref="tvati_extra19"/>
+        <field name="tax_dest_id" ref="tvati_extra"/>
     </record>
     <record id="afptt_extracom_1s" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
@@ -575,17 +575,17 @@
     <record id="afptt_extracom_2s" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvac_05_s"/>
-        <field name="tax_dest_id" ref="tvati_extra5"/>
+        <field name="tax_dest_id" ref="tvati_extra"/>
     </record>
     <record id="afptt_extracom_3s" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvac_09_s"/>
-        <field name="tax_dest_id" ref="tvati_extra9"/>
+        <field name="tax_dest_id" ref="tvati_extra"/>
     </record>
     <record id="afptt_extracom_4s" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvac_19_s"/>
-        <field name="tax_dest_id" ref="tvati_extra19"/>
+        <field name="tax_dest_id" ref="tvati_extra"/>
     </record>
     <!-- Purchases -->
     <record id="afptt_extracom_5" model="account.fiscal.position.tax.template">
@@ -596,17 +596,17 @@
     <record id="afptt_extracom_6" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvad_05"/>
-        <field name="tax_dest_id" ref="tvati_extrap5b"/>
+        <field name="tax_dest_id" ref="tvati_extrap0b"/>
     </record>
     <record id="afptt_extracom_7" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvad_09"/>
-        <field name="tax_dest_id" ref="tvati_extrap9b"/>
+        <field name="tax_dest_id" ref="tvati_extrap0b"/>
     </record>
     <record id="afptt_extracom_8" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvad_19"/>
-        <field name="tax_dest_id" ref="tvati_extrap19b"/>
+        <field name="tax_dest_id" ref="tvati_extrap0b"/>
     </record>
     <record id="afptt_extracom_5s" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
@@ -616,17 +616,17 @@
     <record id="afptt_extracom_6s" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvad_05_s"/>
-        <field name="tax_dest_id" ref="tvati_extrap5s"/>
+        <field name="tax_dest_id" ref="tvati_extrap0s"/>
     </record>
     <record id="afptt_extracom_7s" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvad_09_s"/>
-        <field name="tax_dest_id" ref="tvati_extrap9s"/>
+        <field name="tax_dest_id" ref="tvati_extrap0s"/>
     </record>
     <record id="afptt_extracom_8s" model="account.fiscal.position.tax.template">
         <field name="position_id" ref="fiscal_position_template_7"/>
         <field name="tax_src_id" ref="tvad_19_s"/>
-        <field name="tax_dest_id" ref="tvati_extrap19s"/>
+        <field name="tax_dest_id" ref="tvati_extrap0s"/>
     </record>
 
     <!-- Tva la incasare -->

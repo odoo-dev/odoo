@@ -101,13 +101,13 @@
     </record>
     <record id="pendsettl_template" model="account.reconcile.model.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
-        <field name="name">Operaţiuni în curs de clarificare</field>
+        <field name="name">Operațiuni în curs de clarificare</field>
     </record>
     <record id="pendsettl_line_template" model="account.reconcile.model.line.template">
         <field name="model_id" ref="pendsettl_template"/>
         <field name="account_id" ref="pcg_473"/>
         <field name="amount_type">percentage</field>
         <field name="amount_string">100</field>
-        <field name="label">Operaţiuni în curs de clarificare</field>
+        <field name="label">Operațiuni în curs de clarificare</field>
     </record>
 </odoo>
