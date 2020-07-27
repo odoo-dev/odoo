@@ -40,11 +40,11 @@
     name="Exhibitor Tools">
     <nav class="navbar navbar-light border-top shadow-sm d-print-none">
         <div class="container">
-            <div class="row d-flex justify-content-between w-100 mr-0">
+            <div class="row d-flex justify-content-between w-100">
                 <div class="col-lg-8 col-sm-12">
                     <ul class="o_wesponsor_topbar_filters o_wevent_index_topbar_filters nav"/>
                 </div>
-                <div class="col-lg-3 col-sm-12 d-flex align-items-center flex-wrap px16">
+                <div class="col-lg-3 col-sm-12 d-flex align-items-center flex-wrap pl-3 pr-0">
                     <t t-call="website_event.events_search_box">
                         <t t-set="_searches" t-value="searches"/>
                         <t t-set="action" t-value="'/event/%s/exhibitors' % (slug(event))"/>

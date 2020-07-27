@@ -33,14 +33,12 @@ class EventEvent(models.Model):
         self.exhibitor_menu = val
 
     def _get_menu_update_fields(self):
-        update_fields = super(EventEvent, self)._get_menu_update_fields()
-        update_fields += ['exhibitor_menu']
-        return update_fields
+        return super(EventEvent, self)._get_menu_update_fields() + ['exhibitor_menu']
 
-    def _update_website_menus(self, split_to_update=None):
-        super(EventEvent, self)._update_website_menus(split_to_update=split_to_update)
+    def _update_website_menus(self, menus_update_by_field=None):
+        super(EventEvent, self)._update_website_menus(menus_update_by_field=menus_update_by_field)
         for event in self:
-            if not split_to_update or event in split_to_update.get('exhibitor_menu'):
+            if not menus_update_by_field or event in menus_update_by_field.get('exhibitor_menu'):
                 event._update_website_menu_entry('exhibitor_menu', 'exhibitor_menu_ids', '_get_exhibitor_menu_entries')
 
     def _get_menu_type_field_matching(self):
@@ -50,5 +48,4 @@ class EventEvent(models.Model):
 
     def _get_exhibitor_menu_entries(self):
         self.ensure_one()
-        res = [(_('Exhibitors'), '/event/%s/exhibitors' % slug(self), False, 60, 'exhibitor')]
-        return res
+        return [(_('Exhibitors'), '/event/%s/exhibitors' % slug(self), False, 60, 'exhibitor')]
