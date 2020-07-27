@@ -26,6 +26,7 @@ publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
         // query selector of the element on which we attach the Jitsi iframe
         // if not defined, the widget will pop in a modal instead
         this.attachTo = this.$el.data('attach-to') || false;
+        // default username for jitsi
         this.defaultUsername = this.$el.data('default-username') || false;
 
         if (this.autoOpen) {
@@ -47,7 +48,10 @@ publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
             // maybe we didn't refresh the page for a while and so we might join a room
             // which is full, so we perform a RPC call to verify that we can really join
             let isChatRoomFull = await this._rpc({
-                route: `/website_jitsi/${this.roomName}/is_chat_room_full`,
+                route: '/jitsi/is_full',
+                params: {
+                    room_name: this.roomName,
+                },
             });
 
             if (isChatRoomFull) {
@@ -196,11 +200,11 @@ publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
       */
     _updateParticipantCount: async function (count, joined) {
         await this._rpc({
-            route: `/website_jitsi/update_participant_count`,
+            route: '/jitsi/update_status',
             params: {
-                "participant_count": count,
-                "joined": joined,
-                "room_name": this.roomName,
+                room_name: this.roomName,
+                participant_count: count,
+                joined: joined,
             },
         });
     },

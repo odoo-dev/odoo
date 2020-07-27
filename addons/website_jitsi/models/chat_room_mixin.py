@@ -28,7 +28,6 @@ class ChatRoomMixin(models.AbstractModel):
     room_max_capacity = fields.Selection(string="Max capacity", related="chat_room_id.max_capacity", readonly=False, required=True)
     room_participant_count = fields.Integer("Participant count", related="chat_room_id.participant_count", readonly=False)
     room_last_activity = fields.Datetime("Last activity", related="chat_room_id.last_activity")
-    room_last_joined = fields.Datetime("Last joined", related="chat_room_id.last_joined")
     room_max_participant_reached = fields.Integer("Max participant reached", related="chat_room_id.max_participant_reached")
 
     @api.model_create_multi

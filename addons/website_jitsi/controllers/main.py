@@ -1,34 +1,32 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import logging
-from werkzeug.exceptions import Forbidden, NotFound
+from werkzeug.exceptions import NotFound
 
 from odoo import http
 from odoo.http import request
 
 
-_logger = logging.getLogger(__name__)
-
-
 class WebsiteJitsiController(http.Controller):
-    @http.route(["/website_jitsi/update_participant_count"], type="json", auth="public")
-    def update_participant_count(self, joined, participant_count, room_name):
-        """Update the number of participant in the room.
 
-        Use the SQL keywords "FOR UPDATE SKIP LOCKED" in order to do anything if the SQL
-        row is locked (instead of raising an exception, wait for a moment and retry).
-        As this endpoint can be called multiple times, and we do not care to have a small
-        error in the participant count (but we care about performance).
+    @http.route(["/jitsi/update_status"], type="json", auth="public")
+    def jitsi_update_status(self, room_name, participant_count, joined):
+        """ Update room status: participant count, max reached
 
-        We need to provide the room name so it limit the rooms for which we can update
-        the participant count (visitors can not update the participant count for
-        unpublished rooms).
+        Use the SQL keywords "FOR UPDATE SKIP LOCKED" in order to skip if the row
+        is locked (instead of raising an exception, wait for a moment and retry).
+        This endpoint may be called multiple times and we don't care having small
+        errors in participant count compared to performance issues.
+
+        :raise ValueError: wrong participant count
+        :raise NotFound: wrong room name
         """
         if participant_count < 0:
-            raise Forbidden()
+            raise ValueError()
 
-        self._chat_room_exists(room_name)
+        chat_room = self._chat_room_exists(room_name)
+        if not chat_room:
+            raise NotFound()
 
         request.env.cr.execute(
             """
@@ -41,26 +39,21 @@ class WebsiteJitsiController(http.Controller):
             )
             UPDATE chat_room AS wcr
                SET participant_count = %s,
-                   last_joined = CASE WHEN %s THEN NOW() ELSE last_joined END,
                    last_activity = NOW(),
                    max_participant_reached = GREATEST(max_participant_reached, %s)
               FROM req
              WHERE wcr.id = req.id;
             """,
-            [room_name, participant_count, joined, participant_count]
+            [room_name, participant_count, participant_count]
         )
 
-    @http.route(["/website_jitsi/<string:room_name>/is_chat_room_full"], type="json", auth="public")
-    def is_chat_room_full(self, room_name):
-        """Return True is the given chat room is full."""
-        chat_room = self._chat_room_exists(room_name)
-        return chat_room.sudo().is_full
+    @http.route(["/jitsi/is_full"], type="json", auth="public")
+    def jitsi_is_full(self, room_name):
+        return self._chat_room_exists(room_name).is_full
+
+    # ------------------------------------------------------------
+    # TOOLS
+    # ------------------------------------------------------------
 
     def _chat_room_exists(self, room_name):
-        """Return the Chat Room record or raise an exception if not found."""
-        chat_room = request.env["chat.room"].sudo().search([("name", "=", room_name)], limit=1)
-
-        if not chat_room:
-            raise NotFound()
-
-        return chat_room
+        return request.env["chat.room"].sudo().search([("name", "=", room_name)], limit=1)

@@ -31,7 +31,6 @@
                     <notebook>
                         <page name="Reporting" string="Reporting">
                             <group>
-                                <field name="last_joined"/>
                                 <field name="last_activity"/>
                                 <field name="max_participant_reached"/>
                             </group>
