@@ -114,10 +114,10 @@ class Event(models.Model):
             (_('Register'), '/event/%s/register' % slug(self), False, 100, False),
         ]
 
-    def _update_website_menus(self, split_to_update=None):
+    def _update_website_menus(self, menus_update_by_field=None):
         """ Synchronize event configuration and its menu entries for frontend. """
-        super(Event, self)._update_website_menus(split_to_update=split_to_update)
+        super(Event, self)._update_website_menus(menus_update_by_field=menus_update_by_field)
         for event in self:
-            if event.website_menu and (not split_to_update or event in split_to_update.get('website_menu')):
+            if event.website_menu and (not menus_update_by_field or event in menus_update_by_field.get('website_menu')):
                 for name, url, xml_id, menu_sequence, menu_type in event._get_menu_entries_online():
                     event._create_menu(menu_sequence, name, url, xml_id, menu_type=menu_type)
