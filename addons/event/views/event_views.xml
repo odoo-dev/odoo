@@ -72,9 +72,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-6 o_setting_box" >
-                                <label for="tag_ids" string="Tags"/>
-                                <field name="tag_ids" widget="many2many_tags" options="{'no_quick_create': True}"/>
+                            <div class="col-12 col-lg-6 o_setting_box" name="event_type_visibility_tags">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <label for="tag_ids" string="Tags"/>
+                                    <div class="row">
+                                        <div class="col-12 mt16">
+                                            <field name="tag_ids" widget="many2many_tags" options="{'no_quick_create': True}"/>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <h2>Attendees</h2>
@@ -205,7 +212,7 @@
                             <group>
                                 <field name="active" invisible="1"/>
                                 <label for="date_begin" string="Date"/>
-                                <div class="o_row" name="date_interval">
+                                <div class="o_row">
                                     <field name="date_begin" widget="daterange" nolabel="1" class="oe_inline" options="{'related_end_date': 'date_end'}"/>
                                     <i class="fa fa-long-arrow-right mx-2" aria-label="Arrow icon" title="Arrow"/>
                                     <field name="date_end" widget="daterange" nolabel="1" class="oe_inline" options="{'related_start_date': 'date_begin'}"/>
