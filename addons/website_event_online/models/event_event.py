@@ -26,7 +26,7 @@ class Event(models.Model):
         help="Whether event is going to start today if still not ongoing")
     start_remaining = fields.Integer(
         'Remaining before start', compute='_compute_time_data',
-        help="Remaining time before event starts (hours)")
+        help="Remaining time before event starts (minutes)")
 
     @api.depends('date_begin', 'date_end')
     def _compute_time_data(self):
