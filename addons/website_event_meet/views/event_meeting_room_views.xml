@@ -46,7 +46,6 @@
                     <notebook>
                         <page name="Reporting" string="Reporting">
                             <group>
-                                <field name="room_last_joined"/>
                                 <field name="room_last_activity"/>
                                 <field name="room_max_participant_reached"/>
                             </group>
@@ -70,7 +69,6 @@
                 <field name="room_participant_count"/>
                 <field name="room_max_capacity"/>
                 <field name="room_lang_id"/>
-                <field name="room_last_joined"/>
             </tree>
         </field>
     </record>

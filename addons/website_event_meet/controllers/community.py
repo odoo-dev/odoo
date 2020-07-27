@@ -20,7 +20,7 @@ class WebsiteEventMeetController(http.Controller):
         return search_domain_base
 
     def _sort_event_rooms(self, room):
-        return (room.is_pinned, room.room_last_joined, room.id)
+        return (room.is_pinned, room.room_last_activity, room.id)
 
     # ------------------------------------------------------------
     # MAIN PAGE
@@ -69,39 +69,35 @@ class WebsiteEventMeetController(http.Controller):
             "is_event_manager": request.env.user.has_group("event.group_event_manager"),
         }
 
-    @http.route(["/event/create_meeting_room"], type="http", auth="public", methods=["POST"], website=True)
-    def create_meeting_room(self, **post):
+    @http.route("/event/<model('event.event'):event>/meeting_room_create",
+                type="http", auth="public", methods=["POST"], website=True)
+    def create_meeting_room(self, event, **post):
+        if not event or not event.can_access_from_current_website() or not event.is_published or not event.meeting_room_allow_creation:
+            raise Forbidden()
+
         name = post.get("name")
         summary = post.get("summary")
         target_audience = post.get("audience")
         lang_code = post.get("lang_code")
         max_capacity = post.get("capacity")
-        event_id = int(post.get("event"))
 
         # get the record to be sure they really exist
-        event = request.env["event.event"].browse(event_id).exists()
         lang = request.env["res.lang"].search([("code", "=", lang_code)], limit=1)
 
-        if not event or not event.can_access_from_current_website():
+        if not lang or max_capacity == "no_limit":
             raise Forbidden()
 
-        if not event.website_published or not lang or max_capacity == "no_limit" or not event.meeting_room_allow_creation:
-            raise Forbidden()
-
-        _logger.info("New meeting room (%s) create by %s" % (name, request.httprequest.remote_addr))
-
-        meeting_room = request.env["event.meeting.room"].sudo().create(
-            {
-                "name": name,
-                "summary": summary,
-                "target_audience": target_audience,
-                "is_pinned": False,
-                "event_id": event.id,
-                "room_lang_id": lang.id,
-                "room_max_capacity": max_capacity,
-                "is_published": True,
-            },
-        )
+        meeting_room = request.env["event.meeting.room"].sudo().create({
+            "name": name,
+            "summary": summary,
+            "target_audience": target_audience,
+            "is_pinned": False,
+            "event_id": event.id,
+            "room_lang_id": lang.id,
+            "room_max_capacity": max_capacity,
+            "is_published": True,
+        })
+        _logger.info("New meeting room (%s) created by %s (uid %s)" % (name, request.httprequest.remote_addr, request.env.uid))
 
         return redirect(f"/event/{slug(event)}/meeting_room/{slug(meeting_room)}")
 
@@ -113,9 +109,9 @@ class WebsiteEventMeetController(http.Controller):
     # ROOM PAGE VIEW
     # ------------------------------------------------------------
 
-    @http.route(["/event/<model('event.event'):event>/meeting_room/<model('event.meeting.room'):meeting_room>"], type="http",
-                auth="public", website=True, sitemap=True)
-    def event_meeting_room(self, event, meeting_room, **post):
+    @http.route("/event/<model('event.event'):event>/meeting_room/<model('event.meeting.room'):meeting_room>",
+                type="http", auth="public", website=True, sitemap=True)
+    def event_meeting_room_page(self, event, meeting_room, **post):
         """Display the meeting room frontend view.
 
         :param event: Event for which we display the meeting rooms
@@ -133,10 +129,10 @@ class WebsiteEventMeetController(http.Controller):
 
         return request.render(
             "website_event_meet.event_meet_main",
-            self._event_meet_get_values(event, meeting_room),
+            self._event_meeting_room_page_get_values(event, meeting_room),
         )
 
-    def _event_meet_get_values(self, event, meeting_room):
+    def _event_meeting_room_page_get_values(self, event, meeting_room):
         # search for meeting room list
         meeting_rooms_other = request.env['event.meeting.room'].sudo().search([
             ('event_id', '=', event.id), ('id', '!=', meeting_room.id), ('is_published', '=', True),

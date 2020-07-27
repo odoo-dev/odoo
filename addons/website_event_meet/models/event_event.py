@@ -61,14 +61,12 @@ class Event(models.Model):
     # ------------------------------------------------------------
 
     def _get_menu_update_fields(self):
-        update_fields = super(Event, self)._get_menu_update_fields()
-        update_fields += ['meeting_room_menu']
-        return update_fields
+        return super(Event, self)._get_menu_update_fields() + ['meeting_room_menu']
 
-    def _update_website_menus(self, split_to_update=None):
-        super(Event, self)._update_website_menus(split_to_update=split_to_update)
+    def _update_website_menus(self, menus_update_by_field=None):
+        super(Event, self)._update_website_menus(menus_update_by_field=menus_update_by_field)
         for event in self:
-            if not split_to_update or event in split_to_update.get('meeting_room_menu'):
+            if not menus_update_by_field or event in menus_update_by_field.get('meeting_room_menu'):
                 event._update_website_menu_entry('meeting_room_menu', 'meeting_room_menu_ids', '_get_meet_menu_entries')
 
     def _get_menu_type_field_matching(self):
@@ -78,5 +76,4 @@ class Event(models.Model):
 
     def _get_meet_menu_entries(self):
         self.ensure_one()
-        res = [(_('Community'), '/event/%s/meeting_rooms' % slug(self), False, 70, 'meeting_room')]
-        return res
+        return [(_('Community'), '/event/%s/meeting_rooms' % slug(self), False, 70, 'meeting_room')]

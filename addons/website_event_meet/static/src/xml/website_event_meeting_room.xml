@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t t-name="create_meeting_room_modal">
+    <t t-name="event_meet_create_room_modal">
         <div class="modal fade o_wevent_create_meeting_room_modal" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content border-0">
                     <main class="modal-body p-3">
-                        <form action="/event/create_meeting_room" class="text-dark" id="o_wevent_create_meeting_room_form" method="POST">
+                        <form t-attf-action="/event/#{eventId}/meeting_room_create"
+                            id="o_wevent_create_meeting_room_form"
+                            class="text-dark"
+                            method="POST">
                             <h2>Launch a new topic</h2>
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-left">Room Topic</label>
@@ -22,7 +25,8 @@
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-left">Language</label>
                                 <select class="o_wevent_create_meeting_room_lang form-control col-8" name="lang_code" required="1">
-                                    <option t-foreach="langs" t-as="language" t-att-value="language[0]" t-esc="language[1]"/>
+                                    <option t-foreach="langs" t-as="language" t-att-value="language[0]" t-esc="language[1]"
+                                        t-att-selected="language[0] == defaultLangCode and 'selected' or None"/>
                                 </select>
                             </div>
                             <div class="row m-2">

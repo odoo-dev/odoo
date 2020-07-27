@@ -99,7 +99,7 @@
                     <div class="d-flex mb-3">
                         <div class="flex-grow-1">
                             <span class="d-flex align-items-top">
-                                <a t-attf-href="/event/#{ slug(event) }/meeting_room/#{ slug(meeting_room_other) }"><t t-esc="meeting_room_other.name"/></a>
+                                <a t-att-href="'/event/%s/meeting_room/%s' % (slug(event), slug(meeting_room_other))"><t t-esc="meeting_room_other.name"/></a>
                             </span>
                             <span class="text-muted" t-esc="meeting_room_other.summary"></span>
                             <div class="d-flex justify-content-between align-items-center">

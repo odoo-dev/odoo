@@ -53,7 +53,10 @@
         <h1 class="o_page_header mb-3">Launch a new topic</h1>
         <p>Want to create your own discussion room ?</p>
         <p>Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic.</p>
-        <button class="btn btn-primary o_wevent_create_room_button" t-att-data-event="event.id" t-att-data-default-lang="default_lang_code">Create a Room</button>
+        <button class="btn btn-primary o_wevent_create_room_button"
+            t-att-data-event-id="event.id"
+            t-att-data-default-lang-code="default_lang_code">Create a Room
+        </button>
     </div>
 </template>
 
