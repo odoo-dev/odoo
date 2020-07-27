@@ -49,7 +49,7 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
                 self.displayNotification({
                     type: 'info',
                     title: _t('Error'),
-                    message: _.str.sprintf(_t('Unknown issue, please retry')),
+                    message: _.str.sprintf(_t('Talk already in your Favorites')),
                 });
             } else {
                 self.reminderOn = result.reminderOn;
