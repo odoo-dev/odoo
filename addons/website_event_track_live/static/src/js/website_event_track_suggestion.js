@@ -55,9 +55,7 @@ var WebsiteEventTrackSuggestion = Widget.extend({
         if (secondsLeft > 0) {
             secondsLeft -= 1;
             this.$('.owevent_track_suggestion_timer_text').text(secondsLeft);
-        }
-
-        if (secondsLeft === 0) {
+        } else {
             window.location = this.suggestion.trackUrl;
         }
     }

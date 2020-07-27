@@ -11,10 +11,9 @@ class WebsiteEventTrackLiveController(http.Controller):
         track_suggestion = track._get_track_suggestions(
             restrict_domain=[('youtube_video_url', '!=', False)],
             limit=1)
-        if track_suggestion:
-            return self._prepare_track_suggestion_values(track, track_suggestion)
-        else:
+        if not track_suggestion:
             return False
+        return self._prepare_track_suggestion_values(track, track_suggestion)
 
     def _prepare_track_suggestion_values(self, track, track_suggestion):
         return {
