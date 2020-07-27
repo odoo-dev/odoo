@@ -14,6 +14,10 @@ class Event(models.Model):
     _name = 'event.event'
     _inherit = 'event.event'
 
+    # frontend options
+    menu_register_cta = fields.Boolean(
+        'Add Register Button', compute='_compute_menu_register_cta',
+        readonly=False, store=True)
     # live information
     is_ongoing = fields.Boolean(
         'Is Ongoing', compute='_compute_time_data', search='_search_is_ongoing',
@@ -27,6 +31,11 @@ class Event(models.Model):
     start_remaining = fields.Integer(
         'Remaining before start', compute='_compute_time_data',
         help="Remaining time before event starts (minutes)")
+
+    @api.depends('website_menu')
+    def _compute_menu_register_cta(self):
+        for event in self:
+            event.menu_register_cta = event.website_menu
 
     @api.depends('date_begin', 'date_end')
     def _compute_time_data(self):
