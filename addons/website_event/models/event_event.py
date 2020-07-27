@@ -73,10 +73,10 @@ class Event(models.Model):
         return res
 
     def write(self, vals):
-        split_tocheck = self._split_for_menu_update()
+        menus_state_by_field = self._split_menus_state_by_field()
         res = super(Event, self).write(vals)
-        split_to_update = self._get_events_for_menu_update(split_tocheck)
-        self._update_website_menus(split_to_update=split_to_update)
+        menus_update_by_field = self._get_menus_update_by_field(menus_state_by_field)
+        self._update_website_menus(menus_update_by_field=menus_update_by_field)
         return res
 
     # ------------------------------------------------------------
@@ -95,29 +95,39 @@ class Event(models.Model):
           like website_menu, website_track, ... """
         return ['website_menu']
 
-    def _split_for_menu_update(self):
+    def _split_menus_state_by_field(self):
         """ For each field linked to a menu, get the set of events having this
         menu activated and de-activated. Purpose is to find those whose value
-        changed and update the underlying menus. """
-        split_tocheck = dict()
+        changed and update the underlying menus.
+
+        :return dict: key = name of field triggering a website menu update, get {
+          'activated': subset of self having its menu currently set to True
+          'deactivated': subset of self having its menu currently set to False
+        } """
+        menus_state_by_field = dict()
         for fname in self._get_menu_update_fields():
             activated = self.filtered(lambda event: event[fname])
-            split_tocheck[fname] = {
+            menus_state_by_field[fname] = {
                 'activated': activated,
                 'deactivated': self - activated,
             }
-        return split_tocheck
+        return menus_state_by_field
 
-    def _get_events_for_menu_update(self, split_result):
+    def _get_menus_update_by_field(self, menus_state_by_field):
         """ For each field linked to a menu, get the set of events requiring
         this menu to be activated or de-activated based on previous recorded
-        value. """
-        split_to_update = dict()
+        value.
+
+        :return dict: key = name of field triggering a website menu update, get {
+          'activated': subset of self having its menu toggled to True
+          'deactivated': subset of self having its menu toggled to False
+        } """
+        menus_update_by_field = dict()
         for fname in self._get_menu_update_fields():
-            split_to_update[fname] = self.env['event.event']
-            split_to_update[fname] |= split_result[fname]['activated'].filtered(lambda event: not event[fname])
-            split_to_update[fname] |= split_result[fname]['deactivated'].filtered(lambda event: event[fname])
-        return split_to_update
+            menus_update_by_field[fname] = self.env['event.event']
+            menus_update_by_field[fname] |= menus_state_by_field[fname]['activated'].filtered(lambda event: not event[fname])
+            menus_update_by_field[fname] |= menus_state_by_field[fname]['deactivated'].filtered(lambda event: event[fname])
+        return menus_update_by_field
 
     def _get_menu_entries(self):
         """ Method returning menu entries to display on the website view of the
@@ -135,8 +145,10 @@ class Event(models.Model):
             (_('Register'), '/event/%s/register' % slug(self), False),
         ]
 
-    def _update_website_menus(self, split_to_update=None):
-        """ Synchronize event configuration and its menu entries for frontend. """
+    def _update_website_menus(self, menus_update_by_field=None):
+        """ Synchronize event configuration and its menu entries for frontend.
+
+        :param menus_update_by_field: see ``_get_menus_update_by_field``"""
         for event in self:
             if event.menu_id and not event.website_menu:
                 event.menu_id.unlink()

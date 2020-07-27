@@ -94,16 +94,14 @@ class Event(models.Model):
         self.website_track_proposal = val
 
     def _get_menu_update_fields(self):
-        update_fields = super(Event, self)._get_menu_update_fields()
-        update_fields += ['website_track', 'website_track_proposal']
-        return update_fields
+        return super(Event, self)._get_menu_update_fields() + ['website_track', 'website_track_proposal']
 
-    def _update_website_menus(self, split_to_update=None):
-        super(Event, self)._update_website_menus(split_to_update=split_to_update)
+    def _update_website_menus(self, menus_update_by_field=None):
+        super(Event, self)._update_website_menus(menus_update_by_field=menus_update_by_field)
         for event in self:
-            if not split_to_update or event in split_to_update.get('website_track'):
+            if not menus_update_by_field or event in menus_update_by_field.get('website_track'):
                 event._update_website_menu_entry('website_track', 'track_menu_ids', '_get_track_menu_entries')
-            if not split_to_update or event in split_to_update.get('website_track_proposal'):
+            if not menus_update_by_field or event in menus_update_by_field.get('website_track_proposal'):
                 event._update_website_menu_entry('website_track_proposal', 'track_proposal_menu_ids', '_get_track_proposal_menu_entries')
 
     def _update_website_menu_entry(self, fname_bool, fname_o2m, method_name):
