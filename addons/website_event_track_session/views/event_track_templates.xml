@@ -39,11 +39,11 @@
 <template id="session_topbar" name="Tracks Tools">
     <nav class="navbar navbar-light border-top shadow-sm d-print-none">
         <div class="container">
-            <div class="row d-flex justify-content-between w-100 mr-0">
+            <div class="row d-flex justify-content-between w-100">
                 <div class="col-lg-8 col-sm-12">
                     <ul class="o_wesession_topbar_filters o_wevent_index_topbar_filters nav"/>
                 </div>
-                <div class="col-lg-3 col-sm-12 d-flex align-items-center flex-wrap px16">
+                <div class="col-lg-3 col-sm-12 d-flex align-items-center flex-wrap pl-3 pr-0">
                     <t t-call="website_event.events_search_box">
                         <t t-set="_searches" t-value="searches"/>
                         <t t-set="action" t-value="'/event/%s/track' % (slug(event))"/>
@@ -143,33 +143,42 @@
 <!-- Tracks: List-based display -->
 <template id="tracks_display_list" name="Tracks: List Display">
     <div t-if="tracks" class="o_wesession_list mb-3">
-        <div class="w-100">
-            <h5 class="m-0">Talks</h5>
-            <hr class="mt-2 pb-1 mb-1"/>
-        </div>
-        <div class="mx-3">
-            <!-- CELLS HEADERS -->
-            <div class="o_wesession_list_item row bg-white shadow-sm border-bottom-0 py-2">
-                <span class="col-md-4">Topic</span>
-                <div class="col-md-2">Tags</div>
-                <span class="col-md-2">Speaker</span>
-                <span class="col-md-1">Duration</span>
-                <span class="col-md-3">Starts</span>
-            </div>
-        </div>
-        <ul class="list-unstyled mx-3">
-            <t t-foreach="tracks_by_day" t-as="tracks_info">
+        <ul class="list-unstyled">
+            <li t-foreach="tracks_by_day" t-as="tracks_info"
+                class="mb-3">
                 <t t-set="tracks_date" t-value="tracks_info[0]"/>
                 <t t-set="tracks" t-value="tracks_info[1]"/>
                 <!-- DAY HEADER -->
-                <div class="o_wesession_list_item row bg-white shadow-sm border-bottom-0 py-2">
-                    <strong class="col" t-esc="tracks_date"
-                        t-options="{'widget': 'date', 'format': 'long'}"/>
+                <div class="w-100">
+                    <div class="d-flex">
+                        <span class="h1 m-0 font-weight-bold" t-esc="tracks_date"
+                            t-options="{'widget': 'date', 'format': 'EEEE dd'}"/>
+                        <div class="d-flex flex-column ml-2">
+                            <span class="font-weight-bold" t-esc="tracks_date"
+                                t-options="{'widget': 'date', 'format': 'MMMM'}"/>
+                            <span class="font-weight-bold" t-esc="tracks_date"
+                                t-options="{'widget': 'date', 'format': 'YYYY'}"/>
+                        </div>
+                    </div>
+                    <hr class="mt-2 pb-1 mb-1"/>
                 </div>
                 <!-- DAY TRACKS LIST -->
-                <t t-foreach="tracks" t-as="track">
-                    <li class="o_wesession_list_item row bg-white-50 border-top-0 py-2">
-                        <span class="col-md-4">
+                <ul class="list-unstyled mx-3 o_wesession_list_tracks">
+                    <!-- CELLS HEADERS -->
+                    <li class="o_wesession_list_item row bg-white shadow-sm py-2 d-none d-sm-flex">
+                        <span class="col-md-4 col-sm-8">Topic</span>
+                        <span class="col-md-2 col-sm-4">Tags</span>
+                        <span class="col-md-6 col-sm-12">
+                            <span class="row">
+                                <span class="col-4">Speaker</span>
+                                <span class="col-3">Duration</span>
+                                <span class="col-5">Starts</span>
+                            </span>
+                        </span>
+                    </li>
+                    <li t-foreach="tracks" t-as="track"
+                        class="o_wesession_list_item row bg-white-50 py-2">
+                        <span class="col-md-4 col-sm-8">
                             <a t-att-href="track.website_url"
                                 t-if="track.is_published or user_event_manager"
                                 t-esc="track.name"/>
@@ -179,34 +188,39 @@
                                 Unpublished
                             </span>
                         </span>
-                        <div class="col-md-2">
+                        <div class="col-md-2 col-sm-4">
                             <t t-foreach="track.tag_ids" t-as="tag">
                                 <t t-call="website_event_track_session.track_tag_badge_link"/>
                             </t>
                         </div>
-                        <span class="col-md-2">
-                            <span t-esc="track.partner_name"/>
-                        </span>
-                        <span class="col-md-1" t-esc="track.duration"
-                            t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'hour', 'round': 'minute'}"/>
-                        <span class="col-md-3 d-flex align-items-start">
-                            <span t-if="track.is_track_live and not track.is_track_done"
-                                class="badge badge-danger">Live</span>
-                            <span t-elif="not track.is_track_done and track.is_track_soon">
-                                In <span t-esc="track.track_start_remaining"
-                                    t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'second', 'round': 'minute'}"/>
-                            </span>
-                            <span t-elif="not track.is_track_done and not track.is_track_soon"
-                                t-esc="track.date"
-                                t-options="{'widget': 'datetime', 'format': 'short'}"/>
-                            <span t-else="" class="badge badge-info">Finished</span>
-                            <span class="ml-auto"
-                                t-if="option_tracks_wishlist"
-                                t-call="website_event_track_online.track_widget_reminder"/>
-                        </span>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="row">
+                                <span class="col-4">
+                                    <span t-esc="track.partner_name"/>
+                                </span>
+                                <span class="col-3" t-esc="track.duration"
+                                    t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'hour', 'round': 'minute'}"/>
+                                <span class="col-5 d-flex align-items-start">
+                                    <span t-if="track.is_track_live and not track.is_track_done"
+                                        class="badge badge-danger">Live</span>
+                                    <span t-elif="not track.is_track_done and track.is_track_soon">
+                                        <span t-esc="track.track_start_remaining"
+                                            t-options="{'widget': 'duration', 'digital': False, 'format': 'narrow',
+                                                        'add_direction': True, 'unit': 'second', 'round': 'minute'}"/>
+                                    </span>
+                                    <span t-elif="not track.is_track_done and not track.is_track_soon"
+                                        t-esc="track.date"
+                                        t-options="{'widget': 'datetime', 'time_only': True, 'format': 'short'}"/>
+                                    <span t-else="" class="badge badge-info">Finished</span>
+                                    <span class="ml-auto"
+                                        t-if="option_tracks_wishlist"
+                                        t-call="website_event_track_online.track_widget_reminder"/>
+                                </span>
+                            </div>
+                        </div>
                     </li>
-                </t>
-            </t>
+                </ul>
+            </li>
         </ul>
     </div>
 </template>

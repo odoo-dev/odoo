@@ -15,7 +15,7 @@ class EventTrack(models.Model):
     # Call to action
     website_cta = fields.Boolean('Magic Button')
     website_cta_title = fields.Char('Button Title')
-    website_cta_url = fields.Char('Button Taget Url')
+    website_cta_url = fields.Char('Button Target URL')
     website_cta_delay = fields.Integer('Button appears')
     # time information for track
     is_track_live = fields.Boolean(
