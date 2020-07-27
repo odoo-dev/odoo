@@ -26,25 +26,25 @@ var discoverTalkSteps = function (talkName, fromList, reminderOn, toggleReminder
         steps = steps.concat([{
             content: "Check Reminder is on",
             trigger: 'div.o_wetrack_js_reminder i.fa-bell',
-            extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
+            extra_trigger: 'small.o_wetrack_js_reminder_text:contains("Reminder On")',
             run: function () {}, // it's a check
         }]);
     }
     else {
         steps = steps.concat([{
             content: "Check Reminder is Off",
-            trigger: 'span.o_wetrack_js_reminder_text:contains("Set Reminder")',
+            trigger: 'small.o_wetrack_js_reminder_text:contains("Set Reminder")',
             run: function () {}, // it's a check
         }]);
         if (toggleReminder) {
             steps = steps.concat([{
                 content: "Set Reminder",
-                trigger: 'span.o_wetrack_js_reminder_text',
+                trigger: 'small.o_wetrack_js_reminder_text',
                 run: 'click',
             }, {
                 content: "Check Reminder is On",
                 trigger: 'div.o_wetrack_js_reminder i.fa-bell',
-                extra_trigger: 'span.o_wetrack_js_reminder_text:contains("Reminder On")',
+                extra_trigger: 'small.o_wetrack_js_reminder_text:contains("Reminder On")',
                 run: function () {}, // it's a check
             }]);
         }
