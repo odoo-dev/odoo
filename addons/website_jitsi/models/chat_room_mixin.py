@@ -35,14 +35,14 @@ class ChatRoomMixin(models.AbstractModel):
         for values in values_list:
             if any(values.get(fmatch[0]) for fmatch in self.ROOM_CONFIG_FIELDS) and not values.get('chat_room_id'):
                 room_values = dict((fmatch[1], values[fmatch[0]]) for fmatch in self.ROOM_CONFIG_FIELDS if values.get(fmatch[0]))
-                values['chat_room_id'] = self.env['chat.room'].create(room_values)
+                values['chat_room_id'] = self.env['chat.room'].create(room_values).id
         return super(ChatRoomMixin, self).create(values_list)
 
     def write(self, values):
         if any(values.get(fmatch[0]) for fmatch in self.ROOM_CONFIG_FIELDS):
             for document in self.filtered(lambda doc: not doc.chat_room_id):
                 room_values = dict((fmatch[1], values[fmatch[0]]) for fmatch in self.ROOM_CONFIG_FIELDS if values.get(fmatch[0]))
-                document.chat_room_id = self.env['chat.room'].create(room_values)
+                document.chat_room_id = self.env['chat.room'].create(room_values).id
         return super(ChatRoomMixin, self).write(values)
 
     def copy(self, default=None):
