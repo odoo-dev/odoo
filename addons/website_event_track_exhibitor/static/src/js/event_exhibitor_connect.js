@@ -50,17 +50,7 @@ var ExhibitorConnectClosedDialog = Dialog.extend({
     _fetchSponsor: function () {
         let self = this;
         let rpcPromise = this._rpc({
-            model: 'event.sponsor',
-            method: 'read',
-            args: [
-                this.sponsorId,
-                ['name', 'subtitle', 'sponsor_type_id',
-                 'url', 'email', 'phone',
-                 'website_description', 'website_image_url',
-                 'hour_from', 'hour_to', 'is_in_opening_hours',
-                 'country_id', 'country_flag_url',
-                ],
-            ],
+            route: `/event_sponsor/${this.sponsorId}/read`,
         }).then(function (readData) {
             self.sponsorData = readData[0];
             if (self.sponsorData.country_id) {

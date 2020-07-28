@@ -160,6 +160,20 @@ class ExhibitorController(WebsiteEventTrackController):
         }
 
     # ------------------------------------------------------------
+    # BUSINESS / MISC
+    # ------------------------------------------------------------
+
+    @http.route('/event_sponsor/<int:sponsor_id>/read', type='json', auth='public', website=True)
+    def event_sponsor_read(self, sponsor_id):
+        return request.env['event.sponsor'].browse(sponsor_id).read([
+            'name', 'subtitle', 'sponsor_type_id',
+            'url', 'email', 'phone',
+            'website_description', 'website_image_url',
+            'hour_from', 'hour_to', 'is_in_opening_hours',
+            'country_id', 'country_flag_url'
+        ])
+
+    # ------------------------------------------------------------
     # TOOLS
     # ------------------------------------------------------------
 
