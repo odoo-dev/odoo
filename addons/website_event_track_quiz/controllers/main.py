@@ -75,7 +75,7 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
 
     def _get_quiz_answers_details(self, track, answer_ids):
         all_questions = request.env['event.quiz.question'].sudo().search([('quiz_id', '=', track.quiz_id.id)])
-        user_answers = request.env['event.quiz.question.answer'].sudo().search([('id', 'in', answer_ids)])
+        user_answers = request.env['event.quiz.answer'].sudo().search([('id', 'in', answer_ids)])
 
         if user_answers.mapped('question_id') != all_questions:
             return {'error': 'quiz_incomplete'}

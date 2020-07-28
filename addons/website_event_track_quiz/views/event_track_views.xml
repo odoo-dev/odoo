@@ -7,7 +7,8 @@
         <field name="arch" type="xml">
             <xpath expr="//group[@name='event_track_cta_group']" position="after">
                 <group name="event_track_quiz_group">
-                    <field name="quiz_id"/>
+                    <field name="quiz_id"
+                        context="{'form_view_ref': 'website_event_track_quiz.event_quiz_view_form_from_track'}"/>
                 </group>
             </xpath>
         </field>

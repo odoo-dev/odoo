@@ -7,8 +7,8 @@ from odoo import api, fields, models
 class EventTrack(models.Model):
     _inherit = ['event.track']
 
-    quiz_id = fields.Many2one('event.quiz', string="Quiz")
-    quiz_questions_count = fields.Integer(string="# Quiz Questions", compute='_compute_quiz_questions_count')
+    quiz_id = fields.Many2one('event.quiz', string="Quiz", groups="event.group_event_user")
+    quiz_questions_count = fields.Integer(string="# Quiz Questions", compute='_compute_quiz_questions_count', groups="event.group_event_user")
 
     @api.depends('quiz_id.question_ids')
     def _compute_quiz_questions_count(self):

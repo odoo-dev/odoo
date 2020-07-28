@@ -14,12 +14,14 @@
         'website_event_track_session',
     ],
     'data': [
+        'security/ir.model.access.csv',
         'views/assets.xml',
-        'views/event_quiz_templates.xml',
         'views/event_quiz_views.xml',
+        'views/event_quiz_question_views.xml',
         'views/event_track_views.xml',
-        'views/event_track_templates_track.xml',
-        'security/ir.model.access.csv'
+        'views/event_menus.xml',
+        'views/event_quiz_templates.xml',
+        'views/event_track_templates_page.xml',
     ],
     'demo': [
         'data/quiz_demo.xml',

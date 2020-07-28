@@ -10,21 +10,21 @@
         <field name="sequence">1</field>
         <field name="quiz_id" ref="website_event_track_quiz.event_7_track_1_quiz"/>
     </record>
-    <record id="event_7_track_1_question_0_0" model="event.quiz.question.answer">
+    <record id="event_7_track_1_question_0_0" model="event.quiz.answer">
         <field name="text_value">Resources</field>
         <field name="sequence">1</field>
         <field name="is_correct" eval="True"/>
         <field name="comment">Correct ! It needs water, electricity and more !</field>
         <field name="question_id" ref="event_7_track_1_question_0"/>
     </record>
-    <record id="event_7_track_1_question_0_1" model="event.quiz.question.answer">
+    <record id="event_7_track_1_question_0_1" model="event.quiz.answer">
         <field name="text_value">A dog</field>
         <field name="sequence">2</field>
         <field name="is_correct" eval="False"/>
         <field name="comment">Incorrect ! Even if we all know that dogs are awesome, a home needs resources.</field>
         <field name="question_id" ref="event_7_track_1_question_0"/>
     </record>
-    <record id="event_7_track_1_question_0_2" model="event.quiz.question.answer">
+    <record id="event_7_track_1_question_0_2" model="event.quiz.answer">
         <field name="text_value">A garage</field>
         <field name="sequence">3</field>
         <field name="is_correct" eval="False"/>
@@ -36,14 +36,14 @@
         <field name="sequence">2</field>
         <field name="quiz_id" ref="website_event_track_quiz.event_7_track_1_quiz"/>
     </record>
-    <record id="event_7_track_1_question_1_0" model="event.quiz.question.answer">
+    <record id="event_7_track_1_question_1_0" model="event.quiz.answer">
         <field name="text_value">No !</field>
         <field name="sequence">1</field>
         <field name="is_correct" eval="True"/>
         <field name="comment">Correct ! To prevent global warming, we need to produce cleaner energy which will drastically reduce our carbon emissions !</field>
         <field name="question_id" ref="event_7_track_1_question_1"/>
     </record>
-    <record id="event_7_track_1_question_1_1" model="event.quiz.question.answer">
+    <record id="event_7_track_1_question_1_1" model="event.quiz.answer">
         <field name="text_value">Yes !</field>
         <field name="sequence">2</field>
         <field name="is_correct" eval="False"/>
@@ -64,14 +64,14 @@
         <field name="sequence">1</field>
         <field name="quiz_id" ref="website_event_track_quiz.event_7_track_5_quiz"/>
     </record>
-    <record id="event_7_track_5_question_0_0" model="event.quiz.question.answer">
+    <record id="event_7_track_5_question_0_0" model="event.quiz.answer">
         <field name="text_value">Yes</field>
         <field name="sequence">1</field>
         <field name="is_correct" eval="False"/>
         <field name="comment">Incorrect! In order to avoid accident, Ikea furniture needs to be secured by fixing them to the wall!</field>
         <field name="question_id" ref="event_7_track_5_question_0"/>
     </record>
-    <record id="event_7_track_5_question_0_1" model="event.quiz.question.answer">
+    <record id="event_7_track_5_question_0_1" model="event.quiz.answer">
         <field name="text_value">No</field>
         <field name="sequence">2</field>
         <field name="is_correct" eval="True"/>
@@ -83,21 +83,21 @@
         <field name="sequence">2</field>
         <field name="quiz_id" ref="website_event_track_quiz.event_7_track_5_quiz"/>
     </record>
-    <record id="event_7_track_5_question_1_0" model="event.quiz.question.answer">
+    <record id="event_7_track_5_question_1_0" model="event.quiz.answer">
         <field name="text_value">Hammer and sickle</field>
         <field name="sequence">1</field>
         <field name="is_correct" eval="False"/>
         <field name="comment">Incorrect! The sickle won't be of any help here, unless you want some decoration !</field>
         <field name="question_id" ref="event_7_track_5_question_1"/>
     </record>
-    <record id="event_7_track_5_question_1_1" model="event.quiz.question.answer">
+    <record id="event_7_track_5_question_1_1" model="event.quiz.answer">
         <field name="text_value">Hammer, drill and screwdriver</field>
         <field name="sequence">2</field>
         <field name="is_correct" eval="True"/>
         <field name="comment">Correct!</field>
         <field name="question_id" ref="event_7_track_5_question_1"/>
     </record>
-        <record id="event_7_track_5_question_1_2" model="event.quiz.question.answer">
+        <record id="event_7_track_5_question_1_2" model="event.quiz.answer">
         <field name="text_value">Scotch tape and timber</field>
         <field name="sequence">3</field>
         <field name="is_correct" eval="False"/>
@@ -118,21 +118,21 @@
         <field name="sequence">1</field>
         <field name="quiz_id" ref="website_event_track_quiz.event_7_track_13_quiz"/>
     </record>
-    <record id="event_7_track_13_question_0_0" model="event.quiz.question.answer">
+    <record id="event_7_track_13_question_0_0" model="event.quiz.answer">
         <field name="text_value">Nike Karlsson</field>
         <field name="sequence">1</field>
         <field name="is_correct" eval="True"/>
         <field name="comment">Correct!</field>
         <field name="question_id" ref="event_7_track_13_question_0"/>
     </record>
-    <record id="event_7_track_13_question_0_1" model="event.quiz.question.answer">
+    <record id="event_7_track_13_question_0_1" model="event.quiz.answer">
         <field name="text_value">Nicky Larson</field>
         <field name="sequence">2</field>
         <field name="is_correct" eval="False"/>
         <field name="comment">Incorrect! Nicky Larson is a Private Detective and Body Guard from Tsukasa Hōjō's City Hunter's French TV show adaptation.</field>
         <field name="question_id" ref="event_7_track_13_question_0"/>
     </record>
-    <record id="event_7_track_13_question_0_2" model="event.quiz.question.answer">
+    <record id="event_7_track_13_question_0_2" model="event.quiz.answer">
         <field name="text_value">Martin Aston</field>
         <field name="sequence">3</field>
         <field name="is_correct" eval="False"/>

@@ -9,20 +9,32 @@ class Quiz(models.Model):
     _name = "event.quiz"
     _description = "Quiz"
 
-    name = fields.Char('name', required=True, translate=True)
+    name = fields.Char('Name', required=True, translate=True)
     question_ids = fields.One2many('event.quiz.question', 'quiz_id', string="Questions")
+    event_track_ids = fields.One2many('event.track', 'quiz_id', string="Tracks")
+    event_track_id = fields.Many2one(
+        'event.track', compute='_compute_event_track_id',
+        readonly=True, store=True)
+    event_id = fields.Many2one(
+        'event.event', related='event_track_id.event_id',
+        readonly=True, store=True)
+
+    @api.depends('event_track_ids.quiz_id')
+    def _compute_event_track_id(self):
+        for quiz in self:
+            quiz.event_track_id = quiz.event_track_ids[0] if quiz.event_track_ids else False
+
 
 class QuizQuestion(models.Model):
     _name = "event.quiz.question"
     _description = "Content Quiz Question"
-    _order = "sequence"
+    _order = "quiz_id, sequence"
 
-    sequence = fields.Integer("Sequence")
     name = fields.Char("Question Name", required=True, translate=True)
+    sequence = fields.Integer("Sequence")
     quiz_id = fields.Many2one("event.quiz", "Quiz", required=True, ondelete='cascade')
     awarded_points = fields.Integer("Number of points", default=1)
-
-    answer_ids = fields.One2many('event.quiz.question.answer', 'question_id', string="Answer")
+    answer_ids = fields.One2many('event.quiz.answer', 'question_id', string="Answer")
 
     @api.constrains('answer_ids')
     def _check_answers_integrity(self):
@@ -32,8 +44,9 @@ class QuizQuestion(models.Model):
             if len(question.answer_ids) < 2:
                 raise ValidationError(_('Question "%s" must have 1 correct answer and at least 1 invalid answer') % question.question)
 
+
 class QuizAnswer(models.Model):
-    _name = "event.quiz.question.answer"
+    _name = "event.quiz.answer"
     _rec_name = "text_value"
     _description = "Question's Answer"
     _order = 'question_id, sequence'
