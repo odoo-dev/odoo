@@ -18,8 +18,10 @@
         </div>
     </xpath>
     <xpath expr="//div[hasclass('o_we_track_reminder_button')]" position="before">
-        <div class="mb-2 o_we_track_quiz_button" t-if="track.quiz_id and not track_visitor.quiz_completed">
-            <a class="btn btn-primary" href="#we_track_quiz_container" onclick="$('.o_quiz_js_quiz_container').removeClass('d-none'); ">Take the Quiz</a>
+        <div class="o_we_track_quiz_button mr-2" t-if="track.quiz_id and not track_visitor.quiz_completed">
+            <a class="btn btn-primary" href="#we_track_quiz_container" onclick="$('.o_quiz_js_quiz_container').removeClass('d-none'); ">
+                Take the Quiz
+            </a>
         </div>
     </xpath>
 </template>
