@@ -12,7 +12,7 @@ class EventType(models.Model):
         readonly=False, store=True,
         help="Display community tab on website")
     meeting_room_allow_creation = fields.Boolean(
-        "Allow meeting room creation", compute='_compute_meeting_room_allow_creation',
+        "Allow Room Creation", compute='_compute_meeting_room_allow_creation',
         readonly=False, store=True,
         help="Let Visitors Create Rooms")
 

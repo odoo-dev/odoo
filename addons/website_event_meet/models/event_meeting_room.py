@@ -20,7 +20,7 @@ class EventMeetingRoom(models.Model):
     active = fields.Boolean('Active', default=True)
     is_published = fields.Boolean(copy=True)  # make the inherited field copyable
     event_id = fields.Many2one("event.event", string="Event", required=True, ondelete="cascade")
-    is_pinned = fields.Boolean("Is pinned")
+    is_pinned = fields.Boolean("Is Pinned")
     summary = fields.Char("Summary")
     target_audience = fields.Char("Audience", translate=True)
 
@@ -47,7 +47,7 @@ class EventMeetingRoom(models.Model):
                 values["chat_room_id"] = chat_room.id
 
             values["name"] = values["name"].capitalize()
-            values["target_audience"] = (values.get("target_audience") or _("People")).capitalize()
+            values["target_audience"] = (values.get("target_audience") or _("Attendee(s)")).capitalize()
 
         return super(EventMeetingRoom, self).create(values_list)
 

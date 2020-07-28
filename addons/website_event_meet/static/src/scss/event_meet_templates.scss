@@ -30,17 +30,16 @@
 /* TDE FIXME: reorganize css cleanly */
 .o_wevent_meeting_room_is_pinned {
     transition: 0.2s;
+
+    // the icon must be filled with white when the meeting room is not pinned
     color: white;
     -webkit-text-stroke: 1px $o-main-text-color;
     -webkit-text-fill-color: transparent;
 
-    &:hover {
-        border: 1px solid $o-main-text-color;
+    &.o_wevent_meeting_room_pinned {
+        // the icon must be filled with black when the meeting room is pinned
+        -webkit-text-fill-color: $o-main-text-color;
     }
-}
-
-.o_wevent_meeting_room_pinned {
-    -webkit-text-fill-color: $o-main-text-color;
 }
 
 .o_wevent_meeting_room_corner_ribbon {
@@ -56,5 +55,5 @@
     -webkit-transform: rotate(-45deg);
     z-index: 1;
     position: absolute;
-    opacity: 0.7;
+    opacity: 0.6;
 }

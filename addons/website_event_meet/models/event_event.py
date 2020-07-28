@@ -18,7 +18,7 @@ class Event(models.Model):
         "website.event.menu", "event_id", string="Event Community Menus",
         domain=[("menu_type", "=", "meeting_room")])
     meeting_room_allow_creation = fields.Boolean(
-        "Allow meeting room creation", compute="_compute_meeting_room_allow_creation",
+        "Allow Room Creation", compute="_compute_meeting_room_allow_creation",
         readonly=False, store=True,
         help="Let Visitors Create Rooms")
 
