@@ -113,3 +113,6 @@ class EventSponsor(models.Model):
                     final_name = 'odoo-exhibitor-%s' % sanitized_name
                     values['room_name'] = final_name
         return super(EventSponsor, self).create(values_list)
+
+    def get_backend_menu_id(self):
+        return self.env.ref('event.event_main_menu').id

@@ -6,6 +6,7 @@
         <field name="inherit_id" ref="website_event_track_online.event_sponsor_view_search"/>
         <field name="arch" type="xml">
             <xpath expr="//filter[@name='archived']" position="after">
+                <separator/>
                 <filter string="Exhibitor" name="filter_is_exhibitor" domain="[('is_exhibitor', '=', True)]"/>
             </xpath>
         </field>
@@ -34,7 +35,7 @@
                 </div>
             </xpath>
             <xpath expr="//h1" position="after">
-                <div>
+                <div class="oe_title">
                     <label for="subtitle" class="oe_edit_only"/>
                     <field name="subtitle" placeholder="Enter a catchphrase"/>
                 </div>
@@ -59,15 +60,23 @@
                     </page>
                     <page string="Jitsi" attrs="{'invisible': [('is_exhibitor', '=', False)]}">
                         <group>
-                            <field name="room_name" attrs="{'required': [('is_exhibitor', '=', True)]}"/>
-                            <field name="room_lang_id"/>
-                            <field name="room_max_capacity" attrs="{'required': [('is_exhibitor', '=', True)]}"/>
-                            <field name="chat_room_id" groups="base.group_no_one"/>
+                            <group>
+                                <field name="room_name" attrs="{'required': [('is_exhibitor', '=', True)]}"/>
+                                <field name="room_lang_id"/>
+                                <field name="room_max_capacity" attrs="{'required': [('is_exhibitor', '=', True)]}"/>
+                                <field name="chat_room_id" groups="base.group_no_one"/>
+                            </group>
                         </group>
                     </page>
                 </notebook>
             </xpath>
         </field>
+    </record>
+
+    <record id="event_sponsor_action" model="ir.actions.act_window">
+        <field name="name">Event Sponsors</field>
+        <field name="res_model">event.sponsor</field>
+        <field name="view_mode">kanban,tree,form</field>
     </record>
 
 </odoo>
