@@ -42,7 +42,7 @@
                     t-options="{'format': 'medium'}"/>
             </span>
         </div>
-        <div>
+        <div class="mt-3">
             <div t-if="sponsor.chat_room_id" class="d-flex flex-column mb-1">
                 <t t-if="sponsor.room_is_full">
                     <div class="mt-4 col-12 alert alert-warning text-center" role="alert">
@@ -121,7 +121,7 @@
                     <i class="fa fa-chevron-down d-lg-none"/>
                 </a>
             </div>
-            <hr class="mt-2 pb-1 mb-1 mx-2 d-lg-block"/>
+            <hr class="mt-2 pb-1 mb-1 mx-2 d-none d-lg-block"/>
             <ul id="collapse_exhibitor_aside" class="list-unstyled mx-2 collapse d-lg-block">
                 <li t-foreach="sponsors_other" t-as="sponsor_other">
                     <div t-attf-class="d-flex mb-3">
