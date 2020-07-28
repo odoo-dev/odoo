@@ -4,7 +4,7 @@
 from odoo import models, fields
 
 
-class EventTagPartner(models.Model):
+class EventTag(models.Model):
     _inherit = ['event.tag']
 
     color = fields.Integer(string='Color Index')
