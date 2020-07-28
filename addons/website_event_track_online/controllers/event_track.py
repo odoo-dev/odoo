@@ -16,7 +16,7 @@ class EventTrackOnlineController(WebsiteEventTrackController):
             tracks_sudo = tracks_sudo.filtered(lambda track: track.is_published or track.stage_id.is_accepted)
         return tracks_sudo
 
-    def _fetch_track(self, track_id):
+    def _fetch_track(self, track_id, allow_is_accepted=False):
         track = request.env['event.track'].browse(track_id).exists()
         if not track:
             raise NotFound()
@@ -24,7 +24,11 @@ class EventTrackOnlineController(WebsiteEventTrackController):
             track.check_access_rights('read')
             track.check_access_rule('read')
         except exceptions.AccessError:
-            raise Forbidden()
+            track_sudo = track.sudo()
+            if allow_is_accepted and track_sudo.is_accepted:
+                track = track_sudo
+            else:
+                raise Forbidden()
 
         event = track.event_id
         if not event.can_access_from_current_website():
@@ -49,7 +53,7 @@ class EventTrackOnlineController(WebsiteEventTrackController):
             if set_reminder_on = False, blacklist the track_partner
             otherwise, un-blacklist the track_partner
         """
-        track = self._fetch_track(track_id)
+        track = self._fetch_track(track_id, allow_is_accepted=True)
         force_create = set_reminder_on or track.wishlisted_by_default
         event_track_partner = track._get_event_track_visitors(force_create=force_create)
         visitor_sudo = event_track_partner.visitor_id
