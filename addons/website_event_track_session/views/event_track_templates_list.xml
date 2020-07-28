@@ -7,7 +7,7 @@
     <xpath expr="//div[@id='oe_structure_website_event_track_tracks_1']" position="before">
         <div class="o_wevent_online o_wevent_online_bg o_wesession_index">
             <!-- Options -->
-            <t t-set="option_tracks_wishlist" t-value="not event.is_done and request.website.viewref('website_event_track_session.session_topbar_wishlist').active"/>
+            <t t-set="option_track_wishlist" t-value="not event.is_done and request.website.viewref('website_event_track_session.session_topbar_wishlist').active"/>
             <!-- Topbar -->
             <t t-call="website_event_track_session.session_topbar"/>
             <!-- Drag/Drop Area -->
@@ -39,11 +39,32 @@
 <template id="session_topbar" name="Tracks Tools">
     <nav class="navbar navbar-light border-top shadow-sm d-print-none">
         <div class="container">
-            <div class="row d-flex justify-content-between w-100">
-                <div class="col-lg-8 col-sm-12">
-                    <ul class="o_wesession_topbar_filters o_wevent_index_topbar_filters nav"/>
-                </div>
-                <div class="col-lg-3 col-sm-12 d-flex align-items-center flex-wrap pl-3 pr-0">
+            <div class="d-flex flex-column flex-sm-row justify-content-between w-100">
+                <ul class="o_wesession_topbar_filters o_wevent_index_topbar_filters nav">
+                    <!-- Optional wishlist filter -->
+                    <li t-if="option_track_wishlist" class="nav-item dropdown mr-2 my-1">
+                        <a href="#" role="button" class="btn dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-folder-open"/> Wishlist
+                        </a>
+                        <div class="dropdown-menu">
+                            <a t-att-href="'/event/%s/track?%s' % (
+                                    slug(event),
+                                    keep_query('*', search_wishlist='')
+                                )"
+                                class="dropdown-item d-flex align-items-center justify-content-between">
+                                All Talks
+                            </a>
+                            <a t-att-href="'/event/%s/track?%s' % (
+                                    slug(event),
+                                    keep_query('*', search_wishlist='1')
+                                )"
+                                t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if search_wishlist else ''}">
+                                Wishlisted Talks
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center flex-wrap pl-sm-3 pr-0">
                     <t t-call="website_event.events_search_box">
                         <t t-set="_searches" t-value="searches"/>
                         <t t-set="action" t-value="'/event/%s/track' % (slug(event))"/>
@@ -213,7 +234,7 @@
                                         t-options="{'widget': 'datetime', 'time_only': True, 'format': 'short'}"/>
                                     <span t-else="" class="badge badge-info">Finished</span>
                                     <span class="ml-auto"
-                                        t-if="option_tracks_wishlist"
+                                        t-if="option_track_wishlist"
                                         t-call="website_event_track_online.track_widget_reminder"/>
                                 </span>
                             </div>
@@ -241,7 +262,7 @@
 
                     <div t-if="track.website_image_url" class="card-img-top"
                         t-attf-style="padding-top: 50%; background-image: url(#{track.website_image_url}); background-size: cover; background-position:center">
-                        <span t-if="option_tracks_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
+                        <span t-if="option_track_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
                             <t t-call="website_event_track_online.track_widget_reminder">
                                 <t t-set="reminder_light" t-value="True"/>
                             </t>
@@ -249,7 +270,7 @@
                     </div>
                     <div t-else="" class="o_wesession_gradient card-img-top position-relative"
                         style="padding-top: 50%;">
-                        <span t-if="option_tracks_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
+                        <span t-if="option_track_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
                             <t t-call="website_event_track_online.track_widget_reminder">
                                 <t t-set="reminder_light" t-value="True"/>
                             </t>
@@ -298,6 +319,15 @@
 <!-- Searched tags -->
 <template id="tracks_search" name="Tracks: search tags">
     <div class="d-flex align-items-center mt16">
+        <span t-if="search_wishlist"
+            class="align-items-baseline border d-inline-flex pl-2 rounded ml16 mb-2 bg-white">
+            <i class="fa fa-bell mr-2 text-muted"/> Wishlisted Talks
+            <a t-att-href="'/event/%s/track?%s' % (slug(event), keep_query('*', search_wishlist=''))"
+                class="btn border-0 py-1">
+                &#215;
+            </a>
+        </span>
+
         <t t-foreach="search_tags" t-as="tag">
             <span class="align-items-baseline border d-inline-flex pl-2 rounded ml16 mb-2 bg-white">
                 <i class="fa fa-tag mr-2 text-muted"/>

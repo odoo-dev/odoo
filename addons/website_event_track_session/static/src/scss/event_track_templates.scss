@@ -51,7 +51,14 @@
      */
 
     .o_wevent_online_page_container {
-        // Left panel: other exhibitors
+        // Main panel: current track
+        .o_wesession_track_main {
+            .o_wesession_track_avatar {
+                min-width: 64px;
+            }
+        }
+
+        // Left panel: other tracks
         .o_wesession_track_aside {
 
             // Navigation: keel layout simple

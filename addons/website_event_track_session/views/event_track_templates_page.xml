@@ -6,7 +6,7 @@
         <div class="o_wevent_online o_wevent_online_bg o_wesession_index">
             <!-- Options -->
             <t t-set="option_widescreen" t-value="option_widescreen or False"/>
-            <t t-set="option_tracks_wishlist" t-value="not event.is_done and request.website.viewref('website_event_track_session.session_topbar_wishlist').active"/>
+            <t t-set="option_track_wishlist" t-value="not event.is_done and request.website.viewref('website_event_track_session.session_topbar_wishlist').active"/>
             <!-- Drag/Drop Area -->
             <div id="oe_structure_wesession_track_index_1" class="oe_structure"/>
             <!-- Content -->
@@ -57,7 +57,7 @@
             <div class="d-flex justify-content-between">
                 <span class="h4" t-esc="track.name"/>
                 <div class="o_we_track_action_buttons d-flex justify-content-end flex-wrap">
-                    <div class="o_we_track_reminder_button"><t t-if="option_tracks_wishlist" t-call="website_event_track_online.track_widget_reminder"/></div>
+                    <div class="o_we_track_reminder_button"><t t-if="option_track_wishlist" t-call="website_event_track_online.track_widget_reminder"/></div>
                 </div>
             </div>
             <div class="text-muted">
@@ -72,33 +72,26 @@
                 )
             </div>
             <div class="text-muted" t-if="track.location_id">
-                <strong>Location:</strong><span t-field="track.location_id"/>
+                <strong>Location:</strong> <span t-field="track.location_id"/>
             </div>
             <hr class="mt-2 pb-1 mb-1"/>
 
             <!-- ABOUT AUTHOR -->
-            <div class="mt-2">
-                <div class="float-left">
-                    <span t-if="track.image" t-field="track.image"
-                        t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
-                    <span t-else="" t-field="track.partner_id.sudo().image_128"
-                        t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
-                </div>
+            <div class="mt-2 d-flex">
+                <span t-if="track.image" t-field="track.image" class="o_wesession_track_avatar"
+                    t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
                 <div class="px-3 d-flex flex-column">
                     <span t-field="track.partner_name" class="font-weight-bold mb-2"/>
-                    <span class="mb-2" t-if="track.partner_id.website">
+                    <span class="mb-2 d-flex text-break" t-if="track.partner_id.website">
                         <i class="fa fa-home mr-2"/><a t-att-href="track.partner_id.website"><span t-field="track.partner_id.website"/></a>
                     </span>
-                    <span class="mb-2" t-if="track.partner_email">
+                    <span class="mb-2 d-flex text-break" t-if="track.partner_email">
                         <i class="fa fa-envelope mr-2"/><a t-att-mailto="track.partner_email"><span t-field="track.partner_email"/></a>
                     </span>
-                    <div t-if="not is_html_empty(track.partner_biography)"
-                        t-field="track.partner_biography" class="oe_no_empty"/>
-                    <div t-else=""
-                        t-field="track.partner_id.website_description" class="oe_no_empty"/>
                 </div>
             </div>
-            <hr class="mt-2 pb-1 mb-1"/>
+            <div t-field="track.partner_biography" class="oe_no_empty"/>
+            <hr t-if="not is_html_empty(track.description)" class="mt-2 pb-1 mb-1"/>
             <div t-field="track.description" class="mt-2 oe_no_empty"/>
         </div>
     </div>
@@ -109,7 +102,7 @@
 <!-- ============================================================ -->
 
 <template id="event_track_aside" name="Track: Aside">
-    <div t-att-class="'col-12 pl-0 o_wevent_online_page_aside o_wesession_track_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
+    <div t-att-class="'col-12 pl-0 pr-0 pr-sm-2 o_wevent_online_page_aside o_wesession_track_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
         <div class="bg-white pt-3 o_wevent_online_page_aside_content">
             <div class="mx-2" t-if="track.website_cta">
                 <t t-set="cta_coundown" t-value="bool(track.website_cta_start_remaining)"/>
@@ -148,24 +141,26 @@
                 <div class="tab-pane fade show active" id="track_list" role="tabpanel">
                     <ul class="list-unstyled">
                         <li t-foreach="tracks_other" t-as="track_other"
-                            class="mt-2">
-                            <div>
-                                <a t-att-href="track_other.website_url"
-                                    class="w-100"
-                                    t-esc="track_other.name"/>
-                                <div class="d-flex align-items-center">
-                                    <small class="text-muted" t-esc="track_other.partner_id.name"/>
-                                    <div class="d-inline-block ml-auto o_wesession_track_aside_info">
-                                        <small t-if="track_other.is_track_live and not track_other.is_track_done"
-                                            class="badge badge-danger">Live</small>
-                                        <small t-elif="track_other.is_track_done"
-                                            class="badge badge-light">Done</small>
-                                        <small t-elif="track_other.track_start_remaining"
-                                            class="badge badge-light">
-                                            In <span t-esc="track_other.track_start_remaining"
-                                                t-options="{'widget': 'duration', 'digital': False, 'unit': 'second', 'round': 'minute', 'format': 'narrow'}"/>
-                                        </small>
-                                    </div>
+                            class="mt-2 w-100">
+                            <a t-if="user_event_manager or track_other.is_published"
+                                t-att-href="track_other.website_url"
+                                t-esc="track_other.name"
+                                class="w-100"/>
+                            <span t-else="" t-esc="track_other.name"
+                                class="w-100 text-muted"/>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted" t-esc="track_other.partner_id.name"/>
+                                <div class="d-inline-block ml-auto o_wesession_track_aside_info">
+                                    <small t-if="track_other.is_track_live and not track_other.is_track_done"
+                                        class="badge badge-danger">Live</small>
+                                    <small t-elif="track_other.is_track_done"
+                                        class="badge badge-light">Done</small>
+                                    <small t-elif="track_other.track_start_remaining"
+                                        class="badge badge-light">
+                                        <span t-esc="track_other.track_start_remaining"
+                                            t-options="{'widget': 'duration', 'digital': False, 'add_direction': True,
+                                                        'unit': 'second', 'round': 'minute', 'format': 'narrow'}"/>
+                                    </small>
                                 </div>
                             </div>
                         </li>

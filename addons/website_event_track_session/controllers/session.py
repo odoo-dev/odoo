@@ -55,6 +55,7 @@ class WebsiteEventSessionController(EventTrackOnlineController):
     def _event_tracks_get_values(self, event, tag=None, **searches):
         # init and process search terms
         searches.setdefault('search', '')
+        searches.setdefault('search_wishlist', '')
         searches.setdefault('tags', '')
         search_domain = self._get_event_tracks_base_domain(event)
 
@@ -93,6 +94,10 @@ class WebsiteEventSessionController(EventTrackOnlineController):
         tracks_sudo = event.env['event.track'].sudo().search(search_domain, order='date asc')
         tag_categories = request.env['event.track.tag.category'].sudo().search([])
 
+        # filter on wishlist (as post processing due to costly search on is_reminder_on)
+        if searches.get('search_wishlist'):
+            tracks_sudo = tracks_sudo.filtered(lambda track: track.is_reminder_on)
+
         # organize categories for display: live, soon and day-based
         date_begin_tz_all = list(set(
             dt.date()
@@ -120,6 +125,7 @@ class WebsiteEventSessionController(EventTrackOnlineController):
             # search information
             'searches': searches,
             'search_key': searches['search'],
+            'search_wishlist': searches['search_wishlist'],
             'search_tags': search_tags,
             'tag_categories': tag_categories,
             # environment
@@ -151,11 +157,12 @@ class WebsiteEventSessionController(EventTrackOnlineController):
     def _event_track_page_get_values(self, event, track, **options):
         track = track.sudo()
 
-        # search for tracks list
-        tracks_other = track._get_track_suggestions()
-
         option_widescreen = options.get('widescreen', False)
         option_widescreen = bool(option_widescreen) if option_widescreen != '0' else False
+        # search for tracks list
+        tracks_other = track._get_track_suggestions(
+            restrict_domain=self._get_event_tracks_base_domain(track.event_id)
+        )
 
         return {
             # event information
@@ -169,6 +176,7 @@ class WebsiteEventSessionController(EventTrackOnlineController):
             # environment
             'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
+            'user_event_manager': request.env.user.has_group('event.group_event_manager'),
         }
 
     # ------------------------------------------------------------
