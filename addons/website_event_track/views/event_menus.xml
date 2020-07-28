@@ -9,8 +9,8 @@
         groups="base.group_no_one"/>
 
     <!-- CONFIGURATION -->
-    <menuitem name="Track Stages"
-        id="event_track_stage_menu"
+    <menuitem id="event_track_stage_menu"
+        name="Track Stages"
         action="event_track_stage_action"
         parent="event.menu_event_configuration"
         groups="base.group_no_one"
@@ -36,7 +36,7 @@
         action="event_sponsor_type_action"
         parent="event.menu_event_configuration"
         groups="base.group_no_one"
-        sequence="36"/>
+        sequence="40"/>
 
     <menuitem id="menu_website_event_menu"
         name="Website Menus"
