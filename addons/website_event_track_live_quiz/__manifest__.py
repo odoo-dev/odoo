@@ -15,7 +15,7 @@
     ],
     'data': [
         'views/assets.xml',
-        'views/event_track_templates_track.xml',
+        'views/event_track_templates_page.xml',
     ],
     'qweb': [
         'static/src/xml/website_event_track_live_templates.xml'
