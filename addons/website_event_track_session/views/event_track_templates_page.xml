@@ -11,7 +11,7 @@
             <div id="oe_structure_wesession_track_index_1" class="oe_structure"/>
             <!-- Content -->
             <div t-att-class="'o_wevent_online_page_container %s' % ('container pb-3' if not option_widescreen else 'pb-3')">
-                <div class="row mx-0 mb-5">
+                <div class="row mb-5 mx-0">
                     <t t-call="website_event_track_session.event_track_aside"/>
                     <t t-call="website_event_track_session.event_track_content"/>
                 </div>
@@ -53,14 +53,14 @@
             </div>
         </div>
         <!-- TRACK DESCRIPTION -->
-        <div class="mx-3 pt-3 o_wesession_track_main_description">
-            <div class="d-flex justify-content-between">
+        <div class="o_wesession_track_main_description">
+            <div class="mx-3 pt-3 d-flex justify-content-between">
                 <span class="h4" t-esc="track.name"/>
                 <div class="o_we_track_action_buttons d-flex justify-content-end flex-wrap">
                     <div class="o_we_track_reminder_button"><t t-if="option_track_wishlist" t-call="website_event_track_online.track_widget_reminder"/></div>
                 </div>
             </div>
-            <div class="text-muted">
+            <div class="mx-3 text-muted">
                 <span t-field="track.date"
                     t-options='{"hide_seconds":"True", "format": "short"}'/>
                 -
@@ -71,28 +71,30 @@
                     t-options='{"widget": "duration", "unit": "hour", "round": "minute"}'/>
                 )
             </div>
-            <div class="text-muted" t-if="track.location_id">
+            <div class="mx-3 text-muted" t-if="track.location_id">
                 <strong>Location:</strong> <span t-field="track.location_id"/>
             </div>
-            <hr class="mt-2 pb-1 mb-1"/>
+            <hr class="mt-2 mb-0"/>
 
             <!-- ABOUT AUTHOR -->
-            <div class="mt-2 d-flex">
-                <span t-if="track.image" t-field="track.image" class="o_wesession_track_avatar"
-                    t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
-                <div class="px-3 d-flex flex-column">
-                    <span t-field="track.partner_name" class="font-weight-bold mb-2"/>
-                    <span class="mb-2 d-flex text-break" t-if="track.partner_id.website">
-                        <i class="fa fa-home mr-2"/><a t-att-href="track.partner_id.website"><span t-field="track.partner_id.website"/></a>
-                    </span>
-                    <span class="mb-2 d-flex text-break" t-if="track.partner_email">
-                        <i class="fa fa-envelope mr-2"/><a t-att-mailto="track.partner_email"><span t-field="track.partner_email"/></a>
-                    </span>
+            <div class="mx-3">
+                <div class="mt-2 d-flex">
+                    <span t-if="track.image" t-field="track.image" class="o_wesession_track_avatar"
+                        t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
+                    <div class="px-3 d-flex flex-column">
+                        <span t-field="track.partner_name" class="font-weight-bold mb-2"/>
+                        <span class="mb-1 d-flex align-items-baseline text-break" t-if="track.partner_id.website">
+                            <i class="fa fa-home mr-2"/><a t-att-href="track.partner_id.website"><span t-field="track.partner_id.website"/></a>
+                        </span>
+                        <span class="mb-1 d-flex align-items-baseline text-break" t-if="track.partner_email">
+                            <i class="fa fa-envelope mr-2"/><a t-att-mailto="track.partner_email"><span t-field="track.partner_email"/></a>
+                        </span>
+                    </div>
                 </div>
+                <div t-field="track.partner_biography" class="oe_no_empty"/>
+                <hr t-if="not is_html_empty(track.description)" class="mt-2 pb-1 mb-1"/>
             </div>
-            <div t-field="track.partner_biography" class="oe_no_empty"/>
-            <hr t-if="not is_html_empty(track.description)" class="mt-2 pb-1 mb-1"/>
-            <div t-field="track.description" class="mt-2 oe_no_empty"/>
+            <div t-field="track.description" class="my-2 mx-3 oe_no_empty"/>
         </div>
     </div>
 </template>
@@ -102,7 +104,7 @@
 <!-- ============================================================ -->
 
 <template id="event_track_aside" name="Track: Aside">
-    <div t-att-class="'col-12 pl-0 pr-0 pr-sm-2 o_wevent_online_page_aside o_wesession_track_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
+    <div t-att-class="'col-12 pl-0 pr-0 pr-md-3 o_wevent_online_page_aside o_wesession_track_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
         <div class="bg-white pt-3 o_wevent_online_page_aside_content">
             <div class="mx-2" t-if="track.website_cta">
                 <t t-set="cta_coundown" t-value="bool(track.website_cta_start_remaining)"/>

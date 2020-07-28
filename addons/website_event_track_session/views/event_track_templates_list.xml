@@ -17,7 +17,7 @@
                 <div class="row">
                     <t t-call="website_event_track_session.tracks_search"/>
                 </div>
-                <div class="row mt-3">
+                <div class="row">
                     <t t-call="website_event_track_session.tracks_main"/>
                 </div>
             </div>
@@ -318,9 +318,9 @@
 
 <!-- Searched tags -->
 <template id="tracks_search" name="Tracks: search tags">
-    <div class="d-flex align-items-center mt16">
+    <div class="d-flex align-items-center mb-3">
         <span t-if="search_wishlist"
-            class="align-items-baseline border d-inline-flex pl-2 rounded ml16 mb-2 bg-white">
+            class="align-items-baseline border d-inline-flex pl-2 mt-3 rounded ml16 mb-2 bg-white">
             <i class="fa fa-bell mr-2 text-muted"/> Wishlisted Talks
             <a t-att-href="'/event/%s/track?%s' % (slug(event), keep_query('*', search_wishlist=''))"
                 class="btn border-0 py-1">
@@ -329,7 +329,7 @@
         </span>
 
         <t t-foreach="search_tags" t-as="tag">
-            <span class="align-items-baseline border d-inline-flex pl-2 rounded ml16 mb-2 bg-white">
+            <span class="align-items-baseline border d-inline-flex pl-2 mt-3 rounded ml16 mb-2 bg-white">
                 <i class="fa fa-tag mr-2 text-muted"/>
                 <t t-esc="tag.display_name"/>
                 <a t-att-href="'/event/%s/track?%s' % (slug(event), keep_query('*', tags=str((search_tags - tag).ids)))"
