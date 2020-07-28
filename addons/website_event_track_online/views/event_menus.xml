@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <odoo><data>
 
-    <menuitem string="Track Tag Categories"
-        id="event_track_tag_category_menu"
+    <menuitem id="event_track_tag_category_menu"
+        name="Track Tag Categories"
         action="event_track_tag_category_action"
         parent="event.menu_event_configuration"
         groups="base.group_no_one"
