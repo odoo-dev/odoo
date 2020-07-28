@@ -68,14 +68,12 @@ class Event(models.Model):
         """
         current_visitor = self.env['website.visitor']._get_visitor_from_request(force_create=False)
         if self.env.user._is_public() and not current_visitor:
-            self.is_participating = False
+            events = self.env['event.event']
         elif self.env.user._is_public():
-            participating = self.env['event.registration'].sudo().search([
+            events = self.env['event.registration'].sudo().search([
                 ('event_id', 'in', self.ids),
                 ('visitor_id', '=', current_visitor.id),
             ]).event_id
-            for event in self:
-                event.is_participating = event in participating
         else:
             if current_visitor:
                 domain = [
@@ -85,14 +83,16 @@ class Event(models.Model):
                 ]
             else:
                 domain = [('partner_id', '=', self.env.user.partner_id.id)]
-            participating = self.env['event.registration'].sudo().search(
+            events = self.env['event.registration'].sudo().search(
                 expression.AND([
                     domain,
                     [('event_id', 'in', self.ids)]
                 ])
             ).event_id
-            for event in self:
-                event.is_participating = event in participating
+
+
+        for event in self:
+            event.is_participating = event in events
 
     # ------------------------------------------------------------
     # WEBSITE MENU MANAGEMENT
