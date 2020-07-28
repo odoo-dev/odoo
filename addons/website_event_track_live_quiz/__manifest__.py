@@ -18,7 +18,8 @@
         'views/event_track_templates_page.xml',
     ],
     'qweb': [
-        'static/src/xml/website_event_track_live_templates.xml'
+        'static/src/xml/website_event_track_live_templates.xml',
+        'static/src/xml/website_event_track_quiz_templates.xml',
     ],
     'application': False,
     'installable': True,
