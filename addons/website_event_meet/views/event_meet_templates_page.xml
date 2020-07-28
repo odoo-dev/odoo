@@ -29,7 +29,8 @@
 
 <template id="meeting_room_main" name="Meeting Room: Main Content">
     <div t-att-class="'col-12 o_wevent_online_page_main o_wemeet_room_main bg-white p-0 %s' % ('col-md-9 col-lg-10' if option_widescreen else 'col-md-8 col-lg-9')">
-        <div t-if="not meeting_room.event_id.is_ongoing" class="mx-3 mt-3 alert alert-warning">
+        <!-- EVENT NOT STARTED ALERTS -->
+        <div t-if="not meeting_room.event_id.is_ongoing" class="alert alert-warning text-center">
             Event <span t-esc="meeting_room.event_id.name" class="font-weight-bold"/>
             <span t-if="meeting_room.event_id.start_today">
                 starts in
@@ -42,42 +43,40 @@
                     t-options="{'format': 'medium'}"/>
             </span>
         </div>
-        <div class="mx-3">
-            <div class="d-flex flex-column mb-3">
-                <t t-if="meeting_room.room_is_full and not is_event_manager">
-                    <div class="mt-4 col-12 alert alert-warning text-center" role="alert">
-                        <span>Oops! This room is full</span><br />Come back later to have a chat with us!
-                    </div>
-                </t>
-                <t t-else="">
-                    <div id="o_wemeet_jitsi_iframe">
-                        <div class="o_wjitsi_chat_room_loading position-absolute w-100 text-center text-muted">
-                            <i class="fa fa-spin fa-spinner mr-3"/>
-                            <span>Loading your room...</span>
-                        </div>
-                    </div>
-                    <div class="d-flex flex-row-reverse">
-                        <t t-call="website_jitsi.chat_room_join_button">
-                            <t t-set="_classes" t-value="'d-none'"/>
-                            <t t-set="room_name" t-value="meeting_room.room_name"/>
-                            <t t-set="chat_room_id" t-value="meeting_room.chat_room_id.id"/>
-                            <t t-set="auto_open" t-value="1"/>
-                            <t t-set="attach_to" t-value="'#o_wemeet_jitsi_iframe'"/>
-                            <t t-set="check_full" t-value="is_event_manager"/>
-                            <t t-set="default_username" t-value="default_username"/>
-                        </t>
-                    </div>
-                </t>
+        <!-- ROOM CONTENT -->
+        <div class="d-flex flex-column">
+            <div t-if="meeting_room.room_is_full and not is_event_manager" class="alert alert-warning text-center">
+                <span>Oops! This room is full !</span><br />Come back later to have a chat with us!
             </div>
-            <span class="h5 mb-0" t-esc="meeting_room.name"/>
-            <br/>
-            <span>A chat among <t t-esc="meeting_room.target_audience"/></span>
-            <hr class="mt-2 pb-1 mb-1"/>
-            <div class="row">
-                <div t-field="meeting_room.summary" class="col-12 oe_no_empty mb-3"/>
+            <div t-else="" class="d-flex flex-column">
+                <div id="o_wemeet_jitsi_iframe">
+                    <div class="o_wjitsi_chat_room_loading position-absolute w-100 text-center text-muted">
+                        <i class="fa fa-spin fa-spinner mr-3"/>
+                        <span>Loading your room...</span>
+                    </div>
+                </div>
+                <div class="d-flex flex-row-reverse">
+                    <t t-call="website_jitsi.chat_room_join_button">
+                        <t t-set="_classes" t-value="'d-none'"/>
+                        <t t-set="room_name" t-value="meeting_room.room_name"/>
+                        <t t-set="chat_room_id" t-value="meeting_room.chat_room_id.id"/>
+                        <t t-set="auto_open" t-value="1"/>
+                        <t t-set="attach_to" t-value="'#o_wemeet_jitsi_iframe'"/>
+                        <t t-set="check_full" t-value="is_event_manager"/>
+                        <t t-set="default_username" t-value="default_username"/>
+                    </t>
+                </div>
             </div>
         </div>
-    </div>
+        <!-- ROOM DESCRIPTION -->
+        <div class="mx-3">
+            <span class="h5 d-inline-block mt-3 mb-1" t-esc="meeting_room.name"/>
+            <br/>
+            <span class="text-muted">A chat among <span class="font-weight-bold" t-esc="meeting_room.target_audience"/></span>
+        </div>
+        <hr class="mt-2 mb-0"/>
+        <div t-field="meeting_room.summary" class="my-2 mx-3 oe_no_empty"/>
+     </div>
 </template>
 
 <!-- ============================================================ -->
@@ -85,7 +84,7 @@
 <!-- ============================================================ -->
 
 <template id="meeting_room_aside" name="Meeting Room: Aside">
-    <div t-att-class="'col-12 pl-0 o_wevent_online_page_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
+    <div t-att-class="'col-12 pl-0 pr-0 pr-md-3 o_wevent_online_page_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
         <div class="bg-white pt-3 o_wevent_online_page_aside_content">
             <div class="d-flex align-items-center justify-content-between mx-2">
                 <span class="h5 mb-0">Other Rooms</span>
