@@ -57,7 +57,12 @@
             <div class="mx-3 pt-3 d-flex justify-content-between">
                 <span class="h4" t-esc="track.name"/>
                 <div class="o_we_track_action_buttons d-flex justify-content-end flex-wrap">
-                    <div class="o_we_track_reminder_button"><t t-if="option_track_wishlist" t-call="website_event_track_online.track_widget_reminder"/></div>
+                    <div class="o_we_track_reminder_button">
+                        <t t-if="option_track_wishlist" t-call="website_event_track_online.track_widget_reminder">
+                            <!-- TDE FIXME -->
+                            <t t-set="_span_content" t-value="True"/>
+                        </t>
+                    </div>
                 </div>
             </div>
             <div class="mx-3 text-muted">
