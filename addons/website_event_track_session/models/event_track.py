@@ -133,3 +133,6 @@ class EventTrack(models.Model):
         )
 
         return track_candidates[:limit]
+
+    def get_backend_menu_id(self):
+        return self.env.ref('event.event_main_menu').id
