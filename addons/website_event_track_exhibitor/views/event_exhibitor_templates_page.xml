@@ -29,6 +29,7 @@
 
 <template id="exhibitor_main" name="Exhibitor: Main Content">
     <div t-att-class="'col-12 o_wevent_online_page_main o_wesponsor_exhibitor_main bg-white p-0 %s' % ('col-md-9 col-lg-10' if option_widescreen else 'col-md-8 col-lg-9')">
+        <!-- EVENT NOT STARTED ALERTS -->
         <div t-if="not sponsor.event_id.is_ongoing" class="mx-3 mt-3 alert alert-warning">
             Event <span t-esc="sponsor.event_id.name" class="font-weight-bold"/>
             <span t-if="sponsor.event_id.start_today">
@@ -42,69 +43,81 @@
                     t-options="{'format': 'medium'}"/>
             </span>
         </div>
-        <div class="mt-3">
-            <div t-if="sponsor.chat_room_id" class="d-flex flex-column mb-1">
-                <t t-if="sponsor.room_is_full">
-                    <div class="mt-4 col-12 alert alert-warning text-center" role="alert">
-                        <span>Oops! This room is full</span><br />Come back later to have a chat with us!
-                    </div>
-                </t>
-                <t t-else="">
-                    <div id="o_wsponsor_jitsi_iframe"/>
-                    <div class="d-flex flex-row-reverse">
-                        <t t-call="website_jitsi.chat_room_join_button">
-                            <t t-set="_classes" t-value="'d-none'"/>
-                            <t t-set="room_name" t-value="sponsor.room_name"/>
-                            <t t-set="chat_room_id" t-value="sponsor.chat_room_id.id"/>
-                            <t t-set="auto_open" t-value="1"/>
-                            <t t-set="attach_to" t-value="'#o_wsponsor_jitsi_iframe'"/>
-                            <t t-set="check_full" t-value="option_can_edit"/>
-                        </t>
-                    </div>
-                </t>
-            </div>
-            <span class="h5 d-inline-block mx-3 mt-2 mb-0">About <t t-esc="sponsor.name"/></span>
-            <hr class="mt-2 mb-0"/>
-            <div>
-                <div class="float-left pt-3 mx-3">
-                    <span t-if="sponsor.image_512" t-field="sponsor.image_512"
-                        t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
-                    <span t-else="" t-field="sponsor.partner_id.image_512"
-                        t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
+        <!-- SPONSOR JITSI + CLOSED/FULL ALERTS -->
+        <div t-if="sponsor.chat_room_id" class="d-flex flex-column">
+            <t t-if="not sponsor.is_in_opening_hours">
+                <div class="col-12 alert alert-warning text-center" role="alert">
+                    <span>Oops! This room is currently closed</span><br />
+                    Come back between
+                    <strong>
+                        <t t-esc="sponsor.hour_from" t-options="{'widget': 'float_time'}"/>
+                        -
+                        <t t-esc="sponsor.hour_to" t-options="{'widget': 'float_time'}"/>
+                    </strong>
+                    to meet them !
                 </div>
-                <div class="px-3 pt-3 d-flex flex-row position-relative">
-                    <div class="d-flex flex-column">
-                        <div class="d-flex align-items-center">
-                            <span t-field="sponsor.name" class="h4 mb-0"/>
-                            <div t-if="sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon'" class="ribbon-wrapper">
-                                <div t-field="sponsor.sponsor_type_id" t-attf-class="ribbon ribbon_#{sponsor.sponsor_type_id.name}"/>
-                            </div>
-                        </div>
-                        <span t-field="sponsor.subtitle" class="text-muted mb-3"/>
-                        <div t-if="sponsor.url" class="d-flex text-break align-items-baseline">
-                            <i class="fa fa-home mr-2"/><a t-att-href="sponsor.url"><span t-field="sponsor.url"/></a>
-                        </div>
-                        <div t-elif="sponsor.partner_id.website" class="d-flex text-break align-items-baseline">
-                            <i class="fa fa-home mr-2"/><a t-att-href="sponsor.partner_id.website"><span t-field="sponsor.partner_id.website"/></a>
-                        </div>
-                        <div t-if="sponsor.email" class="d-flex text-break align-items-baseline">
-                            <i class="fa fa-envelope mr-2"/><a t-att-mailto="sponsor.email"><span t-field="sponsor.email"/></a>
-                        </div>
-                        <div t-if="sponsor.phone" class="d-flex text-break align-items-baseline">
-                            <i class="fa fa-phone mr-2"/><span t-field="sponsor.phone"/>
-                        </div>
-                    </div>
-                    <a t-att-href="'/event/%s/exhibitors?countries=%s' % (slug(sponsor.event_id), [sponsor.partner_id.country_id.id])"
-                        t-attf-class="flex-grow-1 text-right d-none d-md-block #{'mr-5' if sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon' else ''}">
-                        <img class="img"
-                            style="max-height: 36px;"
-                            t-att-src="website.image_url(sponsor.partner_id.country_id, 'image')"
-                            t-att-alt="sponsor.partner_id.country_id.name"/>
-                    </a>
+            </t>
+            <t t-elif="sponsor.room_is_full">
+                <div class="col-12 alert alert-warning text-center" role="alert">
+                    <span>Oops! This room is full</span><br />Come back later to have a chat with us!
                 </div>
-            </div>
-            <div t-field="sponsor.website_description" class="mt-2 mx-3 oe_no_empty"/>
+            </t>
+            <t t-else="">
+                <div id="o_wsponsor_jitsi_iframe"/>
+                <div class="d-flex flex-row-reverse">
+                    <t t-call="website_jitsi.chat_room_join_button">
+                        <t t-set="_classes" t-value="'d-none'"/>
+                        <t t-set="room_name" t-value="sponsor.room_name"/>
+                        <t t-set="chat_room_id" t-value="sponsor.chat_room_id.id"/>
+                        <t t-set="auto_open" t-value="1"/>
+                        <t t-set="attach_to" t-value="'#o_wsponsor_jitsi_iframe'"/>
+                        <t t-set="check_full" t-value="option_can_edit"/>
+                    </t>
+                </div>
+            </t>
         </div>
+        <!-- SPONSOR DESCRIPTION -->
+        <span class="h5 d-inline-block mx-3 mt-3 mb-0">About <t t-esc="sponsor.name"/></span>
+        <hr class="mt-2 mb-0"/>
+        <div class="ml-3">
+            <div class="float-left pt-3">
+                <span t-if="sponsor.image_512" t-field="sponsor.image_512"
+                    t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
+                <span t-else="" t-field="sponsor.partner_id.image_512"
+                    t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
+            </div>
+            <div class="px-3 pt-3 d-flex flex-row position-relative">
+                <div class="d-flex flex-column">
+                    <div class="d-flex align-items-center">
+                        <span t-field="sponsor.name" class="h4 mb-0"/>
+                        <div t-if="sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon'" class="ribbon-wrapper">
+                            <div t-field="sponsor.sponsor_type_id" t-attf-class="ribbon ribbon_#{sponsor.sponsor_type_id.name}"/>
+                        </div>
+                    </div>
+                    <span t-field="sponsor.subtitle" class="text-muted mb-3"/>
+                    <div t-if="sponsor.url" class="d-flex text-break align-items-baseline">
+                        <i class="fa fa-home mr-2"/><a t-att-href="sponsor.url"><span t-field="sponsor.url"/></a>
+                    </div>
+                    <div t-elif="sponsor.partner_id.website" class="d-flex text-break align-items-baseline">
+                        <i class="fa fa-home mr-2"/><a t-att-href="sponsor.partner_id.website"><span t-field="sponsor.partner_id.website"/></a>
+                    </div>
+                    <div t-if="sponsor.email" class="d-flex text-break align-items-baseline">
+                        <i class="fa fa-envelope mr-2"/><a t-att-mailto="sponsor.email"><span t-field="sponsor.email"/></a>
+                    </div>
+                    <div t-if="sponsor.phone" class="d-flex text-break align-items-baseline">
+                        <i class="fa fa-phone mr-2"/><span t-field="sponsor.phone"/>
+                    </div>
+                </div>
+                <a t-att-href="'/event/%s/exhibitors?countries=%s' % (slug(sponsor.event_id), [sponsor.partner_id.country_id.id])"
+                    t-attf-class="flex-grow-1 text-right d-none d-md-block #{'mr-5' if sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon' else ''}">
+                    <img class="img"
+                        style="max-height: 36px;"
+                        t-att-src="website.image_url(sponsor.partner_id.country_id, 'image')"
+                        t-att-alt="sponsor.partner_id.country_id.name"/>
+                </a>
+            </div>
+        </div>
+        <div t-field="sponsor.website_description" class="my-2 mx-3 oe_no_empty"/>
     </div>
 </template>
 
@@ -121,7 +134,7 @@
                     <i class="fa fa-chevron-down d-lg-none"/>
                 </a>
             </div>
-            <hr class="mt-2 pb-1 mb-1 mx-2 d-none d-lg-block"/>
+            <hr class="mt-2 pb-1 mb-1 mx-0 d-none d-lg-block"/>
             <ul id="collapse_exhibitor_aside" class="list-unstyled mx-2 collapse d-lg-block">
                 <li t-foreach="sponsors_other" t-as="sponsor_other">
                     <div t-attf-class="d-flex mb-3">
