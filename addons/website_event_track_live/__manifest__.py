@@ -16,9 +16,9 @@
     ],
     'data': [
         'views/assets.xml',
-        'views/event_track_templates.xml',
-        'views/event_track_templates_track.xml',
-        'views/event_views.xml',
+        'views/event_track_templates_list.xml',
+        'views/event_track_templates_page.xml',
+        'views/event_track_views.xml',
     ],
     'demo': [
         'data/event_track_demo.xml'
