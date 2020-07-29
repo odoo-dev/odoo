@@ -103,14 +103,13 @@ class WebsiteEventSessionController(EventTrackOnlineController):
             dt.date()
             for dt in self._get_dt_in_event_tz(tracks_sudo.mapped('date'), event)
         ))
-        date_begin_tz_all.sort(key=lambda date: (date < today_tz, date), reverse=False)
+        date_begin_tz_all.sort()
         tracks_sudo_live = tracks_sudo.filtered(lambda track: track.is_published and track.is_track_live)
         tracks_sudo_soon = tracks_sudo.filtered(lambda track: track.is_published and not track.is_track_live and track.is_track_soon)
         tracks_by_day = []
         for display_date in date_begin_tz_all:
             matching_track = tracks_sudo.filtered(lambda track: self._get_dt_in_event_tz([track.date], event)[0].date() == display_date)
-            sorted_tracks = matching_track.sorted(lambda track: track.is_track_done)
-            tracks_by_day.append((display_date, sorted_tracks))
+            tracks_by_day.append((display_date, matching_track))
 
         # return rendering values
         return {
@@ -122,6 +121,7 @@ class WebsiteEventSessionController(EventTrackOnlineController):
             'tracks_by_day': tracks_by_day,
             'tracks_live': tracks_sudo_live,
             'tracks_soon': tracks_sudo_soon,
+            'today_tz': today_tz,
             # search information
             'searches': searches,
             'search_key': searches['search'],

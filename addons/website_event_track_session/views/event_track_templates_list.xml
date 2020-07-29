@@ -59,7 +59,7 @@
                                     keep_query('*', search_wishlist='1')
                                 )"
                                 t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if search_wishlist else ''}">
-                                Wishlisted Talks
+                                Wishlisted
                             </a>
                         </div>
                     </li>
@@ -166,7 +166,7 @@
     <div t-if="tracks" class="o_wesession_list mb-3">
         <ul class="list-unstyled">
             <li t-foreach="tracks_by_day" t-as="tracks_info"
-                class="mb-3">
+                class="mb-5">
                 <t t-set="tracks_date" t-value="tracks_info[0]"/>
                 <t t-set="tracks" t-value="tracks_info[1]"/>
                 <!-- DAY HEADER -->
@@ -193,17 +193,23 @@
                             <span class="row">
                                 <span class="col-4">Speaker</span>
                                 <span class="col-3">Duration</span>
-                                <span class="col-5">Starts</span>
+                                <span class="col-5">
+                                    <t t-if="today_tz &lt;= tracks_date">Starts</t>
+                                    <t t-else=""></t>
+                                </span>
                             </span>
                         </span>
                     </li>
                     <li t-foreach="tracks" t-as="track"
                         class="o_wesession_list_item row bg-white-50 py-2">
-                        <span class="col-md-4 col-sm-8">
+                        <span class="col-md-4 col-sm-8 o_wesession_list_item_topic">
                             <a t-att-href="track.website_url"
-                                t-if="track.is_published or user_event_manager"
-                                t-esc="track.name"/>
-                            <t t-else="" t-esc="track.name"/>
+                                t-if="track.is_published or user_event_manager">
+                                <span t-field="track.name"/>
+                            </a>
+                            <t t-else="">
+                                <span t-field="track.name"/>
+                            </t>
                             <span t-if="not track.is_published and user_event_manager"
                                 class="badge badge-danger">
                                 Unpublished
@@ -222,20 +228,22 @@
                                 <span class="col-3" t-esc="track.duration"
                                     t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'hour', 'round': 'minute'}"/>
                                 <span class="col-5 d-flex align-items-start">
-                                    <span t-if="track.is_track_live and not track.is_track_done"
-                                        class="badge badge-danger">Live</span>
-                                    <span t-elif="not track.is_track_done and track.is_track_soon">
-                                        <span t-esc="track.track_start_remaining"
-                                            t-options="{'widget': 'duration', 'digital': False, 'format': 'narrow',
-                                                        'add_direction': True, 'unit': 'second', 'round': 'minute'}"/>
-                                    </span>
-                                    <span t-elif="not track.is_track_done and not track.is_track_soon"
-                                        t-esc="track.date"
-                                        t-options="{'widget': 'datetime', 'time_only': True, 'format': 'short'}"/>
-                                    <span t-else="" class="badge badge-info">Finished</span>
-                                    <span class="ml-auto"
-                                        t-if="option_track_wishlist"
-                                        t-call="website_event_track_online.track_widget_reminder"/>
+                                    <t t-if="today_tz &lt;= tracks_date">
+                                        <span t-if="track.is_track_live and not track.is_track_done"
+                                            class="badge badge-danger">Live</span>
+                                        <span t-elif="not track.is_track_done and track.is_track_soon">
+                                            <span t-esc="track.track_start_remaining"
+                                                t-options="{'widget': 'duration', 'digital': False, 'format': 'narrow',
+                                                            'add_direction': True, 'unit': 'second', 'round': 'minute'}"/>
+                                        </span>
+                                        <span t-elif="not track.is_track_done and not track.is_track_soon"
+                                            t-esc="track.date"
+                                            t-options="{'widget': 'datetime', 'time_only': True, 'format': 'short'}"/>
+                                        <span t-else="" class="badge badge-info">Finished</span>
+                                        <span class="ml-auto"
+                                            t-if="option_track_wishlist"
+                                            t-call="website_event_track_online.track_widget_reminder"/>
+                                    </t>
                                 </span>
                             </div>
                         </div>
@@ -262,7 +270,7 @@
 
                     <div t-if="track.website_image_url" class="card-img-top"
                         t-attf-style="padding-top: 50%; background-image: url(#{track.website_image_url}); background-size: cover; background-position:center">
-                        <span t-if="option_track_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
+                        <span t-if="option_track_wishlist and not track.is_track_live" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
                             <t t-call="website_event_track_online.track_widget_reminder">
                                 <t t-set="reminder_light" t-value="True"/>
                             </t>

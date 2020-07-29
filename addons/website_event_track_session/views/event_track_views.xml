@@ -6,7 +6,7 @@
         <field name="model">event.track</field>
         <field name="inherit_id" ref="website_event_track.view_event_track_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='speakers']" position="after">
+            <xpath expr="//page[@name='description']" position="after">
                 <page string="Interactivity" name="interactivity">
                     <group>
                         <group name="event_track_cta_group">

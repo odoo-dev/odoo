@@ -84,7 +84,7 @@
             <!-- ABOUT AUTHOR -->
             <div class="mx-3">
                 <div class="mt-2 d-flex">
-                    <span t-if="track.image" t-field="track.image" class="o_wesession_track_avatar"
+                    <span t-if="track.image" t-field="track.image" class="o_wevent_online_page_avatar"
                         t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
                     <div class="px-3 d-flex flex-column">
                         <span t-field="track.partner_name" class="font-weight-bold mb-2"/>
@@ -93,6 +93,9 @@
                         </span>
                         <span class="mb-1 d-flex align-items-baseline text-break" t-if="track.partner_email">
                             <i class="fa fa-envelope mr-2"/><a t-att-mailto="track.partner_email"><span t-field="track.partner_email"/></a>
+                        </span>
+                        <span class="mb-1 d-flex align-items-baseline text-break" t-if="track.partner_phone">
+                            <i class="fa fa-phone mr-2"/><span t-field="track.partner_phone"/>
                         </span>
                     </div>
                 </div>
