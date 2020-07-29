@@ -80,11 +80,18 @@
 
             // Main panel
             .o_wevent_online_page_main {
-
                 border: 1px solid $border-color;
 
                 @include media-breakpoint-up(md) {
                     border-top-width: 0;
+                }
+
+                .o_wevent_online_page_avatar {
+                    min-width: 64px;
+
+                    img {
+                        max-width: 96px;
+                    }
                 }
             }
 
