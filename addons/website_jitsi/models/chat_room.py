@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import re
+
 from uuid import uuid4
 
 from odoo import api, fields, models
+from odoo.tools import remove_accents
 
 
 class ChatRoom(models.Model):
@@ -25,7 +28,7 @@ class ChatRoom(models.Model):
     name = fields.Char(
         "Room Name", required=True, copy=False,
         default=lambda self: self._default_name())
-    is_full = fields.Boolean("Full", compute="_compute_full")
+    is_full = fields.Boolean("Full", compute="_compute_is_full")
     lang_id = fields.Many2one(
         "res.lang", "Language",
         default=lambda self: self.env["res.lang"].search([("code", "=", self.env.user.lang)], limit=1))
@@ -43,9 +46,12 @@ class ChatRoom(models.Model):
         help="Maximum number of participant reached in the room at the same time")
 
     @api.depends("max_capacity", "participant_count")
-    def _compute_full(self):
+    def _compute_is_full(self):
         for room in self:
             if room.max_capacity == "no_limit":
                 room.is_full = False
             else:
                 room.is_full = room.participant_count >= int(room.max_capacity)
+
+    def _jitsi_sanitize_name(self, name):
+        return re.sub(r'[^\w+.]+', '-', remove_accents(name).lower())
