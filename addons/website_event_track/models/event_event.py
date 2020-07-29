@@ -17,10 +17,10 @@ class EventType(models.Model):
 
     @api.depends('website_menu')
     def _compute_website_menu_data(self):
+        """ Simply activate or de-activate all menus at once. """
         for event_type in self:
-            if not event_type.website_menu:
-                event_type.website_track = False
-                event_type.website_track_proposal = False
+            event_type.website_track = event_type.website_menu
+            event_type.website_track_proposal = event_type.website_menu
 
 
 class Event(models.Model):
@@ -57,26 +57,25 @@ class Event(models.Model):
 
     @api.depends('event_type_id', 'website_menu', 'website_track_proposal')
     def _compute_website_track(self):
+        """ Propagate event_type configuration (only at change); otherwise propagate
+        website_menu updated value. Also force True is track_proposal changes. """
         for event in self:
             if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.website_track = event.event_type_id.website_track
-            elif not event.website_menu:
-                event.website_track = False
+            elif event.website_menu != event._origin.website_menu:
+                event.website_track = event.website_menu
             elif event.website_track_proposal and not event.website_track:
                 event.website_track = True
 
-    @api.depends('event_type_id', 'website_menu', 'website_track')
+    @api.depends('event_type_id', 'website_track')
     def _compute_website_track_proposal(self):
-        """ Explicitly checks that event_type has changed before copying its value
-        on the event itself. Changing website_menu trigger should not mess with the
-        behavior of event_type. """
+        """ Propagate event_type configuration (only at change); otherwise propagate
+        website_track updated value (both together True or False at update). """
         for event in self:
-            if not event.website_track:
-                event.website_track_proposal = False
-            elif event.event_type_id and event.event_type_id != event._origin.event_type_id:
+            if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.website_track_proposal = event.event_type_id.website_track_proposal
-            elif not event.website_menu or not event.website_track_proposal:
-                event.website_track_proposal = False
+            elif event.website_track != event._origin.website_track or not event.website_track_proposal:
+                event.website_track_proposal = event.website_track
 
     @api.depends('track_ids.tag_ids', 'track_ids.tag_ids.color')
     def _compute_tracks_tag_ids(self):
