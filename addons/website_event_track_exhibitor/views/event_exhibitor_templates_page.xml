@@ -30,35 +30,35 @@
 <template id="exhibitor_main" name="Exhibitor: Main Content">
     <div t-att-class="'col-12 o_wevent_online_page_main o_wesponsor_exhibitor_main bg-white p-0 %s' % ('col-md-9 col-lg-10' if option_widescreen else 'col-md-8 col-lg-9')">
         <!-- EVENT NOT STARTED ALERTS -->
-        <div t-if="not sponsor.event_id.is_ongoing" class="mx-3 mt-3 alert alert-warning">
+        <div t-if="not sponsor.event_id.is_ongoing" class="alert alert-warning rounded-0 text-center" role="alert">
             Event <span t-esc="sponsor.event_id.name" class="font-weight-bold"/>
             <span t-if="sponsor.event_id.start_today">
                 starts in
                 <span t-esc="sponsor.event_id.start_remaining"
                     t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
             </span>
-            <span class="my-0" t-else="sponsor.event_id.start_today">
+            <span class="my-0" t-else="">
                 starts at
                 <span t-field="sponsor.event_id.with_context(tz=sponsor.event_id.date_tz).date_begin"
                     t-options="{'format': 'medium'}"/>
             </span>
         </div>
         <!-- SPONSOR JITSI + CLOSED/FULL ALERTS -->
-        <div t-if="sponsor.chat_room_id" class="d-flex flex-column">
+        <div t-if="sponsor.event_id.is_ongoing and sponsor.chat_room_id" class="d-flex flex-column">
             <t t-if="not sponsor.is_in_opening_hours">
-                <div class="col-12 alert alert-warning text-center" role="alert">
+                <div class="col-12 alert alert-warning rounded-0 text-center" role="alert">
                     <span>Oops! This room is currently closed</span><br />
                     Come back between
                     <strong>
                         <t t-esc="sponsor.hour_from" t-options="{'widget': 'float_time'}"/>
                         -
                         <t t-esc="sponsor.hour_to" t-options="{'widget': 'float_time'}"/>
-                    </strong>
+                    </strong> (<span t-esc="sponsor.event_date_tz"/>)
                     to meet them !
                 </div>
             </t>
             <t t-elif="sponsor.room_is_full">
-                <div class="col-12 alert alert-warning text-center" role="alert">
+                <div class="col-12 alert alert-warning rounded-0 text-center" role="alert">
                     <span>Oops! This room is full</span><br />Come back later to have a chat with us!
                 </div>
             </t>
@@ -81,10 +81,10 @@
         <hr class="mt-2 mb-0"/>
         <div class="ml-3">
             <div class="float-left pt-3">
-                <span t-if="sponsor.image_512" t-field="sponsor.image_512"
-                    t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
-                <span t-else="" t-field="sponsor.partner_id.image_512"
-                    t-options="{'widget': 'image', 'class': 'rounded-circle', 'max_width': '96'}"/>
+                <span t-if="sponsor.image_512" t-field="sponsor.image_512" class="o_wevent_online_page_avatar"
+                    t-options="{'widget': 'image', 'class': 'rounded-circle', 'max-width': '96'}"/>
+                <span t-else="" t-field="sponsor.partner_id.image_512" class="o_wevent_online_page_avatar"
+                    t-options="{'widget': 'image', 'class': 'rounded-circle', 'max-width': '96'}"/>
             </div>
             <div class="px-3 pt-3 d-flex flex-row position-relative">
                 <div class="d-flex flex-column">
@@ -108,7 +108,8 @@
                         <i class="fa fa-phone mr-2"/><span t-field="sponsor.phone"/>
                     </div>
                 </div>
-                <a t-att-href="'/event/%s/exhibitors?countries=%s' % (slug(sponsor.event_id), [sponsor.partner_id.country_id.id])"
+                <a t-if="sponsor.partner_id.country_id"
+                    t-att-href="'/event/%s/exhibitors?countries=%s' % (slug(sponsor.event_id), [sponsor.partner_id.country_id.id])"
                     t-attf-class="flex-grow-1 text-right d-none d-md-block #{'mr-5' if sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon' else ''}">
                     <img class="img"
                         style="max-height: 36px;"

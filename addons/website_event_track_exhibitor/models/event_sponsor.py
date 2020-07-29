@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import re
-
 from datetime import datetime
 from pytz import timezone, utc
 
 from odoo import api, fields, models
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.resource.models.resource import float_to_time
-from odoo.tools import is_html_empty, remove_accents
+from odoo.tools import is_html_empty
 from odoo.tools.translate import html_translate
 
 
@@ -25,7 +23,7 @@ class EventSponsor(models.Model):
 
     # description
     subtitle = fields.Char('Slogan', help='Catchy marketing sentence for promote')
-    is_exhibitor = fields.Boolean('Is Exhibitor')
+    is_exhibitor = fields.Boolean("Exhibitor's Chat")
     website_description = fields.Html(
         'Description', compute='_compute_website_description',
         sanitize_attributes=False, sanitize_form=True, translate=html_translate,
@@ -33,6 +31,7 @@ class EventSponsor(models.Model):
     # live mode
     hour_from = fields.Float('Opening hour', default=8.0)
     hour_to = fields.Float('End hour', default=18.0)
+    event_date_tz = fields.Selection(string='Timezone', related='event_id.date_tz', readonly=True)
     is_in_opening_hours = fields.Boolean(
         'Within opening hours', compute='_compute_is_in_opening_hours')
     # chat room
@@ -53,7 +52,10 @@ class EventSponsor(models.Model):
         computed field, an onchange used in form view is sufficient. """
         for sponsor in self:
             if sponsor.is_exhibitor and not sponsor.room_name:
-                sponsor.room_name = self.env['chat.room']._default_name()
+                if sponsor.name:
+                    sponsor.room_name = self.env['chat.room']._jitsi_sanitize_name("odoo-exhibitor-%s" % sponsor.name)
+                else:
+                    sponsor.room_name = self.env['chat.room']._default_name()
 
     @api.depends('partner_id')
     def _compute_website_description(self):
@@ -106,12 +108,9 @@ class EventSponsor(models.Model):
     @api.model_create_multi
     def create(self, values_list):
         for values in values_list:
-            if values.get('is_exhibitor'):
-                if not values.get('room_name') and (values.get('name') or values.get('partner_id')):
-                    name = values['name'] if values.get('name') else self.env['res.partner'].browse(values['partner_id']).name
-                    sanitized_name = re.sub(r'[^\w+.]+', '-', remove_accents(name).lower())
-                    final_name = 'odoo-exhibitor-%s' % sanitized_name
-                    values['room_name'] = final_name
+            if values.get('is_exhibitor') and not values.get('room_name'):
+                name = values['name'] if values.get('name') else self.env['res.partner'].browse(values['partner_id']).name or 'sponsor'
+                values['room_name'] = self.env['chat.room']._jitsi_sanitize_name(name)
         return super(EventSponsor, self).create(values_list)
 
     def get_backend_menu_id(self):

@@ -67,6 +67,10 @@
                 By Country
             </a>
             <div class="dropdown-menu">
+                <a t-att-href="'/event/%s/exhibitors?%s' % (slug(event), keep_query('*', countries=''))"
+                    t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if not search_countries else ''}">
+                    All Countries
+                </a>
                 <t t-foreach="sponsor_countries" t-as="sponsor_country">
                     <a t-att-href="'/event/%s/exhibitors?%s' % (
                             slug(event),
@@ -94,6 +98,10 @@
                 By Sponsorship
             </a>
             <div class="dropdown-menu">
+                <a t-att-href="'/event/%s/exhibitors?%s' % (slug(event), keep_query('*', sponsorships=''))"
+                    t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{'active' if not search_sponsorships else ''}">
+                    All Countries
+                </a>
                 <t t-foreach="sponsor_types" t-as="sponsor_type">
                     <a t-att-href="'/event/%s/exhibitors?%s' % (
                             slug(event),
@@ -159,11 +167,12 @@
                 </small>
 
                 <div t-att-data-sponsor-url="sponsor.website_url" class="o_wesponsor_js_connect"
-                     t-attf-data-register-url="/event/#{slug(event)}/register"
+                     t-att-data-register-url="'/event/%s/register' % (slug(event))"
                      t-att-data-is-participating="event.is_participating"
                      t-att-data-sponsor-id="sponsor.id"
                      t-att-data-event-is-ongoing="sponsor.event_id.is_ongoing"
-                     t-att-data-sponsor-is-ongoing="sponsor.is_in_opening_hours">
+                     t-att-data-sponsor-is-ongoing="sponsor.is_in_opening_hours"
+                     t-att-data-user-event-manager="user_event_manager">
                     <div t-if="sponsor_image_url" class="card-img-top position-static o_wesponsor_bg_image"
                         t-attf-style="padding-top: 50%; background-image: url(#{sponsor_image_url});">
                         <div class="o_wesponsor_connect_button">
@@ -171,6 +180,7 @@
                         </div>
                         <img class="position-absolute mr-2 mt-2"
                             style="right: 0; top: 0; max-height: 20px;"
+                            t-if="sponsor.partner_id.country_id"
                             t-att-src="website.image_url(sponsor.partner_id.country_id, 'image')"
                             t-att-alt="sponsor.partner_id.country_id.name"/>
                     </div>
@@ -186,7 +196,7 @@
                 <main class="card-body h-100">
                     <!-- Title -->
                     <h5 class="card-title mt-0 mb-0 text-truncate d-flex align-items-top">
-                        <span t-field="sponsor.partner_name" itemprop="name"/>
+                        <span t-field="sponsor.name" itemprop="name"/>
                         <span t-if="sponsor.is_in_opening_hours and sponsor.chat_room_id"
                             class="ml-auto badge badge-danger">Live
                         </span>

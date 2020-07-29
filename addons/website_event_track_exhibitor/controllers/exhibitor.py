@@ -71,7 +71,7 @@ class ExhibitorController(WebsiteEventTrackController):
         event = event.with_context(tz=event.date_tz or 'UTC')
         sponsors = request.env['event.sponsor'].sudo().search(search_domain)
         sponsors_all = request.env['event.sponsor'].sudo().search(search_domain_base)
-        sponsor_types = request.env['event.sponsor.type'].sudo().search([])
+        sponsor_types = sponsors_all.mapped('sponsor_type_id')
         sponsor_countries = sponsors_all.mapped('partner_id.country_id')
         # organize sponsors into categories to help display
         sponsor_categories = dict()
@@ -101,6 +101,7 @@ class ExhibitorController(WebsiteEventTrackController):
             'sponsor_countries': sponsor_countries,
             # environment
             'hostname': request.httprequest.host.split(':')[0],
+            'user_event_manager': request.env.user.has_group('event.group_event_manager'),
         }
 
     # ------------------------------------------------------------
@@ -157,6 +158,9 @@ class ExhibitorController(WebsiteEventTrackController):
             # options
             'option_widescreen': option_widescreen,
             'option_can_edit': request.env.user.has_group('event.group_event_manager'),
+            # environment
+            'hostname': request.httprequest.host.split(':')[0],
+            'user_event_manager': request.env.user.has_group('event.group_event_manager'),
         }
 
     # ------------------------------------------------------------
@@ -165,13 +169,35 @@ class ExhibitorController(WebsiteEventTrackController):
 
     @http.route('/event_sponsor/<int:sponsor_id>/read', type='json', auth='public', website=True)
     def event_sponsor_read(self, sponsor_id):
-        return request.env['event.sponsor'].browse(sponsor_id).read([
-            'name', 'subtitle', 'sponsor_type_id',
+        """ Marshmalling data for "event not started / sponsor not available" modal """
+        sponsor = request.env['event.sponsor'].browse(sponsor_id)
+        sponsor_data = sponsor.read([
+            'name', 'subtitle',
             'url', 'email', 'phone',
             'website_description', 'website_image_url',
             'hour_from', 'hour_to', 'is_in_opening_hours',
-            'country_id', 'country_flag_url'
-        ])
+            'event_date_tz', 'country_flag_url',
+        ])[0]
+        if sponsor.country_id:
+            sponsor_data['country_name'] = sponsor.country_id.name
+            sponsor_data['country_id'] = sponsor.country_id.id
+        else:
+            sponsor_data['country_name'] = False
+            sponsor_data['country_id'] = False
+        if sponsor.sponsor_type_id:
+            sponsor_data['sponsor_type_name'] = sponsor.sponsor_type_id.name
+            sponsor_data['sponsor_type_id'] = sponsor.sponsor_type_id.id
+        else:
+            sponsor_data['sponsor_type_name'] = False
+            sponsor_data['sponsor_type_id'] = False
+        sponsor_data['event_name'] = sponsor.event_id.name
+        sponsor_data['event_is_ongoing'] = sponsor.event_id.is_ongoing
+        sponsor_data['event_start_today'] = sponsor.event_id.start_today
+        sponsor_data['event_start_remaining'] = sponsor.event_id.start_remaining
+        sponsor_data['event_date_begin_located'] = sponsor.event_id.date_begin_located
+        sponsor_data['event_date_end_located'] = sponsor.event_id.date_end_located
+
+        return sponsor_data
 
     # ------------------------------------------------------------
     # TOOLS

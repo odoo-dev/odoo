@@ -52,21 +52,7 @@ var ExhibitorConnectClosedDialog = Dialog.extend({
         let rpcPromise = this._rpc({
             route: `/event_sponsor/${this.sponsorId}/read`,
         }).then(function (readData) {
-            self.sponsorData = readData[0];
-            if (self.sponsorData.country_id) {
-                self.sponsorData.country_name = self.sponsorData.country_id[1];
-                self.sponsorData.country_id = self.sponsorData.country_id[0];
-            }
-            else {
-                self.sponsorData.country_name = false;
-            }
-            if (self.sponsorData.sponsor_type_id) {
-                self.sponsorData.sponsor_type_name = self.sponsorData.sponsor_type_id[1];
-                self.sponsorData.sponsor_type_id = self.sponsorData.sponsor_type_id[0];
-            }
-            else {
-                self.sponsorData.sponsor_type_name = false;
-            }
+            self.sponsorData = readData;
             return Promise.resolve();
         });
         return rpcPromise;
@@ -97,6 +83,7 @@ publicWidget.registry.eventExhibitorConnect = publicWidget.Widget.extend({
             self.eventIsOngoing = self.$el.data('eventIsOngoing') || false;
             self.sponsorIsOngoing = self.$el.data('sponsorIsOngoing') || false;
             self.isParticipating = self.$el.data('isParticipating') || false;
+            self.userEventManager = self.$el.data('userEventManager') || false;
             self.$el.on('click', self._onConnectClick.bind(self));
         });
     },
@@ -115,10 +102,12 @@ publicWidget.registry.eventExhibitorConnect = publicWidget.Widget.extend({
         ev.stopPropagation();
         ev.preventDefault();
 
-        if (this.eventIsOngoing && ! this.sponsorIsOngoing) {
-            return this._openClosedDialog();
+        if (this.userEventManager) {
+            document.location = this.$el.data('sponsorUrl');
         } else if (!this.eventIsOngoing && !this.isParticipating) {
             document.location = this.$el.data('registerUrl');
+        } else if (!this.eventIsOngoing || ! this.sponsorIsOngoing) {
+            return this._openClosedDialog();
         } else {
             document.location = this.$el.data('sponsorUrl');
         }
