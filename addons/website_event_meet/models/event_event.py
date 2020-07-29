@@ -10,7 +10,6 @@ class Event(models.Model):
 
     meeting_room_ids = fields.One2many("event.meeting.room", "event_id", string="Meeting rooms")
     meeting_room_count = fields.Integer("Room count", compute="_compute_meeting_room_count")
-
     meeting_room_allow_creation = fields.Boolean(
         "Allow Room Creation", compute="_compute_meeting_room_allow_creation",
         readonly=False, store=True,
@@ -37,5 +36,7 @@ class Event(models.Model):
         for event in self:
             if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.meeting_room_allow_creation = event.event_type_id.meeting_room_allow_creation
+            elif event.community_menu and event.community_menu != event._origin.community_menu:
+                event.meeting_room_allow_creation = True
             elif not event.community_menu or not event.meeting_room_allow_creation:
                 event.meeting_room_allow_creation = False

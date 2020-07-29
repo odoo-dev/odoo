@@ -148,7 +148,7 @@ class WebsiteEventMeetController(WebsiteEventCommunityController):
         return {
             # event information
             'event': event,
-            'main_object': event,
+            'main_object': meeting_room,
             'meeting_room': meeting_room,
             # sidebar
             'meeting_rooms_other': meeting_rooms_other,

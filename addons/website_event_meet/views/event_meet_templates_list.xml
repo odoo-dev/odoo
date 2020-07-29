@@ -53,15 +53,16 @@
         <h1 class="o_page_header mb-3">Launch a new topic</h1>
         <p>Want to create your own discussion room ?</p>
         <p>Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic.</p>
-        <button class="btn btn-primary o_wevent_create_room_button"
+        <a href="#" role="button"  class="btn btn-primary o_wevent_create_room_button"
             t-att-data-event-id="event.id"
-            t-att-data-default-lang-code="default_lang_code">Create a Room
-        </button>
+            t-att-data-default-lang-code="default_lang_code">
+            <span>Create a Room</span>
+        </a>
     </div>
 </template>
 
 <template id="meeting_room_card" name="Meeting Room Card">
-    <div class="modal o_join_later_modal" tabindex="-1" role="dialog" style="height: 400px; top:calc(50% - 200px);">
+    <div class="modal o_join_later_modal" t-attf-id="o_join_later_modal_#{meeting_room.id}" tabindex="-1" role="dialog" style="height: 400px; top:calc(50% - 200px);">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="mt-4 col-12 alert alert-warning text-center" role="alert">
@@ -106,7 +107,7 @@
         <!--Pre-event, if registered but event not stared yet-->
         <t t-set="meeting_room_href" t-value="'#'"/>
         <t t-set="meeting_room_data_toggle" t-value="'modal'"/>
-        <t t-set="meeting_room_data_target" t-value="'.o_join_later_modal'"/>
+        <t t-set="meeting_room_data_target" t-value="'#o_join_later_modal_%i' % meeting_room.id"/>
     </t>
 
     <a t-if="is_event_manager or not meeting_room.room_is_full"
@@ -119,28 +120,31 @@
         t-att-data-target="meeting_room_data_target">
         <div class="text-decoration-none w-100 h-100 p-3">
             <div class="o_wevent_meeting_room_corner_ribbon" t-if="meeting_room.room_is_full">Full</div>
-            <div t-if="is_event_manager" class="dropdown float-right dropleft">
-                <button class="btn py-0" data-toggle="dropdown"><h2>&#8942;</h2></button>
-                <div class="dropdown-menu">
-                    <div class="dropdown-item font-weight-bold disabled">Event Manager</div>
-                    <button class="dropdown-item btn btn-danger o_wevent_meeting_room_duplicate" type="button">Duplicate</button>
-                    <button class="dropdown-item btn btn-danger o_wevent_meeting_room_delete" type="button">Close</button>
-                </div>
-            </div>
-            <button t-if="is_event_manager" t-attf-class="o_wevent_meeting_room_is_pinned float-right btn #{'o_wevent_meeting_room_pinned' if meeting_room.is_pinned else ''}">
-                <i class="fa fa-thumb-tack"/>
-            </button>
             <div class="d-flex flex-column">
-                <h3 class="ml-0 mb-0" t-esc="meeting_room.name"/>
-                <span t-esc="meeting_room.summary" class="h5 text-muted mt-2"/>
-                <div class="d-flex flex-row justify-content-between align-items-center mt-2">
-                    <span class="h4 m-0 row">
-                        <b>&amp;#9900;&amp;nbsp;</b>
+                <div class="d-flex flex-row justify-content-between">
+                    <h4 class="text-break mw-75" t-esc="meeting_room.name"/>
+                    <div t-if="is_event_manager" class="w-25">
+                        <div class="dropdown float-right dropleft">
+                            <button class="btn py-0" data-toggle="dropdown"><h3 class="m-0">&#8942;</h3></button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item font-weight-bold disabled">Room Manager</div>
+                                <button class="dropdown-item btn btn-danger o_wevent_meeting_room_duplicate" type="button">Duplicate</button>
+                                <button class="dropdown-item btn btn-danger o_wevent_meeting_room_delete" type="button">Close</button>
+                            </div>
+                        </div>
+                        <button t-attf-class="o_wevent_meeting_room_is_pinned float-right btn #{'o_wevent_meeting_room_pinned' if meeting_room.is_pinned else ''}">
+                            <i class="fa fa-thumb-tack"/>
+                        </button>
+                    </div>
+                </div>
+                <span t-esc="meeting_room.summary" class="h5 text-muted"/>
+                <div class="d-flex flex-row justify-content-between align-items-center">
+                    <span class="h6 m-0 row">
                         <span class="o_wevent_participant_count">
                             <t t-esc="meeting_room.room_participant_count"/>&amp;nbsp;</span>
                         <t t-esc="meeting_room.target_audience or 'participant(s)'"/>
                     </span>
-                    <div class="d-inline border p-2 bg-secondary" t-esc="meeting_room.room_lang_id.name"/>
+                    <div class="d-inline border py-1 px-2 bg-secondary" t-esc="meeting_room.room_lang_id.name"/>
                 </div>
             </div>
         </div>

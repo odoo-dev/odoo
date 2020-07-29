@@ -11,6 +11,9 @@
                     <field name="meeting_room_count" string="Rooms" widget="statinfo"/>
                 </button>
             </xpath>
+            <xpath expr="//field[@name='community_menu']" position="after">
+                <field name="meeting_room_allow_creation" invisible="1"/>
+            </xpath>
         </field>
     </record>
 
