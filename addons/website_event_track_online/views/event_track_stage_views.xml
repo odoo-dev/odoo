@@ -6,7 +6,7 @@
         <field name="model">event.track.stage</field>
         <field name="inherit_id" ref="website_event_track.event_track_stage_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='is_done']" position="after">
+            <xpath expr="//field[@name='is_done']" position="before">
                 <field name="is_accepted"/>
             </xpath>
         </field>
@@ -18,8 +18,8 @@
         <field name="inherit_id" ref="website_event_track.event_track_stage_view_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
-                <field name="is_done"/>
                 <field name="is_accepted"/>
+                <field name="is_done"/>
                 <field name="is_cancel"/>
             </xpath>
         </field>
