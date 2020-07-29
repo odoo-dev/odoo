@@ -462,6 +462,7 @@ msgstr ""
 
 #. module: website_event
 #: code:addons/website_event/models/event_event.py:0
+#: code:addons/website_event/models/website_menu.py:0
 #: model_terms:ir.ui.view,arch_db:website_event.template_intro
 #, python-format
 msgid "Introduction"
@@ -479,6 +480,7 @@ msgstr ""
 
 #. module: website_event
 #: code:addons/website_event/models/event_event.py:0
+#: code:addons/website_event/models/website_menu.py:0
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 #, python-format
 msgid "Location"
@@ -757,6 +759,7 @@ msgid "Website Home"
 msgstr ""
 
 #. module: website_event
+#: model:ir.model,name:website_event.model_website_menu
 #: model:ir.model.fields,field_description:website_event.field_event_event__website_menu
 msgid "Website Menu"
 msgstr ""
