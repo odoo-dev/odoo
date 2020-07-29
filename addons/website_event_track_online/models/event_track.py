@@ -18,7 +18,7 @@ class Track(models.Model):
         string='Biography', compute='_compute_partner_biography',
         readonly=False, store=True)
     image = fields.Image(
-        string="Speaker Image", compute="_compute_speaker_image",
+        string="Speaker Photo", compute="_compute_speaker_image",
         readonly=False, store=True,
         max_width=256, max_height=256)
     # frontend description
