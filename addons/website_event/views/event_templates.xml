@@ -554,13 +554,13 @@
                         </span>
                     </div>
                     <a href="#" role="button" class="btn o_wevent_registration_btn text-left" data-target="#o_wevent_tickets_collapse">
-                        <span class="py-3">Tickets</span>
+                        <span class="py-2">Tickets</span>
                         <span class="close d-none">×</span>
                     </a>
                 </div>
                 <div id="o_wevent_tickets_collapse" class="collapse show">
-                    <div t-foreach="tickets" t-as="ticket" class="row px-3 mx-0 bg-light border-bottom">
-                        <div class="col-8 py-3" itemscope="itemscope" itemtype="http://schema.org/Offer">
+                    <div t-foreach="tickets" t-as="ticket" class="row px-3 py-3 mx-0 bg-light border-bottom">
+                        <div class="col-md-8 col-xs-12 p-0" itemscope="itemscope" itemtype="http://schema.org/Offer">
                             <h5 itemprop="name" t-field="ticket.name" class="my-0"/>
                             <t t-if="ticket.description">
                                 <small t-field="ticket.description" class="text-muted py-2"/>
@@ -569,7 +569,7 @@
                             <small t-if="ticket.end_sale_date and ticket.sale_available and not ticket.is_expired" class="text-muted mr-3" itemprop="availabilityEnds">Sales end on <span itemprop="priceValidUntil" t-field="ticket.end_sale_date"/></small>
                             <small t-if="ticket.start_sale_date and not ticket.sale_available and not ticket.is_expired" class="text-muted mr-3" itemprop="availabilityEnds">Sales start on <span itemprop="priceValidUntil" t-field="ticket.start_sale_date"/></small>
                         </div>
-                        <div class="col-4 d-flex align-items-center">
+                        <div class="col-md-4 col-xs-12 p-0 d-flex align-items-center justify-content-between">
                             <div class="o_wevent_registration_multi_select"/>
                             <div class="w-auto ml-auto">
                                 <select t-if="not ticket.is_expired and ticket.sale_available"
