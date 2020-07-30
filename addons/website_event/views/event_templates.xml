@@ -703,7 +703,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-4 mt-3" t-foreach="attendees" t-as="attendee">
+                <div class="col-md-4 col-xs-12 mt-3" t-foreach="attendees" t-as="attendee">
                     <div class="d-flex flex-column">
                         <span class="font-weight-bold">
                             <t t-if="attendee.name" t-esc="attendee.name"/>
