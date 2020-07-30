@@ -696,34 +696,40 @@
 <template id="registration_complete" name="Registration Completed">
     <t t-call="website_event.layout">
         <div class="container my-5">
-            <div class="row">
+            <div class="row mb-3">
                 <div class="col-12">
                     <h2>Registration confirmed!</h2>
-                    <table class="table table-striped my-4">
-                        <thead class="bg-secondary">
-                            <tr>
-                                <th>Name</th>
-                                <th>Ticket</th>
-                                <th>E-mail</th>
-                                <th>Phone</th>
-                                <th>Reference</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="attendees" t-as="attendee">
-                                <tr>
-                                    <td><t t-if="attendee.name" t-esc="attendee.name"/><t t-else="">N/A</t></td>
-                                    <td><i class="fa fa-ticket"></i> <t t-if='attendee.event_ticket_id'><t t-esc="attendee.event_ticket_id.name"/></t><t t-if='not attendee.event_ticket_id'>N/A</t></td>
-                                    <td><t t-if="attendee.email" t-esc="attendee.email"/><t t-else="">N/A</t></td>
-                                    <td><t t-if="attendee.phone" t-esc="attendee.phone"/><t t-else="">N/A</t></td>
-                                    <td><t t-esc="attendee.id"/></td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="col-lg-8">
                     <h3><a t-attf-href="/event/#{slug(event)}"><t t-esc="event.name"/></a></h3>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-4 mt-3" t-foreach="attendees" t-as="attendee">
+                    <div class="d-flex flex-column">
+                        <span class="font-weight-bold">
+                            <t t-if="attendee.name" t-esc="attendee.name"/>
+                            <t t-else="">N/A</t>
+                        </span>
+                        <span>
+                            <i class="fa fa-envelope mr-2   "></i>
+                            <t t-if="attendee.email" t-esc="attendee.email"/>
+                            <t t-else="">N/A</t>
+                        </span>
+                        <span>
+                            <i class="fa fa-phone mr-2"></i>
+                            <t t-if="attendee.phone" t-esc="attendee.phone"/>
+                            <t t-else="">N/A</t>
+                        </span>
+                        <span>
+                            <i class="fa fa-ticket mr-2"></i>
+                            <t t-if="attendee.event_ticket_id" t-esc="attendee.event_ticket_id.name"/>
+                            <t t-else="">N/A</t>
+                            (ref: <t t-esc="attendee.id"/>)
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-lg-8">
                     <p><b>Start</b> <span itemprop="startDate" t-esc="event.date_begin_located"/><br/> <b>End</b> <span itemprop="endDate" t-esc="event.date_end_located"/></p>
                     <div id="add_to_calendar" class="mt-4">
                         <a role="button" class="btn btn-primary" t-att-href="iCal_url">
