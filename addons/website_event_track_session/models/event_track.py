@@ -121,7 +121,8 @@ class EventTrack(models.Model):
 
         track_candidates = track_candidates.sorted(
             lambda track:
-                (track.is_track_live,
+                (track.is_published,
+                 track.is_track_live,
                  track.track_start_remaining > 0,
                  -1 * track.track_start_remaining,
                  track.is_reminder_on,

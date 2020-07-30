@@ -161,7 +161,8 @@ class WebsiteEventSessionController(EventTrackOnlineController):
         option_widescreen = bool(option_widescreen) if option_widescreen != '0' else False
         # search for tracks list
         tracks_other = track._get_track_suggestions(
-            restrict_domain=self._get_event_tracks_base_domain(track.event_id)
+            restrict_domain=self._get_event_tracks_base_domain(track.event_id),
+            limit=10
         )
 
         return {

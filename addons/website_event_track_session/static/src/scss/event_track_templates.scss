@@ -63,12 +63,11 @@
                 .nav-link {
                     background-color: transparent;
                     border: 0;
-                    border-bottom: 1px solid $border-color;
                     color: $gray-600;
 
                     &.active {
-                        border-bottom: 1px solid $gray-800;
                         color: $gray-800;
+                        font-weight: 500;
                     }
                 }
             }
