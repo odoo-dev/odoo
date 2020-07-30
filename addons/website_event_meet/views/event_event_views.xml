@@ -11,11 +11,8 @@
                     <field name="meeting_room_count" string="Rooms" widget="statinfo"/>
                 </button>
             </xpath>
-            <xpath expr="//field[@name='website_track_proposal']" position="after">
-                <label for="meeting_room_menu"/>
-                <field name="meeting_room_menu"/>
-            </xpath>
         </field>
     </record>
 
 </data></odoo>
+

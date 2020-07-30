@@ -8,12 +8,13 @@ from werkzeug.utils import redirect
 from odoo import exceptions, http
 from odoo.http import request
 from odoo.addons.http_routing.models.ir_http import slug
+from odoo.addons.website_event_track_online.controllers.community import WebsiteEventCommunityController
 from odoo.osv import expression
 
 _logger = logging.getLogger(__name__)
 
 
-class WebsiteEventMeetController(http.Controller):
+class WebsiteEventMeetController(WebsiteEventCommunityController):
 
     def _get_event_rooms_base_domain(self, event):
         search_domain_base = [('event_id', '=', event.id), ('is_published', '=', True)]
@@ -26,9 +27,9 @@ class WebsiteEventMeetController(http.Controller):
     # MAIN PAGE
     # ------------------------------------------------------------
 
-    @http.route(["/event/<model('event.event'):event>/meeting_rooms"], type="http",
+    @http.route(["/event/<model('event.event'):event>/community"], type="http",
                 auth="public", website=True, sitemap=True)
-    def event_meeting_rooms(self, event, lang=None):
+    def community(self, event, page=1, lang=None, **kwargs):
         """Display the meeting rooms of the event on the frontend side.
 
         :param event: event for which we display the meeting rooms
