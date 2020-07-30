@@ -101,7 +101,7 @@
     </t>
     <t t-elif="not event.is_ongoing and not event.is_participating">
         <!--Pre-event, if not registered yet-->
-        <t t-set="meeting_room_href" t-value="'/event/' + slug(event) + '/register'"/>
+        <t t-set="meeting_room_href" t-value="'/event/' + slug(event) + '/register?from_room_id=%i' % meeting_room.id"/>
     </t>
     <t t-else="">
         <!--Pre-event, if registered but event not stared yet-->
