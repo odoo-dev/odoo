@@ -18,6 +18,7 @@ class EventEvent(models.Model):
 
     @api.depends("event_type_id", "community_menu")
     def _compute_community_menu(self):
+        # TDE FIXME: check true by default
         for event in self:
             if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.community_menu = event.event_type_id.community_menu

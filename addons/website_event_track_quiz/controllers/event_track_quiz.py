@@ -78,6 +78,7 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
         request.session['quiz_answers'] = json.dumps(session_quiz_answers)
 
     def _get_quiz_answers_details(self, track, answer_ids):
+        # TDE FIXME: lost sudo
         all_questions = request.env['event.quiz.question'].sudo().search([('quiz_id', '=', track.sudo().quiz_id.id)])
         user_answers = request.env['event.quiz.answer'].sudo().search([('id', 'in', answer_ids)])
 
