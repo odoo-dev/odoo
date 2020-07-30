@@ -106,8 +106,18 @@
                         border-top-width: 0;
                     }
 
-                    .o_wevent_online_page_aside_collapse.collapsed {
-                        transform: rotate(90deg);
+                    li:not(.nav-item) {
+                        border-bottom: 1px solid $border-color;
+                        &:first-child {
+                            border-top: 1px solid $border-color;
+                        }
+                        &:last-child {
+                            border-bottom: 0px;
+                        }
+                    }
+
+                    .o_wevent_online_page_aside_collapse:not(.collapsed) {
+                        transform: rotate(180deg);
                     }
                 }
             }
