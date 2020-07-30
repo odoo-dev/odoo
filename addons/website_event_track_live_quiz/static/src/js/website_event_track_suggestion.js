@@ -25,7 +25,7 @@ var WebsiteEventTrackSuggestionLiveQuiz = WebsiteEventTrackSuggestion.include({
      */
     _onQuizClick: function () {
         clearInterval(this.timerInterval);
-        this.$('.owevent_track_suggestion_timer_text').remove();
+        this.$('.owevent_track_suggestion_timer_text_wrapper').remove();
     }
 });
 

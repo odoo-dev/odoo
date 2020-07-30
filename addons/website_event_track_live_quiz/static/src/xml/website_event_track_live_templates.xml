@@ -2,11 +2,10 @@
 <odoo>
 
 <t t-extend="website_event_track_live.website_event_track_suggestion">
-    <t t-jquery="button.owevent_track_suggestion_replay" t-operation="before">
-        <a t-if="widget.currentTrack.showQuiz" class="btn btn-primary mr-2 owevent_track_suggestion_quiz"
+    <t t-jquery="a.owevent_track_suggestion_replay" t-operation="before">
+        <a t-if="widget.currentTrack.showQuiz" class="btn btn-primary btn-lg mr-2 owevent_track_suggestion_quiz"
            href="#we_track_quiz_container"
            onclick="$('.o_quiz_js_quiz_container').removeClass('d-none');">
-            <i class="fa fa-question-circle mr-1"/>
             <span>Take the Quiz</span>
         </a>
     </t>
