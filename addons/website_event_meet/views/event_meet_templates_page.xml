@@ -85,21 +85,19 @@
 
 <template id="meeting_room_aside" name="Meeting Room: Aside">
     <div t-att-class="'col-12 pl-0 pr-0 pr-md-3 o_wevent_online_page_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
-        <div class="bg-white pt-3 o_wevent_online_page_aside_content">
-            <div class="d-flex align-items-center justify-content-between mx-2">
-                <span class="h5 mb-0">Other Rooms</span>
-                <a href="#collapse_meet_room_aside" data-toggle="collapse" class="d-lg-none p-2 text-decoration-none o_wevent_online_page_aside_collapse">
+        <div class="bg-white o_wevent_online_page_aside_content">
+            <div class="d-flex align-items-center justify-content-between mx-2 py-1">
+                <span class="h5 mb-0 pt-0 pt-md-3 pb-0 pb-md-2">Other Rooms</span>
+                <a href="#collapse_meet_room_aside" data-toggle="collapse" class="d-lg-none p-2 text-decoration-none o_wevent_online_page_aside_collapse collapsed">
                     <i class="fa fa-chevron-down d-lg-none"/>
                 </a>
             </div>
-            <hr class="mt-2 pb-1 mb-1 mx-2 d-lg-block"/>
-            <ul id="collapse_meet_room_aside" class="list-unstyled mx-2 collapse d-lg-block">
+            <ul id="collapse_meet_room_aside" class="list-unstyled collapse d-lg-block mb-0">
                 <li t-foreach="meeting_rooms_other" t-as="meeting_room_other">
-                    <div class="d-flex mb-3">
+                    <a class="d-block w-100 h-100 px-2 pt-2 pb-1 text-decoration-none"
+                        t-att-href="'/event/%s/meeting_room/%s' % (slug(event), slug(meeting_room_other))">
                         <div class="flex-grow-1 mw-100">
-                            <span class="d-flex align-items-top mw-100">
-                                <a t-att-href="'/event/%s/meeting_room/%s' % (slug(event), slug(meeting_room_other))" class="text-truncate"><t t-esc="meeting_room_other.name"/></a>
-                            </span>
+                            <div class="text-truncate" t-esc="meeting_room_other.name"/>
                             <span class="text-muted" t-esc="meeting_room_other.summary"></span>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="text-muted">
@@ -109,7 +107,7 @@
                                 <small t-if="meeting_room_other.room_lang_id" class="text-muted"><i class="fa fa-globe"/> <t t-esc="meeting_room_other.room_lang_id.name"/></small>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </li>
             </ul>
         </div>
