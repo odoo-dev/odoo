@@ -65,7 +65,6 @@
     inherit_id="website_event_track.event_sponsor">
     <xpath expr="//div[@t-if='event.sponsor_ids']" position="replace">
         <div class="container mt32 mb16 d-print-none" t-if="event.sponsor_ids">
-            <h4 t-attf-class="text-muted #{'' if (len(event.sponsor_ids) > 10) else 'text-md-center'} mb16">Our Sponsors</h4>
             <div t-attf-class="d-flex flex-wrap mb-5 #{'' if (len(event.sponsor_ids) > 10) else 'justify-content-md-center'}">
                 <t t-foreach="event.sponsor_ids" t-as="sponsor">
                     <t t-if="sponsor.url">
