@@ -32,6 +32,14 @@ class EventMeetingRoom(models.Model):
         'room_participant_count': 'participant_count',
     }
 
+    @api.depends('name', 'event_id.name')
+    def _compute_website_url(self):
+        super(EventMeetingRoom, self)._compute_website_url()
+        for meeting_room in self:
+            if meeting_room.id:
+                base_url = meeting_room.event_id.get_base_url()
+                meeting_room.website_url = '%s/event/%s/meeting_room/%s' % (base_url, slug(meeting_room.event_id), slug(meeting_room))
+
     @api.model_create_multi
     def create(self, values_list):
         # TDE FIXME: merge with mixin code
@@ -50,12 +58,3 @@ class EventMeetingRoom(models.Model):
             values["target_audience"] = (values.get("target_audience") or _("Attendee(s)")).capitalize()
 
         return super(EventMeetingRoom, self).create(values_list)
-
-    def action_join(self):
-        """Join the meeting room on the frontend side."""
-        web_base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        url = url_join(web_base_url, f"/event/{slug(self.event_id)}/meeting_room/{slug(self)}")
-        return {
-            "type": "ir.actions.act_url",
-            "url": url,
-        }

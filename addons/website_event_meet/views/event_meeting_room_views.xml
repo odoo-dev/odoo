@@ -19,11 +19,11 @@
         <field name="model">event.meeting.room</field>
         <field name="arch" type="xml">
             <form string="Meeting Room">
-                <header>
-                    <button class="oe_highlight" name="action_join" string="Join the room" type="object"
-                        attrs="{'invisible': [('is_published', '=', False)]}"/>
-                </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <field name="website_url" invisible="1"/>
+                        <field name="is_published" widget="website_redirect_button"/>
+                    </div>
                     <label for="name"/>
                     <h1>
                         <field name="name" placeholder="e.g. Finance"/>
@@ -33,7 +33,6 @@
                             <field name="event_id"/>
                             <field name="summary" placeholder="e.g. Let's talk about Corporate Finance"/>
                             <field name="target_audience" placeholder="e.g. CFOs &amp; Accountants"/>
-                            <field name="is_published"/>
                             <field name="is_pinned"/>
                         </group>
                         <group>
