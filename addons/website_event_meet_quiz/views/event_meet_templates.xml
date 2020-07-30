@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <template id="aside_leaderboard" inherit_id="website_event_meet.meet_main">
-    <xpath expr="//button[hasclass('o_wevent_create_room_button')]" position="after">
+    <xpath expr="//*[hasclass('o_wevent_create_room_button')]" position="after">
         <t t-if="top3_visitors" t-call="website_event_meet_quiz.small_leaderboard"/>
     </xpath>
 </template>
