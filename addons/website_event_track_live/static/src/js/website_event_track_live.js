@@ -55,6 +55,9 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
     _onReplay: function () {
         this.youtubePlayer.seekTo(0);
         this.youtubePlayer.playVideo();
+        if (this.trackSuggestion) {
+            delete this.trackSuggestion;
+        }
     },
 
     /**
@@ -102,10 +105,10 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
      * and the user is not in fullscreen mode.
      */
     _showSuggestion: function () {
-        if (this.nextSuggestion && !this.isFullScreen) {
-            var trackSuggestion = new TrackSuggestionWidget(this, this.nextSuggestion);
-            trackSuggestion.appendTo(this.$el);
-            trackSuggestion.on('replay', null, this._onReplay.bind(this));
+        if (this.nextSuggestion && !this.isFullScreen && !this.trackSuggestion) {
+            this.trackSuggestion = new TrackSuggestionWidget(this, this.nextSuggestion);
+            this.trackSuggestion.appendTo(this.$el);
+            this.trackSuggestion.on('replay', null, this._onReplay.bind(this));
         }
     }
 });

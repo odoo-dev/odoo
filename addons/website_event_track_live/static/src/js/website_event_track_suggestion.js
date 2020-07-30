@@ -7,6 +7,8 @@ var WebsiteEventTrackSuggestion = Widget.extend({
     template: 'website_event_track_live.website_event_track_suggestion',
     xmlDependencies: ['/website_event_track_live/static/src/xml/website_event_track_live_templates.xml'],
     events: {
+        'click .owevent_track_suggestion_next': '_onNextTrackClick',
+        'click .owevent_track_suggestion_close': '_onCloseClick',
         'click .owevent_track_suggestion_replay': '_onReplayClick'
     },
 
@@ -15,12 +17,12 @@ var WebsiteEventTrackSuggestion = Widget.extend({
 
         this.currentTrack = {
             'name': options.current_track.name,
+            'imageSrc': options.current_track.website_image_url,
         };
         this.suggestion = {
             'name': options.suggestion.name,
             'speakerName': options.suggestion.speaker_name,
             'trackUrl': options.suggestion.website_url,
-            'imageSrc': options.suggestion.website_image_url,
         };
     },
 
@@ -45,6 +47,19 @@ var WebsiteEventTrackSuggestion = Widget.extend({
         this.destroy();
     },
 
+    _onCloseClick: function () {
+        clearInterval(this.timerInterval);
+        this.$('.owevent_track_suggestion_next').addClass('invisible');
+    },
+
+    _onNextTrackClick: function (ev) {
+        if ($(ev.target).hasClass('owevent_track_suggestion_close')) {
+            return;
+        }
+
+        window.location = this.suggestion.trackUrl;
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -52,7 +67,7 @@ var WebsiteEventTrackSuggestion = Widget.extend({
     _updateTimer: function () {
         var secondsLeft = parseInt(this.$('.owevent_track_suggestion_timer_text').text());
 
-        if (secondsLeft > 0) {
+        if (secondsLeft > 1) {
             secondsLeft -= 1;
             this.$('.owevent_track_suggestion_timer_text').text(secondsLeft);
         } else {

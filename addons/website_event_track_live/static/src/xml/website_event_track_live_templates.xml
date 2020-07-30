@@ -3,28 +3,28 @@
 
 <div t-name="website_event_track_live.website_event_track_suggestion"
     class="owevent_track_suggestion position-absolute w-100"
-    t-attf-style="background-image: url('#{widget.suggestion.imageSrc}');">
+    t-attf-style="background-image: url('#{widget.currentTrack.imageSrc}');">
     <div class="h-100 w-100 p-4 d-flex flex-column align-items-center owevent_track_suggestion_content">
-        <div class="h1 text-white" t-esc="widget.currentTrack.name"/>
-        <div>
-            <button class="btn btn-secondary owevent_track_suggestion_replay">
-                <i class="fa fa-rotate-left mr-1"/>
-                <span>Replay Video</span>
-            </button>
-        </div>
-        <div class="flex-grow-1 pb-5 d-flex flex-column align-items-center justify-content-center">
-            <div class="owevent_track_suggestion_up_next">
-                Up Next
-            </div>
-            <div class="h3 text-white" t-esc="widget.suggestion.name"/>
-            <div class="h4 text-white" t-esc="widget.suggestion.speakerName"/>
+        <div class="flex-grow-1 pt-5 d-flex flex-column align-items-center justify-content-center">
+            <div class="text-white">You just watched:</div>
+            <div class="h1 text-white" t-esc="widget.currentTrack.name"/>
             <div>
-                <a t-att-href="widget.suggestion.trackUrl"
-                    class="btn btn-primary">
-                    <i class="fa fa-step-forward"/>
-                    <span>Next Track</span>
-                    <span class="owevent_track_suggestion_timer_text pl-2 bl-1 ml-2">30</span>
+                <a href="#" class="owevent_track_suggestion_replay font-weight-bold">
+                    <span>Replay Video</span>
                 </a>
+            </div>
+        </div>
+        <div class="d-flex w-100 flex-column align-items-end">
+            <div class="p-2 rounded owevent_track_suggestion_next position-relative">
+                <div class="text-white text-right owevent_track_suggestion_close_wrapper">
+                    <i class="fa fa-remove owevent_track_suggestion_close position-absolute"/>
+                </div>
+                <span class="text-white">Up Next:</span>
+                <span class="text-primary font-weight-bold pr-4" t-esc="widget.suggestion.name"/>
+                <div class="text-white owevent_track_suggestion_timer_text_wrapper">
+                    <span>Starts in</span>
+                    <span class="owevent_track_suggestion_timer_text">30</span>
+                </div>
             </div>
         </div>
     </div>

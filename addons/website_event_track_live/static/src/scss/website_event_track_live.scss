@@ -15,14 +15,20 @@
     left: 0px;
 
     .owevent_track_suggestion_content {
-        background-color: rgba(0,0,0,.4);
+        background-color: rgba(0,0,0,.5);
 
-        .owevent_track_suggestion_up_next {
-            color: rgba(255,255,255,0.7);
-        }
+        .owevent_track_suggestion_next {
+            background-color: rgba(0,0,0,.5);
+            transition: background-color .3s linear;
+            &:hover {
+                cursor: pointer;
+                background-color: rgba(0,0,0,.9);
+            }
 
-        .owevent_track_suggestion_timer_text {
-            border-left: solid 1px;
+            .owevent_track_suggestion_close {
+                top: .5rem;
+                right: .5rem;
+            }
         }
     }
 }
