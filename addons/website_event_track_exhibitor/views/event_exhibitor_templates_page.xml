@@ -128,28 +128,29 @@
 
 <template id="exhibitor_aside" name="Exhibitor: Aside">
     <div t-att-class="'col-12 pl-0 pr-0 pr-md-3 o_wevent_online_page_aside o_wesponsor_exhibitor_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
-        <div class="bg-white pt-3 o_wevent_online_page_aside_content">
+        <div class="bg-white o_wevent_online_page_aside_content">
             <div class="d-flex align-items-center justify-content-between mx-2">
-                <span class="h5 mb-0">Other exhibitors</span>
-                <a href="#collapse_exhibitor_aside" data-toggle="collapse" class="d-lg-none p-2 text-decoration-none o_wesponsor_exhibitor_aside_collapse">
+                <span class="h5 mb-0 pt-0 pt-md-3 pb-0 pb-md-2">Other exhibitors</span>
+                <a href="#collapse_exhibitor_aside" data-toggle="collapse"
+                   class="d-lg-none p-2 text-decoration-none o_wevent_online_page_aside_collapse collapsed">
                     <i class="fa fa-chevron-down d-lg-none"/>
                 </a>
             </div>
-            <hr class="mt-2 pb-1 mb-1 mx-0 d-none d-lg-block"/>
-            <ul id="collapse_exhibitor_aside" class="list-unstyled mx-2 collapse d-lg-block">
+            <ul id="collapse_exhibitor_aside" class="list-unstyled collapse d-lg-block mb-0">
                 <li t-foreach="sponsors_other" t-as="sponsor_other">
-                    <div t-attf-class="d-flex mb-3">
+                    <a class="d-flex w-100 h-100 px-2 pt-2 pb-1 text-decoration-none"
+                        t-att-href="sponsor_other.website_url">
                         <img class="mr-2 o_wesponsor_aside_logo"
                             t-att-src="website.image_url(sponsor_other.partner_id.country_id, 'image')"
                             t-att-alt="sponsor_other.partner_id.country_id.name"/>
-                        <div class="flex-grow-1">
+                        <div class="flex-grow-1 overflow-auto">
                             <span class="d-flex align-items-baseline o_wesponsor_sponsor_name">
-                                <a t-att-href="sponsor_other.website_url" t-esc="sponsor_other.name"/>
+                                <span class="d-inline-block text-truncate" t-esc="sponsor_other.name"/>
                                 <span class="badge badge-light ml-auto" t-esc="sponsor_other.sponsor_type_id.name"/>
                             </span>
                             <small class="text-muted" t-esc="sponsor_other.subtitle"/>
                         </div>
-                    </div>
+                    </a>
                 </li>
             </ul>
         </div>
