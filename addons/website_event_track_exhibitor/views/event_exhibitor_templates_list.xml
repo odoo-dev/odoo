@@ -167,7 +167,7 @@
                 </small>
 
                 <div t-att-data-sponsor-url="sponsor.website_url" class="o_wesponsor_js_connect"
-                     t-att-data-register-url="'/event/%s/register' % (slug(event))"
+                     t-attf-data-register-url="/event/#{slug(event)}/register?from_sponsor_id=#{sponsor.id}"
                      t-att-data-is-participating="event.is_participating"
                      t-att-data-sponsor-id="sponsor.id"
                      t-att-data-event-is-ongoing="sponsor.event_id.is_ongoing"

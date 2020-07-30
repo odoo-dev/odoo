@@ -35,13 +35,15 @@
             <span t-if="sponsor.event_id.start_today">
                 starts in
                 <span t-esc="sponsor.event_id.start_remaining"
-                    t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
+                    t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>.
             </span>
             <span class="my-0" t-else="">
                 starts at
                 <span t-field="sponsor.event_id.with_context(tz=sponsor.event_id.date_tz).date_begin"
-                    t-options="{'format': 'medium'}"/>
+                    t-options="{'format': 'medium'}"/> (<t t-esc="sponsor.event_id.date_tz"/>).
             </span>
+            <br/>
+            <span>Join us there to meet <b t-esc="sponsor.partner_name"/> !</span>
         </div>
         <!-- SPONSOR JITSI + CLOSED/FULL ALERTS -->
         <div t-if="sponsor.event_id.is_ongoing and sponsor.chat_room_id" class="d-flex flex-column">
