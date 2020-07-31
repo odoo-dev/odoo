@@ -2,8 +2,12 @@
  * EVENT TOOL: REMINDER WIDGET
  */
 .o_wevent_event .o_wetrack_js_reminder {
+    width: fit-content;
+    height: fit-content;
+    cursor: pointer;
+    background: grey;
+
     i {
-        margin-left: 0.5em;
         &.fa-bell {
             color: gold;
         }
@@ -12,15 +16,11 @@
         }
     }
 
-    width: fit-content;
-    height: fit-content;
-    cursor: pointer;
-    background: grey;
+    // Icon only
     &.o_wetrack_reminder_light {
         background: transparent;
-        padding: 0em;
+        padding: 0;
         i {
-            margin-left: 4px;
             &.inactive_color_dark {
                 color: grey;
             }
@@ -31,6 +31,8 @@
             }
         }
     }
+
+    // Text included
     &:not(.o_wetrack_reminder_light) {
         &.o_wetrack_reminder_small {
             padding: 0.25rem 0.50rem;
