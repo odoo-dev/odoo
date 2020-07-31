@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import json
-import math
-
 from odoo import http
-from odoo.addons.website_event_track_online.controllers.community import WebsiteEventCommunityController
-from odoo.exceptions import AccessError, UserError
-from odoo.http import request
-from odoo.osv import expression
-from odoo.addons.http_routing.models.ir_http import slug
-from werkzeug.exceptions import Forbidden
 
+from odoo.addons.website_event_track_online.controllers.community import WebsiteEventCommunityController
+from odoo.http import request
+from werkzeug.exceptions import Forbidden
 
 
 class WebsiteEventTrackQuizMeetController(WebsiteEventCommunityController):
@@ -27,13 +21,3 @@ class WebsiteEventTrackQuizMeetController(WebsiteEventCommunityController):
         # website_event_meet
         values.update(self._event_meeting_rooms_get_values(event, lang=lang))
         return request.render('website_event_meet.event_meet', values)
-
-    @http.route(['/event/<model("event.event"):event>/community/leaderboard',
-                '/event/<model("event.event"):event>/community/leaderboard/page/<int:page>'], type='http', auth="public", website=True, sitemap=False)
-    def leaderboard(self, event, page=1, **kwargs):
-        if not event.can_access_from_current_website():
-            raise Forbidden()
-
-        values = self._get_community_leaderboard_render_values(event, kwargs.get('search'), page)
-
-        return request.render('website_event_track_quiz.event_leaderboard', values)
