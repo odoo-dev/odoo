@@ -22,9 +22,9 @@ class EventEvent(models.Model):
         for event in self:
             if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.community_menu = event.event_type_id.community_menu
-            elif event.website_menu and event.website_menu != event._origin.website_menu:
+            elif event.website_menu and event.website_menu != event._origin.website_menu or not event.community_menu:
                 event.community_menu = True
-            elif not event.website_menu or not event.community_menu:
+            elif not event.website_menu:
                 event.community_menu = False
 
     # ------------------------------------------------------------
@@ -58,7 +58,7 @@ class EventEvent(models.Model):
         self.ensure_one()
         return [
             (_('Talks'), '/event/%s/track' % slug(self), False, 10, 'track'),
-            (_('Agenda'), '/event/%s/agenda' % slug(self), False, 70, 'track')
+            (_('Agenda'), '/event/%s/agenda' % slug(self), False, 70, False)
         ]
 
     def _get_track_proposal_menu_entries(self):
