@@ -24,7 +24,10 @@ var WebsiteEventTrackSuggestionQuiz = Quiz.include({
     _getTrackSuggestion: function () {
         var self = this;
         return this._rpc({
-            route: `/event/track/${this.track.id}/get_track_suggestion`
+            route: '/event_track/get_track_suggestion',
+            params: {
+                track_id: this.track.id,
+            }
         }).then(function (suggestion) {
             self.nextSuggestion = suggestion;
         });
