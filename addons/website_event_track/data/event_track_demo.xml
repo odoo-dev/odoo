@@ -4,7 +4,7 @@
         <field name="name">How to design a new piece of furniture</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location5"/>
         <field name="duration" eval="1"/>
         <field name="partner_id" ref="base.res_partner_2"/>
@@ -16,7 +16,7 @@
         <field name="name">How to integrate hardware materials in your pieces of furniture</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=2, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=2, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location5"/>
         <field name="duration" eval="0.25"/>
         <field name="partner_id" ref="base.res_partner_3"/>
@@ -28,7 +28,7 @@
         <field name="name">Portfolio presentation</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=2, minutes=35)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=2, minutes=35)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location5"/>
         <field name="duration" eval="0.3"/>
         <field name="partner_id" ref="base.res_partner_4"/>
@@ -39,7 +39,7 @@
         <field name="name">How to develop automated processes</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=3, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=3, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location5"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_2"/>
@@ -50,7 +50,7 @@
         <field name="name">The new way to promote your creations</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=4, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=4, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location6"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_4"/>
@@ -61,7 +61,7 @@
         <field name="name">Detailed roadmap of our new products</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=7, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=7, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location6"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_3"/>
@@ -72,7 +72,7 @@
         <field name="name">A technical explanation of how to use computer design apps</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=10, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=10, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location6"/>
         <field name="duration" eval="1"/>
         <field name="partner_id" ref="base.res_partner_1"/>
@@ -83,7 +83,7 @@
         <field name="name">How to optimize your sales, from leads to sales orders</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location7"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_4"/>
@@ -96,7 +96,7 @@
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
         <field name="user_id" ref="base.user_admin"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=3, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=3, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location7"/>
         <field name="duration" eval="1"/>
         <field name="partner_id" ref="base.res_partner_12"/>
@@ -107,7 +107,7 @@
         <field name="name">Raising qualitive insights from your customers</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=5, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=5, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location7"/>
         <field name="duration" eval="0.5"/>
         <field name="stage_id" ref="event_track_stage0"/>
@@ -117,7 +117,7 @@
         <field name="name">Discover our new design team</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=10, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=10, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location7"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_4"/>
@@ -128,7 +128,7 @@
         <field name="name">Latest trends</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=1, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=1, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location7"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_2"/>
@@ -139,7 +139,7 @@
         <field name="name">Advanced reporting</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=2, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=2, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location8"/>
         <field name="duration" eval="0.25"/>
         <field name="partner_id" ref="base.res_partner_12"/>
@@ -150,7 +150,7 @@
         <field name="name">Partnership programs</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=3, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=3, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location8"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_10"/>
@@ -161,7 +161,7 @@
         <field name="name">How to communicate with your community</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=8, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=8, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location8"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_3"/>
@@ -172,7 +172,7 @@
         <field name="name">How to follow us on the social media</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=12, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=12, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location8"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_12"/>
@@ -183,7 +183,7 @@
         <field name="name">The new marketing strategy</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location9"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_10"/>
@@ -194,7 +194,7 @@
         <field name="name">How to build your marketing strategy within a competitive environment</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=1, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=1, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location9"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_2"/>
@@ -205,7 +205,7 @@
         <field name="name">Advanced lead management : tips and tricks from the fields</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=3, hours=1, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=3, hours=1, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location9"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_4"/>
@@ -216,7 +216,7 @@
         <field name="name">New Certification Program</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=3, hours=5, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=3, hours=5, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location9"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_3"/>
@@ -227,7 +227,7 @@
         <field name="name">House of World Cultures</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=4, hours=1, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=4, hours=1, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location9"/>
         <field name="duration" eval="0.5"/>
         <field name="stage_id" ref="event_track_stage1"/>
@@ -237,7 +237,7 @@
         <field name="name">Minimal but efficient design</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=4, hours=4, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=4, hours=4, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location9"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_3"/>
@@ -248,7 +248,7 @@
         <field name="name">Key Success factors selling our furniture</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=4, hours=5, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=4, hours=5, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location9"/>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_1"/>
@@ -259,7 +259,7 @@
         <field name="name">Design contest (entire day)</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=25)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=25)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location10"/>
         <field name="duration" eval="1.5"/>
         <field name="partner_id" ref="base.res_partner_18"/>
@@ -270,9 +270,9 @@
         <field name="name">Design contest (entire afternoon)</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=1, minutes=55)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=4, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="location_id" ref="website_event_track.event_track_location10"/>
-        <field name="duration" eval="2.5"/>
+        <field name="duration" eval="3.5"/>
         <field name="partner_id" ref="base.res_partner_18"/>
         <field name="stage_id" ref="event_track_stage3"/>
         <field name="user_id" ref="base.user_admin"/>
@@ -281,7 +281,7 @@
         <field name="name">My Company global presentation</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=3, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=3, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="duration" eval="1"/>
         <field name="partner_id" ref="base.res_partner_1"/>
         <field name="stage_id" ref="event_track_stage3"/>
@@ -291,7 +291,7 @@
         <field name="name">Status &amp; Strategy</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=4, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=1, hours=4, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="duration" eval="0.5"/>
         <field name="partner_id" ref="base.res_partner_2"/>
         <field name="stage_id" ref="event_track_stage2"/>
@@ -301,7 +301,7 @@
         <field name="name">The new marketing strategy</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=1, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=1, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="duration" eval="0.25"/>
         <field name="partner_id" ref="base.res_partner_2"/>
         <field name="stage_id" ref="event_track_stage2"/>
@@ -311,7 +311,7 @@
         <field name="name">Morning break</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=4, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=4, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="duration" eval="0.25"/>
         <field name="stage_id" ref="event_track_stage1"/>
         <field name="user_id" ref="base.user_admin"/>
@@ -320,7 +320,7 @@
         <field name="name">Lunch</field>
         <field name="is_published" eval="True"/>
         <field name="event_id" ref="event.event_0"/>
-        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=16, minutes=5)).strftime('%Y-%m-%d 08:00:00')"></field>
+        <field name="date" eval="(DateTime.now() + timedelta(days=2, hours=16, minutes=5)).strftime('%Y-%m-%d %H:%M:%S')"></field>
         <field name="duration" eval="1"/>
         <field name="stage_id" ref="event_track_stage1"/>
         <field name="user_id" ref="base.user_admin"/>
@@ -360,7 +360,7 @@
     </record>
     <!-- Location 1 -->
     <record id="event_7_track_3" model="event.track">
-        <field name="name">Home visit: the joy of minimalist living</field>
+        <field name="name">A House Made of Woods ?</field>
         <field name="event_id" ref="event.event_7"/>
         <field name="stage_id" ref="event_track_stage3"/>
         <field name="location_id" ref="website_event_track.event_track_location_online_1"/>
@@ -385,7 +385,7 @@
     </record>
     <!-- Location 2 -->
     <record id="event_7_track_5" model="event.track">
-        <field name="name">Securing your furniture – what you need to know</field>
+        <field name="name">Securing your Lumber during transport</field>
         <field name="event_id" ref="event.event_7"/>
         <field name="stage_id" ref="event_track_stage3"/>
         <field name="location_id" ref="website_event_track.event_track_location_online_2"/>
@@ -397,7 +397,7 @@
         <field name="partner_id" ref="base.res_partner_address_28"/>
     </record>
     <record id="event_7_track_6" model="event.track">
-        <field name="name">Meet our new food containers</field>
+        <field name="name">Meet our woods producers</field>
         <field name="event_id" ref="event.event_7"/>
         <field name="stage_id" ref="event_track_stage3"/>
         <field name="location_id" ref="website_event_track.event_track_location_online_2"/>
@@ -491,7 +491,7 @@
     </record>
     <!-- Location 1 -->
     <record id="event_7_track_12" model="event.track">
-        <field name="name">Facts and figures: climate positive</field>
+        <field name="name">Climate positive</field>
         <field name="event_id" ref="event.event_7"/>
         <field name="stage_id" ref="event_track_stage3"/>
         <field name="location_id" ref="website_event_track.event_track_location_online_1"/>
