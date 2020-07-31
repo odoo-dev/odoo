@@ -149,6 +149,7 @@
                 <span t-if="option_track_wishlist">
                     <t t-call="website_event_track_online.track_widget_reminder">
                         <t t-set="reminder_light" t-value="True"/>
+                        <t t-set="reminder_small" t-value="True"/>
                     </t>
                 </span>
             </div>
