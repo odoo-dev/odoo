@@ -40,9 +40,9 @@ class QuizQuestion(models.Model):
     def _check_answers_integrity(self):
         for question in self:
             if len(question.answer_ids.filtered(lambda answer: answer.is_correct)) != 1:
-                raise ValidationError(_('Question "%s" must have 1 correct answer') % question.question)
+                raise ValidationError(_('Question "%s" must have 1 correct answer') % question.name)
             if len(question.answer_ids) < 2:
-                raise ValidationError(_('Question "%s" must have 1 correct answer and at least 1 invalid answer') % question.question)
+                raise ValidationError(_('Question "%s" must have 1 correct answer and at least 1 invalid answer') % question.name)
 
 
 class QuizAnswer(models.Model):

@@ -1,30 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import json
-import math
-
 from odoo import http
 from odoo.addons.website_event_track_session.controllers.session import WebsiteEventSessionController
-from odoo.exceptions import AccessError, UserError
 from odoo.http import request
-from odoo.osv import expression
-from odoo.addons.http_routing.models.ir_http import slug
 
 
 class WebsiteEventTrackQuiz(WebsiteEventSessionController):
-
-    # ------------------------------------------------------------
-    # PAGE VIEW
-    # ------------------------------------------------------------
-
-    def _event_track_page_get_values(self, event, track, **options):
-        values = super(WebsiteEventTrackQuiz, self)._event_track_page_get_values(event, track)
-        track_visitor = track._get_event_track_visitors(force_create=True)
-        values.update({
-            'track_visitor': track_visitor,
-        })
-        return values
 
     # QUIZZES IN PAGE
     # ----------------------------------------------------------
@@ -39,6 +21,8 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
             return {'error': 'track_quiz_done'}
 
         answers_details = self._get_quiz_answers_details(track, answer_ids)
+        if answers_details.get('error'):
+            return answers_details
 
         event_track_visitor.write({
             'quiz_completed': True,
@@ -69,26 +53,18 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
             'quiz_points': 0,
         })
 
-    @http.route(['/event_track/quiz/save'], type='json', auth='public', website=True)
-    def quiz_save_to_session(self, quiz_answers):
-        session_quiz_answers = json.loads(request.session.get('quiz_answers', '{}'))
-        track_id = quiz_answers['track_id']
-        session_quiz_answers[str(track_id)] = quiz_answers['quiz_answers']
-        request.session['quiz_answers'] = json.dumps(session_quiz_answers)
-
     def _get_quiz_answers_details(self, track, answer_ids):
         # TDE FIXME: lost sudo
-        all_questions = request.env['event.quiz.question'].sudo().search([('quiz_id', '=', track.sudo().quiz_id.id)])
+        questions_count = request.env['event.quiz.question'].sudo().search_count([('quiz_id', '=', track.sudo().quiz_id.id)])
         user_answers = request.env['event.quiz.answer'].sudo().search([('id', 'in', answer_ids)])
 
-        if user_answers.mapped('question_id') != all_questions:
+        if len(user_answers.mapped('question_id')) != questions_count:
             return {'error': 'quiz_incomplete'}
 
-        user_bad_answers = user_answers.filtered(lambda answer: not answer.is_correct)
-        user_good_answers = user_answers - user_bad_answers
         return {
-            'user_bad_answers': user_bad_answers,
-            'user_good_answers': user_good_answers,
             'user_answers': user_answers,
-            'points': sum([answer.awarded_points for answer in user_good_answers])
+            'points': sum([
+                answer.awarded_points
+                for answer in user_answers.filtered(lambda answer: answer.is_correct)
+            ])
         }

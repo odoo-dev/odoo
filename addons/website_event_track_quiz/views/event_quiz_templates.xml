@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <template id="quiz_content" name="Lesson: Quiz specific content">
+    <template id="quiz_content" name="Track: Quiz specific content">
         <t t-set="quiz_completed" t-value="quiz_completed or False"/>
 
-        <div class="o_quiz_js_quiz col" id="lessonQuiz"
+        <div class="o_quiz_js_quiz col"
             t-att-data-id="track.id"
             t-att-data-event-id="track.event_id.id"
             t-att-data-completed="1 if quiz_completed else 0"

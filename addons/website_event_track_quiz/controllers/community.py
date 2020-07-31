@@ -14,13 +14,23 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
     _visitors_per_page = 30
     _pager_max_pages = 5
 
-    @http.route(['/event/<model("event.event"):event>/community',
-                 '/event/<model("event.event"):event>/community/page/<int:page>',
-                 '/event/<model("event.event"):event>/community/leaderboard',
-                 '/event/<model("event.event"):event>/community/leaderboard/page/<int:page>'],
+    @http.route(['/event/<model("event.event"):event>/community/leaderboard/results',
+                 '/event/<model("event.event"):event>/community/leaderboard/results/page/<int:page>'],
                 type='http', auth="public", website=True, sitemap=False)
-    def community(self, event, page=1, lang=None, **kwargs):
+    def leaderboard(self, event, page=1, lang=None, **kwargs):
         values = self._get_community_leaderboard_render_values(event, kwargs.get('search'), page)
+        return request.render('website_event_track_quiz.event_leaderboard', values)
+
+    @http.route('/event/<model("event.event"):event>/community/leaderboard',
+                type='http', auth="public", website=True, sitemap=False)
+    def community_leaderboard(self, event, **kwargs):
+        values = self._get_community_leaderboard_render_values(event, None, None)
+        return request.render('website_event_track_quiz.event_leaderboard', values)
+
+    @http.route('/event/<model("event.event"):event>/community',
+                type='http', auth="public", website=True, sitemap=False)
+    def community(self, event, **kwargs):
+        values = self._get_community_leaderboard_render_values(event, None, None)
         return request.render('website_event_track_quiz.event_leaderboard', values)
 
     def _get_community_leaderboard_render_values(self, event, search_term, page):
@@ -30,10 +40,12 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
         user_count = len(values['visitors'])
         if user_count:
             page_count = math.ceil(user_count / self._visitors_per_page)
-            url = '/event/%s/community/leaderboard' % (slug(event))
-            if values.get('current_visitor_position'):
-                while page * self._visitors_per_page < values['current_visitor_position']:
-                    page = page + 1
+            url = '/event/%s/community/leaderboard/results' % (slug(event))
+            if values.get('current_visitor_position') and not page:
+                values['scroll_to_position'] = True
+                page = math.ceil(values['current_visitor_position'] / self._visitors_per_page)
+            elif not page:
+                page = 1
             pager = request.website.pager(url=url, total=user_count, page=page, step=self._visitors_per_page,
                                           scope=page_count if page_count < self._pager_max_pages else self._pager_max_pages)
         else:
@@ -53,8 +65,14 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
         leaderboard = []
         position = 1
         current_visitor_position = False
+        visitors_by_id = {
+            visitor.id: visitor
+            for visitor in request.env['website.visitor'].sudo().browse(data_map.keys())
+        }
         for visitor_id, points in data_map.items():
-            visitor = request.env['website.visitor'].sudo().browse(visitor_id)
+            visitor = visitors_by_id.get(visitor_id)
+            if not visitor:
+                continue
             if (searched_name and searched_name.lower() in visitor.display_name.lower()) or not searched_name:
                 leaderboard.append({'visitor': visitor, 'points': points, 'position': position})
                 if current_visitor and current_visitor == visitor:
@@ -65,5 +83,6 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
             'top3_visitors': leaderboard[:3] if len(leaderboard) >= 3 else False,
             'visitors': leaderboard,
             'current_visitor_position': current_visitor_position,
-            'current_visitor': current_visitor
+            'current_visitor': current_visitor,
+            'searched_name': searched_name
         }

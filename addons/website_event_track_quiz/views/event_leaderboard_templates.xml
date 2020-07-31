@@ -3,7 +3,7 @@
 
 <template id="event_leaderboard" name="Leaderboard">
     <t t-call="website_event.layout">
-        <div t-if="visitors" class="bg-light pt32 pb32">
+        <div t-if="visitors" class="bg-light pt32 pb32 o_wevent_quiz_leaderboard">
             <t t-call="website_event_track_quiz.leaderboard_search_bar"/>
             <div class="container mt32">
                 <div t-if="not search" class="row mb-3">
@@ -12,7 +12,8 @@
                     </div>
                 </div>
                 <table class="table table-sm">
-                    <tr t-foreach="visitors" t-as="visitor" t-att-class="'alert-info' if visitor['visitor'] == current_visitor else 'bg-white'">
+                    <tr t-foreach="visitors" t-as="visitor"
+                        t-attf-class="#{'alert-info' if visitor['visitor'] == current_visitor else 'bg-white'} #{'o_wevent_quiz_scroll_to' if scroll_to_position and visitor['visitor'] == current_visitor else ''}">
                         <t t-call="website_event_track_quiz.all_visitor_card"/>
                     </tr>
                 </table>
@@ -100,7 +101,7 @@
                                 <i class="fa fa-search"></i>
                             </button>
                         </span>
-                        <input type="text" class="form-control rounded-0" name="search" placeholder="Search users"/>
+                        <input type="text" class="form-control rounded-0" name="search" placeholder="Search users" t-att-value="searched_name or ''"/>
                     </div>
                 </form>
             </div>

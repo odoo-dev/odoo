@@ -17,8 +17,6 @@ $o-wslides-fs-side-width: 300px;
     background-image: linear-gradient(120deg, #875A7B, darken(#875A7B, 10%));
 }
 
-
-
 .o_quiz_main {
     background-color: $o-wslides-color-bg;
 
@@ -90,66 +88,5 @@ $o-wslides-fs-side-width: 300px;
             right: auto;
             left: -2px;
         }
-    }
-}
-
-
-// Modals
-// **************************************************
-
-.o_quiz_quiz_modal {
-    @include media-breakpoint-up (sm) {
-        .modal-body {
-            overflow: visible!important;
-
-            .o_quiz_quiz_modal_close_btn {
-                right: 5px;
-            }
-
-            .o_quiz_gradient {
-                width: 42%;
-            }
-        }
-
-        .modal-content {
-            height: 461px;
-
-            .o_quiz_quiz_modal_hero {
-                margin-left: -30px;
-                position: absolute;
-                margin-top: -45px;
-            }
-        }
-    }
-
-    .progress {
-        border-radius:0;
-        overflow:visible;
-        height: 8px;
-
-        .progress-bar {
-            transition: width 0.8s ease;
-
-            &.no-transition {
-                transition: none;
-            }
-        }
-    }
-
-    .tooltip > .tooltip-inner {
-        background-color: #875A7B;
-        padding:5px 15px;
-        font-weight:bold;
-        font-size:13px;
-    }
-
-    .tooltip > .arrow {
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 5px solid #875A7B;
-    }
-
-    .tooltip > .arrow::before {
-        display: none;
     }
 }

@@ -63,19 +63,4 @@
         </div>
     </t>
 
-    <t t-name="quiz.finish">
-        <div>
-            <button type="button" class="o_quiz_quiz_modal_close_btn close position-absolute" data-dismiss="modal" aria-label="Close">&#215;</button>
-            <div class="o_quiz_gradient d-none d-md-flex flex-shrink-0">
-                <img class="o_quiz_quiz_modal_hero" src="/website_event_track_quiz/static/src/img/quiz_modal_success.svg" alt=""/>
-            </div>
-            <div class="d-flex flex-column flex-grow-1 justify-content-between pl-md-5 p-3 overflow-auto">
-                <div>
-                    <h1 class="o_quiz_quiz_modal_title mt-3 display-4 font-weight-bold">Amazing!</h1>
-                    <h3>You earned <t t-esc="widget.quiz.quizPointsGained"/> Points</h3>
-                </div>
-            </div>
-        </div>
-    </t>
-
 </templates>
