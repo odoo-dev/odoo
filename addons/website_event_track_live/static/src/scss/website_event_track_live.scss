@@ -2,8 +2,16 @@
     height: 70vh;
 }
 
-#o_wevent_youtube_iframe_container {
+#o_wevent_youtube_iframe_container, .o_wevent_event_track_live_loading {
     height: 85vh;
+}
+
+.o_wevent_event_track_live_loading {
+    background-color: #888888;
+
+    i {
+        bottom: 1px;
+    }
 }
 
 .owevent_track_suggestion {

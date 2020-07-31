@@ -16,6 +16,10 @@
         <div t-if="show_youtube_frame" class="flex-grow-1 o_wevent_event_track_live"
             t-att-data-track-id="track.id"
             t-att-data-youtube-video-id="track.youtube_video_id">
+            <div class="position-absolute o_wevent_event_track_live_loading w-100 d-flex align-items-center justify-content-center text-white h4">
+                <i class="fa fa-spin fa-spinner position-relative"/>
+                <span class="pl-2">Loading Video...</span>
+            </div>
             <div id="o_wevent_youtube_iframe_container" class="w-100"/>
         </div>
     </xpath>
@@ -24,14 +28,14 @@
 <!-- ASIDE: ADD CHAT TAB FOR VIDEOS -->
 <template id="event_track_aside" inherit_id="website_event_track_session.event_track_aside">
     <xpath expr="//ul[hasclass('o_wesession_track_aside_nav')]" position="inside">
-        <li t-if="track.is_youtube_chat_available" class="nav-item flex-grow-1">
+        <li t-if="track.is_youtube_chat_available and not is_mobile_chat_disabled" class="nav-item flex-grow-1">
             <a href="#track_chat" aria-controls="track_chat" class="nav-link" role="tab" data-toggle="tab">
                 Chat
             </a>
         </li>
     </xpath>
     <xpath expr="//div[hasclass('o_wesession_track_aside_tabs')]" position="inside">
-        <div t-if="track.is_youtube_chat_available" id="track_chat"
+        <div t-if="track.is_youtube_chat_available and not is_mobile_chat_disabled" id="track_chat"
             class="tab-pane fade o_wesession_track_aside_tab_chat" role="tabpanel">
             <iframe t-attf-src="https://www.youtube.com/live_chat?v=#{track.youtube_video_id}&amp;embed_domain=#{hostname}"
                 height="100%"

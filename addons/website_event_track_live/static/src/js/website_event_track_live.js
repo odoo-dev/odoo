@@ -30,6 +30,7 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
 
     _onPlayerReady: function () {
         $(window).on('resize', this._onResize.bind(this));
+        this.$('.o_wevent_event_track_live_loading').remove();
     },
 
     _onPlayerStateChange: function (event) {
