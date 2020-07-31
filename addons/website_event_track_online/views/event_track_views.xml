@@ -28,14 +28,7 @@
         <field name="model">event.track</field>
         <field name="inherit_id" ref="website_event_track.view_event_track_tree"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='event_id']" position="before">
-                <field name="partner_name"/>
-                <field name="partner_email"/>
-                <field name="partner_phone"/>
-            </xpath>
             <xpath expr="//field[@name='event_id']" position="after">
-                <field name="stage_id"/>
-                <field name="color" widget="color_picker" optional="hide"/>
                 <field name="wishlisted_by_default" optional="hide"/>
                 <field name="wishlist_visitor_count" optional="hide"/>
             </xpath>
