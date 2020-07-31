@@ -186,14 +186,14 @@
                 <!-- DAY TRACKS LIST -->
                 <ul class="list-unstyled mx-3 o_wesession_list_tracks">
                     <!-- CELLS HEADERS -->
-                    <li class="o_wesession_list_item row bg-white shadow-sm py-2 d-none d-sm-flex">
-                        <span class="col-md-4 col-sm-8">Topic</span>
-                        <span class="col-md-2 col-sm-4">Tags</span>
-                        <span class="col-md-6 col-sm-12">
+                    <li class="o_wesession_list_item row bg-white shadow-sm py-2 d-none d-md-flex">
+                        <span class="col-md-4">Topic</span>
+                        <span class="col-md-2">Tags</span>
+                        <span class="col-md-6">
                             <span class="row">
-                                <span class="col-4">Speaker</span>
-                                <span class="col-3">Duration</span>
-                                <span class="col-5">
+                                <span class="col-md-4">Speaker</span>
+                                <span class="col-md-3">Duration</span>
+                                <span class="col-md-5">
                                     <t t-if="today_tz &lt;= tracks_date">Starts</t>
                                     <t t-else=""></t>
                                 </span>
@@ -202,7 +202,7 @@
                     </li>
                     <li t-foreach="tracks" t-as="track"
                         class="o_wesession_list_item row bg-white-50 py-2">
-                        <span class="col-md-4 col-sm-8 o_wesession_list_item_topic">
+                        <span class="col-md-4 col-12 o_wesession_list_item_topic d-flex align-items-center">
                             <a t-att-href="track.website_url"
                                 t-if="track.is_published or user_event_manager">
                                 <span t-field="track.name"/>
@@ -211,23 +211,30 @@
                                 <span t-field="track.name"/>
                             </t>
                             <span t-if="not track.is_published and user_event_manager"
-                                class="badge badge-danger">
+                                class="badge badge-danger ml-2">
                                 Unpublished
                             </span>
+                            <div t-if="option_track_wishlist"
+                                class="d-md-none d-inline ml-auto"
+                                t-call="website_event_track_online.track_widget_reminder">
+                                <t t-set="reminder_light" t-value="True"/>
+                                <t t-set="light_theme" t-value="True"/>
+                            </div>
                         </span>
-                        <div class="col-md-2 col-sm-4">
+                        <div class="col-md-2 col-12 mt-2 mt-md-0">
                             <t t-foreach="track.tag_ids" t-as="tag">
                                 <t t-call="website_event_track_session.track_tag_badge_link"/>
                             </t>
                         </div>
-                        <div class="col-md-6 col-sm-12">
+                        <div class="col-md-6 col-12 mt-2 mt-md-0">
                             <div class="row">
-                                <span class="col-4">
+                                <span class="col-md-4 col-4">
                                     <span t-esc="track.partner_name"/>
                                 </span>
-                                <span class="col-3" t-esc="track.duration"
+                                <span class="col-md-3 col-5"
+                                    t-esc="track.duration"
                                     t-options="{'widget': 'duration', 'digital': False, 'format': 'short', 'unit': 'hour', 'round': 'minute'}"/>
-                                <span class="col-5 d-flex align-items-start">
+                                <span class="col-md-5 col-3 d-flex align-items-start justify-content-between">
                                     <t t-if="today_tz &lt;= tracks_date">
                                         <span t-if="track.is_track_live and not track.is_track_done"
                                             class="badge badge-danger">Live</span>
@@ -240,9 +247,11 @@
                                             t-esc="track.date"
                                             t-options="{'widget': 'datetime', 'time_only': True, 'format': 'short'}"/>
                                         <span t-else="" class="badge badge-info">Finished</span>
-                                        <span class="ml-auto"
-                                            t-if="option_track_wishlist"
-                                            t-call="website_event_track_online.track_widget_reminder"/>
+                                        <div t-if="option_track_wishlist"
+                                            class="d-none d-sm-inline"
+                                            t-call="website_event_track_online.track_widget_reminder">
+                                            <t t-set="reminder_small" t-value="True"/>
+                                        </div>
                                     </t>
                                 </span>
                             </div>
@@ -270,15 +279,16 @@
 
                     <div t-if="track.website_image_url" class="card-img-top"
                         t-attf-style="padding-top: 50%; background-image: url(#{track.website_image_url}); background-size: cover; background-position:center">
-                        <span t-if="option_track_wishlist and not track.is_track_live" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
+                        <span t-if="option_track_wishlist and not track.is_track_live" class="position-absolute h3 mt-2 mr-2" style="right: 0; top: 0;">
                             <t t-call="website_event_track_online.track_widget_reminder">
                                 <t t-set="reminder_light" t-value="True"/>
+                                <t t-set="light_theme" t-value="True"/>
                             </t>
                         </span>
                     </div>
                     <div t-else="" class="o_wesession_gradient card-img-top position-relative"
                         style="padding-top: 50%;">
-                        <span t-if="option_track_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
+                        <span t-if="option_track_wishlist" class="position-absolute h3 mt-2 mr-2" style="right: 0; top: 0;">
                             <t t-call="website_event_track_online.track_widget_reminder">
                                 <t t-set="reminder_light" t-value="True"/>
                             </t>
