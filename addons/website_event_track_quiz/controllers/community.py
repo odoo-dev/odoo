@@ -15,14 +15,15 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
     _pager_max_pages = 5
 
     @http.route(['/event/<model("event.event"):event>/community',
-                '/event/<model("event.event"):event>/community/page/<int:page>',
-                '/event/<model("event.event"):event>/community/leaderboard',
-                '/event/<model("event.event"):event>/community/leaderboard/page/<int:page>'], type='http', auth="public", website=True, sitemap=False)
+                 '/event/<model("event.event"):event>/community/page/<int:page>',
+                 '/event/<model("event.event"):event>/community/leaderboard',
+                 '/event/<model("event.event"):event>/community/leaderboard/page/<int:page>'],
+                type='http', auth="public", website=True, sitemap=False)
     def community(self, event, page=1, lang=None, **kwargs):
         values = self._get_community_leaderboard_render_values(event, kwargs.get('search'), page)
         return request.render('website_event_track_quiz.event_leaderboard', values)
 
-    def _get_community_leaderboard_render_values(self, event, search_term, page, values={}):
+    def _get_community_leaderboard_render_values(self, event, search_term, page):
         values = self._get_leaderboard(event, search_term)
         values.update({'event': event, 'search': search_term})
 
@@ -42,7 +43,7 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
         return values
 
     def _get_leaderboard(self, event, searched_name=None):
-        current_visitor = request.env['website.visitor']._get_visitor_from_request(force_create=True)
+        current_visitor = request.env['website.visitor']._get_visitor_from_request(force_create=False)
         domain = [('track_id', 'in', event.track_ids.ids), ('visitor_id', '!=', False)]
         track_visitor_data = request.env['event.track.visitor'].sudo().read_group(
             domain,
@@ -56,7 +57,7 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
             visitor = request.env['website.visitor'].sudo().browse(visitor_id)
             if (searched_name and searched_name.lower() in visitor.display_name.lower()) or not searched_name:
                 leaderboard.append({'visitor': visitor, 'points': points, 'position': position})
-                if current_visitor.id == visitor.id:
+                if current_visitor and current_visitor == visitor:
                     current_visitor_position = position
             position = position + 1
 
