@@ -17,7 +17,8 @@ class EventTrackLiveController(EventTrackOnlineController):
         if not track_suggestion:
             return False
         track_suggestion_sudo = track_suggestion.sudo()
-        return self._prepare_track_suggestion_values(track, track_suggestion_sudo)
+        track_sudo = track.sudo()
+        return self._prepare_track_suggestion_values(track_sudo, track_suggestion_sudo)
 
     def _prepare_track_suggestion_values(self, track, track_suggestion):
         return {
