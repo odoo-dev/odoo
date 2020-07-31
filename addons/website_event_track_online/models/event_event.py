@@ -16,13 +16,15 @@ class EventEvent(models.Model):
         "website.event.menu", "event_id", string="Event Community Menus",
         domain=[("menu_type", "=", "community")])
 
-    @api.depends("event_type_id", "community_menu")
+    @api.depends("event_type_id", "website_menu", "community_menu")
     def _compute_community_menu(self):
-        # TDE FIXME: check true by default
+        """ At type onchange: synchronize. At website_menu update: synchronize. """
         for event in self:
             if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.community_menu = event.event_type_id.community_menu
-            elif not event.community_menu:
+            elif event.website_menu and event.website_menu != event._origin.website_menu:
+                event.community_menu = True
+            elif not event.website_menu or not event.community_menu:
                 event.community_menu = False
 
     # ------------------------------------------------------------
