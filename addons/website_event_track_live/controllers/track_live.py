@@ -3,17 +3,21 @@
 
 from odoo import http
 
+from odoo.addons.website_event_track_online.controllers.event_track import EventTrackOnlineController
 
-class WebsiteEventTrackLiveController(http.Controller):
 
-    @http.route('/event/track/<model("event.track"):track>/get_track_suggestion', type='json', auth='public')
-    def get_next_track_suggestion(self, track):
+class EventTrackLiveController(EventTrackOnlineController):
+
+    @http.route('/event_track/get_track_suggestion', type='json', auth='public')
+    def get_next_track_suggestion(self, track_id):
+        track = self._fetch_track(track_id)
         track_suggestion = track._get_track_suggestions(
             restrict_domain=[('youtube_video_url', '!=', False), ('is_published', '=', True)],
             limit=1)
         if not track_suggestion:
             return False
-        return self._prepare_track_suggestion_values(track, track_suggestion)
+        track_suggestion_sudo = track_suggestion.sudo()
+        return self._prepare_track_suggestion_values(track, track_suggestion_sudo)
 
     def _prepare_track_suggestion_values(self, track, track_suggestion):
         return {

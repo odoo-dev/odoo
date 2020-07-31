@@ -45,7 +45,10 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
     _onVideoEnded: function () {
         var self = this;
         this._rpc({
-            route: `/event/track/${this.$el.data('trackId')}/get_track_suggestion`
+            route: '/event_track/get_track_suggestion',
+            params: {
+                track_id: this.$el.data('trackId'),
+            }
         }).then(function (suggestion) {
             self.nextSuggestion = suggestion;
             self._showSuggestion();
