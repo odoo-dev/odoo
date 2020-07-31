@@ -23,7 +23,6 @@ class WebsiteEventTrackQuiz(WebsiteEventSessionController):
         track_visitor = track._get_event_track_visitors(force_create=True)
         values.update({
             'track_visitor': track_visitor,
-            'is_manager': request.env.user.has_group('event.group_event_manager')
         })
         return values
 
