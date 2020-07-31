@@ -15,15 +15,18 @@ from odoo.tools import is_html_empty
 class WebsiteEventSessionController(EventTrackOnlineController):
 
     def _get_event_tracks_base_domain(self, event):
-        """ Base domain for displaying tracks. Restrict to accepted tracks for
-        people not managing events. Unpublished tracks may be displayed for teasing
-        purpose. """
+        """ Base domain for displaying tracks. Restrict to accepted or published
+        tracks for people not managing events. Unpublished tracks may be displayed
+        but not reachable for teasing purpose. """
         search_domain_base = [
             ('event_id', '=', event.id),
             ('date', '!=', False)
         ]
         if not request.env.user.has_group('event.group_event_user'):
-            search_domain_base = expression.AND([search_domain_base, [('is_accepted', '=', True)]])
+            search_domain_base = expression.AND([
+                search_domain_base,
+                ['|', ('is_published', '=', True), ('is_accepted', '=', True)]
+            ])
         return search_domain_base
 
     # ------------------------------------------------------------
@@ -138,20 +141,14 @@ class WebsiteEventSessionController(EventTrackOnlineController):
     # PAGE VIEW
     # ------------------------------------------------------------
 
-    @http.route(['/event/<model("event.event"):event>/track/<model("event.track"):track>'],
-                 type='http', auth="public", website=True, sitemap=False)
+    @http.route('/event/<model("event.event"):event>/track/<model("event.track"):track>',
+                type='http', auth="public", website=True, sitemap=False)
     def event_track_page(self, event, track, **options):
-        if not event.can_access_from_current_website():
-            raise NotFound()
-
-        try:
-            track.check_access_rule('read')
-        except exceptions.AccessError:
-            raise Forbidden()
+        track = self._fetch_track(track.id, allow_is_accepted=False)
 
         return request.render(
             "website_event_track_session.event_track_main",
-            self._event_track_page_get_values(event, track, **options)
+            self._event_track_page_get_values(event, track.sudo(), **options)
         )
 
     def _event_track_page_get_values(self, event, track, **options):
