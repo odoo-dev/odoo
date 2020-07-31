@@ -6,13 +6,13 @@
         <div t-if="visitors" class="bg-light pt32 pb32">
             <t t-call="website_event_track_quiz.leaderboard_search_bar"/>
             <div class="container mt32">
-                <div class="row mb-3">
+                <div t-if="not search" class="row mb-3">
                     <div class="col-md-4 d-flex flex-grow-1" t-foreach="top3_visitors" t-as="visitor">
                         <t t-call="website_event_track_quiz.top3_visitor_card"></t>
                     </div>
                 </div>
                 <table class="table table-sm">
-                    <tr t-foreach="visitors" t-as="visitor" class="bg-white">
+                    <tr t-foreach="visitors" t-as="visitor" t-att-class="'alert-info' if visitor['visitor'] == current_visitor else 'bg-white'">
                         <t t-call="website_event_track_quiz.all_visitor_card"/>
                     </tr>
                 </table>
@@ -60,7 +60,7 @@
                     t-att-src="image_data_uri(visitor['visitor'].partner_image) if visitor['visitor'].partner_image else '/web/static/src/img/user_placeholder.jpg'"/>
                 <img class="position-absolute" t-attf-src="/website_profile/static/src/img/rank_#{visitor['position']}.svg" alt="User rank" style="bottom: 0; right: -10px"/>
             </div>
-            <h3 class="mt-2 mb-0" t-esc="visitor['visitor'].name"></h3>
+            <h3 class="mt-2 mb-0" t-esc="visitor['visitor'].display_name"></h3>
         </div>
         <div class="row mx-0 o_wprofile_top3_card_footer text-nowrap">
             <div class="col py-3"><b t-esc="visitor['points']"/> <span class="text-muted">Points</span></div>
@@ -79,7 +79,7 @@
         t-att-src="image_data_uri(visitor['visitor'].partner_image) if visitor['visitor'].partner_image else '/web/static/src/img/user_placeholder.jpg'"/>
     </td>
     <td class="align-middle w-md-75">
-        <span class="font-weight-bold" t-esc="visitor['visitor'].name"/><br/>
+        <span class="font-weight-bold" t-esc="visitor['visitor'].display_name"/><br/>
     </td>
     <td class="align-middle font-weight-bold text-right text-nowrap">
         <b t-esc="visitor['points']"/> <span class="text-muted small font-weight-bold">Points</span>
