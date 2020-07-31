@@ -14,6 +14,5 @@ class EventType(models.Model):
 
     @api.depends('website_menu')
     def _compute_community_menu(self):
-        # TDE FIXME: check true by default
         for event_type in self:
-            event_type.community_menu = False
+            event_type.community_menu = event_type.website_menu
