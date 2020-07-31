@@ -115,7 +115,7 @@
         <div class="bg-white pt-0 pt-md-3 o_wevent_online_page_aside_content">
             <div class="mx-2" t-if="track.website_cta">
                 <t t-set="cta_coundown" t-value="bool(track.website_cta_start_remaining)"/>
-                <div t-if="cta_coundown" class="text-center w-100 btn btn-primary d-none">
+                <div t-if="cta_coundown" class="text-center mt-2 mt-md-0 w-100 btn btn-primary d-none">
                     <t t-call="website_event_online.display_timer_widget">
                         <t t-set="pre_remaining_time" t-value="int(track.track_start_remaining)"/>
                         <!--<t t-set="pre_countdown_text" t-value="'Talk starts in'"/>-->
@@ -129,7 +129,7 @@
                 <div t-att-class="'o_event_cta_action %s' % ('d-none' if cta_coundown else '')">
                     <a t-att-href="track.website_cta_url"
                         target="_blank"
-                        class="btn btn-primary w-100 mb-3">
+                        class="btn btn-primary w-100 mb-3 mt-2 mt-md-0">
                         <span t-esc="track.website_cta_title"/>
                     </a>
                 </div>
@@ -142,12 +142,12 @@
                         </a>
                     </li>
                 </ul>
-                <a href="#collapse_track_aside" data-toggle="collapse" class="d-lg-none p-2 text-decoration-none o_wevent_online_page_aside_collapse collapsed">
-                    <i class="fa fa-chevron-down d-lg-none"/>
+                <a href="#collapse_track_aside" data-toggle="collapse" class="d-md-none p-2 text-decoration-none o_wevent_online_page_aside_collapse collapsed">
+                    <i class="fa fa-chevron-down d-md-none"/>
                 </a>
             </div>
             <div id="collapse_track_aside"
-                class="tab-content collapse d-lg-block o_wesession_track_aside_tabs">
+                class="tab-content collapse d-md-block o_wesession_track_aside_tabs">
                 <div class="tab-pane fade show active" id="track_list" role="tabpanel">
                     <ul class="list-unstyled mb-0">
                         <li t-foreach="tracks_other" t-as="track_other" class="w-100">
@@ -171,7 +171,7 @@
     <span t-esc="track_other.name" class="w-100"/>
     <div class="d-flex align-items-center">
         <small class="text-muted" t-esc="track_other.partner_id.name"/>
-        <div class="d-inline-block ml-auto o_wesession_track_aside_info">
+        <div class="d-inline-block ml-auto o_wesession_track_aside_info text-truncate">
             <small t-if="track_other.is_track_live and not track_other.is_track_done"
                 class="badge badge-danger">Live</small>
             <small t-elif="track_other.is_track_done"

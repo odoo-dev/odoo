@@ -53,10 +53,27 @@
     .o_wevent_online_page_container {
         // Main panel: current track
         .o_wesession_track_main {
+            // Force side panel min-width to account for potential Youtube chat
+            // And adapt main panel max-width accordingly.
+            @include media-breakpoint-up(xl) {
+                max-width: calc(100% - 22rem);
+            }
+
+            @media screen and (min-width: 1400px) {
+                max-width: none;
+            }
         }
 
         // Left panel: other tracks
         .o_wesession_track_aside {
+            // Force side panel min-width to account for potential Youtube chat
+            @include media-breakpoint-up(xl) {
+                min-width: 22rem;
+            }
+
+            @media screen and (min-width: 1400px) {
+                min-width: auto;
+            }
 
             // Navigation: keel layout simple
             .o_wesession_track_aside_nav {
