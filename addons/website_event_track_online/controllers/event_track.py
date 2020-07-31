@@ -31,7 +31,8 @@ class EventTrackOnlineController(WebsiteEventTrackController):
                 raise Forbidden()
 
         event = track.event_id
-        if not event.can_access_from_current_website():
+        # JSON RPC have no website in requests
+        if hasattr(request, 'website_id') and not event.can_access_from_current_website():
             raise NotFound()
         try:
             event.check_access_rights('read')
