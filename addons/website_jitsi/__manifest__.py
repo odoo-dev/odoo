@@ -14,7 +14,7 @@
     ],
     "data": [
         'views/assets.xml',
-        'views/chat_room_templates.xml'
+        'views/chat_room_templates.xml',
         'views/chat_room_views.xml',
     ],
     'application': False,
