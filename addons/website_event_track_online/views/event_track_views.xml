@@ -64,6 +64,9 @@
             <xpath expr="//field[@name='partner_biography']" position="after">
                 <field name="image" widget="image" class="oe_avatar float-left"/>
             </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="color" widget="color_picker"/>
+            </xpath>
         </field>
     </record>
 
