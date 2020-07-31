@@ -37,7 +37,7 @@ class EventTrackOnlineController(WebsiteEventTrackController):
             event.check_access_rights('read')
             event.check_access_rule('read')
         except exceptions.AccessError:
-            raise Forbidden
+            raise Forbidden()
 
         return track
 
