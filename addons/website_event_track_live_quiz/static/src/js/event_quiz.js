@@ -1,7 +1,7 @@
 odoo.define('website_event_track_live_quiz.event_quiz', function (require) {
 'use strict';
 
-var Quiz = require('website_event_track_quiz.event.quiz').Quiz;
+var Quiz = require('website_event_track_quiz.event.quiz');
 
 var WebsiteEventTrackSuggestionQuiz = Quiz.include({
     xmlDependencies: Quiz.prototype.xmlDependencies.concat([
