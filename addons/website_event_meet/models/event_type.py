@@ -16,8 +16,3 @@ class EventType(models.Model):
     def _compute_meeting_room_allow_creation(self):
         for event_type in self:
             event_type.meeting_room_allow_creation = event_type.community_menu
-
-    @api.depends('website_menu')
-    def _compute_community_menu(self):
-        for event_type in self:
-            event_type.community_menu = event_type.website_menu
