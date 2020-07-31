@@ -9,9 +9,10 @@
 <template id="small_leaderboard" name='Small Leaderboard'>
     <div class="row mt32">
         <div class="col">
-            <a t-attf-href="#{'/event/%s/community/leaderboard' % (slug(event))}" class="float-right">View all</a>
-            <h5 class="m-0">Leaderboard</h5>
-            <hr class="mt-2 pt-2"/>
+            <div class="w-100 d-flex justify-content-between align-items-end o_page_header">
+                <h1 class="m-0">Leaderboard</h1>
+                <a t-attf-href="#{'/event/%s/community/leaderboard' % (slug(event))}">View all</a>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -24,18 +25,19 @@
 </template>
 
 <template id='visitor_quiz_points_card' name="User Quick Quiz Points Card">
-    <div class="d-flex mb-3 align-items-center">
-        <b class="mr-2 text-muted" t-esc="visitor['position']"/>
-        <img class="rounded-circle float-left"
-            style="width: 32px; height: 32px; object-fit: cover;"
-            t-att-src="image_data_uri(visitor['visitor'].partner_image) if visitor['visitor'].partner_image else '/web/static/src/img/user_placeholder.jpg'"
-            t-att-alt="visitor['visitor'].name"/>
-        <div style="line-height:1.3">
-            <span class="font-weight-bold" t-esc="visitor['visitor'].name"/>
-            <div class="d-flex align-items-center">
-                <span class="text-500 mx-2">&#8226;</span>
-                <span class="badge badge-success"><t t-esc="visitor['points']"/> Points</span>
+    <div class="d-flex mb-3 align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <b class="mr-2 text-muted" t-esc="visitor['position']"/>
+            <img class="rounded-circle float-left"
+                style="width: 32px; height: 32px; object-fit: cover;"
+                t-att-src="image_data_uri(visitor['visitor'].partner_image) if visitor['visitor'].partner_image else '/web/static/src/img/user_placeholder.jpg'"
+                t-att-alt="visitor['visitor'].name"/>
+            <div style="line-height:1.3">
+                <span class="font-weight-bold" t-esc="visitor['visitor'].name"/>
             </div>
+        </div>
+        <div class="d-flex align-items-center text-muted">
+            <span><t t-esc="visitor['points']"/> Points</span>
         </div>
     </div>
 </template>
