@@ -8,8 +8,9 @@
             <div id="oe_structure_website_event_location_1" class="oe_structure"/>
             <!-- Content -->
             <div class="o_wemeet_container container">
-                <div class="row mx-0 py-3">
-                    <t t-call="website_event_meet.meet_main"/>
+                <div class="row mb-5 mx-0">
+                    <t t-call="website_event_meet.community_main"/>
+                    <t t-call="website_event_meet.community_aside"/>
                 </div>
             </div>
             <!-- Drag/Drop Area -->
@@ -23,12 +24,13 @@
 <!-- ============================================================ -->
 
 <!-- Meeting Rooms Main Display -->
-<template id="meet_main" name="Meeting Rooms: Main Display">
-    <div class="col-12 col-md-8 pl-0 pr-0 pr-md-3">
-        <h1 class="o_page_header mb-3 d-flex flex-row justify-content-between">
+<template id="community_main" name="Meeting Rooms: Main Display">
+    <div class="col-12 col-md-8 pl-0 pr-0 pr-md-3 mt-3">
+        <h1 class="d-flex flex-row justify-content-between">
             <span>Join a room</span>
-            <div class="o_dropdown_kanban dropdown">
-                <a aria-label="Dropdown menu" class="dropdown-toggle o-no-caret btn" data-display="static" data-toggle="dropdown" href="#" role="button" title="Dropdown menu">
+            <div class="dropdown">
+                <a class="dropdown-toggle o-no-caret btn pr-0" title="Languages Menu"
+                    aria-label="Dropdown menu" data-display="static" data-toggle="dropdown" href="#" role="button">
                     <span t-esc="current_lang.name if current_lang else 'All Languages'"/> ▼</a>
                 <div class="dropdown-menu" role="menu">
                     <a class="dropdown-item" role="menuitem" t-attf-href="/event/#{slug(event)}/community">All Languages
@@ -37,7 +39,8 @@
                 </div>
             </div>
         </h1>
-        <p>Choose a topic that interests you and start talking with the community. <br/> Don't forget to setup your camera and microphone.</p>
+        <hr class="mt-2 mb-3"/>
+        <p class="mt-">Choose a topic that interests you and start talking with the community. <br/> Don't forget to setup your camera and microphone.</p>
         <div class="d-flex flex-column justify-content-start align-items-start">
             <t t-as="meeting_room" t-call="website_event_meet.meeting_room_card" t-foreach="meeting_rooms">
                 <t t-set="meeting_room" t-value="meeting_room"/>
@@ -48,16 +51,6 @@
                 <p>Create one to get conversations going</p>
             </div>
         </div>
-    </div>
-    <div t-if="event.meeting_room_allow_creation" class="d-none d-md-block col-md-4 p-0">
-        <h1 class="o_page_header mb-3">Launch a new topic</h1>
-        <p>Want to create your own discussion room ?</p>
-        <p>Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic.</p>
-        <a href="#" role="button"  class="btn btn-primary o_wevent_create_room_button"
-            t-att-data-event-id="event.id"
-            t-att-data-default-lang-code="default_lang_code">
-            <span>Create a Room</span>
-        </a>
     </div>
 </template>
 
@@ -149,6 +142,24 @@
             </div>
         </div>
     </a>
+</template>
+
+<!-- ============================================================ -->
+<!-- ASIDE: CREATE A ROOM -->
+<!-- ============================================================ -->
+
+<template id="community_aside" name="Community: Aside">
+    <div t-if="event.meeting_room_allow_creation" class="d-none d-md-block col-md-4 p-0 mt-3">
+        <h1>Launch a new topic</h1>
+        <hr class="mt-2 mb-3"/>
+        <p>Want to create your own discussion room ?</p>
+        <p>Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic.</p>
+        <a href="#" role="button"  class="btn btn-primary o_wevent_create_room_button"
+            t-att-data-event-id="event.id"
+            t-att-data-default-lang-code="default_lang_code">
+            <span>Create a Room</span>
+        </a>
+    </div>
 </template>
 
 </odoo>
