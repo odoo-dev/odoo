@@ -93,6 +93,7 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
                 playerVars: {
                     autoplay: 1,
                     enablejsapi: 1,
+                    rel: 0,
                     origin: window.location.origin,
                     widget_referrer: window.location.origin,
                 },
