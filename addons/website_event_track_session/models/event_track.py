@@ -23,7 +23,10 @@ class EventTrack(models.Model):
         help="Track has started and is ongoing")
     is_track_soon = fields.Boolean(
         'Is Track Soon', compute='_compute_track_time_data',
-        help="Track will begin soon")
+        help="Track begins soon")
+    is_track_today = fields.Boolean(
+        'Is Track Today', compute='_compute_track_time_data',
+        help="Track begins today")
     is_track_upcoming = fields.Boolean(
         'Is Track Upcoming', compute='_compute_track_time_data',
         help="Track is not yet started")
@@ -51,13 +54,14 @@ class EventTrack(models.Model):
         now_utc = utc.localize(fields.Datetime.now().replace(microsecond=0))
         for track in self:
             if not track.date:
-                track.is_track_live = track.is_track_soon = track.is_track_upcoming = track.is_track_done = False
+                track.is_track_live = track.is_track_soon = track.is_track_today = track.is_track_upcoming = track.is_track_done = False
                 track.track_start_relative = track.track_start_remaining = 0
                 continue
             date_begin_utc = utc.localize(track.date, is_dst=False)
             date_end_utc = utc.localize(track.date_end, is_dst=False)
             track.is_track_live = date_begin_utc <= now_utc < date_end_utc
             track.is_track_soon = (date_begin_utc - now_utc).total_seconds() < 30*60 if date_begin_utc > now_utc else False
+            track.is_track_today = date_begin_utc.date() == now_utc.date()
             track.is_track_upcoming = date_begin_utc > now_utc
             track.is_track_done = date_end_utc <= now_utc
             if date_begin_utc >= now_utc:
