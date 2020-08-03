@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<template id="aside_leaderboard" inherit_id="website_event_meet.meet_main">
-    <xpath expr="//*[hasclass('o_wevent_create_room_button')]" position="after">
-        <t t-if="top3_visitors" t-call="website_event_meet_quiz.small_leaderboard"/>
+<template id="community_aside" name="Community: Aside (Leaderboard)"
+    inherit_id="website_event_meet.community_aside">
+    <xpath expr="//a[hasclass('o_wevent_create_room_button')]" position="after">
+        <t t-if="top3_visitors" t-call="website_event_meet_quiz.community_leaderboard_small"/>
     </xpath>
 </template>
 
-<template id="small_leaderboard" name='Small Leaderboard'>
+<template id="community_leaderboard_small" name="Small Leaderboard">
     <div class="row mt32">
         <div class="col">
             <div class="w-100 d-flex justify-content-between align-items-end o_page_header">
