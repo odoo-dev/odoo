@@ -11,6 +11,11 @@
 
 <!-- MAIN: ADD VIDEO -->
 <template id="event_track_content" inherit_id="website_event_track_session.event_track_content">
+    <!-- Do not display "starting in" in case of replay mode as video is already available -->
+    <xpath expr="//div[@t-elif='track.track_start_remaining']" position="attributes">
+        <attribute name="t-elif">track.track_start_remaining and not track.is_youtube_replay</attribute>
+    </xpath>
+    <!-- Add video -->
     <xpath expr="//div[@name='o_wesession_track_main']//div" position="before">
         <t t-set="show_youtube_frame" t-value="track.youtube_video_url and (track.is_youtube_replay or track.is_track_soon or track.is_track_live or track.is_track_done)" />
         <div t-if="show_youtube_frame" class="flex-grow-1 o_wevent_event_track_live"
