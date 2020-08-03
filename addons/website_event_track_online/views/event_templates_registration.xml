@@ -3,12 +3,12 @@
 
 <!-- Add a shortcut to wishlist / talks after registration -->
 <template id="registration_complete" inherit_id="website_event.registration_complete">
-    <xpath expr="//div[hasclass('row')]" position="after">
+    <xpath expr="//div[hasclass('o_wereg_confirmed_attendees')]" position="after">
         <div t-if="event.website_track" class="row mt-5">
             <div class="col-12">
-                <h3>Get prepared ...</h3>
-                <p>Book your seat to the best talks by
-                    <a t-att-href="'/event/%s/track' % (slug(event))">setting up your wishlist</a>
+                <h3>Book your seats to the best talks</h3>
+                <p>Get prepared and
+                    <a t-att-href="'/event/%s/track' % (slug(event))">register to your favorites talks now.</a>
                 </p>
             </div>
         </div>
