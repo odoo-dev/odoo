@@ -12,9 +12,27 @@ var WebsiteEventTrackSuggestionQuiz = Quiz.include({
      * @override
      */
     willStart: function () {
-        var defs = [this._super.apply(this, arguments)];
-        defs.push(this._getTrackSuggestion());
-        return Promise.all(defs);
+        return Promise.all([
+            this._super(...arguments),
+            this._getTrackSuggestion()
+        ]);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    _submitQuiz: function () {
+        var self = this;
+        return this._super(...arguments).then(function (data) {
+            if (data.quiz_completed) {
+                self.$('.o_quiz_js_quiz_next_track')
+                    .removeClass('btn-light')
+                    .addClass('btn-secondary');
+            }
+
+            return Promise.resolve(data);
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -30,8 +48,9 @@ var WebsiteEventTrackSuggestionQuiz = Quiz.include({
             }
         }).then(function (suggestion) {
             self.nextSuggestion = suggestion;
+            return Promise.resolve();
         });
-    },
+    }
 });
 
 return WebsiteEventTrackSuggestionQuiz;
