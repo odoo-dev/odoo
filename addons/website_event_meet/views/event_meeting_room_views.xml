@@ -32,7 +32,7 @@
                         <group>
                             <field name="event_id"/>
                             <field name="summary" placeholder="e.g. Let's talk about Corporate Finance"/>
-                            <field name="target_audience" placeholder="e.g. CFOs &amp; Accountants"/>
+                            <field name="target_audience" placeholder="e.g. Accountants"/>
                             <field name="is_pinned"/>
                         </group>
                         <group>

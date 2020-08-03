@@ -20,7 +20,7 @@
                             </div>
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-left">Target People</label>
-                                <input class="form-control col-8" maxlength="30" name="audience" placeholder="e.g. CFOs &amp; Accountants"/>
+                                <input class="form-control col-8" maxlength="30" name="audience" placeholder="e.g. Accountants"/>
                             </div>
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-left">Language</label>
