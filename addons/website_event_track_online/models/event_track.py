@@ -136,6 +136,29 @@ class Track(models.Model):
         return [('id', 'in', track_visitors.track_id.ids)]
 
     # ------------------------------------------------------------
+    # CRUD
+    # -----------------------------------------------------------
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        tracks = super(Track, self).create(vals_list)
+
+        for track in tracks:
+            track._synchronize_with_stage(track.stage_id)
+
+        return tracks
+
+    def write(self, vals):
+        if vals.get('stage_id'):
+            stage = self.env['event.track.stage'].browse(vals['stage_id'])
+            self._synchronize_with_stage(stage)
+        return super(Track, self).write(vals)
+
+    def _synchronize_with_stage(self, stage):
+        if stage.is_done:
+            self.is_published = True
+
+    # ------------------------------------------------------------
     # TOOLS
     # ------------------------------------------------------------
 

@@ -7,4 +7,7 @@ from odoo import fields, models
 class TrackStage(models.Model):
     _inherit = 'event.track.stage'
 
-    is_accepted = fields.Boolean(string='Accepted Stage')
+    is_accepted = fields.Boolean(
+        string='Accepted Stage',
+        help='Accepted tracks are displayed in agenda views but not accessible.')
+    is_done = fields.Boolean(help='Done tracks are automatically published so that they are available in frontend.')
