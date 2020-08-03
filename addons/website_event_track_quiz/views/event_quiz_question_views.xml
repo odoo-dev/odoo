@@ -44,22 +44,20 @@
         <field name="arch" type="xml">
             <form string="Quiz Question">
                 <sheet>
-                    <div class="oe_edit_only">
-                        <label for="name" string="Question"/>
-                    </div>
                     <h1>
-                        <field name="name" default_focus="1" placeholder="e.g. According to Douglas, what should you pay most attention to?"/>
+                        <field name="name" default_focus="1"
+                            placeholder="e.g. According to Douglas, what should you pay most attention to?"/>
                     </h1>
                     <group>
                         <field name="quiz_id"/>
-                        <field name="awarded_points"/>
+                        <field name="awarded_points" invisible="1"/>
                     </group>
-                    <group name="questions" string="Questions">
+                    <group name="questions">
                         <field name="answer_ids" nolabel="1">
                             <tree editable="bottom" create="true" delete="true">
                                 <field name="sequence" widget="handle"/>
                                 <field name="text_value"/>
-                                <field name="is_correct"/>
+                                <field name="awarded_points"/>
                                 <field name="comment"/>
                             </tree>
                         </field>

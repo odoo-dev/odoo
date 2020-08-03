@@ -94,14 +94,14 @@
             <!-- Desktop Mode -->
             <div class="col d-none d-md-flex flex-row align-items-center justify-content-end">
                 <!-- search -->
-                <form t-attf-action="#{'/event/%s/community/leaderboard' % (slug(event))}" role="search" method="get">
+                <form t-attf-action="#{'/event/%s/community/leaderboard/results' % (slug(event))}" role="search" method="get">
                     <div class="input-group ml-1 position-relative">
                         <span class="input-group-prepend">
                             <button class="btn btn-link text-white rounded-0 pr-1" type="submit" aria-label="Search" title="Search">
                                 <i class="fa fa-search"></i>
                             </button>
                         </span>
-                        <input type="text" class="form-control rounded-0" name="search" placeholder="Search users" t-att-value="searched_name or ''"/>
+                        <input type="text" class="form-control rounded-0" name="search" placeholder="Search Attendees" t-att-value="searched_name or ''"/>
                     </div>
                 </form>
             </div>

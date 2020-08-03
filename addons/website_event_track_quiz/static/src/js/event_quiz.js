@@ -212,6 +212,8 @@ var Quiz = publicWidget.Widget.extend({
                     utils.set_cookie('visitor_uuid', data.visitor_uuid);
                 }
             }
+
+            return Promise.resolve(data);
         });
     },
 

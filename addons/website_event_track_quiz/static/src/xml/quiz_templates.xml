@@ -43,7 +43,7 @@
 
     <t t-name="quiz.validation">
         <div id="validation">
-            <div class="d-md-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center justify-content-between">
                 <div t-att-class="'d-flex align-items-center' + (widget.track.completed ? ' alert alert-success my-0 py-1 px-3' : '')">
                     <button t-if="!widget.track.completed" role="button" title="Check answers" aria-label="Check answers"
                         class="btn btn-primary text-uppercase font-weight-bold o_quiz_js_quiz_submit">Check your answers</button>
@@ -54,8 +54,9 @@
                         </span>
                     </span>
                 </div>
-                <div class="ml-auto mt-3 mt-md-0">
-                    <button t-if="widget.track.isManager" class="btn btn-light border o_quiz_js_quiz_reset">
+                <div class="flex-grow-1 text-right">
+                    <button t-if="widget.track.isManager"
+                       class="d-none d-md-inline-block btn btn-light border o_quiz_js_quiz_reset">
                         Reset
                     </button>
                 </div>

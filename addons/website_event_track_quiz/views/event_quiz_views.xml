@@ -34,11 +34,9 @@
         <field name="arch" type="xml">
             <form string="Quiz">
                 <sheet>
-                    <div class="oe_edit_only">
-                        <label for="name" string="Quiz Name"/>
-                    </div>
                     <h1>
-                        <field name="name" default_focus="1" placeholder="Name"/>
+                        <field name="name" default_focus="1"
+                            placeholder="e.g. Test your Knowledge"/>
                     </h1>
                     <group>
                         <field name="event_track_id"/>

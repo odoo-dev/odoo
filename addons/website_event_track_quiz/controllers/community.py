@@ -48,17 +48,18 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
                 page = 1
             pager = request.website.pager(url=url, total=user_count, page=page, step=self._visitors_per_page,
                                           scope=page_count if page_count < self._pager_max_pages else self._pager_max_pages)
+            values['visitors'] = values['visitors'][(page - 1) * self._visitors_per_page: (page) * self._visitors_per_page]
         else:
             pager = {'page_count': 0}
-        values['visitors'] = values['visitors'][(page - 1) * self._visitors_per_page: (page) * self._visitors_per_page]
         values.update({'pager': pager})
         return values
 
     def _get_leaderboard(self, event, searched_name=None):
         current_visitor = request.env['website.visitor']._get_visitor_from_request(force_create=False)
-        domain = [('track_id', 'in', event.track_ids.ids), ('visitor_id', '!=', False)]
         track_visitor_data = request.env['event.track.visitor'].sudo().read_group(
-            domain,
+            [('track_id', 'in', event.track_ids.ids),
+             ('visitor_id', '!=', False),
+             ('quiz_points', '>', 0)],
             ['id', 'visitor_id', 'points:sum(quiz_points)'],
             ['visitor_id'], orderby="points DESC")
         data_map = {datum['visitor_id'][0]: datum['points'] for datum in track_visitor_data if datum.get('visitor_id')}
