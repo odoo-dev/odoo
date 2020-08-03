@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo><data>
 
-    <record id="webstite_event.event_7_track_1" model="event.track">
+    <record id="website_event_track.event_7_track_1" model="event.track">
         <field name="wishlisted_by_default" eval="True"/>
         <field name="partner_id" ref="base.res_partner_address_15"/>
     </record>
