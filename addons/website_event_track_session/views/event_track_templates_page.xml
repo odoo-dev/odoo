@@ -58,10 +58,20 @@
                 <span class="h4" t-esc="track.name"/>
                 <div class="o_we_track_action_buttons d-flex justify-content-end align-items-center flex-wrap">
                     <div class="o_we_track_reminder_button my-1">
-                        <t t-if="option_track_wishlist and not track.is_track_done"
+                        <!-- Mobile -->
+                        <div t-if="option_track_wishlist and not track.is_track_done"
+                            class="d-md-none d-inline ml-auto"
                             t-call="website_event_track_online.track_widget_reminder">
                             <t t-set="reminder_small" t-value="True"/>
-                        </t>
+                            <t t-set="reminder_light" t-value="True"/>
+                        </div>
+                        <!-- Desktop -->
+                        <div t-if="option_track_wishlist and not track.is_track_done"
+                            class="d-none d-sm-inline"
+                            t-call="website_event_track_online.track_widget_reminder">
+                            <t t-set="reminder_small" t-value="False"/>
+                            <t t-set="reminder_light" t-value="False"/>
+                        </div>
                     </div>
                 </div>
             </div>
