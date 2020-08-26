@@ -32,13 +32,14 @@ class EventRegistration(models.Model):
         # as registrations can be automatically confirmed, or even created directly
         # with a state given in values
         if not self.env.context.get('event_lead_rule_skip'):
-            self.env['event.lead.rule'].search([('lead_creation_trigger', '=', 'create')]).sudo()._run_on_registrations(registrations)
+            SudoLeadRule = self.env['event.lead.rule'].sudo()
+            SudoLeadRule.search([('lead_creation_trigger', '=', 'create')])._run_on_registrations(registrations)
             open_registrations = registrations.filtered(lambda reg: reg.state == 'open')
             if open_registrations:
-                self.env['event.lead.rule'].search([('lead_creation_trigger', '=', 'confirm')]).sudo()._run_on_registrations(open_registrations)
+                SudoLeadRule.search([('lead_creation_trigger', '=', 'confirm')])._run_on_registrations(open_registrations)
             done_registrations = registrations.filtered(lambda reg: reg.state == 'done')
             if done_registrations:
-                self.env['event.lead.rule'].search([('lead_creation_trigger', '=', 'done')]).sudo()._run_on_registrations(done_registrations)
+                SudoLeadRule.search([('lead_creation_trigger', '=', 'done')])._run_on_registrations(done_registrations)
 
         return registrations
 
@@ -57,7 +58,7 @@ class EventRegistration(models.Model):
         """
         to_update, event_lead_rule_skip = False, self.env.context.get('event_lead_rule_skip')
         if not event_lead_rule_skip:
-            to_update = self.filtered(lambda reg: reg.lead_ids)
+            to_update = self.filtered(lambda reg: reg.sudo().lead_ids)
         if to_update:
             lead_tracked_vals = to_update._get_lead_tracked_values()
 
@@ -70,9 +71,9 @@ class EventRegistration(models.Model):
         # handle triggers based on state
         if not event_lead_rule_skip:
             if vals.get('state') == 'open':
-                self.env['event.lead.rule'].search([('lead_creation_trigger', '=', 'confirm')]).sudo()._run_on_registrations(self)
+                self.env['event.lead.rule'].sudo().search([('lead_creation_trigger', '=', 'confirm')])._run_on_registrations(self)
             elif vals.get('state') == 'done':
-                self.env['event.lead.rule'].search([('lead_creation_trigger', '=', 'done')]).sudo()._run_on_registrations(self)
+                self.env['event.lead.rule'].sudo().search([('lead_creation_trigger', '=', 'done')])._run_on_registrations(self)
 
         return res
 
@@ -105,7 +106,7 @@ class EventRegistration(models.Model):
           based on new_vals;
         """
         for registration in self:
-            leads_attendee = registration.lead_ids.filtered(
+            leads_attendee = registration.sudo().lead_ids.filtered(
                 lambda lead: lead.event_lead_rule_id.lead_creation_basis == 'attendee'
             )
             if not leads_attendee:
@@ -140,7 +141,7 @@ class EventRegistration(models.Model):
             elif lead_values:
                 leads_attendee.write(lead_values)
 
-        leads_order = self.lead_ids.filtered(lambda lead: lead.event_lead_rule_id.lead_creation_basis == 'order')
+        leads_order = self.sudo().lead_ids.filtered(lambda lead: lead.event_lead_rule_id.lead_creation_basis == 'order')
         for lead in leads_order:
             lead_values = {}
             if new_vals.get('partner_id'):

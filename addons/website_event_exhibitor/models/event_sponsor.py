@@ -30,6 +30,7 @@ class Sponsor(models.Model):
     url = fields.Char('Sponsor Website', compute='_compute_url', readonly=False, store=True)
     sequence = fields.Integer('Sequence')
     active = fields.Boolean(default=True)
+
     # description
     subtitle = fields.Char('Slogan', help='Catchy marketing sentence for promote')
     exhibitor_type = fields.Selection(
