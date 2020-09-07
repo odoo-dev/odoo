@@ -5,7 +5,6 @@
         <field name="image_128" type="base64" file="payment_transfer/static/src/img/transfer_icon.png"/>
         <field name="provider">transfer</field>
         <field name="state">enabled</field>
-        <field name="company_id" ref="base.main_company"/>
         <field name="redirect_form_view_id" ref="redirect_form"/>
         <field name="support_authorization">False</field>
         <field name="support_fees_computation">False</field>

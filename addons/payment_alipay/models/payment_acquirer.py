@@ -42,12 +42,12 @@ class PaymentAcquirer(models.Model):
         fees = 0.0
         if self.fees_active:
             if country.id == self.company_id.country_id.id:
-                percentage = self.fees_dom_var
                 fixed = self.fees_dom_fixed
+                variable = self.fees_dom_var
             else:
-                percentage = self.fees_int_var
                 fixed = self.fees_int_fixed
-            fees = (percentage / 100.0 * amount + fixed) / (1 - percentage / 100.0)
+                variable = self.fees_int_var
+            fees = (amount * variable / 100.0 + fixed) / (1 - variable / 100.0)
         return fees
 
     def _alipay_build_sign(self, val):

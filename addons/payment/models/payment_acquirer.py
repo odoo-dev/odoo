@@ -423,7 +423,7 @@ class PaymentAcquirer(models.Model):
     def _compute_fees(self, amount, currency, country):
         """ Compute the acquirer-specific fees given a transaction context.
 
-        For an acquirer to implement fees computation, it must override this method and return the
+        For an acquirer to support fees computation, it must override this method and return the
         resulting fees as a float.
 
         Note: self.ensure_one()

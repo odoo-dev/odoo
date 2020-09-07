@@ -3,7 +3,6 @@
     
     <record id="payment.payment_acquirer_alipay" model="payment.acquirer">
         <field name="provider">alipay</field>
-        <field name="company_id" ref="base.main_company"/>
         <field name="redirect_form_view_id" ref="redirect_template"/>
         <field name="support_authorization">False</field>
         <field name="support_fees_computation">True</field>
