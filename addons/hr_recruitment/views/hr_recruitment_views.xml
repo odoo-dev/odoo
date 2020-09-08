@@ -552,6 +552,7 @@
         <field name="arch" type="xml">
             <tree string="Refuse Reason" editable="bottom">
                 <field name="name"/>
+                <field name="template_id"/>
             </tree>
         </field>
     </record>

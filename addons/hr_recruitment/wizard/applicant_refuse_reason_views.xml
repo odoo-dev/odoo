@@ -5,12 +5,37 @@
             <field name="model">applicant.get.refuse.reason</field>
             <field name="arch" type="xml">
                 <form string="Refuse Reason">
-                    <group class="oe_title">
-                        <field name="refuse_reason_id"/>
-                        <field name="applicant_ids" invisible="1"/>
-                    </group>
+                    <div name="mail_form">
+                        <div class="alert alert-danger" role="alert" attrs="{'invisible': [('applicant_without_email', '=', False)]}">
+                            <field name="applicant_without_email" class="mr4"/>
+                        </div>
+                        <div>
+                            <group>
+                                <field name="applicant_ids" invisible="1"/>
+                                <field name="refuse_reason_id"/>
+                                <label for="partner_ids" groups="base.group_user"/>
+                                <div groups="base.group_user">
+                                    <span>Followers of the application and</span>
+                                    <field name="partner_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..." context="{'force_email':True, 'show_email':True}" attrs="{'invisible': [('partner_ids', '=', [])]}"/>
+                                    <field name="partner_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..." context="{'force_email':True, 'show_email':True}" class="border-danger" attrs="{'invisible': [('partner_ids', '!=', [])]}"/>
+                                </div>
+                                <field name="subject" placeholder="Subject..."/>
+                            </group>
+                        </div>
+                        <field name="body" options="{'style-inline': true}"/>
+                        <group>
+                            <group>
+                                <field name="attachment_ids" widget="many2many_binary" string="Attach a file" nolabel="1" colspan="2"/>
+                            </group>
+                            <group>
+                                <field name="template_id" label="Use template" options="{'no_create': True, 'no_edit': True}" context="{'default_model': 'hr.applicant'}"/>
+                            </group>
+                        </group>
+                    </div>
+
                     <footer>
-                        <button name="action_refuse_reason_apply" string="Submit" type="object" class="btn-primary"/>
+                        <button name="action_send_mail" string="Send By Mail" type="object" class="btn-primary"/>
+                        <button name="action_refuse_reason_apply" string="Confirm" type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
                     </footer>
                 </form>

@@ -493,6 +493,12 @@ class Applicant(models.Model):
         return dict_act_window
 
     def archive_applicant(self):
+        Partner = self.env['res.partner']
+        for applicant in self.filtered(lambda x: x.email_from):
+            parsed_email = Partner._parse_partner_name(applicant.email_from)[1]
+            if parsed_email:
+                applicant.partner_id = Partner.find_or_create(parsed_email)
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Refuse Reason'),
@@ -548,4 +554,5 @@ class ApplicantRefuseReason(models.Model):
     _description = 'Refuse Reason of Applicant'
 
     name = fields.Char('Description', required=True, translate=True)
+    template_id = fields.Many2one('mail.template', string='Email Templates', domain="[('model', '=', 'hr.applicant')]")
     active = fields.Boolean('Active', default=True)
