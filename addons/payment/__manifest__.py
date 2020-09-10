@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
     'name': 'Payment Acquirer',
+    'version': '2.0',
     'category': 'Hidden',
     'summary': 'Base Module for Payment Acquirers',
-    'version': '1.0',
     'description': """Payment Acquirer Base Module""",
     'depends': ['account'],
     'data': [
@@ -26,6 +25,5 @@
         'wizards/payment_link_wizard_views.xml',
         'wizards/account_payment_register_views.xml',
     ],
-    'installable': True,
     'auto_install': True,
 }

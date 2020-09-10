@@ -74,15 +74,15 @@ class PaypalForm(PaypalCommon):
             'return': urls.url_join(base_url, PaypalController._return_url),
             'notify_url': urls.url_join(base_url, PaypalController._notify_url),
             'cancel_return': urls.url_join(base_url, PaypalController._cancel_url),
-            'custom': '{"return_url": "/payment/process"}',
+            'custom': '{"return_url": "/payment/status"}',
         }
 
         # check form result
         tree = objectify.fromstring(res)
 
         data_set = tree.xpath("//input[@name='data_set']")
-        self.assertEqual(len(data_set), 1, 'paypal: Found %d "data_set" input instead of 1' % len(data_set))
-        self.assertEqual(data_set[0].get('data-action-url'), 'https://www.sandbox.paypal.com/cgi-bin/webscr', 'paypal: wrong form POST url')
+        self.assertEqual(len(data_set), 1, 'Paypal: Found %d "data_set" input instead of 1' % len(data_set))
+        self.assertEqual(data_set[0].get('data-action-url'), 'https://www.sandbox.paypal.com/cgi-bin/webscr', 'Paypal: wrong form POST url')
         for form_input in tree.input:
             if form_input.get('name') in ['submit', 'data_set']:
                 continue
@@ -148,7 +148,7 @@ class PaypalForm(PaypalCommon):
             'item_name': u'test_ref_2',
             'address_country': u'France',
             'charset': u'windows-1252',
-            'custom': u'{"return_url": "/payment/process"}',
+            'custom': u'{"return_url": "/payment/status"}',
             'notify_version': u'3.7',
             'address_name': u'Norbert Poilu',
             'pending_reason': u'multi_currency',
