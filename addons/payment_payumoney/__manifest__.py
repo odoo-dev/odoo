@@ -3,14 +3,15 @@
 
 {
     'name': 'PayuMoney Payment Acquirer',
+    'version': '2.0',
     'category': 'Accounting/Payment Acquirers',
     'sequence': 375,
     'summary': 'Payment Acquirer: PayuMoney Implementation',
     'description': """
-    PayuMoney Payment Acquirer for India.
+PayuMoney Payment Acquirer for India.
 
-    PayUmoney payment gateway supports only INR currency.
-    """,
+PayUmoney payment gateway supports only INR currency.
+""",
     'depends': ['payment'],
     'data': [
         'views/payment_views.xml',
@@ -18,6 +19,6 @@
         'data/payment_acquirer_data.xml',
     ],
     'application': True,
-    'post_init_hook': 'create_missing_journal_for_acquirers',
+    'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
 }
