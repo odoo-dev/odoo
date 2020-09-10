@@ -6,8 +6,8 @@ import binascii
 from odoo import fields, http, _
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request
+from odoo.addons.payment.controllers.portal import PaymentPostProcessing
 from odoo.addons.portal.controllers import portal
-from odoo.addons.payment.controllers.portal import PaymentProcessing
 from odoo.addons.portal.controllers.mail import _message_post_helper
 from odoo.addons.portal.controllers.portal import pager as portal_pager, get_records_pager
 from odoo.osv import expression
@@ -30,39 +30,6 @@ class CustomerPortal(portal.CustomerPortal):
                 ('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
                 ('state', 'in', ['sale', 'done'])
             ]) if SaleOrder.check_access_rights('read', raise_exception=False) else 0
-
-        return values
-
-    def _order_get_page_view_values(self, order, access_token, **kwargs):
-        values = {
-            'sale_order': order,
-            'token': access_token,
-            'return_url': '/shop/payment/validate',
-            'bootstrap_formatting': True,
-            'partner_id': order.partner_id.id,
-            'report_type': 'html',
-            'action': order._get_portal_return_action(),
-        }
-        if order.company_id:
-            values['res_company'] = order.company_id
-
-        if order.has_to_be_paid():
-            domain = expression.AND([
-                ['&', ('state', 'in', ['enabled', 'test']), ('company_id', '=', order.company_id.id)],
-                ['|', ('country_ids', '=', False), ('country_ids', 'in', [order.partner_id.country_id.id])]
-            ])
-            acquirers = request.env['payment.acquirer'].sudo().search(domain)
-
-            values['acquirers'] = acquirers.filtered(lambda acq: (acq.payment_flow == 'form' and acq.view_template_id) or
-                                                     (acq.payment_flow == 's2s' and acq.registration_view_template_id))
-            values['pms'] = request.env['payment.token'].search([('partner_id', '=', order.partner_id.id)])
-            values['acq_extra_fees'] = acquirers.get_acquirer_extra_fees(order.amount_total, order.currency_id, order.partner_id.country_id.id)
-
-        if order.state in ('draft', 'sent', 'cancel'):
-            history = request.session.get('my_quotations_history', [])
-        else:
-            history = request.session.get('my_orders_history', [])
-        values.update(get_records_pager(history, order))
 
         return values
 
@@ -199,8 +166,37 @@ class CustomerPortal(portal.CustomerPortal):
                     partner_ids=order_sudo.user_id.sudo().partner_id.ids,
                 )
 
-        values = self._order_get_page_view_values(order_sudo, access_token, **kw)
-        values['message'] = message
+        values = {
+            'sale_order': order_sudo,
+            'message': message,
+            'token': access_token,
+            'landing_route': '/shop/payment/validate',
+            'bootstrap_formatting': True,
+            'partner_id': order_sudo.partner_id.id,
+            'report_type': 'html',
+            'action': order_sudo._get_portal_return_action(),
+        }
+        if order_sudo.company_id:
+            values['res_company'] = order_sudo.company_id
+
+        if order_sudo.has_to_be_paid():
+            domain = expression.AND([
+                ['&', ('state', 'in', ['enabled', 'test']), ('company_id', '=', order_sudo.company_id.id)],
+                ['|', ('country_ids', '=', False), ('country_ids', 'in', [order_sudo.partner_id.country_id.id])]
+            ])
+            acquirers = request.env['payment.acquirer'].sudo().search(domain)
+
+            values['acquirers'] = acquirers  # TODO ANV use _get_compatible_acquirers
+            values['tokens'] = request.env['payment.token'].search([('partner_id', '=', order_sudo.partner_id.id)])
+            values['fees_by_acquirer'] = {acquirer: acquirer._compute_fees(
+                order_sudo.amount_total, order_sudo.currency_id, order_sudo.partner_id.country_id.id
+            ) for acquirer in acquirers.filtered('fees_active')}
+
+        if order_sudo.state in ('draft', 'sent', 'cancel'):
+            history = request.session.get('my_quotations_history', [])
+        else:
+            history = request.session.get('my_orders_history', [])
+        values.update(get_records_pager(history, order_sudo))
 
         return request.render('sale.sale_order_portal_template', values)
 
@@ -267,7 +263,7 @@ class CustomerPortal(portal.CustomerPortal):
 
     # note: website_sale code
     @http.route(['/my/orders/<int:order_id>/transaction/'], type='json', auth="public", website=True)
-    def payment_transaction_token(self, acquirer_id, order_id, save_token=False, access_token=None, **kwargs):
+    def payment_transaction_token(self, acquirer_id, order_id, flow, tokenization_requested=False, access_token=None, **kwargs):
         """ Json method that creates a payment.transaction, used to create a
         transaction when the user clicks on 'pay now' button. After having
         created the transaction, the event continues and the user is redirected
@@ -280,10 +276,13 @@ class CustomerPortal(portal.CustomerPortal):
         if not acquirer_id:
             return False
 
-        try:
-            acquirer_id = int(acquirer_id)
-        except:
-            return False
+        acquirer_sudo = request.env['payment.acquirer'].browse(acquirer_id).sudo()
+        tokenize = bool(
+            # Public users are not allowed to save tokens as their partner is unknown
+            not request.env.user.sudo()._is_public()
+            # Token is only saved if requested by the user and allowed by the acquirer
+            and tokenization_requested and acquirer_sudo.allow_tokenization
+        )
 
         order = request.env['sale.order'].sudo().browse(order_id)
         if not order or not order.order_line or not order.has_to_be_paid():
@@ -292,20 +291,14 @@ class CustomerPortal(portal.CustomerPortal):
         # Create transaction
         vals = {
             'acquirer_id': acquirer_id,
-            'type': order._get_payment_type(save_token),
-            'return_url': order.get_portal_url(),
+            'operation': f'online_{flow}',
+            'tokenize': tokenize,
+            'landing_route': order.get_portal_url(),
         }
 
-        transaction = order._create_payment_transaction(vals)
-        PaymentProcessing.add_payment_transaction(transaction)
-        return transaction.render_sale_button(
-            order,
-            submit_txt=_('Pay & Confirm'),
-            render_values={
-                'type': order._get_payment_type(save_token),
-                'alias_usage': _('If we store your payment information on our server, subscription payments will be made automatically.'),
-            }
-        )
+        transaction = order._create_payment_transaction(vals)  # TODO ANV use order._get_vals_...
+        PaymentPostProcessing.monitor_transactions(transaction)
+        return transaction.render_sale_button(order)
 
     @http.route('/my/orders/<int:order_id>/transaction/token', type='http', auth='public', website=True)
     def payment_token(self, order_id, pm_id=None, **kwargs):
@@ -324,11 +317,11 @@ class CustomerPortal(portal.CustomerPortal):
 
         # Create transaction
         vals = {
-            'payment_token_id': pm_id,
-            'type': 'server2server',
-            'return_url': order.get_portal_url(),
+            'token_id': pm_id,
+            'type': 'online_token',
+            'landing_route': order.get_portal_url(),
         }
 
-        tx = order._create_payment_transaction(vals)
-        PaymentProcessing.add_payment_transaction(tx)
-        return request.redirect('/payment/process')
+        tx = order._create_payment_transaction(vals)  # TODO ANV use order._get_vals_... bis
+        PaymentPostProcessing.monitor_transactions(tx)
+        return request.redirect('/payment/status')
