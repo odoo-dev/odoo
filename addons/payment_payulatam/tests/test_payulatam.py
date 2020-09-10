@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from lxml import objectify
 from werkzeug import urls
 
@@ -59,7 +59,7 @@ class PayUlatamForm(PayUlatamCommon):
             'tax': '0',
             'taxReturnBase': '0',
             'buyerEmail': 'norbert.buyer@example.com',
-            'responseUrl': urls.url_join(base_url, '/payment/payulatam/response'),
+            'responseUrl': urls.url_join(base_url, '/payment/payulatam/return'),
             'extra1': None
         }
         # check form result

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from werkzeug import urls
@@ -65,7 +64,7 @@ class AlipayTest(PaymentAcquirerCommon):
                 'seller_email': self.alipay.alipay_seller_email,
                 'service': 'create_direct_pay_by_user'
             })
-        sign = self.alipay._build_sign(form_values)
+        sign = self.alipay._alipay_build_sign(form_values)
 
         form_values.update({'sign': sign, 'sign_type': 'MD5'})
         # check form result
@@ -132,7 +131,7 @@ class AlipayTest(PaymentAcquirerCommon):
                 'currency': 'EUR',
             })
 
-        alipay_post_data['sign'] = self.alipay._build_sign(alipay_post_data)
+        alipay_post_data['sign'] = self.alipay._alipay_build_sign(alipay_post_data)
         # should raise error about unknown tx
         with self.assertRaises(ValidationError):
             self.env['payment.transaction'].form_feedback(alipay_post_data, 'alipay')
@@ -166,7 +165,7 @@ class AlipayTest(PaymentAcquirerCommon):
             alipay_post_data['trade_status'] = 'TRADE_FINISHED'
         else:
             alipay_post_data['trade_status'] = 'TRADE_SUCCESS'
-        alipay_post_data['sign'] = self.alipay._build_sign(alipay_post_data)
+        alipay_post_data['sign'] = self.alipay._alipay_build_sign(alipay_post_data)
         # validate tx
         tx.form_feedback(alipay_post_data, 'alipay')
         # check tx
