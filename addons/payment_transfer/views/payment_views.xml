@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="payment.acquirer_form"/>
         <field name="arch" type="xml">
             <page name="acquirer_credentials" position="attributes">
-                <attribute name="attrs">{'invisible': [('provider', 'in', ['manual', 'transfer'])]}</attribute>
+                <attribute name="attrs">{'invisible': [('provider', '=', 'transfer')]}</attribute>
             </page>
             <field name="pre_msg" position="attributes">
                 <attribute name="attrs">{'invisible': [('provider', '=', 'transfer')]}</attribute>
@@ -16,6 +16,9 @@
             </field>
             <field name="cancel_msg" position="attributes">
                 <attribute name="attrs">{'invisible': [('provider', '=', 'transfer')]}</attribute>
+            </field>
+            <field name="capture_manually" position="after">
+                <field name="qr_code" attrs="{'invisible': [('provider', '!=', 'transfer')]}" />
             </field>
         </field>
     </record>
