@@ -39,7 +39,7 @@
     </template>
 
     <template id="portal_invoice_payment" name="Invoice Payment">
-        <div class="row" t-if="not tx_ids and invoice.state == 'posted' and invoice.payment_state in ('not_paid', 'partial') and invoice.amount_total" id="portal_pay">
+        <div class="row">
             <div class="modal fade" id="pay_with" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -50,6 +50,10 @@
                         <div class="modal-body">
                             <div t-if="acquirers or tokens" id="payment_method" class="text-left col-md-13">
                                 <t t-call="payment.checkout"/>
+                            </div>
+                            <div t-else="" class="alert alert-warning">
+                                <strong>No suitable payment option could be found.</strong><br/>
+                                If you believe that it is an error, please contact the website administrator.
                             </div>
                         </div>
                     </div>
@@ -78,16 +82,13 @@
         </xpath>
         <xpath expr="//div[@id='invoice_content']//div[hasclass('o_portal_html_view')]" position="before">
             <div t-if="invoice.transaction_ids and invoice.amount_total and not success and not error" class="o_account_payment_tx_status" t-att-data-invoice-id="invoice.id">
-                <t t-call="payment.payment_confirmation_status">
-                    <t t-set="payment_tx_id" t-value="invoice.get_portal_last_transaction()"/>
-                    <t t-set="reference" t-value="invoice.payment_reference"/>
+                <t t-call="payment.transaction_status">
+                    <t t-set="tx" t-value="invoice.get_portal_last_transaction()"/>
                 </t>
             </div>
             <t t-set="tx_ids" t-value="invoice.transaction_ids.filtered(lambda tx: tx.state in ('authorized', 'done'))"/>
             <div t-if="not tx_ids and invoice.state == 'posted' and invoice.payment_state in ('not_paid', 'partial') and invoice.amount_total" id="portal_pay">
-                <div t-if="acquirers or tokens" id="payment_method">
-                    <t t-call="account_payment.portal_invoice_payment"/>
-                </div>
+                <t t-call="account_payment.portal_invoice_payment"/>
             </div>
             <div class="panel-body" t-if="existing_token">
                 <div class="offset-lg-3 col-lg-6">

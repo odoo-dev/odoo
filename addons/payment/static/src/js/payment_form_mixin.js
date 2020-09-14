@@ -16,7 +16,7 @@ odoo.define('payment.payment_form_mixin', require => {
             this.$('[data-toggle="tooltip"]').tooltip();
             this.txContext = {};
             Object.assign(this.txContext, this.$el.data());
-            const $checkedRadios = this.$('input[type="radio"]:checked');
+            const $checkedRadios = this.$('input[name="o_payment_radio"]:checked');
             if ($checkedRadios.length === 1) {
                 const checkedRadio = $checkedRadios[0];
                 this._displayInlineForm(checkedRadio);
@@ -67,7 +67,7 @@ odoo.define('payment.payment_form_mixin', require => {
          *                              undefined otherwise.
          */
         _displayError: function (title, description = '', error = '') {
-            const $checkedRadios = this.$('input[type="radio"]:checked');
+            const $checkedRadios = this.$('input[name="o_payment_radio"]:checked');
             if ($checkedRadios.length !== 1) { // Cannot find selected payment option, show dialog
                 return new Dialog(null, {
                     title: _.str.sprintf(_t("Error: %s"), _.str.escapeHTML(title)),
@@ -92,11 +92,13 @@ odoo.define('payment.payment_form_mixin', require => {
                 // Append error to inline form and center the page on the error
                 const checkedRadio = $checkedRadios[0];
                 const paymentOptionId = this._getPaymentOptionIdFromRadio(checkedRadio);
-                const $inlineForm = this.$(`#o_payment_inline_form_${paymentOptionId}`);
+                const formType = $(checkedRadio).data('payment-option-type');
+                const $inlineForm = this.$(`#o_payment_${formType}_inline_form_${paymentOptionId}`);
                 $inlineForm.removeClass('d-none'); // Show the inline form even if it was empty
                 $inlineForm.append(errorHtml).find('div[name="o_payment_error"]')[0]
                     .scrollIntoView({behavior: 'smooth', block: 'center'});
             }
+            this._enableButton(); // Enable button back after it was disabled before processing
         },
 
         /**
@@ -107,22 +109,20 @@ odoo.define('payment.payment_form_mixin', require => {
          * @return {undefined}
          */
         _displayInlineForm: function (radio) {
-            // Hide all inline forms
-            this.$('[id*="o_payment_inline_form_"]').addClass('d-none');
-            this._hideError();
-
-            // Reset the payment flow to let acquirers overwrite it
-            this._setPaymentFlow();
+            this._hideInlineForms(); // Collapse previously opened inline forms
+            this._hideError(); // The error is only relevant until it is hidden with its inline form
+            this._setPaymentFlow(); // Reset the payment flow to let acquirers overwrite it
 
             // Extract contextual values from the radio button
-            const paymentOptionId = this._getPaymentOptionIdFromRadio(radio);
             const provider = this._getProviderFromRadio(radio);
+            const paymentOptionId = this._getPaymentOptionIdFromRadio(radio);
             const flow = this._getPaymentFlowFromRadio(radio);
 
             // Prepare the inline form of the selected payment option and display it if not empty
-            this._prepareInlineForm(paymentOptionId, provider, flow);
-            const $inlineForm = this.$(`#o_payment_inline_form_${paymentOptionId}`);
-            if (!$inlineForm.is(':empty')) {
+            this._prepareInlineForm(provider, paymentOptionId, flow);
+            const formType = $(radio).data('payment-option-type');
+            const $inlineForm = this.$(`#o_payment_${formType}_inline_form_${paymentOptionId}`);
+            if ($inlineForm.children().length > 0) {
                 $inlineForm.removeClass('d-none');
             }
         },
@@ -185,7 +185,10 @@ odoo.define('payment.payment_form_mixin', require => {
          * @return {string} The flow of the selected payment option. redirect, direct or token.
          */
         _getPaymentFlowFromRadio: function (radio) {
-            if ($(radio).data('is-token') || this.txContext.flow === 'token') {
+            if (
+                $(radio).data('payment-option-type') === 'token'
+                || this.txContext.flow === 'token'
+            ) {
                 return 'token';
             } else if (this.txContext.flow === 'redirect') {
                 return 'redirect';
@@ -222,6 +225,31 @@ odoo.define('payment.payment_form_mixin', require => {
         _hideError: () => this.$('div[name="o_payment_error"]').remove(),
 
         /**
+         * Collapse all inline forms.
+         *
+         * @private
+         * @return {undefined}.
+         */
+        _hideInlineForms: () => this.$('[name="o_payment_inline_form"]').addClass('d-none'),
+
+        /**
+         * Hide the "Save my payment details" label and checkbox, and the submit button.
+         *
+         * The inputs should typically be hidden when the customer has to perform additional actions
+         * in the inline form. All inputs are automatically shown again when the customer clicks on
+         * another inline form.
+         *
+         * @private
+         * @return {undefined}.
+         */
+        _hideInputs: function () {
+            const $submitButton = this.$('button[name="o_payment_submit_button"]');
+            const $tokenizeCheckboxes = this.$('input[name="o_payment_save_as_token"]');
+            $submitButton.addClass('d-none');
+            $tokenizeCheckboxes.closest('label').addClass('d-none');
+        },
+
+        /**
          * Verify that the submit button is ready to be enabled.
          *
          * For a module to support a custom behavior for the submit button, it must override this
@@ -233,7 +261,7 @@ odoo.define('payment.payment_form_mixin', require => {
          * @return {boolean} Whether the submit button can be enabled
          */
         _isButtonReady: function () {
-            const $checkedRadios = this.$('input[type="radio"]:checked');
+            const $checkedRadios = this.$('input[name="o_payment_radio"]:checked');
             if ($checkedRadios.length === 1) {
                 const checkedRadio = $checkedRadios[0];
                 const flow = this._getPaymentFlowFromRadio(checkedRadio);
@@ -244,6 +272,39 @@ odoo.define('payment.payment_form_mixin', require => {
         },
 
         /**
+         * Prepare the params to send to the init tx route.
+         *
+         * For an acquirer to overwrite generic params or to add acquirer-specific ones, it must
+         * override this method and return the extended init tx params.
+         *
+         * @private
+         * @param {string} provider - The provider of the selected payment option's acquirer
+         * @param {number} paymentOptionId - The id of the selected payment option
+         * @param {string} flow - The online payment flow of the selected payment option
+         * @return {object} The init tx params
+         */
+        _prepareInitTxParams: function (provider, paymentOptionId, flow) {
+            return {
+                'payment_option_id': paymentOptionId,
+                'reference_prefix': this.txContext.referencePrefix,
+                'amount': this.txContext.amount !== undefined
+                    ? parseFloat(this.txContext.amount) : null,
+                'currency_id': this.txContext.currencyId
+                    ? parseInt(this.txContext.currencyId) : null,
+                'partner_id': this.txContext.partnerId
+                    ? parseInt(this.txContext.partnerId) : undefined,
+                'flow': flow,
+                'tokenization_requested': this.txContext.tokenizationRequested,
+                'validation_route': this.txContext.validationRoute
+                    ? this.txContext.validationRoute : null,
+                'landing_route': this.txContext.landingRoute,
+                'access_token': this.txContext.accessToken
+                    ? this.txContext.accessToken : undefined,
+                'csrf_token': core.csrf_token,
+            };
+        },
+
+        /**
          * Prepare the acquirer-specific inline form of the selected payment option.
          *
          * For an acquirer to manage an inline form, it must override this method. When the override
@@ -251,49 +312,30 @@ odoo.define('payment.payment_form_mixin', require => {
          * inline form. Otherwise, the call must be sent back to the parent method.
          *
          * @private
-         * @param {number} _paymentOptionId - The id of the selected payment option
-         * @param {string} _provider - The provider of the selected payment option's acquirer
-         * @param {string} _flow - The online payment flow of the selected payment option
+         * @param {string} provider - The provider of the selected payment option's acquirer
+         * @param {number} paymentOptionId - The id of the selected payment option
+         * @param {string} flow - The online payment flow of the selected payment option
          * @return {undefined}
          */
-        _prepareInlineForm: (_paymentOptionId, _provider, _flow) => {},
+        _prepareInlineForm: (provider, paymentOptionId, flow) => {},
 
         /**
-         * Create and process the transaction.
+         * Process the payment.
          *
          * For an acquirer to define its own transaction processing flow, to do pre-processing work
          * or to do post-processing work, it must override this method.
          *
          * @private
+         * @param {string} provider - The provider of the payment option's acquirer
          * @param {number} paymentOptionId - The id of the payment option handling the transaction
-         * @param {string} _provider - The provider of the payment option's acquirer
          * @param {string} flow - The online payment flow of the transaction
-         * @return {undefined}
+         * @return {(object|undefined)} The transaction processing values if in direct payment flow
          */
-        _processTx: function (paymentOptionId, _provider, flow) {
-            // Call the init route to initialize the transaction and retrieve processing values
-            this._rpc({
-                route: this.txContext.initTxRoute,
-                params: {
-                    'payment_option_id': paymentOptionId,
-                    'reference': this.txContext.reference,
-                    'amount': this.txContext.amount !== undefined
-                        ? parseFloat(this.txContext.amount) : null,
-                    'currency_id': this.txContext.currencyId
-                        ? parseInt(this.txContext.currencyId) : null,
-                    'partner_id': this.txContext.partnerId
-                        ? parseInt(this.txContext.partnerId) : undefined,
-                    'order_id': this.txContext.orderId
-                        ? parseInt(this.txContext.orderId) : undefined,
-                    'flow': flow,
-                    'tokenization_requested': this.txContext.tokenizationRequested,
-                    'is_validation': this.txContext.isValidation !== undefined
-                        ? this.txContext.isValidation : false,
-                    'landing_route': this.txContext.landingRoute,
-                    'access_token': this.txContext.accessToken
-                        ? this.txContext.accessToken : undefined,
-                    'csrf_token': core.csrf_token,
-                }
+        _processPayment: function (provider, paymentOptionId, flow) {
+            // Call the init route to create the transaction and retrieve processing values
+            return this._rpc({
+                route: this.txContext.transactionRoute,
+                params: this._prepareInitTxParams(provider, paymentOptionId, flow),
             }).then(result => {
                 if (flow === 'redirect') {
                     // Append the redirect form to the body
@@ -305,9 +347,11 @@ odoo.define('payment.payment_form_mixin', require => {
                     // Submit the form
                     $redirectForm.submit();
                 } else if (flow === 'direct') {
-                    // The direct flow is handled by acquirers in the override of this method
+                    // This flow is handled by acquirers in the override of this method
+                    return result;
                 } else if (flow === 'token') {
-                    window.location = '/payment/status'; // Tokens have already been processed
+                    // This flow is already complete as payments by tokens are immediately processed
+                    window.location = '/payment/status';
                 }
             }).guardedCatch(error => {
                 error.event.preventDefault();
@@ -341,6 +385,19 @@ odoo.define('payment.payment_form_mixin', require => {
             } else {
                 this.txContext.flow = flow;
             }
+        },
+
+        /**
+         * Show the "Save my payment details" label and checkbox, and the submit button.
+         *
+         * @private
+         * @return {undefined}.
+         */
+        _showInputs: function () {
+            const $submitButton = this.$('button[name="o_payment_submit_button"]');
+            const $tokenizeCheckboxes = this.$('input[name="o_payment_save_as_token"]');
+            $submitButton.removeClass('d-none');
+            $tokenizeCheckboxes.closest('label').removeClass('d-none');
         },
 
         //--------------------------------------------------------------------------
@@ -396,10 +453,13 @@ odoo.define('payment.payment_form_mixin', require => {
          */
         _onClickPaymentOption: function (ev) {
             // Uncheck all radio buttons
-            this.$('input[type="radio"]').prop('checked', false);
+            this.$('input[name="o_payment_radio"]').prop('checked', false);
             // Check radio button linked to selected payment option
-            const checkedRadio = $(ev.currentTarget).find('input[type="radio"]')[0];
+            const checkedRadio = $(ev.currentTarget).find('input[name="o_payment_radio"]')[0];
             $(checkedRadio).prop('checked', true);
+
+            // Show the inputs in case they had been hidden
+            this._showInputs();
 
             // Disable the submit button while building the content
             this._disableButton(false);

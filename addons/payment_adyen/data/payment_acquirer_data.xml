@@ -3,13 +3,12 @@
     <data noupdate="1">
 
         <record id="payment.payment_acquirer_adyen" model="payment.acquirer">
-            <field name="name">Adyen</field>
-            <field name="image_128"
-                   type="base64"
-                   file="payment_adyen/static/src/img/adyen_icon.png"/>
             <field name="provider">adyen</field>
             <field name="company_id" ref="base.main_company"/>
-            <field name="inline_template_view_id" ref="adyen_inline_template"/>
+            <field name="inline_form_view_id" ref="inline_form"/>
+            <field name="support_authorization">False</field>
+            <field name="support_fees_computation">False</field>
+            <field name="support_tokenization">True</field>
         </record>
 
     </data>

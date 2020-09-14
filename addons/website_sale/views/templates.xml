@@ -1504,13 +1504,19 @@
 
                             <div class="oe_structure clearfix mt-3" id="oe_structure_website_sale_payment_1"/>
 
-                            <div id="payment_method" class="mt-3" t-if="(acquirers or tokens) and website_sale_order.amount_total">
-                                <h3 class="mb24">Pay with </h3>
-                                <t t-call="payment.checkout">
-                                    <t t-set="footer_template_id" t-value="'website_sale.payment_footer'"/>
-                                    <t t-set="submit_button_label" t-value="'Pay Now'"/>
-                                </t>
-                            </div>
+                            <t t-if="website_sale_order.amount_total">
+                                <div t-if="acquirers or tokens" id="payment_method" class="mt-3">
+                                    <h3 class="mb24">Pay with </h3>
+                                    <t t-call="payment.checkout">
+                                        <t t-set="footer_template_id" t-value="'website_sale.payment_footer'"/>
+                                        <t t-set="submit_button_label" t-value="'Pay Now'"/>
+                                    </t>
+                                </div>
+                                <div t-else="" class="alert alert-warning">
+                                    <strong>No suitable payment option could be found.</strong><br/>
+                                    If you believe that it is an error, please contact the website administrator.
+                                </div>
+                            </t>
 
                             <div t-if="not acquirers" class="mt-2">
                                 <a role="button" class="btn-link"
@@ -1775,14 +1781,6 @@
                 </div>
                 <div t-if="payment_tx_id.acquirer_id.provider == 'transfer' and order.reference" class="card-body">
                     <b>Communication: </b><span t-esc='order.reference'/>
-                </div>
-
-                <div t-if="payment_tx_id.acquirer_id.qr_code and (payment_tx_id.acquirer_id.provider == 'transfer')">
-                    <t t-set="qr_code" t-value="payment_tx_id.acquirer_id.journal_id.bank_account_id.build_qr_code_url(order.amount_total,payment_tx_id.reference, None, payment_tx_id.currency_id, payment_tx_id.partner_id)"/>
-                    <div class="card-body" t-if="qr_code">
-                        <h3>Or scan me with your banking app.</h3>
-                        <img class="border border-dark rounded" t-att-src="qr_code"/>
-                    </div>
                 </div>
             </div>
         </div>

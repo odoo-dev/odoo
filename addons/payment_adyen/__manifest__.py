@@ -2,10 +2,10 @@
 
 {
     'name': 'Adyen Payment Acquirer',
+    'version': '2.0',
     'category': 'Accounting/Payment Acquirers',
     'sequence': 340,
     'summary': 'Payment Acquirer: Adyen Implementation',
-    'version': '1.0',
     'description': """Adyen Payment Acquirer""",
     'depends': ['payment'],
     'data': [
@@ -14,7 +14,6 @@
         'views/assets.xml',
         'data/payment_acquirer_data.xml',  # Depends on views/payment_adyen_templates.xml
     ],
-    'installable': True,
     'application': True,
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',

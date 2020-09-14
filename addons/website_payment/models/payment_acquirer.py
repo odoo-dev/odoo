@@ -14,9 +14,7 @@ class PaymentAcquirer(models.Model):
     )
 
     def _get_base_url(self):
-        """ Get the base url of the website on which the payment is made.
-
-        Override of _get_base_url in payment to use the website_id field if set.
+        """ Override of payment to take multi-website feature into account.
 
         Note: self.ensure_one()
 
@@ -30,5 +28,5 @@ class PaymentAcquirer(models.Model):
         if not url and self.website_id:  # Secondly, use the website set on the acquirer
             url = self.website_id._get_http_domain()
         if not url:  # Fallback to web.base.url
-            url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+            url = super()._get_base_url()
         return url

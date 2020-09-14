@@ -49,27 +49,32 @@ odoo.define('payment.checkout_form', require => {
             ev.preventDefault();
 
             // Check that the user has selected a payment option
-            const $checkedRadios = this.$('input[type="radio"]:checked');
+            const $checkedRadios = this.$('input[name="o_payment_radio"]:checked');
             if (!this._ensureRadioIsChecked($checkedRadios)) {
                 return;
             }
             const checkedRadio = $checkedRadios[0];
 
             // Extract contextual values from the radio button
-            const paymentOptionId = this._getPaymentOptionIdFromRadio(checkedRadio);
             const provider = this._getProviderFromRadio(checkedRadio);
+            const paymentOptionId = this._getPaymentOptionIdFromRadio(checkedRadio);
             const flow = this._getPaymentFlowFromRadio(checkedRadio);
 
             // Update the tx context with the value of the "Save my payment details" checkbox
-            this.txContext.tokenizationRequested = flow !== 'token'
-                && this.$(`#o_payment_inline_form_${paymentOptionId}`).find(
-                    'input[name="o_payment_save_as_token"]'
-                )[0].checked;
+            if (flow !== 'token') {
+                const $tokenizeCheckbox = this.$(
+                    `#o_payment_acquirer_inline_form_${paymentOptionId}` // Only match acq. radios
+                ).find('input[name="o_payment_save_as_token"]');
+                this.txContext.tokenizationRequested = $tokenizeCheckbox.length === 1
+                    && $tokenizeCheckbox[0].checked;
+            } else {
+                this.txContext.tokenizationRequested = false;
+            }
 
             // Make the payment
-            this._disableButton();
-            this._processTx(paymentOptionId, provider, flow);
-            this._enableButton();
+            this._hideError(); // Don't keep the error displayed if the user is going through 3DS2
+            this._disableButton(true); // Disable until it is needed again
+            this._processPayment(provider, paymentOptionId, flow);
         },
 
         /**

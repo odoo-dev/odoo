@@ -11,36 +11,16 @@ import requests
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
-# Endpoints of the Checkout API.
-# See https://docs.adyen.com/api-explorer/#/PaymentSetupAndVerificationService/v52/overview
-API_ENDPOINTS = {
-    'disable': {'path': '/disable', 'version': 49},
-    'origin_keys': {'path': '/originKeys', 'version': 53},
-    'payments': {'path': '/payments', 'version': 53},
-    'payments_details': {'path': '/payments/details', 'version': 53},
-    'payment_methods': {'path': '/paymentMethods', 'version': 53},
-}
-
-# Adyen-specific mapping of currency codes in ISO 4217 format to the number of decimals.
-# Only currencies for which Adyen does not follow the ISO 4217 norm are listed here.
-# See https://docs.adyen.com/development-resources/currency-codes
-CURRENCY_DECIMALS = {
-    'CLP': 2,
-    'CVE': 0,
-    'IDR': 0,
-    'ISK': 2,
-}
+from odoo.addons.payment_adyen.const import API_ENDPOINT_VERSIONS
 
 _logger = logging.getLogger(__name__)
 
 
 class PaymentAcquirer(models.Model):
-
     _inherit = 'payment.acquirer'
 
     provider = fields.Selection(
-        selection_add=[('adyen', "Adyen")], ondelete={'adyen': 'set default'}
-    )
+        selection_add=[('adyen', "Adyen")], ondelete={'adyen': 'set default'})
     adyen_merchant_account = fields.Char(
         string="Merchant Account",
         help="The code of the merchant account to use with this acquirer",
@@ -57,21 +37,6 @@ class PaymentAcquirer(models.Model):
     adyen_recurring_api_url = fields.Char(
         string="Recurring API URL", help="The base URL for the Recurring API endpoints",
         required_if_provider='adyen', groups='base.group_system')
-
-    #=== COMPUTE METHODS ===#
-
-    @api.model
-    def _get_supported_features(self, provider):
-        """Get the specification of features supported by Adyen.
-
-        :param string provider: The provider of the acquirer
-        :return: The supported features for this acquirer
-        :rtype: dict
-        """
-        if provider != 'adyen':
-            return super()._get_supported_features(provider)
-
-        return {'tokenization': True}
 
     #=== CRUD METHODS ===#
 
@@ -179,13 +144,13 @@ class PaymentAcquirer(models.Model):
         """
         return f'ODOO_PARTNER_{partner_id}'
 
-    def _adyen_make_request(self, base_url, endpoint_key, payload=None, method='POST'):
+    def _adyen_make_request(self, base_url, endpoint, payload=None, method='POST'):
         """ Make a request to Adyen API at the specified endpoint.
 
         Note: self.ensure_one()
 
         :param str base_url: The base for the request URL. Depends on both the merchant and the API
-        :param str endpoint_key: The identifier of the endpoint to be reached by the request
+        :param str endpoint: The endpoint to be reached by the request
         :param dict payload: The payload of the request
         :param str method: The HTTP method of the request
         :return The JSON-formatted content of the response
@@ -204,21 +169,22 @@ class PaymentAcquirer(models.Model):
             :return: The final URL
             :rtype: str
             """
-            _base = _base_url.rstrip("/")  # Remove potential trailing slash
-            _endpoint = _endpoint.lstrip("/")  # Remove potential leading slash
+            _base = _base_url.rstrip('/')  # Remove potential trailing slash
+            _endpoint = _endpoint.lstrip('/')  # Remove potential leading slash
             return f'{_base}/V{_version}/{_endpoint}'
 
         self.ensure_one()
 
-        version, endpoint = (API_ENDPOINTS[endpoint_key][k] for k in ('version', 'path'))
+        version = API_ENDPOINT_VERSIONS[endpoint]
         url = _build_url(base_url, version, endpoint)
         headers = {'X-API-Key': self.adyen_api_key}
-        response = requests.request(method, url, json=payload, headers=headers)
-        if not response.ok:
-            try:
-                response.raise_for_status()
-            except requests.exceptions.HTTPError:
-                _logger.exception(response.text)
-                # TODO try except in controller
-                raise ValidationError(f"Adyen: {response.text}")
+        try:
+            response = requests.request(method, url, json=payload, headers=headers, timeout=60)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            _logger.exception(f"Adyen: unable to reach endpoint at {url}")
+            raise ValidationError("The connection to Adyen could not be established.")
+        except requests.exceptions.HTTPError:
+            _logger.exception(f"Adyen: invalid API request at {url} with data {payload}")
+            raise ValidationError("The communication with Adyen failed.")
         return response.json()

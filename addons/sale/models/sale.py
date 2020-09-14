@@ -860,7 +860,7 @@ Reason(s) of this behavior could be:
 
     def action_done(self):
         for order in self:
-            tx = order.sudo().transaction_ids.get_last_transaction()
+            tx = order.sudo().transaction_ids._get_last()
             if tx and tx.state == 'pending' and tx.acquirer_id.provider == 'transfer':
                 tx._set_done()
                 tx.write({'is_post_processed': True})
@@ -977,59 +977,6 @@ Reason(s) of this behavior could be:
 
         return groups
 
-    def _create_payment_transaction(self, vals):  # TODO ANV rename to order._get_vals_...
-        '''Similar to self.env['payment.transaction'].create(vals) but the values are filled with the
-        current sales orders fields (e.g. the partner or the currency).
-        :param vals: The values to create a new payment.transaction.
-        :return: The newly created payment.transaction record.
-        '''
-        # Ensure the currencies are the same.
-        currency = self[0].pricelist_id.currency_id
-        if any(so.pricelist_id.currency_id != currency for so in self):
-            raise ValidationError(_('A transaction can\'t be linked to sales orders having different currencies.'))
-
-        # Ensure the partner are the same.
-        partner = self[0].partner_id
-        if any(so.partner_id != partner for so in self):
-            raise ValidationError(_('A transaction can\'t be linked to sales orders having different partners.'))
-
-        # Try to retrieve the acquirer. However, fallback to the token's acquirer.
-        acquirer_id = vals.get('acquirer_id')
-        payment_token_id = vals.get('token_id')
-
-        if payment_token_id:
-            payment_token = self.env['payment.token'].sudo().browse(payment_token_id)
-            acquirer = payment_token.acquirer_id
-        else:
-            acquirer = self.env['payment.acquirer'].browse(acquirer_id)
-
-        # Check an acquirer is there.
-        if not acquirer:
-            raise ValidationError(_('A payment acquirer is required to create a transaction.'))
-
-        # Check a journal is set on acquirer.
-        if not acquirer.journal_id:
-            raise ValidationError(_('A journal must be specified for the acquirer %s.', acquirer.name))
-
-        if not acquirer_id:
-            vals['acquirer_id'] = acquirer.id
-
-        vals.update({
-            'amount': sum(self.mapped('amount_total')),
-            'currency_id': currency.id,
-            'partner_id': partner.id,
-            'sale_order_ids': [(6, 0, self.ids)],
-            'operation': f'online_{flow}',
-        })
-
-        transaction = self.env['payment.transaction'].create(vals)
-
-        # Process directly if payment_token
-        if transaction.token_id:
-            transaction._send_payment_request()
-
-        return transaction
-
     def preview_sale_order(self):
         self.ensure_one()
         return {
@@ -1046,14 +993,14 @@ Reason(s) of this behavior could be:
                 line.qty_to_invoice = 0
 
     def payment_action_capture(self):
-        self.authorized_transaction_ids.s2s_capture_transaction()
+        self.authorized_transaction_ids._send_capture_request()
 
     def payment_action_void(self):
-        self.authorized_transaction_ids.s2s_void_transaction()
+        self.authorized_transaction_ids._send_void_request()
 
     def get_portal_last_transaction(self):
         self.ensure_one()
-        return self.transaction_ids.get_last_transaction()
+        return self.transaction_ids._get_last()
 
     @api.model
     def _get_customer_lead(self, product_tmpl_id):
@@ -1172,12 +1119,8 @@ class SaleOrderLine(models.Model):
             else:
                 line.product_updatable = True
 
-    @api.depends(
-        'qty_invoiced',
-        'qty_delivered',
-        'product_uom_qty',
-        'order_id.state',
-        'product_id.invoice_policy')
+    # no trigger product_id.invoice_policy to avoid retroactively changing SO
+    @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'order_id.state')
     def _get_to_invoice_qty(self):
         """
         Compute the quantity to invoice. If the invoice policy is order, the quantity to invoice is
