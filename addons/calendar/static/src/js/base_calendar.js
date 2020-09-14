@@ -127,11 +127,11 @@ BasicModel.include({
         return this._rpc({
             model: 'res.partner',
             method: 'get_attendee_detail',
-            args: [attendeeIDs, meetingID],
+            args: [attendeeIDs, [meetingID]],
             context: context,
         }).then(function (result) {
             return _.map(result, function (d) {
-                return _.object(['id', 'display_name', 'status', 'color'], d);
+                return _.object(['id', 'display_name', 'status', 'color', 'event_id', 'attendee_id', 'is_alone'], d);
             });
         });
     },

@@ -51,7 +51,7 @@ QUnit.module('calendar', {
                         "the method should only be called on res.partner");
                     assert.deepEqual(args.args[0], [1, 2],
                         "the partner ids should be passed as argument");
-                    assert.strictEqual(args.args[1], 14,
+                    assert.deepEqual(args.args[1], [14],
                         "the event id should be passed as argument");
                     return Promise.resolve([
                         [1, "Jesus", "accepted", 0],

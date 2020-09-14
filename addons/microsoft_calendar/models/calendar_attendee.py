@@ -10,6 +10,11 @@ class Attendee(models.Model):
     _name = 'calendar.attendee'
     _inherit = 'calendar.attendee'
 
+    def write(self, vals):
+        super().write(vals)
+        if 'state' in vals:
+            self.event_id.write({'need_sync_m': True})
+
     def _send_mail_to_attendees(self, template_xmlid, force_send=False, ignore_recurrence=False):
         """ Override the super method
         If not synced with Microsoft Outlook, let Odoo in charge of sending emails

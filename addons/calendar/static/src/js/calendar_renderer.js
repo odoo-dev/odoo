@@ -5,6 +5,8 @@ const CalendarRenderer = require('web.CalendarRenderer');
 const CalendarPopover = require('web.CalendarPopover');
 const session = require('web.session');
 
+const core = require('web.core');
+const _t = core._t;
 
 const AttendeeCalendarPopover = CalendarPopover.extend({
     template: 'Calendar.attendee.status.popover',
@@ -35,15 +37,21 @@ const AttendeeCalendarPopover = CalendarPopover.extend({
     /**
      * @return {boolean}
      */
+    isCurrentPartnerOrganizer() {
+        return this.event.extendedProps.record.partner_id[0] === session.partner_id;
+    },
+    /**
+     * @return {boolean}
+     */
     isCurrentPartnerAttendee() {
-        return this.event.extendedProps.record.partner_ids.includes(session.partner_id);
+        return this.event.extendedProps.record.partner_ids.includes(session.partner_id) && this.event.extendedProps.attendee_id === session.partner_id;
     },
     /**
      * @override
      * @return {boolean}
      */
     isEventDeletable() {
-        return this._super() && (this._isEventPrivate() ? this.isCurrentPartnerAttendee() : true);
+        return this._super() && this.isCurrentPartnerAttendee();
     },
     /**
      * @override
@@ -104,6 +112,32 @@ const AttendeeCalendarRenderer = CalendarRenderer.extend({
         CalendarPopover: AttendeeCalendarPopover,
         eventTemplate: 'Calendar.calendar-box',
     }),
+    /**
+     * Add the attendee-id attribute in order to distinct the events when there are
+     * several attendees in the event.
+     * @override
+     */
+    _addEventAttributes: function (element, event) {
+        this._super(...arguments);
+        element.attr('data-attendee-id', event.extendedProps.attendee_id);
+    },
+    /**
+     * Check also the attendee-id attribute to select the good event.
+     * @override
+     */
+    _findActualEvent: function (info) {
+        return `${this._super(...arguments)}[data-attendee-id=${info.event.extendedProps.attendee_id}]`;
+    },
+    /**
+     * @override
+     */
+    _onPopoverShown: function ($popoverElement, calendarPopover) {
+        this._super(...arguments);
+        var $popover = $($popoverElement.data('bs.popover').tip);
+        if (calendarPopover.isCurrentPartnerAttendee() && !calendarPopover.isCurrentPartnerOrganizer()) {
+            $popover.find('.o_cw_popover_delete').text(_t("Decline"));
+        }
+    },
 });
 
 return AttendeeCalendarRenderer

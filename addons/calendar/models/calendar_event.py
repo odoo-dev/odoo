@@ -91,11 +91,18 @@ class Meeting(models.Model):
 
     def _find_my_attendee(self):
         """ Return the first attendee where the user connected has been invited
+            or the attendee selected in the filter that is the owner
             from all the meeting_ids in parameters.
         """
         self.ensure_one()
         for attendee in self.attendee_ids:
             if self.env.user.partner_id == attendee.partner_id:
+                return attendee
+        contacts = self.env['calendar.contacts'].search([('user_id', '=', self.env.user.id), ('partner_id', 'in', self.attendee_ids.partner_id.ids), ('partner_checked', '=', True)]).partner_id
+        if self.partner_id in contacts and self.partner_id in self.attendee_ids.partner_id:
+            return self.attendee_ids.filtered(lambda attendee: attendee.partner_id == self.partner_id)
+        for attendee in self.attendee_ids:
+            if attendee.partner_id in contacts and attendee.state != "needsAction":
                 return attendee
         return False
 
@@ -733,8 +740,9 @@ class Meeting(models.Model):
                                 activity_vals['user_id'] = user_id
                             values['activity_ids'] = [(0, 0, activity_vals)]
 
+        self_partner_id = [(4, self.env.user.partner_id.id)]
         vals_list = [
-            dict(vals, attendee_ids=self._attendees_values(vals['partner_ids'])) if 'partner_ids' in vals else vals
+            dict(vals, attendee_ids=self._attendees_values(vals.get('partner_ids', self_partner_id)))
             for vals in vals_list
         ]
         recurrence_fields = self._get_recurrent_fields()

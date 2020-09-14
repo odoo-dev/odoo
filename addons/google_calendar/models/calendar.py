@@ -30,7 +30,7 @@ class Meeting(models.Model):
 
     @api.model
     def _get_google_synced_fields(self):
-        return {'name', 'description', 'allday', 'start', 'date_end', 'stop',
+        return {'name', 'description', 'allday', 'start', 'date_end', 'stop', 'partner_ids',
                 'attendee_ids', 'alarm_ids', 'location', 'privacy', 'active'}
 
     @api.model
@@ -98,7 +98,7 @@ class Meeting(models.Model):
             user = google_event.owner(self.env)
             google_attendees += [{
                 'email': user.partner_id.email,
-                'status': {'response': 'accepted'},
+                'responseStatus': 'accepted',
             }]
         emails = [a.get('email') for a in google_attendees]
         existing_attendees = self.env['calendar.attendee']
@@ -179,7 +179,6 @@ class Meeting(models.Model):
             'method': "email" if alarm.alarm_type == "email" else "popup",
             'minutes': alarm.duration_minutes
         } for alarm in self.alarm_ids]
-        attendee_ids = self.attendee_ids.filtered(lambda a: a.partner_id not in self.user_id.partner_id)
         values = {
             'id': self.google_id,
             'start': start,
@@ -216,3 +215,13 @@ class Meeting(models.Model):
         super(Meeting, my_cancelled_records)._cancel()
         attendees = (self - my_cancelled_records).attendee_ids.filtered(lambda a: a.partner_id == user.partner_id)
         attendees.state = 'declined'
+
+
+class Attendee(models.Model):
+    _name = 'calendar.attendee'
+    _inherit = ['calendar.attendee']
+
+    def write(self, vals):
+        super().write(vals)
+        if 'state' in vals:
+            self.event_id.write({'need_sync': True})

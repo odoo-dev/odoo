@@ -423,7 +423,7 @@ return AbstractRenderer.extend({
                 eventClickInfo.jsEvent.stopPropagation();
                 var eventData = eventClickInfo.event;
                 self._unselectEvent();
-                $(self.calendarElement).find(`[data-event-id=${eventData.id}]`).addClass('o_cw_custom_highlight');
+                $(self.calendarElement).find(self._findActualEvent(eventClickInfo)).addClass('o_cw_custom_highlight');
                 self._renderEventPopover(eventData, $(eventClickInfo.el));
             },
             yearDateClick: function (info) {
@@ -452,7 +452,7 @@ return AbstractRenderer.extend({
                 var event = info.event;
                 var element = $(info.el);
                 var view = info.view;
-                element.attr('data-event-id', event.id);
+                self._addEventAttributes(element, event);
                 if (view.type === 'dayGridYear') {
                     const color = this.getColor(event.extendedProps.color_index);
                     if (typeof color === 'string') {
@@ -477,6 +477,7 @@ return AbstractRenderer.extend({
                 if (view.type === 'dayGridMonth' && event.extendedProps.record) {
                     var start = event.extendedProps.r_start || event.start;
                     var end = event.extendedProps.r_end || event.end;
+                    $(this.el).find(_.str.sprintf('.fc-day[data-date="%s"]', moment(start).format('YYYY-MM-DD'))).addClass('fc-has-event');
                     // Detect if the event occurs in just one day
                     // note: add & remove 1 min to avoid issues with 00:00
                     var isSameDayEvent = moment(start).clone().add(1, 'minute').isSame(moment(end).clone().subtract(1, 'minute'), 'day');
@@ -509,13 +510,13 @@ return AbstractRenderer.extend({
             // The css ":hover" selector can't be used because these events
             // are rendered using multiple elements.
             eventMouseEnter: function (mouseEnterInfo) {
-                $(self.calendarElement).find(`[data-event-id=${mouseEnterInfo.event.id}]`).addClass('o_cw_custom_hover');
+                $(self.calendarElement).find(self._findActualEvent(mouseEnterInfo)).addClass('o_cw_custom_hover');
             },
             eventMouseLeave: function (mouseLeaveInfo) {
                 if (!mouseLeaveInfo.event.id) {
                     return;
                 }
-                $(self.calendarElement).find(`[data-event-id=${mouseLeaveInfo.event.id}]`).removeClass('o_cw_custom_hover');
+                $(self.calendarElement).find(self._findActualEvent(mouseLeaveInfo)).removeClass('o_cw_custom_hover');
             },
             eventDragStart: function (mouseDragInfo) {
                 $(self.calendarElement).find(`[data-event-id=${mouseDragInfo.event.id}]`).addClass('o_cw_custom_hover');
@@ -552,6 +553,22 @@ return AbstractRenderer.extend({
         }, fcOptions);
         options.plugins.push(createYearCalendarView(FullCalendar, options));
         return options;
+    },
+    /**
+     * Compute the string to find the good event.
+     * @param {jQueryElement} info
+     * @returns {String}
+     */
+    _findActualEvent: function (info) {
+        return `[data-event-id=${info.event.id}]`;
+    },
+    /**
+     * Add attribute to the element
+     * @param {jQueryElement} element 
+     * @param {Object} event 
+     */
+    _addEventAttributes: function (element, event) {
+        element.attr('data-event-id', event.id);
     },
     /**
      * Initialize the main calendar
@@ -886,13 +903,15 @@ return AbstractRenderer.extend({
         for (const event of events) {
             const start = moment(event.extendedProps.r_start);
             const end = moment(event.extendedProps.r_end);
+            const duration = moment.duration(end.diff(start)).asDays();
+            event.extendedProps.record.start_hour = event.extendedProps.record.allday === false && duration < 1 ? start.format("HH:mm") : "";
             const key = this._getFormattedDate(start, end, false, event.extendedProps.record.allday);
             if (!(key in groupedEvents)) {
                 groupedEvents[key] = [];
                 groupKeys.push({
                     key: key,
-                    start: event.extendedProps.r_start,
-                    end: event.extendedProps.r_end,
+                    start: event.start,
+                    end: event.end,
                     isSameDayEvent: start.clone().add(1, 'minute')
                         .isSame(end.clone().subtract(1, 'minute'), 'day'),
                 });
@@ -1004,7 +1023,7 @@ return AbstractRenderer.extend({
      */
     _onDeleteEvent: function (event) {
         this._unselectEvent();
-        this.trigger_up('deleteRecord', {id: parseInt(event.data.id, 10)});
+        this.trigger_up('deleteRecord', {id: parseInt(event.data.id, 10), event: event.target.event.extendedProps});
     },
 });
 

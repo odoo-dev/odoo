@@ -105,7 +105,7 @@ class TestSyncOdoo2Google(TransactionCase):
             'guestsCanModify': True,
             'reminders': {'overrides': [], 'useDefault': False},
             'organizer': {'email': 'odoobot@example.com', 'self': True},
-            'attendees': [],
+            'attendees': [{'email': 'odoobot@example.com', 'responseStatus': 'accepted'}],
             'extendedProperties': {'shared': {'%s_odoo_id' % self.env.cr.dbname: event.id}}
         })
 
@@ -164,7 +164,7 @@ class TestSyncOdoo2Google(TransactionCase):
             'guestsCanModify': True,
             'reminders': {'overrides': [], 'useDefault': False},
             'organizer': {'email': 'odoobot@example.com', 'self': True},
-            'attendees': [],
+            'attendees': [{'email': 'odoobot@example.com', 'responseStatus': 'accepted'}],
             'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=2;BYDAY=WE'],
             'extendedProperties': {'shared': {'%s_odoo_id' % self.env.cr.dbname: recurrence.id}}
         })
@@ -229,7 +229,7 @@ class TestSyncOdoo2Google(TransactionCase):
             'location': '',
             'guestsCanModify': True,
             'organizer': {'email': 'odoobot@example.com', 'self': True},
-            'attendees': [],
+            'attendees': [{'email': 'odoobot@example.com', 'responseStatus': 'accepted'}],
             'extendedProperties': {'shared': {'%s_odoo_id' % self.env.cr.dbname: event.id}},
             'reminders': {'overrides': [], 'useDefault': False},
             'visibility': 'public',

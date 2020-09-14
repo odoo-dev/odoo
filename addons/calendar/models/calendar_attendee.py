@@ -31,6 +31,8 @@ class Attendee(models.Model):
     partner_id = fields.Many2one('res.partner', 'Contact', required=True, readonly=True)
     state = fields.Selection(STATE_SELECTION, string='Status', readonly=True, default='needsAction',
                              help="Status of the attendee's participation")
+    is_alone = fields.Boolean('Is alone', compute="_compute_is_alone",
+        help="Check if the attendee is alone in the event, i.e. if he is the organizer and is the only one that hasn't declined the event")
     common_name = fields.Char('Common name', compute='_compute_common_name', store=True)
     email = fields.Char('Email', related='partner_id.email', help="Email of Invited Person")
     availability = fields.Selection(
@@ -42,6 +44,15 @@ class Attendee(models.Model):
     def _compute_common_name(self):
         for attendee in self:
             attendee.common_name = attendee.partner_id.name or attendee.email
+
+    @api.depends('state', 'event_id.attendee_ids', 'event_id.partner_id')
+    def _compute_is_alone(self):
+        for attendee in self:
+            all_declined = not any((attendee.event_id.attendee_ids - attendee).filtered(lambda a: a.state != 'declined'))
+            if len(attendee.event_id.attendee_ids) > 1 and attendee.event_id.partner_id.id == attendee.partner_id.id and all_declined:
+                attendee.is_alone = True
+            else:
+                attendee.is_alone = False
 
     @api.model_create_multi
     def create(self, vals_list):

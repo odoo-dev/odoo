@@ -12,23 +12,27 @@ class Partner(models.Model):
     calendar_last_notif_ack = fields.Datetime(
         'Last notification marked as read from base Calendar', default=fields.Datetime.now)
 
-    def get_attendee_detail(self, meeting_id):
-        """ Return a list of tuple (id, name, status)
-            Used by base_calendar.js : Many2ManyAttendee
+    def get_attendee_detail(self, meeting_ids):
+        """ Return a list of tuple (id, name, status, color, event_id, attendee_id, attendee_status)
+            Used by:
+                - base_calendar.js : Many2ManyAttendee
+                - calendar_model.js (calendar.CalendarModel)
         """
         datas = []
-        meeting = None
-        if meeting_id:
-            meeting = self.env['calendar.event'].browse(meeting_id)
+        meetings = self.env['calendar.event'].browse(meeting_ids)
 
-        for partner in self:
-            data = partner.name_get()[0]
-            data = [data[0], data[1], False, partner.color]
-            if meeting:
+        for meeting in meetings:
+            data = []
+            for partner in self:
+                data = partner.name_get()[0]
+                data = [data[0], data[1], False, partner.color, False, False, False]
                 for attendee in meeting.attendee_ids:
                     if attendee.partner_id.id == partner.id:
                         data[2] = attendee.state
-            datas.append(data)
+                        data[4] = meeting.id
+                        data[5] = attendee.id
+                        data[6] = attendee.is_alone
+                        datas.append(data)
         return datas
 
     @api.model

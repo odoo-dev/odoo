@@ -7,7 +7,7 @@
     'category': 'Productivity',
     'description': "",
     'depends': ['microsoft_account', 'calendar'],
-    'qweb': ['static/src/xml/*.xml'],
+    'qweb': ['static/src/xml/microsoft_calendar_popover.xml'],
     'data': [
         'data/microsoft_calendar_data.xml',
         'security/ir.model.access.csv',
