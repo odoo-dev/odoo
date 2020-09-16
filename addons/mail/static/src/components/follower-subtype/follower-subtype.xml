@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.FollowerSubtype" owl="1">
+        <div class="o-FollowerSubtype">
+            <label class="o-FollowerSubtype-label">
+                <input class="o-FollowerSubtype-checkbox" type="checkbox" t-att-checked="follower.$$$selectedSubtypes(mself).includes(followerSubtype) ? 'checked': ''" t-on-change="_onChangeCheckbox"/>
+                <t t-esc="followerSubtype.$$$name(mself)"/>
+            </label>
+        </div>
+    </t>
+
+</templates>

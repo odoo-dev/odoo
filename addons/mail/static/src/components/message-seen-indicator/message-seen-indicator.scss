@@ -1,0 +1,39 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-MessageSeenIndicator {
+    display: flex;
+    position: relative;
+    flex-wrap: nowrap;
+}
+
+.o-MessageSeenIndicator-icon {
+
+    &.o-isFirst {
+        padding-left: map-get($spacers, 1);
+    }
+
+    &.o-isSecond {
+        position: absolute;
+        top: -1px;
+        left: -1px;
+    }
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-MessageSeenIndicator {
+    opacity: 0.6;
+
+    &.o-isAllSeen {
+        color: $o-brand-odoo;
+    }
+
+    &:hover {
+        cursor: pointer;
+        opacity: 0.8;
+    }
+}

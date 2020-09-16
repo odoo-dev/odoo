@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ComposerSuggestion" owl="1">
+        <a class="o-ComposerSuggestion dropdown-item" t-att-class="{ 'active': isActive }" href="#" t-att-title="title()" role="menuitem" t-on-click="_onClick">
+            <t t-if="record">
+                <t t-if="isCannedResponse">
+                    <span class="o-ComposerSuggestion-part1"><t t-esc="record.$$$source(mself)"/></span>
+                    <span class="o-ComposerSuggestion-part2"><t t-esc="record.$$$substitution(mself)"/></span>
+                </t>
+                <t t-if="isChannel">
+                    <span class="o-ComposerSuggestion-part1"><t t-esc="record.$$$name(mself)"/></span>
+                </t>
+                <t t-if="isCommand">
+                    <span class="o-ComposerSuggestion-part1"><t t-esc="record.$$$name(mself)"/></span>
+                    <span class="o-ComposerSuggestion-part2"><t t-esc="record.$$$help(mself)"/></span>
+                </t>
+                <t t-if="isPartner">
+                    <PartnerImStatusIcon
+                        class="o-ComposerSuggestion-partnerImStatusIcon"
+                        hasBackground="false"
+                        partner="record"
+                    />
+                    <span class="o-ComposerSuggestion-part1"><t t-esc="record.$$$nameOrDisplayName(mself)"/></span>
+                    <t t-if="record.$$$email(mself)">
+                        <span class="o-ComposerSuggestion-part2">(<t t-esc="record.$$$email(mself)"/>)</span>
+                    </t>
+                </t>
+            </t>
+        </a>
+    </t>
+
+</templates>

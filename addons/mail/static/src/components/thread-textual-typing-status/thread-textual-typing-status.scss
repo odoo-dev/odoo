@@ -1,0 +1,12 @@
+
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-ThreadTextualTypingStatus {
+    display: flex;
+}
+
+.o-ThreadTextualTypingStatus-separator {
+    width: map-get($spacers, 1);
+}

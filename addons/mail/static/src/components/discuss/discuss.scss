@@ -7,27 +7,28 @@
     min-height: 0;
 }
 
-.o-autogrow {
+// AKU TODO: move to discuss global variables
+.o-isAutogrow {
     flex: 1 1 auto;
 }
 
-.o_Discuss {
+.o-Discuss {
     display: flex;
     height: 100%;
     min-height: 0;
 
-    &.o-mobile {
+    &.o-isMobile {
         flex-flow: column;
         align-items: center;
     }
 }
 
-.o_Discuss_chatWindowHeader {
+.o-Discuss-chatWindowHeader {
     width: 100%;
     flex: 0 0 auto;
 }
 
-.o_Discuss_content {
+.o-Discuss-content {
     height: 100%;
     overflow: auto;
     flex: 1 1 auto;
@@ -35,39 +36,39 @@
     flex-flow: column;
 }
 
-.o_Discuss_messagingNotInitialized {
+.o-Discuss-messagingNotInitialized {
     flex: 1 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.o_Discuss_messagingNotInitializedIcon {
+.o-Discuss-messagingNotInitializedIcon {
     margin-right: 3px;
 }
 
-.o_Discuss_mobileAddItemHeader {
+.o-Discuss-mobileAddItemHeader {
     display: flex;
     justify-content: center;
     width: 100%;
     padding: 0 10px;
 }
 
-.o_Discuss_mobileAddItemHeaderInput {
+.o-Discuss-mobileAddItemHeaderInput {
     flex: 1 1 auto;
     margin-bottom: 8px;
     padding: 8px;
 }
 
-.o_Discuss_mobileMailboxSelection {
+.o-Discuss-mobileMailboxSelection {
     width: 100%;
 }
 
-.o_Discuss_mobileNavbar {
+.o-Discuss-mobileNavbar {
     width: 100%;
 }
 
-.o_Discuss_noThread {
+.o-Discuss-noThread {
     display: flex;
     flex: 1 1 auto;
     width: 100%;
@@ -75,26 +76,26 @@
     justify-content: center;
 }
 
-.o_Discuss_replyingToMessageComposer {
+.o-Discuss-replyingToMessageComposer {
     width: 100%;
 }
 
-.o_Discuss_sidebar {
+.o-Discuss-sidebar {
     height: 100%;
     overflow: auto;
     padding-top: 10px;
     flex: 0 0 auto;
 }
 
-.o_Discuss_thread {
+.o-Discuss-thread {
     flex: 1 1 auto;
 
-    &.o-mobile {
+    &.o-isMobile {
         width: 100%;
     }
 }
 
-.o_Discuss_notificationList {
+.o-Discuss-notificationList {
     width: 100%;
     flex: 1 1 auto;
 }
@@ -102,11 +103,11 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_Discuss.o-mobile {
+.o-Discuss.o-isMobile {
     background-color: white;
 }
 
-.o_Discuss_mobileAddItemHeaderInput {
+.o-Discuss-mobileAddItemHeaderInput {
     appearance: none;
     border: 1px solid gray('400');
     border-radius: 5px;

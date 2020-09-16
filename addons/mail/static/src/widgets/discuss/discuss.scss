@@ -2,7 +2,7 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_widget_Discuss {
+.o-widget-Discuss {
     display: flex;
     flex: 0 0 100%;
     flex-flow: column;
@@ -13,23 +13,23 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_widget_Discuss {
+.o-widget-Discuss {
 
     .o_control_panel {
         border-bottom: 0; // cancel default border, so that we only apply it on top of discuss content
     }
 
-    .o_Discuss_content {
+    .o-Discuss-content {
         border-top: 1px solid darken($o-control-panel-background-color, 20%);
     }
 
-    .o_Discuss.o-mobile {
+    .o-Discuss.o-isMobile {
 
-        &:not(.o-adding-item) {
+        &:not(.o-isAddingItem) {
             border-top: 1px solid darken($o-control-panel-background-color, 20%);
         }
 
-        &.o-adding-item .o_Discuss_mobileAddItemHeader {
+        &.o-isAddingItem .o-Discuss-mobileAddItemHeader {
             border-bottom: 1px solid darken($o-control-panel-background-color, 20%);
         }
     }

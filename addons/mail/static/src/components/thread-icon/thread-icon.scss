@@ -1,0 +1,26 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-ThreadIcon {
+    display: flex;
+    width: 13px;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.o-ThreadIcon-typing {
+    flex: 1 1 auto;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-ThreadIcon-away {
+    color: theme-color('warning');
+}
+
+.o-ThreadIcon-online {
+    color: $o-enterprise-primary-color;
+}

@@ -1,0 +1,137 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-MessageList {
+    display: flex;
+    flex-flow: column;
+    overflow: auto;
+
+    &.o-isEmpty {
+        align-items: center;
+        justify-content: center;
+    }
+
+    &:not(.o-isEmpty) {
+        padding-bottom: 15px;
+    }
+}
+
+.o-MessageList-empty {
+    flex: 1 1 auto;
+    height: 100%;
+    width: 100%;
+    align-self: center;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    line-height: 2.5rem;
+}
+
+.o-MessageList-loadMore {
+    align-self: center;
+}
+
+.o-MessageList-loadingMore {
+    align-self: center;
+}
+
+.o-MessageList-loadingMoreIcon {
+    margin-right: 3px;
+}
+
+.o-MessageList-separator {
+    display: flex;
+    align-items: center;
+    padding: 0 0;
+    flex: 0 0 auto;
+}
+
+.o-MessageList-separatorDate {
+    padding: 15px 0;
+}
+
+.o-MessageList-separatorLabel {
+    padding: 0 10px;
+}
+
+.o-MessageList-separatorLine {
+    flex: 1 1 auto;
+    width: auto;
+}
+
+.o-MessageList-separatorNewMessages {
+    // bug with safari: container does not auto-grow from child size
+    padding: 0 0;
+    margin-right: 15px;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-MessageList {
+    background-color: white;
+}
+
+.o-MessageList-empty {
+    text-align: center;
+    font-style: italic;
+    color: $text-muted;
+}
+
+.o-MessageList-emptyTitle {
+    font-weight: bold;
+    font-size: 1.3rem;
+
+    &.o-neutral-face-icon:before {
+        @extend %o-nocontent-init-image;
+        @include size(120px, 140px);
+        background: transparent url(/web/static/src/img/neutral_face.svg) no-repeat center;
+    }
+}
+
+.o-MessageList-loadMore {
+    cursor: pointer;
+}
+
+.o-MessageList-message.o-hasMessageSelection:not(.o-isSelected) {
+    opacity: 0.5;
+}
+
+.o-MessageList-separator {
+    font-weight: bold;
+}
+
+.o-MessageList-separatorLabel {
+    background-color: white;
+}
+
+.o-MessageList-separatorLine {
+    border-color: gray('400');
+}
+
+.o-MessageList-separatorLineNewMessages {
+    border-color: lighten($o-brand-odoo, 15%);
+}
+
+.o-MessageList-separatorNewMessages {
+    color: lighten($o-brand-odoo, 15%);
+
+}
+
+// ------------------------------------------------------------------
+// Animation
+// ------------------------------------------------------------------
+
+.o-MessageList-separatorNewMessages:not(.o-hasDisabledAnimation) {
+    &.fade-leave-active {
+        transition: opacity 0.5s;
+    }
+
+    &.fade-leave-to {
+        opacity: 0;
+    }
+}

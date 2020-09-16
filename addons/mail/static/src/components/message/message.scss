@@ -2,46 +2,46 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_Message {
+.o-Message {
     display: flex;
     flex: 0 0 auto;
     padding: map-get($spacers, 2);
 }
 
-.o_Message_authorAvatar {
+.o-Message-authorAvatar {
     height: 100%;
     width: 100%;
     object-fit: cover;
 }
 
-.o_Message_authorAvatarContainer {
+.o-Message-authorAvatarContainer {
     position: relative;
     height: 36px;
     width: 36px;
 }
 
-.o_Message_authorName {
+.o-Message-authorName {
     margin-inline-end: map-get($spacers, 2);
 }
 
-.o_Message_checkbox {
+.o-Message-checkbox {
     margin-inline-end: map-get($spacers, 2);
 }
 
-.o_Message_commandStar {
+.o-Message-commandStar {
     font-size: 1.3em;
 }
 
-.o_Message_Composer {
+.o-Message-Composer {
     flex: 1 1 auto;
 }
 
-.o_Message_commands {
+.o-Message-commands {
     display: flex;
     align-items: center;
 }
 
-.o_Message_content {
+.o-Message-content {
     word-wrap: break-word;
     word-break: break-word;
 
@@ -56,37 +56,37 @@
         overflow-x: auto;
     }
 
-    img {
-        max-width: 100%;
-        height: auto;
+    > pre {
+        white-space: pre-wrap;
+        word-break: break-word;
     }
 }
 
-.o_Message_core {
+.o-Message-core {
     min-width: 0; // allows this flex child to shrink more than its content
     margin-inline-end: map-get($spacers, 3);
 }
 
-.o_Message_footer {
+.o-Message-footer {
     display: flex;
     flex-direction: column;
 }
 
-.o_Message_header {
+.o-Message-header {
     display: flex;
     flex-flow: row wrap;
     align-items: baseline;
 }
 
-.o_Message_headerCommands {
+.o-Message-headerCommands {
     margin-inline-end: map-get($spacers, 2);
     align-self: center;
 
-    .o_Message_headerCommand {
+    .o-Message-headerCommand {
         padding-left: map-get($spacers, 2);
         padding-right: map-get($spacers, 2);
 
-        &.o-mobile {
+        &.o-isMobile {
             padding-left: map-get($spacers, 3);
             padding-right: map-get($spacers, 3);
 
@@ -101,37 +101,37 @@
     }
 }
 
-.o_Message_headerDate {
+.o-Message-headerDate {
     margin-inline-end: map-get($spacers, 2);
     font-size: 0.8em;
 }
 
-.o_Message_moderationAction {
+.o-Message-moderationAction {
     margin-inline-end: map-get($spacers, 3);
 }
 
-.o_Message_moderationPending {
+.o-Message-moderationPending {
     margin-inline-end: map-get($spacers, 3);
 }
 
-.o_Message_moderationSubHeader {
+.o-Message-moderationSubHeader {
     display: flex;
     flex-flow: row wrap;
     align-items: center;
 }
 
-.o_Message_originThread {
+.o-Message-originThread {
     margin-inline-end: map-get($spacers, 2);
 }
 
-.o_Message_partnerImStatusIcon {
+.o-Message-partnerImStatusIcon {
     @include o-position-absolute($bottom: 0, $right: 0);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.o_Message_prettyBody {
+.o-Message-prettyBody {
 
     > p:last-of-type {
         margin-bottom: 0;
@@ -139,15 +139,15 @@
 
 }
 
-.o_Message_readMoreLess {
+.o-Message-readMoreLess {
     display: block;
 }
 
-.o_Message_seenIndicator {
+.o-Message-seenIndicator {
     margin-inline-end: map-get($spacers, 1);
 }
 
-.o_Message_sidebar {
+.o-Message-sidebar {
     flex: 0 0 $o-mail-message-sidebar-width;
     max-width: $o-mail-message-sidebar-width;
     display: flex;
@@ -159,26 +159,26 @@
     }
 }
 
-.o_Message_sidebarItem {
+.o-Message-sidebarItem {
     margin-left: map-get($spacers, 1);
     margin-right: map-get($spacers, 1);
 
-    &.o-message-squashed {
+    &.o-isMessageSquashed {
         display: flex;
     }
 }
 
-.o_Message_trackingValues {
+.o-Message-trackingValues {
     margin-top: map-get($spacers, 2);
 }
 
-.o_Message_trackingValue {
+.o-Message-trackingValue {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
 }
 
-.o_Message_trackingValueItem {
+.o-Message-trackingValueItem {
     margin-inline-end: map-get($spacers, 1);
 }
 
@@ -186,56 +186,56 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_Message {
+.o-Message {
     background-color: white;
 
-    &:hover, &.o-clicked {
+    &:hover, &.o-isClicked {
 
-        .o_Message_commands {
+        .o-Message-commands {
             opacity: 1;
         }
 
-        .o_Message_sidebarItem.o-message-squashed {
+        .o-Message-sidebarItem.o-isMessageSquashed {
             display: flex;
         }
 
-        .o_Message_seenIndicator.o-message-squashed {
+        .o-Message-seenIndicator.o-isMessageSquashed {
             display: none;
         }
     }
 
-    .o_Message_partnerImStatusIcon {
+    .o-Message-partnerImStatusIcon {
         color: white;
     }
 
-    &.o-not-discussion {
+    &.o-isNotDiscussion {
         background-color: lighten(gray('300'), 5%);
         border-bottom: 1px solid darken(gray('300'), 5%);
 
-        .o_Message_partnerImStatusIcon {
+        .o-Message-partnerImStatusIcon {
             color: lighten(gray('300'), 5%);
         }
 
-        &.o-selected {
+        &.o-isSelected {
             border-bottom: 1px solid darken(gray('400'), 5%);
         }
     }
 
-    &.o-selected {
+    &.o-isSelected {
         background-color: gray('400');
 
-        .o_Message_partnerImStatusIcon {
+        .o-Message-partnerImStatusIcon {
             color: gray('400');
         }
     }
 
-    &.o-starred {
+    &.o-isStarred {
 
-        .o_Message_commandStar {
+        .o-Message-commands {
             display: flex;
         }
 
-        .o_Message_commands {
+        .o-Message-commandStar {
             display: flex;
         }
     }
@@ -245,25 +245,25 @@
     }
 }
 
-.o_Message_authorName {
+.o-Message-authorName {
     font-weight: bold;
 }
 
-.o_Message_authorRedirect {
+.o-Message-authorRedirect {
     cursor: pointer;
 }
 
-.o_Message_command {
+.o-Message-command {
     cursor: pointer;
     color: gray('400');
 
-    &:not(.o-mobile) {
+    &:not(.o-isMobile) {
         &:hover {
             filter: brightness(0.8);
         }
     }
 
-    &.o-mobile {
+    &.o-isMobile {
         filter: brightness(0.8);
 
         &:hover {
@@ -271,14 +271,14 @@
         }
     }
 
-    &.o-message-selected {
+    &.o-isMessageSelected {
         color: gray('500');
     }
 }
 
-.o_Message_commandStar {
+.o-Message-commandStar {
 
-    &.o-message-starred {
+    &.o-isMessageStarred {
         color: gold;
 
         &:hover {
@@ -287,7 +287,7 @@
     }
 }
 
-.o_Message_content .o_mention {
+.o-Message-content .o_mention {
     color: $o-brand-primary;
     cursor: pointer;
 
@@ -296,36 +296,36 @@
     }
 }
 
-.o_Message_date {
+.o-Message-date {
     color: gray('500');
 
-    &.o-message-selected {
+    &.o-isMessageSelected {
         color: gray('600');
     }
 }
 
-.o_Message_headerCommands:not(.o-mobile) {
+.o-Message-headerCommands:not(.o-isMobile) {
     opacity: 0;
 }
 
-.o_Message_originThread {
+.o-Message-originThread {
     font-size: 0.8em;
     color: gray('500');
 
-    &.o-message-selected {
+    &.o-isMessageSelected {
         color: gray('600');
     }
 }
 
-.o_Message_originThreadLink {
+.o-Message-originThreadLink {
     font-size: 1.25em; // original size
 }
 
-.o_Message_partnerImStatusIcon:not(.o_Message_partnerImStatusIcon-mobile) {
+.o-Message-partnerImStatusIcon:not(.o-Message-partnerImStatusIcon-isMobile) {
     font-size: x-small;
 }
 
-.o_Message_moderationAction {
+.o-Message-moderationAction {
     font-weight: bold;
     font-style: italic;
 
@@ -347,39 +347,39 @@
     }
 }
 
-.o_Message_moderationPending {
+.o-Message-moderationPending {
     font-style: italic;
 
-    &.o-author {
+    &.o-isCurrentPartnerAuthor {
         color: theme-color('danger');
         font-weight: bold;
     }
 }
 
-.o_Message_notificationIconClickable {
+.o-Message-notificationIconClickable {
     color: gray('600');
     cursor: pointer;
 
-    &.o-error {
+    &.o-isError {
         color: $red;
     }
 }
 
-.o_Message_sidebarCommands {
+.o-Message-sidebarCommands {
     display: none;
 }
 
-.o_Message_sidebarItem.o-message-squashed {
+.o-Message-sidebarItem.o-isMessageSquashed {
     display: none;
 }
 
-.o_Message_subject {
+.o-Message-subject {
     font-style: italic;
 }
 
 // Used to hide buttons on rating emails in chatter
 // FIXME: should use a better approach for not having such buttons
 // in chatter of such messages, but keep having them in emails.
-.o_Message_content [summary~="o_mail_notification"] {
+.o-Message-content [summary~="o_mail_notification"] {
     display: none;
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.FollowerListMenu" owl="1">
+        <div class="o-FollowerListMenu" t-on-keydown="_onKeydown">
+            <div class="o-FollowerListMenu-followers" t-ref="dropdown">
+                <button class="o-FollowerListMenu-buttonFollowers btn btn-link" t-att-disabled="isDisabled" t-on-click="_onClickFollowersButton" title="Show Followers">
+                    <i class="fa fa-user"/>
+                    <span class="o-FollowerListMenu-buttonFollowersCount pl-1" t-esc="thread.$$$followers(mself).length"/>
+                </button>
+
+                <t t-if="state.isDropdownOpen">
+                    <div class="o-FollowerListMenu-dropdown dropdown-menu dropdown-menu-right" role="menu">
+                        <t t-if="thread.$$$channelType !== 'chat'">
+                            <a class="o-FollowerListMenu-addFollowersButton dropdown-item" href="#" role="menuitem" t-on-click="_onClickAddFollowers">
+                                Add Followers
+                            </a>
+                        </t>
+                        <a class="o-FollowerListMenu-addChannelsButton dropdown-item" href="#" role="menuitem" t-on-click="_onClickAddChannels">
+                            Add Channels
+                        </a>
+                        <t t-if="thread.$$$followers(mself).length > 0">
+                            <div role="separator" class="dropdown-divider"/>
+                            <t t-foreach="thread.$$$followers(mself)" t-as="follower" t-key="follower.localId">
+                                <Follower
+                                    class="o-FollowerMenu-follower dropdown-item"
+                                    follower="follower"
+                                    t-on-click="_onClickFollower"
+                                />
+                            </t>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

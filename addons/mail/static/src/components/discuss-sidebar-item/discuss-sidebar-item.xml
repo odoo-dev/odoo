@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.DiscussSidebarItem" owl="1">
+        <div class="o-DiscussSidebarItem"
+            t-att-class="{
+                'o-isActive': thread and discuss.$$$thread(mself) === thread,
+                'o-isStarredBox': thread and thread === env.messaging.$$$starred(mself),
+                'o-isUnread': thread and thread.$$$localMessageUnreadCounter(mself) > 0,
+            }" t-on-click="_onClick" t-att-data-thread-local-id="thread ? thread.localId : undefined" t-att-data-thread-name="thread ? thread.$$$displayName(mself) : undefined"
+        >
+            <t t-if="thread">
+                <div class="o-DiscussSidebarItem-activeIndicator o-DiscussSidebarItem-item" t-att-class="{ 'o-isItemActive': discuss.$$$thread(mself) === thread }"/>
+                <ThreadIcon class="o-DiscussSidebarItem-item" thread="thread"/>
+                <t t-if="thread.$$$channelType(mself) === 'chat' and discuss.$$$renamingThreads(mself).includes(thread)">
+                    <div class="o-DiscussSidebarItem-item o-DiscussSidebarItem-name o-isEditable">
+                        <EditableText
+                            class="o-DiscussSidebarItem-nameInput"
+                            placeholder="thread.$$$correspondent(mself).$$$name(mself)"
+                            value="thread.$$$displayName(mself)"
+                            t-on-o-cancel="_onCancelRenaming"
+                            t-on-o-clicked="_onClickedEditableText"
+                            t-on-o-validate="_onValidateEditableText"
+                        />
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="o-DiscussSidebarItem-item o-DiscussSidebarItem-name" t-att-class="{ 'o-isItemUnread': thread.$$$localMessageUnreadCounter(mself) > 0 }">
+                        <t t-esc="thread.$$$displayName(mself)"/>
+                    </div>
+                    <t t-if="thread.$$$isMassMailing(mself)">
+                        <i class="fa fa-envelope-o" title="Messages are sent by email" role="img"/>
+                    </t>
+                </t>
+                <div class="o-isAutogrow o-DiscussSidebarItem-item"/>
+                <t t-if="thread.$$$model(mself) !== 'mail.box'">
+                    <div class="o-DiscussSidebarItem-commands o-DiscussSidebarItem-item">
+                        <t t-if="thread.$$$channelType(mself) === 'channel'">
+                            <div class="o-DiscussSidebarItem-command o-DiscussSidebarItem-commandSettings fa fa-cog" t-on-click="_onClickSettings" title="Channel settings" role="img"/>
+                            <t t-if="!thread.$$$messageNeedactionCounter(mself) and !thread.$$$isGroupBasedSubscription(mself)">
+                                <div class="o-DiscussSidebarItem-command o-DiscussSidebarItem-commandLeave fa fa-times" t-on-click="_onClickLeave" title="Leave this channel" role="img"/>
+                            </t>
+                        </t>
+                        <t t-if="thread.$$$channelType(mself) === 'chat'">
+                            <div class="o-DiscussSidebarItem-command o-DiscussSidebarItem-commandRename fa fa-cog" t-on-click="_onClickRename" title="Rename conversation" role="img"/>
+                        </t>
+                        <t t-if="hasUnpin()">
+                            <t t-if="!thread.$$$localMessageUnreadCounter(mself)">
+                                <div class="o-DiscussSidebarItem-command o-DiscussSidebarItem-commandUnpin fa fa-times" t-on-click="_onClickUnpin" title="Unpin conversation" role="img"/>
+                            </t>
+                        </t>
+                    </div>
+                </t>
+                <t t-if="counter > 0">
+                    <div class="o-DiscussSidebarItem-counter o-DiscussSidebarItem-item badge badge-pill">
+                        <t t-esc="counter"/>
+                    </div>
+                </t>
+            </t>
+        </div>
+    </t>
+
+</templates>

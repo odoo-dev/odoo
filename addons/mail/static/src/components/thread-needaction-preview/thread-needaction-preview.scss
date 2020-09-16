@@ -1,0 +1,108 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-ThreadNeedactionPreview {
+    @include o-mail-notification-list-item-layout();
+
+    &:hover .o-ThreadNeedactionPreview-markAsRead {
+        opacity: 1;
+    }
+}
+
+.o-ThreadNeedactionPreview-content {
+    @include o-mail-notification-list-item-content-layout();
+}
+
+.o-ThreadNeedactionPreview-core {
+    @include o-mail-notification-list-item-core-layout();
+}
+
+.o-ThreadNeedactionPreview-coreItem {
+    @include o-mail-notification-list-item-core-item-layout();
+}
+
+.o-ThreadNeedactionPreview-counter {
+    @include o-mail-notification-list-item-counter-layout();
+}
+
+.o-ThreadNeedactionPreview-date {
+    @include o-mail-notification-list-item-date-layout();
+}
+
+.o-ThreadNeedactionPreview-header {
+    @include o-mail-notification-list-item-header-layout();
+}
+
+.o-ThreadNeedactionPreview-image {
+    @include o-mail-notification-list-item-image-layout();
+}
+
+.o-ThreadNeedactionPreview-imageContainer {
+    @include o-mail-notification-list-item-image-container-layout();
+}
+
+.o-ThreadNeedactionPreview-inlineText {
+    @include o-mail-notification-list-item-inline-text-layout();
+}
+
+.o-ThreadNeedactionPreview-markAsRead {
+    @include o-mail-notification-list-item-mark-as-read-layout();
+}
+
+.o-ThreadNeedactionPreview-name {
+    @include o-mail-notification-list-item-name-layout();
+}
+
+.o-ThreadNeedactionPreview-partnerImStatusIcon {
+    @include o-mail-notification-list-item-partner-im-status-icon-layout();
+}
+
+.o-ThreadNeedactionPreview-sidebar {
+    @include o-mail-notification-list-item-sidebar-layout();
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-ThreadNeedactionPreview {
+    @include o-mail-notification-list-item-style();
+    background-color: rgba($o-brand-primary, 0.1);
+
+    &:hover {
+        background-color: rgba($o-brand-primary, 0.2);
+
+        .o-ThreadNeedactionPreview-partnerImStatusIcon {
+            @include o-mail-notification-list-item-hover-partner-im-status-icon-style();
+        }
+    }
+}
+
+.o-ThreadNeedactionPreview-core {
+    @include o-mail-notification-list-item-core-style();
+}
+
+.o-ThreadNeedactionPreview-counter {
+    @include o-mail-notification-list-item-bold-style();
+}
+
+.o-ThreadNeedactionPreview_date {
+    @include o-mail-notification-list-item-date-style();
+}
+
+.o-ThreadNeedactionPreview-image {
+    @include o-mail-notification-list-item-image-style();
+}
+
+.o-ThreadNeedactionPreview-markAsRead {
+    @include o-mail-notification-list-item-mark-as-read-style();
+}
+
+.o-ThreadNeedactionPreview-name {
+    @include o-mail-notification-list-item-bold-style();
+}
+
+.o-ThreadNeedactionPreview-partnerImStatusIcon {
+    @include o-mail-notification-list-item-partner-im-status-icon-style();
+}

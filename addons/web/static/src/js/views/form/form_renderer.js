@@ -1118,7 +1118,7 @@ var FormRenderer = BasicRenderer.extend({
         this.$el.html($newContent);
         this.$el.toggleClass('o_form_nosheet', !this.has_sheet);
         if (this.has_sheet) {
-            this.$el.children().not('.o_FormRenderer_chatterContainer')
+            this.$el.children().not('.o-FormRenderer-chatterContainer')
                 .wrapAll($('<div/>', {class: 'o_form_sheet_bg'}));
         }
         this.$el.toggleClass('o_form_editable', this.mode === 'edit');

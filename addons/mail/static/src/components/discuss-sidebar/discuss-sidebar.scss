@@ -1,0 +1,110 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-DiscussSidebar {
+    display: flex;
+    flex-flow: column;
+    width: $o-mail-chat-sidebar-width;
+
+    @include media-breakpoint-up(xl) {
+        width: $o-mail-chat-sidebar-width + 50px;
+    }
+}
+
+.o-DiscussSidebar-group {
+    display: flex;
+    flex-flow: column;
+    flex: 0 0 auto;
+}
+
+.o-DiscussSidebar-groupHeader {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.o-DiscussSidebar-groupHeaderItem {
+    margin-left: 3px;
+    margin-right: 3px;
+
+    &:first-child {
+        margin-left: $o-mail-discuss-sidebar-active-indicator-margin-right;
+    }
+
+    &:last-child {
+        margin-right: $o-mail-discuss-sidebar-scrollbar-width;
+    }
+}
+
+.o-DiscussSidebar-itemNew {
+    display: flex;
+    justify-content: center;
+}
+
+.o-DiscussSidebar-itemNewInput {
+    flex: 1 1 auto;
+    margin-left: $o-mail-discuss-sidebar-active-indicator-margin-right + 3px;
+    margin-right: $o-mail-discuss-sidebar-scrollbar-width;
+}
+
+.o-DiscussSidebar-quickSearch {
+    border-radius: 10px;
+    margin: 0 $o-mail-discuss-sidebar-scrollbar-width 10px;
+    padding: 3px 10px;
+}
+
+.o-DiscussSidebar-separator {
+    width: 100%;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-DiscussSidebar {
+    background-color: gray('900');
+    color: gray('300');
+}
+
+.o-DiscussSidebar-groupHeader {
+    font-size: $font-size-sm;
+    text-transform: uppercase;
+    font-weight: bolder;
+}
+
+.o-DiscussSidebar-groupHeaderItemAdd {
+    cursor: pointer;
+
+    &:not(:hover) {
+        color: gray('600');
+    }
+}
+
+.o-DiscussSidebar-groupTitle {
+
+    &:not(.o-isClickable) {
+        color: gray('600');
+    }
+
+    &.o-isClickable {
+        cursor: pointer;
+
+        &:not(:hover) {
+            color: gray('600');
+        }
+    }
+}
+
+.o-DiscussSidebar-itemNewInput {
+    outline: none;
+}
+
+.o-DiscussSidebar-quickSearch {
+    border: none;
+    outline: none;
+}
+
+.o-DiscussSidebar-separator {
+    background-color: gray('600');
+}

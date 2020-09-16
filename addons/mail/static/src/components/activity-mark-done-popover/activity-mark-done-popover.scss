@@ -1,0 +1,20 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-ActivityMarkDonePopover {
+    min-height: 100px;
+}
+
+.o-ActivityMarkDonePopover-buttons {
+    margin-top: map-get($spacers, 2);
+}
+
+.o-ActivityMarkDonePopover-doneButton {
+    margin: map-get($spacers, 0) map-get($spacers, 2);
+}
+
+.o-ActivityMarkDonePopover-feedback {
+    min-height: 70px;
+}
+

@@ -2,40 +2,40 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_Attachment {
+.o-Attachment {
     display: flex;
 
-    &:hover .o_Attachment_asideItemUnlink.o-pretty {
+    &:hover .o-Attachment-asideItemUnlink.o-isPretty {
         transform: translateX(0);
     }
 }
 
-.o_Attachment_action {
+.o-Attachment-action {
     min-width: 20px;
 }
 
-.o_Attachment_actions {
+.o-Attachment-actions {
     justify-content: space-between;
     display: flex;
     flex-direction: column;
 }
 
-.o_Attachment_aside {
+.o-Attachment-aside {
     position: relative;
     overflow: hidden;
 
-    &:not(.o-has-multiple-action) {
+    &:not(.o-hasMultipleAction) {
         min-width: 50px;
     }
 
-    &.o-has-multiple-action {
+    &.o-hasMultipleAction {
         min-width: 30px;
         display: flex;
         flex-direction: column;
     }
 }
 
-.o_Attachment_asideItem {
+.o-Attachment-asideItem {
     display: flex;
     width: 100%;
     height: 100%;
@@ -43,13 +43,13 @@
     justify-content: center;
 }
 
-.o_Attachment_asideItemUnlink.o-pretty {
+.o-Attachment-asideItemUnlink.o-isPretty {
     position: absolute;
     top: 0;
     transform: translateX(100%);
 }
 
-.o_Attachment_details {
+.o-Attachment-details {
     display: flex;
     flex-flow: column;
     justify-content: center;
@@ -59,41 +59,43 @@
     padding-right : map-get($spacers, 1);
 }
 
-.o_Attachment_filename {
+.o-Attachment-filename {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.o_Attachment_image {
+.o-Attachment-image {
     flex-shrink: 0;
     margin: 3px;
 
-    &.o-details-overlay {
+    &.o-hasDetailsOverlay {
         position: relative;
 
-        &.o-small {
-            min-width: 100px;
-            min-height: 100px;
-        }
-        &.o-medium {
-            min-width: 200px;
-            min-height: 200px;
-        }
-        &.o-large {
+        &.o-isLarge {
             min-width: 400px;
             min-height: 400px;
         }
 
+        &.o-isMedium {
+            min-width: 200px;
+            min-height: 200px;
+        }
+
+        &.o-isSmall {
+            min-width: 100px;
+            min-height: 100px;
+        }
+
         &:hover {
-            .o_Attachment_imageOverlay {
+            .o-Attachment-imageOverlay {
                 opacity: 1;
             }
         }
     }
 }
 
-.o_Attachment_imageOverlay {
+.o-Attachment-imageOverlay {
     bottom: 0;
     display:flex;
     flex-direction: row;
@@ -105,7 +107,7 @@
     top: 0;
 }
 
-.o_Attachment_imageOverlayDetails {
+.o-Attachment-imageOverlayDetails {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -118,14 +120,14 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_Attachment {
-    &.o-has-card-details {
+.o-Attachment {
+    &.o-hasCardDetails {
         background-color: gray('300');
         border-radius: 5px;
     }
 }
 
-.o_Attachment_action {
+.o-Attachment-action {
     border-radius: 10px;
     cursor: pointer;
     text-align: center;
@@ -135,11 +137,11 @@
     }
 }
 
-.o_Attachment_aside {
+.o-Attachment-aside {
     border-radius: 0 5px 5px 0;
 }
 
-.o_Attachment_asideItemDownload {
+.o-Attachment-asideItemDownload {
     cursor: pointer;
 
     &:hover {
@@ -147,14 +149,14 @@
     }
 }
 
-.o_Attachment_asideItemUnlink {
+.o-Attachment-asideItemUnlink {
     cursor: pointer;
 
-    &:not(.o-pretty):hover {
+    &:not(.o-isPretty):hover {
         background-color: gray('400');
     }
 
-    &.o-pretty {
+    &.o-isPretty {
         color: white;
         background-color: $o-brand-primary;
 
@@ -165,25 +167,25 @@
 
 }
 
-.o_Attachment_asideItemUploaded {
+.o-Attachment-asideItemUploaded {
     color: $o-brand-primary;
 }
 
-.o_Attachment_extension {
+.o-Attachment-extension {
     text-transform: uppercase;
     font-size: 80%;
     font-weight: 400;
 }
 
-.o_Attachment_image.o-attachment-viewable {
+.o-Attachment-image.o-isAttachmentViewable {
     cursor: zoom-in;
 
-    &:not(.o-details-overlay):hover {
+    &:not(.o-hasDetailsOverlay):hover {
         opacity: 0.7;
     }
 }
 
-.o_Attachment_imageOverlay {
+.o-Attachment-imageOverlay {
     background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.9));
     border-radius: 5px;
     color: white;
@@ -194,10 +196,10 @@
 // Animation
 // ------------------------------------------------------------------
 
-.o_Attachment_asideItemUnlink.o-pretty {
+.o-Attachment-asideItemUnlink.o-isPretty {
     transition: transform 0.3s ease 0s;
 }
 
-.o_Attachment_imageOverlay {
+.o-Attachment-imageOverlay {
     transition: all 0.3s ease 0s;
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ThreadTextualTypingStatus" owl="1">
+        <div class="o-ThreadTextualTypingStatus">
+            <t t-if="thread and thread.$$$orderedOtherTypingMembers(mself).length > 0">
+                <ThreadTypingIcon animation="'pulse'" size="'medium'"/>
+                <span class="o-ThreadTextualTypingStatus-separator"/>
+                <span t-esc="thread.$$$typingStatusText(mself)"/>
+            </t>
+        </div>
+    </t>
+
+</templates>

@@ -6947,7 +6947,7 @@ Docs & License: https://fullcalendar.io/
             var available = this.parseRawLocales(options.locales);
             this.availableRawLocales = available.map;
             var locale = this.buildLocale(options.locale || available.defaultCode, available.map);
-            this.dateEnv = this.buildDateEnv(locale, options.timeZone, pluginHooks.namedTimeZonedImpl, options.firstDay, options.weekNumberCalculation, options.weekLabel, pluginHooks.cmdFormatter);
+            this.dateEnv = this.buildDatEnv(locale, options.timeZone, pluginHooks.namedTimeZonedImpl, options.firstDay, options.weekNumberCalculation, options.weekLabel, pluginHooks.cmdFormatter);
             this.selectionConfig = this.buildSelectionConfig(options); // needs dateEnv. do after :(
             // ineffecient to do every time?
             this.viewSpecs = buildViewSpecs(pluginHooks.views, this.optionsManager);

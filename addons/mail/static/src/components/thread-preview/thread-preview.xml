@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ThreadPreview" owl="1">
+        <!--
+            The preview template is used by the discuss in mobile, and by the systray
+            menu in order to show preview of threads.
+        -->
+        <div class="o-ThreadPreview" t-att-class="{ 'o-isMuted': thread and thread.$$$localMessageUnreadCounter(mself) === 0 }" t-on-click="_onClick" t-att-data-thread-local-id="thread ? thread.localId : undefined">
+            <t t-if="thread">
+                <div class="o-ThreadPreview-sidebar">
+                    <div class="o-ThreadPreview-imageContainer o-ThreadPreview-sidebarItem">
+                        <img class="o-ThreadPreview-image rounded-circle" t-att-src="image()" alt="Thread Image"/>
+                        <t t-if="thread.$$$correspondent(mself) and thread.$$$correspondent(mself).$$$im_status(mself)">
+                            <PartnerImStatusIcon
+                                class="o-ThreadPreview-partnerImStatusIcon"
+                                t-att-class="{
+                                    'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself),
+                                    'o-isMuted': thread.$$$localMessageUnreadCounter(mself) === 0,
+                                }"
+                                partner="thread.$$$correspondent(mself)"
+                            />
+                        </t>
+                    </div>
+                </div>
+                <div class="o-ThreadPreview-content">
+                    <div class="o-ThreadPreview-header">
+                        <span class="o-ThreadPreview-name" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself), 'o-isMuted': thread.$$$localMessageUnreadCounter(mself) === 0 }">
+                            <t t-esc="thread.$$$displayName(mself)"/>
+                        </span>
+                        <t t-if="thread.$$$localMessageUnreadCounter(mself) > 0">
+                            <span class="o-ThreadPreview-counter" t-att-class="{ 'o-isMuted': thread.$$$localMessageUnreadCounter(mself) === 0 }">
+                                (<t t-esc="thread.$$$localMessageUnreadCounter(mself)"/>)
+                            </span>
+                        </t>
+                        <span class="o-isAutogrow"/>
+                        <t t-if="thread.$$$lastMessage(mself)">
+                            <span class="o-ThreadPreview-date" t-att-class="{ 'o-isMuted': thread.$$$localMessageUnreadCounter(mself) === 0 }">
+                                <t t-esc="thread.$$$lastMessage(mself).$$$date(mself).fromNow()"/>
+                            </span>
+                        </t>
+                    </div>
+                    <div class="o-ThreadPreview-core">
+                        <span class="o-ThreadPreview-coreItem o-ThreadPreview-inlineText" t-att-class="{ 'o-isEmpty': inlineLastMessageBody.length === 0 }">
+                            <t t-if="thread.$$$lastMessage(mself) and thread.$$$lastMessage(mself).$$$author(mself)">
+                                <MessageAuthorPrefix
+                                    message="thread.$$$lastMessage(mself)"
+                                    thread="thread"
+                                />
+                            </t>
+                            <t t-esc="inlineLastMessageBody"/>
+                        </span>
+                        <span class="o-isAutogrow"/>
+                        <t t-if="thread.$$$localMessageUnreadCounter(mself) > 0">
+                            <span class="o-ThreadPreview-coreItem o-ThreadPreview-markAsRead fa fa-check" title="Mark as Read" t-on-click="_onClickMarkAsRead" t-ref="markAsRead"/>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

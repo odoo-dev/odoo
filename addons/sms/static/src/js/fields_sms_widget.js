@@ -3,7 +3,7 @@ odoo.define('sms.sms_widget', function (require) {
 
 var core = require('web.core');
 var fieldRegistry = require('web.field_registry');
-var FieldTextEmojis = require('mail.field_text_emojis');
+var FieldTextEmojis = require('mail.viewFields.text_emojis');
 
 var _t = core._t;
 /**

@@ -2,7 +2,7 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_Chatter {
+.o-Chatter {
     position: relative;
     display: flex;
     flex: 1 1 auto;
@@ -10,16 +10,16 @@
     width: map-get($sizes, 100);
 }
 
-.o_Chatter_composer {
+.o-Chatter-composer {
     border-bottom: $border-width solid;
 
-    &.o-bordered {
+    &.o-isBordered {
         border-left: $border-width solid;
         border-right: $border-width solid;
     }
 }
 
-.o_Chatter_scrollPanel {
+.o-Chatter-scrollPanel {
     overflow-y: auto;
 }
 
@@ -27,15 +27,15 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_Chatter {
+.o-Chatter {
     background-color: white;
     border-color: $border-color;
 }
 
-.o_Chatter_composer {
+.o-Chatter-composer {
     border-bottom-color: $border-color;
 
-    &.o-bordered {
+    &.o-isBordered {
         border-left-color: $border-color;
         border-right-color: $border-color;
     }

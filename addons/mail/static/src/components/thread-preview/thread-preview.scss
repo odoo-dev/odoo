@@ -1,0 +1,117 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-ThreadPreview {
+    @include o-mail-notification-list-item-layout();
+
+    &:hover .o-ThreadPreview-markAsRead {
+        opacity: 1;
+    }
+}
+
+.o-ThreadPreview-content {
+    @include o-mail-notification-list-item-content-layout();
+}
+
+.o-ThreadPreview-core {
+    @include o-mail-notification-list-item-core-layout();
+}
+
+.o-ThreadPreview-coreItem {
+    @include o-mail-notification-list-item-core-item-layout();
+}
+
+.o-ThreadPreview-counter {
+    @include o-mail-notification-list-item-counter-layout();
+}
+
+.o-ThreadPreview-date {
+    @include o-mail-notification-list-item-date-layout();
+}
+
+.o-ThreadPreview-header {
+    @include o-mail-notification-list-item-header-layout();
+}
+
+.o-ThreadPreview-image {
+    @include o-mail-notification-list-item-image-layout();
+}
+
+.o-ThreadPreview-imageContainer {
+    @include o-mail-notification-list-item-image-container-layout();
+}
+
+.o-ThreadPreview-inlineText {
+    @include o-mail-notification-list-item-inline-text-layout();
+}
+
+.o-ThreadPreview-markAsRead {
+    @include o-mail-notification-list-item-mark-as-read-layout();
+}
+
+.o-ThreadPreview-name {
+    @include o-mail-notification-list-item-name-layout();
+}
+
+.o-ThreadPreview-partnerImStatusIcon {
+    @include o-mail-notification-list-item-partner-im-status-icon-layout();
+}
+
+.o-ThreadPreview-sidebar {
+    @include o-mail-notification-list-item-sidebar-layout();
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-ThreadPreview {
+    @include o-mail-notification-list-item-style();
+
+    &:hover {
+        .o-ThreadPreview-partnerImStatusIcon {
+            @include o-mail-notification-list-item-hover-partner-im-status-icon-style();
+        }
+    }
+
+    &.o-isMuted {
+        &:hover {
+            .o-ThreadPreview-partnerImStatusIcon {
+                @include o-mail-notification-list-item-muted-hover-partner-im-status-icon-style();
+            }
+        }
+    }
+}
+
+.o-ThreadPreview-core {
+    @include o-mail-notification-list-item-core-style();
+}
+
+.o-ThreadPreview-counter {
+    @include o-mail-notification-list-item-bold-style();
+}
+
+.o-ThreadPreview-date {
+    @include o-mail-notification-list-item-date-style();
+
+    &.o-isMuted {
+        color: gray('500');
+    }
+}
+
+.o-ThreadPreview-image {
+    @include o-mail-notification-list-item-image-style();
+}
+
+.o-ThreadPreview-markAsRead {
+    @include o-mail-notification-list-item-mark-as-read-style();
+}
+
+.o-ThreadPreview-name {
+    @include o-mail-notification-list-item-bold-style();
+}
+
+.o-ThreadPreview-partnerImStatusIcon {
+    @include o-mail-notification-list-item-partner-im-status-icon-style();
+}

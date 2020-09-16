@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.NotificationRequest" owl="1">
+        <div class="o-NotificationRequest" t-on-click="_onClick">
+            <div class="o-NotificationRequest-sidebar">
+                <div class="o-NotificationRequest-imageContainer o-NotificationRequest-sidebarItem">
+                    <img class="o-NotificationRequest-image rounded-circle" src="/mail/static/src/img/odoobot.png" alt="Avatar of OdooBot"/>
+                    <PartnerImStatusIcon
+                        class="o-NotificationRequest-partnerImStatusIcon"
+                        t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }"
+                        partner="env.messaging.$$$partnerRoot(mself)"
+                    />
+                </div>
+            </div>
+            <div class="o-NotificationRequest-content">
+                <div class="o-NotificationRequest-header">
+                    <span class="o-NotificationRequest-name" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }">
+                        <t t-esc="getHeaderText()"/>
+                    </span>
+                </div>
+                <div class="o-NotificationRequest-core">
+                    <span class="o-NotificationRequest-coreItem o-NotificationRequest-inlineText">
+                        Enable desktop notifications to chat.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

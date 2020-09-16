@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ChatterContainer" owl="1">
+        <div class="o-ChatterContainer">
+            <t t-if="chatter">
+                <Chatter chatter="chatter"/>
+            </t>
+            <t t-else="">
+                <div class="o-ChatterContainer-noChatter"><i class="o-ChatterContainer-noChatterIcon fa fa-spinner fa-spin"/>Please wait...</div>
+            </t>
+        </div>
+    </t>
+
+</templates>

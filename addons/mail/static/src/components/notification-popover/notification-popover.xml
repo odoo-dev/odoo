@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.NotificationPopover" owl="1">
+        <div class="o-NotificationPopover">
+            <t t-foreach="notifications" t-as="notification" t-key="notification.localId">
+                <div class="o-NotificationPopover-notification">
+                    <i class="o-NotificationPopover-notificationIcon" t-att-class="iconClass" t-att-title="iconTitle" role="img"/>
+                    <t t-if="notification.$$$partner(mself)">
+                        <span class="o-NotificationPopover-notificationPartnerName" t-esc="notification.$$$partner(mself).$$$nameOrDisplayName(mself)"/>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

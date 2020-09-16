@@ -1,0 +1,37 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+ .o-NotificationList {
+    display: flex;
+    flex-flow: column;
+    overflow: auto;
+
+    &.o-isEmpty {
+        justify-content: center;
+    }
+}
+
+.o-NotificationList-noConversation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: map-get($spacers, 4) map-get($spacers, 2);
+}
+
+.o-NotificationList-separator {
+    flex: 0 0 auto;
+    width: map-get($sizes, 100);
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-NotificationList-separator {
+    border-bottom: $border-width solid $border-color;
+}
+
+.o-NotificationList-noConversation {
+    color: $text-muted;
+}

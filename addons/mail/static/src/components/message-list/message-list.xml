@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.MessageList" owl="1">
+        <div class="o-MessageList" t-att-class="{ 'o-hasMessageSelection': selectedMessage, 'o-isEmpty': threadView and threadView.$$$messages(mself).length === 0 }" t-on-scroll="onScroll">
+            <t t-if="threadView">
+                <!-- No result messages -->
+                <t t-if="threadView.$$$nonEmptyMessages(mself).length === 0">
+                    <div class="o-MessageList-empty o-MessageList-item">
+                        <t t-if="threadView.$$$thread(mself) === env.messaging.$$$inbox(mself)">
+                            <div class="o-MessageList-emptyTitle">
+                                Congratulations, your inbox is empty
+                            </div>
+                            New messages appear here.
+                        </t>
+                        <t t-elif="threadView.$$$thread(mself) === env.messaging.$$$starred(mself)">
+                            <div class="o-MessageList-emptyTitle">
+                                No starred messages
+                            </div>
+                            You can mark any message as 'starred', and it shows up in this mailbox.
+                        </t>
+                        <t t-elif="threadView.$$$thread(mself) === env.messaging.$$$history(mself)">
+                            <div class="o-MessageList-emptyTitle o-neutral-face-icon">
+                                No history messages
+                            </div>
+                            Messages marked as read will appear in the history.
+                        </t>
+                        <t t-elif="threadView.$$$thread(mself) === env.messaging.$$$moderation(mself)">
+                            <div class="o-MessageList-emptyTitle">
+                                You have no messages to moderate.
+                            </div>
+                            Messages pending moderation appear here.
+                        </t>
+                        <t t-else="">
+                            There are no messages in this conversation.
+                        </t>
+                    </div>
+                </t>
+                <!-- LOADING (if order asc)-->
+                <t t-if="threadView.$$$threadCache(mself).$$$hasLoadingFailed(mself)">
+                    <div class="o-ThreadView-alertLoadingFailed alert alert-info">
+                        <div>
+                            An error occured while fetching messages.
+                        </div>
+                        <button class="o-ThreadView-alertLoadingFailedRetryButton btn btn-link" t-on-click="_onClickRetryLoadMoreMessages">
+                            Click here to retry
+                        </button>
+                     </div>
+                </t>
+                <t t-elif="order === 'asc' and threadView.$$$messages(mself).length > 0">
+                    <t t-call="mail.MessageList.loadMore"/>
+                </t>
+                <!-- MESSAGES -->
+                <t t-set="currentDay" t-value="0"/>
+                <t t-set="prevMessage" t-value="0"/>
+                <t t-foreach="orderedMessages" t-as="message" t-key="message.localId">
+                    <t t-if="message === threadView.$$$thread(mself).$$$messageAfterNewMessageSeparator(mself)">
+                        <div class="o-MessageList-separator o-MessageList-separatorNewMessages o-MessageList-item" t-att-class="{ 'o-hasDisabledAnimation': env.disableAnimation }" t-transition="fade">
+                            <hr class="o-MessageList-separatorLine o-MessageList-separatorLineNewMessages"/><span class="o-MessageList-separatorLabel o-MessageList-separatorLabelNewMessages">New messages</span>
+                        </div>
+                    </t>
+                    <t t-if="!message.$$$isEmpty(mself)">
+                        <t t-set="messageDay" t-value="getDateDay(message)"/>
+                        <t t-if="currentDay !== messageDay">
+                            <div class="o-MessageList-separator o-MessageList-separatorDate o-MessageList-item">
+                                <hr class="o-MessageList-separatorLine"/><span class="o-MessageList-separatorLabel o-MessageList-separatorLabelDate"><t t-esc="messageDay"/></span><hr class="o-MessageList-separatorLine"/>
+                                <t t-set="currentDay" t-value="messageDay"/>
+                                <t t-set="isMessageSquashed" t-value="false"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <t t-set="isMessageSquashed" t-value="shouldMessageBeSquashed(prevMessage, message)"/>
+                        </t>
+                        <Message
+                            class="o-MessageList-item o-MessageList-message"
+                            t-att-class="{
+                                'o-hasMessageSelection': selectedMessage,
+                            }"
+                            hasMarkAsReadIcon="haveMessagesMarkAsReadIcon"
+                            hasCheckbox="hasMessageCheckbox"
+                            hasReplyIcon="haveMessagesReplyIcon"
+                            isSelected="selectedMessage === message"
+                            isSquashed="isMessageSquashed"
+                            message="message"
+                            threadView="threadView"
+                            t-ref="{{ message.localId }}"
+                        />
+                        <t t-set="prevMessage" t-value="message"/>
+                    </t>
+                </t>
+                <!-- LOADING (if order desc)-->
+                <t t-if="!threadView.$$$threadCache(mself).$$$hasLoadingFailed(mself) and order === 'desc' and threadView.$$$messages(mself).length > 0">
+                    <t t-call="mail.MessageList.loadMore"/>
+                </t>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="mail.MessageList.loadMore" owl="1">
+        <t t-if="threadView.$$$threadCache(mself).$$$isLoadingMore(mself)">
+            <div class="o-MessageList-item o-MessageList-loadingMore">
+                <i class="o-MessageList-loadingMoreIcon fa fa-spin fa-spinner"/>
+                Loading...
+            </div>
+        </t>
+        <t t-elif="!threadView.$$$threadCache(mself).$$$isAllHistoryLoaded(mself) and !threadView.$$$thread(mself).$$$isTemporary(mself)">
+            <a class="o-MessageList-item o-MessageList-loadMore" href="#" t-on-click="_onClickLoadMore" t-ref="loadMore">
+                Load more
+            </a>
+        </t>
+    </t>
+
+</templates>

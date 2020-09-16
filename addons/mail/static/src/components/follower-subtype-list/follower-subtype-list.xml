@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.FollowerSubtypeList" owl="1">
+        <div class="o-FollowerSubtypeList modal-dialog">
+            <t t-if="followerSubtypeList">
+                <div class="modal-content">
+                    <header class="modal-header">
+                        <h4 class="modal-title">
+                            Edit Subscription of <t t-esc="record.$$$follower(mself).$$$name(mself)"/>
+                        </h4>
+                        <i class="o-FollowerSubtypeList-closeButton close fa fa-times" aria-label="Close" t-on-click="_onClickCancel"/>
+                    </header>
+                    <main class="modal-body">
+                        <div class="o-FollowerSubtypeList-subtypes">
+                            <t t-foreach="record.$$$follower(mself).$$$subtypes(mself)" t-as="subtype" t-key="subtype.$$$id(mself)">
+                                <FollowerSubtype
+                                    class="o-FollowerSubtypeList-subtype"
+                                    follower="record.$$$follower(mself)"
+                                    followerSubtype="subtype"
+                                />
+                            </t>
+                        </div>
+                    </main>
+                    <div class="modal-footer">
+                        <button class="o-apply btn btn-primary" t-on-click="_onClickApply">
+                            Apply
+                        </button>
+                        <button class="o-cancel btn btn-secondary" t-on-click="_onClickCancel">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

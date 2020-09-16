@@ -2,12 +2,12 @@
 <templates xml:space="preserve">
     <t t-inherit="mail.Activity" t-inherit-mode="extension">
         <xpath expr="//*[@name='tools']" position="replace">
-            <t t-if="activity.requestingPartner and activity.thread.model === 'slide.channel'">
-                <div class="o_Activity_tools">
-                    <button class="o_Activity_toolButton o_Activity_grantAccessButton btn btn-link" t-on-click="_onGrantAccess">
+            <t t-if="activity.$$$requestingPartner(mself) and activity.$$$thread(mself).$$$model(mself) === 'slide.channel'">
+                <div class="o-Activity-tools">
+                    <button class="o-Activity-toolButton o-Activity-grantAccessButton btn btn-link" t-on-click="_onGrantAccess">
                         <i class="fa fa-check"/> Grant Access
                     </button>
-                    <button class="o_Activity_toolButton o_Activity_refuseAccessButton btn btn-link" t-on-click="_onRefuseAccess">
+                    <button class="o-Activity-toolButton o-Activity-refuseAccessButton btn btn-link" t-on-click="_onRefuseAccess">
                         <i class="fa fa-times"/> Refuse Access
                     </button>
                 </div>

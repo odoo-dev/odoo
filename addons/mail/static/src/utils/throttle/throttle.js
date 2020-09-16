@@ -1,7 +1,6 @@
-odoo.define('mail/static/src/utils/throttle/throttle.js', function (require) {
-'use strict';
+/** @odoo-module alias=mail.utils.throttle **/
 
-const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
+import makeDeferred from 'mail.utils.makeDeferred';
 
 /**
  * This module define an utility function that enables throttling calls on a
@@ -40,7 +39,7 @@ const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
   * which means the inner function will not be called. Usually caller should
   * just accept it and kindly treat this error as a polite warning.
   */
-class ThrottleCanceledError extends Error {
+export class ThrottleCanceledError extends Error {
     /**
      * @override
      */
@@ -58,7 +57,7 @@ class ThrottleCanceledError extends Error {
  * caller should just accept it and kindly treat this error as a polite
  * warning.
  */
-class ThrottleReinvokedError extends Error {
+export class ThrottleReinvokedError extends Error {
     /**
      * @override
      */
@@ -109,7 +108,7 @@ class Throttle {
         /**
          * Reference to the OWL envirionment. Useful to fine-tune control of
          * time flow in tests.
-         * @see mail/static/src/utils/test_utils.js:start.hasTimeControl
+         * @see mail.utils.testUtils:start.usingTimeControl
          */
         this.env = env;
         /**
@@ -330,7 +329,7 @@ class Throttle {
  * @returns {function} the cancelable, flushable and clearable throttle version
  *   of the provided function.
  */
-function throttle(
+export default function throttle(
     env,
     func,
     duration,
@@ -374,9 +373,4 @@ function throttle(
 Object.assign(throttle, {
     ThrottleReinvokedError,
     ThrottleCanceledError,
-});
-
-
-return throttle;
-
 });

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.AttachmentList" owl="1">
+        <div class="o-AttachmentList">
+            <div class="o-AttachmentList-partialList o-AttachmentList-partialListImages">
+                <t t-foreach="imageAttachments" t-as="attachment" t-key="attachment.localId">
+                    <Attachment
+                        class="o-AttachmentList-attachment o-AttachmentList-imageAttachment"
+                        attachment="attachment"
+                        attachments="viewableAttachments"
+                        detailsMode="attachmentsDetailsMode"
+                        imageSize="attachmentsImageSize"
+                        isDownloadable="areAttachmentsDownloadable"
+                        isEditable="areAttachmentsEditable"
+                        showExtension="showAttachmentsExtensions"
+                        showFilename="showAttachmentsFilenames"
+                    />
+                </t>
+            </div>
+            <div class="o-AttachmentList-partialList o-AttachmentList-partialListNonImages">
+                <t t-foreach="nonImageAttachments" t-as="attachment" t-key="attachment.localId">
+                    <Attachment
+                        class="o-AttachmentList-attachment o-AttachmentList-nonImageAttachment"
+                        attachment="attachment"
+                        attachments="viewableAttachments"
+                        detailsMode="'card'"
+                        imageSize="attachmentsImageSize"
+                        isDownloadable="areAttachmentsDownloadable"
+                        isEditable="areAttachmentsEditable"
+                        showExtension="showAttachmentsExtensions"
+                        showFilename="showAttachmentsFilenames"
+                    />
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

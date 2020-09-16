@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ThreadTypingIcon" owl="1">
+        <div class="o-ThreadTypingIcon" t-att-title="title">
+            <span class="o-ThreadTypingIcon-dot o-ThreadTypingIcon-dot1" t-att-class="{
+                'o-isAnimationBounce': animation === 'bounce',
+                'o-isAnimationPulse': animation === 'pulse',
+                'o-isSizeMedium': size === 'medium',
+                'o-isSizeSmall': size === 'small',
+            }"/>
+            <span class="o-ThreadTypingIcon-separator"/>
+            <span class="o-ThreadTypingIcon-dot o-ThreadTypingIcon-dot2" t-att-class="{
+                'o-isAnimationBounce': animation === 'bounce',
+                'o-isAnimationPulse': animation === 'pulse',
+                'o-isSizeMedium': size === 'medium',
+                'o-isSizeSmall': size === 'small',
+            }"/>
+            <span class="o-ThreadTypingIcon-separator"/>
+            <span class="o-ThreadTypingIcon-dot o-ThreadTypingIcon-dot3" t-att-class="{
+                'o-isAnimationBounce': animation === 'bounce',
+                'o-isAnimationPulse': animation === 'pulse',
+                'o-isSizeMedium': size === 'medium',
+                'o-isSizeSmall': size === 'small',
+            }"/>
+        </div>
+    </t>
+
+</templates>

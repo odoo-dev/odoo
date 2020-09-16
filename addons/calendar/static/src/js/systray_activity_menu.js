@@ -1,7 +1,7 @@
 odoo.define('calendar.systray.ActivityMenu', function (require) {
 "use strict";
 
-var ActivityMenu = require('mail.systray.ActivityMenu');
+var ActivityMenu = require('mail.widgets.ActivityMenu');
 var fieldUtils = require('web.field_utils');
 
 ActivityMenu.include({

@@ -9,319 +9,345 @@
 
         <template id="assets_backend" name="mail assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/mail/static/src/js/core/translation.js"></script>
-
-                <script type="text/javascript" src="/mail/static/src/js/many2many_tags_email.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/many2one_avatar_user.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/field_char.js"></script>
-
-                <!-- Widgets -->
-                <script type="text/javascript" src="/mail/static/src/js/document_viewer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/basic_view.js"></script>
-                <!-- systray -->
-                <script type="text/javascript" src="/mail/static/src/js/systray/systray_activity_menu.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/tours/mail.js"></script>
-                <!-- tools -->
-                <script type="text/javascript" src="/mail/static/src/js/tools/debug_manager.js"></script>
-                <!-- filter menu -->
-                <script type="text/javascript" src="/mail/static/src/js/custom_filter_item.js"></script>
-                <!-- utils -->
-                <script type="text/javascript" src="/mail/static/src/js/utils.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/activity.js"></script>
-                <!-- Activity view type -->
-                <script type="text/javascript" src="/mail/static/src/js/views/activity/activity_view.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/views/activity/activity_model.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/views/activity/activity_controller.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/views/activity/activity_renderer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/views/activity/activity_record.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/views/activity/activity_cell.js"></script>
-                <!-- Emojis -->
-                <script type="text/javascript" src="/mail/static/src/js/emojis.js"></script>
-                <script type="text/javascript" src="/mail/static/src/js/emojis_mixin.js"/>
-                <script type="text/javascript" src="/mail/static/src/js/field_emojis_common.js"/>
-                <script type="text/javascript" src="/mail/static/src/js/field_char_emojis.js"/>
-                <script type="text/javascript" src="/mail/static/src/js/field_text_emojis.js"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/emojis.scss"/>
-                <!-- Others -->
+                <script type="text/javascript" src="/mail/static/src/bugfix/bugfix.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-addons/custom-filter-item.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-hooks/use-drag-visible-drop-zone/use-drag-visible-drop-zone.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-hooks/use-models/use-models.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-hooks/use-refs/use-refs.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-hooks/use-rendered-values/use-rendered-values.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-hooks/use-store/use-store.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-hooks/use-update/use-update.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-mixins/using-models/using-models.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/activity/activity.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/activity-box/activity-box.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/activity-mark-done-popover/activity-mark-done-popover.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/attachment/attachment.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/attachment-box/attachment-box.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/attachment-delete-confirm-dialog/attachment-delete-confirm-dialog.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/attachment-list/attachment-list.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/attachment-viewer/attachment-viewer.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/autocomplete-input/autocomplete-input.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chat-window/chat-window.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chat-window-header/chat-window-header.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chat-window-hidden-menu/chat-window-hiddenMenu.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chat-window-manager/chat-window-manager.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chatter/chatter.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chatter-container/chatter-container.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chatter-topbar/chatter-topbar.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer/composer.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-suggested-recipient/composer-suggested-recipient.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-suggested-recipient-list/composer-suggested-recipient-list.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-suggestion/composer-suggestion.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-suggestion-list/composer-suggestion-list.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-text-input/composer-text-input.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/dialog/dialog.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/dialog-manager/dialog-manager.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss/discuss.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss-mobile-mailbox-selection/discuss-mobile-mailbox-selection.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss-sidebar/discuss-sidebar.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss-sidebar-item/discuss-sidebar-item.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/drop-zone/drop-zone.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/editable-text/editable-text.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/emojis-popover/emojis-popover.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/file-uploader/file-uploader.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follow-button/follow-button.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follower/follower.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follower-list-menu/follower-list-menu.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follower-subtype/follower-subtype.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follower-subtype-list/follower-subtype-list.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/mail-template/mail-template.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/message/message.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/message-author-prefix/message-author-prefix.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/message-list/message-list.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/message-seen-indicator/message-seen-indicator.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/messaging-menu/messaging-menu.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/mobile-messaging-navbar/mobile-messaging-navbar.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/moderation-ban-dialog/moderation-ban-dialog.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/moderation-discard-dialog/moderation-discard-dialog.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/moderation-reject-dialog/moderatio/>ialog.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/notification-alert/notification-alert.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/notification-group/notification-group.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/notification-list/notification-list.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/notification-popover/notification-popover.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/notification-request/notification-request.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/partner-im-status-icon/partner-im-status-icon.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-icon/thread-icon.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-needaction-preview/thread-needaction-preview.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-preview/thread-preview.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-textual-typing-status/thread-textual-typing-status.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-typing-icon/thread-typing-icon.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-view/thread-view.js"/>
+                <script type="text/javascript" src="/mail/static/src/core/translation.js"/>
+                <script type="text/javascript" src="/mail/static/src/env-mixins/using-models/using-models.js"/>
+                <script type="text/javascript" src="/mail/static/src/features/mail/mail.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/action-addon.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/action-original.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/action.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/errors.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/feature.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/feature-action-info.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/feature-model-info.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/model.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/model-addon.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/model-field.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/model-manager.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/model-original.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/observee.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/observer.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/record.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/record-field.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/record-field-command.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/registry.js"/>
+                <script type="text/javascript" src="/mail/static/src/model/utils.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/activity/activity.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/activity-type/activity-type.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/attachment/attachment.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/attachment-viewer/attachment-viewer.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/canned-response/canned-response.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/channel-command/channel-command.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/chat-window/chat-window.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/chat-window-manager/chat-window-manager.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/chatter/chatter.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/composer/composer.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/country/country.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/device/device.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/dialog/dialog.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/dialog-manager/dialog-manager.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/discuss/discuss.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/follower/follower.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/follower-subtype/follower-subtype.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/follower-subtype-list/follower-subtype-list.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/locale/locale.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/mail-template/mail-template.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/message/message.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/message-seen-indicator/message-seen-indicator.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/messaging/messaging.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/messaging-initializer/messaging-initializer.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/messaging-menu/messaging-menu.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/messaging-notification-handler/messaging-notification-handler.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/notification/notification.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/notification-group/notification-group.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/notification-group-manager/notification-group-manager.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/partner/partner.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/suggested-recipient-info/suggested-recipient-info.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/thread/thread.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/thread-cache/thread-cache.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/thread-partner-seen-info/thread-partner-seen-info.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/vhread-view/thread-view.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/thread-view/thread-viewer.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/user/user.js"/>
+                <script type="text/javascript" src="/mail/static/src/services/chat-window/chat-window.js"/>
+                <script type="text/javascript" src="/mail/static/src/services/dialog/dialog.js"/>
+                <script type="text/javascript" src="/mail/static/src/services/messaging/messaging.js"/>
+                <script type="text/javascript" src="/mail/static/src/tours/mail.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/_class-patch-map.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/_event-handled-weak-map.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/_read-activities.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/add-link.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/escape-and-compact-text-content.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/execute-gracefully.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/get-text-to-html.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/html-to-text-content-inline.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/inline.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/is-event-handled.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/linkify.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/linkify.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/make-deferred/make-deferred.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/mark-event-handled.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/parse-and-transform.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/parse-email.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/patch-class-methods.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/strip-html.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/throttle/throttle.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/time-from-now.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/timer/timer.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/unpatch-class-methods.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-addons/basic/view.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-field-addons/char.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-field-mixins/emojis-common/emojis-common.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/activity/activity.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/activity-exception.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/basic-activity.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/char-emojis.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/kanban-activity/kanban-activity.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/kanban-many2one-avatar-user.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/list-activity/list-activity.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/many2many-tags-email/many2many-tags-email.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/many2one-avatar-user/many2one-avatar-user.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/text-emojis/text-emojis.js"/>
+                <script type="text/javascript" src="/mail/static/src/views/activity/model.js"/>
+                <script type="text/javascript" src="/mail/static/src/views/activity/cell.js"/>
+                <script type="text/javascript" src="/mail/static/src/views/activity/controller.js"/>
+                <script type="text/javascript" src="/mail/static/src/views/activity/record.js"/>
+                <script type="text/javascript" src="/mail/static/src/views/activity/renderer/renderer.js"/>
+                <script type="text/javascript" src="/mail/static/src/views/activity/view.js"/>
+                <script type="text/javascript" src="/mail/static/src/widget-addons/debug-manager/debug-manager.js"/>
+                <script type="text/javascript" src="/mail/static/src/widget-mixins/emojis.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/activity-menu/activity-menu.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/discuss/discuss.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/discuss-invite-partner-dialog/discuss-invite-partner-dialog.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/document-viewer/document-viewer.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/form-renderer/form-renderer.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/messaging-menu/messaging-menu.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/notification-alert/notification-alert.js"/>
 
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/variables.scss"/>
-
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/discuss.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/composer.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/thread.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/systray.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/mail_activity.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/many2one_avatar_user.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/activity_view.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/kanban_view.scss"/>
-
-                <script type="text/javascript" src="/mail/static/src/bugfix/bugfix.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_refs/use_refs.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_rendered_values/use_rendered_values.js"/>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js"/>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_store/use_store.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_update/use_update.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/activity/activity.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/activity_box/activity_box.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/attachment/attachment.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/attachment_box/attachment_box.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/attachment_delete_confirm_dialog/attachment_delete_confirm_dialog.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/attachment_list/attachment_list.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/attachment_viewer/attachment_viewer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/autocomplete_input/autocomplete_input.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chat_window/chat_window.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chat_window_header/chat_window_header.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chat_window_hidden_menu/chat_window_hidden_menu.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chat_window_manager/chat_window_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chatter/chatter.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chatter_container/chatter_container.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chatter_topbar/chatter_topbar.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/composer/composer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/composer_suggested_recipient/composer_suggested_recipient.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/composer_suggested_recipient_list/composer_suggested_recipient_list.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/composer_suggestion/composer_suggestion.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/composer_suggestion_list/composer_suggestion_list.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/composer_text_input/composer_text_input.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/dialog/dialog.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/dialog_manager/dialog_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/discuss/discuss.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/discuss_mobile_mailbox_selection/discuss_mobile_mailbox_selection.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/discuss_sidebar/discuss_sidebar.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/discuss_sidebar_item/discuss_sidebar_item.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/drop_zone/drop_zone.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/editable_text/editable_text.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/emojis_popover/emojis_popover.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/file_uploader/file_uploader.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follow_button/follow_button.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follower/follower.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follower_list_menu/follower_list_menu.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follower_subtype/follower_subtype.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follower_subtype_list/follower_subtype_list.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/mail_template/mail_template.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/message/message.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/message_author_prefix/message_author_prefix.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/message_list/message_list.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/message_seen_indicator/message_seen_indicator.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/messaging_menu/messaging_menu.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/mobile_messaging_navbar/mobile_messaging_navbar.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/moderation_ban_dialog/moderation_ban_dialog.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/moderation_discard_dialog/moderation_discard_dialog.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/moderation_reject_dialog/moderation_reject_dialog.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/notification_alert/notification_alert.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/notification_group/notification_group.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/notification_list/notification_list.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/notification_popover/notification_popover.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/notification_request/notification_request.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_icon/thread_icon.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_preview/thread_preview.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_typing_icon/thread_typing_icon.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_view/thread_view.js"></script>
-                <script type="text/javascript" src="/mail/static/src/model/model_core.js"></script>
-                <script type="text/javascript" src="/mail/static/src/model/model_errors.js"></script>
-                <script type="text/javascript" src="/mail/static/src/model/model_field.js"></script>
-                <script type="text/javascript" src="/mail/static/src/model/model_field_command.js"></script>
-                <script type="text/javascript" src="/mail/static/src/model/model_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/activity/activity.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/activity_type/activity_type.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/attachment/attachment.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/attachment_viewer/attachment_viewer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/canned_response/canned_response.js"/>
-                <script type="text/javascript" src="/mail/static/src/models/channel_command/channel_command.js"/>
-                <script type="text/javascript" src="/mail/static/src/models/chat_window/chat_window.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/chat_window_manager/chat_window_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/chatter/chatter.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/composer/composer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/country/country.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/device/device.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/dialog/dialog.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/dialog_manager/dialog_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/discuss/discuss.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/follower/follower.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/follower_subtype/follower_subtype.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/follower_subtype_list/follower_subtype_list.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/locale/locale.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/mail_template/mail_template.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/message/message.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/message_seen_indicator/message_seen_indicator.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/messaging/messaging.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/messaging_initializer/messaging_initializer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/messaging_menu/messaging_menu.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/messaging_notification_handler/messaging_notification_handler.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/model/model.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/notification/notification.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/notification_group/notification_group.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/notification_group_manager/notification_group_manager.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/partner/partner.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/suggested_recipient_info/suggested_recipient_info.js"/>
-                <script type="text/javascript" src="/mail/static/src/models/thread/thread.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/thread_cache/thread_cache.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/thread_partner_seen_info/thread_partner_seen_info.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/thread_view/thread_view.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/thread_view/thread_viewer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/user/user.js"></script>
-                <script type="text/javascript" src="/mail/static/src/services/chat_window_service/chat_window_service.js"></script>
-                <script type="text/javascript" src="/mail/static/src/services/dialog_service/dialog_service.js"></script>
-                <script type="text/javascript" src="/mail/static/src/services/messaging/messaging.js"/>
-                <script type="text/javascript" src="/mail/static/src/utils/deferred/deferred.js"></script>
-                <script type="text/javascript" src="/mail/static/src/utils/throttle/throttle.js"></script>
-                <script type="text/javascript" src="/mail/static/src/utils/timer/timer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/utils/utils.js"></script>
-                <script type="text/javascript" src="/mail/static/src/widgets/discuss/discuss.js"></script>
-                <script type="text/javascript" src="/mail/static/src/widgets/discuss_invite_partner_dialog/discuss_invite_partner_dialog.js"></script>
-                <script type="text/javascript" src="/mail/static/src/widgets/form_renderer/form_renderer.js"></script>
-                <script type="text/javascript" src="/mail/static/src/widgets/messaging_menu/messaging_menu.js"></script>
-                <script type="text/javascript" src="/mail/static/src/widgets/notification_alert/notification_alert.js"/>
-
-                <!-- notification_list_item.scss contains variables/mixins, it must be positioned before sub-components of NotificationList -->
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_list/notification_list_item.scss"/>
+                <!-- notification-list/item.scss contains variables/mixins, it must be positioned before sub-components of NotificationList -->
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification-list/item.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/bugfix/bugfix.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity/activity.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity_box/activity_box.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity-box/activity-box.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/activity-mark-done-popover/activity-mark-done-popover.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/attachment/attachment.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/attachment_box/attachment_box.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/attachment_list/attachment_list.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/attachment_viewer/attachment_viewer.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat_window/chat_window.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat_window_header/chat_window_header.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat_window_hidden_menu/chat_window_hidden_menu.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat_window_manager/chat_window_manager.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/attachment-box/attachment-box.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/attachment-list/attachment-list.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/attachment-viewer/attachment-viewer.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat-window/chat-window.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat-window-header/chat-window-header.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat-window-hidden-menu/chat-window-hidden-menu.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat-window-manager/chat-window-manager.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter/chatter.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter_container/chatter_container.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter_topbar/chatter_topbar.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter-container/chatter-container.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter-topbar/chatter-topbar.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer/composer.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer_suggested_recipient/composer_suggested_recipient.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer_suggested_recipient_list/composer_suggested_recipient_list.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer_suggestion/composer_suggestion.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer_suggestion_list/composer_suggestion_list.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer_text_input/composer_text_input.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer-suggested-recipient/composer-suggested-recipient.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer-suggested-recipient-list/composer-suggested-recipient-list.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer-suggestion/composer-suggestion.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer-suggestion-list/composer-suggestion-list.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer-text-input/composer-text-input.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/dialog/dialog.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/discuss/discuss.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/discuss_mobile_mailbox_selection/discuss_mobile_mailbox_selection.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/discuss_sidebar/discuss_sidebar.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/discuss_sidebar_item/discuss_sidebar_item.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/drop_zone/drop_zone.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/emojis_popover/emojis_popover.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/file_uploader/file_uploader.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follow_button/follow_button.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/discuss-mobile-mailbox-selection/discuss-mobile-mailbox-selection.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/discuss-sidebar/discuss-sidebar.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/discuss-sidebar-ttem/discuss-sidebar-ttem.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/drop-zone/drop-zone.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/emojis-popover/emojis-popover.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/file-uploader/file-uploader.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follow-button/follow-button.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower/follower.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower_list_menu/follower_list_menu.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower_subtype/follower_subtype.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower_subtype_list/follower_subtype_list.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/mail_template/mail_template.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower-list-menu/follower-list-menu.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower-subtype/follower-subtype.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower-subtype-list/follower-subtype-list.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/mail-template/mail-template.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message/message.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message_author_prefix/message_author_prefix.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message_list/message_list.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message_seen_indicator/message_seen_indicator.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/messaging_menu/messaging_menu.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/mobile_messaging_navbar/mobile_messaging_navbar.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_group/notification_group.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_list/notification_list.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_popover/notification_popover.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_request/notification_request.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_icon/thread_icon.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_preview/thread_preview.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_typing_icon/thread_typing_icon.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_view/thread_view.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message-author-prefix/message-author-prefix.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message-list/message-list.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message-seen-indicator/message-seen-indicator.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/messaging-menu/messaging-menu.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/mobile-messaging-navbar/mobile-messaging-navbar.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification-group/notification-group.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification-list/notification-list.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification-popover/notification-popover.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification-request/notification-request.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/partner-im-status-icon/partner-im-status-icon.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread-icon/thread-icon.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread-needaction-preview/thread-needaction-preview.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread-preview/thread-preview.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread-textual-typing-status/thread-textual-typing-status.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread-typing-icon/thread-typing-icon.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread-view/thread-view.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/discuss.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/many2one_avatar_user.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/thread.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/view-addons/kanban/view.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/view-field-mixins/emojis-common/emojis-common.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/views/activity/view.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/activity-menu/activity-menu.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/discuss/discuss.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/form_renderer/form_renderer.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/form-renderer/form-renderer.scss"/>
             </xpath>
         </template>
 
         <template id="assets_backend_prod_only" name="mail prod only assets" inherit_id="web.assets_backend_prod_only">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/mail/static/src/js/main.js"></script>
+                <script type="text/javascript" src="/mail/static/src/main.js"/>
             </xpath>
         </template>
 
         <template id="assets_tests" name="Mail Assets Tests" inherit_id="web.assets_tests">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/mail/static/tests/tours/mail_full_composer_test_tour.js"/>
+                <script type="text/javascript" src="/mail/static/src/tours/full-composer-test.js"/>
             </xpath>
         </template>
 
         <template id="tests_assets" name="mail_tests_assets" inherit_id="web.tests_assets">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/mail/static/src/env/test_env.js"></script>
-                <script type="text/javascript" src="/mail/static/src/utils/test_utils.js"></script>
-                <script type="text/javascript" src="/mail/static/tests/helpers/mock_models.js"></script>
-                <script type="text/javascript" src="/mail/static/tests/helpers/mock_server.js"></script>
+                <script type="text/javascript" src="/mail/static/src/env-mixins/using-time-control/using-time-control.js"/>
+                <script type="text/javascript" src="/mail/static/src/mock-models.js"/>
+                <script type="text/javascript" src="/mail/static/src/mock-server.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/_create-fake-data-transfer.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/after-each.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/after-next-render.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/before-each.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/dragenter-files.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/drop-files.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/next-animation-frame.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/paste-files.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/test/start.js"/>
             </xpath>
         </template>
 
         <template id="qunit_suite" name="mail_tests" inherit_id="web.qunit_suite_tests">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/mail/static/tests/chatter_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/tests/mail_utils_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/tests/document_viewer_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/tests/many2one_avatar_user_tests.js"></script>
-                <!-- systray -->
-                <script type="text/javascript" src="/mail/static/tests/systray/systray_activity_menu_tests.js"></script>
-                <!-- tools -->
-                <script type="text/javascript" src="/mail/static/tests/tools/debug_manager_tests.js"></script>>
-                <!-- activity view -->
-                <script type="text/javascript" src="/mail/static/tests/activity_tests.js"></script>
-
-                <script type="text/javascript" src="/mail/static/src/bugfix/bugfix_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/component_hooks/use_store/use_store_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/activity/activity_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/attachment/attachment_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/attachment_box/attachment_box_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chat_window_manager/chat_window_manager_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chatter/chatter_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chatter/chatter_suggested_recipient_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/chatter_topbar/chatter_topbar_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/composer/composer_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/composer_suggestion/composer_suggestion_canned_response_tests.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/composer_suggestion/composer_suggestion_channel_tests.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/composer_suggestion/composer_suggestion_command_tests.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/composer_suggestion/composer_suggestion_partner_tests.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/dialog_manager/dialog_manager_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/discuss_domain_tests.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/discuss_inbox_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/discuss_moderation_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/discuss_pinned_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/discuss_sidebar_tests.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/discuss_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/file_uploader/file_uploader_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follow_button/follow_button_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follower/follower_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follower_list_menu/follower_list_menu_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/follower_subtype/follower_subtype_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/message/message_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/message_seen_indicator/message_seen_indicator_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/messaging_menu/messaging_menu_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/notification_list/notification_list_notification_group_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/notification_list/notification_list_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_icon/thread_icon_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_preview/thread_preview_tests.js"/>
-                <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/thread_view/thread_view_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/attachment/attachment_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/message/message_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/messaging/messaging_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/models/thread/thread_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/utils/throttle/throttle_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/utils/timer/timer_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/widgets/form_renderer/form_renderer_tests.js"></script>
-                <script type="text/javascript" src="/mail/static/src/widgets/notification_alert/notification_alert_tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/bugfix/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/component-hooks/use-store/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/activity/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/activity-mark-done-popover/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/attachment/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/attachment-box/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chat-window-manager/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chatter/chatter_tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chatter/suggested-recipient-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/chatter-topbar/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-suggestion/canned-response-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-suggestion/channel-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-suggestion/command-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/composer-suggestion/partner-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/dialog-manager/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/domain-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/inbox-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/moderation-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/pinned-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss/tests/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/file-uploader/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follow-button/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follower/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follower-list-menu/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/follower-subtype/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/message/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/message-seen-indicator/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/messaging-menu/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/notification-list/notification-group-tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/notification-list/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/partner-im-status-icon/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-icon/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-needaction-preview/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-preview/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-textual-typing-status/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/thread-view/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/attachment/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/message/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/messaging/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/thread/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/throttle/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/utils/timer/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/list-activity/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/many2many-tags-email/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/view-fields/many2one-avatar-user/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/views/activity/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/activity-menu/activity-menu/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/document-viewer/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/debug-manager/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/form-renderer/tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/widgets/notification-alert/tests.js"/>
             </xpath>
         </template>
 
         <template id="qunit_mobile_suite" name="mail_qunit_mobile_suite" inherit_id="web.qunit_mobile_suite_tests">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/mail/static/src/components/discuss_mobile_mailbox_selection/discuss_mobile_mailbox_selection_tests.js"/>
+                <script type="text/javascript" src="/mail/static/src/components/discuss-mobile-mailbox-selection/discuss-mobile-mailbox-selection_tests.js"/>
             </xpath>
         </template>
     </data>

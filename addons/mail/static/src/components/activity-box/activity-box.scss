@@ -1,0 +1,45 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-ActivityBox-title {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    margin-top: map-get($spacers, 4);
+    margin-bottom: map-get($spacers, 4);
+}
+
+.o-ActivityBox-titleBadge {
+    padding: map-get($spacers, 0) map-get($spacers, 2);
+}
+
+.o-ActivityBox-titleBadges {
+    margin-inline-end: map-get($spacers, 3);
+}
+
+.o-ActivityBox-titleLine {
+    flex: 1 1 auto;
+    width: auto;
+}
+
+.o-ActivityBox-titleText {
+    margin: map-get($spacers, 0) map-get($spacers, 3);
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-ActivityBox-title {
+    font-weight: bold;
+}
+
+.o-ActivityBox-titleBadge {
+    font-size: 11px;
+}
+
+.o-ActivityBox-titleLine {
+    border-color: gray('400');
+    border-style: dashed;
+}

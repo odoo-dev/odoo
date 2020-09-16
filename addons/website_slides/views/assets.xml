@@ -3,11 +3,13 @@
     <data>
         <template id="assets_backend" inherit_id="web.assets_backend" name="Slides Backend Assets">
             <xpath expr="." position="inside">
-                <link rel="stylesheet" type="text/scss" href="/website_slides/static/src/scss/rating_rating_views.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/website_slides/static/src/scss/slide_views.scss"/>
+                <script type="text/javascript" src="/website_slides/static/src/bugfix/bugfix.js"/>
                 <script type="text/javascript" src="/website_slides/static/src/components/activity/activity.js"/>
                 <script type="text/javascript" src="/website_slides/static/src/js/slide_category_one2many.js"/>
                 <script type="text/javascript" src="/website_slides/static/src/js/rating_field_backend.js"/>
+
+                <link rel="stylesheet" type="text/scss" href="/website_slides/static/src/scss/rating_rating_views.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/website_slides/static/src/scss/slide_views.scss"/>
             </xpath>
         </template>
 
@@ -68,6 +70,7 @@
 
         <template id="website_slides_tests" name="eLearning tests" inherit_id="web.qunit_suite_tests">
             <xpath expr="//script[last()]" position="after">
+                <script type="text/javascript" src="/website_slides/static/src/bugfix/bugfix_tests.js"/>
                 <script type="text/javascript" src="/website_slides/static/src/components/activity/activity_tests.js"/>
             </xpath>
         </template>

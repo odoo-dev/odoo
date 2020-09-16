@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <t t-extend="mail.systray.ActivityMenu.Previews">
+    <t t-extend="mail.widgets.ActivityMenu.Previews">
         <t t-jquery="div.o_preview_title" t-operation="after">
             <div t-if="activity and activity.type == 'meeting'">
                 <t t-set="is_next_meeting" t-value="true"/>

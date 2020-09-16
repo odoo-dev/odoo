@@ -87,20 +87,20 @@ tour.register('project_tour', {
     content: _t("Let's start working on your task."),
     position: "bottom",
 }, {
-    trigger: ".o_ChatterTopbar_buttonSendMessage",
+    trigger: '.o-ChatterTopbar-buttonSendMessage',
     content: _t("Use this chatter to <b>send emails</b> and communicate efficently with your customers. \
     Add new people in the followers list to make them aware about the main changes about this task."),
     width: 350,
     position: "bottom",
 }, {
-    trigger: ".o_ChatterTopbar_buttonLogNote",
+    trigger: '.o-ChatterTopbar-buttonLogNote',
     content: _t("<b>Log notes</b> for internal communications <i>(the people following this task won't be notified \
     of the note you are logging unless you specifically tag them)</i>. Use @ <b>mentions</b> to ping a colleague \
     or # <b>mentions</b> to reach an entire team."),
     width: 350,
     position: "bottom"
 }, {
-    trigger: ".o_ChatterTopbar_buttonScheduleActivity",
+    trigger: '.o-ChatterTopbar-buttonScheduleActivity',
     content: _t("Use <b>activities</b> to organize your daily work."),
 }, {
     trigger: ".modal-dialog .btn-primary",

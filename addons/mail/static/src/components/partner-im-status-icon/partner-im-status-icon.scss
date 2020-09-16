@@ -1,0 +1,54 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-PartnerImStatusIcon {
+    display: flex;
+    flex-flow: column;
+    width: 1.2em;
+    height: 1.2em;
+    line-height: 1.3em;
+
+    &.o-hasBackground {
+        transform: scale(1);
+        margin-inline-end: map-get($spacers, 1);
+        margin-top: 2px;
+    }
+}
+
+.o-PartnerImStatusIcon-outerBackground {
+    transform: scale(1.5);
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-PartnerImStatusIcon {
+    &.o-hasOpenChat {
+        cursor: pointer;
+    }
+}
+
+.o-PartnerImStatusIcon-icon {
+
+    &.o-isAway {
+        color: theme-color('warning');
+    }
+
+    &.o-isBot {
+        color: $o-enterprise-primary-color;
+    }
+
+    &.o-isOffline {
+        color: gray('700');
+    }
+
+    &.o-isOnline {
+        color: $o-enterprise-primary-color;
+    }
+}
+
+.o-PartnerImStatusIcon-innerBackground {
+    color: white;
+}

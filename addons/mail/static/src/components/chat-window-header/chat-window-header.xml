@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ChatWindowHeader" owl="1">
+        <div class="o-ChatWindowHeader" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }" t-on-click="_onClick">
+            <t t-if="chatWindow">
+                <t t-if="hasCloseAsBackButton">
+                    <div class="o-ChatWindowHeader-command o-ChatWindowHeader-commandBack o-ChatWindowHeader-commandClose" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }" t-on-click="_onClickClose" title="Close conversation">
+                        <i class="fa fa-arrow-left"/>
+                    </div>
+                </t>
+                <t t-if="chatWindow.$$$thread(mself) and chatWindow.$$$thread(mself).$$$model(mself) === 'mail.channel'">
+                    <ThreadIcon
+                        class="o-ChatWindowHeader-icon o-ChatWindowHeader-item"
+                        thread="chatWindow.$$$thread(mself)"
+                    />
+                </t>
+                <div class="o-ChatWindowHeader-item o-ChatWindowHeader-name" t-att-title="chatWindow.$$$name(mself)">
+                    <t t-esc="chatWindow.$$$name(mself)"/>
+                </div>
+                <t t-if="chatWindow.$$$thread(mself) and chatWindow.$$$thread(mself).$$$isMassMailing(mself)">
+                    <i class="fa fa-envelope-o" title="Messages are sent by email" role="img"/>
+                </t>
+                <t t-if="chatWindow.$$$thread(mself) and chatWindow.$$$thread(mself).$$$localMessageUnreadCounter(mself) > 0">
+                    <div class="o-ChatWindowHeader-counter o-ChatWindowHeader-item">
+                        (<t t-esc="chatWindow.$$$thread(mself).localMessageUnreadCounter"/>)
+                    </div>
+                </t>
+                <div class="o-isAutogrow"/>
+                <div class="o-ChatWindowHeader-item o-ChatWindowHeader-rightArea">
+                    <t t-if="chatWindow.$$$hasShiftPrev(mself)">
+                        <div class="o-ChatWindowHeader-command o-ChatWindowHeader-commandShiftPrev" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }" t-on-click="_onClickShiftPrev" t-att-title="shiftPrevText">
+                            <!-- this is reversed automatically when language is rtl -->
+                            <i class="fa fa-angle-left"/>
+                        </div>
+                    </t>
+                    <t t-if="chatWindow.$$$hasShiftNext(mself)">
+                        <div class="o-ChatWindowHeader-command o-ChatWindowHeader-commandShiftNext" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }" t-on-click="_onClickShiftNext" t-att-title="shiftNextText">
+                            <!-- this is reversed automatically when language is rtl -->
+                            <i class="fa fa-angle-right"/>
+                        </div>
+                    </t>
+                    <t t-if="isExpandable">
+                        <div class="o-ChatWindowHeader-command o-ChatWindowHeader-commandExpand" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }" t-on-click="_onClickExpand" title="Open in Discuss">
+                            <i class="fa fa-expand"/>
+                        </div>
+                    </t>
+                    <t t-if="!hasCloseAsBackButton">
+                        <div class="o-ChatWindowHeader-command o-ChatWindowHeader-commandClose" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }" t-on-click="_onClickClose" title="Close chat window">
+                            <i class="fa fa-close"/>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

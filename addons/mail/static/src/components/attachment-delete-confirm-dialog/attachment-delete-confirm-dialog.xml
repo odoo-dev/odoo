@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.AttachmentDeleteConfirmDialog" owl="1">
+        <Dialog contentClass="'o-AttachmentDeleteConfirmDialog'" title="getTitle()" size="'medium'" t-ref="dialog">
+            <p class="o-AttachmentDeleteConfirmDialog-mainText" t-esc="getBody()"/>
+            <t t-set-slot="buttons">
+                <button class="o-AttachmentDeleteConfirmDialog-confirmButton btn btn-primary" t-on-click="_onClickOk">Ok</button>
+                <button class="o-AttachmentDeleteConfirmDialog-cancelButton btn btn-secondary" t-on-click="_onClickCancel">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

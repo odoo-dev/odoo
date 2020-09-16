@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.PartnerImStatusIcon" owl="1">
+        <span class="o-PartnerImStatusIcon fa-stack"
+            t-att-class="{
+                'o-hasBackground': !hasBackground,
+                'o-hasOpenChat': hasOpenChat,
+                'o-isAway': partner and partner.$$$im_status(mself) === 'away',
+                'o-isBot': partner and env.messaging.$$$partnerRoot(mself) === partner,
+                'o-isOffline': partner and partner.$$$im_status(mself) === 'offline',
+                'o-isOnline': partner and partner.$$$im_status(mself) === 'online',
+            }"
+            t-on-click="_onClick"
+            t-att-data-partner-local-id="partner ? partner.localId : undefined"
+        >
+            <t t-if="partner" name="rootCondition">
+                <t t-if="hasBackground">
+                    <i class="o-PartnerImStatusIcon-outerBackground fa fa-circle fa-stack-1x"/>
+                    <i class="o-PartnerImStatusIcon-innerBackground fa fa-circle fa-stack-1x"/>
+                </t>
+                <t t-if="partner.$$$im_status(mself) === 'online'">
+                    <i class="o-PartnerImStatusIcon-icon o-isOnline fa fa-circle fa-stack-1x" title="Online" role="img" aria-label="User is online"/>
+                </t>
+                <t t-if="partner.$$$im_status(mself) === 'away'">
+                    <i class="o-PartnerImStatusIcon-icon o-isAway fa fa-circle fa-stack-1x" title="Idle" role="img" aria-label="User is idle"/>
+                </t>
+                <t t-if="partner.$$$im_status(mself) === 'offline'">
+                    <i class="o-PartnerImStatusIcon-icon o-isOffline fa fa-circle-o fa-stack-1x" title="Offline" role="img" aria-label="User is offline"/>
+                </t>
+                <t t-if="partner === env.messaging.$$$partnerRoot(mself)">
+                    <i class="o-PartnerImStatusIcon-icon o-isBot fa fa-heart fa-stack-1x" title="Bot" role="img" aria-label="User is a bot"/>
+                </t>
+            </t>
+        </span>
+    </t>
+
+</templates>

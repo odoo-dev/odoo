@@ -1537,7 +1537,7 @@ return ThreadTypingMixin;
 odoo.define('im_livechat.legacy.mail.model.AbstractMessage', function (require) {
 "use strict";
 
-var mailUtils = require('mail.utils');
+const timeFromNow = require('mail.utils.timeFromNow');
 
 var Class = require('web.Class');
 var core = require('web.core');
@@ -1733,7 +1733,7 @@ var AbstractMessage = Class.extend({
      * @return {string}
      */
     getTimeElapsed: function () {
-        return mailUtils.timeFromNow(this.getDate());
+        return timeFromNow(this.getDate());
     },
     /**
      * Get the type of message (e.g. 'comment', 'email', 'notification', ...)
@@ -2839,7 +2839,7 @@ odoo.define('im_livechat.legacy.mail.widget.Thread', function (require) {
 "use strict";
 
 var DocumentViewer = require('im_livechat.legacy.mail.DocumentViewer');
-var mailUtils = require('mail.utils');
+const timeFromNow = require('mail.utils.timeFromNow');
 
 var core = require('web.core');
 var time = require('web.time');
@@ -3369,7 +3369,7 @@ var ThreadWidget = Widget.extend({
         var isAtBottom = this.isAtBottom();
         this.$('.o_mail_timestamp').each(function () {
             var date = $(this).data('date');
-            $(this).html(mailUtils.timeFromNow(date));
+            $(this).html(timeFromNow(date));
         });
         if (isAtBottom && !this.isAtBottom()) {
             this.scrollToBottom();

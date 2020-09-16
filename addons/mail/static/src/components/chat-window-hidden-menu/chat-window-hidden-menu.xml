@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ChatWindowHiddenMenu" owl="1">
+        <div class="o-ChatWindowHiddenMenu dropup">
+            <div class="o-ChatWindowHiddenMenu-dropdownToggle dropdown-toggle" t-att-class="{ show: env.messaging.$$$chatWindowManager(mself).$$$isHiddenMenuOpen(mself) }" t-on-click="_onClickToggle">
+                <div class="o-ChatWindowHiddenMenu-dropdownToggleIcon o-ChatWindowHiddenMenu-dropdownToggleItem fa fa-comments-o"/>
+                <div class="o-ChatWindowHiddenMenu-dropdownToggleItem o-ChatWindowHiddenMenu-windowCounter">
+                    <t t-esc="env.messaging.$$$chatWindowManager(mself).$$$allOrderedHidden(mself).length"/>
+                </div>
+            </div>
+            <ul class="o-ChatWindowHiddenMenu-list dropdown-menu dropdown-menu-right" t-att-class="{ show: env.messaging.$$$chatWindowManager(mself).$$$isHiddenMenuOpen(mself) }" role="menu" t-ref="list">
+                <t t-foreach="env.messaging.$$$chatWindowManager(mself).$$$allOrderedHidden(mself)" t-as="chatWindow" t-key="chatWindow.localId">
+                    <li class="o-ChatWindowHiddenMenu-listItem" role="menuitem">
+                        <ChatWindowHeader
+                            class="o-ChatWindowHiddenMenu-chatWindowHeader"
+                            chatWindow="chatWindow"
+                            t-on-o-clicked="_onClickedChatWindow"
+                        />
+                    </li>
+                </t>
+            </ul>
+            <t t-if="env.messaging.$$$chatWindowManager(mself).$$$unreadHiddenConversationAmount(mself) > 0">
+                <div class="o-ChatWindowHiddenMenu-unreadCounter badge badge-pill">
+                    <t t-esc="env.messaging.$$$chatWindowManager(mself).$$$unreadHiddenConversationAmount(mself)"/>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

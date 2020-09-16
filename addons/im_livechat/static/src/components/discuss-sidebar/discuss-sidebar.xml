@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="mail.DiscussSidebar" t-inherit-mode="extension">
+        <xpath expr="//*[@name='root']" position="inside">
+            <t t-set="livechats" t-value="quickSearchOrderedAndPinnedLivechatList()"/>
+            <t t-if="livechats and livechats.length">
+                <div class="o-DiscussSidebar-group o-DiscussSidebar-groupLivechat">
+                    <div class="o-DiscussSidebar-groupHeader">
+                        <div class="o-DiscussSidebar-groupHeaderItem o-DiscussSidebar-groupTitle">
+                            Livechat
+                        </div>
+                    </div>
+                    <div class="o-DiscussSidebar-list">
+                        <t t-foreach="livechats" t-as="livechat" t-key="livechat.localId">
+                            <DiscussSidebarItem
+                                class="o-DiscussSidebar-item"
+                                thread="livechat"
+                            />
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

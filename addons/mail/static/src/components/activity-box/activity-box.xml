@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ActivityBox" owl="1">
+        <div class="o-ActivityBox">
+            <t t-if="chatter and chatter.$$$thread(mself)">
+                <a role="button" class="o-ActivityBox-title btn" t-on-click="_onClickTitle">
+                    <hr class="o-ActivityBox-titleLine" />
+                    <span class="o-ActivityBox-titleText">
+                        <i class="fa fa-fw" t-att-class="chatter.$$$isActivityBoxVisible(mself) ? 'fa-caret-down' : 'fa-caret-right'"/>
+                        Planned activities
+                    </span>
+                    <t t-if="!chatter.$$$isActivityBoxVisible(mself)">
+                        <span class="o-ActivityBox-titleBadges">
+                            <t t-if="chatter.$$$thread(mself).$$$overdueActivities(mself).length > 0">
+                                <span class="o-ActivityBox-titleBadge badge rounded-circle badge-danger">
+                                    <t t-esc="chatter.$$$thread(mself).$$$overdueActivities(mself).length"/>
+                                </span>
+                            </t>
+                            <t t-if="chatter.$$$thread(mself).$$$todayActivities(mself).length > 0">
+                                <span class="o-ActivityBox-titleBadge badge rounded-circle badge-warning">
+                                    <t t-esc="chatter.$$$thread(mself).$$$todayActivities(mself).length"/>
+                                </span>
+                            </t>
+                            <t t-if="chatter.$$$thread(mself).$$$futureActivities(mself).length > 0">
+                                <span class="o-ActivityBox-titleBadge badge rounded-circle badge-success">
+                                    <t t-esc="chatter.$$$thread(mself).$$$futureActivities(mself).length"/>
+                                </span>
+                            </t>
+                        </span>
+                    </t>
+                    <hr class="o-ActivityBox-titleLine" />
+                </a>
+                <t t-if="chatter.$$$isActivityBoxVisible(mself)">
+                    <div class="o-ActivityList">
+                        <t t-foreach="chatter.$$$thread(mself).$$$activities(mself)" t-as="activity" t-key="activity.localId">
+                            <Activity class="o-ActivityBox-activity" activity="activity"/>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,77 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-NotificationRequest {
+    @include o-mail-notification-list-item-layout();
+}
+
+.o-NotificationRequest_content {
+    @include o-mail-notification-list-item-content-layout();
+}
+
+.o-NotificationRequest-core {
+    @include o-mail-notification-list-item-core-layout();
+}
+
+.o-NotificationRequest-coreItem {
+    @include o-mail-notification-list-item-core-item-layout();
+}
+
+.o-NotificationRequest-header {
+    @include o-mail-notification-list-item-header-layout();
+}
+
+.o-NotificationRequest-image {
+    @include o-mail-notification-list-item-image-layout();
+}
+
+.o-NotificationRequest-imageContainer {
+    @include o-mail-notification-list-item-image-container-layout();
+}
+
+.o-NotificationRequest-inlineText {
+    @include o-mail-notification-list-item-inline-text-layout();
+}
+
+.o-NotificationRequest-name {
+    @include o-mail-notification-list-item-name-layout();
+}
+
+.o-NotificationRequest-partnerImStatusIcon {
+    @include o-mail-notification-list-item-partner-im-status-icon-layout();
+}
+
+.o-NotificationRequest-sidebar {
+    @include o-mail-notification-list-item-sidebar-layout();
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-NotificationRequest {
+    @include o-mail-notification-list-item-style();
+
+    &:hover {
+        .o-NotificationRequest-partnerImStatusIcon {
+            @include o-mail-notification-list-item-hover-partner-im-status-icon-style();
+        }
+    }
+}
+
+.o-NotificationRequest-core {
+    @include o-mail-notification-list-item-core-style();
+}
+
+.o-NotificationRequest-image {
+    @include o-mail-notification-list-item-image-style();
+}
+
+.o-NotificationRequest-name {
+    @include o-mail-notification-list-item-bold-style();
+}
+
+.o-NotificationRequest-partnerImStatusIcon {
+    @include o-mail-notification-list-item-partner-im-status-icon-style();
+}

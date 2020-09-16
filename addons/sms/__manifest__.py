@@ -39,8 +39,8 @@ The service is provided by the In App Purchase Odoo platform.
     ],
     'qweb': [
         'static/src/bugfix/bugfix.xml',
-        'static/src/components/notification_group/notification_group.xml',
-        'static/src/components/message/message.xml',
+        'static/src/components/Message/Message.xml',
+        'static/src/components/NotificationGroup/NotificationGroup.xml',
     ],
     'installable': True,
     'auto_install': True,

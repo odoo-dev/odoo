@@ -1,0 +1,109 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-DiscussSidebarItem {
+    display: flex;
+    align-items: center;
+    padding: map-get($spacers, 1) 0;
+
+    &:hover .o-DiscussSidebarItem-commands {
+        display: flex;
+    }
+}
+
+.o-DiscussSidebarItem-activeIndicator {
+    width: $o-mail-discuss-sidebar-active-indicator-width;
+    align-self: stretch;
+    flex: 0 0 auto;
+}
+
+.o-DiscussSidebarItem-command {
+    margin-left: 3px;
+    margin-right: 3px;
+
+    &:first-child {
+        margin-left: 0px;
+    }
+
+    &:last-child {
+        margin-right: 0px;
+    }
+}
+
+.o-DiscussSidebarItem-commands {
+    display: none;
+}
+
+.o-DiscussSidebarItem-item {
+    margin-left: 3px;
+    margin-right: 3px;
+
+    &:first-child {
+        margin-left: 0px;
+        margin-right: $o-mail-discuss-sidebar-active-indicator-margin-right;
+    }
+
+    &:last-child {
+        margin-right: $o-mail-discuss-sidebar-scrollbar-width;
+    }
+}
+
+.o-DiscussSidebarItem-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.o-isEditable {
+        margin-left: $o-mail-discuss-sidebar-active-indicator-width + $o-mail-discuss-sidebar-active-indicator-margin-right;
+        margin-right: $o-mail-discuss-sidebar-scrollbar-width;
+    }
+}
+
+.o-DiscussSidebarItem-nameInput {
+    width: 100%;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-DiscussSidebarItem {
+    cursor: pointer;
+
+    &:hover {
+        background-color: darken(gray('900'), 5%);
+    }
+
+    &.o-isStarredBox {
+        .o-DiscussSidebarItem-counter {
+            border-color: gray('600');
+            background-color: gray('600');
+        }
+    }
+}
+
+.o-DiscussSidebarItem-activeIndicator.o-isItemActive {
+    background-color: $o-brand-primary;
+}
+
+.o-DiscussSidebarItem-command:not(:hover) {
+    color: gray('600');
+}
+
+.o-DiscussSidebarItem-counter {
+    background-color: $o-brand-primary;
+}
+
+.o-DiscussSidebarItem-name {
+
+    &.o-isItemUnread {
+        font-weight: bold;
+    }
+}
+
+.o-DiscussSidebarItem-nameInput {
+    outline: none;
+    border: none;
+    border-radius: 2px;
+}

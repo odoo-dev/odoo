@@ -1,0 +1,27 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-MailTemplate {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.o-MailTemplate-button {
+    padding-top: map-get($spacers, 0);
+    padding-bottom: map-get($spacers, 0);
+}
+
+.o-MailTemplate-name {
+    margin-inline-start: map-get($spacers, 2);
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-MailTemplate-text {
+    color: gray('500');
+    font-style: italic;
+}

@@ -1,7 +1,6 @@
-odoo.define('im_livechat/static/src/widgets/discuss/discuss.js', function (require) {
-'use strict';
+/** @odoo-module alias=im_livechat.widgets.Discuss **/
 
-const Discuss = require('mail/static/src/widgets/discuss/discuss.js');
+import Discuss from 'mail.widgets.Discuss';
 
 Discuss.include({
     //----------------------------------------------------------------------
@@ -13,13 +12,11 @@ Discuss.include({
      */
     _shouldHaveInviteButton() {
         if (
-            this.discuss.thread &&
-            this.discuss.thread.channel_type === 'livechat'
+            this.discuss.thread() &&
+            this.discuss.thread().channelType() === 'livechat'
         ) {
             return true;
         }
         return this._super();
     },
-});
-
 });

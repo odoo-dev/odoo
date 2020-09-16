@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.NotificationGroup" owl="1">
+        <div class="o-NotificationGroup" t-on-click="_onClick">
+            <t t-if="group">
+                <div class="o-NotificationGroup-sidebar">
+                    <div class="o-NotificationGroup-imageContainer o-NotificationGroup-sidebarItem">
+                        <img class="o-NotificationGroup-image rounded-circle" t-att-src="image()" alt="Message delivery failure image"/>
+                    </div>
+                </div>
+                <div class="o-NotificationGroup-content">
+                    <div class="o-NotificationGroup-header">
+                        <span class="o-NotificationGroup_name">
+                            <t t-esc="notificationGroup.$$$resModelName(mself)"/>
+                        </span>
+                        <span class="o-NotificationGroup-counter">
+                            (<t t-esc="notificationGroup.$$$notifications(mself).length"/>)
+                        </span>
+                        <span class="o-isAutogrow"/>
+                        <span class="o-NotificationGroup-date">
+                            <t t-esc="notificationGroup.$$$date(mself).fromNow()"/>
+                        </span>
+                    </div>
+                    <div class="o-NotificationGroup-core">
+                        <span class="o-NotificationGroup-coreItem o-NotificationGroup-inlineText">
+                            <t t-if="notificationGroup.$$$type(mself) === 'email'">
+                                An error occurred when sending an email.
+                            </t>
+                        </span>
+                        <span class="o-isAutogrow"/>
+                        <span class="o-NotificationGroup-coreItem o-NotificationGroup-markAsRead fa fa-check" title="Discard message delivery failures" t-on-click="_onClickMarkAsRead" t-ref="markAsRead"/>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

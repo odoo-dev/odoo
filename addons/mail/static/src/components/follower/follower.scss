@@ -2,20 +2,20 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_Follower {
+.o-Follower {
     display: flex;
     flex-flow: row;
     justify-content: space-between;
     padding: map-get($spacers, 0);
 }
 
-.o_Follower_avatar {
+.o-Follower-avatar {
     width: 24px;
     height: 24px;
     margin-inline-end: map-get($spacers, 2);
 }
 
-.o_Follower_details {
+.o-Follower-details {
     align-items: center;
     display: flex;
     flex: 1;
@@ -27,11 +27,11 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_Follower_avatar {
+.o-Follower-avatar {
     border-radius: 50%;
 }
 
-.o_Follower_button {
+.o-Follower-button {
     border-radius: 0;
 
     &:hover {
@@ -40,7 +40,7 @@
     }
 }
 
-.o_Follower_details {
+.o-Follower-details {
     color: gray('700');
 
     &:hover {
@@ -48,7 +48,7 @@
         color: $black;
     }
 
-    &.o-inactive {
+    &.o-isInactive {
         opacity: 0.25;
         font-style: italic;
     }

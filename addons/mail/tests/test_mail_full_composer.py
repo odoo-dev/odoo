@@ -23,4 +23,4 @@ class TestMailFullComposer(HttpCase):
             'login': 'testuser',
             'password': 'testuser',
         })
-        self.start_tour("/web#id=%d&model=res.partner" % testuser.partner_id, 'mail/static/tests/tours/mail_full_composer_test_tour.js', login='testuser')
+        self.start_tour("/web#id=%d&model=res.partner" % testuser.partner_id, 'mail/static/src/tours/full-composer-test.js', login='testuser')

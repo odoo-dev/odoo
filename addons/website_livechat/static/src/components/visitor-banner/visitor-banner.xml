@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="website_livechat.VisitorBanner" owl="1">
+        <div class="o-VisitorBanner">
+            <div class="o-VisitorBanner-sidebar">
+                <div class="o-VisitorBanner-avatarContainer">
+                    <img class="o-VisitorBanner-avatar rounded-circle" t-att-src="visitor.$$$avatarUrl(mself)" alt="Avatar"/>
+                    <t t-if="visitor.$$$isConnected(mself)">
+                        <i class="o-VisitorBanner-onlineStatusIcon fa fa-circle" title="Online" role="img" aria-label="Visitor is online"/>
+                    </t>
+                </div>
+            </div>
+            <div class="o-VisitorBanner-content">
+                <t t-if="visitor.$$$country(mself)">
+                    <img class="o-VisitorBanner-country o_country_flag" t-att-src="visitor.$$$country(mself).$$$flagUrl(mself)" t-att-alt="visitor.$$$country(mself).$$$code(mself) or visitor.$$$country(mself).$$$name(mself)"/>
+                </t>
+                <span class="o-VisitorBanner-visitor" t-esc="visitor.$$$nameOrDisplayName(mself)"/>
+                <span class="o-VisitorBanner-language">
+                    <i class="o-VisitorBanner-languageIcon fa fa-comment-o" aria-label="Lang"/>
+                    <t t-esc="visitor.$$$langName(mself)"/>
+                </span>
+                <t t-if="visitor.$$$websiteName(mself)">
+                    <span class="o-VisitorBanner-website">
+                        <i class="o-VisitorBanner-websiteIcon fa fa-globe" aria-label="Website"/>
+                        <span t-esc="visitor.$$$websiteName(mself)"/>
+                    </span>
+                </t>
+                <div class="o-VisitorBanner-history">
+                    <i class="o-VisitorBanner-historyIcon fa fa-history" aria-label="History"/>
+                    <span t-esc="visitor.$$$history(mself)"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

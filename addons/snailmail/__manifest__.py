@@ -24,10 +24,10 @@ Allows users to send documents by post
     ],
     'qweb': [
         'static/src/bugfix/bugfix.xml',
-        'static/src/components/message/message.xml',
-        'static/src/components/notification_group/notification_group.xml',
-        'static/src/components/snailmail_error_dialog/snailmail_error_dialog.xml',
-        'static/src/components/snailmail_notification_popover/snailmail_notification_popover.xml',
+        'static/src/components/Message/Message.xml',
+        'static/src/components/NotificationGroup/NotificationGroup.xml',
+        'static/src/components/SnailmailErrorDialog/SnailmailErrorDialog.xml',
+        'static/src/components/SnailmailNotificationPopover/SnailmailNotificationPopover.xml',
     ],
     'auto_install': True,
 }

@@ -1,31 +1,21 @@
-odoo.define('mail/static/src/components/message/message.js', function (require) {
-'use strict';
+/** @odoo-module alias=mail.components.Message **/
 
-const components = {
-    AttachmentList: require('mail/static/src/components/attachment_list/attachment_list.js'),
-    MessageSeenIndicator: require('mail/static/src/components/message_seen_indicator/message_seen_indicator.js'),
-    ModerationBanDialog: require('mail/static/src/components/moderation_ban_dialog/moderation_ban_dialog.js'),
-    ModerationDiscardDialog: require('mail/static/src/components/moderation_discard_dialog/moderation_discard_dialog.js'),
-    ModerationRejectDialog: require('mail/static/src/components/moderation_reject_dialog/moderation_reject_dialog.js'),
-    NotificationPopover: require('mail/static/src/components/notification_popover/notification_popover.js'),
-    PartnerImStatusIcon: require('mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
-const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
+import useUpdate from 'mail.componentHooks.useUpdate';
+import usingModels from 'mail.componentMixins.usingModels';
+import isEventHandled from 'mail.utils.isEventHandled';
+import markEventHandled from 'mail.utils.markEventHandled';
 
-const { _lt } = require('web.core');
-const { format } = require('web.field_utils');
-const { getLangDatetimeFormat } = require('web.time');
+import { _lt } from 'web.core';
+import { format } from 'web.field_utils';
+import { getLangDatetimeFormat } from 'web.time';
 
-const { Component, useState } = owl;
+const { Component, QWeb, useState } = owl;
 const { useRef } = owl.hooks;
 
 const READ_MORE = _lt("read more");
 const READ_LESS = _lt("read less");
-const { isEventHandled, markEventHandled } = require('mail/static/src/utils/utils.js');
 
-class Message extends Component {
+class Message extends usingModels(Component) {
 
     /**
      * @override
@@ -45,76 +35,34 @@ class Message extends Component {
              */
             isClicked: false,
         });
-        useShouldUpdateBasedOnProps();
-        useStore(props => {
-            const message = this.env.models['mail.message'].get(props.messageLocalId);
-            const author = message ? message.author : undefined;
-            const partnerRoot = this.env.messaging.partnerRoot;
-            const originThread = message ? message.originThread : undefined;
-            const threadView = this.env.models['mail.thread_view'].get(props.threadViewLocalId);
-            const thread = threadView ? threadView.thread : undefined;
-            return {
-                attachments: message
-                    ? message.attachments.map(attachment => attachment.__state)
-                    : [],
-                author,
-                authorAvatarUrl: author && author.avatarUrl,
-                authorImStatus: author && author.im_status,
-                authorNameOrDisplayName: author && author.nameOrDisplayName,
-                correspondent: thread && thread.correspondent,
-                hasMessageCheckbox: message ? message.hasCheckbox : false,
-                isDeviceMobile: this.env.messaging.device.isMobile,
-                isMessageChecked: message && threadView
-                    ? message.isChecked(thread, threadView.stringifiedDomain)
-                    : false,
-                isMessageSelected: message && threadView && threadView.threadViewer
-                    ? threadView.threadViewer.selectedMessage === message
-                    : false,
-                message: message ? message.__state : undefined,
-                notifications: message ? message.notifications.map(notif => notif.__state) : [],
-                originThread,
-                originThreadModel: originThread && originThread.model,
-                originThreadName: originThread && originThread.name,
-                originThreadUrl: originThread && originThread.url,
-                partnerRoot,
-                thread,
-                threadHasSeenIndicators: thread && thread.hasSeenIndicators,
-                threadMassMailing: thread && thread.mass_mailing,
-            };
-        }, {
-            compareDepth: {
-                attachments: 1,
-                notifications: 1,
-            },
-        });
         useUpdate({ func: () => this._update() });
         /**
-         * The intent of the reply button depends on the last rendered state.
+         * To get checkbox state.
          */
-        this._wasSelected;
+        this._checkboxRef = useRef('checkbox');
+        /**
+         * Reference to the content of the message.
+         */
+        this._contentRef = useRef('content');
+        /**
+         * Id of setInterval used to auto-update time elapsed of message at
+         * regular time.
+         */
+        this._intervalId = undefined;
         /**
          * Value of the last rendered prettyBody. Useful to compare to new value
          * to decide if it has to be updated.
          */
-        this._lastPrettyBody;
+        this._lastPrettyBody = undefined;
         /**
          * Reference to element containing the prettyBody. Useful to be able to
          * replace prettyBody with new value in JS (which is faster than t-raw).
          */
         this._prettyBodyRef = useRef('prettyBody');
         /**
-         * Reference to the content of the message.
+         * The intent of the reply button depends on the last rendered state.
          */
-        this._contentRef = useRef('content');
-        /**
-         * To get checkbox state.
-         */
-        this._checkboxRef = useRef('checkbox');
-        /**
-         * Id of setInterval used to auto-update time elapsed of message at
-         * regular time.
-         */
-        this._intervalId = undefined;
+        this._wasSelected = undefined;
         this._constructor();
     }
 
@@ -135,12 +83,12 @@ class Message extends Component {
      * @returns {string}
      */
     get avatar() {
-        if (this.message.author) {
+        if (this.message.$$$author(this)) {
             // TODO FIXME for public user this might not be accessible. task-2223236
             // we should probably use the correspondig attachment id + access token
             // or create a dedicated route to get message image, checking the access right of the message
-            return this.message.author.avatarUrl;
-        } else if (this.message.message_type === 'email') {
+            return this.message.$$$author(this).$$$avatarUrl(this);
+        } else if (this.message.$$$type(this) === 'email') {
             return '/mail/static/src/img/email_icon.png';
         }
         return '/mail/static/src/img/smiley/avatar.jpg';
@@ -152,7 +100,7 @@ class Message extends Component {
      * @returns {string}
      */
     get datetime() {
-        return this.message.date.format(getLangDatetimeFormat());
+        return this.message.$$$date(this).format(getLangDatetimeFormat());
     }
 
     /**
@@ -161,13 +109,16 @@ class Message extends Component {
      * @returns {boolean}
      */
     get hasAuthorOpenChat() {
-        if (!this.message.author) {
+        if (!this.message.$$$author(this)) {
             return false;
         }
         if (
             this.threadView &&
-            this.threadView.thread &&
-            this.threadView.thread.correspondent === this.message.author
+            this.threadView.$$$thread(this) &&
+            (
+                this.threadView.$$$thread(this).$$$correspondent(this) ===
+                this.message.$$$author(this)
+            )
         ) {
             return false;
         }
@@ -181,7 +132,7 @@ class Message extends Component {
      * @param {integer} [offset=0]
      * @returns {boolean}
      */
-    isBottomVisible({ offset=0 } = {}) {
+    isBottomVisible({ offset = 0 } = {}) {
         if (!this.el) {
             return false;
         }
@@ -223,17 +174,11 @@ class Message extends Component {
     get isSelected() {
         return (
             this.threadView &&
-            this.threadView.threadViewer &&
-            this.threadView.threadViewer.selectedMessage === this.message
+            this.threadView.$$$threadViewer(this) &&
+            this.threadView.$$$threadViewer(this).$$$selectedMessage(this) === this.message
         );
     }
 
-    /**
-     * @returns {mail.message}
-     */
-    get message() {
-        return this.env.models['mail.message'].get(this.props.messageLocalId);
-    }
     /**
      * @returns {string}
      */
@@ -269,22 +214,15 @@ class Message extends Component {
      * @returns {string}
      */
     get shortTime() {
-        return this.message.date.format('hh:mm');
-    }
-
-    /**
-     * @returns {mail.thread_view}
-     */
-    get threadView() {
-        return this.env.models['mail.thread_view'].get(this.props.threadViewLocalId);
+        return this.message.$$$date(this).format('hh:mm');
     }
 
     /**
      * @returns {Object}
      */
     get trackingValues() {
-        return this.message.tracking_value_ids.map(trackingValue => {
-            const value = Object.assign({}, trackingValue);
+        return this.message.$$$trackingValues(this).map(trackingValue => {
+            const value = { ...trackingValue };
             value.changed_field = _.str.sprintf(this.env._t("%s:"), value.changed_field);
             /**
              * Maps tracked field type to a JS formatter. Tracking values are
@@ -292,10 +230,18 @@ class Message extends Component {
              * Field types that are not listed here are not supported by
              * tracking in Python. Also see `create_tracking_values` in Python.
              */
-            switch (value.field_type) {
+             switch (value.field_type) {
                 case 'boolean':
-                    value.old_value = format.boolean(value.old_value, undefined, { forceString: true });
-                    value.new_value = format.boolean(value.new_value, undefined, { forceString: true });
+                    value.old_value = format.boolean(
+                        value.old_value,
+                        undefined,
+                        { forceString: true },
+                    );
+                    value.new_value = format.boolean(
+                        value.new_value,
+                        undefined,
+                        { forceString: true },
+                    );
                     break;
                 /**
                  * many2one formatter exists but is expecting id/name_get or data
@@ -339,25 +285,32 @@ class Message extends Component {
                     value.new_value = format.integer(value.new_value);
                     break;
                 case 'monetary':
-                    value.old_value = format.monetary(value.old_value, undefined, {
-                        currency: value.currency_id
-                            ? this.env.session.currencies[value.currency_id]
-                            : undefined,
-                        forceString: true,
-                    });
-                    value.new_value = format.monetary(value.new_value, undefined, {
-                        currency: value.currency_id
-                            ? this.env.session.currencies[value.currency_id]
-                            : undefined,
-                        forceString: true,
-                    });
+                    value.old_value = format.monetary(
+                        value.old_value,
+                        undefined,
+                        {
+                            currency: value.currency_id
+                                ? this.env.session.currencies[value.currency_id]
+                                : undefined,
+                            forceString: true,
+                        },
+                    );
+                    value.new_value = format.monetary(
+                        value.new_value,
+                        undefined,
+                        {
+                            currency: value.currency_id
+                                ? this.env.session.currencies[value.currency_id]
+                                : undefined,
+                            forceString: true,
+                        },
+                    );
                     break;
                 case 'text':
                     value.old_value = format.text(value.old_value);
                     value.new_value = format.text(value.new_value);
                     break;
             }
-            return value;
         });
     }
 
@@ -385,7 +338,7 @@ class Message extends Component {
         // nodeType 3: text_node
         const $children = $element.contents()
             .filter((index, content) =>
-                content.nodeType === 1 || (content.nodeType === 3 && content.nodeValue.trim())
+                content.nodeType === 1 || (content.nodeType === 3 && content.nodeValue.trim()),
             );
 
         for (const child of $children) {
@@ -427,7 +380,7 @@ class Message extends Component {
         for (const group of groups) {
             // Insert link just before the first node
             const $readMoreLess = $('<a>', {
-                class: 'o_Message_readMoreLess',
+                class: 'o-Message-readMoreLess',
                 href: '#',
                 text: READ_MORE,
             }).insertBefore(group[0]);
@@ -453,27 +406,36 @@ class Message extends Component {
         if (!this.message) {
             return;
         }
-        if (this._prettyBodyRef.el && this.message.prettyBody !== this._lastPrettyBody) {
-            this._prettyBodyRef.el.innerHTML = this.message.prettyBody;
-            this._lastPrettyBody = this.message.prettyBody;
+        if (
+            this._prettyBodyRef.el &&
+            this.message.$$$prettyBody(this) !== this._lastPrettyBody
+        ) {
+            this._prettyBodyRef.el.innerHTML = this.message.$$$prettyBody(this);
+            this._lastPrettyBody = this.message.$$$prettyBody(this);
         }
         // Remove all readmore before if any before reinsert them with _insertReadMoreLess.
         // This is needed because _insertReadMoreLess is working with direct DOM mutations
         // which are not sync with Owl.
         if (this._contentRef.el) {
-            for (const el of [...this._contentRef.el.querySelectorAll(':scope .o_Message_readMoreLess')]) {
+            for (const el of [...this._contentRef.el.querySelectorAll(':scope .o-Message-readMoreLess')]) {
                 el.remove();
             }
             this._insertReadMoreLess($(this._contentRef.el));
-            this.env.messagingBus.trigger('o-component-message-read-more-less-inserted', {
+            this.env.services.model.messagingBus.trigger('o-component-message-read-more-less-inserted', {
                 message: this.message,
             });
         }
         this._wasSelected = this.isSelected;
-        this.message.refreshDateFromNow();
+        this.env.services.action.dispatch(
+            'refreshDateFromNow',
+            this.message,
+        );
         clearInterval(this._intervalId);
         this._intervalId = setInterval(() => {
-            this.message.refreshDateFromNow();
+            this.env.services.action.dispatch(
+                'refreshDateFromNow',
+                this.message,
+            );
         }, 60 * 1000);
     }
 
@@ -485,7 +447,12 @@ class Message extends Component {
      * @private
      */
     _onChangeCheckbox() {
-        this.message.toggleCheck(this.threadView.thread, this.threadView.stringifiedDomain);
+        this.env.services.action.dispatch(
+            'Message/toggleCheck',
+            this.message,
+            this.threadView.$$$thread(this),
+            this.threadView.$$$stringifiedDomain(this),
+        );
     }
 
     /**
@@ -494,20 +461,28 @@ class Message extends Component {
      */
     _onClick(ev) {
         if (ev.target.closest('.o_channel_redirect')) {
-            this.env.messaging.openProfile({
-                id: Number(ev.target.dataset.oeId),
-                model: 'mail.channel',
-            });
+            this.env.services.action.dispatch(
+                'Messaging/openProfile',
+                this.env.services.model.messaging,
+                {
+                    id: Number(ev.target.dataset.oeId),
+                    model: 'mail.channel',
+                },
+            );
             // avoid following dummy href
             ev.preventDefault();
             return;
         }
         if (ev.target.tagName === 'A') {
             if (ev.target.dataset.oeId && ev.target.dataset.oeModel) {
-                this.env.messaging.openProfile({
-                    id: Number(ev.target.dataset.oeId),
-                    model: ev.target.dataset.oeModel,
-                });
+                this.env.services.action.dispatch(
+                    'Messaging/openProfile',
+                    this.env.services.model.messaging,
+                    {
+                        id: Number(ev.target.dataset.oeId),
+                        model: ev.target.dataset.oeModel,
+                    },
+                );
                 // avoid following dummy href
                 ev.preventDefault();
             }
@@ -531,7 +506,10 @@ class Message extends Component {
         if (!this.hasAuthorOpenChat) {
             return;
         }
-        this.message.author.openChat();
+        this.env.services.action.dispatch(
+            'Partner/openChat',
+            this.message.$$$author(this),
+        );
     }
 
     /**
@@ -540,10 +518,13 @@ class Message extends Component {
      */
     _onClickAuthorName(ev) {
         markEventHandled(ev, 'Message.ClickAuthorName');
-        if (!this.message.author) {
+        if (!this.message.$$$author(this)) {
             return;
         }
-        this.message.author.openProfile();
+        this.env.services.action.dispatch(
+            'Partner/openProfile',
+            this.message.$$$author(this),
+        );
     }
 
     /**
@@ -552,7 +533,10 @@ class Message extends Component {
      */
     _onClickFailure(ev) {
         markEventHandled(ev, 'Message.ClickFailure');
-        this.message.openResendAction();
+        this.env.services.action.dispatch(
+            'Message/openResendAction',
+            this.message,
+        );
     }
 
     /**
@@ -561,7 +545,11 @@ class Message extends Component {
      */
     _onClickModerationAccept(ev) {
         ev.preventDefault();
-        this.message.moderate('accept');
+        this.env.services.action.dispatch(
+            'Message/moderate',
+            this.message,
+            'accept',
+        );
     }
 
     /**
@@ -570,7 +558,11 @@ class Message extends Component {
      */
     _onClickModerationAllow(ev) {
         ev.preventDefault();
-        this.message.moderate('allow');
+        this.env.services.action.dispatch(
+            'Message/moderate',
+            this.message,
+            'allow',
+        );
     }
 
     /**
@@ -607,7 +599,10 @@ class Message extends Component {
     _onClickOriginThread(ev) {
         // avoid following dummy href
         ev.preventDefault();
-        this.message.originThread.open();
+        this.env.services.action.dispatch(
+            'Thread/open',
+            this.message.$$$originThread(this),
+        );
     }
 
     /**
@@ -616,7 +611,10 @@ class Message extends Component {
      */
     _onClickStar(ev) {
         ev.stopPropagation();
-        this.message.toggleStar();
+        this.env.services.action.dispatch(
+            'Message/toggleStar',
+            this.message,
+        );
     }
 
     /**
@@ -625,7 +623,10 @@ class Message extends Component {
      */
     _onClickMarkAsRead(ev) {
         ev.stopPropagation();
-        this.message.markAsRead();
+        this.env.services.action.dispatch(
+            'Message/markAsRead',
+            this.message,
+        );
     }
 
     /**
@@ -633,14 +634,20 @@ class Message extends Component {
      * @param {MouseEvent} ev
      */
     _onClickReply(ev) {
-        // Use this._wasSelected because this.props.isSelected might be changed
+        // Use this._wasSelected because this.isSelected might be changed
         // by a global capture click handler (for example the one from Composer)
         // before the current handler is executed. Indeed because it does a
         // toggle it needs to take into account the value before the click.
         if (this._wasSelected) {
-            this.env.messaging.discuss.clearReplyingToMessage();
+            this.env.services.action.dispatch(
+                'Discuss/clearReplyingToMessage',
+                this.env.services.model.messaging.$$$discuss(this),
+            );
         } else {
-            this.message.replyTo();
+            this.env.services.action.dispatch(
+                'Message/replyTo',
+                this.message,
+            );
         }
     }
 
@@ -668,7 +675,6 @@ class Message extends Component {
 }
 
 Object.assign(Message, {
-    components,
     defaultProps: {
         hasCheckbox: false,
         hasMarkAsReadIcon: false,
@@ -685,15 +691,29 @@ Object.assign(Message, {
         hasMarkAsReadIcon: Boolean,
         hasReplyIcon: Boolean,
         isSquashed: Boolean,
-        messageLocalId: String,
-        threadViewLocalId: {
-            type: String,
+        message: {
+            type: Object,
+            validate(p) {
+                if (p.constructor.modelName !== 'Message') {
+                    return false;
+                }
+                return true;
+            },
+        },
+        threadView: {
+            type: Object,
             optional: true,
+            validate(p) {
+                if (p.constructor.modelName !== 'ThreadView') {
+                    return false;
+                }
+                return true;
+            },
         },
     },
     template: 'mail.Message',
 });
 
-return Message;
+QWeb.registerComponent('Message', Message);
 
-});
+export default Message;

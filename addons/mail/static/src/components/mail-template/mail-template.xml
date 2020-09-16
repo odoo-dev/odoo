@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.MailTemplate" owl="1">
+        <div class="o-MailTemplate">
+            <t t-if="mailTemplate">
+                <i class="fa fa-envelope-o" title="Mail" role="img"/>
+                <span class="o-MailTemplate-name" t-esc="mailTemplate.$$$name(mself)"/>
+                <span>:</span>
+                <button
+                    class="o-MailTemplate-button o-MailTemplate-preview btn btn-link"
+                    t-att-data-mail-template-id="mailTemplate.$$$id(mself)"
+                    t-on-click="_onClickPreview"
+                >
+                    Preview
+                </button>
+                <span class="o-MailTemplate-text">or</span>
+                <button
+                    class="o-MailTemplate-button o-MailTemplate-send btn btn-link"
+                    t-att-data-mail-template-id="mailTemplate.$$$id(mself)"
+                    t-on-click="_onClickSend"
+                >
+                    Send Now
+                </button>
+            </t>
+        </div>
+    </t>
+
+</templates>

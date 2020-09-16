@@ -1,7 +1,6 @@
-odoo.define('mail/static/src/utils/timer/timer.js', function (require) {
-'use strict';
+/** @odoo-module alias=mail.utils.Timer **/
 
-const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
+import makeDeferred from 'mail.utils.makeDeferred';
 
 //------------------------------------------------------------------------------
 // Errors
@@ -17,7 +16,7 @@ const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
   * means the inner function will not be called. Usually caller should just
   * accept it and kindly treated this error as a polite warning.
   */
- class TimerClearedError extends Error {
+export class TimerClearedError extends Error {
     /**
      * @override
      */
@@ -36,7 +35,7 @@ const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
  * This class creates a timer which, when times out, calls a function.
  * Note that the timer is not started on initialization (@see start method).
  */
-class Timer {
+export default class Timer {
 
     /**
      * @param {Object} env the OWL env
@@ -158,8 +157,4 @@ class Timer {
  */
 Object.assign(Timer, {
     TimerClearedError,
-});
-
-return Timer;
-
 });

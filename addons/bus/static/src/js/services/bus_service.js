@@ -1,24 +1,22 @@
-odoo.define('bus.BusService', function (require) {
-"use strict";
+/** @odoo-module alias=bus.BusService **/
 
-var CrossTab = require('bus.CrossTab');
-var core = require('web.core');
-var ServicesMixin = require('web.ServicesMixin');
-const session = require('web.session');
+import CrossTab from 'bus.CrossTab';
 
-var BusService =  CrossTab.extend(ServicesMixin, {
+import core from 'web.core';
+import ServicesMixin from 'web.ServicesMixin';
+import session from 'web.session';
+
+const BusService =  CrossTab.extend(ServicesMixin, {
     dependencies : ['local_storage'],
-
     // properties
     _audio: null,
-
     /**
      * As the BusService doesn't extend AbstractService, we have to replicate
      * here what is done in AbstractService
      *
      * @param {Object} env
      */
-    init: function (env) {
+    init(env) {
         this.env = env;
         this._super();
     },
@@ -31,10 +29,10 @@ var BusService =  CrossTab.extend(ServicesMixin, {
      *
      * @param {OdooEvent} ev
      */
-    _trigger_up: function (ev) {
+    _trigger_up(ev) {
         if (ev.name === 'call_service') {
             const payload = ev.data;
-            let args = payload.args || [];
+            let args = payload.args ?? [];
             if (payload.service === 'ajax' && payload.method === 'rpc') {
                 // ajax service uses an extra 'target' argument for rpc
                 args = args.concat(ev.target);
@@ -49,7 +47,7 @@ var BusService =  CrossTab.extend(ServicesMixin, {
      *
      * @abstract
      */
-    start: function () {},
+    start() {},
 
     //--------------------------------------------------------------------------
     // Public
@@ -65,7 +63,7 @@ var BusService =  CrossTab.extend(ServicesMixin, {
      * @param {string} [options.type] 'info', 'success', 'warning', 'danger' or ''
      */
     sendNotification(options, callback) {
-        if (window.Notification && Notification.permission === "granted") {
+        if (window.Notification && window.Notification.permission === 'granted') {
             if (this.isMasterTab()) {
                 try {
                     this._sendNativeNotification(options.title, options.message, callback);
@@ -73,7 +71,7 @@ var BusService =  CrossTab.extend(ServicesMixin, {
                     // Notification without Serviceworker in Chrome Android doesn't works anymore
                     // So we fallback to do_notify() in this case
                     // https://bugs.chromium.org/p/chromium/issues/detail?id=481856
-                    if (error.message.indexOf('ServiceWorkerRegistration') > -1) {
+                    if (error.message.includes('ServiceWorkerRegistration')) {
                         this.displayNotification(options);
                         this._beep();
                     } else {
@@ -94,7 +92,7 @@ var BusService =  CrossTab.extend(ServicesMixin, {
      * @param {Object} receiver
      * @param {function} func
      */
-    onNotification: function () {
+    onNotification() {
         this.on.apply(this, ["notification"].concat(Array.prototype.slice.call(arguments)));
     },
 
@@ -107,11 +105,13 @@ var BusService =  CrossTab.extend(ServicesMixin, {
      *
      * @private
      */
-    _beep: function () {
+    _beep() {
         if (typeof(Audio) !== "undefined") {
             if (!this._audio) {
-                this._audio = new Audio();
-                var ext = this._audio.canPlayType("audio/ogg; codecs=vorbis") ? ".ogg" : ".mp3";
+                this._audio = new window.Audio();
+                const ext = this._audio.canPlayType('audio/ogg; codecs=vorbis')
+                    ? '.ogg'
+                    : '.mp3';
                 this._audio.src = session.url("/mail/static/src/audio/ting" + ext);
             }
             Promise.resolve(this._audio.play()).catch(_.noop);
@@ -125,15 +125,16 @@ var BusService =  CrossTab.extend(ServicesMixin, {
      * @param {string} content
      * @param {function} [callback] if given callback will be called when user clicks on notification
      */
-    _sendNativeNotification: function (title, content, callback) {
-        var notification = new Notification(
+    _sendNativeNotification(title, content, callback) {
+        const notification = new window.Notification(
             // The native Notification API works with plain text and not HTML
             // unescaping is safe because done only at the **last** step
             _.unescape(title),
             {
                 body: _.unescape(content),
-                icon: "/mail/static/src/img/odoobot_transparent.png"
-            });
+                icon: '/mail/static/src/img/odoobot_transparent.png',
+            },
+        );
         notification.onclick = function () {
             window.focus();
             if (this.cancel) {
@@ -151,6 +152,4 @@ var BusService =  CrossTab.extend(ServicesMixin, {
 
 core.serviceRegistry.add('bus_service', BusService);
 
-return BusService;
-
-});
+export default BusService;

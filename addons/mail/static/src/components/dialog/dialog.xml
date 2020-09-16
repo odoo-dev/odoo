@@ -2,13 +2,13 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.Dialog" owl="1">
-        <div class="o_Dialog">
+        <div class="o-Dialog">
             <t t-if="dialog">
-                <t t-if="dialog.record">
+                <t t-if="dialog.$$$record(mself)">
                     <t
-                        t-component="{{ dialog.record['constructor'].name }}"
-                        class="o_Dialog_component"
-                        t-props="{ localId: dialog.record.localId }"
+                        t-component="{{ dialog.$$$record(self)['constructor'].name }}"
+                        class="o-Dialog-component"
+                        t-props="{ record: dialog.$$$record(mself) }"
                         t-ref="component"
                     />
                 </t>

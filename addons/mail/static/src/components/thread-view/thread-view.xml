@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ThreadView" owl="1">
+        <div class="o-ThreadView" t-att-data-correspondent-id="threadView and threadView.$$$thread(mself) and threadView.$$$thread(mself).$$$correspondent(mself) and threadView.$$$thread(mself).$$$correspondent(mself).$$$id(mself)" t-att-data-thread-local-id="threadView and threadView.$$$thread(mself) and threadView.$$$thread(mself).localId">
+            <t t-if="threadView">
+                <t t-if="threadView.$$$isLoading(mself) and !threadView.$$$threadCache(mself).$$$isLoaded(mself)" name="loadingCondition">
+                    <div class="o-ThreadView-loading">
+                        <span><i class="o-ThreadView-loadingIcon fa fa-spinner fa-spin" title="Loading..." role="img"/>Loading...</span>
+                    </div>
+                </t>
+                <t t-elif="threadView.$$$threadCache(mself).$$$isLoaded(mself) or threadView.$$$thread(mself).$$$isTemporary(mself)">
+                    <MessageList
+                        class="o-ThreadView-messageList"
+                        hasMessageCheckbox="hasMessageCheckbox"
+                        hasScrollAdjust="hasScrollAdjust"
+                        hasSquashCloseMessages="hasSquashCloseMessages"
+                        haveMessagesMarkAsReadIcon="haveMessagesMarkAsReadIcon"
+                        haveMessagesReplyIcon="haveMessagesReplyIcon"
+                        order="order"
+                        selectedMessage="selectedMessage"
+                        threadView="threadView"
+                        t-ref="messageList"
+                    />
+                </t>
+                <t t-elif="threadView.$$$threadCache(mself).$$$hasLoadingFailed(mself)">
+                    <div class="o-ThreadView-loadingFailed">
+                        <div class="o-ThreadView-loadingFailedText">
+                            An error occured while fetching messages.
+                        </div>
+                        <button class="o-ThreadView-loadingFailedRetryButton btn btn-link" t-on-click="_onClickRetryLoadMessages">
+                            Click here to retry
+                        </button>
+                    </div>
+                 </t>
+                <t t-elif="hasComposer">
+                    <div class="o-isAutogrow"/>
+                </t>
+                <t t-if="hasComposer">
+                    <Composer
+                        class="o-ThreadView-composer"
+                        attachmentsDetailsMode="composerAttachmentsDetailsMode"
+                        composer="threadView.$$$thread(mself).$$$composer(mself)"
+                        hasCurrentPartnerAvatar="hasComposerCurrentPartnerAvatar"
+                        hasSendButton="hasComposerSendButton"
+                        hasThreadTyping="hasComposerThreadTyping"
+                        isCompact="(threadView.$$$thread(mself).$$$model(mself) === 'mail.channel' and threadView.$$$thread(mself).$$$isMassMailing(mself)) ? false : undefined"
+                        showAttachmentsExtensions="showComposerAttachmentsExtensions"
+                        showAttachmentsFilenames="showComposerAttachmentsFilenames"
+                        textInputSendShortcuts="(threadView.$$$thread(mself).$$$model(mself) === 'mail.channel' and threadView.$$$thread(mself).$$$isMassMailing(mself)) ? ['ctrl-enter', 'meta-enter'] : ['enter']"
+                        t-ref="composer"
+                    />
+                </t>
+            </t>
+        </div>
+    </t>
+
+</templates>

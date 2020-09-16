@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-inherit="mail.NotificationGroup" t-inherit-mode="extension">
+        <xpath expr="//*[hasclass('o-NotificationGroup-inlineText')]" position="inside">
+            <t t-if="notificationGroup.$$$type(mself) === 'snail'">
+                An error occurred when sending a letter with Snailmail.
+            </t>
+        </xpath>
+    </t>
+
+</templates>

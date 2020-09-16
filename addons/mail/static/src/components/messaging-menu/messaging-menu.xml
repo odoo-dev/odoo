@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.MessagingMenu" owl="1">
+        <li class="o-MessagingMenu" t-att-class="{ 'o-isMobile': env.messaging ? env.messaging.$$$device(mself).$$$isMobile(mself) : false 'o-isOpen': messagingMenu ? messagingMenu.$$$isOpen(mself) : false }">
+            <a class="o-MessagingMenu-toggler" t-att-class="{ 'o-hasNoNotification': messagingMenu ? !messagingMenu.$$$counter(mself) : false }" href="#" title="Conversations" role="button" t-att-aria-expanded="messagingMenu and messagingMenu.$$$isOpen(mself) ? 'true' : 'false'" aria-haspopup="true" t-on-click="_onClickToggler">
+                <i class="o-MessagingMenu-icon fa fa-comments" role="img" aria-label="Messages"/>
+                <t t-if="!env.isMessagingInitialized()">
+                    <i class="o-MessagingMenu-loading fa fa-spinner fa-spin"/>
+                </t>
+                <t t-elif="messagingMenu.$$$counter(mself) > 0">
+                    <span class="o-MessagingMenu-counter badge badge-pill">
+                        <t t-esc="messagingMenu.$$$counter(mself)"/>
+                    </span>
+                </t>
+            </a>
+            <t t-if="messagingMenu and messagingMenu.$$$isOpen(mself)">
+                <div class="o-MessagingMenu-dropdownMenu dropdown-menu dropdown-menu-right" t-att-class="{ 'o-isMessagingNotInitialized': !env.messaging.$$$isInitialized(mself), 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }" role="menu">
+                    <t t-if="!env.messaging.$$$isInitialized(mself)">
+                        <span><i class="o-MessagingMenu-dropdownLoadingIcon fa fa-spinner fa-spin"/>Please wait...</span>
+                    </t>
+                    <t t-else="">
+                        <div class="o-MessagingMenu-dropdownMenuHeader" t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }">
+                            <t t-if="!env.messaging.$$$device(mself).$$$isMobile(mself)">
+                                <t t-foreach="['all', 'chat', 'channel']" t-as="tabId" t-key="tabId">
+                                    <button class="o-MessagingMenu-tabButton o-isDesktop btn btn-link" t-att-class="{ 'o-isActive': messagingMenu.$$$activeTabId(mself) === tabId, }" t-on-click="_onClickDesktopTabButton" type="button" role="tab" t-att-data-tab-id="tabId">
+                                        <t t-if="tabId === 'all'">All</t>
+                                        <t t-elif="tabId === 'chat'">Chat</t>
+                                        <t t-elif="tabId === 'channel'">Channels</t>
+                                    </button>
+                                </t>
+                            </t>
+                            <t t-if="env.messaging.$$$device(mself).$$$isMobile(mself)">
+                                <t t-call="mail.MessagingMenu.newMessageButton"/>
+                            </t>
+                            <div class="o-isAutogrow"/>
+                            <t t-if="!env.messaging.$$$device(mself).$$$isMobile(mself) and !discuss.$$$isOpen(mself)">
+                                <t t-call="mail.MessagingMenu.newMessageButton"/>
+                            </t>
+                            <t t-if="env.messaging.$$$device(mself).$$$isMobile(mself) and messagingMenu.$$$isMobileNewMessageToggled(mself)">
+                                <AutocompleteInput
+                                    class="o-MessagingMenu-mobileNewMessageInput"
+                                    customClass="id + '_mobileNewMessageInputAutocomplete'"
+                                    isFocusOnMount="true"
+                                    placeholder="mobileNewMessageInputPlaceholder"
+                                    select="_onMobileNewMessageInputSelect"
+                                    source="_onMobileNewMessageInputSource"
+                                    t-on-o-hide="_onHideMobileNewMessage"
+                                />
+                            </t>
+                        </div>
+                        <NotificationList
+                            class="o-MessagingMenu-notificationList"
+                            t-att-class="{ 'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself) }"
+                            filter="messagingMenu.$$$activeTabId(mself)"
+                        />
+                        <t t-if="env.messaging.$$$device(mself).$$$isMobile(mself)">
+                            <MobileMessagingNavbar
+                                class="o-MessagingMenu-mobileNavbar"
+                                activeTabId="messagingMenu.$$$activeTabId(mself)"
+                                tabs="tabs"
+                                t-on-o-select-mobile-messaging-navbar-tab="_onSelectMobileNavbarTab"
+                            />
+                        </t>
+                    </t>
+                </div>
+            </t>
+        </li>
+    </t>
+
+    <t t-name="mail.MessagingMenu.newMessageButton" owl="1">
+        <button class="o-MessagingMenu-newMessageButton btn"
+            t-att-class="{
+                'btn-link': !env.messaging.$$$device(mself).$$$isMobile(mself),
+                'btn-secondary': env.messaging.$$$device(mself).$$$isMobile(mself),
+                'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself),
+            }" t-on-click="_onClickNewMessage" type="button"
+        >
+            New message
+        </button>
+    </t>
+
+</templates>

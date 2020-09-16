@@ -2,17 +2,17 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.Follower" owl="1">
-        <div class="o_Follower">
+        <div class="o-Follower">
             <t t-if="follower">
-                <a class="o_Follower_details" t-att-class="{ 'o-inactive': !follower.isActive }" href="#" t-on-click="_onClickDetails">
-                    <img class="o_Follower_avatar" t-attf-src="/web/image/{{ follower.resModel }}/{{ follower.resId }}/image_128" alt="Avatar"/>
-                    <span class="o_Follower_name" t-esc="follower.name"/>
+                <a class="o-Follower-details" t-att-class="{ 'o-isInactive': !follower.$$$isActive(mself) }" href="#" t-on-click="_onClickDetails">
+                    <img class="o-Follower-avatar" t-attf-src="/web/image/{{ follower.$$$resModel(mself) }}/{{ follower.$$$resId(mself) }}/image_128" alt="Avatar"/>
+                    <span class="o-Follower-name" t-esc="follower.$$$name(mself)"/>
                 </a>
-                <t t-if="follower.isEditable">
-                    <button class="btn btn-icon o_Follower_button o_Follower_editButton" title="Edit subscription" t-on-click="_onClickEdit">
+                <t t-if="follower.$$$isEditable(mself)">
+                    <button class="o-Follower-button o-Follower-editButton btn btn-icon" title="Edit subscription" t-on-click="_onClickEdit">
                         <i class="fa fa-pencil"/>
                     </button>
-                    <button class="btn btn-icon o_Follower_button o_Follower_removeButton" title="Remove this follower" t-on-click="_onClickRemove">
+                    <button class="o-Follower-button o-Follower-removeButton btn btn-icon" title="Remove this follower" t-on-click="_onClickRemove">
                         <i class="fa fa-remove"/>
                     </button>
                 </t>

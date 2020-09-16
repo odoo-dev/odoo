@@ -1,38 +1,10 @@
-odoo.define('mail/static/src/components/follower/follower.js', function (require) {
-'use strict';
+/** @odoo-module alias=mail.components.Follower **/
 
-const components = {
-    FollowerSubtypeList: require('mail/static/src/components/follower_subtype_list/follower_subtype_list.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+import usingModels from 'mail.componentMixins.usingModels';
 
-const { Component } = owl;
+const { Component, QWeb } = owl;
 
-class Follower extends Component {
-
-    /**
-     * @override
-     */
-    constructor(...args) {
-        super(...args);
-        useShouldUpdateBasedOnProps();
-        useStore(props => {
-            const follower = this.env.models['mail.follower'].get(props.followerLocalId);
-            return [follower ? follower.__state : undefined];
-        });
-    }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @returns {mail.follower}
-     */
-    get follower() {
-        return this.env.models['mail.follower'].get(this.props.followerLocalId);
-    }
+class Follower extends usingModels(Component) {
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -45,7 +17,10 @@ class Follower extends Component {
     _onClickDetails(ev) {
         ev.preventDefault();
         ev.stopPropagation();
-        this.follower.openProfile();
+        this.env.services.action.dispatch(
+            'Follower/openProfile',
+            this.follower,
+        );
     }
 
     /**
@@ -54,7 +29,10 @@ class Follower extends Component {
      */
     _onClickEdit(ev) {
         ev.preventDefault();
-        this.follower.showSubtypes();
+        this.env.services.action.dispatch(
+            'Follower/showSubtypes',
+            this.follower,
+        );
     }
 
     /**
@@ -62,19 +40,29 @@ class Follower extends Component {
      * @param {MouseEvent} ev
      */
     _onClickRemove(ev) {
-        this.follower.remove();
+        this.env.services.action.dispatch(
+            'Follower/remove',
+            this.follower,
+        );
     }
 
 }
 
 Object.assign(Follower, {
-    components,
     props: {
-        followerLocalId: String,
+        follower: {
+            type: Object,
+            validate(p) {
+                if (p.constructor.modelName !== 'Follower') {
+                    return false;
+                }
+                return true;
+            },
+        },
     },
     template: 'mail.Follower',
 });
 
-return Follower;
+QWeb.registerComponent('Follower', Follower);
 
-});
+export default Follower;

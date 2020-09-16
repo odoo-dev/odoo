@@ -1,37 +1,17 @@
-odoo.define('mail/static/src/components/discuss/discuss.js', function (require) {
-'use strict';
+/** @odoo-module alias=mail.components.Discuss **/
 
-const components = {
-    AutocompleteInput: require('mail/static/src/components/autocomplete_input/autocomplete_input.js'),
-    Composer: require('mail/static/src/components/composer/composer.js'),
-    DiscussMobileMailboxSelection: require('mail/static/src/components/discuss_mobile_mailbox_selection/discuss_mobile_mailbox_selection.js'),
-    DiscussSidebar: require('mail/static/src/components/discuss_sidebar/discuss_sidebar.js'),
-    MobileMessagingNavbar: require('mail/static/src/components/mobile_messaging_navbar/mobile_messaging_navbar.js'),
-    ModerationDiscardDialog: require('mail/static/src/components/moderation_discard_dialog/moderation_discard_dialog.js'),
-    ModerationRejectDialog: require('mail/static/src/components/moderation_reject_dialog/moderation_reject_dialog.js'),
-    NotificationList: require('mail/static/src/components/notification_list/notification_list.js'),
-    ThreadView: require('mail/static/src/components/thread_view/thread_view.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+import usingModels from 'mail.componentMixins.usingModels';
 
-const { Component } = owl;
+const { Component, QWeb } = owl;
 const { useRef } = owl.hooks;
 
-class Discuss extends Component {
+export default class Discuss extends usingModels(Component) {
 
     /**
      * @override
      */
     constructor(...args) {
         super(...args);
-        useShouldUpdateBasedOnProps();
-        useStore((...args) => this._useStoreSelector(...args), {
-            compareDepth: {
-                checkedMessages: 1,
-                uncheckedMessages: 1,
-            },
-        });
         this._updateLocalStoreProps();
         /**
          * Reference of the composer. Useful to focus it.
@@ -47,36 +27,50 @@ class Discuss extends Component {
     }
 
     mounted() {
-        this.discuss.update({ isOpen: true });
-        if (this.discuss.thread) {
+        this.env.services.action.dispatch(
+            'Record/update',
+            this.discuss,
+            { isOpen: true },
+        );
+        if (this.discuss.thread(this)) {
             this.trigger('o-push-state-action-manager');
         } else if (this.env.isMessagingInitialized()) {
-            this.discuss.openInitThread();
+            this.env.services.action.dispatch(
+                'Discuss/openInitThread',
+                this.discuss,
+            );
         }
         this._updateLocalStoreProps();
     }
 
     patched() {
         this.trigger('o-update-control-panel');
-        if (this.discuss.thread) {
+        if (this.discuss.thread(this)) {
             this.trigger('o-push-state-action-manager');
         }
         if (
-            this.discuss.thread &&
-            this.discuss.thread === this.env.messaging.inbox &&
-            this.discuss.threadView &&
-            this._lastThreadCache === this.discuss.threadView.threadCache.localId &&
-            this._lastThreadCounter > 0 && this.discuss.thread.counter === 0
+            this.discuss.thread(this) &&
+            this.discuss.thread(this) === this.env.services.model.messaging.inbox(this) &&
+            this.discuss.threadView(this) &&
+            this._lastThreadCache === this.discuss.threadView(this).threadCache(this).localId &&
+            this._lastThreadCounter > 0 &&
+            this.discuss.thread(this).counter === 0
         ) {
             this.trigger('o-show-rainbow-man');
         }
-        this._activeThreadCache = this.discuss.threadView && this.discuss.threadView.threadCache;
+        this._activeThreadCache = (
+            this.discuss.threadView(this) &&
+            this.discuss.threadView(this).threadCache(this)
+        );
         this._updateLocalStoreProps();
     }
 
     willUnmount() {
         if (this.discuss) {
-            this.discuss.close();
+            this.env.services.action.dispatch(
+                'Discuss/close',
+                this.discuss,
+            );
         }
     }
 
@@ -99,10 +93,13 @@ class Discuss extends Component {
     }
 
     /**
-     * @returns {mail.discuss}
+     * @returns {Discuss}
      */
     get discuss() {
-        return this.env.messaging && this.env.messaging.discuss;
+        return (
+            this.env.services.model.messaging &&
+            this.env.services.model.messaging.discuss(this)
+        );
     }
 
     /**
@@ -138,62 +135,18 @@ class Discuss extends Component {
          * rainbox man on inbox.
          */
         this._lastThreadCache = (
-            this.discuss.threadView &&
-            this.discuss.threadView.threadCache &&
-            this.discuss.threadView.threadCache.localId
+            this.discuss.threadView(this) &&
+            this.discuss.threadView(this).threadCache(this) &&
+            this.discuss.threadView(this).threadCache(this).localId
         );
         /**
          * Locally tracked store props `threadCounter`.
          * Useful to display the rainbow man on inbox.
          */
         this._lastThreadCounter = (
-            this.discuss.thread &&
-            this.discuss.thread.counter
+            this.discuss.thread(this) &&
+            this.discuss.thread(this).counter(this)
         );
-    }
-
-    /**
-     * Returns data selected from the store.
-     *
-     * @private
-     * @param {Object} props
-     * @returns {Object}
-     */
-    _useStoreSelector(props) {
-        const discuss = this.env.messaging && this.env.messaging.discuss;
-        const thread = discuss && discuss.thread;
-        const threadView = discuss && discuss.threadView;
-        const replyingToMessage = discuss && discuss.replyingToMessage;
-        const replyingToMessageOriginThread = replyingToMessage && replyingToMessage.originThread;
-        const checkedMessages = threadView ? threadView.checkedMessages : [];
-        return {
-            checkedMessages,
-            checkedMessagesIsModeratedByCurrentPartner: checkedMessages && checkedMessages.some(message => message.isModeratedByCurrentPartner), // for widget
-            discuss,
-            discussActiveId: discuss && discuss.activeId, // for widget
-            discussActiveMobileNavbarTabId: discuss && discuss.activeMobileNavbarTabId,
-            discussHasModerationDiscardDialog: discuss && discuss.hasModerationDiscardDialog,
-            discussHasModerationRejectDialog: discuss && discuss.hasModerationRejectDialog,
-            discussIsAddingChannel: discuss && discuss.isAddingChannel,
-            discussIsAddingChat: discuss && discuss.isAddingChat,
-            discussIsDoFocus: discuss && discuss.isDoFocus,
-            discussReplyingToMessageOriginThreadComposer: replyingToMessageOriginThread && replyingToMessageOriginThread.composer,
-            inbox: this.env.messaging.inbox,
-            isDeviceMobile: this.env.messaging && this.env.messaging.device.isMobile,
-            isMessagingInitialized: this.env.isMessagingInitialized(),
-            replyingToMessage,
-            starred: this.env.messaging.starred, // for widget
-            thread,
-            threadCache: threadView && threadView.threadCache,
-            threadChannelType: thread && thread.channel_type, // for widget
-            threadDisplayName: thread && thread.displayName, // for widget
-            threadCounter: thread && thread.counter,
-            threadModel: thread && thread.model,
-            threadPublic: thread && thread.public, // for widget
-            threadView,
-            threadViewMessagesLength: threadView && threadView.messages.length, // for widget
-            uncheckedMessages: threadView ? threadView.uncheckedMessages : [], // for widget
-        };
     }
 
     //--------------------------------------------------------------------------
@@ -204,14 +157,22 @@ class Discuss extends Component {
      * @private
      */
     _onDialogClosedModerationDiscard() {
-        this.discuss.update({ hasModerationDiscardDialog: false });
+        this.env.services.action.dispatch(
+            'Record/update',
+            this.discuss,
+            { hasModerationDiscardDialog: false },
+        );
     }
 
     /**
      * @private
      */
     _onDialogClosedModerationReject() {
-        this.discuss.update({ hasModerationRejectDialog: false });
+        this.env.services.action.dispatch(
+            'Record/update',
+            this.discuss,
+            { hasModerationRejectDialog: false },
+        );
     }
 
     /**
@@ -219,7 +180,11 @@ class Discuss extends Component {
      * @param {CustomEvent} ev
      */
     _onFocusinComposer(ev) {
-        this.discuss.update({ isDoFocus: false });
+        this.env.services.action.dispatch(
+            'Record/update',
+            this.discuss,
+            { isDoFocus: false },
+        );
     }
 
     /**
@@ -228,7 +193,10 @@ class Discuss extends Component {
      */
     _onHideMobileAddItemHeader(ev) {
         ev.stopPropagation();
-        this.discuss.clearIsAddingItem();
+        this.env.services.action.dispatch(
+            'Discuss/clearIsAddingItem',
+            this.discuss,
+        );
     }
 
     /**
@@ -240,10 +208,20 @@ class Discuss extends Component {
      */
     _onMobileAddItemHeaderInputSelect(ev, ui) {
         const discuss = this.discuss;
-        if (discuss.isAddingChannel) {
-            discuss.handleAddChannelAutocompleteSelect(ev, ui);
+        if (discuss.isAddingChannel(this)) {
+            this.env.services.action.dispatch(
+                'Discuss/handleAddChannelAutocompleteSelect',
+                discuss,
+                ev,
+                ui,
+            );
         } else {
-            discuss.handleAddChatAutocompleteSelect(ev, ui);
+            this.env.services.action.dispatch(
+                'Discuss/handleAddChatAutocompleteSelect',
+                discuss,
+                ev,
+                ui,
+            );
         }
     }
 
@@ -254,10 +232,20 @@ class Discuss extends Component {
      * @param {function} res
      */
     _onMobileAddItemHeaderInputSource(req, res) {
-        if (this.discuss.isAddingChannel) {
-            this.discuss.handleAddChannelAutocompleteSource(req, res);
+        if (this.discuss.isAddingChannel(this)) {
+            this.env.services.action.dispatch(
+                'Discuss/handleAddChannelAutocompleteSource',
+                this.discuss,
+                req,
+                res,
+            );
         } else {
-            this.discuss.handleAddChatAutocompleteSource(req, res);
+            this.env.services.action.dispatch(
+                'Discuss/handleAddChatAutocompleteSource',
+                this.discuss,
+                req,
+                res,
+            );
         }
     }
 
@@ -268,11 +256,16 @@ class Discuss extends Component {
         this.env.services['notification'].notify({
             message: _.str.sprintf(
                 this.env._t(`Message posted on "%s"`),
-                owl.utils.escape(this.discuss.replyingToMessage.originThread.displayName)
+                owl.utils.escape(
+                    this.discuss.replyingToMessage(this).originThread(this).displayName(this),
+                ),
             ),
             type: 'info',
         });
-        this.discuss.clearReplyingToMessage();
+        this.env.services.action.dispatch(
+            'Discuss/clearReplyingToMessage',
+            this.discuss,
+        );
     }
 
     /**
@@ -283,11 +276,18 @@ class Discuss extends Component {
      */
     _onSelectMobileNavbarTab(ev) {
         ev.stopPropagation();
-        if (this.discuss.activeMobileNavbarTabId === ev.detail.tabId) {
+        if (this.discuss.activeMobileNavbarTabId(this) === ev.detail.tabId) {
             return;
         }
-        this.discuss.clearReplyingToMessage();
-        this.discuss.update({ activeMobileNavbarTabId: ev.detail.tabId });
+        this.env.services.action.dispatch(
+            'Discuss/clearReplyingToMessage',
+            this.discuss,
+        );
+        this.env.services.action.dispatch(
+            'Record/update',
+            this.discuss,
+            { activeMobileNavbarTabId: ev.detail.tabId },
+        );
     }
 
     /**
@@ -301,11 +301,8 @@ class Discuss extends Component {
 }
 
 Object.assign(Discuss, {
-    components,
     props: {},
     template: 'mail.Discuss',
 });
 
-return Discuss;
-
-});
+QWeb.registerComponent('Discuss', Discuss);

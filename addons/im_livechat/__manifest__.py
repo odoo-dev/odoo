@@ -41,9 +41,9 @@ Help your customers with this chat, and analyse their feedback.
     'depends': ["mail", "rating", "digest"],
     'qweb': [
         'static/src/bugfix/bugfix.xml',
-        'static/src/components/composer/composer.xml',
-        'static/src/components/discuss_sidebar/discuss_sidebar.xml',
-        'static/src/components/thread_icon/thread_icon.xml',
+        'static/src/components/Composer/Composer.xml',
+        'static/src/components/DiscussSidebar/DiscussSidebar.xml',
+        'static/src/components/ThreadIcon/ThreadIcon.xml',
     ],
     'installable': True,
     'auto_install': False,

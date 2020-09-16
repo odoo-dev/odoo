@@ -1,0 +1,93 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-NotificationGroup {
+    @include o-mail-notification-list-item-layout();
+
+    &:hover .o-NotificationGroup-markAsRead {
+        // TODO also mixin this
+        // task-2258605
+        opacity: 1;
+    }
+}
+
+.o-NotificationGroup-content {
+    @include o-mail-notification-list-item-content-layout();
+}
+
+.o-NotificationGroup-core {
+    @include o-mail-notification-list-item-core-layout();
+}
+
+.o-NotificationGroup-coreItem {
+    @include o-mail-notification-list-item-core-item-layout();
+}
+
+.o-NotificationGroup-counter {
+    @include o-mail-notification-list-item-counter-layout();
+}
+
+.o-NotificationGroup-date {
+    @include o-mail-notification-list-item-date-layout();
+}
+
+.o-NotificationGroup-header {
+    @include o-mail-notification-list-item-header-layout();
+}
+
+.o-NotificationGroup-image {
+    @include o-mail-notification-list-item-image-layout();
+}
+
+.o-NotificationGroup-imageContainer {
+    @include o-mail-notification-list-item-image-container-layout();
+}
+
+.o-NotificationGroup-inlineText {
+    @include o-mail-notification-list-item-inline-text-layout();
+}
+
+.o-NotificationGroup-markAsRead {
+    @include o-mail-notification-list-item-mark-as-read-layout();
+}
+
+.o-NotificationGroup-name {
+    @include o-mail-notification-list-item-name-layout();
+}
+
+.o-NotificationGroup-sidebar {
+    @include o-mail-notification-list-item-sidebar-layout();
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-NotificationGroup {
+    @include o-mail-notification-list-item-style();
+}
+
+.o-NotificationGroup-core {
+    @include o-mail-notification-list-item-core-style();
+}
+
+.o-NotificationGroup-counter {
+    @include o-mail-notification-list-item-bold-style();
+}
+
+.o-NotificationGroup-date {
+    @include o-mail-notification-list-item-date-style();
+}
+
+.o-NotificationGroup-image {
+    @include o-mail-notification-list-item-image-style();
+}
+
+.o-NotificationGroup-markAsRead {
+    @include o-mail-notification-list-item-mark-as-read-style();
+}
+
+.o-NotificationGroup-name {
+    @include o-mail-notification-list-item-bold-style();
+}

@@ -1,18 +1,20 @@
-odoo.define('mrp.controllerMixin', function (require) {
-'use strict';
+/** @odoo-module alias=mrp.controllerMixin **/
 
-const { _t, qweb } = require('web.core');
-const fileUploadMixin = require('web.fileUploadMixin');
-const DocumentViewer = require('mrp.MrpDocumentViewer');
+import DocumentViewer from 'mrp.widgets.DocumentViewer';
 
-const MrpDocumentsControllerMixin = Object.assign({}, fileUploadMixin, {
+import { _t, qweb } from 'web.core';
+import fileUploadMixin from 'web.fileUploadMixin';
+
+export default {
+    ...fileUploadMixin,
     events: {
         'click .o_mrp_documents_kanban_upload': '_onClickMrpDocumentsUpload',
     },
-    custom_events: Object.assign({}, fileUploadMixin.custom_events, {
+    custom_events: {
+        ...fileUploadMixin.custom_events,
         kanban_image_clicked: '_onKanbanPreview',
         upload_file: '_onUploadFile',
-    }),
+    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -24,7 +26,6 @@ const MrpDocumentsControllerMixin = Object.assign({}, fileUploadMixin, {
     async reload() {
         await this._renderFileUploads();
     },
-
     /**
      * @override
      * @param {jQueryElement} $node
@@ -44,7 +45,6 @@ const MrpDocumentsControllerMixin = Object.assign({}, fileUploadMixin, {
     _getFileUploadRoute() {
         return '/mrp/upload_attachment';
     },
-
     /**
      * @override
      * @param {integer} param0.recordId
@@ -76,7 +76,6 @@ const MrpDocumentsControllerMixin = Object.assign({}, fileUploadMixin, {
         });
         $uploadInput.click();
     },
-
     /**
      * Handles custom event to display the document viewer.
      *
@@ -92,7 +91,6 @@ const MrpDocumentsControllerMixin = Object.assign({}, fileUploadMixin, {
         const documentViewer = new DocumentViewer(this, documents, documentID);
         documentViewer.appendTo(this.$('.o_mrp_documents_kanban_view'));
     },
-
     /**
      * Specially created to call `_uploadFiles` method from tests.
      *
@@ -102,7 +100,6 @@ const MrpDocumentsControllerMixin = Object.assign({}, fileUploadMixin, {
     async _onUploadFile(ev) {
         await this._uploadFiles(ev.data.files);
     },
-
     /**
      * @override
      * @param {Object} param0
@@ -119,8 +116,4 @@ const MrpDocumentsControllerMixin = Object.assign({}, fileUploadMixin, {
         }
         fileUploadMixin._onUploadLoad.apply(this, arguments);
     },
-});
-
-return MrpDocumentsControllerMixin;
-
-});
+};

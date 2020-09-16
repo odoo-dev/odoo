@@ -1,7 +1,7 @@
 odoo.define('note.systray.ActivityMenu', function (require) {
 "use strict";
 
-var ActivityMenu = require('mail.systray.ActivityMenu');
+var ActivityMenu = require('mail.widgets.ActivityMenu');
 
 var core = require('web.core');
 var datepicker = require('web.datepicker');

@@ -77,17 +77,26 @@ tour.register('hr_recruitment_tour',{
     position: "bottom",
     width: 195
 }, {
-    trigger: ".o_Chatter .o_ChatterTopbar_buttonSendMessage",
+    trigger: `
+        .o-Chatter
+        .o-ChatterTopbar-buttonSendMessage
+    `,
     extra_trigger: '.o_applicant_form',
     content: _t("<div><b>Try to send an email</b> to the applicant.</div><div><i>Tips: All emails sent or received are saved in the history here</i>"),
     position: "bottom"
 }, {
-    trigger: ".o_Chatter .o_Composer_buttonSend",
+    trigger: `
+        .o-Chatter
+        .o-Composer-buttonSend
+    `,
     extra_trigger: '.o_applicant_form',
     content: _t("Send your email. Followers will get a copy of the communication."),
     position: "bottom"
 }, {
-    trigger: ".o_Chatter .o_ChatterTopbar_buttonLogNote",
+    trigger: `
+        .o-Chatter
+        .o-ChatterTopbar-buttonLogNote
+    `,
     extra_trigger: '.o_applicant_form',
     content: _t("Or talk about this applicant privately with your colleagues."),
     position: "bottom"

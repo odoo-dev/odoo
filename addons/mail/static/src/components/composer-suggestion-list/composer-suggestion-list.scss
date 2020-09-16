@@ -1,0 +1,27 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-ComposerSuggestionList {
+    position: absolute;
+    // prevent suggestion items from overflowing
+    width: 100%;
+
+    &.o-isLowPosition {
+        bottom: 0;
+    }
+}
+
+.o-ComposerSuggestionList-drop {
+    // prevent suggestion items from overflowing
+    width: 100%;
+}
+
+.o-ComposerSuggestionList-list {
+    // prevent suggestion items from overflowing
+    width: 100%;
+    // prevent from overflowing chat window, must be smaller than its height
+    // minus the max height taken by composer and attachment list
+    max-height: 150px;
+    overflow: auto;
+}

@@ -7,20 +7,22 @@
         -->
         <template id="assets_backend" name="im_livechat assets backend" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/im_livechat/static/src/js/im_livechat_channel_form_view.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/js/im_livechat_channel_form_controller.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/bugfix/bugfix.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/discuss/discuss.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/discuss_sidebar/discuss_sidebar.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/discuss_sidebar_item/discuss_sidebar_item.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/notification_list/notification_list.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/thread_needaction_preview/thread_needaction_preview.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/thread_preview/thread_preview.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/models/messaging_initializer/messaging_initializer.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/models/messaging_notification_handler/messaging_notification_handler.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/models/partner/partner.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/models/thread/thread.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/widgets/discuss/discuss.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/js/im_livechat_channel_form_view.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/js/im_livechat_channel_form_controller.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/bugfix/bugfix.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/discuss/discuss.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/discuss-sidebar/discuss-sidebar.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/discuss-sidebarItem/discuss-sidebar-item.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/notification-list/notification-list.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/thread-needaction-preview/thread-needaction-preview.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/thread-preview/thread-preview.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/features/im_livechat/im_livechat.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/model-addons/chat-window/chat-window.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/model-addons/messaging-initializer/messaging-initializer.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/model-addons/messaging-notification-handler/messaging-notification-handler.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/model-addons/partner/partner.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/model-addons/thread/thread.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/widgets/discuss/discuss.js"/>
 
                 <link rel="stylesheet" type="text/scss" href="/im_livechat/static/src/bugfix/bugfix.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/im_livechat/static/src/scss/im_livechat_history.scss"/>
@@ -30,16 +32,16 @@
 
         <template id="qunit_suite" name="livechat_tests" inherit_id="web.qunit_suite_tests">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/im_livechat/static/src/bugfix/bugfix_tests.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/chat_window_manager/chat_window_manager_tests.js"/>
-                <script type="text/javascript" src="/im_livechat/static/src/components/composer/composer_tests.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/discuss/discuss_tests.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/messaging_menu/messaging_menu_tests.js"/>
-                <script type="text/javascript" src="/im_livechat/static/src/components/thread_icon/thread_icon_tests.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/components/thread_textual_typing_status/thread_textual_typing_status_tests.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/src/legacy/public_livechat.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/tests/helpers/mock_models.js"></script>
-                <script type="text/javascript" src="/im_livechat/static/tests/helpers/mock_server.js"></script>
+                <script type="text/javascript" src="/im_livechat/static/src/bugfix/bugfix_tests.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/chat-window-manager/chat-window-manager_tests.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/composer/composer_tests.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/discuss/discuss_tests.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/messaging-menu/messaging-menu_tests.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/thread-icon/thread-icon_tests.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/components/thread-textual-typing-status/thread-textual-typing-status_tests.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/legacy/public_livechat.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/mock-models.js"/>
+                <script type="text/javascript" src="/im_livechat/static/src/mock-server.js"/>
             </xpath>
         </template>
 
@@ -131,60 +133,60 @@
         -->
         <template id="external_lib" name="Livechat : External Librairies of the Livechat, required to make it work">
             <!-- Momentjs -->
-            <script type="text/javascript" src="/web/static/lib/moment/moment.js"></script>
+            <script type="text/javascript" src="/web/static/lib/moment/moment.js"/>
             <!-- Odoo minimal lib -->
-            <script type="text/javascript" src="/web/static/lib/underscore/underscore.js"></script>
-            <script type="text/javascript" src="/web/static/lib/underscore.string/lib/underscore.string.js"></script>
+            <script type="text/javascript" src="/web/static/lib/underscore/underscore.js"/>
+            <script type="text/javascript" src="/web/static/lib/underscore.string/lib/underscore.string.js"/>
             <!-- jQuery -->
-            <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
-            <script type="text/javascript" src="/web/static/lib/jquery.ui/jquery-ui.js"></script>
-            <script type="text/javascript" src="/web/static/lib/jquery/jquery.browser.js"></script>
-            <script type="text/javascript" src="/web/static/lib/jquery.ba-bbq/jquery.ba-bbq.js"></script>
+            <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"/>
+            <script type="text/javascript" src="/web/static/lib/jquery.ui/jquery-ui.js"/>
+            <script type="text/javascript" src="/web/static/lib/jquery/jquery.browser.js"/>
+            <script type="text/javascript" src="/web/static/lib/jquery.ba-bbq/jquery.ba-bbq.js"/>
             <!-- Qweb2 lib -->
-            <script type="text/javascript" src="/web/static/lib/qweb/qweb2.js"></script>
+            <script type="text/javascript" src="/web/static/lib/qweb/qweb2.js"/>
             <!-- Odoo JS Framework -->
-            <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/promise_extension.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/boot.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/libs/download.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/libs/content-disposition.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/services/config.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/abstract_service.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/class.js"></script>
+            <script type="text/javascript" src="/web/static/lib/owl/owl.js"/>
+            <script type="text/javascript" src="/web/static/src/js/promise_extension.js"/>
+            <script type="text/javascript" src="/web/static/src/js/boot.js"/>
+            <script type="text/javascript" src="/web/static/src/js/libs/download.js"/>
+            <script type="text/javascript" src="/web/static/src/js/libs/content-disposition.js"/>
+            <script type="text/javascript" src="/web/static/src/js/services/config.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/abstract_service.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/class.js"/>
             <script type="text/javascript" src="/web/static/src/js/core/collections.js"/>
-            <script type="text/javascript" src="/web/static/src/js/core/translation.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/ajax.js"></script>
-            <script type="text/javascript" src="/im_livechat/static/src/js/ajax_external.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/time.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/mixins.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/service_mixins.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/rpc.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/widget.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/registry.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/session.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/concurrency.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/utils.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/dom.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/qweb.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/bus.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/services/core.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/local_storage.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/ram_storage.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/core/abstract_storage_service.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/common_env.js"></script>
+            <script type="text/javascript" src="/web/static/src/js/core/translation.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/ajax.js"/>
+            <script type="text/javascript" src="/im_livechat/static/src/js/ajax_external.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/time.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/mixins.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/service_mixins.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/rpc.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/widget.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/registry.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/session.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/concurrency.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/utils.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/dom.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/qweb.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/bus.js"/>
+            <script type="text/javascript" src="/web/static/src/js/services/core.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/local_storage.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/ram_storage.js"/>
+            <script type="text/javascript" src="/web/static/src/js/core/abstract_storage_service.js"/>
+            <script type="text/javascript" src="/web/static/src/js/common_env.js"/>
             <script type="text/javascript" src="/web/static/src/js/public/lazyloader.js"/>
             <script type="text/javascript" src="/web/static/src/js/public/public_env.js"/>
             <script type="text/javascript" src="/web/static/src/js/public/public_root.js"/>
             <script type="text/javascript" src="/web/static/src/js/public/public_root_instance.js"/>
             <script type="text/javascript" src="/web/static/src/js/public/public_widget.js"/>
-            <script type="text/javascript" src="/web/static/src/js/services/ajax_service.js"></script>
-            <script type="text/javascript" src="/web/static/src/js/services/local_storage_service.js"></script>
+            <script type="text/javascript" src="/web/static/src/js/services/ajax_service.js"/>
+            <script type="text/javascript" src="/web/static/src/js/services/local_storage_service.js"/>
             <!-- Bus, Mail, Livechat -->
-            <script type="text/javascript" src="/bus/static/src/js/longpolling_bus.js"></script>
-            <script type="text/javascript" src="/bus/static/src/js/crosstab_bus.js"></script>
-            <script type="text/javascript" src="/bus/static/src/js/services/bus_service.js"></script>
-            <script type="text/javascript" src="/mail/static/src/js/utils.js"></script>
-            <script type="text/javascript" src="/im_livechat/static/src/legacy/public_livechat.js"></script>
+            <script type="text/javascript" src="/bus/static/src/js/longpolling_bus.js"/>
+            <script type="text/javascript" src="/bus/static/src/js/crosstab_bus.js"/>
+            <script type="text/javascript" src="/bus/static/src/js/services/bus_service.js"/>
+            <script type="text/javascript" src="/mail/static/src/js/utils.js"/>
+            <script type="text/javascript" src="/im_livechat/static/src/legacy/public_livechat.js"/>
             <t t-call="web._assets_helpers"/>
             <link rel="stylesheet" type="text/scss" href="/im_livechat/static/src/scss/im_livechat_bootstrap.scss"/>
             <link rel="stylesheet" type="text/scss" href="/im_livechat/static/src/legacy/public_livechat.scss"/>

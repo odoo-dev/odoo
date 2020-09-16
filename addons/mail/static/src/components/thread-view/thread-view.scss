@@ -1,0 +1,51 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-ThreadView {
+    display: flex;
+    position: relative;
+    flex-flow: column;
+    overflow: auto;
+}
+
+.o-ThreadView-alertLoadingFailed {
+    display: flex;
+    align-items: center;
+}
+
+.o-ThreadView-composer {
+    flex: 0 0 auto;
+}
+
+.o-ThreadView-loading {
+    display: flex;
+    align-self: center;
+    flex: 1 1 auto;
+    align-items: center;
+}
+
+.o-ThreadView-loadingFailed {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.o-ThreadView-messageList {
+    flex: 1 1 auto;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o-ThreadView {
+    background-color: gray('100');
+
+}
+
+.o-ThreadView-loadingIcon {
+    margin-right: 3px;
+}

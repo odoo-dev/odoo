@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ChatWindow" owl="1">
+        <div class="o-ChatWindow" tabindex="0" t-att-data-visible-index="chatWindow ? chatWindow.$$$visibleIndex(mself) : undefined"
+            t-att-class="{
+                'o-hasNewMessage': chatWindow and !chatWindow.$$$thread(mself),
+                'o-isFocused': chatWindow and chatWindow.$$$isFocused(mself),
+                'o-isFolded': chatWindow and chatWindow.$$$isFolded(mself),
+                'o-isFullscreen': isFullscreen,
+                'o-isMobile': env.messaging.$$$device(mself).$$$isMobile(mself),
+            }" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window-local-id="chatWindow ? chatWindow.localId : undefined" t-att-data-thread-local-id="chatWindow ? (chatWindow.$$$thread(mself) ? chatWindow.$$$thread(mself).localId : '') : undefined"
+        >
+            <t t-if="chatWindow">
+                <ChatWindowHeader
+                    class="o-ChatWindow-header"
+                    chatWindow="chatWindow"
+                    hasCloseAsBackButton="hasCloseAsBackButton"
+                    isExpandable="isExpandable"
+                    t-on-o-clicked="_onClickedHeader"
+                    t-ref="header"
+                />
+                <t t-if="chatWindow.$$$threadView(mself)">
+                    <ThreadView
+                        class="o-ChatWindow-thread"
+                        composerAttachmentsDetailsMode="'card'"
+                        hasComposer="chatWindow.$$$thread(mself).$$$model(mself) !== 'mail.box' and (!chatWindow.$$$thread(mself).$$$isMassMailing(mself) or env.messaging.$$$device(mself).$$$isMobile(mself))"
+                        hasComposerCurrentPartnerAvatar="false"
+                        hasComposerSendButton="env.messaging.$$$device(mself).$$$isMobile(mself)"
+                        hasSquashCloseMessages="chatWindow.$$$thread(mself).$$$model(mself) !== 'mail.box'"
+                        threadView="chatWindow.$$$threadView(mself)"
+                        t-on-focusin="_onFocusinThread"
+                        t-ref="thread"
+                    />
+                </t>
+                <t t-if="chatWindow.$$$hasNewMessageForm(mself)">
+                    <div class="o-ChatWindow-newMessageForm">
+                        <span class="o-ChatWindow-newMessageFormLabel">
+                            To:
+                        </span>
+                        <AutocompleteInput
+                            class="o-ChatWindow-newMessageFormInput"
+                            placeholder="newMessageFormInputPlaceholder"
+                            select="_onAutocompleteSelect"
+                            source="_onAutocompleteSource"
+                            t-ref="input"
+                        />
+                    </div>
+                </t>
+            </t>
+        </div>
+    </t>
+
+</templates>

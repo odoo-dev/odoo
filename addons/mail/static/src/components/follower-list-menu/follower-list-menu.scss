@@ -1,0 +1,17 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o-FollowerListMenu {
+    position: relative;
+}
+
+.o-FollowerListMenu-dropdown {
+    display: flex;
+    flex-flow: column;
+    overflow-y: auto;
+}
+
+.o-FollowerListMenu-followers {
+    display: flex;
+}

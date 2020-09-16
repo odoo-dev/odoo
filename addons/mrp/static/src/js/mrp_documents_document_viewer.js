@@ -1,19 +1,13 @@
-odoo.define('mrp.MrpDocumentViewer', function (require) {
-"use strict";
+/** @odoo-module alias=mrp.widgets.DocumentViewer **/
 
-const DocumentViewer = require('mail.DocumentViewer');
+import DocumentViewer from 'mail.widgets.DocumentViewer';
 
 /**
  * This file defines the DocumentViewer for the MRP Documents Kanban view.
  */
-const MrpDocumentsDocumentViewer = DocumentViewer.extend({
+export default DocumentViewer.extend({
     init(parent, attachments, activeAttachmentID) {
         this._super(...arguments);
         this.modelName = 'mrp.document';
     },
 });
-
-return MrpDocumentsDocumentViewer;
-
-});
-

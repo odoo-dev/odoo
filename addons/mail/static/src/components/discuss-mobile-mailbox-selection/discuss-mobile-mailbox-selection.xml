@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.DiscussMobileMailboxSelection" owl="1">
+        <div class="o-DiscussMobileMailboxSelection">
+            <t t-foreach="orderedMailboxes" t-as="mailbox" t-key="mailbox.localId">
+                <button class="o-DiscussMobileMailboxSelection-button btn"
+                    t-att-class="{
+                        'btn-primary': discuss.$$$thread(mself) === mailbox,
+                        'btn-secondary': discuss.$$$thread(mself) !== mailbox,
+                        'o-isActive': discuss.$$$thread(mself) === mailbox,
+                    }" t-on-click="_onClick" t-att-data-mailbox-local-id="mailbox.localId" type="button"
+                >
+                    <t t-esc="mailbox.$$$name(mself)"/>
+                </button>
+            </t>
+        </div>
+    </t>
+
+</templates>

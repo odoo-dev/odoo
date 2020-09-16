@@ -4,7 +4,7 @@ odoo.define('hr.StandaloneM2OAvatarEmployee', function (require) {
     const StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
     const Widget = require('web.Widget');
 
-    const { Many2OneAvatarEmployee } = require('hr.Many2OneAvatarEmployee');
+    const Many2OneAvatarEmployee = require('hr.viewFields.Many2OneAvatarEmployee');
 
     const StandaloneM2OAvatarEmployee = Widget.extend(StandaloneFieldManagerMixin, {
         className: 'o_standalone_avatar_employee',

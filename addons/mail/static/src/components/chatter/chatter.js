@@ -1,47 +1,18 @@
-odoo.define('mail/static/src/components/chatter/chatter.js', function (require) {
-'use strict';
+/** @odoo-module alias=mail.components.Chatter **/
 
-const components = {
-    ActivityBox: require('mail/static/src/components/activity_box/activity_box.js'),
-    AttachmentBox: require('mail/static/src/components/attachment_box/attachment_box.js'),
-    ChatterTopbar: require('mail/static/src/components/chatter_topbar/chatter_topbar.js'),
-    Composer: require('mail/static/src/components/composer/composer.js'),
-    ThreadView: require('mail/static/src/components/thread_view/thread_view.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
-const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
+import useUpdate from 'mail.componentHooks.useUpdate';
+import usingModels from 'mail.componentMixins.usingModels';
 
-const { Component } = owl;
+const { Component, QWeb } = owl;
 const { useRef } = owl.hooks;
 
-class Chatter extends Component {
+class Chatter extends usingModels(Component) {
 
     /**
      * @override
      */
     constructor(...args) {
         super(...args);
-        useShouldUpdateBasedOnProps();
-        useStore(props => {
-            const chatter = this.env.models['mail.chatter'].get(props.chatterLocalId);
-            const thread = chatter ? chatter.thread : undefined;
-            let attachments = [];
-            if (thread) {
-                attachments = thread.allAttachments;
-            }
-            return {
-                attachments: attachments.map(attachment => attachment.__state),
-                chatter: chatter ? chatter.__state : undefined,
-                composer: thread && thread.composer,
-                thread,
-                threadActivitiesLength: thread && thread.activities.length,
-            };
-        }, {
-            compareDepth: {
-                attachments: 1,
-            },
-        });
         useUpdate({ func: () => this._update() });
         /**
          * Reference of the composer. Useful to focus it.
@@ -54,17 +25,6 @@ class Chatter extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @returns {mail.chatter}
-     */
-    get chatter() {
-        return this.env.models['mail.chatter'].get(this.props.chatterLocalId);
-    }
-
-    //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
@@ -72,10 +32,13 @@ class Chatter extends Component {
      * @private
      */
     _notifyRendered() {
-        this.trigger('o-chatter-rendered', {
-            attachments: this.chatter.thread.allAttachments,
-            thread: this.chatter.thread.localId,
-        });
+        this.trigger(
+            'o-chatter-rendered',
+            {
+                attachments: this.chatter.thread(this).allAttachments(this),
+                thread: this.chatter.thread(this),
+            },
+        );
     }
 
     /**
@@ -85,11 +48,15 @@ class Chatter extends Component {
         if (!this.chatter) {
             return;
         }
-        if (this.chatter.thread) {
+        if (this.chatter.thread(this)) {
             this._notifyRendered();
         }
-        if (this.chatter.isDoFocus) {
-            this.chatter.update({ isDoFocus: false });
+        if (this.chatter.isDoFocus(this)) {
+            this.env.services.action.dispatch(
+                'Record/update',
+                this.chatter,
+                { isDoFocus: false },
+            );
             const composer = this._composerRef.comp;
             if (composer) {
                 composer.focus();
@@ -105,7 +72,11 @@ class Chatter extends Component {
      * @private
      */
     _onComposerMessagePosted() {
-        this.chatter.update({ isComposerVisible: false });
+        this.env.services.action.dispatch(
+            'Record/update',
+            this.chatter,
+            { isComposerVisible: false },
+        );
     }
 
     /**
@@ -122,13 +93,20 @@ class Chatter extends Component {
 }
 
 Object.assign(Chatter, {
-    components,
     props: {
-        chatterLocalId: String,
+        chatter: {
+            type: Object,
+            validate(p) {
+                if (p.constructor.modelName !== 'Chatter') {
+                    return false;
+                }
+                return true;
+            },
+        },
     },
     template: 'mail.Chatter',
 });
 
-return Chatter;
+QWeb.registerComponent('Chatter', Chatter);
 
-});
+export default Chatter;

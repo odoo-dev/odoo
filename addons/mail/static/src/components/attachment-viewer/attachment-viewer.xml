@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.AttachmentViewer" owl="1">
+        <div class="o-AttachmentViewer" t-on-click="_onClick" t-on-keydown="_onKeydown" tabindex="0">
+            <div class="o-AttachmentViewer-header" t-on-click="_onClickHeader">
+                <t t-if="record.$$$attachment(mself).$$$fileType(mself)">
+                    <div class="o-AttachmentViewer-headerItem o-AttachmentViewer-icon">
+                        <t t-if="record.$$$attachment(mself).$$$fileType(mself) === 'image'">
+                            <i class="fa fa-picture-o" role="img" title="Image"/>
+                        </t>
+                        <t t-if="record.$$$attachment(mself).$$$fileType(mself) === 'application/pdf'">
+                            <i class="fa fa-file-text" role="img" title="PDF file"/>
+                        </t>
+                        <t t-if="record.$$$attachment(mself).$$$isTextFile(mself)">
+                            <i class="fa fa-file-text" role="img" title="Text file"/>
+                        </t>
+                        <t t-if="record.$$$attachment(mself).$$$fileType(mself) === 'video'">
+                            <i class="fa fa-video-camera" role="img" title="Video"/>
+                        </t>
+                    </div>
+                </t>
+                <div class="o-AttachmentViewer-headerItem o-AttachmentViewer-name">
+                    <t t-esc="record.$$$attachment(mself).$$$displayName(mself)"/>
+                </div>
+                <div class="o-AttachmentViewer-buttonDownload o-AttachmentViewer-headerItem o-AttachmentViewer-headerItemButton" t-on-click="_onClickDownload" role="button" title="Download">
+                    <i class="fa fa-download fa-fw" role="img"/>
+                </div>
+                <div class="o-isAutogrow"/>
+                <div class="o-AttachmentViewer-headerItem o-AttachmentViewer-headerItemButton o-AttachmentViewer-headerItemButtonClose" t-on-click="_onClickClose" role="button" title="Close (Esc)" aria-label="Close">
+                    <i class="fa fa-fw fa-times" role="img"/>
+                </div>
+            </div>
+            <div class="o-AttachmentViewer-main" t-att-class="{ o-isImg: record.$$$attachment(mself).$$$fileType(mself) === 'image' }" t-on-mousemove="_onMousemoveView">
+                <t t-if="record.$$$attachment(mself).$$$fileType(mself) === 'image'">
+                    <div class="o-AttachmentViewer-zoomer" t-ref="zoomer">
+                        <t t-if="record.$$$isImageLoading(mself)">
+                            <div class="o-AttachmentViewer-loading">
+                                <i class="fa fa-3x fa-circle-o-notch fa-fw fa-spin" role="img" title="Loading"/>
+                            </div>
+                        </t>
+                        <img class="o-AttachmentViewer-view o-AttachmentViewer-viewImage" t-on-click="_onClickImage" t-on-mousedown="_onMousedownImage" t-on-wheel="_onWheelImage" t-on-load="_onLoadImage" t-att-src="record.$$$attachment(mself).$$$defaultSource(mself)" t-att-style="imageStyle" draggable="false" alt="Viewer" t-key="'image_' + record.$$$attachment(mself).$$$id(mself)" t-ref="image_{{ record.$$$attachment(mself).$$$id(mself) }}"/>
+                    </div>
+                </t>
+                <t t-if="record.$$$attachment(mself).$$$fileType(mself) === 'application/pdf'">
+                    <iframe class="o-AttachmentViewer-view o-AttachmentViewer-viewIframe o-AttachmentViewer-viewPdf" t-att-src="record.$$$attachment(mself).$$$defaultSource(mself)"/>
+                </t>
+                <t t-if="record.$$$attachment(mself).$$$isTextFile(mself)">
+                    <iframe class="o-AttachmentViewer-view o-AttachmentViewer-viewIframe o-isText" t-att-src="record.$$$attachment(mself).$$$defaultSource(mself)"/>
+                </t>
+                <t t-if="record.$$$attachment(mself).$$$fileType(mself) === 'youtu'">
+                    <iframe allow="autoplay; encrypted-media" class="o-AttachmentViewer-view o-AttachmentViewer-viewIframe o-AttachmentViewer-youtube" t-att-src="record.$$$attachment(mself).$$$defaultSource(mself)" height="315" width="560"/>
+                </t>
+                <t t-if="record.$$$attachment(mself).$$$fileType(mself) === 'video'">
+                    <video class="o-AttachmentViewer-view o-AttachmentViewer-viewVideo" t-on-click="_onClickVideo" controls="controls">
+                        <source t-att-data-type="record.$$$attachment(mself).$$$mimetype(mself)" t-att-src="record.$$$attachment(mself).$$$defaultSource(mself)"/>
+                    </video>
+                </t>
+            </div>
+            <t t-if="record.$$$attachment(mself).$$$fileType(mself) === 'image'">
+                <div class="o-AttachmentViewer-toolbar" role="toolbar">
+                    <div class="o-AttachmentViewer-toolbarButton" t-on-click="_onClickZoomIn" title="Zoom In (+)" role="button">
+                        <i class="fa fa-fw fa-plus" role="img"/>
+                    </div>
+                    <div class="o-AttachmentViewer-toolbarButton" t-att-class="{ 'o-isDisabled': record.$$$scale(mself) === 1 }" t-on-click="_onClickZoomReset" role="button" title="Reset Zoom (0)">
+                        <i class="fa fa-fw fa-search" role="img"/>
+                    </div>
+                    <div class="o-AttachmentViewer-toolbarButton" t-att-class="{ 'o-isDisabled': record.$$$scale(mself) === MIN_SCALE }" t-on-click="_onClickZoomOut" title="Zoom Out (-)" role="button">
+                        <i class="fa fa-fw fa-minus" role="img"/>
+                    </div>
+                    <div class="o-AttachmentViewer-toolbarButton" t-on-click="_onClickRotate" title="Rotate (r)" role="button">
+                        <i class="fa fa-fw fa-repeat" role="img"/>
+                    </div>
+                    <div class="o-AttachmentViewer-toolbarButton" t-on-click="_onClickPrint" title="Print" role="button">
+                        <i class="fa fa-fw fa-print" role="img"/>
+                    </div>
+                    <div class="o-AttachmentViewer-buttonDownload o-AttachmentViewer-toolbarButton" t-on-click="_onClickDownload" title="Download" role="button">
+                        <i class="fa fa-download fa-fw" role="img"/>
+                    </div>
+                </div>
+            </t>
+            <t t-if="record.$$$attachments(mself).length > 1">
+                <div class="o-AttachmentViewer-buttonNavigation o-AttachmentViewer-buttonNavigationPrevious" t-on-click="_onClickPrevious" title="Previous (Left-Arrow)" role="button">
+                    <span class="fa fa-chevron-left" role="img"/>
+                </div>
+                <div class="o-AttachmentViewer-buttonNavigation o-AttachmentViewer-buttonNavigationNext" t-on-click="_onClickNext" title="Next (Right-Arrow)" role="button">
+                    <span class="fa fa-chevron-right" role="img"/>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>
