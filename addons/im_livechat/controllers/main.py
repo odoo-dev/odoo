@@ -112,7 +112,7 @@ class LivechatController(http.Controller):
                 'is_internal': False,
             }
             if not channel.rating_ids:
-                res_model_id = request.env['ir.model'].sudo().search([('model', '=', channel._name)], limit=1).id
+                res_model_id = request.env['ir.model']._get_id(channel._name)
                 values.update({
                     'res_id': channel.id,
                     'res_model_id': res_model_id,
