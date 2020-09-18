@@ -55,11 +55,14 @@ class TestSupplier(TestsCommon):
         assert Supplier._search_available_today('>', True) == []
 
         for value, rvalue, dayname in tests:
-            with patch.object(fields.Datetime, 'now', return_value=value) as _:
-                assert Supplier._search_available_today('=', True) == ['&', '|', ('recurrency_end_date', '=', False),
-                        ('recurrency_end_date', '>', value.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(self.env.user.tz))),
-                        ('recurrency_%s' % (dayname), '=', True)],\
-                        'Wrong domain generated for values (%s, %s)' % (value, rvalue)
+            with patch.object(fields.Date, 'context_today', return_value=value.date()):
+                assert Supplier._search_available_today('=', True) == [
+                    '&',
+                        '|',
+                        ('recurrency_end_date', '=', False),
+                        ('recurrency_end_date', '>', value.date()),
+                    ('recurrency_%s' % (dayname), '=', True)],\
+                    'Wrong domain generated for values (%s, %s)' % (value, rvalue)
 
         with patch.object(fields.Datetime, 'now', return_value=self.monday_10am) as _:
             assert self.supplier_pizza_inn in Supplier.search([('available_today', '=', True)])

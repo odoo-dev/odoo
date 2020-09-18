@@ -571,8 +571,8 @@ class Picking(models.Model):
 
     @api.model
     def _search_delay_alert_date(self, operator, value):
-        late_stock_moves = self.env['stock.move'].search([('delay_alert_date', operator, value)])
-        return [('move_lines', 'in', late_stock_moves.ids)]
+        subquery = self.env['stock.move']._search([('delay_alert_date', operator, value)])
+        return [('move_lines', 'in', subquery)]
 
     @api.onchange('picking_type_id', 'partner_id')
     def _onchange_picking_type(self):
