@@ -87,8 +87,8 @@ class PurchaseRequisition(models.Model):
             ('state', '=', 'ongoing'),
             ('type_id.quantity_copy', '=', 'none'),
             ('company_id', '=', self.company_id.id),
-        ])
-        if any(requisitions):
+        ], limit=1)
+        if requisitions:
             title = _("Warning for %s", self.vendor_id.name)
             message = _("There is already an open blanket order for this supplier. We suggest you complete this open blanket order, instead of creating a new one.")
             warning = {

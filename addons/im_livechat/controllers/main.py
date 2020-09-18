@@ -58,9 +58,7 @@ class LivechatController(http.Controller):
             country_id = False
             country_code = request.session.geoip and request.session.geoip.get('country_code') or False
             if country_code:
-                country_ids = request.env['res.country'].sudo().search([('code', '=', country_code)])
-                if country_ids:
-                    country_id = country_ids[0].id
+                country_id = request.env['res.country'].sudo().search([('code', '=', country_code)], limit=1).id
             # extract url
             url = request.httprequest.headers.get('Referer')
             # find the first matching rule for the given country and url

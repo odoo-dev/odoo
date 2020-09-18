@@ -68,7 +68,7 @@ class pos_config(models.Model):
 
     def _get_cache_for_user(self):
         pos_cache = self.env['pos.cache']
-        cache_for_user = pos_cache.search([('id', 'in', self.cache_ids.ids), ('compute_user_id', '=', self.env.uid)])
+        cache_for_user = pos_cache.search([('config_id', 'in', self.ids), ('compute_user_id', '=', self.env.uid)], limit=1)
 
         if cache_for_user:
             return cache_for_user[0]
