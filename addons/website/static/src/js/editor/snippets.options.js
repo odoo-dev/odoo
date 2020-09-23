@@ -1906,6 +1906,13 @@ options.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
                 onSuccess: () => resolve(),
             });
         });
+        await new Promise(resolve => {
+            this.trigger_up('action_demand', {
+                actionName: 'toggle_page_option',
+                params: [{name: 'header_text_color', value: ''}],
+                onSuccess: () => resolve(),
+            });
+        });
     },
     /**
      * @override
@@ -1936,10 +1943,54 @@ options.registry.topMenuColor = options.Class.extend({
      */
     selectStyle(previewMode, widgetValue, params) {
         this._super(...arguments);
-        const className = widgetValue ? (params.colorPrefix + widgetValue) : '';
+        if (widgetValue && !ColorpickerWidget.isCSSColor(widgetValue)) {
+            widgetValue = params.colorPrefix + widgetValue;
+        }
         this.trigger_up('action_demand', {
             actionName: 'toggle_page_option',
-            params: [{name: 'header_color', value: className}],
+            params: [{name: 'header_color', value: widgetValue}],
+        });
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeVisibility: async function () {
+        const show = await this._super(...arguments);
+        if (!show) {
+            return false;
+        }
+        return new Promise(resolve => {
+            this.trigger_up('action_demand', {
+                actionName: 'get_page_option',
+                params: ['header_overlay'],
+                onSuccess: value => resolve(!!value),
+            });
+        });
+    },
+});
+
+options.registry.topMenuTextColor = options.Class.extend({
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    selectStyle(previewMode, widgetValue, params) {
+        this._super(...arguments);
+        if (widgetValue && !ColorpickerWidget.isCSSColor(widgetValue)) {
+            widgetValue = params.colorPrefix + widgetValue;
+        }
+        this.trigger_up('action_demand', {
+            actionName: 'toggle_page_option',
+            params: [{name: 'header_text_color', value: widgetValue}],
         });
     },
 

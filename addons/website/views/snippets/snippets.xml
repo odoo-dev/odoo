@@ -701,8 +701,17 @@
             id="option_header_transparent_color"
             data-select-style="true"
             data-css-property="background-color"
-            data-color-prefix="bg-"
-            data-excluded="theme, common, custom"/>
+            data-color-prefix="bg-"/>
+    </div>
+
+    <div data-js="topMenuTextColor"
+         data-selector="[data-main-object^='website.page('] #wrapwrap > header"
+         data-no-check="true">
+        <we-colorpicker string="⌙ Text Color"
+            id="option_header_transparent_text_color"
+            data-select-style="true"
+            data-css-property="color"
+            data-color-prefix="text-"/>
     </div>
 
     <!-- Header > Navbar Options -->
