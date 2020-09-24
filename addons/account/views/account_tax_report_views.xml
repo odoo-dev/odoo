@@ -70,6 +70,15 @@
                     <group>
                         <field name="formula"/>
                     </group>
+                    <group>
+                        <group>
+                            <field name="carry_over_condition_method"/>
+                        </group>
+                        <group>
+                            <field name="carry_over_destination_line_id"/>
+                            <field name="carry_over_analytic_account_id"/>
+                        </group>
+                    </group>
                     <group string="Sublines">
                         <field name="children_line_ids" context="{'default_report_id': report_id}"/>
                     </group>
