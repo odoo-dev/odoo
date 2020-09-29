@@ -5,8 +5,8 @@ Part 13: Inheritance
 ====================
 
 A powerful aspect of Odoo is its modularity. A module is dedicated to a business need, but moreover
-modules can interact one with another. This is useful to extend the functionality of an existing
-module. For example, in out real estate scenario we want to display the list of properties
+modules can interact with one another. This is useful to extend the functionality of an existing
+module. For example, in our real estate scenario we want to display the list of properties
 of a salesperson, directly on the regular user view.
 
 But before going through the specific Odoo module inheritance, let's see how we can alter the

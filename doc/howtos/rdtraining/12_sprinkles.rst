@@ -107,10 +107,10 @@ Widgets
 
     Four states are displayed: New, Offer Received, Offer Accepted and Sold.
 
-When we added fields our models, we (almost) never had to worry about how the field would look like
-in the user interface. For example, a date picker is provided for a ``Date`` field, or a
-``One2many`` field is automatically displayed as a list. Odoo chooses the right 'widget' depending
-on the field type.
+Whenever we've added fields to our models, we've (almost) never had to worry about how
+these fields would look like in the user interface. For example, a date picker is provided
+for a ``Date`` field, or a ``One2many`` field is automatically displayed as a list. Odoo
+chooses the right 'widget' depending on the field type.
 
 However, in some cases, we want a specific representation of a field which can be done thanks to
 the ``widget`` attribute. We already used it for the ``tag_ids`` field when we used the
@@ -130,7 +130,8 @@ take extra options. An exhaustive list can be found in :ref:`reference/js/widget
 
 .. warning:: Same field multiple times in a view
 
-    Always add a field only **once** in a view. Adding it multiple times is simply not supported.
+    Always add a field only **once** in a list or a form view. Adding it multiple times is
+    simply not supported.
 
 List Order
 ==========
@@ -246,7 +247,7 @@ Form
 In our real estate module, we want to modify the behavior of some fields. For example, we don't
 want to be able to create or edit a property type from the form view. In fact, we expect the
 types to be handled in their appropriate menu. Moreover, we want to give tags a color. Several field
-widgets take the ``options`` attribute in to customize their behavior.
+widgets take the ``options`` attribute in order to customize their behavior.
 
 .. exercise:: Widget options
 
@@ -307,7 +308,7 @@ should not be displayed to the user, we can use the ``invisible`` attribute to h
 
 .. warning::
 
-    Using a (conditional) ``readonly`` attribute in the view can be useful to prevent encoding
+    Using a (conditional) ``readonly`` attribute in the view can be useful to prevent data entry
     errors, but keep in mind that it doesn't provide any level of security! There is no check done
     server-side, therefore it's always possible to write on the field through RPC call.
 
@@ -346,7 +347,7 @@ hidden. It can be achieved thanks to the ``optional`` attribute.
     default.
 
 Finally, color codes are useful to visually emphasize records. For example, in the real estate
-module we would like refused offers in red and the accepted offer in green. It can be achieved
+module we would like refused offers in red and the accepted offers in green. It can be achieved
 thanks to the ``decoration-{$name}`` attribute (see :ref:`reference/js/widgets` for a
 complete list):
 
@@ -428,8 +429,8 @@ used to search on both fields ``name`` and ``description``.
 
 .. exercise:: Change the living area search
 
-    Add a ``filter_domain`` on the living area to include properties with an area larger than the
-    given value.
+    Add a ``filter_domain`` on the living area to include properties with an area equal or
+    greater than the given value.
 
 Stat Buttons
 ============
@@ -443,7 +444,7 @@ Stat Buttons
       :align: center
       :alt: Stat button
 
-If you already used some functional modules in Odoo, you probably already encountered a 'stat
+If you've already used some functional modules in Odoo, you've probably already encountered a 'stat
 button'. These buttons are displayed on the top right of a form view and give a quick access to
 linked documents. In our real estate module, we would like to have a quick link to the offers
 related to a given property type, as depicted in the **Goal** of the section.

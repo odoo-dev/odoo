@@ -6,7 +6,7 @@ Part 11: Constraints
 
 The :ref:`previous chapter <howto/rdtraining/10_actions>` introduced the possibility to add some
 business logic to our model. We can now link buttons to business code. But how can we prevent
-users from encoding incorrect data? For example, in our real estate module, nothing prevents the
+users from entering incorrect data? For example, in our real estate module, nothing prevents the
 user to set a negative expected price.
 
 Odoo provides two ways to set up automatically verified invariants:
@@ -117,8 +117,8 @@ A simple example can be found
 
     Be sure the constraint is triggered every time the selling price or the expected price is changed!
 
-SQL constrains are usually more efficient than Python constrains. When performance matters, always
-prefer SQL over Python constrains.
+SQL constraints are usually more efficient than Python constraints. When performance matters, always
+prefer SQL over Python constraints.
 
 Our real estate module is starting to look good: we added some business logic, and now we make sure
 the data is consistent. However, the user interface is still a bit rough. Let's see how we can

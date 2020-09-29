@@ -91,8 +91,8 @@ methods as private unless they need to be called from the user interface.
 Then, we loop on ``self``. Always assume that a method can be called on multiple records, it's
 better for reusability.
 
-Finally, a public method should always return something so it can be called through XML-RPC. In
-doubt, just ``return True``.
+Finally, a public method should always return something so it can be called through XML-RPC.
+If in doubt, just ``return True``.
 
 There are hundreds of examples in the Odoo source code, for example the
 `button view <https://github.com/odoo/odoo/blob/cd9af815ba591935cda367d33a1d090f248dd18d/addons/crm/views/crm_lead_views.xml#L9-L11>`__

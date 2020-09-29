@@ -7,11 +7,12 @@ Part 9: Computed Fields And Onchanges
 The :ref:`relations between models <howto/rdtraining/08_relations>` is a key component of any Odoo
 module. It is necessary to the modelization of any business case: models are linked one to another.
 However, we might want links between the fields inside of a given model. Sometimes because the
-value of a field is determined from the value of other fields, sometimes to help the user encoding.
+value of a field is determined from the value of other fields, sometimes to help the user with data
+entry.
 
 Although this chapter is not technically complex, the semantic of both concepts is very important.
-This is also the first time we will write Python logic. Up to now, we never wrote anything else
-that class definiton or field declaration.
+This is also the first time we will write Python logic. Up to now, we haven't written anything
+other than class definitons or field declarations.
 
 Computed Fields
 ===============
@@ -229,10 +230,11 @@ Onchanges
         :align: center
         :alt: Onchange
 
-In our real estate module, we also want to help the user encoding. When the 'garden' field is set,
-we want to give a default value for the garden area as well as the orientation. Moreover, when the
-'garden' field is unset the garden area is reset to zero and the orientation is removed. In this
-case, the value of a given field modifies the value of other fields.
+In our real estate module, we also want to help the user with data entry. When the 'garden'
+field is set, we want to give a default value for the garden area as well as the orientation.
+Moreover, when the 'garden' field is unset the garden area is reset to zero and the
+orientation is removed. In this case, the value of a given field modifies the value of
+other fields.
 
 The 'onchange' mechanism provides a way for the client interface to update a
 form whenever the user has filled in a value in a field, without saving anything
