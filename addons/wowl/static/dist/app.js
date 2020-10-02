@@ -121,9 +121,6 @@
             this.menuRepo = useService("menus");
         }
     }
-    NavBar.props = {
-        menuID: Number,
-    };
     NavBar.template = "wowl.NavBar";
 
     // import { useService } from "../../services";

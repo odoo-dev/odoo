@@ -3,20 +3,20 @@
 
   <header t-name="wowl.NavBar" owl="1">
     <nav class="o_main_navbar">
-      <t t-call="web.AppsMenu"/>
+      <t t-call="wowl.AppsMenu"/>
       <a class="o_menu_brand" role="button"/>
       <ul class="o_menu_sections" role="menu"/>
       <ul class="o_menu_systray" role="menu"/>
     </nav>
   </header>
 
-<ul t-name="web.AppsMenu" class="o_menu_apps" owl="1">
+<ul t-name="wowl.AppsMenu" class="o_menu_apps" owl="1">
     <li class="dropdown">
         <a class="full" data-toggle="dropdown" data-display="static" href="#">
             <i class="fa fa-th-large"/>
         </a>
         <div class="dropdown-menu" role="menu">
-            <t t-foreach="menuRepo.getApps()" t-as="app">
+            <t t-foreach="menuRepo.getApps()" t-as="app" t-key="app.id">
                 <a role="menuitem" href="#" class="dropdown-item o_app"
                     t-att-data-menu-id="app.id"
                     t-att-data-menu-xmlid="app.xmlid"

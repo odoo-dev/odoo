@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <div t-name="wowl.WebClient" owl="1">
-        <NavBar menuId="" menuRepo="menuRepo"/>
+        <NavBar/>
         Hello WebClient
         <Action/>
         <div>

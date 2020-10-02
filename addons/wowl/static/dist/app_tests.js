@@ -410,9 +410,6 @@
             this.menuRepo = useService("menus");
         }
     }
-    NavBar.props = {
-        menuID: Number,
-    };
     NavBar.template = "wowl.NavBar";
 
     const loadMenusUrl = `/wowl/load_menus`;
