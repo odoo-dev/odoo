@@ -8,6 +8,7 @@ import { userService } from "./services/user";
 import { Service } from "./services";
 import { Type } from "./types";
 import { crashManagerService } from "./services/crash_manager";
+import { modelService } from "./services/model";
 
 // Services
 //
@@ -19,6 +20,7 @@ const serviceRegistry: Registry<Service> = new Registry();
 const services = [
   menusService,
   crashManagerService,
+  modelService,
   notificationService,
   routerService,
   rpcService,

@@ -15,13 +15,15 @@ import type { menusService } from "./services/menus";
 import type { notificationService } from "./services/notifications";
 import type { userService } from "./services/user";
 import { routerService } from "./services/router";
+import { modelService } from "./services/model";
 
 export interface Services {
-  rpc: ServiceType<typeof rpcService["deploy"]>;
   menus: ServiceType<typeof menusService["deploy"]>;
+  model: ServiceType<typeof modelService["deploy"]>;
   notifications: ServiceType<typeof notificationService["deploy"]>;
-  user: ServiceType<typeof userService["deploy"]>;
+  rpc: ServiceType<typeof rpcService["deploy"]>;
   router: ServiceType<typeof routerService["deploy"]>;
+  user: ServiceType<typeof userService["deploy"]>;
 
   [key: string]: any;
 }
@@ -29,9 +31,7 @@ export interface Services {
 export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-
   deploy: (env: OdooEnv, odooGlobal?: Odoo) => Promise<T> | T;
-  specialize?(component: Component, value: T): T;
 }
 
 // -----------------------------------------------------------------------------
@@ -44,8 +44,7 @@ export function useService<T extends keyof Services>(serviceName: T): Services[T
   if (!service) {
     throw new Error(`Service ${serviceName} is not available`);
   }
-  const specialize = env.registries.services.get(serviceName as any).specialize;
-  return specialize ? specialize(component, service) : service;
+  return typeof service === "function" ? service.bind(component) : service;
 }
 
 export const serviceRegistry = new Registry<Service<any>>();

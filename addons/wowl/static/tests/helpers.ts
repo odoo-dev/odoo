@@ -95,11 +95,20 @@ export function click(el: HTMLElement, selector?: string) {
 // -----------------------------------------------------------------------------
 // Mock Services
 // -----------------------------------------------------------------------------
-export function makeFakeUserService(): typeof userService {
+
+/**
+ * Simulate a fake user service.  For convenience, by default, this fake user
+ * service will return { uid: 2 } as context, even though it is not a valid
+ * context.  If this is significant for a test, then the `fullContext` option
+ * should be set to true.
+ */
+export function makeFakeUserService(fullContext: boolean = false): typeof userService {
   return {
     name: "user",
     deploy() {
-      const context = { lang: "en_us", tz: "Europe/Brussels", uid: 2, allowed_company_ids: [1] };
+      const context = fullContext
+        ? { lang: "en_us", tz: "Europe/Brussels", uid: 2, allowed_company_ids: [1] }
+        : ({ uid: 2 } as any);
       return {
         context,
         userId: 2,

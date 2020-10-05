@@ -5,21 +5,10 @@ import { Service } from "../services";
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
-interface RPCRouteQuery {
-  route: string;
-  params?: { [key: string]: any };
-}
 
-interface RPCModelQuery {
-  model: string;
-  method: string;
-  args?: any[];
-  kwargs?: { [key: string]: any };
-}
+type Params = { [key: string]: any };
 
-export type RPCQuery = RPCRouteQuery | RPCModelQuery;
-
-type RPC = (query: RPCQuery) => Promise<any>;
+export type RPC = (route: string, params?: Params) => Promise<any>;
 
 interface RPCServerError {
   type: "server";
@@ -38,32 +27,7 @@ type RPCError = RPCServerError | RPCNetworkError;
 // -----------------------------------------------------------------------------
 // Main RPC method
 // -----------------------------------------------------------------------------
-
-function computeParams(query: RPCQuery, env: OdooEnv): { [key: string]: any } {
-  const userContext = env.services["user"].context;
-
-  let params: any;
-  if ("route" in query) {
-    // call a controller
-    params = query.params || {};
-    params.context = userContext;
-  } else {
-    // call a model
-    params = { model: query.model, method: query.method };
-    let context = userContext;
-    params.args = query.args || [];
-    params.kwargs = { context };
-    if (query.kwargs) {
-      Object.assign(params.kwargs, query.kwargs);
-    }
-    if (query.kwargs && query.kwargs.context) {
-      params.kwargs.context = Object.assign({}, userContext, query.kwargs.context);
-    }
-  }
-  return params;
-}
-
-function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
+function jsonrpc(env: OdooEnv, url: string, params: Params): Promise<any> {
   const bus = env.bus;
   const XHR = env.browser.XMLHttpRequest;
 
@@ -71,15 +35,9 @@ function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
     id: Math.floor(Math.random() * 1000 * 1000 * 1000),
     jsonrpc: "2.0",
     method: "call",
-    params: computeParams(query, env),
+    params: params,
   };
 
-  let url: string;
-  if ("route" in query) {
-    url = query.route;
-  } else {
-    url = `/web/dataset/call_kw/${query.model}/${query.method}`;
-  }
   return new Promise((resolve, reject) => {
     const request = new XHR();
 
@@ -123,23 +81,24 @@ function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
 // -----------------------------------------------------------------------------
 
 export const rpcService: Service<RPC> = {
-  dependencies: ["user"],
   name: "rpc",
   deploy(env: OdooEnv): RPC {
-    return async function (query: RPCQuery): Promise<any> {
-      return await jsonrpc(query, env);
-    };
-  },
-  specialize(component, rpc: RPC): RPC {
-    return async function (this: Component, query) {
-      if (component.__owl__.isDestroyed) {
-        throw new Error("A destroyed component should never initiate a RPC");
+    return async function (
+      this: Component | null,
+      route: string,
+      params: Params = {}
+    ): Promise<any> {
+      if (this instanceof Component) {
+        if (this.__owl__.isDestroyed) {
+          throw new Error("A destroyed component should never initiate a RPC");
+        }
+        const result = await jsonrpc(env, route, params);
+        if (this instanceof Component && this.__owl__.isDestroyed) {
+          return new Promise(() => {});
+        }
+        return result;
       }
-      const result = await rpc(query);
-      if (this instanceof Component && this.__owl__.isDestroyed) {
-        return new Promise(() => {});
-      }
-      return result;
+      return jsonrpc(env, route, params);
     };
   },
 };

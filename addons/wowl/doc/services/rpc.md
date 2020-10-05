@@ -2,66 +2,71 @@
 
 | Technical name | Dependencies |
 | -------------- | ------------ |
-| `rpc`          | `user`       |
+| `rpc`          |              |
 
 ## Overview
 
-The RPC service is necessary to properly send a request to the server. The value
-of the service is a function that takes a query and return a promise (which will
-be resolved to the result of the query).
-
-Here is the type of the query:
+The RPC service has a single purpose: send requests to the server. Its external
+API is a single function, with the following type:
 
 ```ts
-interface RPCRouteQuery {
-  route: string;
-  params?: { [key: string]: any };
-}
-
-interface RPCModelQuery {
-  model: string;
-  method: string;
-  args?: any[];
-  kwargs?: { [key: string]: any };
-}
-
-type RPCQuery = RPCRouteQuery | RPCModelQuery;
+type RPC = (route: string, params?: { [key: string]: any }) => Promise<any>;
 ```
+
+This makes it easy to use. For example, calling a controller `/some/route` can
+be done with the following code:
+
+```ts
+class MyComponent extends Component {
+  rpc = useService("rpc");
+
+  async someMethod() {
+    const result = await this.rpc("/some/route");
+  }
+}
+```
+
+Note that the `rpc` service is considered a low-level service. It should only be
+used to interact with Odoo controllers. To work with models (which is by far the
+most important usecase), one should use the [`model`](model.md) service instead.
 
 ## Calling a controller
 
-As the type of the query shows, there are actually two different ways to call
-the `rpc` method. Either we call a route, or calling a method on a model. Here
-is an example of calling a route:
+As explained in the overview, calling a controller is very simple. The route
+should be the first argument, and optionally, a `params` object can be given as
+a second argument.
 
 ```ts
-const result = await this.rpc({ route: "/my/route", params: { some: "value" } });
+const result = await this.rpc("/my/route", { some: "value" });
 ```
 
-## Calling a model
+## Technical notes
 
-To call a model, we need to specify a model, a method, args and/or kwargs. For
-example:
-
-```ts
-const result = await this.rpc({
-  model: "res.partner",
-  method: "read",
-  args: [[123]],
-});
-```
+- The `rpc` service communicates with the server by using a `XMLHTTPRequest` object,
+  configured to work with `application/json` content type.
+- So clearly the content of the request should be JSON serializable.
+- Each request done by this service uses the `POST` http method
+- Server errors actually return the response with an http code 200. But the `rpc`
+  service will treat them as error (see below)
 
 ## Error Handling
 
-If an rpc fails, then:
+An rpc can fail for two main reasons:
+
+- either the odoo server returns an error (so, we call this a `server` error).
+  In that case the http request will return with am http code 200 BUT with a
+  response object containing an `error` key.
+- or there is some other kind of network error
+
+When a rpc fails, then:
 
 - the promise representing the rpc is rejected, so the calling code will crash,
   unless it handles the situation
 - an event `RPC_ERROR` is triggered on the main application bus. The event payload
   contains a description of the cause of the error:
 
-  It can be a server error (the server code threw an exception). In that case
-  the payload will be an object with the following keys:
+  If it is a server error (the server code threw an exception). In that case
+  the event payload will be an object with the following keys:
 
   - `type = 'server'`
   - `message(string)`
@@ -69,12 +74,12 @@ If an rpc fails, then:
   - `data_message(string)`
   - `data_debug(string)` (this is the main debug information, with the call stack)
 
-  Another possibility is a network error. In that case, the error description is
-  simply an object `{type: 'network'}`.
+  If it is a network error, then the error description is simply an object
+  `{type: 'network'}`.
 
 ## Specialized behaviour for components
 
-The `rpc` service has a specialization to make using it with component safer. It
+The `rpc` service has a specific optimization to make using it with component safer. It
 does two things:
 
 - if a component is destroyed at the moment an rpc is initiated, an error will
@@ -82,15 +87,3 @@ does two things:
 - if a component is destroyed when a rpc is completed, which is a normal situation
   in an application, then the promise is simply left pending, to prevent any
   followup code to execute.
-
-## Notes
-
-- If an rpc fails, then an event `RPC_ERROR` will be triggered on the main bus.
-
-- user context is automatically added to every query. If the query defines
-  explicitely a context, the user context will be expanded with the query
-  context.
-
-- if a query is initiated by a component, the `rpc` service will check if the
-  component is destroyed when the query is completed. In that case, it will
-  leave the query pending, so no additional code is executed.
