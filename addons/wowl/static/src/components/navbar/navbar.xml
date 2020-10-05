@@ -12,10 +12,10 @@
 
 <ul t-name="wowl.AppsMenu" class="o_menu_apps" owl="1">
     <li class="dropdown">
-        <a class="full" data-toggle="dropdown" data-display="static" href="#">
+        <a class="full" data-toggle="dropdown" data-display="static" href="#" t-on-click="toggleDropdownMenu">
             <i class="fa fa-th-large"/>
         </a>
-        <div class="dropdown-menu" role="menu">
+        <div class="dropdown-menu" role="menu" t-att-class="showDropdownMenu ? 'show' : ''">
             <t t-foreach="menuRepo.getApps()" t-as="app" t-key="app.id">
                 <a role="menuitem" href="#" class="dropdown-item o_app"
                     t-att-data-menu-id="app.id"

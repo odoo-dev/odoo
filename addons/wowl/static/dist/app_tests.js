@@ -408,6 +408,8 @@
         constructor() {
             super(...arguments);
             this.menuRepo = useService("menus");
+            this.showDropdownMenu = false;
+            this.toggleDropdownMenu = () => { this.showDropdownMenu = !this.showDropdownMenu; };
         }
     }
     NavBar.template = "wowl.NavBar";

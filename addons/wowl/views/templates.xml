@@ -14,13 +14,7 @@
             <link rel="stylesheet" type="text/scss" t-att-href="scssFile"/>
         </t>
 
-        <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
-        <script type="text/javascript" src="/web/static/lib/bootstrap/js/index.js"></script>
-        <script type="text/javascript" src="/web/static/lib/bootstrap/js/tooltip.js"></script>
-        <script type="text/javascript" src="/web/static/lib/bootstrap/js/scrollspy.js"></script>
         <script type="text/javascript" src="/web/static/lib/popper/popper.js"></script>
-        <script type="text/javascript" src="/web/static/lib/bootstrap/js/util.js"></script>
-        <script type="text/javascript" src="/web/static/lib/bootstrap/js/dropdown.js"></script>
 
         <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
         <script type="text/javascript" src="/wowl/static/dist/app.js"></script>
