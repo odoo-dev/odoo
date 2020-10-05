@@ -18,12 +18,15 @@ export interface OdooEnv extends Env {
   bus: EventBus;
 }
 
-export async function makeEnv(
-  templates: string,
-  registries: Registries,
-  browser: OdooBrowser,
-  odooGlobal?: Odoo
-): Promise<OdooEnv> {
+export interface EnvParams {
+  browser: OdooBrowser;
+  odoo: Odoo;
+  registries: Registries;
+  templates: string;
+}
+
+export async function makeEnv(params: EnvParams): Promise<OdooEnv> {
+  const { browser, odoo, registries, templates } = params;
   const qweb = new owl.QWeb();
   qweb.addTemplates(templates);
 
@@ -35,6 +38,6 @@ export async function makeEnv(
     services: {} as any,
   };
 
-  await deployServices(env, registries.services, odooGlobal);
+  await deployServices(env, registries.services, odoo);
   return env;
 }

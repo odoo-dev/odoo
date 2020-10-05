@@ -57,8 +57,8 @@ async function makeMenus(env: OdooEnv, loadMenusHash: string): Promise<MenuServi
 }
 export const menusService: Service<MenuService> = {
   name: "menus",
-  async deploy(env: OdooEnv, odooGlobal?: Odoo): Promise<MenuService> {
-    const cacheHashes = ((odooGlobal ? odooGlobal.session_info.cache_hashes : {}) || {}) as any;
+  async deploy(env: OdooEnv, odoo: Odoo): Promise<MenuService> {
+    const cacheHashes = ((odoo ? odoo.session_info.cache_hashes : {}) || {}) as any;
     const loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
     delete cacheHashes.load_menus;
     return makeMenus(env, loadMenusHash);

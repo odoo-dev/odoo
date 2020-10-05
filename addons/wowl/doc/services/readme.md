@@ -36,11 +36,7 @@ A service needs to follow the following interface:
 export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-  deploy:
-    | ((env: OdooEnv, odooGlobal?: Odoo) => Promise<T>)
-    | ((env: OdooEnv, odooGlobal?: Odoo) => T);
-
-  specialize?(component: Component, value: T): T;
+  deploy: (env: OdooEnv, odoo: Odoo) => Promise<T> | T;
 }
 ```
 
@@ -53,12 +49,6 @@ as the service infrastructure is deployed (so, even before the web client is
 instantiated), and the return value of the `deploy` method will be the value of
 the service. This method can also be asynchronous, in which case the value of
 the service will be the result of that promise.
-
-Finally, the `specialize` method is useful in some cases where a service need to
-provide additional behaviour whenever a component is using a service. This
-method get the value of the service, and should return it, or at least, something
-that provides the same API. An example of a use for this function is the service
-`rpc`, which performs a check to see if the component is destroyed or not.
 
 Once a service is defined, it needs then to be registered to the `serviceRegistry`,
 to make sure it is properly deployed when the application is started.

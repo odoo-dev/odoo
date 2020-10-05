@@ -31,7 +31,7 @@ export interface Services {
 export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-  deploy: (env: OdooEnv, odooGlobal?: Odoo) => Promise<T> | T;
+  deploy: (env: OdooEnv, odoo: Odoo) => Promise<T> | T;
 }
 
 // -----------------------------------------------------------------------------
@@ -52,7 +52,7 @@ export const serviceRegistry = new Registry<Service<any>>();
 export async function deployServices(
   env: OdooEnv,
   registry: Registry<Service<any>>,
-  odooGlobal?: Odoo
+  odoo: Odoo
 ): Promise<void> {
   const services = env.services;
   const toBeDeployed = new Set(registry.getAll());
@@ -65,7 +65,7 @@ export async function deployServices(
     while ((service = findNext())) {
       let name = service.name;
       toBeDeployed.delete(service);
-      const value = service.deploy(env, odooGlobal);
+      const value = service.deploy(env, odoo);
       if (value instanceof Promise) {
         proms.push(
           value.then((val) => {

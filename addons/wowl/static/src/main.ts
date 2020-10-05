@@ -22,7 +22,7 @@ declare const odoo: Odoo;
   });
 
   // setup environment
-  const env = await makeEnv(templates, registries, browser, odoo);
+  const env = await makeEnv({ browser, odoo, registries, templates });
   owl.Component.env = env;
 
   // start web client

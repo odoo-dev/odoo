@@ -2,7 +2,7 @@ import { Component } from "@odoo/owl";
 import { makeEnv, OdooBrowser, OdooEnv } from "../src/env";
 import { Registries } from "../src/registries";
 import { Registry } from "../src/core/registry";
-import { Type } from "../src/types";
+import { Odoo, Type } from "../src/types";
 import { userService } from "../src/services/user";
 import { Menu, MenuData, menusService, MenuTree } from "../src/services/menus";
 
@@ -32,13 +32,41 @@ interface TestEnvParam {
   browser?: Partial<OdooEnv["browser"]>;
 }
 
+export function makeTestOdoo(): Odoo {
+  return {
+    session_info: {
+      cache_hashes: {
+        load_menus: "161803",
+      },
+      user_context: {
+        lang: "en",
+        uid: 7,
+        tz: "taht",
+      },
+      qweb: "owl",
+      uid: 7,
+      username: "The wise",
+      is_admin: true,
+      partner_id: 7,
+      user_companies: {
+        allowed_companies: [[1, "Hermit"]],
+        current_company: [1, "Hermit"],
+      },
+      db: "test",
+      server_version: "1.0",
+      server_version_info: ["1.0"],
+    },
+  };
+}
+
 export async function makeTestEnv(params: TestEnvParam = {}): Promise<OdooEnv> {
   let registries: Registries = {
     services: params.services || new Registry(),
     Components: params.Components || new Registry(),
   };
   const browser = (params.browser || {}) as OdooBrowser;
-  const env = await makeEnv(templates, registries, browser);
+  const odoo: Odoo = makeTestOdoo();
+  const env = await makeEnv({ browser, odoo, registries, templates });
 
   return env;
 }
