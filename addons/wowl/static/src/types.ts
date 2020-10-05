@@ -2,6 +2,7 @@ import type { Component } from "@odoo/owl";
 
 interface CacheHashes {
   load_menus: string;
+  translations: string;
 }
 
 interface UserContext {
@@ -10,9 +11,11 @@ interface UserContext {
   uid: number;
 }
 
+export type UserCompany = [number, string];
+
 interface UserCompanies {
-  allowed_companies: [number, string][];
-  current_company: [number, string];
+  allowed_companies: UserCompany[];
+  current_company: UserCompany;
 }
 
 export interface SessionInfo {

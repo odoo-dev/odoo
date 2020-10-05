@@ -2,9 +2,11 @@ import { Component } from "@odoo/owl";
 import { makeEnv, OdooBrowser, OdooEnv } from "../src/env";
 import { Registries } from "../src/registries";
 import { Registry } from "../src/core/registry";
-import { Odoo, Type } from "../src/types";
-import { userService } from "../src/services/user";
+import { Odoo, Type, UserCompany } from "../src/types";
+import { UserService, userService } from "../src/services/user";
 import { Menu, MenuData, menusService, MenuTree } from "../src/services/menus";
+import { ServiceParams } from "../src/services";
+import { getDefaultLocalizationParameters, LocalizationParameters } from "../src/core/localization";
 
 export { OdooEnv } from "../src/env";
 
@@ -30,6 +32,8 @@ interface TestEnvParam {
   services?: Registries["services"];
   Components?: Registries["Components"];
   browser?: Partial<OdooEnv["browser"]>;
+  localizationParameters?: Partial<LocalizationParameters>;
+  _t?: (str: string) => string;
 }
 
 export function makeTestOdoo(): Odoo {
@@ -37,6 +41,7 @@ export function makeTestOdoo(): Odoo {
     session_info: {
       cache_hashes: {
         load_menus: "161803",
+        translations: "314159",
       },
       user_context: {
         lang: "en",
@@ -66,7 +71,10 @@ export async function makeTestEnv(params: TestEnvParam = {}): Promise<OdooEnv> {
   };
   const browser = (params.browser || {}) as OdooBrowser;
   const odoo: Odoo = makeTestOdoo();
-  const env = await makeEnv({ browser, odoo, registries, templates });
+  const localizationParameters = (params.localizationParameters ||
+    getDefaultLocalizationParameters()) as LocalizationParameters;
+  const _t = params._t || ((str: string) => str);
+  const env = await makeEnv({ browser, localizationParameters, odoo, registries, templates, _t });
 
   return env;
 }
@@ -133,18 +141,26 @@ export function click(el: HTMLElement, selector?: string) {
 export function makeFakeUserService(fullContext: boolean = false): typeof userService {
   return {
     name: "user",
-    deploy() {
+    deploy(params: ServiceParams): UserService {
+      const { localizationParameters } = params;
       const context = fullContext
         ? { lang: "en_us", tz: "Europe/Brussels", uid: 2, allowed_company_ids: [1] }
         : ({ uid: 2 } as any);
       return {
+        dateFormat: localizationParameters.dateFormat,
+        decimalPoint: localizationParameters.decimalPoint,
+        direction: localizationParameters.direction,
+        grouping: localizationParameters.grouping,
+        multiLang: localizationParameters.multiLang,
+        thousandsSep: localizationParameters.thousandsSep,
+        timeFormat: localizationParameters.timeFormat,
         context,
         userId: 2,
         userName: "admin",
         isAdmin: true,
         partnerId: 3,
-        allowed_companies: [[1, "YourCompany"]],
-        current_company: [1, "YourCompany"],
+        allowed_companies: [[1, "YourCompany"]] as UserCompany[],
+        current_company: [1, "YourCompany"] as UserCompany,
         lang: "en_us",
         tz: "Europe/Brussels",
       };

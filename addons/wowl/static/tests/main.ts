@@ -13,6 +13,7 @@ import "./services/router_tests";
 import "./services/rpc_tests";
 import "./services/services_tests";
 import "./components/webclient_tests";
+import "./core/localization_tests";
 
 const { whenReady, loadFile } = owl.utils;
 

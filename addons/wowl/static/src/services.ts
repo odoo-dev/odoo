@@ -16,6 +16,7 @@ import type { notificationService } from "./services/notifications";
 import type { userService } from "./services/user";
 import { routerService } from "./services/router";
 import { modelService } from "./services/model";
+import { LocalizationParameters } from "./core/localization";
 
 export interface Services {
   menus: ServiceType<typeof menusService["deploy"]>;
@@ -28,10 +29,16 @@ export interface Services {
   [key: string]: any;
 }
 
+export interface ServiceParams {
+  env: OdooEnv;
+  localizationParameters: LocalizationParameters;
+  odoo: Odoo;
+}
+
 export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-  deploy: (env: OdooEnv, odoo: Odoo) => Promise<T> | T;
+  deploy: (params: ServiceParams) => Promise<T> | T;
 }
 
 // -----------------------------------------------------------------------------
@@ -50,11 +57,10 @@ export function useService<T extends keyof Services>(serviceName: T): Services[T
 export const serviceRegistry = new Registry<Service<any>>();
 
 export async function deployServices(
-  env: OdooEnv,
   registry: Registry<Service<any>>,
-  odoo: Odoo
+  params: ServiceParams
 ): Promise<void> {
-  const services = env.services;
+  const services = params.env.services;
   const toBeDeployed = new Set(registry.getAll());
 
   // deploy as many services in parallel as possible
@@ -65,7 +71,7 @@ export async function deployServices(
     while ((service = findNext())) {
       let name = service.name;
       toBeDeployed.delete(service);
-      const value = service.deploy(env, odoo);
+      const value = service.deploy(params);
       if (value instanceof Promise) {
         proms.push(
           value.then((val) => {

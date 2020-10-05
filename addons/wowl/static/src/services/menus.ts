@@ -1,6 +1,5 @@
-import { Odoo } from "../types";
 import { OdooEnv } from "../env";
-import { Service } from "../services";
+import { Service, ServiceParams } from "../services";
 
 export interface Menu {
   id: number | string;
@@ -57,10 +56,10 @@ async function makeMenus(env: OdooEnv, loadMenusHash: string): Promise<MenuServi
 }
 export const menusService: Service<MenuService> = {
   name: "menus",
-  async deploy(env: OdooEnv, odoo: Odoo): Promise<MenuService> {
-    const cacheHashes = ((odoo ? odoo.session_info.cache_hashes : {}) || {}) as any;
+  async deploy(params: ServiceParams): Promise<MenuService> {
+    const { env, odoo } = params;
+    const cacheHashes = odoo.session_info.cache_hashes;
     const loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
-    delete cacheHashes.load_menus;
     return makeMenus(env, loadMenusHash);
   },
 };

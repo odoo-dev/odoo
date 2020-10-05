@@ -1,4 +1,6 @@
-import type { Odoo } from "../types";
+import { LocalizationParameters } from "../core/localization";
+import { ServiceParams } from "../services";
+import type { UserCompany } from "../types";
 
 interface Context {
   lang: string;
@@ -8,23 +10,22 @@ interface Context {
   [key: string]: any;
 }
 
-interface UserService {
+export interface UserService extends LocalizationParameters {
   context: Context;
   userId: number;
   userName: string;
   isAdmin: boolean;
   partnerId: number;
-  allowed_companies: [number, string][];
-  current_company: [number, string];
+  allowed_companies: UserCompany[];
+  current_company: UserCompany;
   lang: string;
   tz: string;
 }
 
-declare const odoo: Odoo;
-
 export const userService = {
   name: "user",
-  deploy(): UserService {
+  deploy(params: ServiceParams): UserService {
+    const { odoo, localizationParameters } = params;
     const info = odoo.session_info;
     const { user_context, username, is_admin, partner_id, user_companies } = info;
     let context: Context = {
@@ -33,8 +34,16 @@ export const userService = {
       uid: info.uid,
       allowed_company_ids: user_companies.allowed_companies.map(([id]) => id),
     };
+
     return {
-      context: context,
+      dateFormat: localizationParameters.dateFormat,
+      decimalPoint: localizationParameters.decimalPoint,
+      direction: localizationParameters.direction,
+      grouping: localizationParameters.grouping,
+      multiLang: localizationParameters.multiLang,
+      thousandsSep: localizationParameters.thousandsSep,
+      timeFormat: localizationParameters.timeFormat,
+      context,
       get userId() {
         return context.uid;
       },

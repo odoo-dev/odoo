@@ -1,6 +1,6 @@
 import { Component } from "@odoo/owl";
 import type { OdooEnv } from "../env";
-import { Service } from "../services";
+import { Service, ServiceParams } from "../services";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -82,7 +82,8 @@ function jsonrpc(env: OdooEnv, url: string, params: Params): Promise<any> {
 
 export const rpcService: Service<RPC> = {
   name: "rpc",
-  deploy(env: OdooEnv): RPC {
+  deploy(params: ServiceParams): RPC {
+    const { env } = params;
     return async function (
       this: Component | null,
       route: string,
