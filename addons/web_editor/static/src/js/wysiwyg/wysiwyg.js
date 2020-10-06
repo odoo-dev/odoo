@@ -335,8 +335,20 @@ var Wysiwyg = Widget.extend({
             await this.snippetsMenu.appendTo($mainSidebar);
 
             // Place the history buttons in their right location.
-            $('.o_we_website_top_actions .o_we_external_history_buttons').append($('button[data-action=undo]'));
-            $('.o_we_website_top_actions .o_we_external_history_buttons').append($('button[data-action=redo]'));
+            const $undoButton = $('<button name="undo" class="btn btn-secondary fa fa-undo"></button>');
+            const $redoButton = $('<button name="redo" class="btn btn-secondary fa fa-repeat"></button>');
+            $undoButton.on('click', () => this.editor.execCommand('undo'));
+            $redoButton.on('click', () => this.editor.execCommand('redo'));
+            const reactiveEditorInfo = this.editor.plugins.get(JWEditorLib.ReactiveEditorInfo);
+            const updateButtons = () => {
+                const state = reactiveEditorInfo.editorInfo.get();
+                state.canUndo ? $undoButton.removeAttr('disabled') : $undoButton.attr('disabled', true);
+                state.canRedo ? $redoButton.removeAttr('disabled') : $redoButton.attr('disabled', true);
+            };
+            reactiveEditorInfo.editorInfo.on('set', updateButtons);
+            updateButtons();
+
+            $('.o_we_website_top_actions .o_we_external_history_buttons').append($undoButton, $redoButton);
 
             this.$el.on('content_changed', function (e) {
                 self.trigger_up('wysiwyg_change');
