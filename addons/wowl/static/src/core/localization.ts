@@ -78,7 +78,7 @@ export async function fetchLocalizationParameters(
   }
   const { lang_params, terms } = await res.json();
 
-  Object.assign(translatedTerms, terms);
+  Object.setPrototypeOf(translatedTerms, terms);
 
   let localizationParameters: LocalizationParameters;
   if (lang_params) {
