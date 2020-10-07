@@ -15,3 +15,4 @@ important data in the environment. Here is a description of its content:
 | `qweb`       | application current `QWeb` rendering engine              |
 | `registries` | object containing all relevant registries                |
 | `services`   | values of all deployed [services](services/readme.md)    |
+| `_t`         | eager [translation function](localization.md#_t)         |

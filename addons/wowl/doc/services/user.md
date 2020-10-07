@@ -15,10 +15,17 @@ with a few keys:
 - `context (object)`: the user main context (see below for a description)
 - `current_company ([number, string])`: the currently active company. It is a
   pair `[id, name]`.
+- `dateFormat`: preferred format when formatting "dates"
+- `decimalPoint`: decimal separator
+- `direction`: "rtl" ("right to left") or "lrt" ("left to right")
+- `grouping`: ?
 - `isAdmin (boolean)`: if true, the user is an administrator of the current
   odoo database
 - `lang (string)`: a short description of the user language (such as `en_us`)
+- `multiLang`: if true, this means that several languages are installed on the database
 - `partnerId (number)`: the id for the partner (`res.partner` record) associated to the user
+- `thousandsSep`: thousands separator
+- `timeFormat`: preferred format when formatting "hours"
 - `tz (string)`: the user configured timezone (such as `Europe/Brussels`)
 - `userId (number)`: the user id (for the `res.user` model)
 - `userName (string)`: the user name (string that can be displayed)
