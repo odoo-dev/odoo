@@ -36,7 +36,7 @@ static/
   and mount it to the `target` html element. This method is asynchronous, and
   returns the instance of the component
 
-- `makeTestEnv(params?: Params)`: create a test environment. By default, a test
+- `makeTestEnv(params?: Params)`: create asynchronously a test environment. By default, a test
   environment has no service, components or browser access. It can be optionally
   customized with the `params` argument:
 
