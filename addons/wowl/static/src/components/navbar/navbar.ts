@@ -5,5 +5,7 @@ export class NavBar extends Component {
   static template = "wowl.NavBar";
   menuRepo = useService("menus");
   state = useState({ showDropdownMenu: false });
-  toggleDropdownMenu = () => { this.state.showDropdownMenu = !this.state.showDropdownMenu; }
+  toggleDropdownMenu = () => {
+    this.state.showDropdownMenu = !this.state.showDropdownMenu;
+  };
 }

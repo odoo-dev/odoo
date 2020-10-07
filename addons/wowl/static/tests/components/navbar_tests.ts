@@ -43,9 +43,9 @@ QUnit.test("dropdown menu can be toggled", async (assert) => {
   assert.expect(2);
   const navbar = await mount(NavBar, { env, target });
 
-  const dropdown = navbar.el!.querySelector<HTMLElement>('.dropdown-menu')!;
+  const dropdown = navbar.el!.querySelector<HTMLElement>(".dropdown-menu")!;
   await click(navbar.el!, 'a[data-toggle="dropdown"]');
-  assert.hasClass(dropdown, 'show');
+  assert.hasClass(dropdown, "show");
   await click(navbar.el!, 'a[data-toggle="dropdown"]');
-  assert.doesNotHaveClass(dropdown, 'show');
+  assert.doesNotHaveClass(dropdown, "show");
 });
