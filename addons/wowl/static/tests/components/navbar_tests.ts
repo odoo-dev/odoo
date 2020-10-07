@@ -1,7 +1,16 @@
 import { NavBar } from "../../src/components/navbar/navbar";
 import * as QUnit from "qunit";
-import { click, createMockedFetch, mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
+import {
+  click,
+  createMockedFetch,
+  mount,
+  makeFakeRPCService,
+  makeTestEnv,
+  OdooEnv,
+  getFixture,
+} from "../helpers";
 import { MenuData, menusService } from "./../../src/services/menus";
+import { actionManagerService } from "./../../src/services/action_manager/action_manager";
 import { Registry } from "./../../src/core/registry";
 import { Service } from "./../../src/services";
 
@@ -15,6 +24,8 @@ QUnit.module("Navbar", {
   async beforeEach() {
     services = new Registry();
     services.add(menusService.name, menusService);
+    services.add(actionManagerService.name, actionManagerService);
+    services.add("rpc", makeFakeRPCService());
     menus = {
       root: { id: "root", children: [1], name: "root" },
       1: { id: 1, children: [], name: "App0" },

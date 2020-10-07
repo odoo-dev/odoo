@@ -1,10 +1,11 @@
 import { Component, hooks, tags } from "@odoo/owl";
 import type { OdooEnv } from "./../../env";
 import { Service, ServiceParams } from "../../services";
-import { ActionRequest, ActionOptions, ClientAction, FunctionAction } from "./helpers";
+import { ActionRequest, ActionOptions, Action, ClientAction } from "./helpers";
+import { FunctionAction } from "./../../registries";
 
 interface ActionManager {
-  doAction(action: ActionRequest, options: ActionOptions): void;
+  doAction(action: ActionRequest, options?: ActionOptions): void;
 }
 
 export class ActionContainer extends Component<{}, OdooEnv> {
@@ -28,37 +29,48 @@ export class ActionContainer extends Component<{}, OdooEnv> {
 
 function makeActionManager(env: OdooEnv): ActionManager {
   let actionId = 0;
-  const loadAction = (action: ActionRequest, options: ActionOptions): ClientAction => {
-    // FIXME: rpc load action
-    let _action: ClientAction;
-    if (typeof action === "string") {
-      _action = {
-        Action: env.registries.actions.get(action),
+  const loadAction = async (
+    actionRequest: ActionRequest,
+    options: ActionOptions
+  ): Promise<Action> => {
+    let action: Action;
+    if (typeof actionRequest === "string" && env.registries.actions.contains(actionRequest)) {
+      // action is a key in the actionRegistry
+      action = {
         jsId: `action_${++actionId}`,
         target: "current",
+        tag: actionRequest,
         type: "ir.actions.client",
-      };
+      } as ClientAction;
+    } else if (["string", "number"].includes(typeof actionRequest)) {
+      // action is an id or an xmlid
+      action = await env.services.rpc("/web/action/load", { action_id: actionRequest });
     } else {
       throw new Error("Case not supported yet");
     }
-    return _action;
+    return action;
   };
   env.bus.on("action_manager:finalize", null, () => {
     console.log("action mounted");
   });
 
-  async function doAction(action: ActionRequest, options: ActionOptions) {
-    const _action = await loadAction(action, options);
-    if (_action.Action.prototype instanceof Component) {
-      env.bus.trigger("action_manager:update", [
-        {
-          name: "main",
-          Component: _action.Action,
-          action: _action,
-        },
-      ]);
-    } else {
-      (_action.Action as FunctionAction)();
+  async function doAction(actionRequest: ActionRequest, options?: ActionOptions) {
+    const action = await loadAction(actionRequest, options || {});
+    if (action.type === "ir.actions.client") {
+      const clientAction = env.registries.actions.get((action as ClientAction).tag);
+      if (clientAction.prototype instanceof Component) {
+        // the client action is a component
+        env.bus.trigger("action_manager:update", [
+          {
+            name: "main",
+            Component: clientAction,
+            action: action,
+          },
+        ]);
+      } else {
+        // the client action is a function
+        (clientAction as FunctionAction)();
+      }
     }
   }
 
@@ -71,7 +83,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["rpc", "menus"],
+  dependencies: ["rpc"],
   deploy(params: ServiceParams): ActionManager {
     return makeActionManager(params.env);
   },

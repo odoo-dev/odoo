@@ -20,7 +20,8 @@
                 <a role="menuitem" href="#" class="dropdown-item o_app"
                     t-att-data-menu-id="app.id"
                     t-att-data-menu-xmlid="app.xmlid"
-                    t-att-data-action-id="app.actionID">
+                    t-att-data-action-id="app.actionID"
+                    t-on-click="_onMenuClicked(app)">
                         <t t-esc="app.name"/>
                 </a>
             </t>

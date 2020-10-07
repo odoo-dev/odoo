@@ -39,6 +39,13 @@ export class Registry<T> {
   }
 
   /**
+   * Check the presence of a key in the registry
+   */
+  contains(key: string): boolean {
+    return key in this.content;
+  }
+
+  /**
    * Get a list of all elements in the registry
    */
   getAll(): T[] {

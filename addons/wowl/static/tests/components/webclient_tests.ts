@@ -3,10 +3,12 @@ import * as QUnit from "qunit";
 import { WebClient } from "../../src/components/webclient/webclient";
 import { Registries } from "../../src/registries";
 import { Registry } from "../../src/core/registry";
+import { actionManagerService } from "./../../src/services/action_manager/action_manager";
 import {
   getFixture,
   makeFakeUserService,
   makeFakeMenusService,
+  makeFakeRPCService,
   makeTestEnv,
   mount,
   OdooEnv,
@@ -25,6 +27,8 @@ QUnit.module("Web Client", {
     services = new Registry();
     services.add("user", makeFakeUserService());
     services.add("menus", makeFakeMenusService());
+    services.add("rpc", makeFakeRPCService());
+    services.add(actionManagerService.name, actionManagerService);
     env = await makeTestEnv({ services });
   },
 });

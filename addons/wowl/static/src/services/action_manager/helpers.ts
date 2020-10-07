@@ -1,6 +1,3 @@
-import { Component } from "@odoo/owl";
-import { Type } from "../../types";
-
 type ActionId = number;
 type ActionXMLId = string;
 type ActionTag = string;
@@ -14,10 +11,8 @@ export interface Action {
   type: "ir.actions.client";
 }
 
-export type ComponentAction = Type<Component>;
-export type FunctionAction = () => void;
 export interface ClientAction extends Action {
-  Action: ComponentAction | FunctionAction;
+  tag: string;
 }
 
 // function makeStandardAction(action: ActionRequest, options:ActionOptions): ClientAction {

@@ -2,7 +2,6 @@ import { Component, tags } from "@odoo/owl";
 import { Registry } from "./core/registry";
 import { Service } from "./services";
 import { actionManagerService } from "./services/action_manager/action_manager";
-import type { ComponentAction, FunctionAction } from "./services/action_manager/helpers";
 import { crashManagerService } from "./services/crash_manager";
 import { menusService } from "./services/menus";
 import { modelService } from "./services/model";
@@ -58,6 +57,8 @@ mainComponentRegistry.add("NotificationManager", NotificationManager);
 // Component or a function. In the former case, the given Component will be
 // instantiated and mounted in the DOM. In the latter, the function will be
 // executed
+export type ComponentAction = Type<Component>;
+export type FunctionAction = () => void;
 export const actionRegistry: Registry<ComponentAction | FunctionAction> = new Registry();
 
 // Demo code
@@ -65,6 +66,8 @@ class HelloAction extends Component {
   static template = tags.xml`<div>Hello World</div>`;
 }
 actionRegistry.add("Hello", HelloAction);
+// actionRegistry.add("mail.widgets.discuss", () => console.log("I'm a function client action"));
+
 // -----------------------------------------------------------------------------
 // Views
 // -----------------------------------------------------------------------------

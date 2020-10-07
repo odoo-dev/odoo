@@ -4,6 +4,7 @@ import { Registries } from "../src/registries";
 import { Registry } from "../src/core/registry";
 import { Odoo, Type, UserCompany } from "../src/types";
 import { UserService, userService } from "../src/services/user";
+import { rpcService } from "../src/services/rpc";
 import { Menu, MenuData, menusService, MenuTree } from "../src/services/menus";
 import { ServiceParams } from "../src/services";
 import { getDefaultLocalizationParameters, LocalizationParameters } from "../src/core/localization";
@@ -200,6 +201,17 @@ export function makeFakeMenusService(menuData?: MenuData): typeof menusService {
     },
   };
 }
+export function makeFakeRPCService(): typeof rpcService {
+  return {
+    name: "rpc",
+    deploy() {
+      return () => {
+        return Promise.resolve();
+      };
+    },
+  };
+}
+
 // -----------------------------------------------------------------------------
 // Low level API mocking
 // -----------------------------------------------------------------------------
