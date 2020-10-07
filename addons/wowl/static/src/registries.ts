@@ -1,4 +1,4 @@
-import { Component } from "@odoo/owl";
+import { Component, tags } from "@odoo/owl";
 import { menusService } from "./services/menus";
 import { NotificationManager, notificationService } from "./services/notifications";
 import { Registry } from "./core/registry";
@@ -9,6 +9,8 @@ import { Service } from "./services";
 import { Type } from "./types";
 import { crashManagerService } from "./services/crash_manager";
 import { modelService } from "./services/model";
+import { actionManagerService } from "./services/action_manager/action_manager";
+import type { ComponentAction, FunctionAction } from "./services/action_manager/helpers";
 
 // Services
 //
@@ -18,6 +20,7 @@ import { modelService } from "./services/model";
 const serviceRegistry: Registry<Service> = new Registry();
 
 const services = [
+  actionManagerService,
   menusService,
   crashManagerService,
   modelService,
@@ -39,9 +42,24 @@ const mainComponentRegistry: Registry<Type<Component>> = new Registry();
 
 mainComponentRegistry.add("NotificationManager", NotificationManager);
 
+// Client Actions
+//
+// This registry contains client actions. A client action can be either a
+// Component or a function. In the former case, the given Component will be
+// instantiated and mounted in the DOM. In the latter, the function will be
+// executed
+export const actionRegistry: Registry<ComponentAction | FunctionAction> = new Registry();
+
+// Demo code
+class HelloAction extends Component {
+  static template = tags.xml`<div>Hello World</div>`;
+}
+actionRegistry.add("Hello", HelloAction);
+
 export const registries = {
   Components: mainComponentRegistry,
   services: serviceRegistry,
+  actions: actionRegistry,
 };
 
 export type Registries = typeof registries;

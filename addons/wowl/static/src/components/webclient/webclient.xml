@@ -4,7 +4,7 @@
     <div t-name="wowl.WebClient" owl="1">
         <NavBar/>
         Hello WebClient
-        <Action/>
+        <ActionContainer/>
         <div>
             <t t-foreach="Components" t-as="Component" t-key="Component[0]">
                 <t t-component="Component[1]"/>

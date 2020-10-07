@@ -31,6 +31,7 @@ export async function mount<T extends Type<Component>>(
 interface TestEnvParam {
   services?: Registries["services"];
   Components?: Registries["Components"];
+  actions?: Registries["actions"];
   browser?: Partial<OdooEnv["browser"]>;
   localizationParameters?: Partial<LocalizationParameters>;
   _t?: (str: string) => string;
@@ -68,6 +69,7 @@ export async function makeTestEnv(params: TestEnvParam = {}): Promise<OdooEnv> {
   let registries: Registries = {
     services: params.services || new Registry(),
     Components: params.Components || new Registry(),
+    actions: params.actions || new Registry(),
   };
   const browser = (params.browser || {}) as OdooBrowser;
   const odoo: Odoo = makeTestOdoo();

@@ -32,7 +32,7 @@ QUnit.module("Web Client", {
 QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
   await mount(WebClient, { env, target });
-  assert.strictEqual(target.innerText, "Hello WebClient\nHello Action");
+  assert.strictEqual(target.innerText, "Hello WebClient");
 });
 
 QUnit.test("can render a main component", async (assert) => {

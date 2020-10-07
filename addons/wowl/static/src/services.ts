@@ -12,6 +12,7 @@ type ServiceType<T extends (...args: any[]) => any> = Unwrap<ReturnType<T>>;
 // add here each service type to have better typing for useService
 import type { rpcService } from "./services/rpc";
 import type { menusService } from "./services/menus";
+import type { actionManagerService } from "./services/action_manager/action_manager";
 import type { notificationService } from "./services/notifications";
 import type { userService } from "./services/user";
 import { routerService } from "./services/router";
@@ -19,6 +20,7 @@ import { modelService } from "./services/model";
 import { LocalizationParameters } from "./core/localization";
 
 export interface Services {
+  action_manager: ServiceType<typeof actionManagerService["deploy"]>;
   menus: ServiceType<typeof menusService["deploy"]>;
   model: ServiceType<typeof modelService["deploy"]>;
   notifications: ServiceType<typeof notificationService["deploy"]>;
