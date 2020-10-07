@@ -18,16 +18,17 @@ available to the interface (and to other services).
 
 ## List of all services
 
-| Service                             | Purpose                                                    |
-| ----------------------------------- | ---------------------------------------------------------- |
-| [`crash_manager`](crash_manager.md) | log and display errors                                     |
-| [`menus`](menus.md)                 | keep track of all menu items (app and submenus)            |
-| [`model`](model.md)                 | interact with (python) models                              |
-| [`notifications`](notifications.md) | display a notification (or error)                          |
-| [`router`](router.md)               | manage the url                                             |
-| [`rpc`](rpc.md)                     | perform a RPC (in other word, call the server)             |
-| [`user`](user.md)                   | keep track of user main properties (lang, ...) and context |
-| [`view_loader`](view_loader.md)     | load (and keep in cache) views information                 |
+| Service                               | Purpose                                                    |
+| -----------------------------------   | ---------------------------------------------------------- |
+| [`crash_manager`](crash_manager.md)   | log and display errors                                     |
+| [`menus`](menus.md)                   | keep track of all menu items (app and submenus)            |
+| [`model`](model.md)                   | interact with (python) models                              |
+| [`notifications`](notifications.md)   | display a notification (or error)                          |
+| [`router`](router.md)                 | manage the url                                             |
+| [`rpc`](rpc.md)                       | perform a RPC (in other word, call the server)             |
+| [`user`](user.md)                     | keep track of user main properties (lang, ...) and context |
+| [`view_loader`](view_loader.md)       | load (and keep in cache) views information                 |
+| [`action_manager`](action_manager.md) | perform actions following user interactions                |
 
 ## Defining a service
 
