@@ -1,15 +1,13 @@
 import { Component } from "@odoo/owl";
-import { makeEnv, OdooBrowser, OdooEnv } from "../src/env";
-import { Registries } from "../src/registries";
+import { getDefaultLocalization } from "../src/core/localization";
 import { Registry } from "../src/core/registry";
-import { Odoo, Type, UserCompany } from "../src/types";
-import { UserService, userService } from "../src/services/user";
-import { rpcService } from "../src/services/rpc";
+import { makeEnv } from "../src/env";
 import { Menu, MenuData, menusService, MenuTree } from "../src/services/menus";
-import { ServiceParams } from "../src/services";
-import { getDefaultLocalizationParameters, LocalizationParameters } from "../src/core/localization";
+import { rpcService } from "../src/services/rpc";
+import { UserService, userService } from "../src/services/user";
+import { Odoo, OdooConfig, OdooEnv, Type, UserCompany } from "../src/types";
 
-export { OdooEnv } from "../src/env";
+export { OdooEnv } from "../src/types";
 
 // -----------------------------------------------------------------------------
 // Main Helpers
@@ -29,58 +27,34 @@ export async function mount<T extends Type<Component>>(
   return component as any;
 }
 
-interface TestEnvParam {
-  services?: Registries["services"];
-  Components?: Registries["Components"];
-  actions?: Registries["actions"];
-  browser?: Partial<OdooEnv["browser"]>;
-  localizationParameters?: Partial<LocalizationParameters>;
-  _t?: (str: string) => string;
-}
+type TestConfig = Partial<
+  {
+    [K in keyof OdooConfig]: OdooConfig[K] extends Registry<any>
+      ? OdooConfig[K]
+      : Partial<OdooConfig[K]>;
+  }
+>;
 
-export function makeTestOdoo(): Odoo {
-  return {
-    session_info: {
-      cache_hashes: {
-        load_menus: "161803",
-        translations: "314159",
-      },
-      user_context: {
-        lang: "en",
-        uid: 7,
-        tz: "taht",
-      },
-      qweb: "owl",
-      uid: 7,
-      username: "The wise",
-      is_admin: true,
-      partner_id: 7,
-      user_companies: {
-        allowed_companies: [[1, "Hermit"]],
-        current_company: [1, "Hermit"],
-      },
-      db: "test",
-      server_version: "1.0",
-      server_version_info: ["1.0"],
-    },
-  };
-}
-
-export async function makeTestEnv(params: TestEnvParam = {}): Promise<OdooEnv> {
-  let registries: Registries = {
-    services: params.services || new Registry(),
-    Components: params.Components || new Registry(),
-    actions: params.actions || new Registry(),
-    views: new Registry(),
-  };
-  const browser = (params.browser || {}) as OdooBrowser;
+export function makeTestConfig(config: TestConfig = {}): OdooConfig {
+  const browser = (config.browser || {}) as OdooConfig["browser"];
+  const localization = config.localization || (getDefaultLocalization() as any);
   const odoo: Odoo = makeTestOdoo();
-  const localizationParameters = (params.localizationParameters ||
-    getDefaultLocalizationParameters()) as LocalizationParameters;
-  const _t = params._t || ((str: string) => str);
-  const env = await makeEnv({ browser, localizationParameters, odoo, registries, templates, _t });
+  const _t = config._t || (((str: string) => str) as any);
+  return {
+    browser,
+    localization,
+    _t,
+    templates,
+    services: config.services || new Registry(),
+    Components: config.Components || new Registry(),
+    actions: config.actions || new Registry(),
+    views: new Registry(),
+    odoo,
+  };
+}
 
-  return env;
+export async function makeTestEnv(config: TestConfig = {}): Promise<OdooEnv> {
+  return await makeEnv(makeTestConfig(config));
 }
 
 export function getFixture(): HTMLElement {
@@ -145,19 +119,19 @@ export function click(el: HTMLElement, selector?: string) {
 export function makeFakeUserService(fullContext: boolean = false): typeof userService {
   return {
     name: "user",
-    deploy(params: ServiceParams): UserService {
-      const { localizationParameters } = params;
+    deploy(env: OdooEnv, config: OdooConfig): UserService {
+      const { localization } = config;
       const context = fullContext
         ? { lang: "en_us", tz: "Europe/Brussels", uid: 2, allowed_company_ids: [1] }
         : ({ uid: 2 } as any);
       return {
-        dateFormat: localizationParameters.dateFormat,
-        decimalPoint: localizationParameters.decimalPoint,
-        direction: localizationParameters.direction,
-        grouping: localizationParameters.grouping,
-        multiLang: localizationParameters.multiLang,
-        thousandsSep: localizationParameters.thousandsSep,
-        timeFormat: localizationParameters.timeFormat,
+        dateFormat: localization.dateFormat,
+        decimalPoint: localization.decimalPoint,
+        direction: localization.direction,
+        grouping: localization.grouping,
+        multiLang: localization.multiLang,
+        thousandsSep: localization.thousandsSep,
+        timeFormat: localization.timeFormat,
         context,
         userId: 2,
         userName: "admin",
@@ -208,6 +182,34 @@ export function makeFakeRPCService(): typeof rpcService {
       return () => {
         return Promise.resolve();
       };
+    },
+  };
+}
+
+export function makeTestOdoo(): Odoo {
+  return {
+    session_info: {
+      cache_hashes: {
+        load_menus: "161803",
+        translations: "314159",
+      },
+      user_context: {
+        lang: "en",
+        uid: 7,
+        tz: "taht",
+      },
+      qweb: "owl",
+      uid: 7,
+      username: "The wise",
+      is_admin: true,
+      partner_id: 7,
+      user_companies: {
+        allowed_companies: [[1, "Hermit"]],
+        current_company: [1, "Hermit"],
+      },
+      db: "test",
+      server_version: "1.0",
+      server_version_info: ["1.0"],
     },
   };
 }

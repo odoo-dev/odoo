@@ -19,7 +19,7 @@ available to the interface (and to other services).
 ## List of all services
 
 | Service                               | Purpose                                                    |
-| -----------------------------------   | ---------------------------------------------------------- |
+| ------------------------------------- | ---------------------------------------------------------- |
 | [`crash_manager`](crash_manager.md)   | log and display errors                                     |
 | [`menus`](menus.md)                   | keep track of all menu items (app and submenus)            |
 | [`model`](model.md)                   | interact with (python) models                              |
@@ -51,6 +51,10 @@ as the service infrastructure is deployed (so, even before the web client is
 instantiated), and the return value of the `deploy` method will be the value of
 the service. This method can also be asynchronous, in which case the value of
 the service will be the result of that promise.
+
+Some services do not export any value. They may just do their work without a
+need to be directly called by other code. In that case, their value will be
+set to `null` in `env.services`.
 
 Once a service is defined, it needs then to be registered to the `serviceRegistry`,
 to make sure it is properly deployed when the application is started.

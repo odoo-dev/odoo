@@ -1,8 +1,6 @@
 import { Component, hooks, tags } from "@odoo/owl";
-import type { OdooEnv } from "./../../env";
-import { Service, ServiceParams } from "../../services";
+import type { OdooEnv, Service, FunctionAction } from "./../../types";
 import { ActionRequest, ActionOptions, Action, ClientAction } from "./helpers";
-import { FunctionAction } from "./../../registries";
 
 interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): void;
@@ -84,7 +82,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
   dependencies: ["rpc"],
-  deploy(params: ServiceParams): ActionManager {
-    return makeActionManager(params.env);
+  deploy(env: OdooEnv): ActionManager {
+    return makeActionManager(env);
   },
 };

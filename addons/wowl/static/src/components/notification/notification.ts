@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { useService } from "../../services";
+import { useService } from "../../core/hooks";
 
 export class Notification extends Component {
   static template = "wowl.Notification";

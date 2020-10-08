@@ -1,7 +1,6 @@
 import { Component, tags } from "@odoo/owl";
-import type { OdooEnv } from "../env";
+import type { OdooEnv, Service } from "../types";
 import { Notification as NotificationComponent } from "../components/notification/notification";
-import { ServiceParams } from "../services";
 
 const AUTOCLOSE_DELAY: number = 4000;
 
@@ -42,10 +41,9 @@ export class NotificationManager extends Component<{}, OdooEnv> {
   }
 }
 
-export const notificationService = {
+export const notificationService: Service<NotificationService> = {
   name: "notifications",
-  deploy(params: ServiceParams): NotificationService {
-    const { env } = params;
+  deploy(env: OdooEnv): NotificationService {
     let notifId: number = 0;
     let notifications: Notification[] = [];
 

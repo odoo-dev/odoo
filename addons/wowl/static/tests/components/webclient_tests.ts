@@ -1,7 +1,6 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
 import { WebClient } from "../../src/components/webclient/webclient";
-import { Registries } from "../../src/registries";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "./../../src/services/action_manager/action_manager";
 import {
@@ -13,7 +12,7 @@ import {
   mount,
   OdooEnv,
 } from "../helpers";
-import { Service } from "../../src/services";
+import { Service, Type } from "../../src/types";
 
 const { xml } = tags;
 
@@ -45,7 +44,7 @@ QUnit.test("can render a main component", async (assert) => {
     static template = xml`<span class="chocolate">MyComponent</span>`;
   }
 
-  const componentRegistry: Registries["Components"] = new Registry();
+  const componentRegistry = new Registry<Type<Component>>();
   componentRegistry.add("mycomponent", MyComponent);
 
   env = await makeTestEnv({ Components: componentRegistry, services });

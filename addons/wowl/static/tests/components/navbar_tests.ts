@@ -12,7 +12,7 @@ import {
 import { MenuData, menusService } from "./../../src/services/menus";
 import { actionManagerService } from "./../../src/services/action_manager/action_manager";
 import { Registry } from "./../../src/core/registry";
-import { Service } from "./../../src/services";
+import { Service } from "./../../src/types";
 
 let target: HTMLElement;
 let env: OdooEnv;

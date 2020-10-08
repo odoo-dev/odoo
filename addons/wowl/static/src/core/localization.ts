@@ -1,7 +1,6 @@
-import { OdooBrowser } from "../env";
-import { Odoo } from "../types";
+import { Odoo, OdooBrowser } from "../types";
 
-export interface LocalizationParameters {
+export interface Localization {
   dateFormat: string;
   decimalPoint: string;
   direction: string;
@@ -18,7 +17,7 @@ interface TranslatedTerms {
 /**
  * Default values for localization parameters
  */
-export function getDefaultLocalizationParameters(): LocalizationParameters {
+export function getDefaultLocalization(): Localization {
   return {
     dateFormat: "%m/%d/%Y",
     decimalPoint: ".",
@@ -55,14 +54,11 @@ export function _lt(str: string): Stringifiable {
 }
 
 interface Result {
-  localizationParameters: LocalizationParameters;
+  localization: Localization;
   _t: (str: string) => string;
 }
 
-export async function fetchLocalizationParameters(
-  browser: OdooBrowser,
-  odoo: Odoo
-): Promise<Result> {
+export async function fetchLocalization(browser: OdooBrowser, odoo: Odoo): Promise<Result> {
   const cacheHashes = odoo.session_info.cache_hashes;
   const translationsHash = cacheHashes.translations || new Date().getTime().toString();
   const lang = odoo.session_info.user_context.lang || null;
@@ -80,9 +76,9 @@ export async function fetchLocalizationParameters(
 
   Object.setPrototypeOf(translatedTerms, terms);
 
-  let localizationParameters: LocalizationParameters;
+  let localization: Localization;
   if (lang_params) {
-    localizationParameters = {
+    localization = {
       dateFormat: lang_params.date_format,
       decimalPoint: lang_params.decimal_point,
       direction: lang_params.direction,
@@ -92,9 +88,9 @@ export async function fetchLocalizationParameters(
       timeFormat: lang_params.time_format,
     };
   } else {
-    localizationParameters = getDefaultLocalizationParameters();
+    localization = getDefaultLocalization();
   }
-  return { localizationParameters, _t };
+  return { localization, _t };
 }
 
 /*

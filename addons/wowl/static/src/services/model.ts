@@ -1,6 +1,5 @@
 import { Component } from "@odoo/owl";
-import { OdooEnv } from "../env";
-import { Service, ServiceParams } from "../services";
+import { Service, OdooEnv } from "../types";
 import { RPC } from "./rpc";
 
 interface DBRecord {
@@ -157,8 +156,7 @@ function callModel(rpc: RPC, env: OdooEnv, model: string): Model["call"] {
 export const modelService: Service<ModelBuilder> = {
   name: "model",
   dependencies: ["rpc", "user"],
-  deploy(params: ServiceParams) {
-    const { env } = params;
+  deploy(env: OdooEnv) {
     return function (this: Component | null, model: string): Model {
       const rpc = this instanceof Component ? env.services.rpc.bind(this) : env.services.rpc;
       return {

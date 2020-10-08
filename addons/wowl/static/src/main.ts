@@ -1,9 +1,9 @@
 import * as owl from "@odoo/owl";
 import { WebClient } from "./components/webclient/webclient";
-import { fetchLocalizationParameters } from "./core/localization";
-import { makeEnv, OdooBrowser } from "./env";
-import { registries } from "./registries";
-import { Odoo, RuntimeOdoo } from "./types";
+import { fetchLocalization } from "./core/localization";
+import { makeEnv } from "./env";
+import * as registries from "./registries";
+import { Odoo, RuntimeOdoo, OdooBrowser } from "./types";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -20,13 +20,23 @@ declare const odoo: Odoo;
 
   // load templates
   const templatesUrl = `/wowl/templates/${odoo.session_info.qweb}`;
-  const [templates, { localizationParameters, _t }] = await Promise.all([
+  const [templates, { localization, _t }] = await Promise.all([
     loadFile(templatesUrl),
-    fetchLocalizationParameters(browser, odoo),
+    fetchLocalization(browser, odoo),
   ]);
 
   // setup environment
-  const env = await makeEnv({ browser, localizationParameters, odoo, registries, templates, _t });
+  const env = await makeEnv({
+    browser,
+    localization,
+    odoo,
+    views: registries.viewRegistry,
+    Components: registries.mainComponentRegistry,
+    services: registries.serviceRegistry,
+    actions: registries.actionRegistry,
+    templates,
+    _t,
+  });
   owl.Component.env = env;
 
   // start web client

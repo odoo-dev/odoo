@@ -1,5 +1,5 @@
 import { Component, useState } from "@odoo/owl";
-import { useService } from "../../services";
+import { useService } from "../../core/hooks";
 
 export class NavBar extends Component {
   static template = "wowl.NavBar";

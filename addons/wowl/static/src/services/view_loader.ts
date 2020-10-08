@@ -1,4 +1,4 @@
-import { Service, ServiceParams } from "../services";
+import { Service, OdooEnv } from "../types";
 import { ViewType } from "../views/types";
 
 interface ViewLoader {
@@ -14,8 +14,7 @@ interface ViewDefinition {
 export const viewLoaderService: Service<ViewLoader> = {
   name: "view_loader",
   dependencies: ["model"],
-  deploy(params: ServiceParams): ViewLoader {
-    const { env } = params;
+  deploy(env: OdooEnv): ViewLoader {
     const modelService = env.services.model;
 
     const loadView = async (model: string, type: ViewType, viewId: number | false = false) => {

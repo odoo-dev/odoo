@@ -1,5 +1,4 @@
-import type { OdooEnv } from "../env";
-import { ServiceParams } from "../services";
+import type { Service, OdooEnv } from "../types";
 
 type Query = { [key: string]: string };
 
@@ -78,10 +77,9 @@ function makeRouter(env: OdooEnv) {
   };
 }
 
-export const routerService = {
+export const routerService: Service<Router> = {
   name: "router",
-  deploy(params: ServiceParams): Router {
-    const { env } = params;
+  deploy(env: OdooEnv): Router {
     return makeRouter(env);
   },
 };

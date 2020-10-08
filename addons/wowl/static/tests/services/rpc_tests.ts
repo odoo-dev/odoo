@@ -1,7 +1,8 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
-import { Service, useService } from "../../src/services";
+import { Service } from "../../src/types";
+import { useService } from "../../src/core/hooks";
 import { rpcService } from "../../src/services/rpc";
 import { Deferred, getFixture, makeDeferred, makeTestEnv, mount, nextTick } from "../helpers";
 

@@ -1,6 +1,5 @@
-import { LocalizationParameters } from "../core/localization";
-import { ServiceParams } from "../services";
-import type { UserCompany } from "../types";
+import { Localization } from "../core/localization";
+import type { UserCompany, Service, OdooEnv } from "../types";
 
 interface Context {
   lang: string;
@@ -10,7 +9,7 @@ interface Context {
   [key: string]: any;
 }
 
-export interface UserService extends LocalizationParameters {
+export interface UserService extends Localization {
   context: Context;
   userId: number;
   userName: string;
@@ -22,10 +21,10 @@ export interface UserService extends LocalizationParameters {
   tz: string;
 }
 
-export const userService = {
+export const userService: Service<UserService> = {
   name: "user",
-  deploy(params: ServiceParams): UserService {
-    const { odoo, localizationParameters } = params;
+  deploy(env: OdooEnv, config): UserService {
+    const { odoo, localization } = config;
     const info = odoo.session_info;
     const { user_context, username, is_admin, partner_id, user_companies } = info;
     let context: Context = {
@@ -36,13 +35,13 @@ export const userService = {
     };
 
     return {
-      dateFormat: localizationParameters.dateFormat,
-      decimalPoint: localizationParameters.decimalPoint,
-      direction: localizationParameters.direction,
-      grouping: localizationParameters.grouping,
-      multiLang: localizationParameters.multiLang,
-      thousandsSep: localizationParameters.thousandsSep,
-      timeFormat: localizationParameters.timeFormat,
+      dateFormat: localization.dateFormat,
+      decimalPoint: localization.decimalPoint,
+      direction: localization.direction,
+      grouping: localization.grouping,
+      multiLang: localization.multiLang,
+      thousandsSep: localization.thousandsSep,
+      timeFormat: localization.timeFormat,
       context,
       get userId() {
         return context.uid;

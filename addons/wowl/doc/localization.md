@@ -36,8 +36,11 @@ const greeting = _lt("Hello");
 The value returned by `_lt` is an object with a single property `toString`.
 If the current user language is `fr_FR` and `Today` has translation `Bonjour`,
 `greeting` takes the value
+
 ```ts
-{ toString: () => "Bonjour" }
+{
+  toString: () => "Bonjour";
+}
 ```
 
 ## Other localization parameters

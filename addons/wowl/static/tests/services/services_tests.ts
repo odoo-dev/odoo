@@ -1,24 +1,13 @@
 import * as QUnit from "qunit";
-import { deployServices, Service } from "../../src/services";
 import { Registry } from "../../src/core/registry";
-import { OdooEnv } from "../../src/env";
-import { makeDeferred, makeTestOdoo, nextTick } from "../helpers";
-import { Odoo } from "../../src/types";
-import {
-  getDefaultLocalizationParameters,
-  LocalizationParameters,
-} from "../../src/core/localization";
+import { Service } from "../../src/types";
+import { makeDeferred, makeTestEnv, nextTick } from "../helpers";
 
 let registry: Registry<Service>;
-let env: OdooEnv;
-let localizationParameters: LocalizationParameters;
-let odoo: Odoo = makeTestOdoo();
 
 QUnit.module("deployServices", {
   beforeEach() {
     registry = new Registry();
-    localizationParameters = getDefaultLocalizationParameters();
-    env = { services: {} } as any;
   },
 });
 
@@ -29,7 +18,7 @@ QUnit.test("can deploy a service", async (assert) => {
       return 17;
     },
   });
-  await deployServices(registry, { env, localizationParameters, odoo });
+  const env = await makeTestEnv({ services: registry });
   assert.strictEqual(env.services.test, 17);
 });
 
@@ -37,14 +26,18 @@ QUnit.test("can deploy an asynchronous service", async (assert) => {
   const def = makeDeferred();
   registry.add("test", {
     name: "test",
-    deploy() {
-      return def;
+    async deploy() {
+      assert.step("before");
+      const result = await def;
+      assert.step("after");
+      return result;
     },
   });
-  deployServices(registry, { env, localizationParameters, odoo });
-  assert.strictEqual(env.services.test, undefined);
+  const prom = makeTestEnv({ services: registry });
+  assert.verifySteps(["before"]);
   def.resolve(15);
-  await Promise.resolve();
+  const env = await prom;
+  assert.verifySteps(["after"]);
   assert.strictEqual(env.services.test, 15);
 });
 
@@ -74,7 +67,7 @@ QUnit.test("can deploy two sequentially dependant asynchronous services", async 
       assert.step("test3");
     },
   });
-  deployServices(registry, { env, localizationParameters, odoo });
+  const promise = makeTestEnv({ services: registry });
   await nextTick();
   assert.verifySteps(["test1"]);
   def2.resolve();
@@ -83,6 +76,7 @@ QUnit.test("can deploy two sequentially dependant asynchronous services", async 
   def1.resolve();
   await nextTick();
   assert.verifySteps(["test2", "test3"]);
+  return promise;
 });
 
 QUnit.test("can deploy two independant asynchronous services in parallel", async (assert) => {
@@ -110,7 +104,7 @@ QUnit.test("can deploy two independant asynchronous services in parallel", async
       assert.step("test3");
     },
   });
-  deployServices(registry, { env, localizationParameters, odoo });
+  const promise = makeTestEnv({ services: registry });
   await nextTick();
   assert.verifySteps(["test1", "test2"]);
 
@@ -121,6 +115,7 @@ QUnit.test("can deploy two independant asynchronous services in parallel", async
   def2.resolve();
   await nextTick();
   assert.verifySteps(["test3"]);
+  return promise;
 });
 
 QUnit.test("can deploy a service with a dependency", async (assert) => {
@@ -138,7 +133,7 @@ QUnit.test("can deploy a service with a dependency", async (assert) => {
     },
   });
 
-  await deployServices(registry, { env, localizationParameters, odoo });
+  await makeTestEnv({ services: registry });
   assert.verifySteps(["appa", "aang"]);
 });
 
@@ -152,7 +147,7 @@ QUnit.test("throw an error if missing dependency", async (assert) => {
     },
   });
   try {
-    await deployServices(registry, { env, localizationParameters, odoo });
+    await makeTestEnv({ services: registry });
   } catch (e) {
     assert.ok(true);
   }
@@ -171,7 +166,7 @@ QUnit.test("throw an error when there is a cycle in service dependencies", async
     deploy: () => {},
   });
   try {
-    await deployServices(registry, { env, localizationParameters, odoo });
+    await makeTestEnv({ services: registry });
   } catch (e) {
     assert.ok(e.message.startsWith("Some services could not be deployed"));
   }

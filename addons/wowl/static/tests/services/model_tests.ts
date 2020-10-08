@@ -1,7 +1,8 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
-import { Service, useService } from "../../src/services";
+import { Service } from "../../src/types";
+import { useService } from "../../src/core/hooks";
 import { modelService } from "../../src/services/model";
 import { RPC } from "../../src/services/rpc";
 import { getFixture, makeFakeUserService, makeTestEnv, mount } from "../helpers";
@@ -169,7 +170,7 @@ QUnit.test("useModel take proper reference to rpc service", async (assert) => {
   const [, rpc] = makeFakeRPC();
   services.add("rpc", rpc);
 
-  const env = await makeTestEnv({ services: services });
+  const env = await makeTestEnv({ services });
 
   const component = await mount(MyComponent, { env, target: getFixture() });
 

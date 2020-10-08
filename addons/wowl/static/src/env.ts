@@ -1,40 +1,13 @@
 import * as owl from "@odoo/owl";
-import { Env } from "@odoo/owl/dist/types/component/component";
-import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
-import type { Registries } from "./registries";
-import { LocalizationParameters } from "./core/localization";
-import { deployServices, Services } from "./services";
-import type { Odoo } from "./types";
+import { OdooConfig, OdooEnv, Service } from "./types";
 
-type Browser = Env["browser"];
-export interface OdooBrowser extends Browser {
-  XMLHttpRequest: typeof window["XMLHttpRequest"];
-  console: typeof window["console"];
-}
-
-export interface OdooEnv extends Env {
-  browser: OdooBrowser;
-  services: Services;
-  registries: Registries;
-  bus: EventBus;
-  _t: (str: string) => string;
-}
-
-export interface EnvParams {
-  browser: OdooBrowser;
-  localizationParameters: LocalizationParameters;
-  odoo: Odoo;
-  registries: Registries;
-  templates: string;
-  _t: (str: string) => string;
-}
-
-export async function makeEnv(params: EnvParams): Promise<OdooEnv> {
-  const { browser, localizationParameters, odoo, registries, templates, _t } = params;
+export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
+  const { browser, services, Components, actions, templates, views, _t } = config;
+  const registries = { services, Components, views, actions };
   const qweb = new owl.QWeb({ translateFn: _t });
   qweb.addTemplates(templates);
 
-  const env = {
+  const env: OdooEnv = {
     browser,
     qweb,
     bus: new owl.core.EventBus(),
@@ -43,6 +16,54 @@ export async function makeEnv(params: EnvParams): Promise<OdooEnv> {
     _t,
   };
 
-  await deployServices(registries.services, { env, odoo, localizationParameters });
+  await deployServices(env, config);
   return env;
+}
+
+async function deployServices(env: OdooEnv, config: OdooConfig): Promise<void> {
+  const services = env.services;
+  const serviceRegistry = config.services;
+  const toBeDeployed = new Set(serviceRegistry.getAll());
+
+  // deploy as many services in parallel as possible
+  function deploy(): Promise<any> {
+    let service: Service | null = null;
+    const proms: Promise<any>[] = [];
+
+    while ((service = findNext())) {
+      let name = service.name;
+      toBeDeployed.delete(service);
+      const value = service.deploy(env, config);
+      if (value instanceof Promise) {
+        proms.push(
+          value.then((val) => {
+            services[name] = val || null;
+            return deploy();
+          })
+        );
+      } else {
+        services[service.name] = value;
+      }
+    }
+    return Promise.all(proms);
+  }
+
+  await deploy();
+
+  if (toBeDeployed.size) {
+    throw new Error(`Some services could not be deployed: ${[...toBeDeployed].map((s) => s.name)}`);
+  }
+
+  function findNext(): Service | null {
+    for (let s of toBeDeployed) {
+      if (s.dependencies) {
+        if (s.dependencies.every((d) => d in services)) {
+          return s;
+        }
+      } else {
+        return s;
+      }
+    }
+    return null;
+  }
 }

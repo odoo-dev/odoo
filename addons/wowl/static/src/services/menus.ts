@@ -1,5 +1,4 @@
-import { OdooEnv } from "../env";
-import { Service, ServiceParams } from "../services";
+import { OdooEnv, Service } from "../types";
 
 export interface Menu {
   id: number | string;
@@ -24,6 +23,7 @@ export interface MenuService {
 }
 
 const loadMenusUrl = `/wowl/load_menus`;
+
 async function fetchLoadMenus(env: OdooEnv, url: string): Promise<MenuData> {
   const res = await env.browser.fetch(url);
   if (!res.ok) {
@@ -32,9 +32,8 @@ async function fetchLoadMenus(env: OdooEnv, url: string): Promise<MenuData> {
   return res.json();
 }
 
-async function makeMenus(env: OdooEnv, loadMenusHash: string): Promise<MenuService> {
-  const menusData: MenuData = await fetchLoadMenus(env, `${loadMenusUrl}/${loadMenusHash}`);
-  const menuService: MenuService = {
+function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
+  return {
     getAll(): Menu[] {
       return Object.values(menusData);
     },
@@ -52,14 +51,15 @@ async function makeMenus(env: OdooEnv, loadMenusHash: string): Promise<MenuServi
       return menu;
     },
   };
-  return menuService;
 }
+
 export const menusService: Service<MenuService> = {
   name: "menus",
-  async deploy(params: ServiceParams): Promise<MenuService> {
-    const { env, odoo } = params;
+  async deploy(env: OdooEnv, config): Promise<MenuService> {
+    const { odoo } = config;
     const cacheHashes = odoo.session_info.cache_hashes;
     const loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
-    return makeMenus(env, loadMenusHash);
+    const menusData: MenuData = await fetchLoadMenus(env, `${loadMenusUrl}/${loadMenusHash}`);
+    return makeMenus(env, menusData);
   },
 };
