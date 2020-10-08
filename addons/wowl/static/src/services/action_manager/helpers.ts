@@ -10,13 +10,19 @@ export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescripti
 export interface ActionOptions {}
 
 export interface Action {
+  id?: number;
   jsId: string;
+  context: object;
   target: "current";
-  type: "ir.actions.client";
+  type: "ir.actions.client" | "ir.actions.server";
 }
 export interface ClientAction extends Action {
   tag: string;
   type: "ir.actions.client";
+}
+export interface ServerAction extends Action {
+  id: number;
+  type: "ir.actions.server";
 }
 
 // function makeStandardAction(action: ActionRequest, options:ActionOptions): ClientAction {
