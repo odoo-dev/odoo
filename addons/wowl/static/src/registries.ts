@@ -8,7 +8,7 @@ import { NotificationManager, notificationService } from "./services/notificatio
 import { routerService } from "./services/router";
 import { rpcService } from "./services/rpc";
 import { userService } from "./services/user";
-import { viewLoaderService } from "./services/view_loader";
+import { viewManagerService } from "./services/view_manager";
 import { ComponentAction, FunctionAction, Service, Type, View } from "./types";
 import { FormView } from "./views/form_view";
 
@@ -30,7 +30,7 @@ const services = [
   routerService,
   rpcService,
   userService,
-  viewLoaderService,
+  viewManagerService,
 ];
 
 for (let service of services) {

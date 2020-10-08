@@ -1,6 +1,6 @@
 import { Service, OdooEnv, ViewType } from "../types";
 
-interface ViewLoader {
+interface ViewManager {
   loadView(model: string, type: ViewType, viewId?: number | false): Promise<ViewDefinition>;
 }
 
@@ -10,10 +10,10 @@ interface ViewDefinition {
   viewId: number;
 }
 
-export const viewLoaderService: Service<ViewLoader> = {
-  name: "view_loader",
+export const viewManagerService: Service<ViewManager> = {
+  name: "view_manager",
   dependencies: ["model"],
-  deploy(env: OdooEnv): ViewLoader {
+  deploy(env: OdooEnv): ViewManager {
     const modelService = env.services.model;
 
     const loadView = async (model: string, type: ViewType, viewId: number | false = false) => {

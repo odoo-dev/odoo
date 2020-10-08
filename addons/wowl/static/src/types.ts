@@ -12,7 +12,7 @@ import { routerService } from "./services/router";
 // add here each service type to have better typing for useService
 import type { rpcService } from "./services/rpc";
 import type { userService } from "./services/user";
-import { viewLoaderService } from "./services/view_loader";
+import { viewManagerService } from "./services/view_manager";
 // import type { ComponentAction, FunctionAction } from "./services/action_manager/helpers";
 
 interface CacheHashes {
@@ -113,7 +113,8 @@ export interface OdooConfig extends Registries {
 // Types
 // -----------------------------------------------------------------------------
 type Unwrap<T> = T extends Promise<infer U> ? U : T;
-type ServiceType<T extends (...args: any[]) => any> = Unwrap<ReturnType<T>>;
+type Nullify<T> = T extends void ? null : T;
+type ServiceType<T extends (...args: any[]) => any> = Nullify<Unwrap<ReturnType<T>>>;
 
 export interface Services {
   action_manager: ServiceType<typeof actionManagerService["deploy"]>;
@@ -124,7 +125,7 @@ export interface Services {
   rpc: ServiceType<typeof rpcService["deploy"]>;
   router: ServiceType<typeof routerService["deploy"]>;
   user: ServiceType<typeof userService["deploy"]>;
-  view_loader: ServiceType<typeof viewLoaderService["deploy"]>;
+  view_manager: ServiceType<typeof viewManagerService["deploy"]>;
 
   [key: string]: any;
 }
