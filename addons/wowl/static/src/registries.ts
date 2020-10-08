@@ -60,7 +60,7 @@ export const actionRegistry: Registry<ComponentAction | FunctionAction> = new Re
 
 // Demo code
 class HelloAction extends Component {
-  static template = tags.xml`<div>Hello World</div>`;
+  static template = tags.xml`<div>Discuss ClientAction</div>`;
 }
 actionRegistry.add("mail.widgets.discuss", HelloAction);
 // actionRegistry.add("mail.widgets.discuss", () => console.log("I'm a function client action"));

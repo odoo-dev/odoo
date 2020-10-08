@@ -1,23 +1,30 @@
 import { Component, hooks, tags } from "@odoo/owl";
 import type { OdooEnv, Service, FunctionAction } from "./../../types";
-import { ActionRequest, ActionOptions, Action, ClientAction, ServerAction } from "./helpers";
+import { ActionRequest, ActionOptions, Action, ClientAction } from "./helpers";
 
 interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): void;
+}
+interface SubRenderingInfo {
+  Component: typeof Component;
+  props: any;
+}
+interface RenderingInfo {
+  main: SubRenderingInfo;
 }
 
 export class ActionContainer extends Component<{}, OdooEnv> {
   static template = tags.xml`
     <div t-name="wowl.ActionContainer">
-      <t t-foreach="slots" t-as="slot" t-key="slot.name">
-        <t t-component="slot.Component" slot="slot" />
-      </t>
+      <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="rId"/>
     </div>`;
-  slots = {};
+  main = {};
+  rId = 0;
   constructor(...args: any[]) {
     super(...args);
-    this.env.bus.on("action_manager:update", this, (slots) => {
-      this.slots = slots;
+    this.env.bus.on("action_manager:update", this, (info: RenderingInfo) => {
+      this.main = info.main;
+      this.rId = ++this.rId;
       this.render();
     });
     hooks.onMounted(() => this.env.bus.trigger("action_manager:finalize"));
@@ -42,7 +49,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     } else if (["string", "number"].includes(typeof actionRequest)) {
       // actionRequest is an id or an xmlid
       action = await env.services.rpc("/web/action/load", { action_id: actionRequest });
-    } else  {
+    } else {
       // actionRequest is an object describing the action
       action = Object.assign({}, actionRequest);
     }
@@ -59,19 +66,26 @@ function makeActionManager(env: OdooEnv): ActionManager {
       const clientAction = env.registries.actions.get((action as ClientAction).tag);
       if (clientAction.prototype instanceof Component) {
         // the client action is a component
-        env.bus.trigger("action_manager:update", [
-          {
-            name: "main",
+        env.bus.trigger("action_manager:update", {
+          main: {
             Component: clientAction,
-            action: action,
+            props: { action },
           },
-        ]);
+        });
       } else {
         // the client action is a function
         (clientAction as FunctionAction)();
       }
+    } else if (action.type === "ir.actions.act_window") {
+      const view = env.registries.views.get("form"); // FIXME: get the first view here
+      env.bus.trigger("action_manager:update", {
+        main: {
+          Component: view.Component,
+          props: { action },
+        },
+      });
     } else if (action.type === "ir.actions.server") {
-      const newAction = await env.services.rpc('/web/action/run', {
+      const newAction = await env.services.rpc("/web/action/run", {
         action_id: action.id,
         context: action.context || {},
       });

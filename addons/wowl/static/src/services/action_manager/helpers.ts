@@ -2,9 +2,9 @@ type ActionId = number;
 type ActionXMLId = string;
 type ActionTag = string;
 interface ActionDescription {
-    tag: string;
-    type: "ir.actions.client";
-    [key: string]: any;
+  tag: string;
+  type: "ir.actions.client";
+  [key: string]: any;
 }
 export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
 export interface ActionOptions {}
@@ -14,11 +14,16 @@ export interface Action {
   jsId: string;
   context: object;
   target: "current";
-  type: "ir.actions.client" | "ir.actions.server";
+  type: "ir.actions.act_window" | "ir.actions.client" | "ir.actions.server";
 }
 export interface ClientAction extends Action {
   tag: string;
   type: "ir.actions.client";
+}
+export interface ActWindowAction extends Action {
+  id: number;
+  type: "ir.actions.act_window";
+  res_model: string;
 }
 export interface ServerAction extends Action {
   id: number;

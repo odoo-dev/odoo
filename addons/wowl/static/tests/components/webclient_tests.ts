@@ -35,7 +35,7 @@ QUnit.module("Web Client", {
 QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
   await mount(WebClient, { env, target });
-  assert.strictEqual(target.innerText, "Hello WebClient");
+  assert.containsOnce(target, "header > nav.o_main_navbar");
 });
 
 QUnit.test("can render a main component", async (assert) => {
