@@ -31,11 +31,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
     actionRequest: ActionRequest,
     options: ActionOptions
   ): Promise<Action> => {
-    let action: Action;
+    let action;
     if (typeof actionRequest === "string" && env.registries.actions.contains(actionRequest)) {
       // action is a key in the actionRegistry
       action = {
-        jsId: `action_${++actionId}`,
         target: "current",
         tag: actionRequest,
         type: "ir.actions.client",
@@ -43,9 +42,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
     } else if (["string", "number"].includes(typeof actionRequest)) {
       // action is an id or an xmlid
       action = await env.services.rpc("/web/action/load", { action_id: actionRequest });
-    } else {
-      throw new Error("Case not supported yet");
+    } else  {
+      action = Object.assign({}, actionRequest);
     }
+    action.jsId = `action_${++actionId}`;
     return action;
   };
   env.bus.on("action_manager:finalize", null, () => {

@@ -1,8 +1,12 @@
 type ActionId = number;
 type ActionXMLId = string;
 type ActionTag = string;
-export type ActionRequest = ActionId | ActionXMLId | ActionTag;
-
+interface ActionDescription {
+    tag: string;
+    type: "ir.actions.client";
+    [key: string]: any;
+}
+export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
 export interface ActionOptions {}
 
 export interface Action {
@@ -10,9 +14,9 @@ export interface Action {
   target: "current";
   type: "ir.actions.client";
 }
-
 export interface ClientAction extends Action {
   tag: string;
+  type: "ir.actions.client";
 }
 
 // function makeStandardAction(action: ActionRequest, options:ActionOptions): ClientAction {
