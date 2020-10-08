@@ -6,6 +6,7 @@ interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): void;
 }
 interface SubRenderingInfo {
+  id: number;
   Component: typeof Component;
   props: any;
 }
@@ -16,15 +17,13 @@ interface RenderingInfo {
 export class ActionContainer extends Component<{}, OdooEnv> {
   static template = tags.xml`
     <div t-name="wowl.ActionContainer">
-      <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="rId"/>
+      <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="main.id"/>
     </div>`;
   main = {};
-  rId = 0;
   constructor(...args: any[]) {
     super(...args);
     this.env.bus.on("action_manager:update", this, (info: RenderingInfo) => {
       this.main = info.main;
-      this.rId = ++this.rId;
       this.render();
     });
     hooks.onMounted(() => this.env.bus.trigger("action_manager:finalize"));
@@ -33,7 +32,7 @@ export class ActionContainer extends Component<{}, OdooEnv> {
 }
 
 function makeActionManager(env: OdooEnv): ActionManager {
-  let actionId = 0;
+  let id = 0;
   const loadAction = async (
     actionRequest: ActionRequest,
     options: ActionOptions
@@ -53,45 +52,45 @@ function makeActionManager(env: OdooEnv): ActionManager {
       // actionRequest is an object describing the action
       action = Object.assign({}, actionRequest);
     }
-    action.jsId = `action_${++actionId}`;
+    action.jsId = `action_${++id}`;
     return action;
   };
   env.bus.on("action_manager:finalize", null, () => {
     console.log("action mounted");
   });
 
-  async function doAction(actionRequest: ActionRequest, options?: ActionOptions) {
+  async function doAction(actionRequest: ActionRequest, options?: ActionOptions): Promise<any> {
     let action = await loadAction(actionRequest, options || {});
+    let Comp;
     if (action.type === "ir.actions.client") {
       const clientAction = env.registries.actions.get((action as ClientAction).tag);
       if (clientAction.prototype instanceof Component) {
         // the client action is a component
-        env.bus.trigger("action_manager:update", {
-          main: {
-            Component: clientAction,
-            props: { action },
-          },
-        });
+        Comp = clientAction;
       } else {
         // the client action is a function
-        (clientAction as FunctionAction)();
+        return (clientAction as FunctionAction)();
       }
     } else if (action.type === "ir.actions.act_window") {
       const view = env.registries.views.get("form"); // FIXME: get the first view here
-      env.bus.trigger("action_manager:update", {
-        main: {
-          Component: view.Component,
-          props: { action },
-        },
-      });
+      Comp = view.Component;
     } else if (action.type === "ir.actions.server") {
-      const newAction = await env.services.rpc("/web/action/run", {
+      const nextAction = await env.services.rpc("/web/action/run", {
         action_id: action.id,
         context: action.context || {},
       });
-      // action = action || { type: 'ir.actions.act_window_close' };
-      doAction(newAction);
+      // nextAction = nextAction || { type: 'ir.actions.act_window_close' };
+      return doAction(nextAction);
     }
+
+    // if we get here, it means that the action requires an update of the UI
+    env.bus.trigger("action_manager:update", {
+      main: {
+        id: ++id,
+        Component: Comp,
+        props: { action },
+      },
+    });
   }
 
   return {
