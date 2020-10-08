@@ -4,6 +4,7 @@ import { ActionRequest, ActionOptions, Action, ClientAction } from "./helpers";
 
 interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): void;
+  getBreadcrumbs(): any;
 }
 interface SubRenderingInfo {
   id: number;
@@ -33,6 +34,7 @@ export class ActionContainer extends Component<{}, OdooEnv> {
 
 function makeActionManager(env: OdooEnv): ActionManager {
   let id = 0;
+  let actionStack: any[] = [];
   const loadAction = async (
     actionRequest: ActionRequest,
     options: ActionOptions
@@ -60,7 +62,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
   });
 
   async function doAction(actionRequest: ActionRequest, options?: ActionOptions): Promise<any> {
-    let action = await loadAction(actionRequest, options || {});
+    options = options || {};
+    let action = await loadAction(actionRequest, options);
     let Comp;
     if (action.type === "ir.actions.client") {
       const clientAction = env.registries.actions.get((action as ClientAction).tag);
@@ -84,6 +87,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
 
     // if we get here, it means that the action requires an update of the UI
+    if (options.clear_breadcrumbs) {
+      actionStack = [];
+    }
+    actionStack.push(action);
     env.bus.trigger("action_manager:update", {
       main: {
         id: ++id,
@@ -96,6 +103,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
   return {
     doAction: (...args) => {
       doAction(...args);
+    },
+    getBreadcrumbs: () => {
+      return actionStack.map((action) => {
+        return { name: action.name };
+      });
     },
   };
 }

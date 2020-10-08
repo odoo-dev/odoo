@@ -12,7 +12,7 @@ export class NavBar extends Component {
   }
 
   _onMenuClicked(menu: any) {
-    this.actionManager.doAction(menu.actionID);
+    this.actionManager.doAction(menu.actionID, { clear_breadcrumbs: true });
     this.state.showDropdownMenu = false;
   }
 }

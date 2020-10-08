@@ -32,7 +32,7 @@ declare const odoo: Odoo;
   // legacy templates. At the end, we'll get rid of all this.
   const doc = new DOMParser().parseFromString(templates, "text/xml");
   for (let child of doc.querySelectorAll("templates > [owl]")) {
-    child.removeAttribute('owl');
+    child.removeAttribute("owl");
   }
   templates = new XMLSerializer().serializeToString(doc);
 
@@ -53,7 +53,7 @@ declare const odoo: Odoo;
   // start web client
   const root = new WebClient();
   await whenReady();
-  await root.mount(document.body, { position: 'self' });
+  await root.mount(document.body, { position: "self" });
 
   // prepare runtime Odoo object
   const sessionInfo = odoo.session_info;

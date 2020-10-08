@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div t-name="wowl.ControlPanel" class="o_control_panel" owl="1">
+        <ol class="breadcrumb">
+          <t t-foreach="breadcrumbs" t-as="breadcrumb">
+              <li class="breadcrumb-item">
+                <a t-if="!breadcrumb_last" href="#"><t t-esc="breadcrumb.name"/></a>
+                <t t-else=""><t t-esc="breadcrumb.name"/></t>
+              </li>
+          </t>
+        </ol>
+
+        <button t-on-click="_onExecuteAction(35)">Open Apps</button>
+        <button t-on-click="_onExecuteAction(86)">Open Settings</button>
+    </div>
+
+</templates>

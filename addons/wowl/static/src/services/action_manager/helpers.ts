@@ -7,7 +7,9 @@ interface ActionDescription {
   [key: string]: any;
 }
 export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
-export interface ActionOptions {}
+export interface ActionOptions {
+  clear_breadcrumbs?: boolean;
+}
 
 export interface Action {
   id?: number;
