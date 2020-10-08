@@ -3,7 +3,7 @@ import { getDefaultLocalization } from "../src/core/localization";
 import { Registry } from "../src/core/registry";
 import { makeEnv } from "../src/env";
 import { Menu, MenuData, menusService, MenuTree } from "../src/services/menus";
-import { rpcService } from "../src/services/rpc";
+import { RPC, rpcService } from "../src/services/rpc";
 import { UserService, userService } from "../src/services/user";
 import { Odoo, OdooConfig, OdooEnv, Type, UserCompany } from "../src/types";
 
@@ -175,12 +175,14 @@ export function makeFakeMenusService(menuData?: MenuData): typeof menusService {
     },
   };
 }
-export function makeFakeRPCService(): typeof rpcService {
+export function makeFakeRPCService(
+  mockRpc?: (...params: Parameters<RPC>) => any
+): typeof rpcService {
   return {
     name: "rpc",
     deploy() {
-      return () => {
-        return Promise.resolve();
+      return async (...args: Parameters<RPC>) => {
+        return mockRpc ? mockRpc(...args) : undefined;
       };
     },
   };
