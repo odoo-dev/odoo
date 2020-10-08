@@ -99,6 +99,7 @@ interface Registries {
   services: Registry<Service<any>>;
   actions: Registry<ComponentAction | FunctionAction>;
   views: Registry<View>;
+  systray: Registry<SystrayItem>;
 }
 
 export interface OdooConfig extends Registries {
@@ -145,4 +146,10 @@ export interface View {
   name: string;
   type: ViewType;
   Component: Type<Component>;
+}
+
+export interface SystrayItem {
+  name: string;
+  Component: Type<Component>;
+  sequence?: number;
 }

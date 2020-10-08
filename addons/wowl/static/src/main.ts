@@ -45,6 +45,7 @@ declare const odoo: Odoo;
     Components: registries.mainComponentRegistry,
     services: registries.serviceRegistry,
     actions: registries.actionRegistry,
+    systray: registries.systrayRegistry,
     templates,
     _t,
   });

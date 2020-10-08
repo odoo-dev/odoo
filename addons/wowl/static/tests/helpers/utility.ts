@@ -46,6 +46,7 @@ export function makeTestConfig(config: TestConfig = {}): OdooConfig {
     services: config.services || new Registry(),
     Components: config.Components || new Registry(),
     actions: config.actions || new Registry(),
+    systray: config.systray || new Registry(),
     views: new Registry(),
     odoo,
   };

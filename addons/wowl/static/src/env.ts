@@ -2,8 +2,8 @@ import * as owl from "@odoo/owl";
 import { OdooConfig, OdooEnv, Service } from "./types";
 
 export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
-  const { browser, services, Components, actions, templates, views, _t } = config;
-  const registries = { services, Components, views, actions };
+  const { browser, services, Components, actions, templates, views, _t, systray } = config;
+  const registries = { services, Components, views, actions, systray };
   const qweb = new owl.QWeb({ translateFn: _t });
   qweb.addTemplates(templates);
 

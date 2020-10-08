@@ -1,4 +1,5 @@
 import { Component, tags } from "@odoo/owl";
+import { userMenuItem } from "./components/user_menu/user_menu";
 import { Registry } from "./core/registry";
 import { actionManagerService } from "./services/action_manager/action_manager";
 import { crashManagerService } from "./services/crash_manager";
@@ -9,7 +10,7 @@ import { routerService } from "./services/router";
 import { rpcService } from "./services/rpc";
 import { userService } from "./services/user";
 import { viewManagerService } from "./services/view_manager";
-import { ComponentAction, FunctionAction, Service, Type, View } from "./types";
+import { ComponentAction, FunctionAction, Service, SystrayItem, Type, View } from "./types";
 import { FormView } from "./views/form_view";
 import { ListView } from "./views/list_view";
 
@@ -76,3 +77,11 @@ export const viewRegistry: Registry<View> = new Registry();
 for (let view of views) {
   viewRegistry.add(view.name, view);
 }
+
+// -----------------------------------------------------------------------------
+// Systray
+// -----------------------------------------------------------------------------
+
+export const systrayRegistry: Registry<SystrayItem> = new Registry();
+
+systrayRegistry.add("wowl.user_menu", userMenuItem);
