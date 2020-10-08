@@ -11,6 +11,7 @@ import { userService } from "./services/user";
 import { viewManagerService } from "./services/view_manager";
 import { ComponentAction, FunctionAction, Service, Type, View } from "./types";
 import { FormView } from "./views/form_view";
+import { ListView } from "./views/list_view";
 
 // -----------------------------------------------------------------------------
 // Services
@@ -68,7 +69,7 @@ actionRegistry.add("mail.widgets.discuss", HelloAction);
 // Views
 // -----------------------------------------------------------------------------
 
-const views: View[] = [FormView];
+const views: View[] = [FormView, ListView];
 
 export const viewRegistry: Registry<View> = new Registry();
 
