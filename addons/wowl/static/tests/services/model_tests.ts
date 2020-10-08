@@ -5,7 +5,7 @@ import { Service } from "../../src/types";
 import { useService } from "../../src/core/hooks";
 import { modelService } from "../../src/services/model";
 import { RPC } from "../../src/services/rpc";
-import { getFixture, makeFakeUserService, makeTestEnv, mount } from "../helpers";
+import { getFixture, makeFakeUserService, makeTestEnv, mount } from "../helpers/index";
 
 const { xml } = tags;
 

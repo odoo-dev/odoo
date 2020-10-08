@@ -2,7 +2,7 @@ import * as QUnit from "qunit";
 import { NotificationManager, notificationService } from "../../src/services/notifications";
 import { OdooEnv, Service } from "../../src/types";
 import { Registry } from "../../src/core/registry";
-import { click, getFixture, makeTestEnv, mount, nextTick } from "../helpers";
+import { click, getFixture, makeTestEnv, mount, nextTick } from "../helpers/index";
 
 let target: HTMLElement;
 let browser: Partial<OdooEnv["browser"]>;

@@ -8,7 +8,7 @@ import {
   makeTestEnv,
   OdooEnv,
   getFixture,
-} from "../helpers";
+} from "../helpers/index";
 import { MenuData, menusService } from "./../../src/services/menus";
 import { actionManagerService } from "./../../src/services/action_manager/action_manager";
 import { Registry } from "./../../src/core/registry";

@@ -9,9 +9,8 @@ import { routerService } from "./services/router";
 import { rpcService } from "./services/rpc";
 import { userService } from "./services/user";
 import { viewLoaderService } from "./services/view_loader";
-import { Type, Service, ComponentAction, FunctionAction } from "./types";
+import { ComponentAction, FunctionAction, Service, Type, View } from "./types";
 import { FormView } from "./views/form_view";
-import { View } from "./views/types";
 
 // -----------------------------------------------------------------------------
 // Services

@@ -1,5 +1,4 @@
-import { Service, OdooEnv } from "../types";
-import { ViewType } from "../views/types";
+import { Service, OdooEnv, ViewType } from "../types";
 
 interface ViewLoader {
   loadView(model: string, type: ViewType, viewId?: number | false): Promise<ViewDefinition>;

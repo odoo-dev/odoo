@@ -1,5 +1,5 @@
 import { Component, tags } from "@odoo/owl";
-import { View } from "./types";
+import { View } from "../types";
 const { xml } = tags;
 
 class FormRenderer extends Component {

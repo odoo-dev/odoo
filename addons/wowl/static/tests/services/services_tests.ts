@@ -1,7 +1,7 @@
 import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
 import { Service } from "../../src/types";
-import { makeDeferred, makeTestEnv, nextTick } from "../helpers";
+import { makeDeferred, makeTestEnv, nextTick } from "../helpers/index";
 
 let registry: Registry<Service>;
 

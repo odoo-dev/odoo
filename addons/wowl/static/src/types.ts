@@ -14,7 +14,6 @@ import type { rpcService } from "./services/rpc";
 import type { userService } from "./services/user";
 import { viewLoaderService } from "./services/view_loader";
 // import type { ComponentAction, FunctionAction } from "./services/action_manager/helpers";
-import { View } from "./views/types";
 
 interface CacheHashes {
   load_menus: string;
@@ -128,4 +127,21 @@ export interface Services {
   view_loader: ServiceType<typeof viewLoaderService["deploy"]>;
 
   [key: string]: any;
+}
+
+export type ViewType =
+  | "list"
+  | "form"
+  | "kanban"
+  | "calendar"
+  | "pivot"
+  | "graph"
+  | "activity"
+  | "grid"
+  | string;
+
+export interface View {
+  name: string;
+  type: ViewType;
+  Component: Type<Component>;
 }

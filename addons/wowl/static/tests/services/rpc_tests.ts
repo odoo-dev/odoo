@@ -4,45 +4,19 @@ import { Registry } from "../../src/core/registry";
 import { Service } from "../../src/types";
 import { useService } from "../../src/core/hooks";
 import { rpcService } from "../../src/services/rpc";
-import { Deferred, getFixture, makeDeferred, makeTestEnv, mount, nextTick } from "../helpers";
+import {
+  createMockXHR,
+  getFixture,
+  makeDeferred,
+  makeTestEnv,
+  mount,
+  nextTick,
+} from "../helpers/index";
 
 const { xml } = tags;
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
-
-function createMockXHR(
-  response?: any,
-  sendCb?: (data: any) => void,
-  def?: Deferred<any>
-): typeof XMLHttpRequest {
-  let MockXHR: typeof XMLHttpRequest = function () {
-    return {
-      _loadListener: null,
-      url: "",
-      addEventListener(type: string, listener: any) {
-        if (type === "load") {
-          this._loadListener = listener;
-        }
-      },
-      open(method: string, url: string) {
-        this.url = url;
-      },
-      setRequestHeader() {},
-      async send(data: string) {
-        if (sendCb) {
-          sendCb.call(this, JSON.parse(data));
-        }
-        if (def) {
-          await def;
-        }
-        (this._loadListener as any)();
-      },
-      response: JSON.stringify(response || ""),
-    };
-  } as any;
-  return MockXHR;
-}
 
 interface RPCInfo {
   url: string;

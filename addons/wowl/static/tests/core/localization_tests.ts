@@ -2,7 +2,7 @@ import * as owl from "@odoo/owl";
 import * as QUnit from "qunit";
 import { OdooEnv, Service } from "../../src/types";
 import { useService } from "../../src/core/hooks";
-import { getFixture, makeFakeUserService, makeTestEnv, mount } from "../helpers";
+import { getFixture, makeFakeUserService, makeTestEnv, mount } from "../helpers/index";
 import { Registry } from "./../../src/core/registry";
 
 let target: HTMLElement;

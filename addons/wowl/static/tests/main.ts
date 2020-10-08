@@ -1,5 +1,4 @@
-import * as owl from "@odoo/owl";
-import { setTemplates } from "./helpers";
+import { setupTests } from "./helpers/index";
 
 // import qunit configurations and customizations
 import "./qunit";
@@ -16,12 +15,7 @@ import "./services/services_tests";
 import "./components/webclient_tests";
 import "./core/localization_tests";
 
-const { whenReady, loadFile } = owl.utils;
-
 (async () => {
-  const templatesUrl = `/wowl/templates/${new Date().getTime()}`;
-  const templates = await loadFile(templatesUrl);
-  setTemplates(templates);
-  await whenReady();
+  await setupTests();
   QUnit.start();
 })();

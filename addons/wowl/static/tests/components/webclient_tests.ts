@@ -11,7 +11,7 @@ import {
   makeTestEnv,
   mount,
   OdooEnv,
-} from "../helpers";
+} from "../helpers/index";
 import { Service, Type } from "../../src/types";
 
 const { xml } = tags;
