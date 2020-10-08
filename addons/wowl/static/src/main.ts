@@ -53,7 +53,7 @@ declare const odoo: Odoo;
   // start web client
   const root = new WebClient();
   await whenReady();
-  await root.mount(document.body);
+  await root.mount(document.body, { position: 'self' });
 
   // prepare runtime Odoo object
   const sessionInfo = odoo.session_info;

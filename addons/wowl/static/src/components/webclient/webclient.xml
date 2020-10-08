@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <div t-name="wowl.WebClient" owl="1">
+    <body t-name="wowl.WebClient" class="o_web_client" owl="1">
         <NavBar/>
         <ActionContainer/>
         <div>
@@ -9,6 +9,6 @@
                 <t t-component="Component[1]"/>
             </t>
         </div>
-    </div>
+    </body>
 
 </templates>
