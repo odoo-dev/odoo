@@ -17,6 +17,7 @@ import "./components/web_client_integrated_tests";
 import "./components/user_menu_tests";
 import "./core/localization_tests";
 import "./components/dialog_tests";
+import "./core/py_tests";
 
 (async () => {
   await setupTests();

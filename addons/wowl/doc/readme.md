@@ -14,6 +14,7 @@
 - [Global odoo object](global_odoo_object.md)
 - [Localization](localization.md)
 - [Main Components](main_components.md)
+- [Python interpreter](python_interpreter.md)
 - [Registries](registries.md)
 - [Services](services/readme.md)
 - [Systray](systray.md)
