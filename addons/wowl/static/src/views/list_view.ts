@@ -1,10 +1,10 @@
 import { Component, tags } from "@odoo/owl";
-import { View } from "../types";
+import { OdooEnv, View } from "../types";
 import { ControlPanel } from "../components/control_panel/control_panel";
 
 const { xml } = tags;
 
-class ListRenderer extends Component {
+class ListRenderer extends Component<{}, OdooEnv> {
   static template = xml`
     <div>
         <ControlPanel/>

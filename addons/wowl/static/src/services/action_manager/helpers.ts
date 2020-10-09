@@ -1,4 +1,5 @@
 import { Component } from "@odoo/owl";
+import { OdooEnv, Type } from "./../../types";
 
 type ActionId = number;
 type ActionXMLId = string;
@@ -13,20 +14,27 @@ export interface ActionOptions {
   clear_breadcrumbs?: boolean;
 }
 
+type ActionType =
+  | "ir.actions.act_url"
+  | "ir.actions.act_window"
+  | "ir.actions.act_window_close"
+  | "ir.actions.client"
+  | "ir.actions.report"
+  | "ir.actions.server";
 export interface Action {
   id?: number;
   jsId: string;
   context: object;
   target: "current";
-  type: "ir.actions.act_window" | "ir.actions.client" | "ir.actions.server";
+  type: ActionType;
 }
 export interface ClientAction extends Action {
-  Component?: typeof Component;
+  Component?: Type<Component<{}, OdooEnv>>;
   tag: string;
   type: "ir.actions.client";
 }
 export interface ActWindowAction extends Action {
-  Component: typeof Component;
+  Component: Type<Component<{}, OdooEnv>>;
   id: number;
   type: "ir.actions.act_window";
   res_model: string;

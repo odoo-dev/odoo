@@ -91,7 +91,7 @@ export interface OdooEnv extends Env {
   _t: (str: string) => string;
 }
 
-export type ComponentAction = Type<Component>;
+export type ComponentAction = Type<Component<{}, OdooEnv>>;
 export type FunctionAction = () => void;
 
 interface Registries {
@@ -145,7 +145,7 @@ export type ViewType =
 export interface View {
   name: string;
   type: ViewType;
-  Component: Type<Component>;
+  Component: Type<Component<{}, OdooEnv>>;
 }
 
 export interface SystrayItem {
