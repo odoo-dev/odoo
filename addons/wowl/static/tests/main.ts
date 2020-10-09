@@ -12,6 +12,7 @@ import "./services/router_tests";
 import "./services/rpc_tests";
 import "./services/services_tests";
 import "./components/webclient_tests";
+import "./components/web_client_integrated_tests";
 import "./components/user_menu_tests";
 import "./core/localization_tests";
 import "./components/dialog_tests";

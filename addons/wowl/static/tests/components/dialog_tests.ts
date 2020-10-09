@@ -114,7 +114,6 @@ QUnit.test(
     assert.containsOnce(target, ".o_dialog");
     await click(target, ".o_dialog footer button");
     assert.containsNone(target, ".o_dialog");
-
   }
 );
 

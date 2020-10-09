@@ -2,7 +2,6 @@ import { Component, tags } from "@odoo/owl";
 import { Dialog } from "../../components/dialog/dialog";
 import type { OdooEnv, Service, ComponentAction, FunctionAction, Type, View } from "./../../types";
 
-
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -18,7 +17,7 @@ type ActionTarget = "current" | "main" | "new" | "fullscreen" | "inline";
 type ActionId = number;
 type ActionXMLId = string;
 type ActionTag = string;
-interface ActionDescription {
+export interface ActionDescription {
   target?: ActionTarget;
   type: ActionType;
   [key: string]: any;
@@ -220,7 +219,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action_id: action.id,
       context: action.context || {},
     });
-    nextAction = nextAction || { type: 'ir.actions.act_window_close' };
+    nextAction = nextAction || { type: "ir.actions.act_window_close" };
     _doAction(nextAction, options);
   }
 
@@ -261,13 +260,13 @@ function makeActionManager(env: OdooEnv): ActionManager {
    */
   function _updateUI(controller: Controller, options: UpdateStackOptions = {}): void {
     const action = controller.action;
-    if (action.target === 'new') {
+    if (action.target === "new") {
       env.bus.trigger("action_manager:update", {
         dialog: {
           id: ++id,
           Component: controller.Component,
           props: { action },
-        }
+        },
       });
       return;
     }
@@ -301,7 +300,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       main: {
         id: ++id,
         Component: Controller,
-        props
+        props,
       },
     });
   }

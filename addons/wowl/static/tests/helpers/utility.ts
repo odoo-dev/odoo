@@ -2,8 +2,9 @@ import { Component } from "@odoo/owl";
 import { getDefaultLocalization } from "../../src/core/localization";
 import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
-import { Odoo, OdooConfig, OdooEnv, Type } from "../../src/types";
-import { makeTestOdoo } from "./mocks";
+import { Odoo, OdooConfig, OdooEnv, Service, Services, Type } from "../../src/types";
+import { MockRPC, makeTestOdoo } from "./mocks";
+import { ServerData, makeMockServer } from "./mock_server";
 
 // export { OdooEnv } from "../../src/types";
 
@@ -25,7 +26,7 @@ export async function mount<T extends Type<Component>>(
   return component as any;
 }
 
-type TestConfig = Partial<
+export type TestConfig = Partial<
   {
     [K in keyof OdooConfig]: OdooConfig[K] extends Registry<any>
       ? OdooConfig[K]
@@ -108,4 +109,34 @@ let templates: string;
 
 export function setTemplates(xml: string) {
   templates = xml;
+}
+
+export interface CreateComponentParams {
+  config: TestConfig;
+  serverData?: ServerData;
+  mockRPC?: MockRPC;
+}
+
+export async function createComponent(
+  Component: Type<Component>,
+  params?: CreateComponentParams
+): Promise<Component> {
+  const config = (params && params.config) || {};
+  const services = (config.services = config.services || new Registry<Service>());
+  if (params && (params.serverData || params.mockRPC)) {
+    services.remove("rpc");
+    services.remove("model");
+    makeMockServer(services, params.serverData, params.mockRPC);
+  }
+  const env = await makeTestEnv(config);
+  const target = getFixture();
+  return mount(Component, { env, target });
+}
+
+export function getService(
+  component: Component,
+  serviceName: keyof Services
+): Services[typeof serviceName] {
+  const env = component.env as OdooEnv;
+  return env.services[serviceName];
 }

@@ -74,10 +74,7 @@ export class Dialog extends Component<DialogProps, OdooEnv> {
   }
 
   _onKeydown(ev: KeyboardEvent) {
-    if (
-      ev.key === "Escape" &&
-      !this.modalRef.el?.classList.contains("o_inactive_modal")
-    ) {
+    if (ev.key === "Escape" && !this.modalRef.el?.classList.contains("o_inactive_modal")) {
       this._close();
     }
   }

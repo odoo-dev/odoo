@@ -6,13 +6,13 @@ The Dialog component is one of the main bricks of the web client.
 
 Here are its props
 
-| Name           | Type    | Default     | Description                                                       |
-| -------------- | ------- |------------ | ----------------------------------------------------------------- |
-| `fullscreen`   | boolean | false       | a class `o_modal_full` is added on the element "div.modal"        | 
-| `renderFooter` | boolean | true        | the footer contains a slot `buttons` and a default button `Ok`    |
-| `renderHeader` | boolean | true        | the header contains a title and a button `x` for "closing" dialog |
-| `size`         | string  | "modal-lg"  | used to set the dialog size (available suffix: "xl", "lg", "sm")  |
-| `title`        | string  | "Odoo"      |                                                                   |
+| Name           | Type    | Default    | Description                                                       |
+| -------------- | ------- | ---------- | ----------------------------------------------------------------- |
+| `fullscreen`   | boolean | false      | a class `o_modal_full` is added on the element "div.modal"        |
+| `renderFooter` | boolean | true       | the footer contains a slot `buttons` and a default button `Ok`    |
+| `renderHeader` | boolean | true       | the header contains a title and a button `x` for "closing" dialog |
+| `size`         | string  | "modal-lg" | used to set the dialog size (available suffix: "xl", "lg", "sm")  |
+| `title`        | string  | "Odoo"     |                                                                   |
 
 ## Slots
 
@@ -50,4 +50,3 @@ a custom event `dialog-closed` is triggered, allowing the parent to take action 
 
 The Dialog class uses a portal to locate itself in a div with class `o_dialog_container` but the
 communication with the parent goes as usual: via props or custom/dom events.
-

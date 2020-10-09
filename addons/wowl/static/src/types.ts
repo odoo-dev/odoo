@@ -181,7 +181,7 @@ export interface ModelData {
   records: DBRecord[];
   methods?: ModelMethods;
 }
-type Method = (args: any[], kwargs: any) => any;
+export type ModelMethod = (args: any[], kwargs: any) => any;
 export interface ModelMethods {
-  [methodName: string]: Method;
+  [methodName: string]: ModelMethod;
 }
