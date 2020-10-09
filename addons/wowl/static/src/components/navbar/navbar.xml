@@ -7,9 +7,9 @@
       <a class="o_menu_brand" role="button"/>
       <ul class="o_menu_sections" role="menu"/>
       <ul class="o_menu_systray" role="menu">
-        <li t-foreach="systrayItems" t-as="item" t-key="item.name">
-          <t t-component="item.Component" />
-        </li>
+        <t t-foreach="systrayItems" t-as="item" t-key="item.name">
+          <t t-component="item.Component"/>
+        </t>
       </ul>
     </nav>
   </header>

@@ -4,18 +4,39 @@
 
 The systray is the zone on the right of the navbar that contains various small
 components (called _systray items_). These components usually display some sort
-of information (like the number of unread message), notifications and/or let the
+of information (like the number of unread messages), notifications and/or let the
 user interact with them.
 
-## Adding a systray item
+## Systray items
 
-Adding a systray item is a two step process: create a component and register it
-to the systray registry.
-
-The systray registry takes an object with the following properties:
+A systray item is an object with the following properties:
 
 - `name (string)`: an unique string describing the systray item (technical name,
   usually prefixed by the current module name)
-- `Component`: the Component class that will be used to display the item
+- `Component`: the Component class that will be used to display the item. Its root
+  node has to be a `<li>` tag!
 - `sequence (number, optional)`: if given, this number will be used to order the
   items.
+
+Warning: the root node need to be a `<li>` tag. Otherwise, the systray item will
+not be styled properly.
+
+## Adding a systray item
+
+Once a systray item is defined, adding it to the web client is only a matter of
+registering it to the systray registry.
+
+For example:
+
+```js
+class MySystrayItem extends Component {
+  // some component ...
+}
+
+const item = {
+  name: "myaddon.some_description",
+  Component: MySystrayItem,
+};
+
+systrayRegistry.add(item.name, Component);
+```

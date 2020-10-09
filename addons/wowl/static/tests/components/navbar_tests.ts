@@ -13,7 +13,9 @@ import { MenuData, menusService } from "./../../src/services/menus";
 import { actionManagerService } from "./../../src/services/action_manager/action_manager";
 import { Registry } from "./../../src/core/registry";
 import { Service } from "./../../src/types";
+import { Component, tags } from "@odoo/owl";
 
+const { xml } = tags;
 let target: HTMLElement;
 let env: OdooEnv;
 let menus: MenuData;
@@ -45,13 +47,11 @@ QUnit.module("Navbar", {
 });
 
 QUnit.test("can be rendered", async (assert) => {
-  assert.expect(1);
   const navbar = await mount(NavBar, { env, target });
   assert.containsOnce(navbar.el!, '.o_menu_apps a[role="menuitem"]', "1 app present");
 });
 
 QUnit.test("dropdown menu can be toggled", async (assert) => {
-  assert.expect(2);
   const navbar = await mount(NavBar, { env, target });
 
   const dropdown = navbar.el!.querySelector<HTMLElement>(".dropdown-menu")!;
@@ -59,4 +59,20 @@ QUnit.test("dropdown menu can be toggled", async (assert) => {
   assert.hasClass(dropdown, "show");
   await click(navbar.el!, 'a[data-toggle="dropdown"]');
   assert.doesNotHaveClass(dropdown, "show");
+});
+
+QUnit.test("navbar can display systray items", async (assert) => {
+  class MyItem extends Component {
+    static template = xml`<li class="my-item">my item</li>`;
+  }
+
+  const item = {
+    name: "addon.myitem",
+    Component: MyItem,
+  };
+  env.registries.systray.add(item.name, item);
+
+  await mount(NavBar, { env, target });
+
+  assert.containsOnce(target, "li.my-item");
 });
