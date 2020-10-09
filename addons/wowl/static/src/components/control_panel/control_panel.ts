@@ -9,6 +9,9 @@ export class ControlPanel extends Component {
     return this.actionManager.getBreadcrumbs();
   }
 
+  _onBreadcrumbClicked(jsId: string) {
+    this.actionManager.restore(jsId);
+  }
   _onExecuteAction(actionId: number) {
     this.actionManager.doAction(actionId);
   }

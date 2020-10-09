@@ -1,3 +1,5 @@
+import { Component } from "@odoo/owl";
+
 type ActionId = number;
 type ActionXMLId = string;
 type ActionTag = string;
@@ -19,10 +21,12 @@ export interface Action {
   type: "ir.actions.act_window" | "ir.actions.client" | "ir.actions.server";
 }
 export interface ClientAction extends Action {
+  Component?: typeof Component;
   tag: string;
   type: "ir.actions.client";
 }
 export interface ActWindowAction extends Action {
+  Component: typeof Component;
   id: number;
   type: "ir.actions.act_window";
   res_model: string;

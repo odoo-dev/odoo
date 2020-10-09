@@ -5,7 +5,9 @@
         <ol class="breadcrumb">
           <t t-foreach="breadcrumbs" t-as="breadcrumb">
               <li class="breadcrumb-item">
-                <a t-if="!breadcrumb_last" href="#"><t t-esc="breadcrumb.name"/></a>
+                <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="_onBreadcrumbClicked(breadcrumb.jsId)">
+                  <t t-esc="breadcrumb.name"/>
+                </a>
                 <t t-else=""><t t-esc="breadcrumb.name"/></t>
               </li>
           </t>

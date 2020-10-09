@@ -1,10 +1,11 @@
 import { Component, hooks, tags } from "@odoo/owl";
 import type { OdooEnv, Service, FunctionAction } from "./../../types";
-import { ActionRequest, ActionOptions, Action, ClientAction } from "./helpers";
+import { ActionRequest, ActionOptions, Action, ClientAction, ActWindowAction } from "./helpers";
 
 interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): void;
   getBreadcrumbs(): any;
+  restore(jsId: string): void;
 }
 interface SubRenderingInfo {
   id: number;
@@ -35,10 +36,8 @@ export class ActionContainer extends Component<{}, OdooEnv> {
 function makeActionManager(env: OdooEnv): ActionManager {
   let id = 0;
   let actionStack: any[] = [];
-  const loadAction = async (
-    actionRequest: ActionRequest,
-    options: ActionOptions
-  ): Promise<Action> => {
+
+  async function loadAction(actionRequest: ActionRequest, options: ActionOptions): Promise<Action> {
     let action;
     if (typeof actionRequest === "string" && env.registries.actions.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
@@ -56,7 +55,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
     action.jsId = `action_${++id}`;
     return action;
-  };
+  }
+
   env.bus.on("action_manager:finalize", null, () => {
     console.log("action mounted");
   });
@@ -64,19 +64,18 @@ function makeActionManager(env: OdooEnv): ActionManager {
   async function doAction(actionRequest: ActionRequest, options?: ActionOptions): Promise<any> {
     options = options || {};
     let action = await loadAction(actionRequest, options);
-    let Comp;
     if (action.type === "ir.actions.client") {
       const clientAction = env.registries.actions.get((action as ClientAction).tag);
       if (clientAction.prototype instanceof Component) {
         // the client action is a component
-        Comp = clientAction;
+        (action as ClientAction).Component = (clientAction as typeof Component);
       } else {
         // the client action is a function
         return (clientAction as FunctionAction)();
       }
     } else if (action.type === "ir.actions.act_window") {
       const view = env.registries.views.get("form"); // FIXME: get the first view here
-      Comp = view.Component;
+      (action as ActWindowAction).Component = (view.Component as typeof Component);
     } else if (action.type === "ir.actions.server") {
       const nextAction = await env.services.rpc("/web/action/run", {
         action_id: action.id,
@@ -94,7 +93,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     env.bus.trigger("action_manager:update", {
       main: {
         id: ++id,
-        Component: Comp,
+        Component: (action as ClientAction | ActWindowAction).Component,
         props: { action },
       },
     });
@@ -106,7 +105,26 @@ function makeActionManager(env: OdooEnv): ActionManager {
     },
     getBreadcrumbs: () => {
       return actionStack.map((action) => {
-        return { name: action.name };
+        return {
+          name: action.name,
+          id: action.id,
+          jsId: action.jsId,
+        };
+      });
+    },
+    restore: (jsId) => {
+      const index = actionStack.findIndex((action) => action.jsId === jsId);
+      if (index < 0) {
+        throw new Error("invalid action to restore");
+      }
+      const action = actionStack[index];
+      actionStack = actionStack.slice(0, index + 1);
+      env.bus.trigger("action_manager:update", {
+        main: {
+          id: ++id,
+          Component: action.Component,
+          props: { action },
+        },
       });
     },
   };
