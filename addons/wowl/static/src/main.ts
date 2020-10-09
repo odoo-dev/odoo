@@ -5,6 +5,9 @@ import { makeEnv } from "./env";
 import * as registries from "./registries";
 import { Odoo, RuntimeOdoo, OdooBrowser } from "./types";
 
+// remove some day
+import "./demo_data";
+
 const { whenReady, loadFile } = owl.utils;
 
 declare const odoo: Odoo;

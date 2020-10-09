@@ -1,4 +1,4 @@
-import { Component, tags } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { userMenuItem } from "./components/user_menu/user_menu";
 import { Registry } from "./core/registry";
 import { actionManagerService } from "./services/action_manager/action_manager";
@@ -58,13 +58,6 @@ mainComponentRegistry.add("NotificationManager", NotificationManager);
 // instantiated and mounted in the DOM. In the latter, the function will be
 // executed
 export const actionRegistry: Registry<ComponentAction | FunctionAction> = new Registry();
-
-// Demo code
-class HelloAction extends Component {
-  static template = tags.xml`<div>Discuss ClientAction</div>`;
-}
-actionRegistry.add("mail.widgets.discuss", HelloAction);
-// actionRegistry.add("mail.widgets.discuss", () => console.log("I'm a function client action"));
 
 // -----------------------------------------------------------------------------
 // Views
