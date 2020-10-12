@@ -236,6 +236,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
     },
     switchView: (viewType) => {
       const controller = controllerStack[controllerStack.length - 1] as ViewController;
+      if (controller.action.type !== 'ir.actions.act_window') {
+        throw new Error(`switchView called but the current controller isn't a view`)
+      }
       const view = controller.views.find((view: any) => view.type === viewType);
       if (view) {
         const newController = Object.assign({}, controller, {
@@ -252,15 +255,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       if (index < 0) {
         throw new Error("invalid controller to restore");
       }
-      const controller = controllerStack[index];
-      controllerStack = controllerStack.slice(0, index + 1);
-      env.bus.trigger("action_manager:update", {
-        main: {
-          id: ++id,
-          Component: controller.Component,
-          props: { action: controller.action },
-        },
-      });
+      _updateStack(controllerStack[index], { index });
     },
   };
 }
