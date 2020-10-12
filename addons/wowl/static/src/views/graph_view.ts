@@ -7,7 +7,7 @@ const { xml } = tags;
 class GraphRenderer extends Component<{}, OdooEnv> {
   static template = xml`
     <div>
-        <ControlPanel/>
+        <ControlPanel breadcrumbs="props.breadcrumbs" views="props.views"/>
         <h2>Graph view</h2>
 
         <span>Model: <b><t t-esc="props.action.res_model"/></b></span>

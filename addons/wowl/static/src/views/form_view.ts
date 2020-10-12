@@ -7,7 +7,7 @@ const { xml } = tags;
 class FormRenderer extends Component<{}, OdooEnv> {
   static template = xml`
     <div>
-        <ControlPanel/>
+        <ControlPanel breadcrumbs="props.breadcrumbs" views="props.views"/>
         <h2>Form view</h2>
 
         <span>Model: <b><t t-esc="props.action.res_model"/></b></span>

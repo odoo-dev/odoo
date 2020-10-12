@@ -8,7 +8,7 @@ const { xml } = tags;
 class ListRenderer extends Component<{}, OdooEnv> {
   static template = xml`
     <div>
-        <ControlPanel/>
+        <ControlPanel breadcrumbs="props.breadcrumbs" views="props.views"/>
         <h2>List view</h2>
 
         <span>Model: <b><t t-esc="props.action.res_model"/></b></span>

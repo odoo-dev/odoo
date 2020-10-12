@@ -1,38 +1,98 @@
-import { Component, hooks, tags } from "@odoo/owl";
-import type { OdooEnv, Service, ComponentAction, FunctionAction } from "./../../types";
-import {
-  ActionRequest,
-  ActionOptions,
-  Action,
-  ClientAction,
-  ActWindowAction,
-  ServerAction,
-  Controller,
-  ViewController,
-} from "./helpers";
+import { Component, tags } from "@odoo/owl";
+import type { OdooEnv, Service, ComponentAction, FunctionAction, Type, View } from "./../../types";
+
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
-interface ActionManager {
-  doAction(action: ActionRequest, options?: ActionOptions): void;
-  getBreadcrumbs(): any;
-  getViews(): any;
-  switchView(viewType: string): void;
-  restore(jsId: string): void;
+type ActionType =
+  | "ir.actions.act_url"
+  | "ir.actions.act_window"
+  | "ir.actions.act_window_close"
+  | "ir.actions.client"
+  | "ir.actions.report"
+  | "ir.actions.server";
+type ActionTarget = "current" | "main" | "new" | "fullscreen" | "inline";
+type ActionId = number;
+type ActionXMLId = string;
+type ActionTag = string;
+interface ActionDescription {
+  target: ActionTarget;
+  type: ActionType;
+  [key: string]: any;
 }
+type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
+interface ActionOptions {
+  clearBreadcrumbs?: boolean;
+}
+
+interface Action {
+  id?: number;
+  jsId: string;
+  name: string;
+  context: object;
+  target: "current";
+  type: ActionType;
+}
+interface ClientAction extends Action {
+  tag: string;
+  type: "ir.actions.client";
+}
+type ViewId = number | false;
+type ViewType = string;
+interface ActWindowAction extends Action {
+  id?: number;
+  type: "ir.actions.act_window";
+  res_model: string;
+  views: [ViewId, ViewType][];
+}
+interface ServerAction extends Action {
+  id: number;
+  type: "ir.actions.server";
+}
+
+interface Controller {
+  jsId: string;
+  Component: Type<Component<{}, OdooEnv>>;
+  action: ClientAction | ActWindowAction;
+}
+interface ViewController extends Controller {
+  action: ActWindowAction;
+  view: View;
+  views: View[];
+}
+type ControllerStack = Controller[];
+
+interface Breadcrumb {
+  jsId: string;
+  name: string;
+}
+type Breadcrumbs = Breadcrumb[];
+interface ControllerProps {
+  action: ClientAction | ActWindowAction;
+  breadcrumbs: Breadcrumbs;
+  views?: View[];
+}
+
 interface SubRenderingInfo {
   id: number;
-  Component: typeof Component;
-  props: any;
+  Component: Type<Component<{}, OdooEnv>>;
+  props: ControllerProps;
 }
 interface RenderingInfo {
   main: SubRenderingInfo;
 }
+
 interface UpdateStackOptions {
   clearBreadcrumbs?: boolean;
   index?: number;
+}
+
+interface ActionManager {
+  doAction(action: ActionRequest, options?: ActionOptions): void;
+  switchView(viewType: string): void;
+  restore(jsId: string): void;
 }
 
 // -----------------------------------------------------------------------------
@@ -51,8 +111,6 @@ export class ActionContainer extends Component<{}, OdooEnv> {
       this.main = info.main;
       this.render();
     });
-    hooks.onMounted(() => this.env.bus.trigger("action_manager:finalize"));
-    hooks.onPatched(() => this.env.bus.trigger("action_manager:finalize"));
   }
 }
 
@@ -62,11 +120,7 @@ export class ActionContainer extends Component<{}, OdooEnv> {
 
 function makeActionManager(env: OdooEnv): ActionManager {
   let id = 0;
-  let controllerStack: Controller[] = [];
-
-  env.bus.on("action_manager:finalize", null, () => {
-    console.log("action mounted");
-  });
+  let controllerStack: ControllerStack = [];
 
   /**
    * Given an id, xmlid, tag (key of the client action registry) or directly an
@@ -159,6 +213,28 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
+   * @param {ControllerStack} stack
+   * @returns {Breadcrumbs}
+   */
+  function _getBreadcrumbs(stack: ControllerStack): Breadcrumbs {
+    return stack.map((controller) => {
+      return {
+        jsId: controller.jsId,
+        name: controller.action.name,
+      };
+    });
+  }
+
+  /**
+   * @param {ViewController} controller
+   * @returns {View[]}
+   */
+  function _getViews(controller: ViewController): View[] {
+    const multiRecord = controller.view.multiRecord;
+    return controller.views.filter((view) => view.multiRecord === multiRecord);
+  }
+
+  /**
    * Updates the controller stack and triggers a re-rendering.
    *
    * @param {Controller} controller
@@ -172,16 +248,32 @@ function makeActionManager(env: OdooEnv): ActionManager {
       index = 0;
     } else if ("index" in options) {
       index = options.index;
+    } else {
+      index = controllerStack.length + 1;
     }
-    if (index !== null) {
-      controllerStack = controllerStack.slice(0, index);
+    const nextStack = controllerStack.slice(0, index).concat([controller]);
+
+    class Controller extends Component {
+      static template = tags.xml`<t t-component="Component" t-props="props"/>`;
+      Component = controller.Component;
+      mounted() {
+        controllerStack = nextStack; // the controller is mounted, commit the new stack
+      }
     }
-    controllerStack.push(controller);
+
+    const props: ControllerProps = {
+      action: controller.action,
+      breadcrumbs: _getBreadcrumbs(nextStack),
+    };
+    if (controller.action.type === "ir.actions.act_window") {
+      props.views = _getViews(controller as ViewController);
+    }
+
     env.bus.trigger("action_manager:update", {
       main: {
         id: ++id,
-        Component: controller.Component,
-        props: { action: controller.action },
+        Component: Controller,
+        props
       },
     });
   }
@@ -220,24 +312,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
     doAction: (...args) => {
       _doAction(...args);
     },
-    getBreadcrumbs: () => {
-      return controllerStack.map((controller) => {
-        return {
-          name: controller.action.name,
-          id: controller.action.id,
-          jsId: controller.jsId,
-        };
-      });
-    },
-    getViews: () => {
-      const controller = controllerStack[controllerStack.length - 1] as ViewController;
-      const multiRecord = controller.view.multiRecord;
-      return controller.views.filter((view) => view.multiRecord === multiRecord);
-    },
     switchView: (viewType) => {
       const controller = controllerStack[controllerStack.length - 1] as ViewController;
-      if (controller.action.type !== 'ir.actions.act_window') {
-        throw new Error(`switchView called but the current controller isn't a view`)
+      if (controller.action.type !== "ir.actions.act_window") {
+        throw new Error(`switchView called but the current controller isn't a view`);
       }
       const view = controller.views.find((view: any) => view.type === viewType);
       if (view) {
