@@ -5,6 +5,64 @@
   background-color: $o-brand-odoo;
   color: white;
 
+  .o_navbar_apps_menu,
+  .o_menu_sections {
+    &.o_dropdown,
+    > div,
+    > li,
+    > li > .o_dropdown {
+      position: relative;
+      line-height: $o-navbar-height;
+      float: left;
+
+      > button {
+        height: $o-navbar-height;
+        border: none;
+        padding: 0 $o-horizontal-padding - 4px 0 $o-horizontal-padding;
+        background-color: transparent;
+        text-align: center;
+        color: inherit;
+
+        font-size: 1.5rem;
+        user-select: none;
+
+        &:focus,
+        &:active,
+        &:focus:active {
+          outline: none;
+        }
+      }
+      > ul {
+        position: absolute;
+        max-height: 90vh; // the dropdown should not overstep the viewport
+        overflow: auto;
+        margin: 0;
+        padding: 0.5rem 0;
+        box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.25);
+        color: #4c4c4c;
+        list-style: none;
+        background-color: #ffffff;
+        background-clip: padding-box;
+        border: 1px solid #dee2e6;
+        border-radius: 3px;
+      }
+
+      > li,
+      > ul > li {
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        padding: 0.25rem 1.6rem;
+        clear: both;
+        font-weight: 400;
+        color: #4c4c4c;
+        text-align: inherit;
+        white-space: nowrap;
+        line-height: 1.6rem;
+      }
+    }
+  }
+
   > a,
   > button {
     float: left;
@@ -16,7 +74,7 @@
     text-align: center;
     color: inherit;
 
-    font-size: 18px;
+    font-size: 1.5rem;
     user-select: none;
 
     &:hover,
@@ -38,17 +96,18 @@
   > .o_menu_brand {
     display: block;
     float: left;
-    margin-right: 35px;
+    margin-right: 3rem;
     user-select: none;
     color: white;
-    font-size: 22px;
+    font-size: 1.8rem;
     font-weight: 500;
     line-height: $o-navbar-height;
+    padding: 0 $o-horizontal-padding - 4px 0 $o-horizontal-padding;
     cursor: pointer;
   }
 
   > .o_menu_toggle {
-    margin-right: 5px;
+    margin-right: 0.4rem;
   }
 
   > ul {
@@ -81,44 +140,12 @@
       > a,
       > label {
         height: $o-navbar-height;
-        padding: 0 10px;
+        padding: 0 0.8rem;
         color: white;
         line-height: $o-navbar-height;
 
         &:hover {
           background-color: $o-navbar-inverse-link-hover-bg;
-        }
-      }
-
-      &.o_extra_menu_items {
-        > a {
-          width: $o-navbar-height;
-          text-align: center;
-        }
-        &.show > ul {
-          padding: 0;
-
-          > li {
-            > a {
-              background-color: $o-brand-odoo;
-              color: white;
-              border-bottom: 1px solid $o-brand-lightsecondary;
-
-              &.dropdown-toggle {
-                background-color: lighten($o-brand-odoo, 15%);
-                pointer-events: none; // hack to prevent clicking on it because dropdown always opened
-              }
-            }
-            > .dropdown-menu {
-              // remove dropdown-menu default style as it is nested in another one
-              position: static;
-              float: none;
-              display: block;
-              border: none;
-              box-shadow: none;
-              max-height: none;
-            }
-          }
         }
       }
     }
@@ -130,7 +157,7 @@
 
   .dropdown-menu.show {
     max-height: 90vh; // the dropdown should not overstep the viewport
-    min-width: 100%;
+    width: 100%;
     overflow: auto;
     margin-top: 0;
 
@@ -146,17 +173,22 @@
     background-color: $o-navbar-inverse-link-hover-bg;
   }
   .o_user_menu {
-    margin-left: 6px;
+    margin-left: 0.5rem;
 
     > a {
       padding-right: $o-horizontal-padding;
     }
 
     .oe_topbar_avatar {
-      height: 26px;
-      width: 26px;
+      height: 2.15rem;
+      width: 2.15rem;
       object-fit: cover;
       transform: translateY(-2px);
     }
   }
+}
+
+.highlighted,
+.highlight_on_hover:hover {
+  background-color: $o-navbar-inverse-link-hover-bg !important;
 }

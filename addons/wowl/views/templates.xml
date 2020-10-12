@@ -14,8 +14,6 @@
             <link rel="stylesheet" type="text/scss" t-att-href="scssFile"/>
         </t>
 
-        <script type="text/javascript" src="/web/static/lib/popper/popper.js"></script>
-
         <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
         <script type="text/javascript" src="/wowl/static/dist/app.js"></script>
         <t t-if="live_reload">

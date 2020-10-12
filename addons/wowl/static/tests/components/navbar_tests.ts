@@ -43,17 +43,17 @@ QUnit.module("Navbar", {
 
 QUnit.test("can be rendered", async (assert) => {
   const navbar = await createComponent(NavBar, { config: { services }, serverData });
-  assert.containsOnce(navbar.el!, '.o_menu_apps a[role="menuitem"]', "1 app present");
+  assert.containsOnce(navbar.el!, '.o_navbar_apps_menu button.o_dropdown_toggler', "1 apps menu toggler present");
 });
 
 QUnit.test("dropdown menu can be toggled", async (assert) => {
   const navbar = await createComponent(NavBar, { config: { services }, serverData });
 
-  const dropdown = navbar.el!.querySelector<HTMLElement>(".dropdown-menu")!;
-  await click(navbar.el!, 'a[data-toggle="dropdown"]');
-  assert.hasClass(dropdown, "show");
-  await click(navbar.el!, 'a[data-toggle="dropdown"]');
-  assert.doesNotHaveClass(dropdown, "show");
+  const dropdown = navbar.el!.querySelector<HTMLElement>(".o_navbar_apps_menu")!;
+  await click(navbar.el!, 'button.o_dropdown_toggler');
+  assert.containsOnce(dropdown, "ul.o_dropdown_menu");
+  await click(navbar.el!, 'button.o_dropdown_toggler');
+  assert.containsNone(dropdown, "ul.o_dropdown_menu");
 });
 
 QUnit.test("navbar can display systray items", async (assert) => {

@@ -1,36 +1,92 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
   <header t-name="wowl.NavBar" owl="1">
-    <nav class="o_main_navbar">
-      <t t-call="wowl.AppsMenu"/>
-      <a class="o_menu_brand" role="button"/>
-      <ul class="o_menu_sections" role="menu"/>
+    <nav class="o_main_navbar" t-on-dropdown-item-selected="onNavBarDropdownItemSelection">
+      <t t-call="wowl.NavBar.AppsMenu" />
+      <t t-if="state.selectedApp">
+        <DropdownItem class="o_menu_brand highlight_on_hover" payload="state.selectedApp">
+          <t t-esc="state.selectedApp.name" />
+        </DropdownItem>
+        <t t-call="wowl.NavBar.SectionsMenu">
+          <t
+            t-set="sections"
+            t-value="menuRepo.getMenuAsTree(state.selectedApp?.id).childrenTree"
+          />
+        </t>
+      </t>
       <ul class="o_menu_systray" role="menu">
         <t t-foreach="systrayItems" t-as="item" t-key="item.name">
-          <t t-component="item.Component"/>
+          <t t-component="item.Component" />
         </t>
       </ul>
     </nav>
   </header>
 
-<ul t-name="wowl.AppsMenu" class="o_menu_apps" owl="1">
-    <li class="dropdown">
-        <a class="full" data-toggle="dropdown" data-display="static" href="#" t-on-click="toggleDropdownMenu">
-            <i class="fa fa-th-large"/>
-        </a>
-        <div class="dropdown-menu" role="menu" t-att-class="{ show: state.showDropdownMenu }">
-            <t t-foreach="menuRepo.getApps()" t-as="app" t-key="app.id">
-                <a role="menuitem" href="#" class="dropdown-item o_app"
-                    t-att-data-menu-id="app.id"
-                    t-att-data-menu-xmlid="app.xmlid"
-                    t-att-data-action-id="app.actionID"
-                    t-on-click="_onMenuClicked(app)">
-                        <t t-esc="app.name"/>
-                </a>
-            </t>
-        </div>
-    </li>
-</ul>
+  <Dropdown
+    t-name="wowl.NavBar.AppsMenu"
+    class="o_navbar_apps_menu"
+    togglerClass="'highlight_on_hover'"
+    owl="1"
+  >
+    <i class="fa fa-th-large" />
+    <t t-set-slot="menu">
+        <t t-foreach="menuRepo.getApps()" t-as="app" t-key="app.id">
+          <DropdownItem
+            payload="app"
+            class="dropdown-item"
+            t-att-class="{active: state.selectedApp?.appID === app.appID}"
+          >
+              <t t-esc="app.name" />
+          </DropdownItem>
+        </t>
+    </t>
+  </Dropdown>
+
+  <ul t-name="wowl.NavBar.SectionsMenu" class="o_menu_sections" role="menu" owl="1">
+    <t t-foreach="sections" t-as="section" t-key="section.id">
+      <t t-if="section.childrenTree.length">
+        <t t-call="wowl.NavBar.SectionsMenu.Dropdown">
+          <t t-set="sectionId" t-value="section.id" />
+          <t t-set="name" t-value="section.name" />
+          <t t-set="items" t-value="section.childrenTree" />
+        </t>
+      </t>
+      <t t-else="">
+        <DropdownItem class="highlight_on_hover" payload="section">
+            <t t-esc="section.name" />
+        </DropdownItem>
+      </t>
+    </t>
+  </ul>
+
+  <Dropdown
+    t-name="wowl.NavBar.SectionsMenu.Dropdown"
+    togglerClass="{
+      'menu-item': true,
+      'highlight_on_hover': true,
+      'highlighted': open
+    }"
+    owl="1"
+  >
+    <t t-esc="name" />
+    <t t-set-slot="menu">
+      <t t-foreach="items" t-as="item" t-key="item.id">
+        <t t-if="!item.childrenTree.length">
+          <DropdownItem class="dropdown-item" payload="item">
+            <t t-esc="item.name" />
+          </DropdownItem>
+        </t>
+        <t t-else="">
+          <span class="text-muted pl-3"><t t-esc="item.name" /></span>
+          <t t-foreach="item.childrenTree" t-as="subItem" t-key="subItem.id">
+            <DropdownItem class="dropdown-item" payload="subItem">
+              <t t-esc="subItem.name" />
+            </DropdownItem>
+          </t>
+        </t>
+      </t>
+    </t>
+  </Dropdown>
 
 </templates>
