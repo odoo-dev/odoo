@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+  <div class="o_dropdown" t-name="wowl.Dropdown" t-on-dropdown-item-selected="onItemSelected" owl="1">
+    <button
+      class="o_dropdown_toggler"
+      t-att-class="props.togglerClass"
+      t-on-click="onTogglerClick"
+      t-on-mouseenter="onTogglerMouseEnter"
+    >
+      <t t-slot="default" />
+    </button>
+    <ul t-if="state.open" class="o_dropdown_menu" t-att-class="props.menuClass">
+      <t t-slot="menu" />
+    </ul>
+  </div>
+</templates>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <li t-name="wowl.DropdownItem" t-on-click="onClick" owl="1">
+    <t t-slot="default" />
+  </li>
+
+</templates>
