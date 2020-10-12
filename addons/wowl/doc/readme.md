@@ -17,3 +17,4 @@
 - [Registries](registries.md)
 - [Services](services/readme.md)
 - [Systray](systray.md)
+- [Various components](components/readme.md)

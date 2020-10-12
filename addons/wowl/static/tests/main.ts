@@ -14,6 +14,7 @@ import "./services/services_tests";
 import "./components/webclient_tests";
 import "./components/user_menu_tests";
 import "./core/localization_tests";
+import "./components/dialog_tests";
 
 (async () => {
   await setupTests();
