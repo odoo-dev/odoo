@@ -13,6 +13,10 @@
         <div class="o_action_buttons">
           <button t-on-click="_onExecuteAction(35)">Open Apps</button>
           <button t-on-click="_onExecuteAction(86)">Open Settings</button>
+          <button
+            t-on-click="_onExecuteAction({target: 'new', tag: 'mail.widgets.discuss', type: 'ir.actions.client'})">
+            Open Dialog Action
+          </button>
         </div>
         <nav class="btn-group o_cp_switch_buttons">
           <button t-if="props.views.length > 1"

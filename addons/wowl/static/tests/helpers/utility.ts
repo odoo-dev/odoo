@@ -118,9 +118,9 @@ export interface CreateComponentParams {
 }
 
 export async function createComponent(
-  Component: Type<Component>,
+  Component: Parameters<typeof mount>[0],
   params?: CreateComponentParams
-): Promise<Component> {
+): ReturnType<typeof mount> {
   const config = (params && params.config) || {};
   const services = (config.services = config.services || new Registry<Service>());
   if (params && (params.serverData || params.mockRPC)) {

@@ -17,7 +17,7 @@ export class ControlPanel extends Component {
   }
 
   // Demo code
-  _onExecuteAction(actionId: number) {
-    this.actionManager.doAction(actionId);
+  _onExecuteAction(action: any) {
+    this.actionManager.doAction(action);
   }
 }
