@@ -94,7 +94,9 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         promise.catch(error => {
             console.error(error);
         });
-        this._value = await promise;
+        const value = await promise;
+        this._isDirty = value !== this._value;
+        this._value = value;
         return _super();
     },
     /**
