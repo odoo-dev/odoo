@@ -80,14 +80,11 @@ interface ControllerProps {
   views?: View[];
 }
 
-interface SubRenderingInfo {
-  id: number;
-  Component: Type<Component<{}, OdooEnv>>;
-  props: ControllerProps;
-}
-interface RenderingInfo {
-  main: SubRenderingInfo;
-  dialog: SubRenderingInfo;
+interface ActionMangerUpdateInfo {
+  type: "MAIN" | "OPEN_DIALOG" | "CLOSE_DIALOG";
+  id?: number;
+  Component?: Type<Component<{}, OdooEnv>>;
+  props?: Controller;
 }
 
 interface UpdateStackOptions {
@@ -118,9 +115,18 @@ export class ActionContainer extends Component<{}, OdooEnv> {
   dialog = {};
   constructor(...args: any[]) {
     super(...args);
-    this.env.bus.on("action_manager:update", this, (info: RenderingInfo) => {
-      this.main = info.main || this.main;
-      this.dialog = info.dialog || {};
+    this.env.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionMangerUpdateInfo) => {
+      switch (info.type) {
+        case "MAIN":
+          this.main = { id: info.id, Component: info.Component, props: info.props };
+          break;
+        case "OPEN_DIALOG":
+          this.dialog = { id: info.id, Component: info.Component, props: info.props };
+          break;
+        case "CLOSE_DIALOG":
+          this.dialog = {};
+          break;
+      }
       this.render();
     });
   }
@@ -236,16 +242,18 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {ActURLAction} action
    */
   function _executeActURLAction(action: ActURLAction): void {
-    if (action.target === 'self') {
+    if (action.target === "self") {
       // framework.redirect(action.url); // TODO
     } else {
-      const w = env.browser.open(action.url, '_blank');
-      if (!w || w.closed || typeof w.closed === 'undefined') {
-        const msg = env._t('A popup window has been blocked. You may need to change your ' +
-                           'browser settings to allow popup windows for this page.');
+      const w = env.browser.open(action.url, "_blank");
+      if (!w || w.closed || typeof w.closed === "undefined") {
+        const msg = env._t(
+          "A popup window has been blocked. You may need to change your " +
+            "browser settings to allow popup windows for this page."
+        );
         env.services.notifications.create(msg, {
           sticky: true,
-          type: 'warning',
+          type: "warning",
         });
       }
     }
@@ -261,7 +269,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     return stack.map((controller) => {
       return {
         jsId: controller.jsId,
-        name: controller.action.name || env._t('Undefined'),
+        name: controller.action.name || env._t("Undefined"),
       };
     });
   }
@@ -289,12 +297,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
   function _updateUI(controller: Controller, options: UpdateStackOptions = {}): void {
     const action = controller.action;
     if (action.target === "new") {
-      env.bus.trigger("action_manager:update", {
-        dialog: {
-          id: ++id,
-          Component: controller.Component,
-          props: { action },
-        },
+      env.bus.trigger("ACTION_MANAGER:UPDATE", {
+        type: "OPEN_DIALOG",
+        id: ++id,
+        Component: controller.Component,
+        props: { action },
       });
       return;
     }
@@ -324,12 +331,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
       props.views = _getViews(controller as ViewController);
     }
 
-    env.bus.trigger("action_manager:update", {
-      main: {
-        id: ++id,
-        Component: Controller,
-        props,
-      },
+    env.bus.trigger("ACTION_MANAGER:UPDATE", {
+      type: "MAIN",
+      id: ++id,
+      Component: Controller,
+      props,
     });
   }
 
@@ -355,7 +361,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       case "ir.actions.act_url":
         return _executeActURLAction(action as ActURLAction);
       case "ir.actions.act_window_close":
-        return env.bus.trigger("action_manager:update", {});
+        return env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "CLOSE_DIALOG" });
       case "ir.actions.report":
         throw new Error("Report actions not handled yet");
       default:

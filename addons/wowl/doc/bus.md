@@ -7,10 +7,9 @@ of interest.
 
 ## Message List
 
-| Message                   | Payload                                   | Triggered when:                                                                                                        | Addon |
-| ------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----- |
-| `ROUTE_CHANGE`            | none                                      | the url hash was changed                                                                                               | wowl  |
-| `NOTIFICATIONS_CHANGE`    | list of notifications                     | the list of notifications changes                                                                                      | wowl  |
-| `RPC_ERROR`               | error data object                         | a rpc request (going through `rpc` service) fails                                                                      | wowl  |
-| `action_manager:update`   | list of descriptors of the user interface | the action manager has finished computing the next interface                                                           | wowl  |
-| `action_manager:finalize` | none                                      | the next interface has finished rendering, the action manager should commit it in its state. Its use is very sensitive | wowl  |
+| Message                 | Payload               | Triggered when:                                              | Addon |
+| ----------------------- | --------------------- | ------------------------------------------------------------ | ----- |
+| `ROUTE_CHANGE`          | none                  | the url hash was changed                                     | wowl  |
+| `NOTIFICATIONS_CHANGE`  | list of notifications | the list of notifications changes                            | wowl  |
+| `RPC_ERROR`             | error data object     | a rpc request (going through `rpc` service) fails            | wowl  |
+| `ACTION_MANAGER:UPDATE` | next rendering info   | the action manager has finished computing the next interface | wowl  |
