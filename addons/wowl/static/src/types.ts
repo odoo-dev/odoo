@@ -81,8 +81,9 @@ export interface Service<T = any> {
 type Browser = Env["browser"];
 
 export interface OdooBrowser extends Browser {
-  XMLHttpRequest: typeof window["XMLHttpRequest"];
   console: typeof window["console"];
+  open: typeof window["open"];
+  XMLHttpRequest: typeof window["XMLHttpRequest"];
 }
 
 export interface OdooEnv extends Env {

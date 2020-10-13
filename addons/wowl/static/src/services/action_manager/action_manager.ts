@@ -14,6 +14,7 @@ type ActionType =
   | "ir.actions.report"
   | "ir.actions.server";
 type ActionTarget = "current" | "main" | "new" | "fullscreen" | "inline";
+type URLActionTarget = "self";
 type ActionId = number;
 type ActionXMLId = string;
 type ActionTag = string;
@@ -30,9 +31,9 @@ interface ActionOptions {
 export interface Action {
   id?: number;
   jsId: string;
-  name: string;
-  context: object;
-  target: "current" | "new";
+  name?: string;
+  context?: object;
+  target?: ActionTarget | URLActionTarget;
   type: ActionType;
 }
 interface ClientAction extends Action {
@@ -49,6 +50,11 @@ interface ActWindowAction extends Action {
 interface ServerAction extends Action {
   id: number;
   type: "ir.actions.server";
+}
+interface ActURLAction extends Action {
+  target?: URLActionTarget;
+  type: "ir.actions.act_url";
+  url: string;
 }
 
 interface Controller {
@@ -224,7 +230,29 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
-   * Given a controller stack, return the list of breadcrumb items.
+   * Executes actions of type 'ir.actions.act_url', i.e. redirects to the
+   * given url.
+   *
+   * @param {ActURLAction} action
+   */
+  function _executeActURLAction(action: ActURLAction): void {
+    if (action.target === 'self') {
+      // framework.redirect(action.url); // TODO
+    } else {
+      const w = env.browser.open(action.url, '_blank');
+      if (!w || w.closed || typeof w.closed === 'undefined') {
+        const msg = env._t('A popup window has been blocked. You may need to change your ' +
+                           'browser settings to allow popup windows for this page.');
+        env.services.notifications.create(msg, {
+          sticky: true,
+          type: 'warning',
+        });
+      }
+    }
+  }
+
+  /**
+   * Given a controller stack, returns the list of breadcrumb items.
    *
    * @param {ControllerStack} stack
    * @returns {Breadcrumbs}
@@ -233,13 +261,13 @@ function makeActionManager(env: OdooEnv): ActionManager {
     return stack.map((controller) => {
       return {
         jsId: controller.jsId,
-        name: controller.action.name,
+        name: controller.action.name || env._t('Undefined'),
       };
     });
   }
 
   /**
-   * Given a controller, return the list of views of the same type (mono or
+   * Given a controller, returns the list of views of the same type (mono or
    * multi-record), to display in the view switcher.
    *
    * @param {ViewController} controller
@@ -251,7 +279,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
-   * Trigger a re-rendering with respect to the given controller.
+   * Triggers a re-rendering with respect to the given controller.
    *
    * @param {Controller} controller
    * @param {UpdateStackOptions} options
@@ -324,10 +352,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
         return _executeClientAction(action as ClientAction, options);
       case "ir.actions.server":
         return _executeServerAction(action as ServerAction, options);
+      case "ir.actions.act_url":
+        return _executeActURLAction(action as ActURLAction);
       case "ir.actions.act_window_close":
         return env.bus.trigger("action_manager:update", {});
-      case "ir.actions.act_url":
-        throw new Error("URl actions not handled yet");
       case "ir.actions.report":
         throw new Error("Report actions not handled yet");
       default:
@@ -367,7 +395,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["rpc"],
+  dependencies: ["notifications", "rpc"],
   deploy(env: OdooEnv): ActionManager {
     return makeActionManager(env);
   },

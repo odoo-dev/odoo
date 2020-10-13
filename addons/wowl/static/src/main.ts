@@ -17,8 +17,9 @@ declare const odoo: Odoo;
   const c = new owl.Component();
   const baseEnv = c.env;
   const browser: OdooBrowser = Object.assign({}, baseEnv.browser, {
-    XMLHttpRequest: window.XMLHttpRequest,
     console: window.console,
+    open: window.open.bind(window),
+    XMLHttpRequest: window.XMLHttpRequest,
   });
 
   // load templates and localization
