@@ -3,6 +3,10 @@ import { useService } from "../../core/hooks";
 
 export class ControlPanel extends Component {
   static template = "wowl.ControlPanel";
+  static defaultProps = {
+    breadcrumbs: [],
+    views: [],
+  };
   actionManager = useService("action_manager");
 
   _onBreadcrumbClicked(jsId: string) {

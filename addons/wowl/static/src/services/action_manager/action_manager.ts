@@ -1,4 +1,5 @@
 import { Component, tags } from "@odoo/owl";
+import { Dialog } from "../../components/dialog/dialog";
 import type { OdooEnv, Service, ComponentAction, FunctionAction, Type, View } from "./../../types";
 
 
@@ -18,7 +19,7 @@ type ActionId = number;
 type ActionXMLId = string;
 type ActionTag = string;
 interface ActionDescription {
-  target: ActionTarget;
+  target?: ActionTarget;
   type: ActionType;
   [key: string]: any;
 }
@@ -32,7 +33,7 @@ export interface Action {
   jsId: string;
   name: string;
   context: object;
-  target: "current";
+  target: "current" | "new";
   type: ActionType;
 }
 interface ClientAction extends Action {
@@ -42,7 +43,6 @@ interface ClientAction extends Action {
 type ViewId = number | false;
 type ViewType = string;
 interface ActWindowAction extends Action {
-  id?: number;
   type: "ir.actions.act_window";
   res_model: string;
   views: [ViewId, ViewType][];
@@ -82,6 +82,7 @@ interface SubRenderingInfo {
 }
 interface RenderingInfo {
   main: SubRenderingInfo;
+  dialog: SubRenderingInfo;
 }
 
 interface UpdateStackOptions {
@@ -103,14 +104,25 @@ export class ActionContainer extends Component<{}, OdooEnv> {
   static template = tags.xml`
     <div t-name="wowl.ActionContainer">
       <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="main.id"/>
+      <Dialog t-if="dialog.Component" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed">
+        <t t-component="dialog.Component" t-props="dialog.props"/>
+      </Dialog>
     </div>`;
+  static components = { Dialog };
   main = {};
+  dialog = {};
   constructor(...args: any[]) {
     super(...args);
     this.env.bus.on("action_manager:update", this, (info: RenderingInfo) => {
-      this.main = info.main;
+      this.main = info.main || this.main;
+      this.dialog = info.dialog || {};
       this.render();
     });
+  }
+
+  _onDialogClosed() {
+    this.dialog = {};
+    this.render();
   }
 }
 
@@ -176,7 +188,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       view: views[0],
       views,
     };
-    _updateStack(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
+    _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
   }
 
   /**
@@ -192,7 +204,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         Component: clientAction as ComponentAction,
         action,
       };
-      _updateStack(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
+      _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
     } else {
       (clientAction as FunctionAction)();
     }
@@ -204,15 +216,17 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {ServerAction} action
    */
   async function _executeServerAction(action: ServerAction, options: ActionOptions): Promise<void> {
-    const nextAction = await env.services.rpc("/web/action/run", {
+    let nextAction = await env.services.rpc("/web/action/run", {
       action_id: action.id,
       context: action.context || {},
     });
-    // nextAction = nextAction || { type: 'ir.actions.act_window_close' };
+    nextAction = nextAction || { type: 'ir.actions.act_window_close' };
     _doAction(nextAction, options);
   }
 
   /**
+   * Given a controller stack, return the list of breadcrumb items.
+   *
    * @param {ControllerStack} stack
    * @returns {Breadcrumbs}
    */
@@ -226,6 +240,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
+   * Given a controller, return the list of views of the same type (mono or
+   * multi-record), to display in the view switcher.
+   *
    * @param {ViewController} controller
    * @returns {View[]}
    */
@@ -235,14 +252,25 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
-   * Updates the controller stack and triggers a re-rendering.
+   * Trigger a re-rendering with respect to the given controller.
    *
    * @param {Controller} controller
    * @param {UpdateStackOptions} options
    * @param {boolean} [options.clearBreadcrumbs=false]
    * @param {number} [options.index]
    */
-  function _updateStack(controller: Controller, options: UpdateStackOptions = {}): void {
+  function _updateUI(controller: Controller, options: UpdateStackOptions = {}): void {
+    const action = controller.action;
+    if (action.target === 'new') {
+      env.bus.trigger("action_manager:update", {
+        dialog: {
+          id: ++id,
+          Component: controller.Component,
+          props: { action },
+        }
+      });
+      return;
+    }
     let index = null;
     if (options.clearBreadcrumbs) {
       index = 0;
@@ -262,7 +290,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
 
     const props: ControllerProps = {
-      action: controller.action,
+      action,
       breadcrumbs: _getBreadcrumbs(nextStack),
     };
     if (controller.action.type === "ir.actions.act_window") {
@@ -297,12 +325,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
         return _executeClientAction(action as ClientAction, options);
       case "ir.actions.server":
         return _executeServerAction(action as ServerAction, options);
+      case "ir.actions.act_window_close":
+        return env.bus.trigger("action_manager:update", {});
       case "ir.actions.act_url":
         throw new Error("URl actions not handled yet");
       case "ir.actions.report":
         throw new Error("Report actions not handled yet");
-      case "ir.actions.act_window_close":
-        throw new Error("ActWindowClose actions not handled yet");
       default:
         throw new Error(`The ActionManager service can't handle actions of type ${action.type}`);
     }
@@ -325,7 +353,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
           view,
         });
         const index = view.multiRecord ? controllerStack.length - 1 : controllerStack.length;
-        _updateStack(newController, { index });
+        _updateUI(newController, { index });
       }
     },
     restore: (jsId) => {
@@ -333,7 +361,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       if (index < 0) {
         throw new Error("invalid controller to restore");
       }
-      _updateStack(controllerStack[index], { index });
+      _updateUI(controllerStack[index], { index });
     },
   };
 }
