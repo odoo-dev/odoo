@@ -706,7 +706,7 @@ snippetOptions.registry.WebsiteSaleProductsItem = snippetOptions.SnippetOptionWi
     },
 });
 
-options.registry.ProductsRecentlyViewed = options.Class.extend({
+snippetOptions.registry.ProductsRecentlyViewed = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
