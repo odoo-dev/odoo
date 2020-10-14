@@ -36,12 +36,10 @@ QUnit.module("Navbar", {
     };
     target = getFixture();
     browser = {
-      fetch: makeMockFetch({
-        mockFetch(route: string): MenuData | undefined {
-          if (route.includes("load_menus")) {
-            return menus;
-          }
-        },
+      fetch: makeMockFetch((route) => {
+        if (route.includes("load_menus")) {
+          return menus;
+        }
       }),
     };
     env = await makeTestEnv({ browser, services });

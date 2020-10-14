@@ -125,8 +125,7 @@ export async function createComponent(
   const services = (config.services = config.services || new Registry<Service>());
   if (params && (params.serverData || params.mockRPC)) {
     services.remove("rpc");
-    services.remove("model");
-    makeMockServer(services, params.serverData, params.mockRPC);
+    makeMockServer(config, params.serverData, params.mockRPC);
   }
   const env = await makeTestEnv(config);
   const target = getFixture();

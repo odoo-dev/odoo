@@ -82,27 +82,20 @@ export function makeFakeMenusService(menuData?: MenuData): Service<MenuService> 
   };
 }
 
+function buildMockRPC(mockRPC?: MockRPC) {
+  return async (...args: Parameters<RPC>) => {
+    if (mockRPC) {
+      return mockRPC(...args);
+    }
+  };
+}
+
 export type MockRPC = (...params: Parameters<RPC>) => any;
-export function makeFakeRPCService(mockRPCs?: MockRPC | MockRPC[]): Service<RPC> {
+export function makeFakeRPCService(mockRPC?: MockRPC): Service<RPC> {
   return {
     name: "rpc",
     deploy() {
-      return async (...args: Parameters<RPC>) => {
-        let res;
-        if (mockRPCs) {
-          if (Array.isArray(mockRPCs)) {
-            for (const fn of mockRPCs) {
-              res = fn(...args);
-              if (res !== undefined) {
-                break;
-              }
-            }
-          } else {
-            res = mockRPCs(...args);
-          }
-        }
-        return res;
-      };
+      return buildMockRPC(mockRPC);
     },
   };
 }
@@ -173,33 +166,27 @@ export function makeMockXHR(
 //   // Low level API mocking
 //   // -----------------------------------------------------------------------------
 
-type MockFetchFn = (route: string) => any;
-
-interface MockFetchParams {
-  mockFetch?: MockFetchFn;
-}
-
-export function makeMockFetch(params: MockFetchParams): typeof fetch {
-  const mockFetch: MockFetchFn = (route) => {
+export function makeMockFetch(mockRPC: MockRPC): typeof fetch {
+  const _rpc = buildMockRPC(mockRPC);
+  return async (input: RequestInfo) => {
+    let route = typeof input === "string" ? input : input.url;
+    let params;
     if (route.includes("load_menus")) {
-      return {};
+      const routeArray = route.split("/");
+      params = {
+        hash: routeArray.pop(),
+      };
+      route = routeArray.join("/");
     }
-    return "";
-  };
-  const fetch: MockFetchFn = (...args) => {
-    let res = params && params.mockFetch ? params.mockFetch(...args) : undefined;
-    if (res === undefined || res === null) {
-      res = mockFetch(...args);
+    let res;
+    let status;
+    try {
+      res = await _rpc(route, params);
+      status = 200;
+    } catch (e) {
+      status = 500;
     }
-    return Array.isArray(res) ? res : [res];
-  };
-  return (input: RequestInfo) => {
-    const route = typeof input === "string" ? input : input.url;
-    const res = fetch(route);
-    const blob = new Blob(
-      res.map((r: any) => JSON.stringify(r)),
-      { type: "application/json" }
-    );
-    return Promise.resolve(new Response(blob, { status: 200 }));
+    const blob = new Blob([JSON.stringify(res || {})], { type: "application/json" });
+    return new Response(blob, { status });
   };
 }
