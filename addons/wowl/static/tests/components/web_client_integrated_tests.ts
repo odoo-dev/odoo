@@ -34,8 +34,8 @@ QUnit.module("Basic action rendering", {
     actionsRegistry = new Registry<ComponentAction | FunctionAction>();
     actionsRegistry.add("clientAction", ClientAction);
     const menus = {
-      root: { id: "root", children: [1], name: "root" },
-      1: { id: 1, children: [], name: "App0" },
+      root: { id: "root", children: [1], name: "root", appID: "root" },
+      1: { id: 1, children: [], name: "App0", appID: 1 },
     };
     const serverSideActions: any = {
       "wowl.client_action": {
@@ -60,7 +60,7 @@ QUnit.test("can display client actions from tag name", async function (assert) {
       assert.step(args[0]);
     },
   });
-  assert.verifySteps(['/wowl/load_menus']);
+  assert.verifySteps(["/wowl/load_menus"]);
   const actionManager = getService(webClient, "action_manager");
   actionManager.doAction("clientAction");
   await nextTick();

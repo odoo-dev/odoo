@@ -4,6 +4,7 @@ export interface Menu {
   id: number | string;
   children: number[];
   name: string;
+  appID?: Menu['id'];
 }
 
 export interface MenuTree extends Menu {

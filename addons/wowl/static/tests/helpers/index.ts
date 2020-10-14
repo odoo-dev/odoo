@@ -16,7 +16,6 @@ export { OdooEnv } from "../../src/types";
 export {
   makeTestOdoo,
   makeFakeUserService,
-  makeFakeMenusService,
   makeFakeRPCService,
   makeMockXHR,
   makeMockFetch,

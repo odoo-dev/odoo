@@ -121,12 +121,11 @@ export async function createComponent(
   Component: Parameters<typeof mount>[0],
   params?: CreateComponentParams
 ): ReturnType<typeof mount> {
-  const config = (params && params.config) || {};
+  let { config, serverData, mockRPC } = params || {};
+  config = config || {};
   const services = (config.services = config.services || new Registry<Service>());
-  if (params && (params.serverData || params.mockRPC)) {
-    services.remove("rpc");
-    makeMockServer(config, params.serverData, params.mockRPC);
-  }
+  services.remove("rpc");
+  makeMockServer(config, serverData, mockRPC);
   const env = await makeTestEnv(config);
   const target = getFixture();
   return mount(Component, { env, target });

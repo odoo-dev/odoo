@@ -1,4 +1,3 @@
-import { Menu, MenuData, MenuService, MenuTree } from "../../src/services/menus";
 import { UserService } from "../../src/services/user";
 import { Odoo, OdooEnv, OdooConfig, Service } from "../../src/types";
 import { RPC } from "../../src/services/rpc";
@@ -51,7 +50,7 @@ export function makeFakeUserService(
   };
 }
 
-export function makeFakeMenusService(menuData?: MenuData): Service<MenuService> {
+/*export function makeFakeMenusService(menuData?: MenuData): Service<MenuService> {
   const _menuData = menuData || {
     root: { id: "root", children: [1], name: "root" },
     1: { id: 1, children: [], name: "App0" },
@@ -80,7 +79,7 @@ export function makeFakeMenusService(menuData?: MenuData): Service<MenuService> 
       return menusService;
     },
   };
-}
+}*/
 
 function buildMockRPC(mockRPC?: MockRPC) {
   return async (...args: Parameters<RPC>) => {
