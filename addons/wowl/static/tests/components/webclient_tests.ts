@@ -3,6 +3,7 @@ import * as QUnit from "qunit";
 import { WebClient } from "../../src/components/webclient/webclient";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "./../../src/services/action_manager/action_manager";
+import { notificationService } from "./../../src/services/notifications";
 import {
   getFixture,
   makeFakeUserService,
@@ -28,6 +29,7 @@ QUnit.module("Web Client", {
     services.add("menus", makeFakeMenusService());
     services.add("rpc", makeFakeRPCService());
     services.add(actionManagerService.name, actionManagerService);
+    services.add(notificationService.name, notificationService);
     env = await makeTestEnv({ services });
   },
 });

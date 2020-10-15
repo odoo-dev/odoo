@@ -11,6 +11,7 @@ import {
 } from "../helpers/index";
 import { MenuData, menusService } from "./../../src/services/menus";
 import { actionManagerService } from "./../../src/services/action_manager/action_manager";
+import { notificationService } from "./../../src/services/notifications";
 import { Registry } from "./../../src/core/registry";
 import { Service } from "./../../src/types";
 import { Component, tags } from "@odoo/owl";
@@ -27,6 +28,7 @@ QUnit.module("Navbar", {
     services = new Registry();
     services.add(menusService.name, menusService);
     services.add(actionManagerService.name, actionManagerService);
+    services.add(notificationService.name, notificationService);
     services.add("rpc", makeFakeRPCService());
     menus = {
       root: { id: "root", children: [1], name: "root" },

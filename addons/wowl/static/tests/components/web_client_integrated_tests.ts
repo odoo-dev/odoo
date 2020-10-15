@@ -5,6 +5,7 @@ import { ComponentAction, FunctionAction, Service } from "../../src/types";
 import { OdooEnv, makeFakeMenusService, makeFakeUserService, nextTick } from "../helpers/index";
 import { ServerData } from "../helpers/mock_server";
 import { actionManagerService } from "../../src/services/action_manager/action_manager";
+import { notificationService } from "./../../src/services/notifications";
 import { WebClient } from "../../src/components/webclient/webclient";
 import { CreateComponentParams, createComponent, getService } from "../helpers/utility";
 
@@ -22,7 +23,8 @@ async function createWebClient(params: CreateComponentParams) {
   params.serverData = serverData;
   services.add("user", makeFakeUserService());
   services.add("menus", makeFakeMenusService(params.serverData.menus));
-  services.add("action_manager", actionManagerService);
+  services.add(actionManagerService.name, actionManagerService);
+  services.add(notificationService.name, notificationService);
   return createComponent(WebClient, params);
 }
 

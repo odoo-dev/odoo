@@ -1,6 +1,7 @@
 import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "../../src/services/action_manager/action_manager";
+import { notificationService } from "./../../src/services/notifications";
 import { makeTestEnv, nextTick } from "../helpers/index";
 import { ComponentAction, FunctionAction, OdooEnv, Service } from "../../src/types";
 import { makeMockServer } from "../helpers/mock_server";
@@ -38,7 +39,9 @@ QUnit.module("Action Manager Service", {
     services = new Registry<Service>();
     makeMockServer(services, { models, actions: serverSideActions, views: {} });
 
-    services.add("action_manager", actionManagerService);
+    services.add(actionManagerService.name, actionManagerService);
+    services.add(notificationService.name, notificationService);
+
     env = await makeTestEnv({ actions: actionsRegistry, services });
   },
 });
