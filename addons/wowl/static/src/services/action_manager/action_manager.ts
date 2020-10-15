@@ -13,6 +13,8 @@ import type {
   ViewOptions,
   ViewType,
 } from "./../../types";
+import { Route } from "../router";
+import { ActionContext, ClientActionProps } from "../../types";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -36,8 +38,9 @@ export interface ActionDescription {
   [key: string]: any;
 }
 export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
-interface ActionOptions {
+export interface ActionOptions {
   clearBreadcrumbs?: boolean;
+  viewType?: ViewType;
 }
 
 interface Context {
@@ -56,6 +59,9 @@ export interface Action {
 interface ClientAction extends Action {
   tag: string;
   type: "ir.actions.client";
+  params?: {
+    [key: string]: any;
+  };
 }
 interface ActWindowAction extends Action {
   type: "ir.actions.act_window";
@@ -87,7 +93,7 @@ interface Controller {
   jsId: string;
   Component: Type<Component<{}, OdooEnv>>;
   action: ClientAction | ActWindowAction;
-  props: ActionProps | ViewProps;
+  props: ActionProps | ViewProps | ClientActionProps;
 }
 interface ViewController extends Controller {
   action: ActWindowAction;
@@ -116,9 +122,10 @@ interface UpdateStackOptions {
 }
 
 interface ActionManager {
-  doAction(action: ActionRequest, options?: ActionOptions): void;
+  doAction(action: ActionRequest, options?: ActionOptions): Promise<void>;
   switchView(viewType: string): void;
   restore(jsId: string): void;
+  loadRouterState(state: Route["hash"], options: ActionOptions): Promise<boolean>;
 }
 
 // -----------------------------------------------------------------------------
@@ -134,8 +141,9 @@ export class ActionContainer extends Component<{}, OdooEnv> {
       </Dialog>
     </div>`;
   static components = { Dialog };
-  main = {};
-  dialog = {};
+  main: Partial<ActionMangerUpdateInfo> = {};
+  dialog: Partial<ActionMangerUpdateInfo> = {};
+
   constructor(...args: any[]) {
     super(...args);
     this.env.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionMangerUpdateInfo) => {
@@ -168,6 +176,7 @@ export class ActionContainer extends Component<{}, OdooEnv> {
 function makeActionManager(env: OdooEnv): ActionManager {
   let id = 0;
   let controllerStack: ControllerStack = [];
+  let dialogCloseProm: Promise<any> | undefined = undefined;
 
   // ---------------------------------------------------------------------------
   // misc
@@ -240,7 +249,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       context: action.context,
       viewSwitcherEntries,
       withActionMenus: target !== "new" && target !== "inline",
-      withFilters: action.views.some((v) => v[1] === 'search'),
+      withFilters: action.views.some((v) => v[1] === "search"),
     };
 
     return {
@@ -260,16 +269,47 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {boolean} [options.clearBreadcrumbs=false]
    * @param {number} [options.index]
    */
-  function _updateUI(controller: Controller, options: UpdateStackOptions = {}): void {
+  function _updateUI(controller: Controller, options: UpdateStackOptions = {}): Promise<void> {
+    let resolve: () => any;
+    let dialogCloseResolve: () => any;
+    const currentActionProm: Promise<void> = new Promise((_r) => {
+      resolve = _r;
+    });
     const action = controller.action;
+    class Controller extends Component {
+      static template = tags.xml`<t t-component="Component" t-props="props"/>`;
+      Component = controller.Component;
+      componentProps = this.props;
+      mounted() {
+        let updatedMode;
+        if (action.target !== "new") {
+          updatedMode = "main";
+          controllerStack = nextStack; // the controller is mounted, commit the new stack
+        } else {
+          updatedMode = "dialog";
+          dialogCloseProm = new Promise((_r) => {
+            dialogCloseResolve = _r;
+          }).then(() => {
+            dialogCloseProm = undefined;
+          });
+        }
+        resolve();
+        env.bus.trigger("ACTION_MANAGER:UI-UPDATED", { updatedMode, action });
+      }
+      willUnmount() {
+        if (action.target === "new" && dialogCloseResolve) {
+          dialogCloseResolve();
+        }
+      }
+    }
     if (action.target === "new") {
       env.bus.trigger("ACTION_MANAGER:UPDATE", {
         type: "OPEN_DIALOG",
         id: ++id,
-        Component: controller.Component,
+        Component: Controller,
         props: controller.props,
       });
-      return;
+      return currentActionProm;
     }
 
     let index = null;
@@ -281,14 +321,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
       index = controllerStack.length + 1;
     }
     const nextStack = controllerStack.slice(0, index).concat([controller]);
-    class Controller extends Component {
-      static template = tags.xml`<t t-component="Component" t-props="props"/>`;
-      Component = controller.Component;
-      componentProps = this.props;
-      mounted() {
-        controllerStack = nextStack; // the controller is mounted, commit the new stack
-      }
-    }
     controller.props.breadcrumbs = _getBreadcrumbs(nextStack);
 
     env.bus.trigger("ACTION_MANAGER:UPDATE", {
@@ -297,6 +329,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       Component: Controller,
       props: controller.props,
     });
+    return currentActionProm;
   }
 
   // ---------------------------------------------------------------------------
@@ -339,7 +372,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {ActWindowAction} action
    * @param {ActionOptions} options
    */
-  function _executeActWindowAction(action: ActWindowAction, options: ActionOptions): void {
+  function _executeActWindowAction(action: ActWindowAction, options: ActionOptions): Promise<void> {
     const views: View[] = [];
     for (const [_, type] of action.views) {
       if (env.registries.views.contains(type)) {
@@ -367,7 +400,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       views,
       props: _getViewProps(view, action, views),
     };
-    _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
+    return _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
   }
 
   // ---------------------------------------------------------------------------
@@ -381,18 +414,20 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {ClientAction} action
    * @param {ActionOptions} options
    */
-  function _executeClientAction(action: ClientAction, options: ActionOptions): void {
+  async function _executeClientAction(action: ClientAction, options: ActionOptions): Promise<void> {
     const clientAction = env.registries.actions.get(action.tag);
     if (clientAction.prototype instanceof Component) {
       const controller: Controller = {
         jsId: `controller_${++id}`,
         Component: clientAction as ComponentAction,
         action,
-        props: {},
+        props: {
+          params: action.params,
+        },
       };
-      _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
+      return _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
     } else {
-      (clientAction as FunctionAction)();
+      return (clientAction as FunctionAction)();
     }
   }
 
@@ -464,11 +499,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
     // TODO: download the report
     console.log(`download report ${url}`);
     if (action.close_on_report_download) {
-      doAction({ type: "ir.actions.act_window_close" });
+      return doAction({ type: "ir.actions.act_window_close" });
     }
   }
 
-  function _executeReportClientAction(action: ReportAction, options: ActionOptions): void {
+  function _executeReportClientAction(action: ReportAction, options: ActionOptions): Promise<void> {
     const clientActionOptions = Object.assign({}, options, {
       context: action.context,
       data: action.data,
@@ -478,7 +513,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       report_name: action.report_name,
       report_url: _getReportUrl(action, "html"),
     });
-    doAction("report.client_action", clientActionOptions);
+    return doAction("report.client_action", clientActionOptions);
   }
 
   /**
@@ -490,7 +525,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    */
   async function _executeReportAction(action: ReportAction, options: ActionOptions): Promise<void> {
     if (action.report_type === "qweb-html") {
-      _executeReportClientAction(action, options);
+      return _executeReportClientAction(action, options);
     } else if (action.report_type === "qweb-pdf") {
       // check the state of wkhtmltopdf before proceeding
       if (!wkhtmltopdfStateProm) {
@@ -537,7 +572,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       context: action.context || {},
     });
     nextAction = nextAction || { type: "ir.actions.act_window_close" };
-    doAction(nextAction, options);
+    return doAction(nextAction, options);
   }
 
   // ---------------------------------------------------------------------------
@@ -561,8 +596,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
         return _executeActURLAction(action as ActURLAction);
       case "ir.actions.act_window":
         return _executeActWindowAction(action as ActWindowAction, options);
-      case "ir.actions.act_window_close":
-        return env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "CLOSE_DIALOG" });
+      case "ir.actions.act_window_close": {
+        env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "CLOSE_DIALOG" });
+        return dialogCloseProm;
+      }
       case "ir.actions.client":
         return _executeClientAction(action as ClientAction, options);
       case "ir.actions.report":
@@ -580,11 +617,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
    *
    * @param {ViewType} viewType
    */
-  function switchView(viewType: ViewType): void {
+  function switchView(viewType?: ViewType): void {
     const controller = controllerStack[controllerStack.length - 1] as ViewController;
     if (controller.action.type !== "ir.actions.act_window") {
       throw new Error(`switchView called but the current controller isn't a view`);
     }
+    viewType = viewType || controller.view.type;
     const view = controller.views.find((view: any) => view.type === viewType);
     if (!view) {
       throw new Error(`switchView: cannot find view of type ${viewType}`);
@@ -615,12 +653,88 @@ function makeActionManager(env: OdooEnv): ActionManager {
     _updateUI(controllerStack[index], { index });
   }
 
+  async function _loadRouterState(state: Route["hash"], options: ActionOptions): Promise<boolean> {
+    let action: ActionRequest | undefined;
+    if (state.action) {
+      // ClientAction
+      if (Number.isNaN(state.action) && env.registries.actions.contains(state.action)) {
+        action = {
+          params: state,
+          tag: state.action,
+          type: "ir.actions.client",
+        };
+      }
+      const currentController = controllerStack[controllerStack.length - 1];
+      const currentActionId =
+        currentController && currentController.action && currentController.action.id;
+      // Window Action: determine model, viewType etc....
+      if (
+        !action &&
+        !Number.isNaN(state.action) &&
+        currentActionId === parseInt(state.action, 10)
+      ) {
+        // only when we already have an action in dom
+        try {
+          // TODO: insert options into switchView
+          switchView(state.view_type);
+          return true;
+        } catch (e) {}
+      }
+      if (!action) {
+        // the action to load isn't the current one, so execute it
+        const context: ActionContext = {};
+        if (state.active_id) {
+          context.active_id = state.active_id;
+        }
+        if (state.active_ids) {
+          // jQuery's BBQ plugin does some parsing on values that are valid integers
+          // which means that if there's only one item, it will do parseInt() on it,
+          // otherwise it will keep the comma seperated list as string
+          context.active_ids = state.active_ids.split(",").map(function (id: string) {
+            return parseInt(id, 10) || id;
+          });
+        } else if (state.active_id) {
+          context.active_ids = [state.active_id];
+        }
+        context.params = state;
+        action = state.action;
+        options = Object.assign(options, {
+          additional_context: context,
+          resID: state.id || undefined, // empty string with bbq
+          viewType: state.view_type,
+        });
+      }
+    } else if (state.model && (state.view_type || state.id)) {
+      if (state.id) {
+        action = {
+          res_model: state.model,
+          res_id: state.id,
+          type: "ir.actions.act_window",
+          views: [[state.view_id || false, "form"]],
+        };
+      } else if (state.view_type) {
+        // this is a window action on a multi-record view, so restore it
+        // from the session storage
+        // const storedAction = this.call('session_storage', 'getItem', 'current_action');
+        const lastAction = JSON.parse(/*storedAction ||*/ "{}");
+        if (lastAction.res_model === state.model) {
+          action = lastAction;
+          options.viewType = state.view_type;
+        }
+      }
+    }
+    if (action) {
+      await doAction(action, options);
+      return true;
+    }
+    return false;
+  }
+
   return {
-    doAction: (...args) => {
-      doAction(...args);
-    },
+    doAction,
     switchView,
     restore,
+    loadRouterState: _loadRouterState,
   };
 }
 

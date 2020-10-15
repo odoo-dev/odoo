@@ -1,4 +1,4 @@
-import { Component, useState } from "@odoo/owl";
+import { Component, hooks } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
 import { useService } from "../../core/hooks";
 import { MenuTree } from "../../services/menus";
@@ -15,9 +15,13 @@ export class NavBar extends Component<{}, OdooEnv> {
   static components = { Dropdown, DropdownItem };
   actionManager = useService("action_manager");
   menuRepo = useService("menus");
-  state = useState<NavBarState>({
-    selectedApp: null,
-  });
+
+  constructor(...args: any[]) {
+    super(...args);
+    hooks.onMounted(() => {
+      this.env.bus.on("MENUS:APP-CHANGED", this, () => this.render());
+    });
+  }
 
   systrayItems = this._getSystrayItems();
 
@@ -31,7 +35,10 @@ export class NavBar extends Component<{}, OdooEnv> {
 
   onNavBarDropdownItemSelection(ev: OwlEvent<{ payload: any }>) {
     const { payload: menu } = ev.detail;
-    this.state.selectedApp = this.menuRepo.getMenuAsTree(menu.appID);
-    this.actionManager.doAction(menu.actionID, { clearBreadcrumbs: true });
+    this.menuRepo.selectMenu(menu);
+  }
+
+  get currentApp() {
+    return this.menuRepo.getCurrentApp();
   }
 }

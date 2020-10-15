@@ -8,7 +8,7 @@ export interface Route {
   hash: Query;
 }
 
-interface Router {
+export interface Router {
   current: Route;
   pushState(hash: Query, replace?: boolean): void;
 }

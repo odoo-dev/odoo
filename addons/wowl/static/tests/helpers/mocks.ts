@@ -2,6 +2,7 @@ import { UserService } from "../../src/services/user";
 import { Odoo, OdooEnv, OdooConfig, Service } from "../../src/types";
 import { RPC } from "../../src/services/rpc";
 import type { Deferred } from "./utility";
+import { Route, Router } from "../../src/services/router";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -187,5 +188,45 @@ export function makeMockFetch(mockRPC: MockRPC): typeof fetch {
     }
     const blob = new Blob([JSON.stringify(res || {})], { type: "application/json" });
     return new Response(blob, { status });
+  };
+}
+
+interface FakeRouterParams {
+  onPushState?: (...args: any[]) => any;
+  initialRoute?: Route;
+}
+
+export function makeFakeRouterService(params?: FakeRouterParams): Service<Router> {
+  let current: Route = {
+    pathname: "test.wowl",
+    search: {},
+    hash: {},
+  };
+  if (params && params.initialRoute) {
+    Object.assign(current, params.initialRoute);
+  }
+  return {
+    name: "router",
+    deploy(env: OdooEnv) {
+      function loadState(hash: Route["hash"]) {
+        current.hash = hash;
+        env.bus.trigger("ROUTE_CHANGE");
+      }
+      env.bus.on("test:hashchange", null, loadState);
+      return {
+        get current(): Route {
+          return current;
+        },
+        pushState(hash, replace) {
+          if (!replace) {
+            hash = Object.assign({}, current.hash, hash);
+          }
+          current = Object.assign({}, current, { hash });
+          if (params && params.onPushState) {
+            params.onPushState(current.hash);
+          }
+        },
+      };
+    },
   };
 }

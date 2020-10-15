@@ -31,6 +31,9 @@ interface UserContext {
   tz: string;
   uid: number;
 }
+export interface ActionContext {
+  [key: string]: any;
+}
 
 export type UserCompany = [number, string];
 
@@ -176,7 +179,11 @@ export interface ViewProps extends ActionProps {
   options: ViewOptions;
 }
 
-export type ControllerProps = ActionProps | ViewProps;
+export interface ClientActionProps extends ActionProps {
+  params?: any;
+}
+
+export type ControllerProps = ActionProps | ViewProps | ClientActionProps;
 
 export interface RendererProps {
   arch: string; // ViewDefinition['arch'];

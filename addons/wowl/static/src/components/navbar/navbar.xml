@@ -4,14 +4,14 @@
   <header t-name="wowl.NavBar" owl="1">
     <nav class="o_main_navbar" t-on-dropdown-item-selected="onNavBarDropdownItemSelection">
       <t t-call="wowl.NavBar.AppsMenu" />
-      <t t-if="state.selectedApp">
-        <DropdownItem class="o_menu_brand highlight_on_hover" payload="state.selectedApp">
-          <t t-esc="state.selectedApp.name" />
+      <t t-if="currentApp">
+        <DropdownItem class="o_menu_brand highlight_on_hover" payload="currentApp">
+          <t t-esc="currentApp.name" />
         </DropdownItem>
         <t t-call="wowl.NavBar.SectionsMenu">
           <t
             t-set="sections"
-            t-value="menuRepo.getMenuAsTree(state.selectedApp?.id).childrenTree"
+            t-value="currentApp ? menuRepo.getMenuAsTree(currentApp.id).childrenTree : []"
           />
         </t>
       </t>
@@ -35,7 +35,7 @@
           <DropdownItem
             payload="app"
             class="dropdown-item"
-            t-att-class="{active: state.selectedApp?.appID === app.appID}"
+            t-att-class="{active: currentApp?.appID === app.appID}"
           >
               <t t-esc="app.name" />
           </DropdownItem>

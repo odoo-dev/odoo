@@ -8,6 +8,7 @@ import { makeFakeUserService } from "../helpers/index";
 import { Service, Type } from "../../src/types";
 import { mount, makeTestEnv, TestConfig } from "../helpers/utility";
 import { menusService } from "../../src/services/menus";
+import { makeFakeRouterService } from "../helpers/mocks";
 
 const { xml } = tags;
 
@@ -20,6 +21,7 @@ QUnit.module("Web Client", {
     services.add(actionManagerService.name, actionManagerService);
     services.add(notificationService.name, notificationService);
     services.add("menus", menusService);
+    services.add("router", makeFakeRouterService());
     baseConfig = { services, activateMockServer: true };
   },
 });
