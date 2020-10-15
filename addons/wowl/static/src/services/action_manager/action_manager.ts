@@ -31,7 +31,7 @@ export interface ActionDescription {
   type: ActionType;
   [key: string]: any;
 }
-type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
+export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
 interface ActionOptions {
   clearBreadcrumbs?: boolean;
 }
