@@ -141,6 +141,7 @@ export class ActionContainer extends Component<{}, OdooEnv> {
       switch (info.type) {
         case "MAIN":
           this.main = { id: info.id, Component: info.Component, props: info.props };
+          this.dialog = {};
           break;
         case "OPEN_DIALOG":
           this.dialog = { id: info.id, Component: info.Component, props: info.props };
