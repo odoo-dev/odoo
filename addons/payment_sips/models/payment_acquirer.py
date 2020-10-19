@@ -36,9 +36,9 @@ class PaymentAcquirer(models.Model):
         """ Override of payment to unlist Sips acquirers when the currency is not supported. """
         acquirers = super()._get_compatible_acquirers(*args, currency_id=currency_id, **kwargs)
 
-        if currency_id and 'sips' in acquirers.mapped('name'):
-            if self.env['res.currency'].browse(currency_id).name not in SUPPORTED_CURRENCIES:
-                acquirers = acquirers.filtered(lambda a: a.provider != 'sips')
+        currency = self.env['res.currency'].browse(currency_id).exists()
+        if currency and currency.name not in SUPPORTED_CURRENCIES:
+            acquirers = acquirers.filtered(lambda a: a.provider != 'sips')
 
         return acquirers
 

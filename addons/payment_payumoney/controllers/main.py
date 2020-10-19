@@ -3,6 +3,7 @@
 
 import logging
 import pprint
+
 import werkzeug
 
 from odoo import http
@@ -11,12 +12,11 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 
-class PayuMoneyController(http.Controller):
-    @http.route(['/payment/payumoney/return', '/payment/payumoney/cancel', '/payment/payumoney/error'], type='http', auth='public', csrf=False)
-    def payu_return(self, **post):
-        """ PayUmoney."""
-        _logger.info(
-            'PayUmoney: entering form_feedback with post data %s', pprint.pformat(post))
-        if post:
-            request.env['payment.transaction'].sudo().form_feedback(post, 'payumoney')
-        return werkzeug.utils.redirect('/payment/process')
+class PayUMoneyController(http.Controller):
+    _return_url = '/payment/payumoney/return'
+
+    @http.route(_return_url, type='http', auth='public', methods=['GET', 'POST'], csrf=False)
+    def payumoney_return(self, **data):
+        _logger.info(f"entering handle_feedback_data with data:\n{pprint.pformat(data)}")
+        request.env['payment.transaction'].sudo()._handle_feedback_data('payumoney', data)
+        return werkzeug.utils.redirect('/payment/status')
