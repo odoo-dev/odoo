@@ -10,8 +10,8 @@
     'description': """Alipay Payment Acquirer""",
     'depends': ['payment'],
     'data': [
-        'views/alipay_views.xml',
         'views/payment_alipay_templates.xml',
+        'views/payment_views.xml',
         'data/payment_acquirer_data.xml',
     ],
     'application': True,

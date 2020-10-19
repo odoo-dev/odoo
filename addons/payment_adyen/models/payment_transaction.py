@@ -117,7 +117,7 @@ class PaymentTransaction(models.Model):
         tx = self.search([('reference', '=', reference)])
         if not tx:
             raise ValidationError(
-                "Adyen: " + _("received data with reference %s matching no transaction", reference)
+                "Adyen: " + _("Received data with reference %s matching no transaction", reference)
             )
         return tx
 

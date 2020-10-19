@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    
     <record id="payment_acquirer_view_form_inherit_payment_alipay" model="ir.ui.view">
         <field name="name">payment.acquirer.view.form.inherit.payment.alipay</field>
         <field name="model">payment.acquirer</field>
@@ -16,4 +17,5 @@
             </xpath>
         </field>
     </record>
+    
 </odoo>

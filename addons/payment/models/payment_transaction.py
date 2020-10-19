@@ -422,7 +422,7 @@ class PaymentTransaction(models.Model):
 
         return processing_values
 
-    def _get_specific_processing_values(self, _processing_values):
+    def _get_specific_processing_values(self, processing_values):
         """ Return a dict of acquirer-specific values used to process the transaction.
 
         For an acquirer to add its own processing values, it must overwrite this method and return a
@@ -430,20 +430,20 @@ class PaymentTransaction(models.Model):
         Acquirer-specific values take precedence over those of the dict of generic processing
         values.
 
-        :param dict _processing_values: The generic processing values of the transaction
+        :param dict processing_values: The generic processing values of the transaction
         :return: The dict of acquirer-specific processing values
         :rtype: dict
         """
         return dict()
 
-    def _get_specific_rendering_values(self, _processing_values):
+    def _get_specific_rendering_values(self, processing_values):
         """ Return a dict of acquirer-specific values used to render the redirect form.
 
         For an acquirer to add its own rendering values, it must overwrite this method and return a
         dict of acquirer-specific values based on the processing values (acquirer-specific
         processing values included).
 
-        :param dict _processing_values: The processing values of the transaction
+        :param dict processing_values: The processing values of the transaction
         :return: The dict of acquirer-specific rendering values
         :rtype: dict
         """
@@ -719,10 +719,10 @@ class PaymentTransaction(models.Model):
             'validation_route': self.validation_route,
             'landing_route': self.landing_route,
         }
-        _logger.info(
+        _logger.debug(
             f"payment.transaction._get_post_processing_values for acquirer with id "
             f"{self.acquirer_id.id}:\n{pprint.pformat(post_processing_values)}",
-        )
+        )  # DEBUG level because this can get spammy with transactions in non-final states
         return post_processing_values
 
     def _finalize_post_processing(self):
