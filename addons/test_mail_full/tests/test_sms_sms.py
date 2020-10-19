@@ -66,7 +66,7 @@ class TestSMSPost(TestMailFullCommon, LinkTrackerMock):
         self.env['link.tracker'].search([('url', '=', link)]).unlink()
         new_body = self.env['mail.render.mixin']._shorten_links_text('Welcome to %s !' % link, self.tracker_values)
         self.assertNotIn(link, new_body)
-        self.assertLinkTracker(link, {'utm_campaign': self.utm_c.name, 'utm_medium': self.utm_m.name})
+        self.assertLinkTracker(link, {'utm_campaign': self.utm_c.identifier, 'utm_medium': self.utm_m.identifier})
         link = self.env['link.tracker'].search([('url', '=', link)])
         self.assertIn(link.short_url, new_body)
 
@@ -75,8 +75,8 @@ class TestSMSPost(TestMailFullCommon, LinkTrackerMock):
         new_body = self.env['mail.render.mixin']._shorten_links_text('Welcome to %s !' % link, self.tracker_values)
         self.assertNotIn(link, new_body)
         self.assertLinkTracker(link, {
-            'utm_campaign': self.utm_c.name,
-            'utm_medium': self.utm_m.name,
+            'utm_campaign': self.utm_c.identifier,
+            'utm_medium': self.utm_m.identifier,
             'test[0]': '42',
             'toto': 'áâà',
         })

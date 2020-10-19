@@ -83,10 +83,10 @@ class LinkTracker(models.Model):
         for tracker in self:
             parsed = urls.url_parse(tracker.url)
             utms = {}
-            for key, field, cook in self.env['utm.mixin'].tracking_fields():
-                attr = getattr(tracker, field).name
-                if attr:
-                    utms[key] = attr
+            for url_parameter, field_name, __ in self.env['utm.mixin'].tracking_fields():
+                record = getattr(tracker, field_name)
+                if record:
+                    utms[url_parameter] = record.identifier
             utms.update(parsed.decode_query())
             tracker.redirected_url = parsed.replace(query=urls.url_encode(utms)).to_url()
 
@@ -126,9 +126,9 @@ class LinkTracker(models.Model):
             create_vals['title'] = self._get_title_from_url(create_vals['url'])
 
         # Prevent the UTMs to be set by the values of UTM cookies
-        for (key, fname, cook) in self.env['utm.mixin'].tracking_fields():
-            if fname not in create_vals:
-                create_vals[fname] = False
+        for __, field_name, ___ in self.env['utm.mixin'].tracking_fields():
+            if field_name not in create_vals:
+                create_vals[field_name] = False
 
         link = super(LinkTracker, self).create(create_vals)
 

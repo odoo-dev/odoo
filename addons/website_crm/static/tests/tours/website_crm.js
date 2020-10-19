@@ -5,7 +5,7 @@ odoo.define('website_crm.tour', function(require) {
 
     tour.register('website_crm_tour', {
         test: true,
-        url: '/contactus',
+        url: '/contactus?utm_source=test_source&utm_medium=test_medium&utm_campaign=new_campaign_[XXXXX]',
     }, [{
         content: "Complete name",
         trigger: "input[name=contact_name]",

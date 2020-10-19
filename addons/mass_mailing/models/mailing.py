@@ -295,15 +295,17 @@ class MassMailing(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        now = fields.Datetime.now()
         for values in vals_list:
             if values.get('subject') and not values.get('name'):
-                values['name'] = "%s %s" % (values['subject'], now)
+                values['name'] = self.env['utm.source']._generate_name(self, values['subject'])
+                values['identifier'] = self.env['utm.source']._generate_identifier(self)
             if values.get('body_html'):
                 values['body_html'] = self._convert_inline_images_to_urls(values['body_html'])
         return super().create(vals_list)
 
     def write(self, values):
+        if values.get('subject') and not values.get('name'):
+            values['name'] = self.env['utm.source']._generate_name(self, values['subject'])
         if values.get('body_html'):
             values['body_html'] = self._convert_inline_images_to_urls(values['body_html'])
 
@@ -313,7 +315,6 @@ class MassMailing(models.Model):
     def copy(self, default=None):
         self.ensure_one()
         default = dict(default or {},
-                       name=_('%s (copy)', self.name),
                        contact_list_ids=self.contact_list_ids.ids)
         return super(MassMailing, self).copy(default=default)
 

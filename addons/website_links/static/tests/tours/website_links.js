@@ -39,7 +39,7 @@ tour.register('website_links_tour', {
             content: "check that we landed on correct page with correct query strings",
             trigger: '.s_title h1:containsExact("Contact us")',
             run: function () {
-                var expectedUrl = "/contactus?utm_campaign=Sale&utm_source=Search+engine&utm_medium=Website";
+                var expectedUrl = "/contactus?utm_campaign=sale&utm_source=search_engine&utm_medium=website";
                 if (window.location.pathname + window.location.search !== expectedUrl) {
                     console.error("The link was not correctly created.");
                 }

@@ -249,7 +249,7 @@ Email: <a id="url5" href="mailto:test@odoo.com">test@odoo.com</a></div>""",
                               ('url4', 'https://www.example.com/foo/bar?baz=qux', True),
                               ('url5', 'mailto:test@odoo.com', False)]:
                 # TDE FIXME: why going to mail message id ? mail.body_html seems to fail, check
-                link_params = {'utm_medium': 'Email', 'utm_source': mailing.name}
+                link_params = {'utm_medium': mailing.medium_id.identifier, 'utm_source': mailing.identifier}
                 if link_info[0] == 'url4':
                     link_params['baz'] = 'qux'
                 self.assertLinkShortenedHtml(

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import uuid
+
 from odoo import api, fields, models
 from odoo.http import request
 
@@ -34,14 +36,8 @@ class UtmMixin(models.AbstractModel):
                     value = request.httprequest.cookies.get(cookie_name)
                 # if we receive a string for a many2one, we search/create the id
                 if field.type == 'many2one' and isinstance(value, str) and value:
-                    Model = self.env[field.comodel_name]
-                    records = Model.search([('name', '=', value)], limit=1)
-                    if not records:
-                        if 'is_website' in records._fields:
-                            records = Model.create({'name': value, 'is_website': True})
-                        else:
-                            records = Model.create({'name': value})
-                    value = records.id
+                    record = self._find_or_create_record(field.comodel_name, value)
+                    value = record.id
                 if value:
                     values[field_name] = value
         return values
@@ -59,3 +55,36 @@ class UtmMixin(models.AbstractModel):
             ('utm_source', 'source_id', 'odoo_utm_source'),
             ('utm_medium', 'medium_id', 'odoo_utm_medium'),
         ]
+
+    def _find_or_create_record(self, model_name, identifier):
+        """Based on the URL parameter, retrieve the corresponding record or create it."""
+        Model = self.env[model_name]
+
+        record = None
+        if identifier:
+            record = Model.search([('identifier', '=', identifier)], limit=1)
+
+        if not record:
+            record = Model.search([('name', 'ilike', identifier)], limit=1)
+
+        if not record:
+            # No record found, create a new one
+            record_values = {'identifier': identifier}
+            if 'is_website' in record._fields:
+                record_values.update({'is_website': True})
+            record = Model.create(record_values)
+
+        return record
+
+    @api.model
+    def _generate_identifier_from_name(self, record, name):
+        """Generate the identifier of the UTM records based on the name.
+
+        The identifier is generated from the name, but if a duplication is detected, we add
+        some random chars at the end.
+        """
+        identifier = name.lower().replace(' ', '_')
+        similar_identifiers = self.env[record._name].search_count([('identifier', 'like', identifier)])
+        if similar_identifiers:
+            identifier = f'{identifier}_[{str(uuid.uuid4())[:8]}]'
+        return identifier
