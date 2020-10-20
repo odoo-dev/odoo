@@ -52,7 +52,10 @@ QUnit.test("can display a danger notification with a title", async (assert) => {
   await nextTick();
   assert.containsOnce(target, ".o_notification");
   const notif = target.querySelector<HTMLElement>(".o_notification");
-  assert.strictEqual(notif!.querySelector<HTMLElement>(".o_notification_header")!.innerText, "Some title");
+  assert.strictEqual(
+    notif!.querySelector<HTMLElement>(".o_notification_header")!.innerText,
+    "Some title"
+  );
   assert.strictEqual(
     notif!.querySelector<HTMLElement>(".o_notification_body")!.innerText,
     "I'm a danger notification"

@@ -1,19 +1,21 @@
 import { Component, tags } from "@odoo/owl";
-import { OdooEnv, View } from "../types";
-import { ControlPanel } from "../components/control_panel/control_panel";
+import { OdooEnv, RendererProps, View } from "../types";
+import { AbstractController } from "./abstract_controller";
 
 const { xml } = tags;
 
-class PivotRenderer extends Component<{}, OdooEnv> {
+class PivotRenderer extends Component<RendererProps, OdooEnv> {
   static template = xml`
-    <div>
-        <ControlPanel breadcrumbs="props.breadcrumbs" views="props.views"/>
+      <div class="o_pivot_renderer">
         <h2>Pivot view</h2>
 
-        <span>Model: <b><t t-esc="props.action.res_model"/></b></span>
-    </div>
-  `;
-  static components = { ControlPanel };
+        <span><t t-esc="props.arch"/></span>
+      </div>
+    `;
+}
+
+class PivotController extends AbstractController {
+  static components = { ...AbstractController.components, Renderer: PivotRenderer };
 }
 
 export const PivotView: View = {
@@ -21,5 +23,6 @@ export const PivotView: View = {
   icon: "fa-table",
   multiRecord: true,
   type: "pivot",
-  Component: PivotRenderer,
+  Component: PivotController,
+  Renderer: PivotRenderer,
 };

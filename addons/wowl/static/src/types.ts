@@ -13,12 +13,17 @@ import { routerService } from "./services/router";
 import type { rpcService } from "./services/rpc";
 import type { userService } from "./services/user";
 import { viewManagerService } from "./services/view_manager";
-
+import { Breadcrumb } from "./services/action_manager/action_manager";
+import { AbstractController } from "./views/abstract_controller";
 // import type { ComponentAction, FunctionAction } from "./services/action_manager/helpers";
 
 interface CacheHashes {
   load_menus: string;
   translations: string;
+}
+
+export interface Context {
+  [key: string]: any;
 }
 
 interface UserContext {
@@ -134,6 +139,7 @@ export interface Services {
   [key: string]: any;
 }
 
+export type ViewId = number | false;
 export type ViewType =
   | "list"
   | "form"
@@ -145,12 +151,49 @@ export type ViewType =
   | "grid"
   | string;
 
+export interface ActionProps {
+  breadcrumbs?: Breadcrumb[];
+}
+
+interface ViewSwitcherEntry {
+  name: string;
+  icon: string;
+  type: string;
+}
+export type ViewSwitcherEntries = ViewSwitcherEntry[];
+
+export type ViewOptions = {
+  actionId?: number;
+  context?: Context;
+  withActionMenus?: boolean;
+  withFilters?: boolean;
+  viewSwitcherEntries?: ViewSwitcherEntries;
+};
+export interface ViewProps extends ActionProps {
+  views: [ViewId, ViewType][];
+  model: string;
+  type: ViewType;
+  options: ViewOptions;
+}
+
+export type ControllerProps = ActionProps | ViewProps;
+
+export interface RendererProps {
+  arch: string; // ViewDefinition['arch'];
+  model: string;
+  fields: any;
+}
+export interface FormRendererProps extends RendererProps {
+  mode: "edit" | "readonly";
+}
+
 export interface View {
   name: string;
   icon: string;
   multiRecord: boolean;
   type: ViewType;
-  Component: Type<Component<{}, OdooEnv>>;
+  Component: Type<AbstractController>;
+  Renderer?: Type<Component<RendererProps, OdooEnv>>;
 }
 
 export interface SystrayItem {

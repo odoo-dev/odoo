@@ -1,19 +1,25 @@
 import { Component, tags } from "@odoo/owl";
-import { OdooEnv, View } from "../types";
-import { ControlPanel } from "../components/control_panel/control_panel";
+import { OdooEnv, RendererProps, View } from "../types";
+import { AbstractController, ControlPanelSubTemplates } from "./abstract_controller";
 
 const { xml } = tags;
 
-class KanbanRenderer extends Component<{}, OdooEnv> {
+class KanbanRenderer extends Component<RendererProps, OdooEnv> {
   static template = xml`
-    <div>
-        <ControlPanel breadcrumbs="props.breadcrumbs" views="props.views"/>
+      <div class="o_kanban_renderer">
         <h2>Kanban view</h2>
 
-        <span>Model: <b><t t-esc="props.action.res_model"/></b></span>
-    </div>
-  `;
-  static components = { ControlPanel };
+        <span><t t-esc="props.arch"/></span>
+      </div>
+    `;
+}
+
+class KanbanController extends AbstractController {
+  static components = { ...AbstractController.components, Renderer: KanbanRenderer };
+  cpSubTemplates: ControlPanelSubTemplates = {
+    ...this.cpSubTemplates,
+    bottomLeft: "wowl.KanbanView.ControlPanelBottomLeft",
+  };
 }
 
 export const KanbanView: View = {
@@ -21,5 +27,6 @@ export const KanbanView: View = {
   icon: "fa-th-large",
   multiRecord: true,
   type: "kanban",
-  Component: KanbanRenderer,
+  Component: KanbanController,
+  Renderer: KanbanRenderer,
 };

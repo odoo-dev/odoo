@@ -1,27 +1,21 @@
 import { Component, tags } from "@odoo/owl";
-import { OdooEnv, View } from "../types";
-import { useService } from "../core/hooks";
-import { ControlPanel } from "../components/control_panel/control_panel";
+import { OdooEnv, RendererProps, View } from "../types";
+import { AbstractController } from "./abstract_controller";
 
 const { xml } = tags;
 
-class ListRenderer extends Component<{}, OdooEnv> {
+class ListRenderer extends Component<RendererProps, OdooEnv> {
   static template = xml`
-    <div>
-        <ControlPanel breadcrumbs="props.breadcrumbs" views="props.views"/>
+      <div class="o_list_renderer">
         <h2>List view</h2>
 
-        <span>Model: <b><t t-esc="props.action.res_model"/></b></span>
+        <span><t t-esc="props.arch"/></span>
+      </div>
+    `;
+}
 
-        <button t-on-click="_onRecordClicked"> Open Record </button>
-    </div>
-  `;
-  static components = { ControlPanel };
-  actionManager = useService("action_manager");
-
-  _onRecordClicked() {
-    this.actionManager.switchView("form");
-  }
+class ListController extends AbstractController {
+  static components = { ...AbstractController.components, Renderer: ListRenderer };
 }
 
 export const ListView: View = {
@@ -29,5 +23,6 @@ export const ListView: View = {
   icon: "fa-list-ul",
   multiRecord: true,
   type: "list",
-  Component: ListRenderer,
+  Component: ListController,
+  Renderer: ListRenderer,
 };

@@ -7,6 +7,10 @@ import type {
   FunctionAction,
   Type,
   View,
+  ViewId,
+  ActionProps,
+  ViewProps,
+  ViewOptions,
   ViewType,
 } from "./../../types";
 
@@ -53,11 +57,11 @@ interface ClientAction extends Action {
   tag: string;
   type: "ir.actions.client";
 }
-type ViewId = number | false;
 interface ActWindowAction extends Action {
   type: "ir.actions.act_window";
   res_model: string;
   views: [ViewId, ViewType][];
+  search_view_id?: [ViewId, string]; // second member is the views's display_name, not the type
 }
 interface ServerAction extends Action {
   id: number;
@@ -83,24 +87,21 @@ interface Controller {
   jsId: string;
   Component: Type<Component<{}, OdooEnv>>;
   action: ClientAction | ActWindowAction;
+  props: ActionProps | ViewProps;
 }
 interface ViewController extends Controller {
   action: ActWindowAction;
   view: View;
   views: View[];
+  props: ViewProps;
 }
 type ControllerStack = Controller[];
 
-interface Breadcrumb {
+export interface Breadcrumb {
   jsId: string;
   name: string;
 }
-type Breadcrumbs = Breadcrumb[];
-interface ControllerProps {
-  action: ClientAction | ActWindowAction;
-  breadcrumbs: Breadcrumbs;
-  views?: View[];
-}
+export type Breadcrumbs = Breadcrumb[];
 
 interface ActionMangerUpdateInfo {
   type: "MAIN" | "OPEN_DIALOG" | "CLOSE_DIALOG";
@@ -222,16 +223,32 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
-   * Given a controller, returns the list of views of the same type (mono or
-   * multi-record), to display in the view switcher.
-   *
-   * @private
-   * @param {ViewController} controller
-   * @returns {View[]}
+   * @param {View} view
+   * @param {ActWindowAction} action
+   * @param {View[]} views
+   * @returns {ViewProps}
    */
-  function _getViews(controller: ViewController): View[] {
-    const multiRecord = controller.view.multiRecord;
-    return controller.views.filter((view) => view.multiRecord === multiRecord);
+  function _getViewProps(view: View, action: ActWindowAction, views: View[]): ViewProps {
+    const target = action.target;
+    const viewSwitcherEntries = views
+      .filter((v) => v.multiRecord === view.multiRecord)
+      .map((v) => {
+        return { icon: v.icon, name: v.name, type: v.type };
+      });
+    const controllerOptions: ViewOptions = {
+      actionId: action.id,
+      context: action.context,
+      viewSwitcherEntries,
+      withActionMenus: target !== "new" && target !== "inline",
+      withFilters: action.views.some((v) => v[1] === 'search'),
+    };
+
+    return {
+      model: action.res_model,
+      type: view.type,
+      views: action.views,
+      options: controllerOptions,
+    };
   }
 
   /**
@@ -250,10 +267,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
         type: "OPEN_DIALOG",
         id: ++id,
         Component: controller.Component,
-        props: { action },
+        props: controller.props,
       });
       return;
     }
+
     let index = null;
     if (options.clearBreadcrumbs) {
       index = 0;
@@ -263,28 +281,21 @@ function makeActionManager(env: OdooEnv): ActionManager {
       index = controllerStack.length + 1;
     }
     const nextStack = controllerStack.slice(0, index).concat([controller]);
-
     class Controller extends Component {
       static template = tags.xml`<t t-component="Component" t-props="props"/>`;
       Component = controller.Component;
+      componentProps = this.props;
       mounted() {
         controllerStack = nextStack; // the controller is mounted, commit the new stack
       }
     }
-
-    const props: ControllerProps = {
-      action,
-      breadcrumbs: _getBreadcrumbs(nextStack),
-    };
-    if (controller.action.type === "ir.actions.act_window") {
-      props.views = _getViews(controller as ViewController);
-    }
+    controller.props.breadcrumbs = _getBreadcrumbs(nextStack);
 
     env.bus.trigger("ACTION_MANAGER:UPDATE", {
       type: "MAIN",
       id: ++id,
       Component: Controller,
-      props,
+      props: controller.props,
     });
   }
 
@@ -329,7 +340,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {ActionOptions} options
    */
   function _executeActWindowAction(action: ActWindowAction, options: ActionOptions): void {
-    const views = [];
+    const views: View[] = [];
     for (const [_, type] of action.views) {
       if (env.registries.views.contains(type)) {
         views.push(env.registries.views.get(type));
@@ -338,12 +349,23 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (!views.length) {
       throw new Error(`No view found for act_window action ${action.id}`);
     }
+
+    const target = action.target;
+    if (target !== "inline" && !(target === "new" && action.views[0][1] === "form")) {
+      // FIXME: search view arch is already sent with load_action, so either remove it
+      // from there or load all fieldviews alongside the action for the sake of consistency
+      const searchViewId = action.search_view_id ? action.search_view_id[0] : false;
+      action.views.push([searchViewId, "search"]);
+    }
+
+    const view = views[0];
     const controller: ViewController = {
       jsId: `controller_${++id}`,
-      Component: views[0].Component,
+      Component: view.Component,
       action,
-      view: views[0],
+      view,
       views,
+      props: _getViewProps(view, action, views),
     };
     _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
   }
@@ -366,6 +388,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         jsId: `controller_${++id}`,
         Component: clientAction as ComponentAction,
         action,
+        props: {},
       };
       _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
     } else {
@@ -438,6 +461,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     type: ReportType
   ): Promise<void> {
     const url = _getReportUrl(action, type);
+    // TODO: download the report
     console.log(`download report ${url}`);
     if (action.close_on_report_download) {
       doAction({ type: "ir.actions.act_window_close" });
@@ -562,15 +586,19 @@ function makeActionManager(env: OdooEnv): ActionManager {
       throw new Error(`switchView called but the current controller isn't a view`);
     }
     const view = controller.views.find((view: any) => view.type === viewType);
-    if (view) {
-      const newController = Object.assign({}, controller, {
-        jsId: `controller_${++id}`,
-        Component: view.Component,
-        view,
-      });
-      const index = view.multiRecord ? controllerStack.length - 1 : controllerStack.length;
-      _updateUI(newController, { index });
+    if (!view) {
+      throw new Error(`switchView: cannot find view of type ${viewType}`);
     }
+    const newController = {
+      jsId: `controller_${++id}`,
+      Component: view.Component,
+      action: controller.action,
+      views: controller.views,
+      view,
+      props: _getViewProps(view, controller.action, controller.views),
+    };
+    const index = view.multiRecord ? controllerStack.length - 1 : controllerStack.length;
+    _updateUI(newController, { index });
   }
 
   /**

@@ -1,19 +1,21 @@
 import { Component, tags } from "@odoo/owl";
-import { OdooEnv, View } from "../types";
-import { ControlPanel } from "../components/control_panel/control_panel";
+import { OdooEnv, RendererProps, View } from "../types";
+import { AbstractController } from "./abstract_controller";
 
 const { xml } = tags;
 
-class GraphRenderer extends Component<{}, OdooEnv> {
+class GraphRenderer extends Component<RendererProps, OdooEnv> {
   static template = xml`
-    <div>
-        <ControlPanel breadcrumbs="props.breadcrumbs" views="props.views"/>
+      <div class="o_graph_renderer">
         <h2>Graph view</h2>
 
-        <span>Model: <b><t t-esc="props.action.res_model"/></b></span>
-    </div>
-  `;
-  static components = { ControlPanel };
+        <span><t t-esc="props.arch"/></span>
+      </div>
+    `;
+}
+
+class GraphController extends AbstractController {
+  static components = { ...AbstractController.components, Renderer: GraphRenderer };
 }
 
 export const GraphView: View = {
@@ -21,5 +23,6 @@ export const GraphView: View = {
   icon: "fa-bar-chart",
   multiRecord: true,
   type: "graph",
-  Component: GraphRenderer,
+  Component: GraphController,
+  Renderer: GraphRenderer,
 };
