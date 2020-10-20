@@ -224,6 +224,12 @@ function factory(dependencies) {
             ],
         }),
         /**
+         * Serves as compute dependency.
+         */
+        hasVisibleSearchBox: attr({
+            related: 'chatter.isSearchBoxVisible',
+        }),
+        /**
          * Determines the selected `mail.message`.
          */
         selectedMessage: many2one('mail.message', {

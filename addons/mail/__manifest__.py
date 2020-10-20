@@ -78,6 +78,7 @@
         'static/src/components/chat_window_manager/chat_window_manager.xml',
         'static/src/components/chatter/chatter.xml',
         'static/src/components/chatter_container/chatter_container.xml',
+        'static/src/components/chatter_search_box/chatter_search_box.xml',
         'static/src/components/chatter_topbar/chatter_topbar.xml',
         'static/src/components/composer/composer.xml',
         'static/src/components/composer_suggested_recipient/composer_suggested_recipient.xml',

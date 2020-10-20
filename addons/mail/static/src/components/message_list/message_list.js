@@ -29,6 +29,7 @@ class MessageList extends Component {
                 isDeviceMobile: this.env.messaging.device.isMobile,
                 thread,
                 threadCache,
+                threadCacheFilteredMessages: threadCache ? threadCache.filteredMessages : [],
                 threadCacheHasLoadingFailed: threadCache && threadCache.hasLoadingFailed,
                 threadCacheIsAllHistoryLoaded: threadCache && threadCache.isAllHistoryLoaded,
                 threadCacheIsLoaded: threadCache && threadCache.isLoaded,
@@ -39,10 +40,12 @@ class MessageList extends Component {
                 threadMainCache: thread && thread.mainCache,
                 threadMessageAfterNewMessageSeparator: thread && thread.messageAfterNewMessageSeparator,
                 threadViewComponentHintList: threadView ? threadView.componentHintList : [],
+                threadViewHasVisibleSearchBox: threadView && threadView.hasVisibleSearchBox,
                 threadViewNonEmptyMessagesLength: threadView && threadView.nonEmptyMessages.length,
             };
         }, {
             compareDepth: {
+                threadCacheFilteredMessages: 1,
                 threadCacheOrderedMessages: 1,
                 threadViewComponentHintList: 1,
             },
@@ -76,6 +79,7 @@ class MessageList extends Component {
             const threadCache = threadView && threadView.threadCache;
             return {
                 componentHintList: threadView ? [...threadView.componentHintList] : [],
+                filteredMessages: threadCache ? [...threadCache.filteredMessages] : [],
                 hasAutoScrollOnMessageReceived: threadView && threadView.hasAutoScrollOnMessageReceived,
                 hasScrollAdjust: this.props.hasScrollAdjust,
                 mainCache: thread && thread.mainCache,
@@ -266,12 +270,15 @@ class MessageList extends Component {
     /**
      * @returns {mail.message[]}
      */
-    get orderedMessages() {
+    get messages() {
         const threadCache = this.threadView.threadCache;
+        const messages = this.threadView.hasVisibleSearchBox && threadCache.filteredMessages.length > 0
+                       ? threadCache.filteredMessages
+                       : threadCache.orderedMessages;
         if (this.props.order === 'desc') {
-            return [...threadCache.orderedMessages].reverse();
+            return [...messages].reverse();
         }
-        return threadCache.orderedMessages;
+        return messages;
     }
 
     /**
@@ -283,6 +290,20 @@ class MessageList extends Component {
         }
         this._isLastScrollProgrammatic = true;
         this.el.scrollTop = value;
+    }
+
+    /**
+     * @param {mail.message} message
+     * @returns {boolean}
+     */
+    shouldMessageBeFiltered(message) {
+        const threadCache = this.threadView.threadCache;
+        if (threadCache.filteredMessages.includes(message)) {
+            message.update({ 'isFiltered': true });
+        } else {
+            message.update({ 'isFiltered': false });
+        }
+        return message.isFiltered;
     }
 
     /**

@@ -4,6 +4,7 @@ odoo.define('mail/static/src/components/chatter/chatter.js', function (require) 
 const components = {
     ActivityBox: require('mail/static/src/components/activity_box/activity_box.js'),
     AttachmentBox: require('mail/static/src/components/attachment_box/attachment_box.js'),
+    ChatterSearchBox: require('mail/static/src/components/chatter_search_box/chatter_search_box.js'),
     ChatterTopbar: require('mail/static/src/components/chatter_topbar/chatter_topbar.js'),
     Composer: require('mail/static/src/components/composer/composer.js'),
     ThreadView: require('mail/static/src/components/thread_view/thread_view.js'),
@@ -47,6 +48,10 @@ class Chatter extends Component {
          * Reference of the composer. Useful to focus it.
          */
         this._composerRef = useRef('composer');
+        /**
+         * Reference of the search box. Useful to focus it.
+         */
+        this._searchBoxRef = useRef('searchBox');
         /**
          * Reference of the message list. Useful to trigger the scroll event on it.
          */
@@ -93,6 +98,10 @@ class Chatter extends Component {
             const composer = this._composerRef.comp;
             if (composer) {
                 composer.focus();
+            }
+            const searchBox = this._searchBoxRef.comp;
+            if (searchBox) {
+                searchBox.focus();
             }
         }
     }

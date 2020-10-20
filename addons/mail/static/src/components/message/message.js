@@ -102,6 +102,7 @@ class Message extends Component {
          * replace prettyBody with new value in JS (which is faster than t-raw).
          */
         this._prettyBodyRef = useRef('prettyBody');
+        this._prettyBodyHighlighterRef = useRef('prettyBodyHighlighter');
         /**
          * Reference to the content of the message.
          */
@@ -416,6 +417,10 @@ class Message extends Component {
         if (!this.message) {
             return;
         }
+        if (this._prettyBodyHighlighterRef.el) {
+            this._prettyBodyHighlighterRef.el.innerHTML = this.message.filteredMessageBody;
+            this._lastPrettyBody = this.message.filteredMessageBody;
+        }
         if (this._prettyBodyRef.el && this.message.prettyBody !== this._lastPrettyBody) {
             this._prettyBodyRef.el.innerHTML = this.message.prettyBody;
             this._lastPrettyBody = this.message.prettyBody;
@@ -636,6 +641,7 @@ Object.assign(Message, {
         hasCheckbox: false,
         hasMarkAsReadIcon: false,
         hasReplyIcon: false,
+        isFiltered: false,
         isSquashed: false,
     },
     props: {
@@ -647,6 +653,7 @@ Object.assign(Message, {
         hasCheckbox: Boolean,
         hasMarkAsReadIcon: Boolean,
         hasReplyIcon: Boolean,
+        isFiltered: Boolean,
         isSquashed: Boolean,
         messageLocalId: String,
         threadViewLocalId: {

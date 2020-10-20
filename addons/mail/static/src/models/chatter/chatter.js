@@ -2,7 +2,7 @@ odoo.define('mail/static/src/models/chatter/chatter.js', function (require) {
 'use strict';
 
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr, many2one, one2one } = require('mail/static/src/model/model_field.js');
+const { attr, many2one, many2many, one2one } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -56,6 +56,11 @@ function factory(dependencies) {
         showLogNote() {
             this.update({ isComposerVisible: true });
             this.thread.composer.update({ isLog: true });
+            this.focus();
+        }
+
+        showSearchBox() {
+            this.update({ isSearchBoxVisible: true });
             this.focus();
         }
 
@@ -258,6 +263,12 @@ function factory(dependencies) {
          * Determine whether this chatter should be focused at next render.
          */
         isDoFocus: attr({
+            default: false,
+        }),
+        /**
+         * Determiners whether the search box is currently visible.
+         */
+        isSearchBoxVisible: attr({
             default: false,
         }),
         isShowingAttachmentsLoading: attr({

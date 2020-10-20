@@ -69,6 +69,21 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {boolean}
+         */
+        _computeHasLoadMore() {
+            if (!this.threadCache) {
+                return false;
+            }
+            return (
+                this.threadCache.messages.length > 0 &&
+                this.threadCache.filteredMessages.length === 0 ||
+                this.threadCache.filteredMessages.length >= 30
+            );
+        }
+
+        /**
+         * @private
          * @returns {integer|undefined}
          */
         _computeThreadCacheInitialScrollHeight() {
@@ -199,8 +214,31 @@ function factory(dependencies) {
         composer: many2one('mail.composer', {
             related: 'thread.composer',
         }),
+        /**
+         * Serves as compute dependency.
+         */
+        filteredMessages: many2many('mail.message', {
+            related: 'threadCache.filteredMessages',
+        }),
         hasComposerFocus: attr({
             related: 'composer.hasFocus',
+        }),
+        /**
+         * Determines whether load more should be displayed.
+         */
+        hasLoadMore: attr({
+            compute: '_computeHasLoadMore',
+            dependencies: [
+                'filteredMessages',
+                'messages',
+                'threadCache',
+            ],
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        hasVisibleSearchBox: attr({
+            related: 'threadViewer.hasVisibleSearchBox',
         }),
         /**
          * States whether `this.threadCache` is currently loading messages.

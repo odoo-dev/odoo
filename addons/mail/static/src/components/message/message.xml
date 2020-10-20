@@ -157,9 +157,14 @@
                         </t>
                     </t>
                     <div class="o_Message_content" t-ref="content">
-                        <div class="o_Message_prettyBody" t-ref="prettyBody"/><!-- message.prettyBody is inserted here from _update() -->
-                        <t t-if="message.subtype_description and !message.isBodyEqualSubtypeDescription">
-                            <p t-esc="message.subtype_description"/>
+                        <t t-if="props.isFiltered and message.isFiltered">
+                            <div class="o_Message_prettyBody_highlighter" t-ref="prettyBodyHighlighter"/>
+                        </t>
+                        <t t-else="">
+                            <div class="o_Message_prettyBody" t-ref="prettyBody"/><!-- message.prettyBody is inserted here from _update() -->
+                            <t t-if="message.subtype_description and !message.isBodyEqualSubtypeDescription">
+                                <p t-esc="message.subtype_description"/>
+                            </t>
                         </t>
                         <t t-if="trackingValues.length > 0">
                             <ul class="o_Message_trackingValues">

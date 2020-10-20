@@ -12,6 +12,35 @@ function factory(dependencies) {
         // Public
         //----------------------------------------------------------------------
 
+        /**
+         * Fetch messages that contains searched keyword.
+         *
+         * This is usefull when have messages more than limit to display.
+         */
+        async getMessages() {
+            const searchedText = this.thread.searchedText;
+            if (!searchedText || /<.+>/g.exec( searchedText )) {
+                return;
+            }
+            const messageIds = this.messages.map(message => message.id);
+            this.update({ isSearchingMessages: true });
+            const filteredMessages = await this.async(() => this._loadMessages({
+                extraDomain: [
+                    ['id', 'not in', messageIds],
+                    '|',
+                    ['body', 'ilike', this.thread.searchedText],
+                    ['subtype_id.description', 'ilike', this.thread.searchedText]
+                ],
+            }));
+            if (!filteredMessages) {
+                return;
+            }
+            this.update({
+                filteredMessages: [['link', filteredMessages]],
+                isSearchingMessages: false,
+            });
+        }
+
         async loadMoreMessages() {
             if (this.isAllHistoryLoaded || this.isLoading) {
                 return;
@@ -111,6 +140,27 @@ function factory(dependencies) {
             }
             return [['unlink', toUnlinkMessages]];
         }
+
+        /**
+         * @private
+         * @returns {mail.message[]}
+         */
+        _computeFilteredMessages() {
+            if (!this.thread) {
+                return [['unlink-all']];
+            }
+            const searchedText = this.thread.searchedText;
+            if (!searchedText || /<.+>/g.exec( searchedText )) {
+                return [['unlink-all']];
+            }
+            const filteredMessages = this.thread.messages.filter(
+                message => message.body.toLowerCase().includes(searchedText.toLowerCase())
+                        || (message.subtype_description
+                        && message.subtype_description.toLowerCase().includes(searchedText.toLowerCase()))
+            );
+            filteredMessages.sort((m1, m2) => m1.id < m2.id ? -1 : 1);
+            return [['replace', filteredMessages]];
+       }
 
         /**
          * @private
@@ -436,6 +486,19 @@ function factory(dependencies) {
             dependencies: ['threadMessages'],
         }),
         /**
+         * List of filtered messages based on searched keyword linked
+         * to this cache.
+         */
+        filteredMessages: many2many('mail.message', {
+            compute: '_computeFilteredMessages',
+            dependencies: [
+                'messages',
+                'thread',
+                'threadMessages',
+                'threadSearchedText',
+            ],
+        }),
+        /**
          * Determines whether the last message fetch failed.
          */
         hasLoadingFailed: attr({
@@ -487,6 +550,12 @@ function factory(dependencies) {
          * @see `_onChangeMarkAllAsRead`
          */
         isMarkAllAsReadRequested: attr({
+            default: false,
+        }),
+        /**
+         * States whether `this` is currently searching messages.
+         */
+        isSearchingMessages: attr({
             default: false,
         }),
         /**
@@ -618,6 +687,12 @@ function factory(dependencies) {
          */
         threadModel: attr({
             related: 'thread.model',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        threadSearchedText: attr({
+            related: 'thread.searchedText',
         }),
         /**
          * States the 'mail.thread_view' that are currently displaying `this`.

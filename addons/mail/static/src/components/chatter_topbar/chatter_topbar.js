@@ -72,6 +72,9 @@ class ChatterTopbar extends Component {
         if (!this.chatter.composer) {
             return;
         }
+        if (this.chatter.isSearchBoxVisible) {
+            this.chatter.update({ isSearchBoxVisible: false });
+        }
         if (this.chatter.isComposerVisible && this.chatter.composer.isLog) {
             this.chatter.update({ isComposerVisible: false });
         } else {
@@ -111,9 +114,27 @@ class ChatterTopbar extends Component {
      * @private
      * @param {MouseEvent} ev
      */
+    _onClickSearch(ev) {
+        if (this.chatter.isComposerVisible) {
+            this.chatter.update({ isComposerVisible: false });
+        }
+        if (this.chatter.isSearchBoxVisible) {
+            this.chatter.update({ isSearchBoxVisible: false });
+        } else {
+            this.chatter.showSearchBox();
+        }
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onClickSendMessage(ev) {
         if (!this.chatter.composer) {
             return;
+        }
+        if (this.chatter.isSearchBoxVisible) {
+            this.chatter.update({ isSearchBoxVisible: false });
         }
         if (this.chatter.isComposerVisible && !this.chatter.composer.isLog) {
             this.chatter.update({ isComposerVisible: false });

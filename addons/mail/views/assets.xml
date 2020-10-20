@@ -77,6 +77,7 @@
                 <script type="text/javascript" src="/mail/static/src/components/chat_window_manager/chat_window_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/chatter/chatter.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/chatter_container/chatter_container.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/chatter_search_box/chatter_search_box.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/chatter_topbar/chatter_topbar.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/composer/composer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/composer_suggested_recipient/composer_suggested_recipient.js"/>
@@ -192,6 +193,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chat_window_manager/chat_window_manager.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter/chatter.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter_container/chatter_container.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter_search_box/chatter_search_box.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/chatter_topbar/chatter_topbar.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer/composer.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/composer_suggested_recipient/composer_suggested_recipient.scss"/>

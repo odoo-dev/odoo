@@ -388,6 +388,24 @@ function factory(dependencies) {
         }
 
         /**
+         * return body with highlighted text based on searched text
+         *
+         * @private
+         * @returns {string}
+         */
+        _computeFilteredMessageBody() {
+            if (!this.isFiltered) {
+                return '';
+            }
+            let body = this.body ? this.body : this.subtype_description;
+            const searchRegExp = new RegExp(this.originThread.searchedText, 'gi');
+            body = body.replace(searchRegExp, (match) => {
+                return `<span class="highlighter">${match}</span>`;
+            });
+            return body;
+        }
+
+        /**
          * @private
          * @returns {boolean}
          */
@@ -603,6 +621,14 @@ function factory(dependencies) {
             compute: '_computeFailureNotifications',
             dependencies: ['notificationsStatus'],
         }),
+        filteredMessageBody: attr({
+            compute: '_computeFilteredMessageBody',
+            dependencies: [
+                'isFiltered',
+                'originThread',
+                'originThreadSearchedText',
+            ],
+        }),
         hasCheckbox: attr({
             compute: '_computeHasCheckbox',
             default: false,
@@ -660,6 +686,13 @@ function factory(dependencies) {
                 'subtype_description',
                 'tracking_value_ids',
             ],
+        }),
+        /**
+         * Determine whether the message is filtered or not. Useful to make
+         * body with highlighted keyword.
+         */
+        isFiltered: attr({
+            default: false,
         }),
         isModeratedByCurrentPartner: attr({
             compute: '_computeIsModeratedByCurrentPartner',
@@ -765,6 +798,12 @@ function factory(dependencies) {
          */
         originThreadName: attr({
             related: 'originThread.name',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        originThreadSearchedText: attr({
+            related: 'originThread.searchedText',
         }),
         /**
          * This value is meant to be based on field body which is
