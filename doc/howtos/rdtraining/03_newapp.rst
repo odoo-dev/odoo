@@ -12,7 +12,7 @@ The Real Estate Advertisement module
 ====================================
 
 Our new module will cover a business area which is very specific, and therefore not included in the
-standard set of modules: the real estate properties. It is worth noting that before
+standard set of modules: real estate. It is worth noting that before
 developing a new module, it always makes sense to verify if Odoo doesn't already provide a way
 to answer the specific business needs.
 
@@ -39,7 +39,7 @@ less than the expected selling price. It is up to the seller to accept an offer.
 
 Here is a quick video showing the workflow of the module.
 
-Hopfully, this topic will be written soon :-): video showing features
+Hopfully, this video will be recorded soon :-)
 
 Prepare the addon directory
 ===========================
@@ -56,9 +56,9 @@ Prepare the addon directory
       :align: center
       :alt: The new module appears in the list
 
-The very first step of a module creation is to create a new folder. To ease the development, we
-suggest you first create the folder ``/home/$USER/src/custom``. In this folder we add the folder
-``estate``, which is our module.
+The very first step of a module creation is to create a new directory. To ease the development, we
+suggest you first create the directory ``/home/$USER/src/custom``. In this directory we add
+the directory ``estate``, which is our module.
 
 A module must contain at least 2 files: the ``__manifest__.py`` file and a ``__init__.py`` file.
 The ``__init__.py`` file can remain empty for now, so we'll come back to it in the next chapter.
@@ -101,4 +101,4 @@ No, it doesn't appear? Maybe try to remove the default 'Apps' filter ;-)
 
 You can even install the module! But obviously it's an empty shell, so no menu will appear.
 
-It's all good? If so, let's :ref:`create our first table <howto/rdtraining/04_basicmodel>`!
+All good? If so, let's :ref:`create our first model <howto/rdtraining/04_basicmodel>`!

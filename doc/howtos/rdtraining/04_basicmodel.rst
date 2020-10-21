@@ -194,8 +194,8 @@ or :class:`~odoo.fields.Selection`.
     garden_orientation        Selection
     ========================= =========================
 
-    The ``garden_orientation`` fields must have 4 options: 'North', 'South', 'East' and 'West'. The
-    selection list is defined as a list of tuples, see
+    The ``garden_orientation`` fields must have 4 possible values: 'North', 'South', 'East'
+    and 'West'. The selection list is defined as a list of tuples, see
     `here <https://github.com/odoo/odoo/blob/b0e0035b585f976e912e97e7f95f66b525bc8e43/addons/crm/report/crm_activity_report.py#L31-L34>`__
     for example.
 
@@ -213,7 +213,7 @@ Common Attributes
 
 .. note::
 
-    **Goal**: at the end of this section, the fields ``name`` and ``expected_price`` should be
+    **Goal**: at the end of this section, the columns ``name`` and ``expected_price`` should be
     not nullable in the table ``estate_property``:
 
     .. code-block:: console
@@ -264,9 +264,9 @@ Automatic Fields
 **Reference**: the documentation related to this topic can be found in
 :ref:`reference/fields/automatic`.
 
-As noticed previously, extra fields were added to the table ``estate_property``.
+As you may have noticed, your model has a few fields you never defined.
 Odoo creates a few fields in all models\ [#autofields]_. These fields are
-managed by the system and shouldn't be written to. They can be read if
+managed by the system and can't be written to. They can be read if
 useful or necessary:
 
 :attr:`~odoo.fields.Model.id` (:class:`~odoo.fields.Id`)
@@ -281,7 +281,7 @@ useful or necessary:
     User who last modified the record.
 
 
-Now that we have created our first table, let's
+Now that we have created our first model, let's
 :ref:`add some security <howto/rdtraining/05_securityintro>`!
 
 

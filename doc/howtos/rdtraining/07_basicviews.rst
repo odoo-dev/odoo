@@ -35,7 +35,7 @@ List
 
 List views, also called tree views, display records in a tabular form.
 
-Their root element is ``<tree>``. The simplest form of the tree view simply
+Their root element is ``<tree>``. The simplest form of the list view simply
 lists all the fields to display in the table (each field as a column):
 
 .. code-block:: xml
@@ -54,9 +54,11 @@ A simple example can be found
     **Goal** of the section for the fields to display.
 
     Tips:
+    
     - do not add the ``editable="bottom"`` attribute that you can find in the example above. We'll
-    come back to it later.
+      come back to it later.
     - some field labels may need to be adapted to match the reference. 
+
 
 As always, you need to restart the server (do not forget the ``-u`` option) and refresh the browser
 to see the result.

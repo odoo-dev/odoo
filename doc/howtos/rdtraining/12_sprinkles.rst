@@ -375,9 +375,11 @@ The records where ``is_partner`` is ``True`` will be displayed in green.
     - The state should not be visible anymore
 
     Tips:
+
     - keep in mind that **all** fields used in attributes must be in the view!
     - if you want to test the color of the "Offer Received" and "Offer Accepted" states, add the
-    field in the form view and change it manually (we'll implement this later). 
+      field in the form view and change it manually (we'll implement this later). 
+
 
 Search
 ------

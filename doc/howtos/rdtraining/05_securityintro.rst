@@ -89,7 +89,7 @@ It is actually notified in the log:
 Access rights are defined as records of the model ``ir.model.access``. Each
 access right is associated to a model, a group (or no group for global
 access), and a set of permissions: create, read, write, unlink\ [#unlink]_. Such access
-rights are usually created by a CSV file named after their model:
+rights are usually defined in a CSV file named
 ``ir.model.access.csv``.
 
 Here is an example for our former ``test.model``:
@@ -121,6 +121,6 @@ Restart the server, and the warning message should have disappeared!
 
 It's now time to finally :ref:`interact with the UI <howto/rdtraining/06_firstui>`!
 
-.. [#who] 'who' means which Odoo user
+.. [#who] meaning which Odoo user (or group of users)
 
 .. [#unlink] 'unlink' is the equivalent of 'delete'

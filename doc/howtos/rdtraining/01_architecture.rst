@@ -38,19 +38,24 @@ sole purpose.
 
 Odoo modules can either add brand new business logic to an Odoo system, or
 alter and extend existing business logic: a module can be created to add your
-country's accounting rules to Odoo's generic accounting support, while the
-next module adds support for real-time visualisation of a bus fleet.
+country's accounting rules to Odoo's generic accounting support, while
+a different module adds support for real-time visualisation of a bus fleet.
 
 Everything in Odoo thus starts and ends with modules.
+
+Terminology: developers group their business features in Odoo *modules*. The main user-facing
+modules are flagged and exposed as *Apps*, but a majority of the modules aren't Apps. *Modules*
+may also be referred to as *addons*, and the directories where the Odoo server finds them
+form the ``addons_path``.
 
 Composition of a module
 -----------------------
 
 An Odoo module **can** contain a number of elements:
 
-Business objects
-    A business object (e.g. an invoice) is declared as a Python class. The variables defined in
-    these classes are automatically mapped to database fields thanks to the
+:ref:`Business objects <reference/orm>`
+    A business object (e.g. an invoice) is declared as a Python class. The fields defined in
+    these classes are automatically mapped to database columns thanks to the
     :abbr:`ORM (Object-Relational Mapping)` layer.
 
 :ref:`Object views <reference/views>`
@@ -72,8 +77,9 @@ Static web data
 
 None of these elements is mandatory: some modules may only add data files (e.g. country-specific
 accounting configuration), while others add business objects. During this training, we will
-create business objects, object views and data files. Web controllers and static web data
-are the topic of advanced trainings.
+create business objects, object views and data files.
+:ref:`Web controllers <howto/rdtraining/G_website>` and
+:ref:`static web data <howto/rdtraining/I_jswidget>` are covered by advanced sections.
 
 Module structure
 ----------------
@@ -89,11 +95,24 @@ When an Odoo module includes business objects (i.e. Python files), they are orga
 with a ``__init__.py`` file, containing import instructions for various Python
 files in the module.
 
+Here is a simplified module directory:
+
+.. code-block:: bash
+
+    module
+    ├── models
+    │   ├── *.py
+    │   └── __init__.py
+    ├── data
+    │   └── *.xml
+    ├── __init__.py
+    └── __manifest__.py
+
 Odoo Editions
 =============
 
 Odoo is available in `two versions`_: Odoo Enterprise (licensed & shared sources) and Odoo Community
-(open-source). On top of services such as suport or upgrades, an Enterprise version provide extra
+(open-source). On top of services such as support or upgrades, an Enterprise version provide extra
 functionalities to Odoo. From a technical point-of-view, these functionalities are simply
 new modules installed on top of the modules provided by the Community version.
 

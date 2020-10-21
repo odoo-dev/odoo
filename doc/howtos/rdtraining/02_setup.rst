@@ -321,7 +321,8 @@ Extra tools
 Code Editor
 -----------
 If you are working at Odoo, many of your colleagues are using `VSCode`_ (`VSCodium`_ the open source
-equivalent), `Sublime Text`_, `Atom`_ or `PyCharm`_. However, you are free to chose your preferred editor.
+equivalent), `Sublime Text`_, `Atom`_ or `PyCharm`_. However, you are free to
+choose your preferred editor.
 
 Don't forget to configure the linters correctly. Using a linter can help you by showing syntax and semantic
 warnings or errors. Odoo source code tries to respect Python and JavaScript standards, but some of
@@ -358,8 +359,8 @@ To connect the GUI application to your database we recommend you connect using t
 Python Debugging
 ----------------
 
-When you have a bug, debugging it using print might be enough at first. But, by learning how to use
-a proper debugger, you will save time.
+When facing a bug or trying to understand how the code works, simply printing things out can
+go a long way, but a proper debugger can save a lot of time.
 
 You can use a classic Python library debugger (`pdb <https://docs.python.org/3/library/pdb.html>`__,
 `pudb <https://pypi.org/project/pudb/>`__ or `ipdb <https://pypi.org/project/ipdb/>`__) or you can
@@ -398,35 +399,54 @@ Here is a list of commands:
 
 .. option:: h(elp) [command]
 
-      Without argument, print the list of available commands. With a command as argument, print help
-      about that command.
+    Without argument, print the list of available commands. With a command as argument, print help
+    about that command.
+
+.. option:: pp expression
+
+    The value of the ``expression`` is pretty-printed using the ``pprint`` module.
 
 .. option:: w(here)
 
-      Print a stack trace, with the most recent frame at the bottom.
+    Print a stack trace, with the most recent frame at the bottom.
 
 .. option:: d(own)
 
-      Move the current frame one level down in the stack trace (to a newer frame).
+    Move the current frame one level down in the stack trace (to a newer frame).
 
 .. option:: u(p)
 
-      Move the current frame one level up in the stack trace (to an older frame).
+    Move the current frame one level up in the stack trace (to an older frame).
 
 .. option:: n(ext)
 
-      Continue the execution until the next line in the current function is reached or it returns.
+    Continue the execution until the next line in the current function is reached or it returns.
 
 .. option:: c(ontinue)
 
-      Continue the execution and only stop when a breakpoint is encountered.
+    Continue the execution and only stop when a breakpoint is encountered.
+
+.. option:: s(tep)
+
+    Execute the current line, stop at the first possible occasion (either in a function that is
+    called or on the next line in the current function).
 
 .. option:: q(uit)
 
-      Quit the debugger. The program being executed is aborted.
+    Quit the debugger. The program being executed is aborted.
 
-.. tip:: To avoid killing the worker when debugging, you can add this arguments when launching the
-         server ` --limit-time-cpu=9999 --limit-time-real=9999`
+.. tip::
+
+    To avoid killing the worker when debugging, you can add these arguments when launching the
+    server: `--limit-time-cpu=9999 --limit-time-real=9999`
+    Another solution is to add them directly in the `~/.odoorc` file:
+
+    .. code-block:: console
+
+        $ cat ~/.odoorc
+        [options]
+        limit_time_cpu = 9999
+        limit_time_real = 9999
 
 Alright, now that your server is running, it's time to start
 :ref:`writing your own application <howto/rdtraining/03_newapp>`!

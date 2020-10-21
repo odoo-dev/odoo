@@ -136,7 +136,8 @@ between the menu and the model.
 
 However, menus always follow an architecture; in practice, there are three levels of menus:
 
-1. The root menu, which is displayed in the App switcher
+1. The root menu, which is displayed in the App switcher (the Odoo Community App switcher is a
+   dropdown menu)
 2. The first level menu, displayed in the top bar
 3. The action menus
 
@@ -187,8 +188,8 @@ Fields, Attributes And View
     
     The reserved fields ``active`` and ``state`` are added to the ``estate.property`` model.
 
-Up to now, we were able to generate a default view for our real estate property advertisements.
-In many cases we want to fine tune the view. There are many fine-tunings possible in Odoo, but
+Up to now, we were using the generic view for our real estate property advertisements.
+In most cases we want to fine tune the view. There are many fine-tunings possible in Odoo, but
 the very first step is usually to make sure that:
 
 - some fields have a default value

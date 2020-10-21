@@ -24,7 +24,7 @@ of an Odoo module, so it's always a good idea to give them a quick look.
 All topics are built around a business case we will enhance along the way. The reader is expected
 to take part actively in the training by writing the solution for each exercise.
 
-Ready? So let's start go!
+Ready? Let's get started!
 
 .. toctree::
     :caption: Core Training
