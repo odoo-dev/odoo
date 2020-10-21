@@ -4,6 +4,7 @@ import { setupTests } from "./helpers/index";
 import "./qunit";
 
 // import here every test suite files
+import "./components/dropdown_tests";
 import "./components/navbar_tests";
 import "./services/action_manager_tests";
 import "./services/model_tests";
