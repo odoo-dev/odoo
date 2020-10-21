@@ -5,7 +5,7 @@ import { DropdownItemSelectedPayload, ParentClosingMode } from "./dropdown_item"
 export class Dropdown extends Component {
   static bus = new core.EventBus();
   static props = {
-    open: {
+    startOpen: {
       type: Boolean,
       optional: true,
     },
@@ -20,7 +20,7 @@ export class Dropdown extends Component {
   };
   static template = "wowl.Dropdown";
 
-  state = useState({ open: this.props.open, groupIsOpen: this.props.open });
+  state = useState({ open: this.props.startOpen, groupIsOpen: this.props.startOpen });
 
   constructor() {
     super(...arguments);

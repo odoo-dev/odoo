@@ -78,7 +78,7 @@ Doing so, **_when one sibling dropdown is open_**, the others will **_automatica
 
 | Prop name      | Default Value | Value type | Description                                      |
 | -------------- | ------------- | ---------- | ------------------------------------------------ |
-| `open`         | `false`       | boolean    | initial dropdown open state                      |
+| `startOpen`    | `false`       | boolean    | initial dropdown open state                      |
 | `menuClass`    | /             | string     | could be used to style the dropdown menu `<ul/>` |
 | `togglerClass` | /             | string     | could be used to style the toggler `<button/>`   |
 
