@@ -17,7 +17,7 @@
                     </group>
                 </xpath>
                 <xpath expr="//field[@name='check_validity']" position="attributes">
-                    <attribute name="invisible">1</attribute>
+                    <attribute name="attrs">{'invisible':[('provider', '=', 'adyen')]}</attribute>
                 </xpath>
             </field>
         </record>

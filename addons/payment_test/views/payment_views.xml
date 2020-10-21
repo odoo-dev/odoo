@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="acquirer_form_test" model="ir.ui.view">
+        <field name="name">acquirer.form.test</field>
+        <field name="model">payment.acquirer</field>
+        <field name="inherit_id" ref="payment.acquirer_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='acquirer_credentials']" position="attributes">
+                <attribute name="attrs">{'invisible':[('provider', '=', 'test')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='check_validity']" position="attributes">
+                <attribute name="attrs">{'invisible':[('provider', '=', 'test')]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
