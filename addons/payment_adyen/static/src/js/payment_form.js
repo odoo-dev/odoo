@@ -117,7 +117,7 @@ odoo.define('payment_adyen.payment_form', require => {
          */
         _prepareInlineForm: function (provider, paymentOptionId, flow) {
             if (provider !== 'adyen') {
-                return this._super(...arguments);
+                this._super(...arguments);
             }
 
             // Check if instantiation of the drop-in is needed
