@@ -2,7 +2,9 @@
 <templates xml:space="preserve">
 
   <li t-name="wowl.DropdownItem" class="o_dropdown_item" t-on-click="onClick" owl="1">
-    <t t-slot="default" />
+    <span>
+      <t t-slot="default" />
+    </span>
   </li>
 
 </templates>

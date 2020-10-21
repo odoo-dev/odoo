@@ -6,8 +6,6 @@ As dropdowns are common in Odoo, we decided to make a generic dropdown component
 
 It contains all the logic you can usually expect a dropdown to behave.
 
-We made the choice to develop this simple component with as little style as possible, therefore it is your responsibility to make yours look awesome 😎!
-
 ### Features
 
 - Toggle the list on click
@@ -22,7 +20,7 @@ We made the choice to develop this simple component with as little style as poss
 
 ### Behind the scenes
 
-A `<Dropdown/>` component is simply a `<div class="o_dropdown"/>` having a `<button/>` next to an unordered list (`<ul/>`). The button is responsible for the list being present in the DOM or not.
+A `<Dropdown/>` component is simply a `<div class="o_dropdown"/>` having a `<button class="o_dropdown_toggler"/>` next to an unordered list (`<ul class="o_dropdown_menu"/>`). The button is responsible for the list being present in the DOM or not.
 
 A `<DropdownItem/>` is simply a list item (`<li class="o_dropdown_item"/>`). On click, you can ask this item to return you a payload (which you'll receive back in a custom `dropdown-item-selected` event). This payload is an object, so feel free to put anything you want in it. Most likely, you will use ids as payloads to know which item was clicked.
 
@@ -30,11 +28,17 @@ Illustration of what the final DOM could look like:
 
 ```html
 <div class="o_dropdown">
-  <button>Click me to toggle the dropdown menu !</button>
+  <button class="o_dropdown_toggler">
+    <span>Click me to toggle the dropdown menu !</span>
+  </button>
   <!-- following <ul/> list will or won't appear in the DOM depending on the state controlled by the button -->
-  <ul>
-    <li class="o_dropdown_item">Menu Item 1</li>
-    <li class="o_dropdown_item">Menu Item 2</li>
+  <ul class="o_dropdown_menu">
+    <li class="o_dropdown_item">
+      <span>Menu Item 1</span>
+    </li>
+    <li class="o_dropdown_item">
+      <span>Menu Item 2</span>
+    </li>
   </ul>
 </div>
 ```
@@ -45,7 +49,7 @@ In order to properly use a `<Dropdown/>` component, you need to populate two [OW
 
 <dl>
   <dt><strong>The <code>default</code> slot</strong></dt>
-  <dd>It contains the <strong>toggler elements of your dropdown</strong> and will take place inside your dropdown <code>&lt;button/></code> element.</dd>
+  <dd>It contains the <strong>toggler elements of your dropdown</strong> and will take place inside your dropdown <code>&lt;button>&lt;span/>&lt;/button></code> elements.</dd>
   <dt><strong>The <code>menu</code> slot</strong></dt>
   <dd>
     It contains the <strong>elements of the dropdown menu itself</strong> and will take place inside your dropdown <code>&lt;ul/></code> element.<br/>
@@ -89,6 +93,16 @@ Doing so, **_when one sibling dropdown is open_**, the others will **_automatica
 | `payload`           | null          | Object                       | item payload that will be part of the `dropdown-item-selected` event                   |
 | `parentClosingMode` | `all`         | `none` \| `closest` \| `all` | when item clicked, control which parent dropdown will get closed: none, closest or all |
 
+### Z-Index
+
+As Odoo previous dropdown menus made use of Bootstrap dropdowns, we added the same `z-index` value for the dropdown menu. See [Bootstrap documentation](https://getbootstrap.com/docs/4.5/layout/overview/#z-index).
+
+```scss
+.o_dropdown_menu {
+  z-index: 1000;
+}
+```
+
 ## Usage
 
 ### Step 1: make it appear on your app
@@ -111,15 +125,19 @@ And in the DOM it would get translated similarly to:
 
 ```xml
 <div class="o_dropdown">
-  <button>
+  <button class="o_dropdown_toggler">
     <!-- "default" slot content will take place here -->
-    Click me to toggle the dropdown menu !
+    <span>Click me to toggle the dropdown menu !</span>
   </button>
 
-  <ul>
+  <ul class="o_dropdown_menu">
     <!-- "dropdown" slot content will take place here -->
-    <li class="o_dropdown_item">Menu Item 1</li>
-    <li class="o_dropdown_item">Menu Item 2</li>
+    <li class="o_dropdown_item">
+      <span>Menu Item 1</span>
+    </li>
+    <li class="o_dropdown_item">
+      <span>Menu Item 2</span>
+    </li>
   </ul>
 </div>
 ```
@@ -157,6 +175,15 @@ Now that you understand the basics of the Dropdown Component, all you need to do
 
 ✨ Are you ready to make it shine? ✨
 
+Default CSS classes are:
+
+- `.o_dropdown` : the whole dropdown
+- `.o_dropdown_toggler` : the dropdown button
+- `.o_dropdown_menu` : the dropdown menu list
+- `.o_dropdown_item` : a dropdown item
+
+But you can go even further by extending them:
+
 - `<Dropdown class="my_class"/>` will become
   ```xml
   <div class="o_dropdown my_class">...</div>
@@ -164,7 +191,9 @@ Now that you understand the basics of the Dropdown Component, all you need to do
 - `<Dropdown togglerClass="my_class"/>` will become
   ```xml
   <div class="o_dropdown">
-    <button class="my_class">...</button>
+    <button class="o_dropdown_toggler my_class">
+      <span>...</span>
+    </button>
     ...
   </div>
   ```
@@ -172,12 +201,14 @@ Now that you understand the basics of the Dropdown Component, all you need to do
   ```xml
   <div class="o_dropdown">
     <button>...</button>
-    <ul class="my_class">...</ul>
+    <ul class="o_dropdown_menu my_class">...</ul>
   </div>
   ```
 - `<DropdownItem class="my_class"/>` will become
   ```xml
-  <li class="o_dropdown_item my_class" />
+  <li class="o_dropdown_item my_class">
+    <span>...</span>
+  </li>
   ```
 
 ## More Examples
@@ -191,7 +222,7 @@ This example uses the dropdown components without added style.
 ```xml
 <div t-on-dropdown-item-selected="onItemSelected">
   <Dropdown>
-    <span>File</span>
+    File
     <t t-set-slot="menu">
       <DropdownItem payload="'file-open'">Open</DropdownItem>
       <DropdownItem payload="'file-new-document'">New Document</DropdownItem>
@@ -199,7 +230,7 @@ This example uses the dropdown components without added style.
     </t>
   </Dropdown>
   <Dropdown>
-    <span>Edit</span>
+    Edit
     <t t-set-slot="menu">
       <DropdownItem payload="'edit-undo'">Undo</DropdownItem>
       <DropdownItem payload="'edit-redo'">Redo</DropdownItem>
@@ -207,7 +238,7 @@ This example uses the dropdown components without added style.
     </t>
   </Dropdown>
   <Dropdown>
-    <span>About</span>
+    About
     <t t-set-slot="menu">
       <DropdownItem payload="'about-help'">Help</DropdownItem>
       <DropdownItem payload="'about-update'">Check update</DropdownItem>
@@ -224,7 +255,7 @@ This example uses the dropdown components without added style.
 
 ```xml
 <Dropdown t-on-dropdown-item-selected="onItemSelected" owl="1">
-  <span>File</span>
+  File
   <t t-set-slot="menu">
     <DropdownItem payload="'file-open'">Open</DropdownItem>
     <t t-call="addon.Dropdown.File.New"/>
@@ -234,7 +265,7 @@ This example uses the dropdown components without added style.
 </Dropdown>
 
 <Dropdown t-name="addon.Dropdown.File.New" owl="1">
-  <span>New</span>
+  New
   <t t-set-slot="menu">
     <DropdownItem payload="'file-new-document'">Document</DropdownItem>
     <DropdownItem payload="'file-new-spreadsheet'">Spreadsheet</DropdownItem>
@@ -242,7 +273,7 @@ This example uses the dropdown components without added style.
 </Dropdown>
 
 <Dropdown t-name="addon.Dropdown.File.Save.As" owl="1">
-  <span>Save as...</span>
+  Save as...
   <t t-set-slot="menu">
     <DropdownItem payload="'file-save-as-csv'">CSV</DropdownItem>
     <DropdownItem payload="'file-save-as-pdf'">PDF</DropdownItem>
@@ -254,11 +285,11 @@ This example uses the dropdown components without added style.
 
 ```xml
 <Dropdown t-on-dropdown-item-selected="onItemSelected" owl="1">
-  <span>File</span>
+  File
   <t t-set-slot="menu">
     <DropdownItem payload="'file-open'">Open</DropdownItem>
     <Dropdown>
-      <span>New</span>
+      New
       <t t-set-slot="menu">
         <DropdownItem payload="'file-new-document'">Document</DropdownItem>
         <DropdownItem payload="'file-new-spreadsheet'">Spreadsheet</DropdownItem>
@@ -266,7 +297,7 @@ This example uses the dropdown components without added style.
     </Dropdown>
     <DropdownItem payload="'file-save'">Save</DropdownItem>
     <Dropdown>
-      <span>Save as...</span>
+      Save as...
       <t t-set-slot="menu">
         <DropdownItem payload="'file-save-as-csv'">CSV</DropdownItem>
         <DropdownItem payload="'file-save-as-pdf'">PDF</DropdownItem>

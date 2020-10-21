@@ -1,0 +1,59 @@
+.o_dropdown {
+  position: relative;
+}
+
+// Menu
+ul.o_dropdown_menu {
+  background-color: $white;
+  border: 1px solid $gray-300;
+  border-radius: 3px;
+  box-shadow: 0 6px 12px -4px rgba($black, 0.25);
+  color: $o-main-text-color;
+  list-style: none;
+  margin: 0;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 0.5rem 0;
+  position: absolute;
+  min-width: 100%;
+  z-index: 1000;
+}
+
+// Toggler and items
+button.o_dropdown_toggler,
+li.o_dropdown_item {
+  background-color: inherit;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.25rem 1.6rem;
+  position: relative;
+  user-select: none;
+  white-space: nowrap;
+
+  // On hover or when opened, put a 15% dark veil
+  &:hover::before,
+  &.o_dropdown_active::before {
+    content: "\00A0"; // Non-breaking space unicode
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba($black, 0.15);
+    width: 100%;
+    height: 100%;
+  }
+
+  // Make sure the dark veil does not affect child content,
+  // so it is just applied to the background.
+  &:hover > *,
+  &.o_dropdown_active > * {
+    filter: brightness(1);
+  }
+
+  &:focus,
+  &:active,
+  &:focus:active,
+  &.o_dropdown_active {
+    outline: none;
+  }
+}
