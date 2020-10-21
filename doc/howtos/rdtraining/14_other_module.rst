@@ -48,6 +48,8 @@ When the ``estate_account`` module appears in the list, go on and install it! Yo
 the Invoicing application is installed as well. This is expected since your module depends on it.
 If you uninstall the Invoicing application, your module will be uninstalled as well.
 
+.. _howto/rdtraining/14_other_module/create:
+
 Invoice Creation
 ----------------
 
