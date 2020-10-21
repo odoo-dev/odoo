@@ -109,7 +109,7 @@ export function click(el: HTMLElement, selector?: string) {
     }
     target = els[0];
   }
-  const ev = new MouseEvent("click");
+  const ev = new MouseEvent("click", { bubbles: true });
   target.dispatchEvent(ev);
   return nextTick();
 }
