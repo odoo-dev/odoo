@@ -140,7 +140,7 @@
                             <div class="o_setting_right_pane" id="crm_iap_lead_enrich">
                                 <label string="Lead Enrichment" for="module_crm_iap_lead_enrich"/>
                                 <div class="text-muted">
-                                    Enrich your leads automatically with company data based on their email address
+                                    Enrich your leads with company data based on their email addresses
                                 </div>
                                 <div id="crm_iap_lead_enrich">
                                     <div class="mt8" attrs="{'invisible': [('module_crm_iap_lead_enrich','=',False)]}">

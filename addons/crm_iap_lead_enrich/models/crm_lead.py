@@ -3,6 +3,7 @@
 
 import datetime
 import logging
+import threading
 from psycopg2 import OperationalError
 
 from odoo import _, api, fields, models, tools
@@ -29,19 +30,21 @@ class Lead(models.Model):
             else:
                 lead.show_enrich_button = True
 
-    @api.model
-    def _iap_enrich_leads_cron(self):
-        timeDelta = fields.datetime.now() - datetime.timedelta(hours=1)
-        # Get all leads not lost nor won (lost: active = False)
-        leads = self.search([
-            ('iap_enrich_done', '=', False),
-            ('reveal_id', '=', False),
-            ('probability', '<', 100),
-            ('create_date', '>', timeDelta)
-        ])
-        leads.iap_enrich(from_cron=True)
+    @api.model_create_multi
+    def create(self, vals_list):
+        leads = super(Lead, self).create(vals_list)
+        ConfigParameter = self.env['ir.config_parameter'].sudo()
+        enrich_mode = ConfigParameter.get_param('crm.iap.lead.enrich.setting', 'manual')
+        user_creation_mode = (not self._context.get('install_mode') or self._context.get('import_file')) and not getattr(threading.currentThread(), 'testing', False)
+        if enrich_mode == 'auto' and user_creation_mode:
+            enrich_limit = ConfigParameter.get_param('crm.iap.enrich.limit', 1000)
+            leads_to_enrich = leads.filtered(lambda lead: lead.email_from and (lead.probability != 100 or not lead.iap_enrich_done) and lead.active)
+            leads_to_enrich = leads_to_enrich[:int(enrich_limit)]
+            if leads_to_enrich:
+                leads_to_enrich.iap_enrich()
+        return leads
 
-    def iap_enrich(self, from_cron=False):
+    def iap_enrich(self):
         # Split self in a list of sub-recordsets or 50 records to prevent timeouts
         batches = [self[index:index + 50] for index in range(0, len(self), 50)]
         for leads in batches:
@@ -52,8 +55,7 @@ class Lead(models.Model):
                         "SELECT 1 FROM {} WHERE id in %(lead_ids)s FOR UPDATE NOWAIT".format(self._table),
                         {'lead_ids': tuple(leads.ids)}, log_exceptions=False)
                     for lead in leads:
-                        # If lead is lost, active == False, but is anyway removed from the search in the cron.
-                        if lead.probability == 100 or lead.iap_enrich_done:
+                        if lead.probability == 100 or lead.iap_enrich_done or not lead.active:
                             continue
 
                         normalized_email = tools.email_normalize(lead.email_from)
@@ -78,14 +80,13 @@ class Lead(models.Model):
                             iap_response = self.env['iap.enrich.api']._request_enrich(lead_emails)
                         except iap_tools.InsufficientCreditError:
                             _logger.info('Sent batch %s enrich requests: failed because of credit', len(lead_emails))
-                            if not from_cron:
-                                data = {
-                                    'url': self.env['iap.account'].get_credits_url('reveal'),
-                                }
-                                leads[0].message_post_with_view(
-                                    'crm_iap_lead_enrich.mail_message_lead_enrich_no_credit',
-                                    values=data,
-                                    subtype_id=self.env.ref('mail.mt_note').id)
+                            data = {
+                                'url': self.env['iap.account'].get_credits_url('reveal'),
+                            }
+                            leads[0].message_post_with_view(
+                                'crm_iap_lead_enrich.mail_message_lead_enrich_no_credit',
+                                values=data,
+                                subtype_id=self.env.ref('mail.mt_note').id)
                             # Since there are no credits left, there is no point to process the other batches
                             break
                         except Exception as e:
