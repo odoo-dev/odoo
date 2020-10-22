@@ -193,6 +193,10 @@ export interface RendererProps {
 export interface FormRendererProps extends RendererProps {
   mode: "edit" | "readonly";
 }
+export interface ListRendererProps extends RendererProps {
+  fieldNames: string[];
+  records: any[];
+}
 
 export interface View {
   name: string;

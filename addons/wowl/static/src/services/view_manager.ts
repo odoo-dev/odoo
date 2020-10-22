@@ -4,6 +4,7 @@ export interface ViewDefinition {
   arch: string;
   type: ViewType;
   viewId: number;
+  fields: {[key: string]: any};
 }
 
 interface ViewDefinitions {

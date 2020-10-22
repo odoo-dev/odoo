@@ -26,13 +26,13 @@ export class AbstractController extends Component<ViewProps, OdooEnv> {
 
   vm = useService("view_manager");
   am = useService("action_manager");
-  viewDescription = {};
+  viewDescription: ViewDefinition = {} as any;
 
   get rendererProps(): RendererProps {
     return {
       arch: (this.viewDescription as ViewDefinition).arch,
       model: this.props.model,
-      fields: {},
+      fields: (this.viewDescription as ViewDefinition).fields,
     };
   }
 
