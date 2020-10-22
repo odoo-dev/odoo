@@ -1,7 +1,7 @@
 import { Component } from "@odoo/owl";
 import { Registry } from "../../core/registry";
-import { Dropdown } from "../dropdown/dropdown";
-import { DropdownItem } from "../dropdown/dropdown_item";
+import { Dropdown } from "../../components/dropdown/dropdown";
+import { DropdownItem } from "../../components/dropdown/dropdown_item";
 
 export interface ActionMenusProps {
   selectedIds: number[];

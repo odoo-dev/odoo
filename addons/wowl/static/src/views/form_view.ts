@@ -1,7 +1,7 @@
 import { Component, tags, useState } from "@odoo/owl";
 import { OdooEnv, FormRendererProps, View } from "../types";
 import { AbstractController, ControlPanelSubTemplates } from "./abstract_controller";
-import { ActionMenus } from "./../components/action_menus/action_menus";
+import { ActionMenus } from "./action_menus/action_menus";
 
 const { xml } = tags;
 
