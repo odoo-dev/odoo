@@ -5,9 +5,7 @@
     <nav class="o_main_navbar" t-on-dropdown-item-selected="onNavBarDropdownItemSelection">
       <t t-call="wowl.NavBar.AppsMenu" />
       <t t-if="currentApp">
-        <DropdownItem class="o_menu_brand highlight_on_hover" payload="currentApp">
-          <t t-esc="currentApp.name" />
-        </DropdownItem>
+        <DropdownItem class="o_menu_brand" payload="currentApp" t-esc="currentApp.name" />
         <t t-call="wowl.NavBar.SectionsMenu">
           <t
             t-set="sections"
@@ -26,7 +24,6 @@
   <Dropdown
     t-name="wowl.NavBar.AppsMenu"
     class="o_navbar_apps_menu"
-    togglerClass="'highlight_on_hover'"
     owl="1"
   >
     <i class="fa fa-th-large" />
@@ -34,8 +31,7 @@
         <t t-foreach="menuRepo.getApps()" t-as="app" t-key="app.id">
           <DropdownItem
             payload="app"
-            class="dropdown-item"
-            t-att-class="{active: currentApp?.appID === app.appID}"
+            t-att-class="{o_dropdown_active: currentApp?.appID === app.appID}"
           >
               <t t-esc="app.name" />
           </DropdownItem>
@@ -53,7 +49,7 @@
         </t>
       </t>
       <t t-else="">
-        <DropdownItem class="highlight_on_hover" payload="section">
+        <DropdownItem payload="section">
             <t t-esc="section.name" />
         </DropdownItem>
       </t>
@@ -62,25 +58,20 @@
 
   <Dropdown
     t-name="wowl.NavBar.SectionsMenu.Dropdown"
-    togglerClass="{
-      'menu-item': true,
-      'highlight_on_hover': true,
-      'highlighted': open
-    }"
     owl="1"
   >
     <t t-esc="name" />
     <t t-set-slot="menu">
       <t t-foreach="items" t-as="item" t-key="item.id">
         <t t-if="!item.childrenTree.length">
-          <DropdownItem class="dropdown-item" payload="item">
+          <DropdownItem payload="item">
             <t t-esc="item.name" />
           </DropdownItem>
         </t>
         <t t-else="">
           <span class="text-muted pl-3"><t t-esc="item.name" /></span>
           <t t-foreach="item.childrenTree" t-as="subItem" t-key="subItem.id">
-            <DropdownItem class="dropdown-item" payload="subItem">
+            <DropdownItem payload="subItem">
               <t t-esc="subItem.name" />
             </DropdownItem>
           </t>
