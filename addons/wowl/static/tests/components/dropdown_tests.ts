@@ -47,7 +47,7 @@ QUnit.test("can be styled", async (assert) => {
   const menu = parent.el!.querySelector("ul") as HTMLElement;
   assert.hasClass(menu, "o_dropdown_menu three");
   const item = parent.el!.querySelector("li") as HTMLElement;
-  assert.hasClass(item, "four");
+  assert.hasClass(item, "o_dropdown_item four");
 });
 
 QUnit.test("menu can be toggled", async (assert) => {

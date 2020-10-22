@@ -24,7 +24,7 @@ We made the choice to develop this simple component with as little style as poss
 
 A `<Dropdown/>` component is simply a `<div class="o_dropdown"/>` having a `<button/>` next to an unordered list (`<ul/>`). The button is responsible for the list being present in the DOM or not.
 
-A `<DropdownItem/>` is simply a list item (`<li/>`). On click, you can ask this item to return you a payload (which you'll receive back in a custom `dropdown-item-selected` event). This payload is an object, so feel free to put anything you want in it. Most likely, you will use ids as payloads to know which item was clicked.
+A `<DropdownItem/>` is simply a list item (`<li class="o_dropdown_item"/>`). On click, you can ask this item to return you a payload (which you'll receive back in a custom `dropdown-item-selected` event). This payload is an object, so feel free to put anything you want in it. Most likely, you will use ids as payloads to know which item was clicked.
 
 Illustration of what the final DOM could look like:
 
@@ -33,8 +33,8 @@ Illustration of what the final DOM could look like:
   <button>Click me to toggle the dropdown menu !</button>
   <!-- following <ul/> list will or won't appear in the DOM depending on the state controlled by the button -->
   <ul>
-    <li>Menu Item 1</li>
-    <li>Menu Item 2</li>
+    <li class="o_dropdown_item">Menu Item 1</li>
+    <li class="o_dropdown_item">Menu Item 2</li>
   </ul>
 </div>
 ```
@@ -118,8 +118,8 @@ And in the DOM it would get translated similarly to:
 
   <ul>
     <!-- "dropdown" slot content will take place here -->
-    <li>Menu Item 1</li>
-    <li>Menu Item 2</li>
+    <li class="o_dropdown_item">Menu Item 1</li>
+    <li class="o_dropdown_item">Menu Item 2</li>
   </ul>
 </div>
 ```
@@ -177,7 +177,7 @@ Now that you understand the basics of the Dropdown Component, all you need to do
   ```
 - `<DropdownItem class="my_class"/>` will become
   ```xml
-  <li class="my_class" />
+  <li class="o_dropdown_item my_class" />
   ```
 
 ## More Examples
