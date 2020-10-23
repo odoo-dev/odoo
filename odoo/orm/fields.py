@@ -1696,13 +1696,7 @@ class Field[T]:
         :param records:
         :param value: a value in any format
         """
-        # discard the records that are not modified
-        ids, cache_value = self.to_write(records, value)
-        if not ids:
-            return
-
-        # update the cache
-        self._update_cache(records.browse(ids), cache_value, dirty=True)
+        self._update_cache(records, value, dirty=True)
 
     ############################################################################
     #

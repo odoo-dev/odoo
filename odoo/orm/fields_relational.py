@@ -394,12 +394,6 @@ class Many2one(_Relational):
         return value.display_name
 
     def write(self, records, value):
-        # discard the records that are not modified
-        ids, value = self.to_write(records, value)
-        if not ids:
-            return
-        records = records.__class__(records.env, ids, records._prefetch_ids)
-
         if self.bypass_search_access and not records.env.su:
             try:
                 records.env[self.comodel_name].browse(value).check_access('read')
@@ -845,10 +839,6 @@ class _RelationalMulti(_Relational):
         return ids, commands
 
     def write(self, records: BaseModel, value):
-        ids, value = self.to_write(records, value)
-        if not ids:
-            return
-        records = records.__class__(records.env, ids, records._prefetch_ids)
         self.write_batch([(records, value)])
 
     def write_batch(self, records_commands_list: list[tuple[BaseModel, typing.Any]], create: bool = False) -> None:
