@@ -319,29 +319,35 @@ class BaseString(Field[str | typing.Literal[False]]):
             if target and bool(target.id) == bool(record.id):
                 target[field.name] = record_value[record]
 
+    def to_write(self, records, value):
+        if self.translate and isinstance(value, dict):
+            if isinstance(value, StoredTranslations):
+                return super().to_write(records.with_context(prefetch_langs=True), value)
+            # force update all records
+            return records, value
+        return super().to_write(records, value)
+
     def write(self, records, value):
-        if not self.translate or value is False or value is None:
+        records, value = self.to_write(records, value)
+        if not records:
+            return
+
+        if not self.translate or value is None:
             super().write(records, value)
             return
 
         lang = records.env.lang or 'en_US'
         if isinstance(value, StoredTranslations):
             assert any(records._ids)
-            cache_value = self.convert_to_cache(value, records)
-            records = self._filter_not_equal(records.with_context(prefetch_langs=True), cache_value)
-            self._update_cache(records.with_context(prefetch_langs=True), cache_value, dirty=bool(self.store))
+            self._update_cache(records.with_context(prefetch_langs=True), value, dirty=True)
             return
-        elif isinstance(value, dict):
+        if isinstance(value, dict):
             cache_value_dict = self.convert_to_cache(value, records)
             if not cache_value_dict:
                 return
             # force update all records
         else:
-            cache_value = self.convert_to_cache(value, records)
-            cache_value_dict = {self.translation_lang(records.env): cache_value}
-            records = self._filter_not_equal(records, cache_value)
-        if not records:
-            return
+            cache_value_dict = {self.translation_lang(records.env): value}
 
         field_cache = self._get_cache(records.env)
         dirty_ids = records.env._field_dirty.get(self, ())

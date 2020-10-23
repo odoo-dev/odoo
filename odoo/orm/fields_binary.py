@@ -180,13 +180,12 @@ class Binary(Field[BinaryValue]):
             return
 
         # update the cache, and discard the records that are not modified
-        cache_value = self.convert_to_cache(value, records)
-        records = self._filter_not_equal(records, cache_value)
+        records, cache_value = self.to_write(records, value)
         if not records:
             return
         if self.store:
             # determine records that are known to be not null
-            not_null = self._filter_not_equal(records, None)
+            not_null = self.to_write(records, None)[0]
 
         self._update_cache(records, cache_value)
 
@@ -308,6 +307,18 @@ class Image(Binary):
             self._update_cache(record, cache_value)
         super().create(new_record_values)
 
+    def to_write(self, records, value):
+        try:
+            return super().to_write(records, value)
+        except ValueError:
+            if not any(records._ids):
+                # Some crap is assigned to a new record. This can happen in an
+                # onchange, where the client sends the "bin size" value of the
+                # field instead of its full value (this saves bandwidth). In
+                # this case, let method write() deal with it.
+                return records, value
+            raise
+
     def write(self, records, value):
         try:
             new_value = self._image_process(value, records.env)
@@ -322,6 +333,9 @@ class Image(Binary):
             raise
 
         super().write(records, new_value)
+        # when setting related image field, keep the unprocessed image in cache
+        # to let the inverse method use the original image; the image will be
+        # resized once the inverse has been applied
         cache_value = self.convert_to_cache(value if self.related else new_value, records)
         self._update_cache(records, cache_value, dirty=True)
 

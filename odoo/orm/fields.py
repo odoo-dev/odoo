@@ -1672,6 +1672,16 @@ class Field[T]:
         for record, value in record_values:
             self.write(record, value)
 
+    def to_write(self, records: BaseModel, value: typing.Any) -> tuple[BaseModel, typing.Any]:
+        """ Convert ``value`` to the format internally used by ``self.write()``,
+        and determine the subset of ``records`` that should be updated.
+        """
+        cache_value = self.convert_to_cache(value, records)
+        field_cache = self._get_cache(records.env)
+        ids = tuple(id_ for id_ in records._ids if field_cache.get(id_, SENTINEL) != cache_value)
+        records_to_write = records.__class__(records.env, ids, records._prefetch_ids)
+        return records_to_write, cache_value
+
     def write(self, records: BaseModel, value: typing.Any) -> None:
         """ Write the value of ``self`` on ``records``. This method must update
         the cache and prepare database updates.
@@ -1680,8 +1690,7 @@ class Field[T]:
         :param value: a value in any format
         """
         # discard the records that are not modified
-        cache_value = self.convert_to_cache(value, records)
-        records = self._filter_not_equal(records, cache_value)
+        records, cache_value = self.to_write(records, value)
         if not records:
             return
 
@@ -1743,18 +1752,6 @@ class Field[T]:
         """ Generator of ids that have no value in cache. """
         field_cache = self._get_cache(records.env)
         return (id_ for id_ in records._ids if id_ not in field_cache)
-
-    def _filter_not_equal(self, records: ModelType, cache_value: typing.Any) -> ModelType:
-        """ Return the subset of ``records`` for which the value of ``self`` is
-        either not in cache, or different from ``cache_value``.
-        """
-        field_cache = self._get_cache(records.env)
-        ids_to_update = tuple(
-            record_id
-            for record_id in records._ids
-            if field_cache.get(record_id, SENTINEL) != cache_value
-        )
-        return records.__class__(records.env, ids_to_update, records._prefetch_ids)
 
     def _to_prefetch(self, record: ModelType) -> ModelType:
         """ Return a recordset including ``record`` to prefetch the field. """

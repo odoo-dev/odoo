@@ -395,17 +395,15 @@ class Many2one(_Relational):
 
     def write(self, records, value):
         # discard the records that are not modified
-        cache_value = self.convert_to_cache(value, records)
+        records, cache_value = self.to_write(records, value)
+        if not records:
+            return
 
         if self.bypass_search_access and not records.env.su:
             try:
                 records.env[self.comodel_name].browse(cache_value).check_access('read')
             except AccessError as e:
                 raise AccessError(records.env._("Failed to write field %s", self) + "\n" + str(e)) from e
-
-        records = self._filter_not_equal(records, cache_value)
-        if not records:
-            return
 
         # remove records from the cache of one2many fields of old corecords
         self._remove_inverses(records, cache_value)
@@ -793,37 +791,82 @@ class _RelationalMulti(_Relational):
         :param record_values: a list of pairs ``(record, value)``, where
             ``value`` is in the format of method :meth:`BaseModel.write`
         """
-        self.write_batch(record_values, create=True)
+        records_commands_list = [
+            (record, self.convert_to_commands(value))
+            for record, value in record_values
+        ]
+        self.write_batch(records_commands_list, create=True)
+
+    def to_write(self, records, value):
+        commands = self.convert_to_commands(value)
+        if not commands:
+            # non-stored fields without a value are considered not equal,
+            # otherwise their computation will fail to assign them
+            ids = () if self.store else tuple(self._cache_missing_ids(records))
+            records_to_write = records.__class__(records.env, ids, records._prefetch_ids)
+            return records_to_write, commands
+
+        # new records without value in cache are considered not equal (onchange)
+        new_ids = [id_ for id_ in records._ids if not id_]
+        if new_ids:
+            field_cache = self._get_cache(records.env)
+            if any(id_ not in field_cache for id_ in new_ids):
+                return records, commands
+
+        # check for obvious changes
+        if any(
+            command[0] in (Command.CREATE, Command.DELETE, Command.UPDATE)
+            for command in commands
+        ):
+            return records, commands
+
+        # check for actual changes
+        vals = [set(record[self.name]._ids) for record in records]
+        diff = {}  # maps ids to add on True, and ids to discard on False
+        for command in commands:
+            if command[0] == Command.UNLINK:
+                diff[command[1]] = False
+            elif command[0] == Command.LINK:
+                diff[command[1]] = True
+            elif command[0] == Command.CLEAR:
+                diff = {id_: False for val in vals for id_ in val}
+            elif command[0] == Command.SET:
+                diff = {id_: False for val in vals for id_ in val}
+                for id_ in ((ids,) if (ids := command[2]).__class__ is int else ids):
+                    diff[id_] = True
+
+        to_add = {id_ for id_, flag in diff.items() if flag}
+        to_remove = {id_ for id_, flag in diff.items() if not flag}
+        ids = tuple(
+            id_
+            for id_, val in zip(records._ids, vals)
+            if (val | to_add) - to_remove != val
+        )
+        records_to_write = records.__class__(records.env, ids, records._prefetch_ids)
+        return records_to_write, commands
 
     def write(self, records: BaseModel, value):
+        records, value = self.to_write(records, value)
+        if not records:
+            return
         self.write_batch([(records, value)])
 
     def write_batch(self, records_commands_list: list[tuple[BaseModel, typing.Any]], create: bool = False) -> None:
         raise NotImplementedError
 
-    def _parse_write_commands(self, records_commands_list: list[tuple[BaseModel, typing.Any]]) -> tuple[BaseModel, list[tuple[BaseModel, CommandValue]]]:
-        """Mutate the command list to make sure we only have command values."""
-        if not records_commands_list:
-            return None, records_commands_list  # not typed correctly, but falsy so we skip it
-        for idx, (recs, value) in enumerate(records_commands_list):
-            if isinstance(value, tuple):
-                value = [Command.set(value)]
-            elif isinstance(value, BaseModel) and value._name == self.comodel_name:
-                value = [Command.set(value._ids)]
-            elif value is False or value is None:
-                value = [Command.clear()]
-            elif isinstance(value, list) and value and not isinstance(value[0], (tuple, list)):
-                value = [Command.set(tuple(value))]
-            if not isinstance(value, list):
-                raise ValueError("Wrong value for %s: %s" % (self, value))
-            records_commands_list[idx] = (recs, value)
-        if len(records_commands_list) == 1:
-            records = records_commands_list[0][0]
-        else:
-            model = records_commands_list[0][0].browse()
-            records = model.browse(unique(rid for recs, _cs in records_commands_list for rid in recs._ids))
-        assert all(records._ids) or not any(records._ids), f"{records_commands_list} contains a mix of real and new records. It is not supported."
-        return records, records_commands_list
+    def convert_to_commands(self, value: typing.Any) -> list[CommandValue]:
+        """ Convert ``value`` into an equivalent list of commands. """
+        if isinstance(value, tuple):
+            value = [Command.set(value)]
+        elif isinstance(value, BaseModel) and value._name == self.comodel_name:
+            value = [Command.set(value._ids)]
+        elif value is False or value is None:
+            value = [Command.clear()]
+        elif isinstance(value, list) and value and not isinstance(value[0], (tuple, list)):
+            value = [Command.set(tuple(value))]
+        if not isinstance(value, list):
+            raise TypeError(f"Wrong value for {self}: {value}")
+        return value
 
     def _check_sudo_commands(self, comodel):
         # if the model doesn't accept sudo commands
@@ -1013,12 +1056,15 @@ class One2many(_RelationalMulti):
         self._insert_cache(records, values)
 
     def write_batch(self, records_commands_list, create=False):
-        records, records_commands_list = self._parse_write_commands(records_commands_list)
-        if not records:
-            return
+        if len(records_commands_list) == 1:
+            records = records_commands_list[0][0]
+            model = records.browse()
+        else:
+            model = records_commands_list[0][0].browse()
+            records = model.browse(unique(id_ for recs, _cs in records_commands_list for id_ in recs._ids))
+        assert all(records._ids) or not any(records._ids), f"{records_commands_list} contains a mix of real and new records. It is not supported."
 
         is_real = any(records._ids)
-        model = records.browse()
         comodel = model.env[self.comodel_name].with_context(**self.context)
         comodel = self._check_sudo_commands(comodel)
 
@@ -1434,12 +1480,15 @@ class Many2many(_RelationalMulti):
         self._insert_cache(records, values)
 
     def write_batch(self, records_commands_list, create=False):
-        records, records_commands_list = self._parse_write_commands(records_commands_list)
-        if not records:
-            return
+        if len(records_commands_list) == 1:
+            records = records_commands_list[0][0]
+            model = records.browse()
+        else:
+            model = records_commands_list[0][0].browse()
+            records = model.browse(unique(id_ for recs, _cs in records_commands_list for id_ in recs._ids))
+        assert all(records._ids) or not any(records._ids), f"{records_commands_list} contains a mix of real and new records. It is not supported."
 
         is_real = any(records._ids)
-        model = records.browse()
         comodel = model.env[self.comodel_name].with_context(**self.context)
         comodel = self._check_sudo_commands(comodel)
         cr = model.env.cr
