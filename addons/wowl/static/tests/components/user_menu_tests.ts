@@ -20,5 +20,8 @@ QUnit.module("UserMenu", {
 
 QUnit.test("can be rendered", async (assert) => {
   const userMenu = await mount(UserMenu, { env, target });
-  assert.strictEqual(userMenu.el!.innerHTML, "Sauron");
+  assert.strictEqual(
+    userMenu.el!.innerHTML,
+    '<button class="o_dropdown_toggler "><span>Sauron</span></button>'
+  );
 });

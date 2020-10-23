@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <li t-name="wowl.UserMenu" class="o_user_menu" owl="1">
+    <Dropdown t-name="wowl.UserMenu" class="o_user_menu" owl="1">
         <t t-esc="user.name"/>
-    </li>
+    </Dropdown>
 
 </templates>

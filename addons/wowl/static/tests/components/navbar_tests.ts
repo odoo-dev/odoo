@@ -55,9 +55,9 @@ QUnit.test("dropdown menu can be toggled", async (assert) => {
   const navbar = await mount(NavBar, { env });
 
   const dropdown = navbar.el!.querySelector<HTMLElement>(".o_navbar_apps_menu")!;
-  await click(navbar.el!, "button.o_dropdown_toggler");
+  await click(dropdown, "button.o_dropdown_toggler");
   assert.containsOnce(dropdown, "ul.o_dropdown_menu");
-  await click(navbar.el!, "button.o_dropdown_toggler");
+  await click(dropdown, "button.o_dropdown_toggler");
   assert.containsNone(dropdown, "ul.o_dropdown_menu");
 });
 
