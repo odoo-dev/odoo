@@ -302,11 +302,6 @@ class Properties(Field):
         return super().to_write(records, value)
 
     def write(self, records, value):
-        ids, value = self.to_write(records, value)
-        if not ids:
-            return
-        records = records.__class__(records.env, ids, records._prefetch_ids)
-
         # update the field and its definitions
         if not isinstance(value, dict | None):
             value = self._update_definition(records, value)

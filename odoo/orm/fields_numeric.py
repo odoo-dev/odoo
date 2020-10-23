@@ -302,3 +302,11 @@ class Monetary(Field[float]):
         if value or value == 0.0:
             return value
         return ''
+
+    def to_write(self, records, value):
+        # return the value unrounded, in order to round it again in write()
+        return super().to_write(records, value)[0], value
+
+    def write(self, records, value):
+        cache_value = self.convert_to_cache(value, records)
+        super().write(records, cache_value)

@@ -328,11 +328,6 @@ class BaseString(Field[str | typing.Literal[False]]):
         return super().to_write(records, value)
 
     def write(self, records, value):
-        ids, value = self.to_write(records, value)
-        if not ids:
-            return
-        records = records.__class__(records.env, ids, records._prefetch_ids)
-
         if not self.translate or value is None:
             super().write(records, value)
             return
@@ -346,7 +341,6 @@ class BaseString(Field[str | typing.Literal[False]]):
             cache_value_dict = self.convert_to_cache(value, records)
             if not cache_value_dict:
                 return
-            # force update all records
         else:
             cache_value_dict = {self.translation_lang(records.env): value}
 

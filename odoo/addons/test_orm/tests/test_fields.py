@@ -4002,22 +4002,22 @@ class TestHtmlField(TransactionCase):
 
         # new value sanitized for insertion in cache
         record.html = '<p>comment</p>'
-        self.assertEqual(patch.call_count, 3)
+        self.assertEqual(patch.call_count, 2)
 
         # the value in cache is dirty -> convert_to_column_update(..., validate=False),
         # so no additional call to `html_sanitize`
         record.flush_recordset()
-        self.assertEqual(patch.call_count, 3)
+        self.assertEqual(patch.call_count, 2)
 
         # value coming from db does not need to be sanitized
         record.invalidate_recordset()
         record.html
-        self.assertEqual(patch.call_count, 3)
+        self.assertEqual(patch.call_count, 2)
 
         # value coming from db during an onchange does not need to be sanitized
         new_record = record.new(origin=record)
         new_record.html
-        self.assertEqual(patch.call_count, 3)
+        self.assertEqual(patch.call_count, 2)
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
