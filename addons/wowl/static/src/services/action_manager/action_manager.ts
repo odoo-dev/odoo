@@ -121,9 +121,13 @@ interface UpdateStackOptions {
   index?: number;
 }
 
+interface SwitchViewOptions {
+  recordId?: number;
+}
+
 interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): Promise<void>;
-  switchView(viewType: string): void;
+  switchView(viewType: string, options?: SwitchViewOptions): void;
   restore(jsId: string): void;
   loadRouterState(state: Route["hash"], options: ActionOptions): Promise<boolean>;
 }
@@ -237,7 +241,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {View[]} views
    * @returns {ViewProps}
    */
-  function _getViewProps(view: View, action: ActWindowAction, views: View[]): ViewProps {
+  function _getViewProps(view: View, action: ActWindowAction, views: View[], recordId: number | null): ViewProps {
     const target = action.target;
     const viewSwitcherEntries = views
       .filter((v) => v.multiRecord === view.multiRecord)
@@ -247,6 +251,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     const controllerOptions: ViewOptions = {
       actionId: action.id,
       context: action.context,
+      recordId: recordId || null,
       viewSwitcherEntries,
       withActionMenus: target !== "new" && target !== "inline",
       withFilters: action.views.some((v) => v[1] === "search"),
@@ -617,12 +622,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
    *
    * @param {ViewType} viewType
    */
-  function switchView(viewType?: ViewType): void {
+  function switchView(viewType: ViewType, options: SwitchViewOptions): void {
     const controller = controllerStack[controllerStack.length - 1] as ViewController;
     if (controller.action.type !== "ir.actions.act_window") {
       throw new Error(`switchView called but the current controller isn't a view`);
     }
-    viewType = viewType || controller.view.type;
     const view = controller.views.find((view: any) => view.type === viewType);
     if (!view) {
       throw new Error(`switchView: cannot find view of type ${viewType}`);
@@ -633,7 +637,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action: controller.action,
       views: controller.views,
       view,
-      props: _getViewProps(view, controller.action, controller.views),
+      props: _getViewProps(view, controller.action, controller.views, options && options.recordId || null),
     };
     const index = view.multiRecord ? controllerStack.length - 1 : controllerStack.length;
     _updateUI(newController, { index });

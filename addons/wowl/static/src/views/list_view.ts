@@ -61,8 +61,8 @@ class ListRenderer extends Component<ListRendererProps, OdooEnv> {
 
     am = useService('action_manager');
 
-    _onRowClicked(/* id: number */) {
-      this.am.switchView('form');
+    _onRowClicked(id: number) {
+      this.am.switchView('form', { recordId: id });
     }
 }
 

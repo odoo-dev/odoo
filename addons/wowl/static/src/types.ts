@@ -168,6 +168,7 @@ export type ViewSwitcherEntries = ViewSwitcherEntry[];
 export type ViewOptions = {
   actionId?: number;
   context?: Context;
+  recordId: number | null;
   withActionMenus?: boolean;
   withFilters?: boolean;
   viewSwitcherEntries?: ViewSwitcherEntries;
@@ -192,6 +193,7 @@ export interface RendererProps {
 }
 export interface FormRendererProps extends RendererProps {
   mode: "edit" | "readonly";
+  record: any;
 }
 export interface ListRendererProps extends RendererProps {
   fieldNames: string[];
