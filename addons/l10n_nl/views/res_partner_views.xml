@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="l10n_nl_view_partner_form" model="ir.ui.view">
+        <field name="name">l10n.nl.res.partner.vat.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="priority" eval="100"/>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="l10n_nl_kvk" attrs="{'invisible': ['|', ('country_code', '!=', 'NL'), ('is_company', '=', False)]}"/>
+                <field name="l10n_nl_oin" attrs="{'invisible': ['|', ('country_code', '!=', 'NL'), ('is_company', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
