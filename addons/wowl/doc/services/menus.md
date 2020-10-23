@@ -1,8 +1,8 @@
 # Menus Service
 
-| Technical name | Dependencies |
-| -------------- | ------------ |
-| `menus`        |              |
+| Technical name | Dependencies               |
+| -------------- | -------------------------- |
+| `menus`        | `action_manager`, `router` |
 
 ## Overview
 

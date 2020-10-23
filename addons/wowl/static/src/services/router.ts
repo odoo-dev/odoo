@@ -1,6 +1,6 @@
 import type { Service, OdooEnv } from "../types";
 
-type Query = { [key: string]: string };
+export type Query = { [key: string]: string | undefined };
 
 export interface Route {
   pathname: string;
@@ -33,6 +33,7 @@ export function parseSearchQuery(search: string): Query {
 
 function toString(query: Query): string {
   return Object.entries(query)
+    .filter(([k, v]) => v !== undefined)
     .map(([k, v]) => (v ? `${k}=${v}` : k))
     .join("&");
 }
@@ -59,21 +60,47 @@ function makeRouter(env: OdooEnv) {
     bus.trigger("ROUTE_CHANGE");
   });
 
+  function doPush(route: Route) {
+    const url = location.origin + routeToUrl(route);
+    if (url !== window.location.href) {
+      window.history.pushState({}, url, url);
+    }
+    current = getRoute();
+  }
+
+  function getCurrent(): Route {
+    return current;
+  }
+
   return {
     get current(): Route {
-      return current;
+      return getCurrent();
     },
-    pushState(hash: Query, replace: boolean = false) {
+    pushState: makePushState(env, getCurrent, doPush),
+  };
+}
+
+export function makePushState(
+  env: OdooEnv,
+  getCurrent: () => Route,
+  doPush: (route: Route) => void
+): Router["pushState"] {
+  let tempHash: Route["hash"] | undefined;
+  let timeoutId: number | undefined;
+
+  return (hash: Query, replace: boolean = false) => {
+    env.browser.clearTimeout(timeoutId);
+    hash = tempHash = Object.assign(tempHash || {}, hash);
+    timeoutId = env.browser.setTimeout(() => {
+      tempHash = undefined;
+      timeoutId = undefined;
+      const current = getCurrent();
       if (!replace) {
         hash = Object.assign({}, current.hash, hash);
       }
       const route = Object.assign({}, current, { hash });
-      const url = location.origin + routeToUrl(route);
-      if (url !== window.location.href) {
-        window.history.pushState({}, url, url);
-      }
-      current = getRoute();
-    },
+      doPush(route);
+    });
   };
 }
 

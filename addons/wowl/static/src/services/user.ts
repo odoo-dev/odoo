@@ -20,6 +20,7 @@ export interface UserService extends Localization {
   current_company: UserCompany;
   lang: string;
   tz: string;
+  home_action_id?: number | false;
 }
 
 export const userService: Service<UserService> = {
@@ -27,7 +28,15 @@ export const userService: Service<UserService> = {
   deploy(env: OdooEnv, config): UserService {
     const { odoo, localization } = config;
     const info = odoo.session_info;
-    const { user_context, username, name, is_admin, partner_id, user_companies } = info;
+    const {
+      user_context,
+      username,
+      name,
+      is_admin,
+      partner_id,
+      user_companies,
+      home_action_id,
+    } = info;
     let context: Context = {
       lang: user_context.lang,
       tz: user_context.tz,
@@ -59,6 +68,7 @@ export const userService: Service<UserService> = {
       get tz() {
         return context.tz;
       },
+      home_action_id,
     };
   },
 };

@@ -10,26 +10,26 @@ export class WebClient extends Component<{}, OdooEnv> {
   menus = useService("menus");
   actionManager = useService("action_manager");
   router = useService("router");
+  user = useService("user");
   Components = this.env.registries.Components.getEntries();
   constructor(...args: any[]) {
     super(...args);
     hooks.onMounted(() => {
       this.env.bus.on("ROUTE_CHANGE", this, this._loadRouterState);
       this._loadRouterState();
-      this.env.bus.on("ACTION_MANAGER:UI-UPDATED", this, this._onUiUpdated);
     });
   }
-  async _loadRouterState() {
+  async _loadRouterState(): Promise<void> {
     const options: ActionOptions = {
       clearBreadcrumbs: true,
     };
     const state = this.router.current.hash;
     let action: string | number | undefined = state.action;
     if (action && !Number.isNaN(action)) {
-      action = parseInt(state.action, 10);
+      action = parseInt(action, 10);
     }
     let menuId: number | undefined = state.menu_id ? parseInt(state.menu_id, 10) : undefined;
-    const actionManagerHandles = await this.actionManager.loadRouterState(state, options);
+    const actionManagerHandles = await this.actionManager.loadState(state, options);
     if (!actionManagerHandles) {
       if (!action && menuId) {
         // determine action from menu_id key
@@ -45,29 +45,24 @@ export class WebClient extends Component<{}, OdooEnv> {
       const menu = this.menus.getAll().find((m) => m.actionID === action);
       menuId = (menu && menu.appID) as number;
     }
-    this.menus.setCurrentMenu(menuId);
+    if (menuId) {
+      this.menus.setCurrentMenu(menuId);
+    }
+    if (!actionManagerHandles && !action) {
+      return this._loadDefaultApp();
+    }
   }
-  async _onUiUpdated({
-    updatedMode,
-    action,
-  }: {
-    updatedMode: "dialog" | "main";
-    action?: any;
-  }): Promise<void> {
-    if (updatedMode === "dialog" || !action) {
-      return;
+  async _loadDefaultApp(): Promise<void> {
+    const action = this.user.home_action_id;
+    if (action) {
+      // Don't know what to do here: should we set the menu
+      // even if it's a guess ?
+      return this.actionManager.doAction(action, { clearBreadcrumbs: true });
     }
-    await new Promise((r) => {
-      this.env.browser.setTimeout(r);
-    }); // wait for promise callbacks to execute
-    const newState: any = {};
-    if (action.id) {
-      newState.action = action.id;
+    const root = this.menus.getMenu("root");
+    const firstApp = root.children[0];
+    if (firstApp) {
+      return this.menus.selectMenu(firstApp);
     }
-    const menu = this.menus.getCurrentApp();
-    if (menu) {
-      newState.menu_id = menu.id;
-    }
-    this.router.pushState(newState, true);
   }
 }

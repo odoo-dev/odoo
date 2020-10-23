@@ -23,7 +23,9 @@ QUnit.module("web client integrated tests", (hooks) => {
     const actionsRegistry = new Registry<any>();
     actionsRegistry.add("clientAction", ClientAction);
     const menus = {
-      root: { id: "root", children: [1, 2], name: "root", appID: "root" },
+      root: { id: "root", children: [0, 1, 2], name: "root", appID: "root" },
+      // id:0 is a hack to not load anything at webClient mount
+      0: { id: 0, children: [], name: "UglyHack", appID: 0 },
       1: { id: 1, children: [], name: "App1", appID: 1, actionID: 1 },
       2: { id: 2, children: [], name: "App2", appID: 2, actionID: 2 },
     };
@@ -62,7 +64,8 @@ QUnit.module("web client integrated tests", (hooks) => {
     services.add("router", makeFakeRouterService());
 
     const browser = {
-      setTimeout: setTimeout.bind(window),
+      setTimeout: window.setTimeout.bind(window),
+      clearTimeout: window.clearTimeout.bind(window),
     };
 
     baseConfig = { serverData, actions: actionsRegistry, services, browser };
@@ -247,8 +250,8 @@ QUnit.module("web client integrated tests", (hooks) => {
       makeFakeRouterService({
         onPushState(newState) {
           assert.deepEqual(newState, {
-            action: 2,
-            menu_id: 2,
+            action: "2",
+            menu_id: "2",
           });
         },
       })
@@ -256,7 +259,7 @@ QUnit.module("web client integrated tests", (hooks) => {
     const env = await makeTestEnv(baseConfig);
     const webClient = await mount(WebClient, { env });
     await click(webClient.el!, ".o_navbar_apps_menu button");
-    await click(webClient.el!, ".o_navbar_apps_menu .o_dropdown_item:nth-child(2)");
+    await click(webClient.el!, ".o_navbar_apps_menu .o_dropdown_item:nth-child(3)");
     await nextTick();
     await nextTick();
     assert.strictEqual(

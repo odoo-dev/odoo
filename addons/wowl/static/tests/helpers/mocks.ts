@@ -2,7 +2,7 @@ import { UserService } from "../../src/services/user";
 import { Odoo, OdooEnv, OdooConfig, Service } from "../../src/types";
 import { RPC } from "../../src/services/rpc";
 import type { Deferred } from "./utility";
-import { Route, Router } from "../../src/services/router";
+import { Query, Route, Router, makePushState } from "../../src/services/router";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -193,18 +193,34 @@ export function makeMockFetch(mockRPC: MockRPC): typeof fetch {
 
 interface FakeRouterParams {
   onPushState?: (...args: any[]) => any;
-  initialRoute?: Route;
+  initialRoute?: Partial<Route>;
+}
+
+function stripUndefinedQueryKey(query: Query): Query {
+  const keyValArray = Array.from(Object.entries(query)).filter(([k, v]) => v !== undefined);
+  // transform to Object.fromEntries in es > 2019
+  const newObj: Query = {};
+  keyValArray.forEach(([k, v]) => {
+    newObj[k] = v;
+  });
+  return newObj;
+}
+function getRoute(route: Route): Route {
+  route.hash = stripUndefinedQueryKey(route.hash);
+  route.search = stripUndefinedQueryKey(route.search);
+  return route;
 }
 
 export function makeFakeRouterService(params?: FakeRouterParams): Service<Router> {
-  let current: Route = {
+  let _current: Route = {
     pathname: "test.wowl",
     search: {},
     hash: {},
   };
   if (params && params.initialRoute) {
-    Object.assign(current, params.initialRoute);
+    Object.assign(_current, params.initialRoute);
   }
+  let current = getRoute(_current);
   return {
     name: "router",
     deploy(env: OdooEnv) {
@@ -213,19 +229,22 @@ export function makeFakeRouterService(params?: FakeRouterParams): Service<Router
         env.bus.trigger("ROUTE_CHANGE");
       }
       env.bus.on("test:hashchange", null, loadState);
+
+      function getCurrent() {
+        return current;
+      }
+
+      function doPush(route: Route) {
+        if (params && params.onPushState) {
+          params.onPushState(route.hash);
+        }
+        current = getRoute(route);
+      }
       return {
         get current(): Route {
-          return current;
+          return getCurrent();
         },
-        pushState(hash, replace) {
-          if (!replace) {
-            hash = Object.assign({}, current.hash, hash);
-          }
-          current = Object.assign({}, current, { hash });
-          if (params && params.onPushState) {
-            params.onPushState(current.hash);
-          }
-        },
+        pushState: makePushState(env, getCurrent, doPush),
       };
     },
   };

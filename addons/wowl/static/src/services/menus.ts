@@ -23,8 +23,8 @@ export interface MenuService {
   getCurrentApp(): Menu | undefined;
   getMenu(menuID: keyof MenuData): Menu;
   getMenuAsTree(menuID: keyof MenuData): MenuTree;
-  selectMenu(menu: Menu): void;
-  setCurrentMenu(menu?: Menu | Menu["id"]): void;
+  selectMenu(menu: Menu | Menu["id"]): Promise<void>;
+  setCurrentMenu(menu: Menu | Menu["id"]): void;
 }
 
 const loadMenusUrl = `/wowl/load_menus`;
@@ -62,21 +62,22 @@ function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
       }
       return menu;
     },
-    async selectMenu(menu) {
+    async selectMenu(menu: Menu | Menu["id"]) {
+      menu = (typeof menu === "number" ? this.getMenu(menu) : menu) as Menu;
       if (!menu.actionID) {
         return;
       }
       await env.services.action_manager.doAction(menu.actionID, { clearBreadcrumbs: true });
       this.setCurrentMenu(menu);
     },
-    setCurrentMenu(menu?: Menu | Menu["id"]) {
-      if (!menu) {
-        return;
-      }
+    setCurrentMenu(menu: Menu | Menu["id"]) {
       menu = (typeof menu === "number" ? this.getMenu(menu) : menu) as Menu;
       if (menu && menu.appID !== currentAppId) {
         currentAppId = menu.appID;
         env.bus.trigger("MENUS:APP-CHANGED");
+        env.services.router.pushState({
+          menu_id: `${menu.appID}`,
+        });
       }
     },
   };
@@ -84,7 +85,7 @@ function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
 
 export const menusService: Service<MenuService> = {
   name: "menus",
-  dependencies: ["action_manager"],
+  dependencies: ["action_manager", "router"],
   async deploy(env: OdooEnv, config): Promise<MenuService> {
     const { odoo } = config;
     const cacheHashes = odoo.session_info.cache_hashes;

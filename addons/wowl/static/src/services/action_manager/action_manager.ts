@@ -14,7 +14,7 @@ import type {
   ViewType,
 } from "./../../types";
 import { Route } from "../router";
-import { ActionContext, ClientActionProps } from "../../types";
+import { ActionContext, ClientActionProps, ControllerProps } from "../../types";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -133,7 +133,7 @@ interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): Promise<void>;
   switchView(viewType: string, options?: SwitchViewOptions): void;
   restore(jsId: string): void;
-  loadRouterState(state: Route["hash"], options: ActionOptions): Promise<boolean>;
+  loadState(state: Route["hash"], options: ActionOptions): Promise<boolean>;
 }
 
 // -----------------------------------------------------------------------------
@@ -289,7 +289,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {boolean} [options.clearBreadcrumbs=false]
    * @param {number} [options.index]
    */
-  function _updateUI(controller: Controller, options: UpdateStackOptions = {}): Promise<void> {
+  async function _updateUI(
+    controller: Controller,
+    options: UpdateStackOptions = {}
+  ): Promise<void> {
     let resolve: () => any;
     let dialogCloseResolve: () => any;
     const currentActionProm: Promise<void> = new Promise((_r) => {
@@ -349,7 +352,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       Component: Controller,
       props: controller.props,
     });
-    return currentActionProm;
+    await currentActionProm;
+    pushState(action, controller.props);
   }
 
   // ---------------------------------------------------------------------------
@@ -410,7 +414,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       const searchViewId = action.search_view_id ? action.search_view_id[0] : false;
       action.views.push([searchViewId, "search"]);
     }
-
+    // TODO: take the view type present in options.
+    // TODO: if view !== multiview, push a multiview before it
     const view = views[0];
     const controller: ViewController = {
       jsId: `controller_${++id}`,
@@ -659,7 +664,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
         (options && options.recordId) || null
       ),
     };
-    const index = view.multiRecord ? controllerStack.length - 1 : controllerStack.length;
+    let index = controllerStack.length;
+    if (view.multiRecord) {
+      // if the very same action is in stack, replace the multiview controller
+      index = controllerStack.findIndex((ct) => ct.action.jsId === controller.action.jsId);
+      index = index > -1 ? index : controllerStack.length - 1;
+    }
     _updateUI(newController, { index });
   }
 
@@ -677,7 +687,25 @@ function makeActionManager(env: OdooEnv): ActionManager {
     _updateUI(controllerStack[index], { index });
   }
 
-  async function _loadRouterState(state: Route["hash"], options: ActionOptions): Promise<boolean> {
+  function pushState(action: Action, actionProps: ControllerProps) {
+    const newState: Route["hash"] = {};
+    if (action.id) {
+      newState.action = `${action.id}`;
+    }
+    if ("model" in actionProps) {
+      // type === ViewProps
+      newState.model = actionProps.model;
+      newState.view_type = actionProps.type;
+      const recordId = actionProps.options.recordId;
+      newState.id = recordId ? `${recordId}` : undefined;
+    }
+    // we should not remove keys in the router that we do not manage.
+    // another way to say this is that we must push in new state every
+    // single key each time
+    env.services.router.pushState(newState);
+  }
+
+  async function loadState(state: Route["hash"], options: ActionOptions): Promise<boolean> {
     let action: ActionRequest | undefined;
     if (state.action) {
       // ClientAction
@@ -700,7 +728,16 @@ function makeActionManager(env: OdooEnv): ActionManager {
         // only when we already have an action in dom
         try {
           // TODO: insert options into switchView
-          switchView(state.view_type);
+          const viewOptions: SwitchViewOptions = {};
+          if (state.id) {
+            viewOptions.recordId = parseInt(state.id, 10);
+          }
+          let viewType = state.view_type;
+          if (!viewType) {
+            const controller = controllerStack[controllerStack.length - 1] as ViewController;
+            viewType = controller.view.type;
+          }
+          switchView(viewType, viewOptions);
           return true;
         } catch (e) {}
       }
@@ -758,13 +795,13 @@ function makeActionManager(env: OdooEnv): ActionManager {
     doAction,
     switchView,
     restore,
-    loadRouterState: _loadRouterState,
+    loadState,
   };
 }
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["notifications", "rpc"],
+  dependencies: ["notifications", "rpc", "router"],
   deploy(env: OdooEnv): ActionManager {
     return makeActionManager(env);
   },

@@ -26,6 +26,11 @@ QUnit.test("a missing value is encoded as an empty string", (assert) => {
   assert.deepEqual(parseHash(hash), { action: "" });
 });
 
+QUnit.test("a missing value is encoded as an empty string -- 2", (assert) => {
+  const hash = "#action=";
+  assert.deepEqual(parseHash(hash), { action: "" });
+});
+
 QUnit.test("can parse a realistic hash", (assert) => {
   const hash = "#action=114&active_id=mail.box_inbox&cids=1&menu_id=91";
   const expected = {
@@ -57,9 +62,9 @@ QUnit.test("routeToUrl", (assert) => {
   const route: Route = { pathname: "/asf", search: {}, hash: {} };
   assert.strictEqual(routeToUrl(route), "/asf");
 
-  route.search = { a: "11" };
+  route.search = { a: "11", f: undefined };
   assert.strictEqual(routeToUrl(route), "/asf?a=11");
 
-  route.hash = { b: "2", c: "" };
+  route.hash = { b: "2", c: "", d: undefined };
   assert.strictEqual(routeToUrl(route), "/asf?a=11#b=2&c");
 });

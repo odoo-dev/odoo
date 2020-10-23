@@ -54,6 +54,7 @@ export interface SessionInfo {
   db: string;
   server_version: string;
   server_version_info: (number | string)[];
+  home_action_id?: number | false;
 }
 
 export interface Odoo {
