@@ -1002,7 +1002,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             if count <= 0:
                 return
             count -= 1
-            record.name = 'x'
+            record.modified(['name'])  # trigger recomputation of 'value'
 
         def compute_value(self):
             self.value = 10 + count
@@ -4982,6 +4982,45 @@ class TestComputeQueries(TransactionCase):
         # some value, some default
         with self.assertQueries([insert(model, 'foo', 'bar')]):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
+        self.assertEqual(record.bar, 'Bar')
+
+    def test_compute_idempotent(self):
+        model = self.env['test_orm.compute.readwrite']
+        record = model.create({'foo': 'Foo', 'bar': 'Bar'})
+
+        # do not trigger recomputation when writing the same value
+        with self.assertQueries([]):
+            record.foo = 'Foo'
+        self.assertEqual(record.bar, 'Bar')
+
+        with self.assertQueries([]):
+            record.write({'foo': 'Foo'})
+        self.assertEqual(record.bar, 'Bar')
+
+        # write and trigger recomputation
+        with self.assertQueries([update(model, 'foo', 'bar')]):
+            record.write({'foo': 'A'})
+        self.assertEqual(record.bar, 'A')
+
+        # write and do not trigger recomputation
+        with self.assertQueries([update(model, 'foo', 'bar')]):
+            record.write({'foo': 'B', 'bar': 'Bar'})
+        self.assertEqual(record.bar, 'Bar')
+
+        # write and do not trigger recomputation (field 'bar' must be protected)
+        with self.assertQueries([update(model, 'foo')]):
+            record.write({'foo': 'C', 'bar': 'Bar'})
+        self.assertEqual(record.bar, 'Bar')
+
+        # write and discard recomputation
+        with self.assertQueries([update(model, 'foo')]):
+            record.write({'foo': 'D'})
+            record.write({'bar': 'Bar'})
+        self.assertEqual(record.bar, 'Bar')
+
+        with self.assertQueries([update(model, 'foo')]):
+            record.foo = 'E'
+            record.bar = 'Bar'
         self.assertEqual(record.bar, 'Bar')
 
     def test_compute_inverse(self):

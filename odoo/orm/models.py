@@ -2915,8 +2915,8 @@ class BaseModel(metaclass=MetaModel):
                     })
             else:
                 write_value = translations
-            self[field_name] = write_value
-            return True
+            self[field_name] = write_value  # mark modified ?
+
         else:
             stored_translations = self._get_stored_translations(field_name)
             if not stored_translations:
@@ -2925,7 +2925,8 @@ class BaseModel(metaclass=MetaModel):
                 self.env, field, source_lang, translations, digest=digest,
                 delay_translations=bool(self.env.context.get('delay_translations')),
             )
-            self[field_name] = write_value
+            self[field_name] = write_value  # mark modified ?
+
         return True
 
     def get_field_translations(self, field_name: str, langs: Collection[str] | None = None) -> tuple[list[dict[str, str]], dict[str, typing.Any]]:
@@ -3966,22 +3967,22 @@ class BaseModel(metaclass=MetaModel):
                     field_updates[field] = value
                     ids_to_update.update(ids)
 
-            with env.protecting(fields_to_protect, records):
-                records.modified(
-                    [f.name for f in field_vals if env.registry.is_modifying_relations(f)],
-                    before=True,
-                )
-                if ids_to_update:
+            if ids_to_update:
+                with env.protecting(fields_to_protect, records):
                     recs_to_update = records.filtered(lambda rec: rec.id in ids_to_update)
+                    recs_to_update.modified(
+                        [f.name for f in field_vals if env.registry.is_modifying_relations(f)],
+                        before=True,
+                    )
                     for field, value in field_updates.items():
                         field.write(recs_to_update, value)
-                records.modified([field.name for field in field_vals])
+                    recs_to_update.modified([field.name for field in field_vals])
 
-                # special case: also assign parent records if they are new
-                for field, value in field_vals.items():
-                    if field.inherited:
-                        parents = records[field.related.split('.')[0]]
-                        parents.filtered(lambda r: not r.id)[field.name] = value
+                    # special case: also assign parent records if they are new
+                    for field, value in field_vals.items():
+                        if field.inherited:
+                            parents = recs_to_update[field.related.split('.')[0]]
+                            parents.filtered(lambda r: not r.id)[field.name] = value
 
         if real_updates:
             # real records: full business logic
@@ -4134,7 +4135,7 @@ class BaseModel(metaclass=MetaModel):
                     # order to avoid an inconsistent update.
                     self[field.name]
                 field_inverses[field] = value
-            if env.registry.is_modifying_relations(field):
+            if ids and env.registry.is_modifying_relations(field):
                 fnames_modifying_relations.append(field.name)
 
         # from now on, we ignore records that don't change at all, except for
@@ -4162,7 +4163,7 @@ class BaseModel(metaclass=MetaModel):
             # In this situation, the total amount must be recomputed on *both*
             # sales order: the line's order before the modification, and the
             # line's order after the modification.
-            self.modified(fnames_modifying_relations, before=True)
+            records.modified(fnames_modifying_relations, before=True)
 
             if records:
                 for field, value in field_updates.items():
@@ -4181,9 +4182,9 @@ class BaseModel(metaclass=MetaModel):
             # res.partner includes display_name. The computation of display_name
             # is then done too soon because the parent_id was not yet written.
             # (`test_01_website_reset_password_tour`)
-            self.modified(vals)
-
             updated_fnames = [field.name for field in field_updates]
+            records.modified(updated_fnames)
+
             if self._parent_store and self._parent_name in updated_fnames:
                 records.flush_model([self._parent_name])
 
