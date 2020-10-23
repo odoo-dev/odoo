@@ -18,7 +18,9 @@ QUnit.module("Dialog", {
     env = await makeTestEnv();
   },
   async afterEach() {
-    parent.unmount();
+    if (parent) {
+      parent.unmount();
+    }
   },
 });
 

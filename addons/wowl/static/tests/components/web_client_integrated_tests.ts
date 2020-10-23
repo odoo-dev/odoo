@@ -256,7 +256,7 @@ QUnit.module("web client integrated tests", (hooks) => {
     const env = await makeTestEnv(baseConfig);
     const webClient = await mount(WebClient, { env });
     await click(webClient.el!, ".o_navbar_apps_menu button");
-    await click(webClient.el!, ".o_navbar_apps_menu .dropdown-item:nth-child(2)");
+    await click(webClient.el!, ".o_navbar_apps_menu .o_dropdown_item:nth-child(2)");
     await nextTick();
     await nextTick();
     assert.strictEqual(
