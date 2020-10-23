@@ -359,7 +359,7 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
             rec2.write({'line_ids': [Command.clear()]})
         self.assertFalse(rec2.line_ids)
 
-        with self.assertQueryCount(3):
+        with self.assertQueryCount(2):
             self.env.invalidate_all()
             rec2.write({'line_ids': [Command.clear()]})
         self.assertFalse(rec2.line_ids)
@@ -368,19 +368,19 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
         lines = rec1.line_ids
 
         # set N lines in rec2: O(1) queries
-        with self.assertQueryCount(6):
+        with self.assertQueryCount(7):
             self.env.invalidate_all()
             rec2.write({'line_ids': [Command.set(lines[0].ids)]})
         self.assertEqual(rec1.line_ids, lines[1:])
         self.assertEqual(rec2.line_ids, lines[0])
 
-        with self.assertQueryCount(5):
+        with self.assertQueryCount(8):
             self.env.invalidate_all()
             rec2.write({'line_ids': [Command.set(lines.ids)]})
         self.assertFalse(rec1.line_ids)
         self.assertEqual(rec2.line_ids, lines)
 
-        with self.assertQueryCount(4):
+        with self.assertQueryCount(3):
             self.env.invalidate_all()
             rec2.write({'line_ids': [Command.set(lines.ids)]})
         self.assertEqual(rec2.line_ids, lines)
