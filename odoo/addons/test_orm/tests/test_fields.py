@@ -3845,8 +3845,9 @@ class SudoCommands(TransactionCaseWithUserDemo):
             # 2.1 Command.UPDATE
             # Case: a normal updating his user to add himself a group
             with self.assertRaisesRegex(AccessError, "not allowed to modify 'test_orm.group'"):
+                group = my_user.group_ids[0]
                 my_user.write({
-                    'group_ids': [Command.update(my_user.group_ids[0].id, {})],
+                    'group_ids': [Command.update(group.id, {'name': f"{group.name}!"})],
                 })
             # 2.2 Command.DELETE
             # Case: a public user deleting the public user to mess with the database
@@ -4001,22 +4002,22 @@ class TestHtmlField(TransactionCase):
 
         # new value sanitized for insertion in cache
         record.html = '<p>comment</p>'
-        self.assertEqual(patch.call_count, 2)
+        self.assertEqual(patch.call_count, 3)
 
         # the value in cache is dirty -> convert_to_column_update(..., validate=False),
         # so no additional call to `html_sanitize`
         record.flush_recordset()
-        self.assertEqual(patch.call_count, 2)
+        self.assertEqual(patch.call_count, 3)
 
         # value coming from db does not need to be sanitized
         record.invalidate_recordset()
         record.html
-        self.assertEqual(patch.call_count, 2)
+        self.assertEqual(patch.call_count, 3)
 
         # value coming from db during an onchange does not need to be sanitized
         new_record = record.new(origin=record)
         new_record.html
-        self.assertEqual(patch.call_count, 2)
+        self.assertEqual(patch.call_count, 3)
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
@@ -5462,6 +5463,169 @@ class TestModifiedPerformance(TransactionCase):
         # One INSERT
         with self.assertQueryCount(1):
             self.ModifiedLine.create({})
+
+
+@tagged('at_install', '-post_install')
+class TestFieldToWrite(TransactionCase):
+    def test_char_to_write(self):
+        model = self.env['test_orm.compute.readwrite']
+        field = model._fields['foo']
+        record = model.create({'foo': 'Foo', 'bar': 'Bar'})
+        self.env.flush_all()
+
+        def must_write(record, value):
+            return field.to_write(record, value)[0]
+
+        self.assertFalse(must_write(record, 'Foo'))
+        self.assertTrue(must_write(record, 'Bar'))
+
+        self.env.invalidate_all()
+        self.assertTrue(must_write(record, 'Bar'))
+
+    def test_one2many_to_write(self):
+        model = self.env['test_orm.model_active_field']
+        field = model._fields['children_ids']
+        record = model.create({})
+        line1 = model.create({'name': '1', 'parent_id': record.id})
+        line2 = model.create({'name': '2', 'parent_id': record.id})
+        line3 = model.create({'name': '3'})
+
+        def must_write(record, value):
+            return field.to_write(record, value)[0]
+
+        self.assertFalse(must_write(record, []))
+        self.assertTrue(must_write(record, [Command.create({})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '1'})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '3'})]))
+        self.assertTrue(must_write(record, [Command.delete(line1.id)]))
+        self.assertTrue(must_write(record, [Command.unlink(line1.id)]))
+        self.assertFalse(must_write(record, [Command.link(line1.id)]))
+        self.assertTrue(must_write(record, [Command.link(line3.id)]))
+        self.assertFalse(must_write(line1, [Command.clear()]))
+        self.assertTrue(must_write(record, [Command.clear()]))
+        self.assertFalse(must_write(record, [Command.set([line1.id, line2.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id, line2.id, line3.id])]))
+        self.assertTrue(must_write(record, [Command.set([line3.id])]))
+
+        # same tests on a new record with value in cache
+        record = record.new(origin=record)
+        line1 = line1.new(origin=line1)
+        line2 = line2.new(origin=line2)
+        line3 = line3.new(origin=line3)
+        (record + line1).children_ids
+        line1.name
+
+        self.assertFalse(must_write(record, []))
+        self.assertTrue(must_write(record, [Command.create({})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '1'})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '3'})]))
+        self.assertTrue(must_write(record, [Command.delete(line1.id)]))
+        self.assertTrue(must_write(record, [Command.unlink(line1.id)]))
+        self.assertFalse(must_write(record, [Command.link(line1.id)]))
+        self.assertTrue(must_write(record, [Command.link(line3.id)]))
+        self.assertFalse(must_write(line1, [Command.clear()]))
+        self.assertTrue(must_write(record, [Command.clear()]))
+        self.assertFalse(must_write(record, [Command.set([line1.id, line2.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id, line2.id, line3.id])]))
+        self.assertTrue(must_write(record, [Command.set([line3.id])]))
+
+        # same tests on a new record without value in cache
+        self.env.invalidate_all()
+
+        self.assertFalse(must_write(record, []))
+        self.assertTrue(must_write(record, [Command.create({})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '1'})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '3'})]))
+        self.assertTrue(must_write(record, [Command.delete(line1.id)]))
+        self.assertTrue(must_write(record, [Command.unlink(line1.id)]))
+        self.assertTrue(must_write(record, [Command.link(line1.id)]))
+        self.assertTrue(must_write(record, [Command.link(line3.id)]))
+        self.assertTrue(must_write(line1, [Command.clear()]))
+        self.assertTrue(must_write(record, [Command.clear()]))
+        self.assertTrue(must_write(record, [Command.set([line1.id, line2.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id, line2.id, line3.id])]))
+        self.assertTrue(must_write(record, [Command.set([line3.id])]))
+
+    def test_many2many_to_write(self):
+        line1 = self.env['test_orm.multi.tag'].create({'name': '1'})
+        line2 = self.env['test_orm.multi.tag'].create({'name': '2'})
+        line3 = self.env['test_orm.multi.tag'].create({'name': '3'})
+        model = self.env['test_orm.multi.line']
+        field = model._fields['tags']
+        record = model.create({'tags': [Command.link(line1.id), Command.link(line2.id)]})
+        record0 = model.create({})
+
+        def must_write(record, value):
+            return field.to_write(record, value)[0]
+
+        self.assertFalse(must_write(record, []))
+        self.assertTrue(must_write(record, [Command.create({})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '1'})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '3'})]))
+        self.assertTrue(must_write(record, [Command.delete(line1.id)]))
+        self.assertTrue(must_write(record, [Command.unlink(line1.id)]))
+        self.assertFalse(must_write(record, [Command.unlink(line3.id)]))
+        self.assertFalse(must_write(record, [Command.link(line1.id)]))
+        self.assertTrue(must_write(record, [Command.link(line3.id)]))
+        self.assertFalse(must_write(record0, [Command.clear()]))
+        self.assertTrue(must_write(record, [Command.clear()]))
+        self.assertFalse(must_write(record, [Command.set([line1.id, line2.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id, line2.id, line3.id])]))
+        self.assertTrue(must_write(record, [Command.set([line3.id])]))
+
+        # same tests on a new record with value in cache
+        record = record.new(origin=record)
+        record0 = record.new(origin=record)
+        line1 = line1.new(origin=line1)
+        line2 = line2.new(origin=line2)
+        line3 = line3.new(origin=line3)
+        (record + record0).tags
+        line1.name
+
+        self.assertFalse(must_write(record, []))
+        self.assertTrue(must_write(record, [Command.create({})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '1'})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '3'})]))
+        self.assertTrue(must_write(record, [Command.delete(line1.id)]))
+        self.assertTrue(must_write(record, [Command.unlink(line1.id)]))
+        self.assertFalse(must_write(record, [Command.unlink(line3.id)]))
+        self.assertFalse(must_write(record, [Command.link(line1.id)]))
+        self.assertTrue(must_write(record, [Command.link(line3.id)]))
+        self.assertFalse(must_write(record0, [Command.clear()]))
+        self.assertTrue(must_write(record, [Command.clear()]))
+        self.assertFalse(must_write(record, [Command.set([line1.id, line2.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id, line2.id, line3.id])]))
+        self.assertTrue(must_write(record, [Command.set([line3.id])]))
+
+        # same tests on a new record without value in cache
+        self.env.invalidate_all()
+
+        self.assertFalse(must_write(record, []))
+        self.assertTrue(must_write(record, [Command.create({})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '1'})]))
+        self.assertTrue(must_write(record, [Command.update(line1.id, {'name': '3'})]))
+        self.assertTrue(must_write(record, [Command.delete(line1.id)]))
+        self.assertTrue(must_write(record, [Command.unlink(line1.id)]))
+        self.assertTrue(must_write(record, [Command.unlink(line3.id)]))
+        self.assertTrue(must_write(record, [Command.link(line1.id)]))
+        self.assertTrue(must_write(record, [Command.link(line3.id)]))
+        self.assertTrue(must_write(record0, [Command.clear()]))
+        self.assertTrue(must_write(record, [Command.clear()]))
+        self.assertTrue(must_write(record, [Command.set([line1.id, line2.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id])]))
+        self.assertTrue(must_write(record, [Command.set([line1.id, line2.id, line3.id])]))
+        self.assertTrue(must_write(record, [Command.set([line3.id])]))
 
 
 @tagged('at_install', '-post_install')
