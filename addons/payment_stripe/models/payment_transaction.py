@@ -237,13 +237,9 @@ class PaymentTransaction(models.Model):
         elif intent_status in INTENT_STATUS_MAPPING['cancel']:
             self._set_canceled()
         else:  # Classify unknown intent statuses as `error` tx state
-            _logger.info(
-                f"received data with invalid intent status: {intent_status}"
-            )
+            _logger.info(f"received data with invalid intent status: {intent_status}")
             self._set_error(
-                "stripe: " + _(
-                    "Received data with invalid intent status: %s", intent_status
-                )
+                "Stripe: " + _("Received data with invalid intent status: %s", intent_status)
             )
 
     def _stripe_tokenize_from_feedback_data(self, data):

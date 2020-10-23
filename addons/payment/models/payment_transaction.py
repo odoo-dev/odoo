@@ -416,7 +416,8 @@ class PaymentTransaction(models.Model):
         )
 
         # Render the html form for the redirect flow if available
-        if self.operation == 'online_redirect' and self.acquirer_id.redirect_form_view_id:
+        if self.operation in ('online_redirect', 'validation') \
+                and self.acquirer_id.redirect_form_view_id:
             rendering_values = self._get_specific_rendering_values(processing_values)
             redirect_form_html = self.acquirer_id.redirect_form_view_id._render(
                 rendering_values, engine='ir.qweb'
@@ -471,15 +472,12 @@ class PaymentTransaction(models.Model):
 
         :param str provider: The provider of the acquirer that handled the transaction
         :param dict data: The feedback data sent by the provider
-        :return: The transaction if found
+        :return: The transaction
         :rtype: recordset of `payment.transaction`
         """
         tx = self._get_tx_from_feedback_data(provider, data)
-        if tx:
-            tx._process_feedback_data(data)
-            tx._execute_callback()
-        else:
-            pass  # The transaction might not be recorded in Odoo in some acquirer-specific flows
+        tx._process_feedback_data(data)
+        tx._execute_callback()
         return tx
 
     @api.model
