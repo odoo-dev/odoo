@@ -125,6 +125,10 @@ interface SwitchViewOptions {
   recordId?: number;
 }
 
+interface ActionCache {
+  [key: string]: Promise<ActionDescription>;
+}
+
 interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): Promise<void>;
   switchView(viewType: string, options?: SwitchViewOptions): void;
@@ -181,6 +185,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
   let id = 0;
   let controllerStack: ControllerStack = [];
   let dialogCloseProm: Promise<any> | undefined = undefined;
+  const actionCache: ActionCache = {};
 
   // ---------------------------------------------------------------------------
   // misc
@@ -200,7 +205,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     actionRequest: ActionRequest,
     options: ActionOptions
   ): Promise<Action> {
-    let action;
+    let action: any;
     if (typeof actionRequest === "string" && env.registries.actions.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
       action = {
@@ -210,11 +215,16 @@ function makeActionManager(env: OdooEnv): ActionManager {
       } as ClientAction;
     } else if (["string", "number"].includes(typeof actionRequest)) {
       // actionRequest is an id or an xmlid
-      action = await env.services.rpc("/web/action/load", { action_id: actionRequest });
+      const key = JSON.stringify(actionRequest);
+      if (!actionCache[key]) {
+        actionCache[key] = env.services.rpc("/web/action/load", { action_id: actionRequest });
+      }
+      action = await actionCache[key];
     } else {
       // actionRequest is an object describing the action
-      action = Object.assign({}, actionRequest);
+      action = actionRequest;
     }
+    action = JSON.parse(JSON.stringify(action)); // manipulate a deep copy
     action.jsId = `action_${++id}`;
     return action;
   }
