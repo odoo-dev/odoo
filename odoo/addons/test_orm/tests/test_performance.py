@@ -374,7 +374,7 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
         self.assertEqual(rec1.line_ids, lines[1:])
         self.assertEqual(rec2.line_ids, lines[0])
 
-        with self.assertQueryCount(8):
+        with self.assertQueryCount(7):
             self.env.invalidate_all()
             rec2.write({'line_ids': [Command.set(lines.ids)]})
         self.assertFalse(rec1.line_ids)

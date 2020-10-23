@@ -1080,7 +1080,7 @@ class TestPartnerAddressCompany(TransactionCase):
             for i in range(5)
         ])
         self.env.invalidate_all()
-        with self.assertQueryCount(14):
+        with self.assertQueryCount(13):
             contacts.write({'street': 'New Street'})
 
     def test_company_dependent_commercial_sync(self):
