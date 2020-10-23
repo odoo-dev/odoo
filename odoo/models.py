@@ -3582,10 +3582,40 @@ Fields:
             if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
                 bad_names.update(LOG_ACCESS_COLUMNS)
 
+        # minimize updates, and determine what should not be recomputed
+        protected_records = self
+        protected_fields = set()
+        modified_ids = set()
+        modified_vals = {}
+        for fname, value in vals.items():
+            field = self._fields.get(fname)
+            if not field:
+                raise ValueError("Invalid field %r on model %r" % (fname, self._name))
+            if field.inverse or (field.compute and not field.readonly):
+                if field.store or field.type not in ('one2many', 'many2many'):
+                    # Protect the field from being recomputed. In the case of
+                    # non-stored x2many fields, the field's value may contain
+                    # unexpeced new records (created by command 0). Those new
+                    # records are necessary for inversing the field, but should
+                    # no longer appear if the field is recomputed afterwards.
+                    # Not protecting the field will automatically invalidate the
+                    # field from the cache, forcing its value to be recomputed
+                    # once dependencies are up-to-date.
+                    protected_fields.update(self.pool.field_computed.get(field, [field]))
+            records = field.filter_not_equal(self, value)
+            if not records:
+                continue
+            modified_ids.update(records._ids)
+            modified_vals[fname] = value
+
+        if not modified_ids or not modified_vals:
+            return True
+        self = self.browse(modified_ids)
+        vals = modified_vals
+
         determine_inverses = defaultdict(list)      # {inverse: fields}
         records_to_inverse = {}                     # {field: records}
         relational_names = []
-        protected = set()
         check_company = False
         for fname in vals:
             field = self._fields.get(fname)
@@ -3606,23 +3636,11 @@ Fields:
                 records_to_inverse[field] = self.filtered('id')
             if field.relational or self._field_inverses[field]:
                 relational_names.append(fname)
-            if field.inverse or (field.compute and not field.readonly):
-                if field.store or field.type not in ('one2many', 'many2many'):
-                    # Protect the field from being recomputed while being
-                    # inversed. In the case of non-stored x2many fields, the
-                    # field's value may contain unexpeced new records (created
-                    # by command 0). Those new records are necessary for
-                    # inversing the field, but should no longer appear if the
-                    # field is recomputed afterwards. Not protecting the field
-                    # will automatically invalidate the field from the cache,
-                    # forcing its value to be recomputed once dependencies are
-                    # up-to-date.
-                    protected.update(self.pool.field_computed.get(field, [field]))
             if fname == 'company_id' or (field.relational and field.check_company):
                 check_company = True
 
         # protect fields being written against recomputation
-        with env.protecting(protected, self):
+        with env.protecting(protected_fields, protected_records):
             # Determine records depending on values. When modifying a relational
             # field, you have to recompute what depends on the field's values
             # before and after modification.  This is because the modification
@@ -5405,9 +5423,9 @@ Fields:
 
     def update(self, values):
         """ Update the records in ``self`` with ``values``. """
-        for record in self:
-            for name, value in values.items():
-                record[name] = value
+        # method BaseModel.write() handles new records and avoids accidental
+        # recomputation of fields being updated
+        BaseModel.write(self, values)
 
     @api.model
     def flush(self, fnames=None, records=None):
