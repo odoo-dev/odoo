@@ -394,25 +394,20 @@ class Many2one(_Relational):
         return value.display_name
 
     def write(self, records, value):
-        # discard the records that are not modified
-        records, cache_value = self.to_write(records, value)
-        if not records:
-            return
-
         if self.bypass_search_access and not records.env.su:
             try:
-                records.env[self.comodel_name].browse(cache_value).check_access('read')
+                records.env[self.comodel_name].browse(value).check_access('read')
             except AccessError as e:
                 raise AccessError(records.env._("Failed to write field %s", self) + "\n" + str(e)) from e
 
         # remove records from the cache of one2many fields of old corecords
-        self._remove_inverses(records, cache_value)
+        self._remove_inverses(records, value)
 
         # update the cache of self
-        self._update_cache(records, cache_value, dirty=True)
+        self._update_cache(records, value, dirty=True)
 
         # update the cache of one2many fields of new corecord
-        self._update_inverses(records, cache_value)
+        self._update_inverses(records, value)
 
     def _remove_inverses(self, records: BaseModel, value):
         """ Remove `records` from the cached values of the inverse fields (o2m) of `self`. """
@@ -846,9 +841,6 @@ class _RelationalMulti(_Relational):
         return records_to_write, commands
 
     def write(self, records: BaseModel, value):
-        records, value = self.to_write(records, value)
-        if not records:
-            return
         self.write_batch([(records, value)])
 
     def write_batch(self, records_commands_list: list[tuple[BaseModel, typing.Any]], create: bool = False) -> None:

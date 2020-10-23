@@ -1689,13 +1689,7 @@ class Field[T]:
         :param records:
         :param value: a value in any format
         """
-        # discard the records that are not modified
-        records, cache_value = self.to_write(records, value)
-        if not records:
-            return
-
-        # update the cache
-        self._update_cache(records, cache_value, dirty=True)
+        self._update_cache(records, value, dirty=True)
 
     ############################################################################
     #
@@ -1984,7 +1978,9 @@ class Field[T]:
         if prot_ids:
             # records being computed: no business logic, no recomputation
             recs = records.__class__(records.env, tuple(prot_ids), records._prefetch_ids)
-            self.write(recs, value)
+            recs_to_write, write_value = self.to_write(recs, value)
+            if recs_to_write:
+                self.write(recs_to_write, write_value)
 
         if real_ids:
             # real records: full business logic
@@ -2007,11 +2003,14 @@ class Field[T]:
                     # discard recomputation of self on records
                     records.env.remove_to_compute(self, recs)
 
+            recs_to_write, write_value = self.to_write(recs, value)
+
             # important: protect all assigned records, not just the ones that are modified
             with records.env.protecting(records.pool.field_computed.get(self) or [self], records):
                 if records.pool.is_modifying_relations(self):
                     recs.modified([self.name], before=True)
-                self.write(recs, value)
+                if recs_to_write:
+                    self.write(recs_to_write, write_value)
                 recs.modified([self.name])
 
             if self.inherited:

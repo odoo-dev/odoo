@@ -302,10 +302,6 @@ class Properties(Field):
         return super().to_write(records, value)
 
     def write(self, records, value):
-        records, value = self.to_write(records, value)
-        if not records:
-            return
-
         # update the field and its definitions
         if not isinstance(value, dict | None):
             value = self._update_definition(records, value)

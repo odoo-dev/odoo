@@ -3894,12 +3894,17 @@ class BaseModel(metaclass=MetaModel):
             for computed_field in self.pool.field_computed.get(field) or (field,)
         )
 
-        # determine what to update
+        # determine what to update, ignoring idempotent updates
         field_updates = {}
+        ids_to_update = set()
         field_inverses = {}
         fnames_modifying_relations = []
+
         for field, value in field_values.items():
-            field_updates[field] = value
+            records, value = field.to_write(self, value)
+            if records:
+                field_updates[field] = value
+                ids_to_update.update(records._ids)
             if field.inverse:
                 if field.type in ('one2many', 'many2many'):
                     # The written value is a list of commands that must applied
@@ -3910,8 +3915,13 @@ class BaseModel(metaclass=MetaModel):
                     # order to avoid an inconsistent update.
                     self[field.name]
                 field_inverses[field] = value
-            if self.pool.is_modifying_relations(field):
+            if records and self.pool.is_modifying_relations(field):
                 fnames_modifying_relations.append(field.name)
+
+        # from now on, we ignore records that don't change at all, except for
+        # recomputations and inverse methods
+        ids = tuple(id_ for id_ in self._ids if id_ in ids_to_update)
+        records = self.__class__(self.env, ids, self._prefetch_ids)
 
         # protect fields being written against recomputation
         with env.protecting(fields_to_protect, self):
@@ -3935,8 +3945,9 @@ class BaseModel(metaclass=MetaModel):
             # line's order after the modification.
             self.modified(fnames_modifying_relations, before=True)
 
-            for field, value in field_updates.items():
-                field.write(self, value)
+            if records:
+                for field, value in field_updates.items():
+                    field.write(records, value)
 
             # determine records depending on new values
             #
@@ -3953,28 +3964,30 @@ class BaseModel(metaclass=MetaModel):
             # (`test_01_website_reset_password_tour`)
             self.modified(vals)
 
-            if self._parent_store and self._parent_name in vals:
-                self.flush_model([self._parent_name])
+            updated_fnames = [field.name for field in field_updates]
+            if self._parent_store and self._parent_name in updated_fnames:
+                records.flush_model([self._parent_name])
 
             # validate non-inversed fields first
-            real_recs = self.filtered('id')
-            inverse_fnames = [field.name for field in field_inverses]
-            real_recs._validate_fields(vals, inverse_fnames)
+            if real_recs := records.filtered('id'):
+                inverse_fnames = [field.name for field in field_inverses]
+                real_recs._validate_fields(updated_fnames, inverse_fnames)
 
-            # group inverse fields by inverse method
+            # group inverse fields by inverse method, and apply on all records
+            real_self = self.filtered('id')
             for _method, fields_ in groupby(field_inverses, lambda field: field.inverse):
                 # write again on non-stored fields that have been invalidated from cache
                 for field in fields_:
                     if (
                         not field.store
                         and not (field.inherited and field.type in ('one2many', 'many2many'))
-                        and any(field._cache_missing_ids(real_recs))
+                        and any(field._cache_missing_ids(real_self))
                     ):
-                        field.write(real_recs, field_inverses[field])
+                        field.write(real_self, field_inverses[field])
 
                 # inverse records that are not being computed
                 try:
-                    fields_[0].determine_inverse(real_recs)
+                    fields_[0].determine_inverse(real_self)
                 except AccessError as e:
                     if fields_[0].inherited:
                         description = self.env['ir.model']._get(self._name).name
@@ -3989,15 +4002,16 @@ class BaseModel(metaclass=MetaModel):
             # invalidate the cache
             if real_recs and (cache_name := self._clear_cache_name) and (
                 self._clear_cache_on_fields is None
-                or not vals.keys().isdisjoint(self._clear_cache_on_fields)
+                or not set(updated_fnames).isdisjoint(self._clear_cache_on_fields)
             ):
                 self.env.transaction.invalidate_ormcache(cache_name)
 
             # validate inversed fields
-            real_recs._validate_fields(inverse_fnames)
+            if real_recs:
+                real_recs._validate_fields(inverse_fnames)
 
-        if self._check_company_auto:
-            self._check_company(list(vals))
+        if records and self._check_company_auto:
+            records._check_company(updated_fnames)
         return True
 
     def _write(self, vals: ValuesType) -> None:

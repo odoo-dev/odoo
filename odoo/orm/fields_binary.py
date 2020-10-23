@@ -179,15 +179,11 @@ class Binary(Field[BinaryValue]):
             super().write(records, value)
             return
 
-        # update the cache, and discard the records that are not modified
-        records, cache_value = self.to_write(records, value)
-        if not records:
-            return
         if self.store:
             # determine records that are known to be not null
             not_null = self.to_write(records, None)[0]
 
-        self._update_cache(records, cache_value)
+        self._update_cache(records, value)
 
         # retrieve the attachments that store the values, and adapt them
         if self.store and any(records._ids):
@@ -199,9 +195,9 @@ class Binary(Field[BinaryValue]):
                     ('res_field', '=', self.name),
                     ('res_id', 'in', real_records.ids),
                 ])
-            if cache_value:
+            if value:
                 # update the existing attachments
-                atts.write({'raw': cache_value})
+                atts.write({'raw': value})
                 atts_records = records.browse(atts.mapped('res_id'))
                 # create the missing attachments
                 missing = (real_records - atts_records)
@@ -211,7 +207,7 @@ class Binary(Field[BinaryValue]):
                             'res_field': self.name,
                             'res_id': record.id,
                             'type': 'binary',
-                            'raw': cache_value,
+                            'raw': value,
                         }
                         for record in missing
                     ])
@@ -349,7 +345,7 @@ class Image(Binary):
             value = self._process_related(record[self.name], record.env) or None
             self._update_cache(record, value, dirty=True)
 
-    def _image_process(self, value, env: Environment) -> BinaryValue | typing.Literal[False]:
+    def _image_process(self, value, env: Environment) -> BinaryValue | None:
         if self.readonly and (
             (not self.max_width and not self.max_height)
             or (
@@ -392,7 +388,7 @@ class Image(Binary):
         return BinaryBytes(image_process(img,
             size=(self.max_width, self.max_height),
             verify_resolution=self.verify_resolution,
-        )) or False
+        )) or None
 
     def _process_related(self, value, env):
         """Override to resize the related value before saving it on self."""
