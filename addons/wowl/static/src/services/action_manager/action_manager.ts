@@ -10,33 +10,25 @@ import type {
   ViewId,
   ActionProps,
   ViewProps,
-  ViewOptions,
   ViewType,
-} from "./../../types";
+  Domain,
+} from "../../types";
 import { Route } from "../router";
 import { ActionContext, ClientActionProps, ControllerProps } from "../../types";
+import { evaluateExpr } from "../../core/py/index";
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
-type ActionType =
-  | "ir.actions.act_url"
-  | "ir.actions.act_window"
-  | "ir.actions.act_window_close"
-  | "ir.actions.client"
-  | "ir.actions.report"
-  | "ir.actions.server";
+type ActionType = Action["type"];
 type ActionTarget = "current" | "main" | "new" | "fullscreen" | "inline";
 type URLActionTarget = "self";
 type ActionId = number;
 type ActionXMLId = string;
 type ActionTag = string;
-export interface ActionDescription {
-  target?: ActionTarget;
-  type: ActionType;
-  [key: string]: any;
-}
+export type ActionDescription = any;
+
 export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
 export interface ActionOptions {
   clearBreadcrumbs?: boolean;
@@ -47,44 +39,58 @@ interface Context {
   [key: string]: any;
 }
 
-export interface Action {
+interface ActionCommonInfo {
   id?: number;
   jsId: string;
   display_name?: string;
   name?: string;
   context?: Context;
-  target?: ActionTarget | URLActionTarget;
   type: ActionType;
 }
-interface ClientAction extends Action {
-  tag: string;
+interface ClientAction extends ActionCommonInfo {
   type: "ir.actions.client";
+  tag: string;
+  target: ActionTarget;
   params?: {
     [key: string]: any;
   };
 }
-interface ActWindowAction extends Action {
+interface ActWindowAction extends ActionCommonInfo {
   type: "ir.actions.act_window";
   res_model: string;
   views: [ViewId, ViewType][];
+  context: Context;
+  domain: Domain;
   search_view_id?: [ViewId, string]; // second member is the views's display_name, not the type
+  target: ActionTarget;
 }
-interface ServerAction extends Action {
-  id: number;
+interface ServerAction extends ActionCommonInfo {
   type: "ir.actions.server";
+  id: number;
 }
-interface ActURLAction extends Action {
-  target?: URLActionTarget;
+interface ActURLAction extends ActionCommonInfo {
   type: "ir.actions.act_url";
+  target?: URLActionTarget;
   url: string;
 }
-interface ReportAction extends Action {
+interface ReportAction extends ActionCommonInfo {
+  type: "ir.actions.report";
   close_on_report_download?: boolean;
   data?: any;
   report_file?: string;
   report_name: string;
   report_type: "qweb-html" | "qweb-pdf" | "qweb-text";
 }
+interface CloseAction extends ActionCommonInfo {
+  type: "ir.actions.act_window_close";
+}
+export type Action =
+  | ClientAction
+  | CloseAction
+  | ActWindowAction
+  | ServerAction
+  | ActURLAction
+  | ReportAction;
 
 type ReportType = "html" | "pdf" | "text";
 type WkhtmltopdfState = "ok" | "broken" | "install" | "upgrade" | "workers";
@@ -126,7 +132,7 @@ interface SwitchViewOptions {
 }
 
 interface ActionCache {
-  [key: string]: Promise<ActionDescription>;
+  [key: string]: Promise<Partial<Action>>;
 }
 
 interface ActionManager {
@@ -205,15 +211,17 @@ function makeActionManager(env: OdooEnv): ActionManager {
     actionRequest: ActionRequest,
     options: ActionOptions
   ): Promise<Action> {
-    let action: any;
+    let action;
+    const jsId = `action_${++id}`;
     if (typeof actionRequest === "string" && env.registries.actions.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
-      action = {
+      return {
+        jsId,
         target: "current",
         tag: actionRequest,
         type: "ir.actions.client",
-      } as ClientAction;
-    } else if (["string", "number"].includes(typeof actionRequest)) {
+      };
+    } else if (typeof actionRequest === "string" || typeof actionRequest === "number") {
       // actionRequest is an id or an xmlid
       const key = JSON.stringify(actionRequest);
       if (!actionCache[key]) {
@@ -224,8 +232,19 @@ function makeActionManager(env: OdooEnv): ActionManager {
       // actionRequest is an object describing the action
       action = actionRequest;
     }
+
     action = JSON.parse(JSON.stringify(action)); // manipulate a deep copy
     action.jsId = `action_${++id}`;
+    if (action.type === "ir.actions.act_window" || action.type === "ir.actions.client") {
+      action.target = action.target || "current";
+    }
+    if (action.type === "ir.actions.act_window") {
+      let context = action.context || {};
+      context = typeof context === "string" ? evaluateExpr(context) : context;
+      action.context = Object.assign({}, env.services.user.context, context);
+      action.domain = evaluateExpr(action.domain || "[]", action.context);
+    }
+
     return action;
   }
 
@@ -263,20 +282,18 @@ function makeActionManager(env: OdooEnv): ActionManager {
       .map((v) => {
         return { icon: v.icon, name: v.name, type: v.type };
       });
-    const controllerOptions: ViewOptions = {
+
+    return {
       actionId: action.id,
       context: action.context,
+      domain: action.domain,
+      model: action.res_model,
       recordId: recordId || null,
+      type: view.type,
+      views: action.views,
       viewSwitcherEntries,
       withActionMenus: target !== "new" && target !== "inline",
       withFilters: action.views.some((v) => v[1] === "search"),
-    };
-
-    return {
-      model: action.res_model,
-      type: view.type,
-      views: action.views,
-      options: controllerOptions,
     };
   }
 
@@ -618,21 +635,23 @@ function makeActionManager(env: OdooEnv): ActionManager {
     const action = await _loadAction(actionRequest, options);
     switch (action.type) {
       case "ir.actions.act_url":
-        return _executeActURLAction(action as ActURLAction);
+        return _executeActURLAction(action);
       case "ir.actions.act_window":
-        return _executeActWindowAction(action as ActWindowAction, options);
+        return _executeActWindowAction(action, options);
       case "ir.actions.act_window_close": {
         env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "CLOSE_DIALOG" });
         return dialogCloseProm;
       }
       case "ir.actions.client":
-        return _executeClientAction(action as ClientAction, options);
+        return _executeClientAction(action, options);
       case "ir.actions.report":
-        return _executeReportAction(action as ReportAction, options);
+        return _executeReportAction(action, options);
       case "ir.actions.server":
-        return _executeServerAction(action as ServerAction, options);
+        return _executeServerAction(action, options);
       default:
-        throw new Error(`The ActionManager service can't handle actions of type ${action.type}`);
+        throw new Error(
+          `The ActionManager service can't handle actions of type ${(action as any).type}`
+        );
     }
   }
 
@@ -696,8 +715,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       // type === ViewProps
       newState.model = actionProps.model;
       newState.view_type = actionProps.type;
-      const recordId = actionProps.options.recordId;
-      newState.id = recordId ? `${recordId}` : undefined;
+      newState.id = actionProps.recordId ? `${actionProps.recordId}` : undefined;
     }
     // we should not remove keys in the router that we do not manage.
     // another way to say this is that we must push in new state every
@@ -801,7 +819,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["notifications", "rpc", "router"],
+  dependencies: ["notifications", "rpc", "router", "user"],
   deploy(env: OdooEnv): ActionManager {
     return makeActionManager(env);
   },

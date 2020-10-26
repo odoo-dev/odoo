@@ -11,19 +11,20 @@ interface ViewDefinitions {
   [key: string]: ViewDefinition;
 }
 
+interface LoadViewsParams {
+  model: string;
+  views: [ViewId, ViewType][];
+  context: Context;
+}
+
 interface LoadViewsOptions {
   actionId?: number;
-  context?: Context;
   withActionMenus?: boolean;
   withFilters?: boolean;
 }
 
 interface ViewManager {
-  loadViews(
-    model: string,
-    views: [ViewId, ViewType][],
-    options: LoadViewsOptions
-  ): Promise<ViewDefinitions>;
+  loadViews(params: LoadViewsParams, options: LoadViewsOptions): Promise<ViewDefinitions>;
 }
 
 export const viewManagerService: Service<ViewManager> = {
@@ -34,40 +35,27 @@ export const viewManagerService: Service<ViewManager> = {
     const cache: { [key: string]: Promise<any> } = {};
 
     /**
-     * Generates an hash key according to some params.
-     *
-     * @private
-     * @param {string} model
-     * @param {[ViewId, ViewType][]} views something like [[20, 'kanban'], [false, 'form']]
-     * @returns {string}
-     */
-    function _genKey(model: string, views: [ViewId, ViewType][]): string {
-      return JSON.stringify([model, views]);
-    }
-
-    /**
      * Loads various information concerning views: fields_view for each view,
      * fields of the corresponding model, and optionally the filters.
      *
-     * @param {string} model
-     * @param {[ViewId, ViewType][]} views something like [[20, 'kanban'], [false, 'form']]
+     * @param {params} LoadViewsParams
+     * @param {options} LoadViewsOptions
      * @returns {Promise<ViewDefinitions>}
      */
     async function loadViews(
-      model: string,
-      views: [ViewId, ViewType][],
+      params: LoadViewsParams,
       options: LoadViewsOptions
     ): Promise<ViewDefinitions> {
-      const key = _genKey(model, views);
+      const key = JSON.stringify([params.model, params.views, params.context, options]);
       if (!cache[key]) {
-        cache[key] = modelService(model).call("load_views", [], {
-          views,
+        cache[key] = modelService(params.model).call("load_views", [], {
+          views: params.views,
           options: {
             action_id: options.actionId || false,
-            context: options.context || {},
             load_filters: options.withFilters || false,
             toolbar: options.withActionMenus || false,
           },
+          context: params.context,
         });
       }
       const data = await cache[key];

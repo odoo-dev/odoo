@@ -7,7 +7,7 @@ import { Registry } from "./../../src/core/registry";
 import { actionManagerService } from "./../../src/services/action_manager/action_manager";
 import { menusService } from "./../../src/services/menus";
 import { notificationService } from "./../../src/services/notifications";
-import { makeFakeRouterService } from "../helpers/mocks";
+import { makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 
 const { xml } = tags;
 
@@ -24,6 +24,7 @@ QUnit.module("Navbar", {
     services.add(actionManagerService.name, actionManagerService);
     services.add(notificationService.name, notificationService);
     services.add("router", makeFakeRouterService());
+    services.add("user", makeFakeUserService());
     const menus = {
       root: { id: "root", children: [1], name: "root", appID: "root" },
       1: { id: 1, children: [], name: "App0", appID: 1 },

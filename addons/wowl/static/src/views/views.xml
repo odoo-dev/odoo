@@ -48,9 +48,9 @@
     </t>
 
     <t t-name="wowl.ViewSwitcher" owl="1">
-        <nav t-if="props.options.viewSwitcherEntries and props.options.viewSwitcherEntries.length > 1"
+        <nav t-if="props.viewSwitcherEntries and props.viewSwitcherEntries.length > 1"
              class="btn-group o_cp_switch_buttons">
-            <button t-foreach="props.options.viewSwitcherEntries" t-as="view" t-key="view.type"
+            <button t-foreach="props.viewSwitcherEntries" t-as="view" t-key="view.type"
                     t-attf-class="btn btn-secondary fa fa-lg {{view.icon}}"
                     t-att-title="view.name"
                     t-on-click="onViewClicked(view.type)"/>

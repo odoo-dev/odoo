@@ -80,9 +80,11 @@ class ListController extends AbstractController {
     this.fieldNames = Object.keys(fields).filter((fieldName: string) =>
       fieldTypes.includes(fields[fieldName].type)
     );
-    this.records = (await this.modelService(this.props.model).searchRead([], this.fieldNames, {
-      limit: 80,
-    })) as any;
+    const domain = this.props.domain;
+    const context = this.props.context;
+    const options = { limit: 80 };
+    const model = this.modelService(this.props.model);
+    this.records = (await model.searchRead(domain, this.fieldNames, options, context)) as any;
   }
 
   get rendererProps(): ListRendererProps {

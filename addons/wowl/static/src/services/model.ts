@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { Service, OdooEnv } from "../types";
+import { Context, Domain, Service, OdooEnv } from "../types";
 import { RPC } from "./rpc";
 
 export interface DBRecord {
@@ -7,12 +7,7 @@ export interface DBRecord {
   [field: string]: any;
 }
 
-type Context = { [key: string]: any };
 type KWargs = { [key: string]: any };
-
-type DomainOperator = "=";
-type DomainAtom = [string, DomainOperator, number | string];
-type Domain = DomainAtom[];
 
 interface GroupByOptions {
   lazy?: boolean;

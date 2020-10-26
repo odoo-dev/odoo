@@ -56,10 +56,11 @@ class KanbanController extends AbstractController {
 
   async willStart() {
     await super.willStart();
-    const fieldNames = ["display_name"];
-    this.records = (await this.modelService(this.props.model).searchRead([], fieldNames, {
-      limit: 80,
-    })) as any;
+    const domain = this.props.domain;
+    const context = this.props.context;
+    const options = { limit: 80 };
+    const model = this.modelService(this.props.model);
+    this.records = (await model.searchRead(domain, ["display_name"], options, context)) as any;
   }
 
   get rendererProps(): any {

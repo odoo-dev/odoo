@@ -37,12 +37,18 @@ export class AbstractController extends Component<ViewProps, OdooEnv> {
   }
 
   async willStart() {
-    const options = {
-      actionId: this.props.options.actionId,
-      withActionMenus: this.props.options.withActionMenus,
-      withFilters: this.props.options.withFilters,
+    const params = {
+      model: this.props.model,
+      views: this.props.views,
+      context: this.props.context,
     };
-    const viewDescriptions = await this.vm.loadViews(this.props.model, this.props.views, options);
+    const options = {
+      actionId: this.props.actionId,
+      context: this.props.context,
+      withActionMenus: this.props.withActionMenus,
+      withFilters: this.props.withFilters,
+    };
+    const viewDescriptions = await this.vm.loadViews(params, options);
     this.viewDescription = viewDescriptions[this.props.type];
   }
 

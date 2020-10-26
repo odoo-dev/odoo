@@ -82,10 +82,10 @@ class FormController extends AbstractController {
   async willStart() {
     await super.willStart();
     const fieldNames = ["id", "display_name"];
-    if (this.props.options.recordId) {
+    if (this.props.recordId) {
       this.state.mode = "readonly";
       this.record = (
-        await this.modelService(this.props.model).read([this.props.options.recordId], fieldNames)
+        await this.modelService(this.props.model).read([this.props.recordId], fieldNames)
       )[0];
     } else {
       this.state.mode = "edit";

@@ -21,6 +21,11 @@ interface CacheHashes {
   translations: string;
 }
 
+// todo: check & improve Domain types
+type DomainOperator = "=";
+type DomainAtom = [string, DomainOperator, number | string] | "&" | "|";
+export type Domain = DomainAtom[];
+
 export interface Context {
   [key: string]: any;
 }
@@ -166,19 +171,17 @@ interface ViewSwitcherEntry {
 }
 export type ViewSwitcherEntries = ViewSwitcherEntry[];
 
-export type ViewOptions = {
+export interface ViewProps extends ActionProps {
   actionId?: number;
-  context?: Context;
+  context: Context;
+  domain: Domain;
+  model: string;
   recordId: number | null;
+  type: ViewType;
+  views: [ViewId, ViewType][];
+  viewSwitcherEntries?: ViewSwitcherEntries;
   withActionMenus?: boolean;
   withFilters?: boolean;
-  viewSwitcherEntries?: ViewSwitcherEntries;
-};
-export interface ViewProps extends ActionProps {
-  views: [ViewId, ViewType][];
-  model: string;
-  type: ViewType;
-  options: ViewOptions;
 }
 
 export interface ClientActionProps extends ActionProps {

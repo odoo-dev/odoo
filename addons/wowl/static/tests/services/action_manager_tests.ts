@@ -5,7 +5,7 @@ import { notificationService } from "./../../src/services/notifications";
 import { makeTestEnv, nextTick } from "../helpers/index";
 import { ComponentAction, FunctionAction, OdooEnv, Service } from "../../src/types";
 import { makeMockServer } from "../helpers/mock_server";
-import { makeFakeRouterService } from "../helpers/mocks";
+import { makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 
 let env: OdooEnv;
 let services: Registry<Service>;
@@ -43,6 +43,7 @@ QUnit.module("Action Manager Service", {
     services.add(actionManagerService.name, actionManagerService);
     services.add(notificationService.name, notificationService);
     services.add("router", makeFakeRouterService());
+    services.add("user", makeFakeUserService());
 
     env = await makeTestEnv({ actions: actionsRegistry, services });
   },

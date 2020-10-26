@@ -1,8 +1,8 @@
 # Action Manager Service
 
-| Technical name   | Dependencies                     |
-| ---------------- | -------------------------------- |
-| `action_manager` | `notifications`, `rpc`, `router` |
+| Technical name   | Dependencies                             |
+| ---------------- | ---------------------------------------- |
+| `action_manager` | `notifications`, `rpc`, `router`, `user` |
 
 ## Overview
 
