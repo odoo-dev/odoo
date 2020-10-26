@@ -60,6 +60,7 @@ export const userService: Service<UserService> = {
       userName: username,
       isAdmin: is_admin,
       partnerId: partner_id,
+      // LPE FIXME: allowed_companies should be retrievec from url if present, otherwise should be current company
       allowed_companies: user_companies.allowed_companies,
       current_company: user_companies.current_company,
       get lang() {

@@ -14,7 +14,7 @@ import type {
   Domain,
 } from "../../types";
 import { Route } from "../router";
-import { ActionContext, ClientActionProps, ControllerProps } from "../../types";
+import { ActionContext, ClientActionProps } from "../../types";
 import { evaluateExpr } from "../../core/py/index";
 
 // -----------------------------------------------------------------------------
@@ -321,12 +321,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
       Component = controller.Component;
       componentProps = this.props;
       mounted() {
-        let updatedMode;
         if (action.target !== "new") {
-          updatedMode = "main";
           controllerStack = nextStack; // the controller is mounted, commit the new stack
+          // wait Promise callbacks to be executed
+          pushState(controller);
+          env.browser.setTimeout(() => env.bus.trigger("ACTION_MANAGER:MAIN-ACTION-PUSHED"));
         } else {
-          updatedMode = "dialog";
           dialogCloseProm = new Promise((_r) => {
             dialogCloseResolve = _r;
           }).then(() => {
@@ -334,7 +334,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
           });
         }
         resolve();
-        env.bus.trigger("ACTION_MANAGER:UI-UPDATED", { updatedMode, action });
       }
       willUnmount() {
         if (action.target === "new" && dialogCloseResolve) {
@@ -369,8 +368,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       Component: Controller,
       props: controller.props,
     });
-    await currentActionProm;
-    pushState(action, controller.props);
+    return currentActionProm;
   }
 
   // ---------------------------------------------------------------------------
@@ -706,23 +704,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
     _updateUI(controllerStack[index], { index });
   }
 
-  function pushState(action: Action, actionProps: ControllerProps) {
-    const newState: Route["hash"] = {};
-    if (action.id) {
-      newState.action = `${action.id}`;
-    }
-    if ("model" in actionProps) {
-      // type === ViewProps
-      newState.model = actionProps.model;
-      newState.view_type = actionProps.type;
-      newState.id = actionProps.recordId ? `${actionProps.recordId}` : undefined;
-    }
-    // we should not remove keys in the router that we do not manage.
-    // another way to say this is that we must push in new state every
-    // single key each time
-    env.services.router.pushState(newState);
-  }
-
   async function loadState(state: Route["hash"], options: ActionOptions): Promise<boolean> {
     let action: ActionRequest | undefined;
     if (state.action) {
@@ -750,10 +731,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
           if (state.id) {
             viewOptions.recordId = parseInt(state.id, 10);
           }
-          let viewType = state.view_type;
-          if (!viewType) {
-            const controller = controllerStack[controllerStack.length - 1] as ViewController;
-            viewType = controller.view.type;
+          let viewType = state.view_type || "";
+          if (!viewType && (currentController as any).view) {
+            viewType = (currentController as ViewController).view.type;
           }
           switchView(viewType, viewOptions);
           return true;
@@ -809,6 +789,24 @@ function makeActionManager(env: OdooEnv): ActionManager {
     return false;
   }
 
+  function pushState(controller: Controller) {
+    const newState: Route["hash"] = {};
+    const action = controller.action;
+    if (action.id) {
+      newState.action = `${action.id}`;
+    } else if ((action as any).tag) {
+      newState.action = (action as any).tag;
+    }
+    const actionProps = controller.props;
+    if ("model" in actionProps) {
+      // type === ViewProps
+      newState.model = actionProps.model;
+      newState.view_type = actionProps.type;
+      newState.id = actionProps.recordId ? `${actionProps.recordId}` : undefined;
+    }
+    env.services.router.pushState(newState, true);
+  }
+
   return {
     doAction,
     switchView,
@@ -819,7 +817,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["notifications", "rpc", "router", "user"],
+  dependencies: ["notifications", "rpc", "user", "router"],
   deploy(env: OdooEnv): ActionManager {
     return makeActionManager(env);
   },

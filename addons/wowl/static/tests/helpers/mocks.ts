@@ -192,7 +192,7 @@ export function makeMockFetch(mockRPC: MockRPC): typeof fetch {
 }
 
 interface FakeRouterParams {
-  onPushState?: (...args: any[]) => any;
+  onPushState?: (mode: "push" | "replace", newState: Route["hash"]) => any;
   initialRoute?: Partial<Route>;
 }
 
@@ -234,9 +234,9 @@ export function makeFakeRouterService(params?: FakeRouterParams): Service<Router
         return current;
       }
 
-      function doPush(route: Route) {
+      function doPush(mode: "push" | "replace" = "push", route: Route) {
         if (params && params.onPushState) {
-          params.onPushState(route.hash);
+          params.onPushState(mode, route.hash);
         }
         current = getRoute(route);
       }
@@ -244,7 +244,8 @@ export function makeFakeRouterService(params?: FakeRouterParams): Service<Router
         get current(): Route {
           return getCurrent();
         },
-        pushState: makePushState(env, getCurrent, doPush),
+        pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
+        replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
       };
     },
   };

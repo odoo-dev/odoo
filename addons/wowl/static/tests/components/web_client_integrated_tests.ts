@@ -8,6 +8,7 @@ import { menusService } from "../../src/services/menus";
 import { actionManagerService } from "../../src/services/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
 import { makeFakeRouterService } from "../helpers/mocks";
+import { useService } from "../../src/core/hooks";
 
 let baseConfig: TestConfig;
 
@@ -242,31 +243,153 @@ QUnit.module("web client integrated tests", (hooks) => {
   QUnit.module("push state to router");
 
   QUnit.test("basic action as App", async (assert) => {
-    assert.expect(3);
+    assert.expect(5);
 
     baseConfig.services!.remove("router");
-    baseConfig.services!.add(
-      "router",
-      makeFakeRouterService({
-        onPushState(newState) {
-          assert.deepEqual(newState, {
-            action: "2",
-            menu_id: "2",
-          });
-        },
-      })
-    );
+    baseConfig.services!.add("router", makeFakeRouterService());
     const env = await makeTestEnv(baseConfig);
     const webClient = await mount(WebClient, { env });
+    let urlState = env.services.router.current;
+    assert.deepEqual(urlState.hash, {});
     await click(webClient.el!, ".o_navbar_apps_menu button");
     await click(webClient.el!, ".o_navbar_apps_menu .o_dropdown_item:nth-child(3)");
     await nextTick();
     await nextTick();
+    urlState = env.services.router.current;
+    assert.strictEqual(urlState.hash.action, "2");
+    assert.strictEqual(urlState.hash.menu_id, "2");
     assert.strictEqual(
       webClient.el!.querySelector(".test_client_action")!.textContent!.trim(),
       "ClientAction_Id 2"
     );
     assert.strictEqual(webClient.el!.querySelector(".o_menu_brand")!.textContent, "App2");
+  });
+
+  QUnit.test("do action keeps menu in url", async (assert) => {
+    assert.expect(9);
+
+    const env = await makeTestEnv(baseConfig);
+    const webClient = await mount(WebClient, { env });
+    let urlState = env.services.router.current;
+    assert.deepEqual(urlState.hash, {});
+    await click(webClient.el!, ".o_navbar_apps_menu button");
+    await click(webClient.el!, ".o_navbar_apps_menu .o_dropdown_item:nth-child(3)");
+    await nextTick();
+    await nextTick();
+    urlState = env.services.router.current;
+    assert.strictEqual(urlState.hash.action, "2");
+    assert.strictEqual(urlState.hash.menu_id, "2");
+    assert.strictEqual(
+      webClient.el!.querySelector(".test_client_action")!.textContent!.trim(),
+      "ClientAction_Id 2"
+    );
+    assert.strictEqual(webClient.el!.querySelector(".o_menu_brand")!.textContent, "App2");
+
+    env.services.action_manager.doAction(1, { clearBreadcrumbs: true });
+    await nextTick();
+    await nextTick();
+    urlState = env.services.router.current;
+    assert.strictEqual(urlState.hash.action, "1");
+    assert.strictEqual(urlState.hash.menu_id, "2");
+    assert.strictEqual(
+      webClient.el!.querySelector(".test_client_action")!.textContent!.trim(),
+      "ClientAction_Id 1"
+    );
+    assert.strictEqual(webClient.el!.querySelector(".o_menu_brand")!.textContent, "App2");
+  });
+
+  QUnit.test("actions can push state", async (assert) => {
+    assert.expect(5);
+    class ClientActionPushes extends Component<{}, OdooEnv> {
+      static template = tags.xml`
+      <div class="test_client_action" t-on-click="_actionPushState">
+        ClientAction_<t t-esc="props.params?.description" />
+      </div>`;
+      router = useService("router");
+      _actionPushState() {
+        this.router.pushState({ arbitrary: "actionPushed" });
+      }
+    }
+    baseConfig.actions!.add("client_action_pushes", ClientActionPushes);
+
+    const env = await makeTestEnv(baseConfig);
+    const webClient = await mount(WebClient, { env });
+    let urlState = env.services.router.current;
+    assert.deepEqual(urlState.hash, {});
+    env.services.action_manager.doAction("client_action_pushes");
+    await nextTick();
+    await nextTick();
+    urlState = env.services.router.current;
+    assert.strictEqual(urlState.hash.action, "client_action_pushes");
+    assert.strictEqual(urlState.hash.menu_id, undefined);
+    await click(webClient.el!, ".test_client_action");
+    urlState = env.services.router.current;
+    assert.strictEqual(urlState.hash.action, "client_action_pushes");
+    assert.strictEqual(urlState.hash.arbitrary, "actionPushed");
+  });
+
+  QUnit.test("actions override previous state", async (assert) => {
+    assert.expect(5);
+    class ClientActionPushes extends Component<{}, OdooEnv> {
+      static template = tags.xml`
+      <div class="test_client_action" t-on-click="_actionPushState">
+        ClientAction_<t t-esc="props.params?.description" />
+      </div>`;
+      router = useService("router");
+      _actionPushState() {
+        this.router.pushState({ arbitrary: "actionPushed" });
+      }
+    }
+    baseConfig.actions!.add("client_action_pushes", ClientActionPushes);
+
+    const env = await makeTestEnv(baseConfig);
+    const webClient = await mount(WebClient, { env });
+    let urlState = env.services.router.current;
+    assert.deepEqual(urlState.hash, {});
+    env.services.action_manager.doAction("client_action_pushes");
+    await nextTick();
+    await nextTick();
+    await click(webClient.el!, ".test_client_action");
+    urlState = env.services.router.current;
+    assert.strictEqual(urlState.hash.action, "client_action_pushes");
+    assert.strictEqual(urlState.hash.arbitrary, "actionPushed");
+    env.services.action_manager.doAction(1);
+    await nextTick();
+    await nextTick();
+    urlState = env.services.router.current;
+    assert.strictEqual(urlState.hash.action, "1");
+    assert.strictEqual(urlState.hash.arbitrary, undefined);
+  });
+
+  QUnit.test("actions override previous state from menu click", async (assert) => {
+    assert.expect(3);
+    class ClientActionPushes extends Component<{}, OdooEnv> {
+      static template = tags.xml`
+      <div class="test_client_action" t-on-click="_actionPushState">
+        ClientAction_<t t-esc="props.params?.description" />
+      </div>`;
+      router = useService("router");
+      _actionPushState() {
+        this.router.pushState({ arbitrary: "actionPushed" });
+      }
+    }
+    baseConfig.actions!.add("client_action_pushes", ClientActionPushes);
+
+    const env = await makeTestEnv(baseConfig);
+    const webClient = await mount(WebClient, { env });
+    let urlState = env.services.router.current;
+    assert.deepEqual(urlState.hash, {});
+    env.services.action_manager.doAction("client_action_pushes");
+    await nextTick();
+    await nextTick();
+    await click(webClient.el!, ".test_client_action");
+    await click(webClient.el!, ".o_navbar_apps_menu button");
+    await click(webClient.el!, ".o_navbar_apps_menu .o_dropdown_item:nth-child(3)");
+    await nextTick();
+    await nextTick();
+    urlState = env.services.router.current;
+    assert.strictEqual(urlState.hash.action, "2");
+    assert.strictEqual(urlState.hash.menu_id, "2");
   });
 
   QUnit.test("action in target new do not push state", async (assert) => {
@@ -277,8 +400,8 @@ QUnit.module("web client integrated tests", (hooks) => {
     baseConfig.services!.add(
       "router",
       makeFakeRouterService({
-        onPushState(newState) {
-          assert.step("pushState");
+        onPushState(mode, newState) {
+          assert.step(`${mode}State`);
         },
       })
     );

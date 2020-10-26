@@ -75,9 +75,6 @@ function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
       if (menu && menu.appID !== currentAppId) {
         currentAppId = menu.appID;
         env.bus.trigger("MENUS:APP-CHANGED");
-        env.services.router.pushState({
-          menu_id: `${menu.appID}`,
-        });
       }
     },
   };
@@ -85,7 +82,7 @@ function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
 
 export const menusService: Service<MenuService> = {
   name: "menus",
-  dependencies: ["action_manager", "router"],
+  dependencies: ["action_manager"],
   async deploy(env: OdooEnv, config): Promise<MenuService> {
     const { odoo } = config;
     const cacheHashes = odoo.session_info.cache_hashes;

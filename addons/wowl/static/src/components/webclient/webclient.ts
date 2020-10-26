@@ -3,6 +3,7 @@ import { Component, hooks } from "@odoo/owl";
 import { NavBar } from "../navbar/navbar";
 import { OdooEnv } from "../../types";
 import { useService } from "../../core/hooks";
+import { Route } from "./../../services/router";
 
 export class WebClient extends Component<{}, OdooEnv> {
   static components = { ActionContainer, NavBar };
@@ -12,14 +13,17 @@ export class WebClient extends Component<{}, OdooEnv> {
   router = useService("router");
   user = useService("user");
   Components = this.env.registries.Components.getEntries();
+
   constructor(...args: any[]) {
     super(...args);
     hooks.onMounted(() => {
-      this.env.bus.on("ROUTE_CHANGE", this, this._loadRouterState);
-      this._loadRouterState();
+      this.env.bus.on("ROUTE_CHANGE", this, this.loadRouterState);
+      this.env.bus.on("ACTION_MANAGER:MAIN-ACTION-PUSHED", this, this.replaceRouterState);
+      this.loadRouterState();
     });
   }
-  async _loadRouterState(): Promise<void> {
+
+  async loadRouterState(): Promise<void> {
     const options: ActionOptions = {
       clearBreadcrumbs: true,
     };
@@ -52,6 +56,7 @@ export class WebClient extends Component<{}, OdooEnv> {
       return this._loadDefaultApp();
     }
   }
+
   async _loadDefaultApp(): Promise<void> {
     const action = this.user.home_action_id;
     if (action) {
@@ -64,5 +69,14 @@ export class WebClient extends Component<{}, OdooEnv> {
     if (firstApp) {
       return this.menus.selectMenu(firstApp);
     }
+  }
+
+  replaceRouterState(): void {
+    const currentApp = this.menus.getCurrentApp();
+    const persistentHash: Route["hash"] = {
+      menu_id: currentApp && `${currentApp.id}`,
+      cids: "",
+    };
+    this.router.replaceState(persistentHash);
   }
 }

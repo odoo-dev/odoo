@@ -11,6 +11,7 @@ export interface Route {
 export interface Router {
   current: Route;
   pushState(hash: Query, replace?: boolean): void;
+  replaceState(hash: Query, replace?: boolean): void;
 }
 
 function parseString(str: string): Query {
@@ -60,10 +61,14 @@ function makeRouter(env: OdooEnv) {
     bus.trigger("ROUTE_CHANGE");
   });
 
-  function doPush(route: Route) {
+  function doPush(mode: "push" | "replace" = "push", route: Route) {
     const url = location.origin + routeToUrl(route);
     if (url !== window.location.href) {
-      window.history.pushState({}, url, url);
+      if (mode === "push") {
+        window.history.pushState({}, url, url);
+      } else {
+        window.history.replaceState({}, url, url);
+      }
     }
     current = getRoute();
   }
@@ -76,7 +81,8 @@ function makeRouter(env: OdooEnv) {
     get current(): Route {
       return getCurrent();
     },
-    pushState: makePushState(env, getCurrent, doPush),
+    pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
+    replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
   };
 }
 
@@ -85,22 +91,13 @@ export function makePushState(
   getCurrent: () => Route,
   doPush: (route: Route) => void
 ): Router["pushState"] {
-  let tempHash: Route["hash"] | undefined;
-  let timeoutId: number | undefined;
-
   return (hash: Query, replace: boolean = false) => {
-    env.browser.clearTimeout(timeoutId);
-    hash = tempHash = Object.assign(tempHash || {}, hash);
-    timeoutId = env.browser.setTimeout(() => {
-      tempHash = undefined;
-      timeoutId = undefined;
-      const current = getCurrent();
-      if (!replace) {
-        hash = Object.assign({}, current.hash, hash);
-      }
-      const route = Object.assign({}, current, { hash });
-      doPush(route);
-    });
+    const current = getCurrent();
+    if (!replace) {
+      hash = Object.assign({}, current.hash, hash);
+    }
+    const route = Object.assign({}, current, { hash });
+    doPush(route);
   };
 }
 
