@@ -17,6 +17,9 @@
             <field name="cancel_msg" position="attributes">
                 <attribute name="attrs">{'invisible': [('provider', '=', 'transfer')]}</attribute>
             </field>
+            <field name="capture_manually" position="after">
+                <field name="qr_code" attrs="{'invisible': [('provider', '!=', 'transfer')]}" />
+            </field>
         </field>
     </record>
 </odoo>
