@@ -334,19 +334,20 @@
             - 'tx' - The transaction whose status must be displayed
         -->
         <div t-if="tx.state == 'pending'" class="alert alert-warning alert-dismissible">
-            <span t-if='tx.acquirer_id.pending_msg' t-raw="tx.acquirer_id.pending_msg"/>
+            <span t-if='tx.acquirer_id.sudo().pending_msg'
+                  t-raw="tx.acquirer_id.sudo().pending_msg"/>
             <button class="close" data-dismiss="alert" title="Dismiss">×</button>
         </div>
         <div t-elif="tx.state == 'authorized'" class="alert alert-success alert-dismissible">
-            <span t-if='tx.acquirer_id.auth_msg' t-raw="tx.acquirer_id.auth_msg"/>
+            <span t-if='tx.acquirer_id.sudo().auth_msg' t-raw="tx.acquirer_id.sudo().auth_msg"/>
             <button class="close" data-dismiss="alert" title="Dismiss">×</button>
         </div>
         <div t-elif="tx.state == 'done'" class="alert alert-success alert-dismissible">
-            <span t-if='tx.acquirer_id.done_msg' t-raw="tx.acquirer_id.done_msg"/>
+            <span t-if='tx.acquirer_id.sudo().done_msg' t-raw="tx.acquirer_id.sudo().done_msg"/>
             <button class="close" data-dismiss="alert" title="Dismiss">×</button>
         </div>
         <div t-elif="tx.state == 'cancel'" class="alert alert-danger alert-dismissible">
-            <span t-if='tx.acquirer_id.cancel_msg' t-raw="tx.acquirer_id.cancel_msg"/>
+            <span t-if='tx.acquirer_id.sudo().cancel_msg' t-raw="tx.acquirer_id.sudo().cancel_msg"/>
             <button class="close" data-dismiss="alert" title="Dismiss">×</button>
         </div>
         <span t-if="tx.state_message" t-esc="tx.state_message"/>
