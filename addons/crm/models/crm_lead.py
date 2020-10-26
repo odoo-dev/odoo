@@ -1107,13 +1107,10 @@ class Lead(models.Model):
         self.ensure_one()
         for opportunity in opportunities:
             for message in opportunity.message_ids:
+                subject = message.subject and _("From %s : %s") % (opportunity.name, message.subject) or opportunity.name
                 message.write({
                     'res_id': self.id,
-                    'subject': _(
-                        "From %(source_name)s : %(source_subject)s",
-                        source_name=opportunity.name,
-                        source_subject=message.subject
-                    )
+                    'subject': subject,
                 })
         return True
 
