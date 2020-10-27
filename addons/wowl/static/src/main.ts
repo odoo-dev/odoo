@@ -41,6 +41,7 @@ declare const odoo: Odoo;
     actions: registries.actionRegistry,
     systray: registries.systrayRegistry,
     errorDialogs: registries.errorDialogRegistry,
+    userMenu: registries.userMenuRegistry,
     templates,
     _t,
   });

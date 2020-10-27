@@ -12,8 +12,9 @@ export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
     _t,
     systray,
     errorDialogs,
+    userMenu,
   } = config;
-  const registries = { services, Components, views, actions, systray, errorDialogs };
+  const registries = { services, Components, views, actions, systray, errorDialogs, userMenu };
   const qweb = new owl.QWeb({ translateFn: _t });
   qweb.addTemplates(templates);
 
@@ -34,7 +35,6 @@ async function deployServices(env: OdooEnv, config: OdooConfig): Promise<void> {
   const services = env.services;
   const serviceRegistry = config.services;
   const toBeDeployed = new Set(serviceRegistry.getAll());
-
   // deploy as many services in parallel as possible
   function deploy(): Promise<any> {
     let service: Service | null = null;

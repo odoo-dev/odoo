@@ -4,7 +4,7 @@ const { useRef, useExternalListener } = hooks;
 const { Portal } = misc;
 
 interface DialogProps {
-  contentClass: String;
+  contentClass?: string;
   fullscreen: boolean;
   renderFooter: boolean;
   renderHeader: boolean;
@@ -16,7 +16,7 @@ interface DialogProps {
 export class Dialog extends Component<DialogProps, OdooEnv> {
   static components = { Portal };
   static props = {
-    contentClass: String,
+    contentClass: { type: String, optional: 1 },
     fullscreen: Boolean,
     renderFooter: Boolean,
     renderHeader: Boolean,

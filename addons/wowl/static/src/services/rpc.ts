@@ -29,6 +29,10 @@ interface RPCNetworkError {
 
 export type RPCError = RPCServerError | RPCNetworkError;
 
+// -----------------------------------------------------------------------------
+// Handling of lost connection
+// -----------------------------------------------------------------------------
+
 let isConnected = true;
 let rpcId: number = 0;
 
@@ -59,6 +63,7 @@ function handleLostConnection(env: OdooEnv) {
 // -----------------------------------------------------------------------------
 // Main RPC method
 // -----------------------------------------------------------------------------
+
 function jsonrpc(env: OdooEnv, url: string, params: Params, rpcId: number): Promise<any> {
   const bus = env.bus;
   const XHR = env.browser.XMLHttpRequest;

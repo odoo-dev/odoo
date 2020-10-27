@@ -1,5 +1,4 @@
 import { Component } from "@odoo/owl";
-import { CrashManager } from "./components/crash_manager/crash_manager";
 import { LoadingIndicator } from "./components/loading_indicator/loading_indicator";
 import {
   Error504Dialog,
@@ -7,7 +6,7 @@ import {
   SessionExpiredDialog,
   WarningDialog,
 } from "./components/error_dialogs/error_dialogs";
-import { userMenuItem } from "./components/user_menu/user_menu";
+import { userMenu, UserMenuItem } from "./components/user_menu/user_menu";
 import { _lt } from "./core/localization";
 import { Registry } from "./core/registry";
 import { actionManagerService } from "./services/action_manager/action_manager";
@@ -25,6 +24,16 @@ import { GraphView } from "./views/graph_view";
 import { KanbanView } from "./views/kanban_view";
 import { ListView } from "./views/list_view";
 import { PivotView } from "./views/pivot_view";
+import {
+  documentationItem,
+  logOutItem,
+  odooAccountItem,
+  preferencesItem,
+  shortCutsItem,
+  supportItem,
+} from "./components/user_menu_items/user_menu_items";
+import { dialogManagerService } from "./services/dialog_manager";
+import { crashManagerService } from "./services/crash_manager";
 
 // -----------------------------------------------------------------------------
 // Services
@@ -37,6 +46,8 @@ export const serviceRegistry: Registry<Service<any>> = new Registry();
 
 const services = [
   actionManagerService,
+  crashManagerService,
+  dialogManagerService,
   menusService,
   modelService,
   notificationService,
@@ -59,7 +70,6 @@ for (let service of services) {
 // of the webclient.
 export const mainComponentRegistry: Registry<Type<Component>> = new Registry();
 
-mainComponentRegistry.add("CrashManager", CrashManager);
 mainComponentRegistry.add("LoadingIndicator", LoadingIndicator);
 
 // -----------------------------------------------------------------------------
@@ -90,20 +100,35 @@ for (let view of views) {
 
 export const systrayRegistry: Registry<SystrayItem> = new Registry();
 
-systrayRegistry.add("wowl.user_menu", userMenuItem);
+systrayRegistry.add("wowl.user_menu", userMenu);
 
 // -----------------------------------------------------------------------------
-// Custom Dialogs for CrashManager
+// Custom Dialogs for CrashManagerService
 // -----------------------------------------------------------------------------
 
 export const errorDialogRegistry: Registry<Type<Component>> = new Registry();
 
-errorDialogRegistry.add("odoo.exceptions.AccessDenied", WarningDialog);
-errorDialogRegistry.add("odoo.exceptions.AccessError", WarningDialog);
-errorDialogRegistry.add("odoo.exceptions.MissingError", WarningDialog);
-errorDialogRegistry.add("odoo.exceptions.UserError", WarningDialog);
-errorDialogRegistry.add("odoo.exceptions.ValidationError", WarningDialog);
-errorDialogRegistry.add("odoo.exceptions.RedirectWarning", RedirectWarningDialog);
-errorDialogRegistry.add("odoo.http.SessionExpiredException", SessionExpiredDialog);
-errorDialogRegistry.add("werkzeug.exceptions.Forbidden", SessionExpiredDialog);
-errorDialogRegistry.add("504", Error504Dialog);
+errorDialogRegistry
+  .add("odoo.exceptions.AccessDenied", WarningDialog)
+  .add("odoo.exceptions.AccessError", WarningDialog)
+  .add("odoo.exceptions.MissingError", WarningDialog)
+  .add("odoo.exceptions.UserError", WarningDialog)
+  .add("odoo.exceptions.ValidationError", WarningDialog)
+  .add("odoo.exceptions.RedirectWarning", RedirectWarningDialog)
+  .add("odoo.http.SessionExpiredException", SessionExpiredDialog)
+  .add("werkzeug.exceptions.Forbidden", SessionExpiredDialog)
+  .add("504", Error504Dialog);
+
+// -----------------------------------------------------------------------------
+// Default UserMenu items
+// -----------------------------------------------------------------------------
+
+export const userMenuRegistry: Registry<UserMenuItem> = new Registry();
+
+userMenuRegistry
+  .add("documentation", documentationItem)
+  .add("support", supportItem)
+  .add("shortcuts", shortCutsItem)
+  .add("profile", preferencesItem)
+  .add("odoo_account", odooAccountItem)
+  .add("log_out", logOutItem);

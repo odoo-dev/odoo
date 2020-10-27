@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <Dropdown t-name="wowl.UserMenu" class="o_user_menu" owl="1">
-        <t t-esc="user.name"/>
-    </Dropdown>
+    <t t-name="wowl.UserMenu" owl="1">
+        <Dropdown class="o_user_menu" t-on-dropdown-item-selected.stop="onDropdownItemSelected">
+            <img class="rounded-circle o_user_avatar" t-att-src="source" alt="User"/>
+            <span class="o_user_name" t-esc="user.name"/>
+            <t t-set-slot="menu">
+                <t t-foreach="getItemGroups()" t-as="group" t-key="group_index">
+                    <t t-foreach="group" t-as="item" t-key="item_index">
+                        <DropdownItem payload="{ callback: item.callback }"><t t-esc="item.description"/></DropdownItem>
+                    </t>
+                    <div t-if="!group_last" role="separator" class="dropdown-divider"/>
+                </t>
+            </t>
+        </Dropdown>
+    </t>
 
 </templates>
