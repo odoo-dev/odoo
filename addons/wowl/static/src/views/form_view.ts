@@ -3,10 +3,11 @@ import { OdooEnv, FormRendererProps, View } from "../types";
 import { AbstractController, ControlPanelSubTemplates } from "./abstract_controller";
 import { ActionMenus } from "./action_menus/action_menus";
 import { Pager, usePager } from "./pager";
-import type { DBRecord } from "../services/model";
+import type { DBRecord, ModelBuilder } from "../services/model";
 
 import { useService } from "../core/hooks";
-const { css, xml } = tags;
+import { ViewDefinition } from "../services/view_manager";
+const { xml } = tags;
 
 interface FormControllerState {
   mode: "edit" | "readonly";
@@ -14,59 +15,131 @@ interface FormControllerState {
 }
 
 class FormRenderer extends Component<FormRendererProps, OdooEnv> {
-  static template = xml`
-    <div class="o_form_view" t-attf-class="{{props.mode === 'readonly' ? 'o_form_readonly' : 'o_form_editable'}}">
-      <div class="o_form_sheet_bg">
-        <div class="o_form_sheet">
-          <div class="o_group">
-            <table class="o_group o_inner_group o_group_col_6">
-              <tbody>
-                <tr>
-                  <td class="o_td_label">ID</td>
-                  <td><t t-esc="props.record and props.record.id"/></td>
-                </tr>
-                <tr>
-                  <td class="o_td_label">Name</td>
-                  <td><t t-esc="props.record and props.record.display_name"/></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  static template = xml`<t t-call="{{_template}}"/>`;
 
-  static style = css`
-    .o_form_sheet_bg {
-      border-bottom: 1px solid #ddd;
-      background: url(/web/static/src/img/form_sheetbg.png);
-      .o_form_sheet {
-        margin: 12px auto;
-        min-width: 650px;
-        max-width: 1140px;
-        min-height: 330px;
-        padding: 24px;
-        background: white;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        border: 1px solid #c8c8d3;
-        .o_group {
-          display: inline-block;
-          width: 100%;
-          margin: 10px 0;
-          .o_td_label {
-            border-right: 1px solid #ddd;
+  static nextId = 1;
+
+  _template: string;
+
+  constructor(parent: any, props: FormRendererProps) {
+    super(parent, props);
+    const name = `__form__${FormRenderer.nextId++}`;
+    const template = compileFormTemplate(props.arch, name);
+    this.env.qweb.addTemplates(template);
+    this._template = name;
+  }
+}
+
+function compileFormTemplate(arch: string, name: string): Document {
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(arch, "text/xml");
+  const document = parser.parseFromString("<templates />", "text/xml");
+  const tTag = document.createElement("t");
+  tTag.setAttribute("t-name", name);
+  document.documentElement.appendChild(tTag);
+  let isInGroup = false;
+
+  generateQWeb(xml.documentElement, tTag);
+
+  function generateQWeb(node: Element | ChildNode, parent: Element) {
+    if (!(node instanceof Element)) {
+      parent.appendChild(document.createTextNode(node.textContent!));
+      return;
+    }
+    if (node.nodeType === 1) {
+      // standard tag
+      switch (node.tagName) {
+        case "form":
+          const form = document.createElement("div");
+          form.setAttribute(`class`, "o_form_view");
+          form.setAttribute(
+            `t-attf-class`,
+            "{{props.mode === 'readonly' ? 'o_form_readonly' : 'o_form_editable'}}"
+          );
+          parent.appendChild(form);
+          for (let child of node.childNodes) {
+            generateQWeb(child, form);
           }
-          .o_td_label + td {
-            padding: 0 36px 0 8px;
+          break;
+        case "sheet":
+          const sheetBG = document.createElement("div");
+          sheetBG.setAttribute("class", "o_form_sheet_bg");
+          parent.appendChild(sheetBG);
+          const sheetFG = document.createElement("div");
+          sheetFG.setAttribute("class", "o_form_sheet");
+          sheetBG.appendChild(sheetFG);
+          for (let child of node.childNodes) {
+            generateQWeb(child, sheetFG);
           }
-        }
-        .o_group.o_inner_group {
-          display: inline-table;
-        }
+          break;
+        case "group":
+          if (!isInGroup) {
+            const group = document.createElement("div");
+            group.setAttribute("class", "o_group");
+            parent.appendChild(group);
+            isInGroup = true;
+            for (let child of node.childNodes) {
+              generateQWeb(child, group);
+            }
+            isInGroup = false;
+          } else {
+            const table = document.createElement("table");
+            table.setAttribute("class", "o_group o_inner_group o_group_col_6");
+            parent.appendChild(table);
+            const tbody = document.createElement("tbody");
+            table.appendChild(tbody);
+            for (let child of node.childNodes) {
+              const tr = document.createElement("tr");
+              tbody.appendChild(tr);
+              generateQWeb(child, tr);
+            }
+          }
+          break;
+        case "field":
+          if (node.getAttribute("invisible") === "1") {
+            break;
+          }
+          const field = document.createElement("t");
+          field.setAttribute("t-esc", `props.record['${node.getAttribute("name")}']`);
+          parent.appendChild(field);
+          break;
+        default:
+          const elem = document.createElement(node.tagName);
+          if (node.hasAttribute("class")) {
+            elem.setAttribute("class", node.getAttribute("class")!);
+          }
+          parent.appendChild(elem);
+          for (let child of node.childNodes) {
+            generateQWeb(child, elem);
+          }
       }
     }
-  `;
+  }
+  return document;
+}
+
+class RelationalModel {
+  model: ModelBuilder;
+  modelName: string;
+  viewDef: () => ViewDefinition;
+
+  constructor(model: ModelBuilder, modelName: string, viewDef: () => ViewDefinition) {
+    this.model = model;
+    this.modelName = modelName;
+    this.viewDef = viewDef;
+  }
+
+  async load(id: number): Promise<DBRecord> {
+    const view = this.viewDef();
+    const { fields } = view;
+    const records = await this.model(this.modelName).read([id], Object.keys(fields));
+    return records[0];
+  }
+}
+
+function useRelationalModel(model: string, viewDefinition: () => ViewDefinition) {
+  const modelService = useService("model");
+  return new RelationalModel(modelService, model, viewDefinition);
 }
 
 class FormController extends AbstractController {
@@ -89,7 +162,8 @@ class FormController extends AbstractController {
     recordIds: [],
   };
 
-  modelService = useService("model");
+  dataModel = useRelationalModel(this.props.model, () => this.viewDescription);
+
   state: FormControllerState = useState({
     mode: "readonly",
     record: null,
@@ -114,8 +188,7 @@ class FormController extends AbstractController {
   }
 
   async loadRecord(id: number) {
-    const result = await this.modelService(this.props.model).read([id], ["id", "display_name"]);
-    this.state.record = result[0];
+    this.state.record = await this.dataModel.load(id);
   }
 
   get actionMenusProps() {
