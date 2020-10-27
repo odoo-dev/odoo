@@ -124,18 +124,21 @@ function callModel(rpc: RPC, env: OdooEnv, model: string): Model["call"] {
   const user = env.services.user;
   return (method, args = [], kwargs = {}) => {
     let url = `/web/dataset/call_kw/${model}/${method}`;
-    // yes or no???
-    // if (method === "search_read") {
-    //   url = `/web/dataset/search_read`;
-    // }
     const fullContext = Object.assign({}, user.context, kwargs.context || {});
     const fullKwargs = Object.assign({}, kwargs, { context: fullContext });
-    return rpc(url, {
-      model: model,
+    let params: any = {
+      model,
       method,
-      args: args,
-      kwargs: fullKwargs,
-    });
+    };
+    // yes or no???
+    if (method === "search_read") {
+      url = `/web/dataset/search_read`;
+      params = Object.assign(params, { context: fullContext }, fullKwargs);
+    } else {
+      params.args = args;
+      params.kwargs = fullKwargs;
+    }
+    return rpc(url, params);
   };
 }
 

@@ -127,8 +127,9 @@ interface UpdateStackOptions {
   index?: number;
 }
 
-interface SwitchViewOptions {
+interface ViewOptions {
   recordId?: number;
+  recordIds?: number[];
 }
 
 interface ActionCache {
@@ -137,7 +138,7 @@ interface ActionCache {
 
 interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): Promise<void>;
-  switchView(viewType: string, options?: SwitchViewOptions): void;
+  switchView(viewType: string, options?: ViewOptions): void;
   restore(jsId: string): void;
   loadState(state: Route["hash"], options: ActionOptions): Promise<boolean>;
 }
@@ -274,7 +275,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     view: View,
     action: ActWindowAction,
     views: View[],
-    recordId?: number | null
+    options: ViewOptions = {},
   ): ViewProps {
     const target = action.target;
     const viewSwitcherEntries = views
@@ -288,7 +289,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       context: action.context,
       domain: action.domain,
       model: action.res_model,
-      recordId: recordId || null,
+      recordId: options.recordId || null,
+      recordIds: options.recordIds || null,
       type: view.type,
       views: action.views,
       viewSwitcherEntries,
@@ -661,7 +663,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    *
    * @param {ViewType} viewType
    */
-  function switchView(viewType: ViewType, options?: SwitchViewOptions): void {
+  function switchView(viewType: ViewType, options?: ViewOptions): void {
     const controller = controllerStack[controllerStack.length - 1] as ViewController;
     if (controller.action.type !== "ir.actions.act_window") {
       throw new Error(`switchView called but the current controller isn't a view`);
@@ -676,12 +678,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action: controller.action,
       views: controller.views,
       view,
-      props: _getViewProps(
-        view,
-        controller.action,
-        controller.views,
-        (options && options.recordId) || null
-      ),
+      props: _getViewProps(view, controller.action, controller.views, options),
     };
     let index = controllerStack.length;
     if (view.multiRecord) {
@@ -746,7 +743,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         // only when we already have an action in dom
         try {
           // TODO: insert options into switchView
-          const viewOptions: SwitchViewOptions = {};
+          const viewOptions: ViewOptions = {};
           if (state.id) {
             viewOptions.recordId = parseInt(state.id, 10);
           }

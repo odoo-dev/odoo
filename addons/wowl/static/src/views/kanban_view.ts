@@ -1,7 +1,9 @@
-import { Component, tags } from "@odoo/owl";
+import { Component, useState, tags } from "@odoo/owl";
 import { useService } from "../core/hooks";
 import { OdooEnv, RendererProps, View } from "../types";
 import { AbstractController, ControlPanelSubTemplates } from "./abstract_controller";
+import { Pager, usePager } from "./pager";
+import type { DBRecord } from "../services/model";
 
 const { xml, css } = tags;
 
@@ -45,28 +47,51 @@ class KanbanRenderer extends Component<RendererProps, OdooEnv> {
   }
 }
 
+interface KanbanControllerState {
+  records: DBRecord[];
+}
+
 class KanbanController extends AbstractController {
-  static components = { ...AbstractController.components, Renderer: KanbanRenderer };
+  static components = { ...AbstractController.components, Renderer: KanbanRenderer, Pager };
   cpSubTemplates: ControlPanelSubTemplates = {
     ...this.cpSubTemplates,
     bottomLeft: "wowl.KanbanView.ControlPanelBottomLeft",
+    bottomRight: "wowl.KanbanView.ControlPanelBottomRight",
   };
+
   modelService = useService("model");
-  records: any[] = [];
+
+  count: number = 0;
+  state: KanbanControllerState = useState({
+    records: [],
+  });
+  pager = usePager('pager', {
+    limit: 5,
+    onPagerChanged: this.onPagerChanged.bind(this),
+  });
 
   async willStart() {
     await super.willStart();
+    await this._loadRecords({ limit: this.pager.limit, offset: this.pager.currentMinimum - 1 });
+  }
+
+  async _loadRecords(options: any = {}) {
     const domain = this.props.domain;
     const context = this.props.context;
-    const options = { limit: 80 };
     const model = this.modelService(this.props.model);
-    this.records = (await model.searchRead(domain, ["display_name"], options, context)) as any;
+    const result = await model.searchRead(domain, ["display_name"], options, context);
+    this.pager.size = result.length;
+    this.state.records = result.records;
   }
 
   get rendererProps(): any {
     const props: any = super.rendererProps;
-    props.records = this.records;
+    props.records = this.state.records;
     return props;
+  }
+
+  async onPagerChanged(currentMinimum: number, limit: number) {
+    await this._loadRecords({ limit, offset: currentMinimum - 1 });
   }
 }
 

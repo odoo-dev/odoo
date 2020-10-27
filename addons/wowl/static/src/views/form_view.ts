@@ -2,6 +2,7 @@ import { Component, tags, useState } from "@odoo/owl";
 import { OdooEnv, FormRendererProps, View } from "../types";
 import { AbstractController, ControlPanelSubTemplates } from "./abstract_controller";
 import { ActionMenus } from "./action_menus/action_menus";
+// import { Pager, usePager } from "./pager";
 
 import { useService } from "../core/hooks";
 const { css, xml } = tags;
@@ -78,6 +79,10 @@ class FormController extends AbstractController {
     mode: "readonly",
   });
   record: any = null;
+  // pager = usePager('pager', {
+  //   limit: 5,
+  //   onPagerChanged: this.onPagerChanged.bind(this),
+  // });
 
   async willStart() {
     await super.willStart();

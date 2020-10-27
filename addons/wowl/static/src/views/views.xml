@@ -25,7 +25,8 @@
     <t t-name="wowl.Breadcrumbs" owl="1">
         <ol class="breadcrumb">
             <li t-foreach="props.breadcrumbs" t-as="breadcrumb" class="breadcrumb-item">
-                <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="onBreadcrumbClicked(breadcrumb.jsId)">
+                <!-- <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="onBreadcrumbClicked(breadcrumb.jsId)"> -->
+                <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="trigger('breadcrumb-clicked', breadcrumb.jsId)">
                     <t t-esc="breadcrumb.name"/>
                 </a>
                 <t t-else=""><t t-esc="breadcrumb.name"/></t>
@@ -57,10 +58,54 @@
         </nav>
     </t>
 
+    <t t-name="wowl.Pager" owl="1">
+        <nav class="o_pager" aria-label="Pager">
+            <span class="o_pager_counter" t-on-click.stop="">
+                <input t-if="state.editing" type="text"
+                    class="o_pager_value o_input"
+                    autofocus=""
+                    t-att-value="value"
+                    t-on-blur="onBlur"
+                    t-on-change="onValueChange"
+                    t-on-keydown.stop="onValueKeydown"
+                />
+                <span t-else=""
+                    class="o_pager_value"
+                    t-esc="value"
+                    t-on-click="onEdit"
+                />
+                <span> / </span>
+                <span class="o_pager_limit" t-esc="props.model.size"/>
+            </span>
+            <span class="btn-group" aria-atomic="true">
+                <!-- accesskeys not wanted in X2Many widgets -->
+                <button type="button"
+                    class="fa fa-chevron-left btn btn-secondary o_pager_previous"
+                    t-att-disabled="props.model.disabled || singlePage"
+                    t-att-accesskey="props.withAccessKey ? 'p' : false"
+                    aria-label="Previous"
+                    title="Previous"
+                    tabindex="-1"
+                    t-on-click="changeSelection(-1)"
+                />
+                <button type="button"
+                    class="fa fa-chevron-right btn btn-secondary o_pager_next"
+                    t-att-disabled="props.model.disabled || singlePage"
+                    t-att-accesskey="props.withAccessKey ? 'n' : false"
+                    aria-label="Next"
+                    title="Next"
+                    tabindex="-1"
+                    t-on-click="changeSelection(1)"
+                />
+            </span>
+        </nav>
+    </t>
+
     <t t-name="wowl.Views.ControlPanelTopLeft" owl="1">
         <t t-call="wowl.Breadcrumbs"/>
     </t>
     <t t-name="wowl.Views.ControlPanelBottomRight" owl="1">
+        <div class="o_cp_pager"/>
         <t t-call="wowl.ViewSwitcher"/>
     </t>
 
@@ -78,6 +123,11 @@
 
     <t t-name="wowl.KanbanView.ControlPanelBottomLeft" owl="1">
         <t t-call="wowl.KanbanView.Buttons"/>
+    </t>
+    <t t-name="wowl.KanbanView.ControlPanelBottomRight" t-inherit="wowl.Views.ControlPanelBottomRight" t-inherit-mode="primary" owl="1">
+        <xpath expr="//div" position="inside">
+            <Pager model="pager" t-ref="pager"/>
+        </xpath>
     </t>
 
     <!-- FormView -->
