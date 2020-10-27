@@ -15,13 +15,14 @@ export class Registry<T> {
   content: { [key: string]: T } = {};
 
   /**
-   * Add an item to the registry
+   * Add an entry (key, value) to the registry if key is not already used. If
+   * the parameter force is set to true, an entry with same key (if any) is replaced.
    *
    * Note that this also returns the registry, so another add method call can
    * be chained
    */
-  add(key: string, value: T): Registry<T> {
-    if (key in this.content) {
+  add(key: string, value: T, force: boolean = false): Registry<T> {
+    if (!force && key in this.content) {
       throw new Error(`Cannot add '${key}' in this registry: it already exists`);
     }
     this.content[key] = value;
