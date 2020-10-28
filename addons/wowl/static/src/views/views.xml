@@ -25,8 +25,7 @@
     <t t-name="wowl.Breadcrumbs" owl="1">
         <ol class="breadcrumb">
             <li t-foreach="props.breadcrumbs" t-as="breadcrumb" class="breadcrumb-item">
-                <!-- <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="onBreadcrumbClicked(breadcrumb.jsId)"> -->
-                <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="trigger('breadcrumb-clicked', breadcrumb.jsId)">
+                <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="onBreadcrumbClicked(breadcrumb.jsId)">
                     <t t-esc="breadcrumb.name"/>
                 </a>
                 <t t-else=""><t t-esc="breadcrumb.name"/></t>
@@ -113,11 +112,11 @@
 
     <t t-name="wowl.KanbanView.Buttons" owl="1">
         <div class="o_cp_buttons">
-            <button class="btn btn-primary" t-on-click="_onExecuteAction(35)">Open Apps</button>
+            <button class="btn btn-primary" t-on-click="onCreate">Create</button>
+            <button class="btn btn-secondary" t-on-click="_onExecuteAction(35)">Open Apps</button>
             <button class="btn btn-secondary" t-on-click="_onExecuteAction({target: 'new', tag: 'mail.widgets.discuss', type: 'ir.actions.client'})">
                 Open Dialog Action
             </button>
-            <button class="btn btn-secondary" t-on-click="_onOpenFormView">Open form view</button>
         </div>
     </t>
 
@@ -148,6 +147,11 @@
     <t t-name="wowl.FormView.ControlPanelBottomLeft" owl="1">
         <t t-call="wowl.FormView.Buttons"/>
         <ActionMenus t-if="actionMenusProps" t-props="actionMenusProps"/>
+    </t>
+    <t t-name="wowl.FormView.ControlPanelBottomRight" t-inherit="wowl.Views.ControlPanelBottomRight" t-inherit-mode="primary" owl="1">
+        <xpath expr="//div" position="inside">
+            <Pager t-if="props.recordId" model="pager" t-ref="pager"/>
+        </xpath>
     </t>
 
 </templates>

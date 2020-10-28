@@ -115,7 +115,7 @@ export interface Breadcrumb {
 }
 export type Breadcrumbs = Breadcrumb[];
 
-interface ActionMangerUpdateInfo {
+interface ActionManagerUpdateInfo {
   type: "MAIN" | "OPEN_DIALOG" | "CLOSE_DIALOG";
   id?: number;
   Component?: Type<Component<{}, OdooEnv>>;
@@ -156,12 +156,12 @@ export class ActionContainer extends Component<{}, OdooEnv> {
       </Dialog>
     </div>`;
   static components = { Dialog };
-  main: Partial<ActionMangerUpdateInfo> = {};
-  dialog: Partial<ActionMangerUpdateInfo> = {};
+  main: Partial<ActionManagerUpdateInfo> = {};
+  dialog: Partial<ActionManagerUpdateInfo> = {};
 
   constructor(...args: any[]) {
     super(...args);
-    this.env.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionMangerUpdateInfo) => {
+    this.env.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionManagerUpdateInfo) => {
       switch (info.type) {
         case "MAIN":
           this.main = { id: info.id, Component: info.Component, props: info.props };
@@ -284,19 +284,24 @@ function makeActionManager(env: OdooEnv): ActionManager {
         return { icon: v.icon, name: v.name, type: v.type };
       });
 
-    return {
+    const props: ViewProps = {
       actionId: action.id,
       context: action.context,
       domain: action.domain,
       model: action.res_model,
-      recordId: options.recordId || null,
-      recordIds: options.recordIds || null,
       type: view.type,
       views: action.views,
       viewSwitcherEntries,
       withActionMenus: target !== "new" && target !== "inline",
       withFilters: action.views.some((v) => v[1] === "search"),
     };
+    if (options.recordId) {
+      props.recordId = options.recordId;
+    }
+    if (options.recordIds) {
+      props.recordIds = options.recordIds;
+    }
+    return props;
   }
 
   /**

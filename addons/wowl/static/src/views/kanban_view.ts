@@ -1,6 +1,6 @@
 import { Component, useState, tags } from "@odoo/owl";
 import { useService } from "../core/hooks";
-import { OdooEnv, RendererProps, View } from "../types";
+import { OdooEnv, KanbanRendererProps, View } from "../types";
 import { AbstractController, ControlPanelSubTemplates } from "./abstract_controller";
 import { Pager, usePager } from "./pager";
 import type { DBRecord } from "../services/model";
@@ -14,7 +14,7 @@ class KanbanRecord extends Component {
     </div>
     `;
 }
-class KanbanRenderer extends Component<RendererProps, OdooEnv> {
+class KanbanRenderer extends Component<KanbanRendererProps, OdooEnv> {
   static template = xml`
       <div class="o_kanban_renderer">
         <t t-foreach="props.records" t-as="record" t-key="record.id">
@@ -43,7 +43,7 @@ class KanbanRenderer extends Component<RendererProps, OdooEnv> {
   am = useService("action_manager");
 
   _onClick(id: number) {
-    this.am.switchView("form", { recordId: id });
+    this.am.switchView("form", { recordId: id, recordIds: this.props.records.map(r => r.id) });
   }
 }
 
@@ -90,8 +90,13 @@ class KanbanController extends AbstractController {
     return props;
   }
 
+  onCreate() {
+    this.am.switchView('form');
+  }
+
   async onPagerChanged(currentMinimum: number, limit: number) {
     await this._loadRecords({ limit, offset: currentMinimum - 1 });
+    return {};
   }
 }
 

@@ -10,7 +10,10 @@ interface PagerModel {
 }
 interface UsePagerParams {
   limit: number;
-  onPagerChanged: (currentMinimum: number, limit: number) => Promise<void> | void,
+  currentMinimum?: number;
+  size?: number;
+  disabled?: boolean;
+  onPagerChanged: (currentMinimum: number, limit: number) => Promise<Partial<PagerModel>> | Partial<PagerModel>,
 }
 interface PagerProps {
   model: PagerModel;
@@ -24,10 +27,10 @@ export function usePager(ref: string, params: UsePagerParams) {
   const comp: Component = Component.current!;
   const pagerRef = hooks.useRef(ref);
   const pagerModel: PagerModel = {
-    currentMinimum: 1,
+    currentMinimum: 'currentMinimum' in params ? (params.currentMinimum || 0) : 1,
+    disabled: params.disabled || false,
     limit: params.limit,
-    disabled: false,
-    size: 0,
+    size: params.size || 0,
   };
 
   async function onPagerChanged (ev: any) {
@@ -37,9 +40,10 @@ export function usePager(ref: string, params: UsePagerParams) {
       pagerRef.comp!.render();
       const limit = ev.detail.limit;
       const currentMinimum = ev.detail.currentMinimum;
-      await params.onPagerChanged(currentMinimum, limit);
-      pagerModel.limit = limit;
-      pagerModel.currentMinimum = currentMinimum;
+      let newModel = await params.onPagerChanged(currentMinimum, limit);
+      pagerModel.limit = 'limit' in newModel ? newModel.limit : limit;
+      pagerModel.currentMinimum = 'currentMinimum' in newModel ? newModel.currentMinimum : currentMinimum;
+      pagerModel.size = 'size' in newModel ? (newModel.size || 0) : pagerModel.size;
       pagerModel.disabled = false;
       pagerRef.comp!.render();
     }

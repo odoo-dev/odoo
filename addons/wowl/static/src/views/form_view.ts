@@ -2,13 +2,15 @@ import { Component, tags, useState } from "@odoo/owl";
 import { OdooEnv, FormRendererProps, View } from "../types";
 import { AbstractController, ControlPanelSubTemplates } from "./abstract_controller";
 import { ActionMenus } from "./action_menus/action_menus";
-// import { Pager, usePager } from "./pager";
+import { Pager, usePager } from "./pager";
+import type { DBRecord } from "../services/model";
 
 import { useService } from "../core/hooks";
 const { css, xml } = tags;
 
-interface ControllerState {
+interface FormControllerState {
   mode: "edit" | "readonly";
+  record: DBRecord | null;
 }
 
 class FormRenderer extends Component<FormRendererProps, OdooEnv> {
@@ -68,33 +70,45 @@ class FormRenderer extends Component<FormRendererProps, OdooEnv> {
 }
 
 class FormController extends AbstractController {
-  static components = { ...AbstractController.components, Renderer: FormRenderer, ActionMenus };
+  static components = { ...AbstractController.components, Renderer: FormRenderer, ActionMenus, Pager };
   cpSubTemplates: ControlPanelSubTemplates = {
     ...this.cpSubTemplates,
     bottomLeft: "wowl.FormView.ControlPanelBottomLeft",
+    bottomRight: "wowl.FormView.ControlPanelBottomRight",
   };
+  static props = {
+    recordId: { type: Number, optional: true },
+    recordIds: { type: Array, element: Number, optional: true },
+  }
+  static defaultProps = {
+    recordIds: [],
+  }
 
   modelService = useService("model");
-  state: ControllerState = useState({
+  state: FormControllerState = useState({
     mode: "readonly",
+    record: null,
   });
-  record: any = null;
-  // pager = usePager('pager', {
-  //   limit: 5,
-  //   onPagerChanged: this.onPagerChanged.bind(this),
-  // });
+  pager = usePager('pager', {
+    currentMinimum: this.props.recordId ? this.props.recordIds!.indexOf(this.props.recordId) + 1 : 0,
+    limit: 1,
+    size: this.props.recordIds!.length,
+    onPagerChanged: this.onPagerChanged.bind(this),
+  });
 
   async willStart() {
     await super.willStart();
-    const fieldNames = ["id", "display_name"];
     if (this.props.recordId) {
       this.state.mode = "readonly";
-      this.record = (
-        await this.modelService(this.props.model).read([this.props.recordId], fieldNames)
-      )[0];
+      return this.loadRecord(this.props.recordId);
     } else {
       this.state.mode = "edit";
     }
+  }
+
+  async loadRecord(id: number) {
+    const result = await this.modelService(this.props.model).read([id], ["id", "display_name"]);
+    this.state.record = result[0];
   }
 
   get actionMenusProps() {
@@ -131,9 +145,13 @@ class FormController extends AbstractController {
     }
   }
   get rendererProps(): FormRendererProps {
-    return { ...super.rendererProps, mode: this.state.mode, record: this.record };
+    return { ...super.rendererProps, mode: this.state.mode, record: this.state.record };
   }
 
+  async onPagerChanged(currentMinimum: number, limit: number) {
+    await this.loadRecord(this.props.recordIds![currentMinimum - 1]);
+    return {};
+  }
   _onCreate() {
     this.state.mode = "edit";
   }

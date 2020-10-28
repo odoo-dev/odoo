@@ -176,10 +176,10 @@ export interface ViewProps extends ActionProps {
   context: Context;
   domain: Domain;
   model: string;
-  recordId: number | null;
-  recordIds: number[] | null;
   type: ViewType;
   views: [ViewId, ViewType][];
+  recordId?: number;
+  recordIds?: number[];
   viewSwitcherEntries?: ViewSwitcherEntries;
   withActionMenus?: boolean;
   withFilters?: boolean;
@@ -202,6 +202,9 @@ export interface FormRendererProps extends RendererProps {
 }
 export interface ListRendererProps extends RendererProps {
   fieldNames: string[];
+  records: any[];
+}
+export interface KanbanRendererProps extends RendererProps {
   records: any[];
 }
 
