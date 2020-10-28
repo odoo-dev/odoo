@@ -105,20 +105,24 @@ class FormController extends AbstractController {
           print: [
             {
               name: this.env._t("Print report"),
+              id: 1,
               callback: () => () => {},
             },
           ],
           action: [
             {
               name: this.env._t("Export"),
+              id: 1,
               callback: () => () => {},
             },
             {
               name: this.env._t("Archive"),
+              id: 2,
               callback: () => () => {},
             },
             {
               name: this.env._t("Delete"),
+              id: 3,
               callback: () => () => {},
             },
           ],

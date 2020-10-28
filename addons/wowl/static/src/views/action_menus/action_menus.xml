@@ -6,7 +6,7 @@
             <Dropdown t-if="printItems.length" togglerClass="'o_dropdown_toggler_btn btn btn-secondary'">
                 <span class="fa fa-print">Print</span>
                 <t t-set-slot="menu">
-                    <t t-foreach="printItems" t-as="item">
+                    <t t-foreach="printItems" t-as="item" t-key="item.key">
                         <DropdownItem payload="item"><t t-esc="item.name" /></DropdownItem>
                     </t>
                 </t>
@@ -14,7 +14,7 @@
             <Dropdown t-if="printItems.length" togglerClass="'o_dropdown_toggler_btn btn btn-secondary'">
                 <span class="fa fa-print">Action</span>
                 <t t-set-slot="menu">
-                    <t t-foreach="actionItems" t-as="item">
+                    <t t-foreach="actionItems" t-as="item" t-key="item.key">
                         <DropdownItem payload="item"><t t-esc="item.name" /></DropdownItem>
                     </t>
                 </t>

@@ -66,7 +66,7 @@ export class ActionMenus extends Component {
     const formattedActions = [...actionActions, ...relateActions].map((action) => ({
       callback: action.callback,
       name: action.name,
-      // key: action.id,
+      key: action.id,
     }));
     // ActionMenus action registry components
     const registryActions = ActionMenus.registry
@@ -87,7 +87,7 @@ export class ActionMenus extends Component {
     const printItems = printActions.map((action: any) => ({
       callback: action.callback,
       name: action.name,
-      // key: action.id,
+      key: action.id,
     }));
     return printItems;
   }
