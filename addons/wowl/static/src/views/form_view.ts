@@ -70,7 +70,12 @@ class FormRenderer extends Component<FormRendererProps, OdooEnv> {
 }
 
 class FormController extends AbstractController {
-  static components = { ...AbstractController.components, Renderer: FormRenderer, ActionMenus, Pager };
+  static components = {
+    ...AbstractController.components,
+    Renderer: FormRenderer,
+    ActionMenus,
+    Pager,
+  };
   cpSubTemplates: ControlPanelSubTemplates = {
     ...this.cpSubTemplates,
     bottomLeft: "wowl.FormView.ControlPanelBottomLeft",
@@ -79,18 +84,20 @@ class FormController extends AbstractController {
   static props = {
     recordId: { type: Number, optional: true },
     recordIds: { type: Array, element: Number, optional: true },
-  }
+  };
   static defaultProps = {
     recordIds: [],
-  }
+  };
 
   modelService = useService("model");
   state: FormControllerState = useState({
     mode: "readonly",
     record: null,
   });
-  pager = usePager('pager', {
-    currentMinimum: this.props.recordId ? this.props.recordIds!.indexOf(this.props.recordId) + 1 : 0,
+  pager = usePager("pager", {
+    currentMinimum: this.props.recordId
+      ? this.props.recordIds!.indexOf(this.props.recordId) + 1
+      : 0,
     limit: 1,
     size: this.props.recordIds!.length,
     onPagerChanged: this.onPagerChanged.bind(this),

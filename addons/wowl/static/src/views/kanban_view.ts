@@ -43,7 +43,7 @@ class KanbanRenderer extends Component<KanbanRendererProps, OdooEnv> {
   am = useService("action_manager");
 
   _onClick(id: number) {
-    this.am.switchView("form", { recordId: id, recordIds: this.props.records.map(r => r.id) });
+    this.am.switchView("form", { recordId: id, recordIds: this.props.records.map((r) => r.id) });
   }
 }
 
@@ -65,7 +65,7 @@ class KanbanController extends AbstractController {
   state: KanbanControllerState = useState({
     records: [],
   });
-  pager = usePager('pager', {
+  pager = usePager("pager", {
     limit: 5,
     onPagerChanged: this.onPagerChanged.bind(this),
   });
@@ -91,7 +91,7 @@ class KanbanController extends AbstractController {
   }
 
   onCreate() {
-    this.am.switchView('form');
+    this.am.switchView("form");
   }
 
   async onPagerChanged(currentMinimum: number, limit: number) {

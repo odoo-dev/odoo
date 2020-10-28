@@ -275,7 +275,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     view: View,
     action: ActWindowAction,
     views: View[],
-    options: ViewOptions = {},
+    options: ViewOptions = {}
   ): ViewProps {
     const target = action.target;
     const viewSwitcherEntries = views

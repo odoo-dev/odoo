@@ -13,7 +13,10 @@ interface UsePagerParams {
   currentMinimum?: number;
   size?: number;
   disabled?: boolean;
-  onPagerChanged: (currentMinimum: number, limit: number) => Promise<Partial<PagerModel>> | Partial<PagerModel>,
+  onPagerChanged: (
+    currentMinimum: number,
+    limit: number
+  ) => Promise<Partial<PagerModel>> | Partial<PagerModel>;
 }
 interface PagerProps {
   model: PagerModel;
@@ -27,13 +30,13 @@ export function usePager(ref: string, params: UsePagerParams) {
   const comp: Component = Component.current!;
   const pagerRef = hooks.useRef(ref);
   const pagerModel: PagerModel = {
-    currentMinimum: 'currentMinimum' in params ? (params.currentMinimum || 0) : 1,
+    currentMinimum: "currentMinimum" in params ? params.currentMinimum || 0 : 1,
     disabled: params.disabled || false,
     limit: params.limit,
     size: params.size || 0,
   };
 
-  async function onPagerChanged (ev: any) {
+  async function onPagerChanged(ev: any) {
     if (ev.originalComponent === pagerRef.comp) {
       ev.stopPropagation();
       pagerModel.disabled = true;
@@ -41,22 +44,23 @@ export function usePager(ref: string, params: UsePagerParams) {
       const limit = ev.detail.limit;
       const currentMinimum = ev.detail.currentMinimum;
       let newModel = await params.onPagerChanged(currentMinimum, limit);
-      pagerModel.limit = 'limit' in newModel ? newModel.limit : limit;
-      pagerModel.currentMinimum = 'currentMinimum' in newModel ? newModel.currentMinimum : currentMinimum;
-      pagerModel.size = 'size' in newModel ? (newModel.size || 0) : pagerModel.size;
+      pagerModel.limit = "limit" in newModel ? newModel.limit : limit;
+      pagerModel.currentMinimum =
+        "currentMinimum" in newModel ? newModel.currentMinimum : currentMinimum;
+      pagerModel.size = "size" in newModel ? newModel.size || 0 : pagerModel.size;
       pagerModel.disabled = false;
       pagerRef.comp!.render();
     }
   }
   hooks.onMounted(() => {
-    comp.el!.addEventListener('pager-changed', onPagerChanged);
+    comp.el!.addEventListener("pager-changed", onPagerChanged);
   });
   hooks.onWillUnmount(() => {
-    comp.el!.removeEventListener('pager-changed', onPagerChanged);
+    comp.el!.removeEventListener("pager-changed", onPagerChanged);
   });
 
   return pagerModel;
-};
+}
 
 /**
  * Pager
@@ -97,7 +101,10 @@ export class Pager extends Component<PagerProps, OdooEnv> {
   }
 
   get maximum(): number {
-    return Math.min(this.props.model.currentMinimum + this.props.model.limit - 1, this.props.model.size);
+    return Math.min(
+      this.props.model.currentMinimum + this.props.model.limit - 1,
+      this.props.model.size
+    );
   }
   get singlePage(): boolean {
     const { currentMinimum, size } = this.props.model;
