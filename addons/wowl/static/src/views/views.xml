@@ -154,4 +154,12 @@
         </xpath>
     </t>
 
+    <!-- ListView -->
+
+    <t t-name="wowl.ListView.ControlPanelBottomRight" t-inherit="wowl.Views.ControlPanelBottomRight" t-inherit-mode="primary" owl="1">
+        <xpath expr="//div" position="inside">
+            <Pager model="pager" t-ref="pager"/>
+        </xpath>
+    </t>
+
 </templates>

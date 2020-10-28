@@ -1,7 +1,9 @@
-import { Component, tags } from "@odoo/owl";
+import { Component, tags, useState } from "@odoo/owl";
 import { OdooEnv, ListRendererProps, View } from "../types";
-import { AbstractController } from "./abstract_controller";
+import { AbstractController, ControlPanelSubTemplates } from "./abstract_controller";
 import { useService } from "../core/hooks";
+import { Pager, usePager } from "./pager";
+import type { DBRecord } from "../services/model";
 
 const { css, xml } = tags;
 
@@ -63,18 +65,36 @@ class ListRenderer extends Component<ListRendererProps, OdooEnv> {
   am = useService("action_manager");
 
   _onRowClicked(id: number) {
-    this.am.switchView("form", { recordId: id });
+    this.am.switchView("form", { recordId: id, recordIds: this.props.records.map((r) => r.id) });
   }
 }
 
+interface ListControllerState {
+  records: DBRecord[];
+}
+
 class ListController extends AbstractController {
-  static components = { ...AbstractController.components, Renderer: ListRenderer };
+  static components = { ...AbstractController.components, Renderer: ListRenderer, Pager };
   modelService = useService("model");
-  records: any[] = [];
+  cpSubTemplates: ControlPanelSubTemplates = {
+    ...this.cpSubTemplates,
+    bottomRight: "wowl.ListView.ControlPanelBottomRight",
+  };
+  state: ListControllerState = useState({
+    records: [],
+  });
   fieldNames: string[] = [];
+  pager = usePager("pager", {
+    limit: 5,
+    onPagerChanged: this.onPagerChanged.bind(this),
+  });
 
   async willStart() {
     await super.willStart();
+    await this.loadRecords({ limit: this.pager.limit, offset: this.pager.currentMinimum - 1 });
+  }
+
+  async loadRecords(options: any = {}) {
     const fieldTypes = ["char", "text", "integer", "float", "many2one"];
     const fields = this.viewDescription.fields;
     this.fieldNames = Object.keys(fields).filter((fieldName: string) =>
@@ -82,16 +102,22 @@ class ListController extends AbstractController {
     );
     const domain = this.props.domain;
     const context = this.props.context;
-    const options = { limit: 80 };
     const model = this.modelService(this.props.model);
-    this.records = (await model.searchRead(domain, this.fieldNames, options, context)) as any;
+    const result = await model.searchRead(domain, this.fieldNames, options, context);
+    this.pager.size = result.length;
+    this.state.records = result.records;
   }
 
   get rendererProps(): ListRendererProps {
     const props: any = super.rendererProps;
     props.fieldNames = this.fieldNames;
-    props.records = this.records;
+    props.records = this.state.records;
     return props;
+  }
+
+  async onPagerChanged(currentMinimum: number, limit: number) {
+    await this.loadRecords({ limit, offset: currentMinimum - 1 });
+    return {};
   }
 }
 

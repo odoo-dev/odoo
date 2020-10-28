@@ -61,7 +61,6 @@ class KanbanController extends AbstractController {
 
   modelService = useService("model");
 
-  count: number = 0;
   state: KanbanControllerState = useState({
     records: [],
   });
