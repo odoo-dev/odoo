@@ -149,14 +149,11 @@ QUnit.test("searchRead method", async (assert) => {
   services.add("rpc", rpc);
   const env = await makeTestEnv({ services });
   await env.services.model("sale.order").searchRead([["user_id", "=", 2]], ["amount_total"]);
-  assert.strictEqual(query.route, "/web/dataset/call_kw/sale.order/search_read");
+  assert.strictEqual(query.route, "/web/dataset/search_read");
   assert.deepEqual(query.params, {
-    args: [],
-    kwargs: {
-      context: { uid: 2 },
-      domain: [["user_id", "=", 2]],
-      fields: ["amount_total"],
-    },
+    context: { uid: 2 },
+    domain: [["user_id", "=", 2]],
+    fields: ["amount_total"],
     method: "search_read",
     model: "sale.order",
   });
