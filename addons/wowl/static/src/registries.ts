@@ -19,11 +19,11 @@ import { uiService } from "./services/ui/ui";
 import { userService } from "./services/user";
 import { viewManagerService } from "./services/view_manager";
 import { ComponentAction, FunctionAction, Service, SystrayItem, Type, View } from "./types";
-import { FormView } from "./views/form_view";
-import { GraphView } from "./views/graph_view";
-import { KanbanView } from "./views/kanban_view";
-import { ListView } from "./views/list_view";
-import { PivotView } from "./views/pivot_view";
+// import { FormView } from "./views/form_view";
+// import { GraphView } from "./views/graph_view";
+// import { KanbanView } from "./views/kanban_view";
+// import { ListView } from "./views/list_view";
+// import { PivotView } from "./views/pivot_view";
 import {
   documentationItem,
   logOutItem,
@@ -86,13 +86,13 @@ export const actionRegistry: Registry<ComponentAction | FunctionAction> = new Re
 // Views
 // -----------------------------------------------------------------------------
 
-const views: View[] = [FormView, GraphView, KanbanView, ListView, PivotView];
+// const views: View[] = [FormView, GraphView, KanbanView, ListView, PivotView];
 
 export const viewRegistry: Registry<View> = new Registry();
 
-for (let view of views) {
-  viewRegistry.add(view.name, view);
-}
+// for (let view of views) {
+//   viewRegistry.add(view.name, view);
+// }
 
 // -----------------------------------------------------------------------------
 // Systray

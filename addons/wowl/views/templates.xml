@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- prod only bundle, like in web, but without the main.js file of web
+    which starts the webclient (mainly allows mail to add its main.js file which
+    starts the mail services) -->
+    <template id="assets_backend_prod_only">
+    </template>
+
     <template id="assets">
         <!-- basic scss setup -->
         <t t-call="web._assets_helpers">
             <t t-call="web._assets_backend_helpers"/>
         </t>
         <t t-call="web._assets_bootstrap"/>
-        <link rel="stylesheet" type="text/css" href="/web/static/lib/fontawesome/css/font-awesome.css"/>
 
         <!-- insert all scss files in /wowl -->
         <t t-foreach="scssFiles" t-as="scssFile">
             <link rel="stylesheet" type="text/scss" t-att-href="scssFile"/>
         </t>
 
-        <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
         <script type="text/javascript" src="/wowl/static/dist/app.js"></script>
         <t t-if="live_reload">
             <script type="text/javascript" src="/wowl/static/livereload.js"></script>
@@ -33,6 +37,12 @@
                         session_info: <t t-raw="json.dumps(session_info)"/>,
                     };
                 </script>
+
+                <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_backend" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-css="false"/>
+                <t t-call-assets="wowl.assets_backend_prod_only" t-css="false"/>
 
                 <t t-call-assets="wowl.assets" t-js="False"/>
                 <t t-call-assets="wowl.assets" t-css="False"/>
@@ -60,6 +70,11 @@
                 <meta charset="utf-8"/>
                 <title t-esc="'WOWL Tests'"/>
                 <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/img/favicon.ico'"/>
+
+                <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_backend" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-css="false"/>
 
                 <t t-call-assets="wowl.test_assets" t-js="False"/>
                 <t t-call-assets="wowl.test_assets" t-css="False"/>

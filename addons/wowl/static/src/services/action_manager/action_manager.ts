@@ -282,11 +282,18 @@ function makeActionManager(env: OdooEnv): ActionManager {
     const viewSwitcherEntries = views
       .filter((v) => v.multiRecord === view.multiRecord)
       .map((v) => {
-        return { icon: v.icon, name: v.name, type: v.type };
+        return {
+          // FIXME: missing accesskey
+          icon: v.icon,
+          name: v.name,
+          type: v.type,
+          multiRecord: v.multiRecord, // FIXME: needed for legacy views
+        };
       });
 
     const props: ViewProps = {
       actionId: action.id,
+      action: action, // FIXME: needed for legacy views, find another way to give it to them
       context: action.context,
       domain: action.domain,
       model: action.res_model,
@@ -470,6 +477,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         Component: clientAction as ComponentAction,
         action,
         props: {
+          action, // FIXME
           params: action.params,
         },
       };

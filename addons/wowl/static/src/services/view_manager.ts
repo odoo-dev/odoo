@@ -58,8 +58,7 @@ export const viewManagerService: Service<ViewManager> = {
           context: params.context,
         });
       }
-      const data = await cache[key];
-      return data.fields_views;
+      return await cache[key]; // FIXME: clarify the API
     }
     return { loadViews };
   },

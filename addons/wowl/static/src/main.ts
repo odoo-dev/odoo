@@ -7,6 +7,7 @@ import { Odoo, RuntimeOdoo, OdooBrowser } from "./types";
 
 // remove some day
 import "./demo_data";
+import "./views/legacy";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -45,7 +46,7 @@ declare const odoo: Odoo;
     templates,
     _t,
   });
-  owl.Component.env = env;
+  WebClient.env = env;
 
   // start web client
   const root = new WebClient();
@@ -54,8 +55,8 @@ declare const odoo: Odoo;
 
   // prepare runtime Odoo object
   const sessionInfo = odoo.session_info;
-  delete (odoo as any).session_info;
-  ((odoo as any) as RuntimeOdoo).__DEBUG__ = { root };
+  // delete (odoo as any).session_info; // FIXME: some legacy code rely on this (e.g. ajax.js)
+  ((odoo as any) as RuntimeOdoo).__WOWL_DEBUG__ = { root };
   ((odoo as any) as RuntimeOdoo).info = {
     db: sessionInfo.db,
     server_version: sessionInfo.server_version,

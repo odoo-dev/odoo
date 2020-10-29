@@ -78,7 +78,7 @@ interface Debug {
 }
 
 export interface RuntimeOdoo {
-  __DEBUG__: Debug;
+  __WOWL_DEBUG__: Debug;
   info: DBInfo;
 }
 
@@ -164,6 +164,7 @@ export type ViewType =
   | string;
 
 export interface ActionProps {
+  action?: any;
   breadcrumbs?: Breadcrumb[];
 }
 
