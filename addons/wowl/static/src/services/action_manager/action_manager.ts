@@ -149,7 +149,7 @@ interface ActionManager {
 
 export class ActionContainer extends Component<{}, OdooEnv> {
   static template = tags.xml`
-    <div t-name="wowl.ActionContainer">
+    <div t-name="wowl.ActionContainer" class="o_action_manager">
       <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="main.id"/>
       <Dialog t-if="dialog.Component" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed">
         <t t-component="dialog.Component" t-props="dialog.props"/>
