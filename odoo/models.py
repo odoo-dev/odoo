@@ -3666,14 +3666,14 @@ Fields:
             # If there are only fields that do not trigger _write (e.g. only
             # determine inverse), the below ensures that `write_date` and
             # `write_uid` are updated (`test_orm.py`, `test_write_date`)
-            if self._log_access and self.ids:
+            if self._log_access and real_recs:
                 towrite = env.all.towrite[self._name]
                 for record in real_recs:
                     towrite[record.id]['write_uid'] = self.env.uid
                     towrite[record.id]['write_date'] = False
                 self.env.cache.invalidate([
-                    (self._fields['write_date'], self.ids),
-                    (self._fields['write_uid'], self.ids),
+                    (self._fields['write_date'], real_recs._ids),
+                    (self._fields['write_uid'], real_recs._ids),
                 ])
 
             # for monetary field, their related currency field must be cached
@@ -3699,31 +3699,32 @@ Fields:
             # (`test_01_website_reset_password_tour`)
             self.modified(vals)
 
-            if self._parent_store and self._parent_name in vals:
-                self.flush([self._parent_name])
+            if real_recs:
+                if self._parent_store and self._parent_name in vals:
+                    self.flush([self._parent_name])
 
-            # validate non-inversed fields first
-            inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
-            real_recs._validate_fields(vals, inverse_fields)
+                # validate non-inversed fields first
+                inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
+                real_recs._validate_fields(vals, inverse_fields)
 
-            for fields in determine_inverses.values():
-                # inverse records that are not being computed
-                try:
-                    fields[0].determine_inverse(real_recs)
-                except AccessError as e:
-                    if fields[0].inherited:
-                        description = self.env['ir.model']._get(self._name).name
-                        raise AccessError(
-                            _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
-                                'previous_message': e.args[0],
-                                'document_kind': description,
-                                'document_model': self._name,
-                            }
-                        )
-                    raise
+                for fields in determine_inverses.values():
+                    # inverse records that are not being computed
+                    try:
+                        fields[0].determine_inverse(real_recs)
+                    except AccessError as e:
+                        if fields[0].inherited:
+                            description = self.env['ir.model']._get(self._name).name
+                            raise AccessError(
+                                _("%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).") % {
+                                    'previous_message': e.args[0],
+                                    'document_kind': description,
+                                    'document_model': self._name,
+                                }
+                            )
+                        raise
 
-            # validate inversed fields
-            real_recs._validate_fields(inverse_fields)
+                # validate inversed fields
+                real_recs._validate_fields(inverse_fields)
 
         if check_company and self._check_company_auto:
             self._check_company()
