@@ -3414,8 +3414,16 @@ Fields:
         ])
 
     def _filter_access_rules_python(self, operation):
+        ids, new_ids = [], []
+        for id_ in self._ids:
+            (ids if id_ else new_ids).append(id_)
+        if not ids:
+            return self
         dom = self.env['ir.rule']._compute_domain(self._name, operation)
-        return self.sudo().filtered_domain(dom or [])
+        result = self.browse(ids).sudo().filtered_domain(dom or [])
+        if new_ids:
+            result += self.browse(new_ids)
+        return result
 
     def unlink(self):
         """ unlink()
