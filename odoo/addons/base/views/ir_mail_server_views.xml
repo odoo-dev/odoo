@@ -16,13 +16,21 @@
                         <field name="smtp_port" options="{'format': false}"/>
                         <field name="smtp_debug" groups="base.group_no_one"/>
                      </group>
-                     <group string="Security and Authentication" colspan="4">
-                        <field name="smtp_encryption"/>
-                        <field name="smtp_user"/>
-                        <field name="smtp_pass" password="True"/>
-                        <button name="test_smtp_connection" type="object" string="Test Connection" icon="fa-television"/>
+                     <group>
+                        <group string="Security and Authentication">
+                            <field name="smtp_encryption"/>
+                            <field name="smtp_user"/>
+                            <field name="smtp_pass" password="True"/>
+                        </group>
+                        <group string="SSL Authentication">
+                            <field name="smtp_ssl_certificate"/>
+                            <field name="smtp_ssl_private_key"/>
+                        </group>
+                        <group>
+                            <button name="test_smtp_connection" type="object" string="Test Connection" icon="fa-television"/>
+                        </group>
                     </group>
-                  </sheet>  
+                  </sheet>
                 </form>
             </field>
         </record>

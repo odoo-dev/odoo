@@ -218,6 +218,10 @@ class configmanager(object):
                          help='specify the SMTP username for sending email')
         group.add_option('--smtp-password', dest='smtp_password', my_default=False,
                          help='specify the SMTP password for sending email')
+        group.add_option('--smtp-ssl-certificate', dest='smtp_ssl_certificate', my_default=False,
+                         help='specify the SSL certificate used for authentication')
+        group.add_option('--smtp-ssl-private-key', dest='smtp_ssl_private_key', my_default=False,
+                         help='specify the SSL private key used for authentication')
         parser.add_option_group(group)
 
         group = optparse.OptionGroup(parser, "Database related options")
