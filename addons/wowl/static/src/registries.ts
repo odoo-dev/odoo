@@ -34,6 +34,7 @@ import {
 } from "./components/user_menu_items/user_menu_items";
 import { dialogManagerService } from "./services/dialog_manager";
 import { crashManagerService } from "./services/crash_manager";
+import { cookieService } from "./services/cookie";
 
 // -----------------------------------------------------------------------------
 // Services
@@ -47,6 +48,7 @@ export const serviceRegistry: Registry<Service<any>> = new Registry();
 const services = [
   actionManagerService,
   crashManagerService,
+  cookieService,
   dialogManagerService,
   menusService,
   modelService,

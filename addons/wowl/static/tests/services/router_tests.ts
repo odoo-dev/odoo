@@ -58,13 +58,18 @@ QUnit.test("can parse an search with 2 key/value pairs", (assert) => {
   assert.deepEqual(parseSearchQuery("?a=1&b=2"), { a: "1", b: "2" });
 });
 
-QUnit.test("routeToUrl", (assert) => {
+QUnit.test("can parse URI encoded strings", (assert) => {
+  assert.deepEqual(parseSearchQuery("?space=this%20is"), { space: "this is" });
+  assert.deepEqual(parseHash("#comma=that%2Cis"), { comma: "that,is" });
+});
+
+QUnit.test("routeToUrl encodes URI compatible strings", (assert) => {
   const route: Route = { pathname: "/asf", search: {}, hash: {} };
   assert.strictEqual(routeToUrl(route), "/asf");
 
-  route.search = { a: "11", f: undefined };
-  assert.strictEqual(routeToUrl(route), "/asf?a=11");
+  route.search = { a: "11", f: undefined, g: "summer wine" };
+  assert.strictEqual(routeToUrl(route), "/asf?a=11&g=summer%20wine");
 
-  route.hash = { b: "2", c: "", d: undefined };
-  assert.strictEqual(routeToUrl(route), "/asf?a=11#b=2&c");
+  route.hash = { b: "2", c: "", d: undefined, e: "kloug,gloubi" };
+  assert.strictEqual(routeToUrl(route), "/asf?a=11&g=summer%20wine#b=2&c&e=kloug%2Cgloubi");
 });

@@ -75,8 +75,11 @@ export class WebClient extends Component<{}, OdooEnv> {
     const currentApp = this.menus.getCurrentApp();
     const persistentHash: Route["hash"] = {
       menu_id: currentApp && `${currentApp.id}`,
-      cids: "",
     };
+    const allowedCompanyIds = this.user.context.allowed_company_ids;
+    if (allowedCompanyIds) {
+      persistentHash.cids = allowedCompanyIds.join(",");
+    }
     this.router.replaceState(persistentHash);
   }
 }

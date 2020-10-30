@@ -3,6 +3,7 @@ import { Odoo, OdooEnv, OdooConfig, Service } from "../../src/types";
 import { RPC } from "../../src/services/rpc";
 import type { Deferred } from "./utility";
 import { Query, Route, Router, makePushState } from "../../src/services/router";
+import { Cookie, cookieService } from "../../src/services/cookie";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -250,3 +251,23 @@ export function makeFakeRouterService(params?: FakeRouterParams): Service<Router
     },
   };
 }
+
+export const fakeCookieService: typeof cookieService = {
+  name: "cookie",
+  deploy() {
+    const cookie: Cookie = {};
+    return {
+      get current() {
+        return cookie;
+      },
+      setCookie(key, value, ttl) {
+        if (value !== undefined) {
+          cookie[key] = value;
+        }
+      },
+      deleteCookie(key) {
+        delete cookie[key];
+      },
+    };
+  },
+};

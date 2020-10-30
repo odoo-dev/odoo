@@ -19,7 +19,7 @@ function parseString(str: string): Query {
   const result: Query = {};
   for (let part of parts) {
     const [key, value] = part.split("=");
-    result[key] = value || "";
+    result[key] = decodeURIComponent(value || "");
   }
   return result;
 }
@@ -35,7 +35,7 @@ export function parseSearchQuery(search: string): Query {
 function toString(query: Query): string {
   return Object.entries(query)
     .filter(([k, v]) => v !== undefined)
-    .map(([k, v]) => (v ? `${k}=${v}` : k))
+    .map(([k, v]) => (v ? `${k}=${encodeURIComponent(v)}` : k))
     .join("&");
 }
 
