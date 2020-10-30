@@ -1070,7 +1070,7 @@ class Field(MetaField('DummyField', (object,), {})):
         all_records = records
         records = self.filter_not_equal(all_records, value)
         if self.compute and self.store:
-            records.env.remove_to_compute(self, all_records - records)
+            records.env.remove_to_compute(self, all_records)
         if not records:
             return
 

@@ -3160,17 +3160,28 @@ class TestComputeQueries(common.TransactionCase):
 
         # write and trigger recomputation
         with self.assertQueries([update(model, 'foo', 'bar')]):
-            record.write({'foo': 'One'})
-        self.assertEqual(record.bar, 'One')
+            record.write({'foo': 'A'})
+        self.assertEqual(record.bar, 'A')
 
         # write and do not trigger recomputation
         with self.assertQueries([update(model, 'foo', 'bar')]):
-            record.write({'foo': 'Two', 'bar': 'Bar'})
+            record.write({'foo': 'B', 'bar': 'Bar'})
         self.assertEqual(record.bar, 'Bar')
 
         # write and do not trigger recomputation (field 'bar' must be protected)
         with self.assertQueries([update(model, 'foo')]):
-            record.write({'foo': 'One', 'bar': 'Bar'})
+            record.write({'foo': 'C', 'bar': 'Bar'})
+        self.assertEqual(record.bar, 'Bar')
+
+        # write and discard recomputation
+        with self.assertQueries([update(model, 'foo')]):
+            record.write({'foo': 'D'})
+            record.write({'bar': 'Bar'})
+        self.assertEqual(record.bar, 'Bar')
+
+        with self.assertQueries([update(model, 'foo')]):
+            record.foo = 'E'
+            record.bar = 'Bar'
         self.assertEqual(record.bar, 'Bar')
 
     def test_compute_inverse(self):

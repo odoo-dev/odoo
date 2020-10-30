@@ -3616,7 +3616,11 @@ Fields:
             modified_ids.update(records._ids)
             modified_vals[fname] = value
 
-        if not modified_ids or not modified_vals:
+        # discard recomputations on fields being written
+        for field in protected_fields:
+            self.env.remove_to_compute(field, self)
+
+        if not modified_vals:
             return True
         self = self.browse(modified_ids)
         vals = modified_vals
