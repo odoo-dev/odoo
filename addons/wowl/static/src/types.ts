@@ -14,7 +14,7 @@ import type { userService } from "./services/user";
 import { viewManagerService } from "./services/view_manager";
 import { Breadcrumb } from "./services/action_manager/action_manager";
 import { AbstractController } from "./views/abstract_controller";
-import { UserMenuItem } from "./components/user_menu/user_menu";
+import { UserMenuItemFactory } from "./components/user_menu/user_menu";
 // import type { ComponentAction, FunctionAction } from "./services/action_manager/helpers";
 
 interface CacheHashes {
@@ -120,7 +120,7 @@ interface Registries {
   views: Registry<View>;
   systray: Registry<SystrayItem>;
   errorDialogs: Registry<Type<Component>>;
-  userMenu: Registry<UserMenuItem>;
+  userMenu: Registry<UserMenuItemFactory>;
 }
 
 export interface OdooConfig extends Registries {

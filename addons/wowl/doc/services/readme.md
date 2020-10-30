@@ -20,6 +20,9 @@ available to the interface (and to other services).
 
 | Service                               | Purpose                                                    |
 | ------------------------------------- | ---------------------------------------------------------- |
+| [`action_manager`](action_manager.md) | perform actions following user interactions                |
+| [`crash_manager`](crash_manager.md)   | listen errors and open error dialogs                       |
+| [`dialog_manager`](dialog_manager.md) | open dialogs                                               |
 | [`menus`](menus.md)                   | keep track of all menu items (app and submenus)            |
 | [`model`](model.md)                   | interact with (python) models                              |
 | [`notifications`](notifications.md)   | display a notification (or error)                          |
@@ -28,7 +31,6 @@ available to the interface (and to other services).
 | [`ui`](ui.md)                         | miscellaneous ui features (block/unblock)                  |
 | [`user`](user.md)                     | keep track of user main properties (lang, ...) and context |
 | [`view_manager`](view_manager.md)     | load (and keep in cache) views information                 |
-| [`action_manager`](action_manager.md) | perform actions following user interactions                |
 
 ## Defining a service
 

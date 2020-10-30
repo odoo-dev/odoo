@@ -1,19 +1,20 @@
 import { Component } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
 import { useService } from "../../core/hooks";
-import { Stringifiable } from "../../core/localization";
 import { OdooEnv, SystrayItem } from "../../types";
 import { Dropdown } from "../dropdown/dropdown";
 import { DropdownItem } from "../dropdown/dropdown_item";
 
-type Callback = (env: OdooEnv) => void | Promise<any>;
-
-export interface UserMenuItem {
-  description: Stringifiable;
+type Callback = () => void | Promise<any>;
+interface UserMenuItem {
+  description: string;
   callback: Callback;
-  isVisible?: (env: OdooEnv) => boolean;
+  hide?: boolean;
+  href?: string;
   sequence?: number;
 }
+
+export type UserMenuItemFactory = (env: OdooEnv) => UserMenuItem;
 
 interface Detail {
   payload: {
@@ -35,9 +36,14 @@ export class UserMenu extends Component<{}, OdooEnv> {
   }
 
   getItemGroups(): UserMenuItem[][] {
-    const filteredItems = this.env.registries.userMenu.getAll().filter((item) => {
-      return item.isVisible ? item.isVisible(this.env) : true;
-    });
+    const filteredItems = [];
+    for (const itemFactory of this.env.registries.userMenu.getAll()) {
+      const item = itemFactory(this.env);
+      const { hide } = item;
+      if (!hide) {
+        filteredItems.push(item);
+      }
+    }
     const sortedItems = filteredItems.sort((x, y) => {
       return (x.sequence ?? 100) - (y.sequence ?? 100);
     });
@@ -50,7 +56,13 @@ export class UserMenu extends Component<{}, OdooEnv> {
   }
 
   onDropdownItemSelected(ev: OwlEvent<Detail>) {
-    ev.detail.payload.callback(this.env);
+    ev.detail.payload.callback();
+  }
+
+  onClickOnTagA(ev: MouseEvent) {
+    if (!ev.ctrlKey) {
+      ev.preventDefault();
+    }
   }
 }
 

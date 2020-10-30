@@ -21,8 +21,9 @@ import "./core/localization_tests";
 import "./components/dialog_tests";
 import "./core/py_tests";
 import "./core/utils_tests";
-import "./components/crash_manager_tests";
+import "./services/crash_manager_tests";
 import "./components/error_dialogs_tests";
+import "./services/dialog_manager_tests";
 
 (async () => {
   await setupTests();

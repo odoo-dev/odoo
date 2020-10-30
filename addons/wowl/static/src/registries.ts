@@ -6,7 +6,7 @@ import {
   SessionExpiredDialog,
   WarningDialog,
 } from "./components/error_dialogs/error_dialogs";
-import { userMenu, UserMenuItem } from "./components/user_menu/user_menu";
+import { userMenu, UserMenuItemFactory } from "./components/user_menu/user_menu";
 import { _lt } from "./core/localization";
 import { Registry } from "./core/registry";
 import { actionManagerService } from "./services/action_manager/action_manager";
@@ -125,7 +125,7 @@ errorDialogRegistry
 // Default UserMenu items
 // -----------------------------------------------------------------------------
 
-export const userMenuRegistry: Registry<UserMenuItem> = new Registry();
+export const userMenuRegistry: Registry<UserMenuItemFactory> = new Registry();
 
 userMenuRegistry
   .add("documentation", documentationItem)

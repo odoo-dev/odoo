@@ -15,7 +15,7 @@
 - [Localization](localization.md)
 - [Main Components](main_components.md)
 - [Python interpreter](python_interpreter.md)
-- [Registries](registries.md)
+- [Registries](registries/readme.md)
 - [Services](services/readme.md)
 - [Systray](systray.md)
 - [Various components](components/readme.md)

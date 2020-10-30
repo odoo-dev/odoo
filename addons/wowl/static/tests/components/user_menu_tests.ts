@@ -34,33 +34,40 @@ QUnit.module("UserMenu", {
 });
 
 QUnit.test("can be rendered", async (assert) => {
-  env.registries.userMenu.add("bad_item", {
-    description: "Bad",
-    callback: () => {
-      assert.step("callback bad_item");
-    },
-    sequence: 10,
+  env.registries.userMenu.add("bad_item", function () {
+    return {
+      description: "Bad",
+      callback: () => {
+        assert.step("callback bad_item");
+      },
+      sequence: 10,
+    };
   });
-  env.registries.userMenu.add("ring_item", {
-    description: "Ring",
-    callback: () => {
-      assert.step("callback ring_item");
-    },
-    sequence: 5,
+  env.registries.userMenu.add("ring_item", function () {
+    return {
+      description: "Ring",
+      callback: () => {
+        assert.step("callback ring_item");
+      },
+      sequence: 5,
+    };
   });
-  env.registries.userMenu.add("invisible_item", {
-    description: "Hidden Power",
-    callback: () => {},
-    sequence: 5,
-    isVisible: (env: OdooEnv) => false,
+  env.registries.userMenu.add("invisible_item", function () {
+    return {
+      description: "Hidden Power",
+      callback: () => {},
+      sequence: 5,
+      hide: true,
+    };
   });
-  env.registries.userMenu.add("eye_item", {
-    description: "Eye",
-    callback: () => {
-      assert.step("callback eye_item");
-    },
+  env.registries.userMenu.add("eye_item", function () {
+    return {
+      description: "Eye",
+      callback: () => {
+        assert.step("callback eye_item");
+      },
+    };
   });
-
   userMenu = await mount(UserMenu, { env, target });
   let userMenuEl = userMenu.el as HTMLElement;
   assert.containsOnce(userMenuEl, "img.o_user_avatar");
