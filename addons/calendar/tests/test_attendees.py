@@ -43,7 +43,7 @@ class TestEventNotifications(TransactionCase):
             'stop': datetime(2019, 10, 27, 18, 0),
         })
         events = self.event | event
-        events.partner_ids = self.partner
+        events.write({'partner_ids': [(6, 0, self.partner.ids)]})
         self.assertEqual(len(events.attendee_ids), 2, "It should have created one attendee per event")
 
     def test_existing_attendee_added(self):
