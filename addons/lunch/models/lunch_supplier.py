@@ -13,7 +13,7 @@ from odoo.tools import float_round
 from odoo.addons.base.models.res_partner import _tz_get
 
 
-WEEKDAY_TO_NAME = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+WEEKDAY_TO_NAME = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
 def float_to_time(hours, moment='am', tz=None):
     """ Convert a number of hours into a time object. """
@@ -60,13 +60,13 @@ class LunchSupplier(models.Model):
     ], 'Send Order By', default='phone')
     automatic_email_time = fields.Float('Order Time', default=12.0, required=True)
 
-    recurrency_monday = fields.Boolean('Monday', default=True)
-    recurrency_tuesday = fields.Boolean('Tuesday', default=True)
-    recurrency_wednesday = fields.Boolean('Wednesday', default=True)
-    recurrency_thursday = fields.Boolean('Thursday', default=True)
-    recurrency_friday = fields.Boolean('Friday', default=True)
-    recurrency_saturday = fields.Boolean('Saturday')
-    recurrency_sunday = fields.Boolean('Sunday')
+    mon = fields.Boolean(default=True)
+    tue = fields.Boolean(default=True)
+    wed = fields.Boolean(default=True)
+    thu = fields.Boolean(default=True)
+    fri = fields.Boolean(default=True)
+    sat = fields.Boolean()
+    sun = fields.Boolean()
 
     recurrency_end_date = fields.Date('Until', help="This field is used in order to ")
 
@@ -144,9 +144,7 @@ class LunchSupplier(models.Model):
 
                     lines.action_confirm()
 
-    @api.depends('recurrency_end_date', 'recurrency_monday', 'recurrency_tuesday',
-                 'recurrency_wednesday', 'recurrency_thursday', 'recurrency_friday',
-                 'recurrency_saturday', 'recurrency_sunday')
+    @api.depends('recurrency_end_date', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')
     def _compute_available_today(self):
         now = fields.Datetime.now().replace(tzinfo=pytz.UTC)
 
@@ -156,7 +154,7 @@ class LunchSupplier(models.Model):
             if supplier.recurrency_end_date and now.date() >= supplier.recurrency_end_date:
                 supplier.available_today = False
             else:
-                fieldname = 'recurrency_%s' % (WEEKDAY_TO_NAME[now.weekday()])
+                fieldname = WEEKDAY_TO_NAME[now.weekday()]
                 supplier.available_today = supplier[fieldname]
 
     def _search_available_today(self, operator, value):
@@ -166,7 +164,7 @@ class LunchSupplier(models.Model):
         searching_for_true = (operator == '=' and value) or (operator == '!=' and not value)
 
         now = fields.Datetime.now().replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(self.env.user.tz or 'UTC'))
-        fieldname = 'recurrency_%s' % (WEEKDAY_TO_NAME[now.weekday()])
+        fieldname = WEEKDAY_TO_NAME[now.weekday()]
 
         recurrency_domain = expression.OR([
             [('recurrency_end_date', '=', False)],
