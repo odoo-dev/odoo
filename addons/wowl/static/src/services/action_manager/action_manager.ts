@@ -243,7 +243,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       let context = action.context || {};
       context = typeof context === "string" ? evaluateExpr(context) : context;
       action.context = Object.assign({}, env.services.user.context, context);
-      action.domain = evaluateExpr(action.domain || "[]", action.context);
+      let domain = action.domain || [];
+      action.domain = typeof domain === "string" ? evaluateExpr(domain, action.context) : domain;
     }
 
     return action;
