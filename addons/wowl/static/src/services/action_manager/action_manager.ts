@@ -16,7 +16,7 @@ import type {
 import { Route } from "../router";
 import { ActionContext, ClientActionProps } from "../../types";
 import { evaluateExpr } from "../../core/py/index";
-import { mergeContexts } from "../../core/utils";
+import { makeContext } from "../../core/utils";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -260,7 +260,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
     if (action.type === "ir.actions.act_window") {
       if (typeof action.context === "string") {
-        const evalContext = mergeContexts(env.services.user.context, context, action.context);
+        const evalContext = makeContext(env.services.user.context, context, action.context);
         action.context = evaluateExpr(action.context, evalContext);
       }
       let domain = action.domain || [];
@@ -708,7 +708,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
   async function doActionButton(params: DoActionButtonParams) {
     // determine the action to execute according to the params
     let action;
-    const context = mergeContexts(params.context, params.buttonContext);
+    const context = makeContext(params.context, params.buttonContext);
     if (params.special) {
       action = { type: "ir.actions.act_window_close" }; // FIXME: infos: { special : true } ?
     } else if (params.type === "object") {
@@ -754,7 +754,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       activeCtx.active_id = params.recordId;
       activeCtx.active_ids = [params.recordId];
     }
-    action.context = mergeContexts(currentCtx, params.buttonContext, activeCtx, action.context);
+    action.context = makeContext(currentCtx, params.buttonContext, activeCtx, action.context);
 
     // in case an effect is returned from python and there is already an effect
     // attribute on the button, the priority is given to the button attribute

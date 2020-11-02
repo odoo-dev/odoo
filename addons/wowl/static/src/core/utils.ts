@@ -3,7 +3,7 @@ import { evaluateExpr } from "./py/index";
 
 type ContextDescription = Context | string | undefined;
 
-export function mergeContexts(...contexts: ContextDescription[]): Context {
+export function makeContext(...contexts: ContextDescription[]): Context {
   let context = {};
   for (let ctx of contexts) {
     const subCtx = typeof ctx === "string" ? evaluateExpr(ctx, context) : ctx;
