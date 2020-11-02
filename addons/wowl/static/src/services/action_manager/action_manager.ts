@@ -34,6 +34,7 @@ export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescripti
 export interface ActionOptions {
   clearBreadcrumbs?: boolean;
   viewType?: ViewType;
+  resId?: number;
 }
 
 interface Context {
@@ -64,6 +65,7 @@ interface ActWindowAction extends ActionCommonInfo {
   domain: Domain;
   search_view_id?: [ViewId, string]; // second member is the views's display_name, not the type
   target: ActionTarget;
+  res_id?: number;
 }
 interface ServerAction extends ActionCommonInfo {
   type: "ir.actions.server";
@@ -126,6 +128,7 @@ interface ActionManagerUpdateInfo {
 interface UpdateStackOptions {
   clearBreadcrumbs?: boolean;
   index?: number;
+  lazyController?: Controller;
 }
 
 interface ViewOptions {
@@ -323,8 +326,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       withActionMenus: target !== "new" && target !== "inline",
       withFilters: action.views.some((v) => v[1] === "search"),
     };
-    if (options.recordId) {
-      props.recordId = options.recordId;
+    if (options.recordId || action.res_id) {
+      props.recordId = options.recordId || action.res_id;
     }
     if (options.recordIds) {
       props.recordIds = options.recordIds;
@@ -400,7 +403,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
     } else {
       index = controllerStack.length + 1;
     }
-    const nextStack = controllerStack.slice(0, index).concat([controller]);
+    const controllerArray: typeof controllerStack = [controller];
+    if (options.lazyController) {
+      controllerArray.unshift(options.lazyController);
+    }
+    const nextStack = controllerStack.slice(0, index).concat(controllerArray);
     controller.props.breadcrumbs = _getBreadcrumbs(nextStack);
 
     env.bus.trigger("ACTION_MANAGER:UPDATE", {
@@ -454,7 +461,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    */
   function _executeActWindowAction(action: ActWindowAction, options: ActionOptions): Promise<void> {
     const views: View[] = [];
-    for (const [_, type] of action.views) {
+    for (const [, type] of action.views) {
       if (env.registries.views.contains(type)) {
         views.push(env.registries.views.get(type));
       }
@@ -470,18 +477,36 @@ function makeActionManager(env: OdooEnv): ActionManager {
       const searchViewId = action.search_view_id ? action.search_view_id[0] : false;
       action.views.push([searchViewId, "search"]);
     }
-    // TODO: take the view type present in options.
-    // TODO: if view !== multiview, push a multiview before it
-    const view = views[0];
+    let view = options.viewType && views.find((v) => v.type === options.viewType);
+    let lazyController: ViewController | undefined;
+    if (view && !view.multiRecord) {
+      const lazyView = views[0].multiRecord ? views[0] : undefined;
+      if (lazyView) {
+        lazyController = {
+          jsId: `controller_${++id}`,
+          Component: lazyView.Component,
+          action,
+          view: lazyView,
+          views,
+          props: _getViewProps(lazyView, action, views),
+        };
+      }
+    } else if (!view) {
+      view = views[0];
+    }
+    const viewOptions: ViewOptions = {};
+    if (options.resId) {
+      viewOptions.recordId = options.resId;
+    }
     const controller: ViewController = {
       jsId: `controller_${++id}`,
       Component: view.Component,
       action,
       view,
       views,
-      props: _getViewProps(view, action, views),
+      props: _getViewProps(view, action, views, viewOptions),
     };
-    return _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
+    return _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs, lazyController });
   }
 
   // ---------------------------------------------------------------------------
@@ -786,11 +811,19 @@ function makeActionManager(env: OdooEnv): ActionManager {
       view,
       props: _getViewProps(view, controller.action, controller.views, options),
     };
-    let index = controllerStack.length;
+
+    let index;
     if (view.multiRecord) {
-      // if the very same action is in stack, replace the multiview controller
       index = controllerStack.findIndex((ct) => ct.action.jsId === controller.action.jsId);
       index = index > -1 ? index : controllerStack.length - 1;
+    } else {
+      // This case would mostly happen when one changes the view_type in the URL
+      // via loadState. Also, I guess we may need it when we have other monoRecord views
+      index = controllerStack.findIndex(
+        (ct) =>
+          ct.action.jsId === controller.action.jsId && !(ct as ViewController).view.multiRecord
+      );
+      index = index > -1 ? index : controllerStack.length;
     }
     _updateUI(newController, { index });
   }
@@ -831,7 +864,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
       ) {
         // only when we already have an action in dom
         try {
-          // TODO: insert options into switchView
           const viewOptions: ViewOptions = {};
           if (state.id) {
             viewOptions.recordId = parseInt(state.id, 10);
@@ -864,7 +896,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         action = state.action;
         options = Object.assign(options, {
           additional_context: context,
-          resID: state.id || undefined, // empty string with bbq
+          resId: state.id ? parseInt(state.id, 10) : undefined, // empty string from router state
           viewType: state.view_type,
         });
       }
@@ -872,9 +904,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
       if (state.id) {
         action = {
           res_model: state.model,
-          res_id: state.id,
+          res_id: parseInt(state.id, 10),
           type: "ir.actions.act_window",
-          views: [[state.view_id || false, "form"]],
+          views: [[state.view_id ? parseInt(state.view_id, 10) : false, "form"]],
         };
       } else if (state.view_type) {
         // this is a window action on a multi-record view, so restore it
