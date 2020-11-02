@@ -187,6 +187,7 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         let controlPanelFieldsView;
         if (result.fields_views.search) {
           controlPanelFieldsView = Object.assign({}, result.fields_views.search, {
+            favoriteFilters: result.filters,
             fields: result.fields,
             viewFields: result.fields_views.search.fields,
           });
