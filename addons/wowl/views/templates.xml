@@ -25,7 +25,7 @@
         </t>
     </template>
 
-    <template id="wowl.root">
+    <template id="wowl.root">&lt;!DOCTYPE html&gt;
         <html>
             <head>
                 <meta charset="utf-8"/>
@@ -38,13 +38,14 @@
                     };
                 </script>
 
+                <t t-call-assets="wowl.assets" t-js="False"/>
+
                 <t t-call-assets="web.assets_common" t-js="false"/>
                 <t t-call-assets="web.assets_backend" t-js="false"/>
                 <t t-call-assets="web.assets_common" t-css="false"/>
                 <t t-call-assets="web.assets_backend" t-css="false"/>
                 <t t-call-assets="wowl.assets_backend_prod_only" t-css="false"/>
 
-                <t t-call-assets="wowl.assets" t-js="False"/>
                 <t t-call-assets="wowl.assets" t-css="False"/>
             </head>
             <body />
