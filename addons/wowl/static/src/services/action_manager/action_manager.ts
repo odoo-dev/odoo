@@ -16,6 +16,7 @@ import type {
 import { Route } from "../router";
 import { ActionContext, ClientActionProps } from "../../types";
 import { evaluateExpr } from "../../core/py/index";
+import { mergeContexts } from "../../core/utils";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -138,8 +139,22 @@ interface ActionCache {
   [key: string]: Promise<Partial<Action>>;
 }
 
+interface DoActionButtonParams {
+  args?: string;
+  buttonContext?: string;
+  context: Context;
+  effect?: string;
+  model: string;
+  name: string;
+  recordId?: number;
+  recordIds: number[];
+  special?: boolean;
+  type: "object" | "action";
+}
+
 interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): Promise<void>;
+  doActionButton(params: DoActionButtonParams): Promise<void>;
   switchView(viewType: string, options?: ViewOptions): void;
   restore(jsId: string): void;
   loadState(state: Route["hash"], options: ActionOptions): Promise<boolean>;
@@ -195,6 +210,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
   let controllerStack: ControllerStack = [];
   let dialogCloseProm: Promise<any> | undefined = undefined;
   const actionCache: ActionCache = {};
+  // regex that matches context keys not to forward from an action to another
+  const CTX_KEY_REGEX = /^(?:(?:default_|search_default_|show_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids|orderedBy)$/;
 
   // ---------------------------------------------------------------------------
   // misc
@@ -210,10 +227,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {ActionOptions} options
    * @returns {Promise<Action>}
    */
-  async function _loadAction(
-    actionRequest: ActionRequest,
-    options: ActionOptions
-  ): Promise<Action> {
+  async function _loadAction(actionRequest: ActionRequest, context: Context): Promise<Action> {
     let action;
     const jsId = `action_${++id}`;
     if (typeof actionRequest === "string" && env.registries.actions.contains(actionRequest)) {
@@ -228,7 +242,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
       // actionRequest is an id or an xmlid
       const key = JSON.stringify(actionRequest);
       if (!actionCache[key]) {
-        actionCache[key] = env.services.rpc("/web/action/load", { action_id: actionRequest });
+        actionCache[key] = env.services.rpc("/web/action/load", {
+          action_id: actionRequest,
+          context,
+        });
       }
       action = await actionCache[key];
     } else {
@@ -242,9 +259,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action.target = action.target || "current";
     }
     if (action.type === "ir.actions.act_window") {
-      let context = action.context || {};
-      context = typeof context === "string" ? evaluateExpr(context) : context;
-      action.context = Object.assign({}, env.services.user.context, context);
+      if (typeof action.context === "string") {
+        const evalContext = mergeContexts(env.services.user.context, context, action.context);
+        action.context = evaluateExpr(action.context, evalContext);
+      }
       let domain = action.domain || [];
       action.domain = typeof domain === "string" ? evaluateExpr(domain, action.context) : domain;
     }
@@ -678,6 +696,74 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
+   * Executes an action on top of the current one (typically, when a button in a
+   * view is clicked). The button may be of type 'object' (call a given method
+   * of a given model) or 'action' (execute a given action). Alternatively, the
+   * button may have the attribute 'special', and in this case an
+   * 'ir.actions.act_window_close' is executed.
+   *
+   * @param {DoActionButtonParams} params
+   * @returns {Promise<void>}
+   */
+  async function doActionButton(params: DoActionButtonParams) {
+    // determine the action to execute according to the params
+    let action;
+    const context = mergeContexts(params.context, params.buttonContext);
+    if (params.special) {
+      action = { type: "ir.actions.act_window_close" }; // FIXME: infos: { special : true } ?
+    } else if (params.type === "object") {
+      // call a Python Object method, which may return an action to execute
+      let args = params.recordId ? [[params.recordId]] : [params.recordIds];
+      if (params.args) {
+        let additionalArgs;
+        try {
+          // warning: quotes and double quotes problem due to json and xml clash
+          // maybe we should force escaping in xml or do a better parse of the args array
+          additionalArgs = JSON.parse(params.args.replace(/'/g, '"'));
+        } catch (e) {
+          env.browser.console.error("Could not JSON.parse arguments", params.args);
+        }
+        args = args.concat(additionalArgs);
+      }
+      action = await env.services.rpc("/web/dataset/call_button", {
+        args,
+        kwargs: { context },
+        method: params.name,
+        model: params.model,
+      });
+      action = action || { type: "ir.actions.act_window_close" };
+    } else if (params.type === "action") {
+      // execute a given action, so load it first
+      context.active_id = params.recordId || null;
+      context.active_ids = params.recordIds;
+      context.active_model = params.model;
+      action = await _loadAction(params.name, context);
+    }
+
+    // filter out context keys that are specific to the current action, because:
+    //  - wrong default_* and search_default_* values won't give the expected result
+    //  - wrong group_by values will fail and forbid rendering of the destination view
+    let currentCtx: Context = {};
+    for (const key in params.context) {
+      if (key.match(CTX_KEY_REGEX) === null) {
+        currentCtx[key] = params.context[key];
+      }
+    }
+    const activeCtx: Context = { active_model: params.model };
+    if (params.recordId) {
+      activeCtx.active_id = params.recordId;
+      activeCtx.active_ids = [params.recordId];
+    }
+    action.context = mergeContexts(currentCtx, params.buttonContext, activeCtx, action.context);
+
+    // in case an effect is returned from python and there is already an effect
+    // attribute on the button, the priority is given to the button attribute
+    action.effect = params.effect ? evaluateExpr(params.effect) : action.effect;
+
+    return doAction(action);
+  }
+
+  /**
    * Switches to the given view type in action of the last controller of the
    * stack. This action must be of type 'ir.actions.act_window'.
    *
@@ -828,6 +914,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
   return {
     doAction,
+    doActionButton,
     switchView,
     restore,
     loadState,

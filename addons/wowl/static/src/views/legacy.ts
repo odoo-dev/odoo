@@ -95,6 +95,18 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           searchModel: state.searchModel,
           searchPanel: state.searchPanel,
         });
+      } else if (ev.name === "execute_action") {
+        this.am.doActionButton({
+          args: payload.action_data.args,
+          buttonContext: payload.action_data.context,
+          context: payload.env.context,
+          model: payload.env.model,
+          name: payload.action_data.name,
+          recordId: payload.env.currentID || null,
+          recordIds: payload.env.resIDs,
+          special: payload.action_data.special,
+          type: payload.action_data.type,
+        });
       } else {
         super._trigger_up(ev);
       }
