@@ -90,9 +90,10 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
       if (ev.name === "switch_view") {
         const state = ev.target.exportState();
         this.am.switchView(payload.view_type, {
-          // TODO: use state.searchModel
           recordId: payload.res_id,
           recordIds: state.resIds,
+          searchModel: state.searchModel,
+          searchPanel: state.searchPanel,
         });
       } else {
         super._trigger_up(ev);
@@ -164,6 +165,8 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         controllerState: {
           currentId: this.props.recordId,
           resIds: this.props.recordIds,
+          searchModel: this.props.searchModel,
+          searchPanel: this.props.searchPanel,
         },
       };
       async willStart() {

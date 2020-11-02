@@ -130,6 +130,8 @@ interface UpdateStackOptions {
 interface ViewOptions {
   recordId?: number;
   recordIds?: number[];
+  searchModel?: string;
+  searchPanel?: string;
 }
 
 interface ActionCache {
@@ -308,6 +310,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
     if (options.recordIds) {
       props.recordIds = options.recordIds;
+    }
+    if (options.searchModel) {
+      props.searchModel = options.searchModel;
+    }
+    if (options.searchPanel) {
+      props.searchPanel = options.searchPanel;
     }
     return props;
   }

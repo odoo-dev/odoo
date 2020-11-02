@@ -184,6 +184,8 @@ export interface ViewProps extends ActionProps {
   views: [ViewId, ViewType][];
   recordId?: number;
   recordIds?: number[];
+  searchModel?: string;
+  searchPanel?: string;
   viewSwitcherEntries?: ViewSwitcherEntries;
   withActionMenus?: boolean;
   withFilters?: boolean;
