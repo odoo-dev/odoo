@@ -166,6 +166,7 @@ export type ViewType =
 export interface ActionProps {
   action?: any;
   breadcrumbs?: Breadcrumb[];
+  state?: any;
 }
 
 interface ViewSwitcherEntry {

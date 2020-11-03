@@ -1,4 +1,4 @@
-import { Component, tags } from "@odoo/owl";
+import { Component, hooks, tags } from "@odoo/owl";
 import {
   ClientActionProps,
   OdooEnv,
@@ -11,6 +11,7 @@ import {
 } from "../types";
 import { actionRegistry, viewRegistry } from "../registries";
 import { useService } from "../core/hooks";
+import { useSetupAction } from "../services/action_manager/action_manager";
 
 const odoo = (window as any).odoo;
 
@@ -92,7 +93,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
 
   class ActionAdapter extends ComponentAdapter {
     am = useService("action_manager");
-    rpc = useService("rpc");
+
     _trigger_up(ev: any) {
       const payload = ev.data;
       if (ev.name === "do_action") {
@@ -103,10 +104,35 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         super._trigger_up(ev);
       }
     }
+
+    /**
+     * This function is called just before the component will be unmounted,
+     * because it will be replaced by another one. However, we need to keep it
+     * alive, because we might come back to this one later. We thus return the
+     * widget instance, and set this.widget to null so that it is not destroyed
+     * by the compatibility layer. That instance will be destroyed by the
+     * ActionManager service when it will be removed from the controller stack,
+     * and if we ever come back to that controller, the instance will be given
+     * in props so that we can re-use it.
+     */
+    exportState() {
+      const widget = this.widget;
+      this.widget = null;
+      return { __legacy_widget__: widget };
+    }
   }
 
   class ClientActionAdapter extends ActionAdapter {
     env = Component.env;
+
+    async willStart() {
+      if (this.props.widget) {
+        this.widget = this.props.widget;
+        return this.widget.do_show();
+      }
+      return super.willStart();
+    }
+
     do_push_state() {}
   }
 
@@ -116,9 +142,26 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     vm = useService("view_manager");
     env = Component.env;
     async willStart() {
-      const view = new this.props.View(this.props.viewInfo, this.props.viewParams);
-      this.widget = await view.getController(this);
-      return this.widget._widgetRenderAndInsert(() => {});
+      if (this.props.widget) {
+        this.widget = this.props.widget;
+        const options = Object.assign({}, this.props.viewParams, {
+          shouldUpdateSearchComponents: true,
+        });
+        return this.widget.reload(options);
+      } else {
+        const view = new this.props.View(this.props.viewInfo, this.props.viewParams);
+        this.widget = await view.getController(this);
+        return this.widget._widgetRenderAndInsert(() => {});
+      }
+    }
+
+    /**
+     * Override to add the state of the legacy controller in the exported state.
+     */
+    exportState() {
+      const widgetState = this.widget.exportState();
+      const state = super.exportState();
+      return Object.assign({}, state, widgetState);
     }
 
     async loadViews(model: string, context: Context, views: [ViewId, ViewType][]) {
@@ -171,10 +214,21 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
     if ((action as any).prototype instanceof Widget) {
       // the action is a widget, wrap it into a Component and register that component
       class Action extends Component<ClientActionProps, OdooEnv> {
-        static template = tags.xml`<ClientActionAdapter Component="Widget" widgetArgs="widgetArgs"/>`;
+        static template = tags.xml`<ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget" t-ref="controller"/>`;
         static components = { ClientActionAdapter };
+
+        controllerRef = hooks.useRef("controller");
+
         Widget = action;
         widgetArgs = [this, this.props.action, {}];
+        widget = this.props.state && this.props.state.__legacy_widget__;
+
+        constructor() {
+          super(...arguments);
+          useSetupAction({
+            export: () => (this.controllerRef.comp! as any).exportState(),
+          });
+        }
       }
       actionRegistry.add(name, Action);
     } else {
@@ -200,13 +254,15 @@ odoo.define("wowl.legacyViews", async function (require: any) {
   function registerView(name: string, LegacyView: any) {
     class Controller extends Component<ViewProps, OdooEnv> {
       static template = tags.xml`
-        <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"/>
+        <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams" widget="widget" t-ref="controller"/>
       `;
       static components = { ViewAdapter };
 
+      vm = useService("view_manager");
+      controllerRef = hooks.useRef("controller");
+
       Widget = Widget; // fool the ComponentAdapter with a simple Widget
       View = LegacyView;
-      vm = useService("view_manager");
       viewInfo: any = {};
       viewParams = {
         action: this.props.action,
@@ -219,12 +275,21 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         modelName: this.props.model,
         currentId: this.props.recordId,
         controllerState: {
-          currentId: this.props.recordId,
-          resIds: this.props.recordIds,
-          searchModel: this.props.searchModel,
-          searchPanel: this.props.searchPanel,
+          currentId: this.props.recordId || (this.props.state && this.props.state.currentId),
+          resIds: this.props.recordIds || (this.props.state && this.props.state.resIds),
+          searchModel: this.props.searchModel || (this.props.state && this.props.state.searchModel),
+          searchPanel: this.props.searchPanel || (this.props.state && this.props.state.searchPanel),
         },
       };
+      widget = this.props.state && this.props.state.__legacy_widget__;
+
+      constructor() {
+        super(...arguments);
+        useSetupAction({
+          export: () => (this.controllerRef.comp! as any).exportState(),
+        });
+      }
+
       async willStart() {
         const params = {
           model: this.props.model,

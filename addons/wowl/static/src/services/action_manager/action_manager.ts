@@ -1,4 +1,4 @@
-import { Component, tags } from "@odoo/owl";
+import { Component, hooks, tags } from "@odoo/owl";
 import { Dialog } from "../../components/dialog/dialog";
 import type {
   OdooEnv,
@@ -58,6 +58,9 @@ interface ClientAction extends ActionCommonInfo {
     [key: string]: any;
   };
 }
+interface ActWindowControllers {
+  [key: string]: ViewController;
+}
 interface ActWindowAction extends ActionCommonInfo {
   type: "ir.actions.act_window";
   res_model: string;
@@ -67,6 +70,7 @@ interface ActWindowAction extends ActionCommonInfo {
   search_view_id?: [ViewId, string]; // second member is the views's display_name, not the type
   target: ActionTarget;
   res_id?: number;
+  controllers: ActWindowControllers;
 }
 interface ServerAction extends ActionCommonInfo {
   type: "ir.actions.server";
@@ -104,6 +108,7 @@ interface Controller {
   Component: Type<Component<{}, OdooEnv>>;
   action: ClientAction | ActWindowAction;
   props: ActionProps | ViewProps | ClientActionProps;
+  exportedState?: any;
 }
 interface ViewController extends Controller {
   action: ActWindowAction;
@@ -165,6 +170,28 @@ export interface ActionManager {
   switchView(viewType: string, options?: ViewOptions): void;
   restore(jsId: string): void;
   loadState(state: Route["hash"], options: ActionOptions): Promise<boolean>;
+}
+
+interface useSetupActionParams {
+  export?: () => any;
+}
+
+// -----------------------------------------------------------------------------
+// Action hook
+// -----------------------------------------------------------------------------
+
+/**
+ * This hooks should be used by Action Components (client actions or views). It
+ * allows to implement the 'export' feature which aims at restoring the state
+ * of the Component when we come back to it (e.g. using the breadcrumbs).
+ */
+export function useSetupAction(params: useSetupActionParams) {
+  const component: Component = Component.current!;
+  if (params.export && component.props.__exportState__) {
+    hooks.onWillUnmount(() => {
+      component.props.__exportState__(params.export!());
+    });
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -274,6 +301,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action.target = action.target || "current";
     }
     if (action.type === "ir.actions.act_window") {
+      action.controllers = {};
       action.context = makeContext(env.services.user.context, additionalContext, action.context);
       let domain = action.domain || [];
       action.domain = typeof domain === "string" ? evaluateExpr(domain, action.context) : domain;
@@ -347,6 +375,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (options.searchPanel) {
       props.searchPanel = options.searchPanel;
     }
+    if (action.controllers[view.type]) {
+      // this controller has already been used, re-import its exported state
+      props.state = action.controllers[view.type].exportedState;
+    }
     return props;
   }
 
@@ -369,12 +401,46 @@ function makeActionManager(env: OdooEnv): ActionManager {
       resolve = _r;
     });
     const action = controller.action;
-    class Controller extends Component {
-      static template = tags.xml`<t t-component="Component" t-props="props"/>`;
+    class ControllerComponent extends Component {
+      static template = tags.xml`<t t-component="Component" t-props="props" __exportState__="exportState" t-ref="component"/>`;
       Component = controller.Component;
       componentProps = this.props;
+      componentRef = hooks.useRef("component");
+      exportState: ((state: any) => void) | null = null;
+
+      constructor() {
+        super(...arguments);
+        if (action.target !== "new") {
+          this.exportState = (state) => {
+            controller.exportedState = state;
+          };
+        }
+      }
       mounted() {
         if (action.target !== "new") {
+          // LEGACY CODE COMPATIBILITY: remove when controllers will be written in owl
+          // we determine here which actions no longer occur in the nextStack,
+          // and we manually destroy all their controller's widgets
+          const nextStackActionIds = nextStack.map((c) => c.action.jsId);
+          const toDestroy: Set<Controller> = new Set();
+          for (const c of controllerStack) {
+            if (!nextStackActionIds.includes(c.action.jsId)) {
+              if (c.action.type === "ir.actions.act_window") {
+                for (const viewType in (c.action as any).controllers) {
+                  toDestroy.add(c.action.controllers[viewType]);
+                }
+              } else {
+                toDestroy.add(c);
+              }
+            }
+          }
+          for (const c of toDestroy) {
+            if (c.exportedState) {
+              c.exportedState.__legacy_widget__.destroy();
+            }
+          }
+          // END LEGACY CODE COMPATIBILITY
+
           controllerStack = nextStack; // the controller is mounted, commit the new stack
           // wait Promise callbacks to be executed
           pushState(controller);
@@ -398,7 +464,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       env.bus.trigger("ACTION_MANAGER:UPDATE", {
         type: "OPEN_DIALOG",
         id: ++id,
-        Component: Controller,
+        Component: ControllerComponent,
         props: controller.props,
         dialogProps: {
           //TODO add size and dialogClass
@@ -426,7 +492,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     env.bus.trigger("ACTION_MANAGER:UPDATE", {
       type: "MAIN",
       id: ++id,
-      Component: Controller,
+      Component: ControllerComponent,
       props: controller.props,
     });
     return currentActionProm;
@@ -511,6 +577,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (options.resId) {
       viewOptions.recordId = options.resId;
     }
+
     const controller: ViewController = {
       jsId: `controller_${++id}`,
       Component: view.Component,
@@ -519,6 +586,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       views,
       props: _getViewProps(view, action, views, viewOptions),
     };
+    action.controllers[view.type] = controller;
     return _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs, lazyController });
   }
 
@@ -818,15 +886,15 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (!view) {
       throw new Error(`switchView: cannot find view of type ${viewType}`);
     }
-    const newController = {
+    const newController = controller.action.controllers[viewType] || {
       jsId: `controller_${++id}`,
       Component: view.Component,
       action: controller.action,
       views: controller.views,
       view,
-      props: _getViewProps(view, controller.action, controller.views, options),
     };
-
+    newController.props = _getViewProps(view, controller.action, controller.views, options);
+    controller.action.controllers[viewType] = newController;
     let index;
     if (view.multiRecord) {
       index = controllerStack.findIndex((ct) => ct.action.jsId === controller.action.jsId);
@@ -854,7 +922,17 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (index < 0) {
       throw new Error("invalid controller to restore");
     }
-    _updateUI(controllerStack[index], { index });
+    const controller = controllerStack[index];
+    if (controller.action.type === "ir.actions.act_window") {
+      controller.props = _getViewProps(
+        (controller as ViewController).view,
+        controller.action,
+        (controller as ViewController).views
+      );
+    } else if (controller.exportedState) {
+      controller.props.state = controller.exportedState;
+    }
+    _updateUI(controller, { index });
   }
 
   async function loadState(state: Route["hash"], options: ActionOptions): Promise<boolean> {
