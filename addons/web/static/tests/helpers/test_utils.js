@@ -135,7 +135,7 @@ odoo.define('web.test_utils', async function (require) {
 
         // this is done with the hope that tests are
         // only started all together...
-        QUnit.start();
+        //QUnit.start();
     }, 0);
     return {
         mock: {

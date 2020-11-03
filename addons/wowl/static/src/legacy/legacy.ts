@@ -1,4 +1,4 @@
-import { Component, config, tags, utils } from "@odoo/owl";
+import { Component, tags } from "@odoo/owl";
 import {
   ClientActionProps,
   OdooEnv,
@@ -8,27 +8,16 @@ import {
   View,
   ViewId,
   ViewType,
-} from "../../types";
-import { actionRegistry, serviceRegistry, systrayRegistry, viewRegistry } from "../../registries";
-import { useService } from "../../core/hooks";
+} from "../types";
+import { actionRegistry, viewRegistry } from "../registries";
+import { useService } from "../core/hooks";
 
-const { whenReady } = utils;
 const odoo = (window as any).odoo;
 
-odoo.define("wowl.legacySetup", async function (require: any) {
-  // build the legacy env and set it on owl.Component (this was done in main.js,
-  // with the starting of the webclient)
-  const AbstractService = require("web.AbstractService");
-  const legacyEnv = require("web.env");
-  const session = require("web.session");
-
-  config.mode = legacyEnv.isDebug() ? "dev" : "prod";
-  AbstractService.prototype.deployServices(legacyEnv);
-  Component.env = legacyEnv;
-
+export function makeLegacyActionManagerService(legacyEnv: any): Service<void> {
   // add a service to redirect 'do-action' events triggered on the bus in the
   // legacy env to the action-manager service in the wowl env
-  const legacyActionManagerService: Service<void> = {
+  return {
     name: "legacy_action_manager",
     dependencies: ["action_manager"],
     deploy(env: OdooEnv): void {
@@ -37,11 +26,10 @@ odoo.define("wowl.legacySetup", async function (require: any) {
       });
     },
   };
-  serviceRegistry.add(legacyActionManagerService.name, legacyActionManagerService);
+}
 
-  // add a service to redirect rpc events triggered on the bus in the
-  // legacy env on the bus in the wowl env
-  const legacyRpcService: Service<void> = {
+export function makeLegacyRpcService(legacyEnv: any): Service<void> {
+  return {
     name: "legacy_rpc",
     deploy(env: OdooEnv): void {
       legacyEnv.bus.on("rpc_request", null, (rpcId: number) => {
@@ -55,30 +43,43 @@ odoo.define("wowl.legacySetup", async function (require: any) {
       });
     },
   };
-  serviceRegistry.add(legacyRpcService.name, legacyRpcService);
+}
 
-  let webClientReady = new Promise((resolve) => {
-    const busToOwlLegacyBus: Service<void> = {
-      name: "bus_to_owl_legacy_bus",
-      deploy(env: OdooEnv): void {
-        env.bus.on("WEB_CLIENT_READY", null, resolve);
-      },
-    };
-    serviceRegistry.add(busToOwlLegacyBus.name, busToOwlLegacyBus);
+export function mapLegacyEnvToWowlEnv(legacyEnv: any, wowlEnv: OdooEnv) {
+  // rpc
+  legacyEnv.session.rpc = (...args: any[]) => {
+    let rejection;
+    const prom = new Promise((resolve, reject) => {
+      rejection = () => reject();
+      const [route, params, settings] = args;
+      wowlEnv.services.rpc(route, params, settings).then(resolve).catch(reject);
+    });
+    (prom as any).abort = rejection;
+    return prom;
+  };
+  // localStorage
+  const localStorage = wowlEnv.browser.localStorage;
+  legacyEnv.services.local_storage = Object.assign(Object.create(localStorage), {
+    getItem(key: string, defaultValue: any) {
+      const val = localStorage.getItem(key);
+      return val ? JSON.parse(val) : defaultValue;
+    },
+    setItem(key: string, value: any) {
+      localStorage.setItem(key, JSON.stringify(value));
+    },
   });
-
-  await Promise.all([whenReady(), session.is_bound]);
-  legacyEnv.qweb.addTemplates(session.owlTemplates);
-
-  await webClientReady;
-  legacyEnv.bus.trigger("web_client_ready");
-});
+  // map WebClientReady
+  wowlEnv.bus.on("WEB_CLIENT_READY", null, () => {
+    legacyEnv.bus.trigger("web_client_ready");
+  });
+}
 
 odoo.define("wowl.ActionAdapters", function (require: any) {
   const { ComponentAdapter } = require("web.OwlCompatibility");
 
   class ActionAdapter extends ComponentAdapter {
     am = useService("action_manager");
+    rpc = useService("rpc");
     _trigger_up(ev: any) {
       const payload = ev.data;
       if (ev.name === "do_action") {
@@ -97,7 +98,6 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
   }
 
   class ViewAdapter extends ActionAdapter {
-    rpc = useService("rpc");
     model = useService("model");
     am = useService("action_manager");
     vm = useService("view_manager");
@@ -262,37 +262,4 @@ odoo.define("wowl.legacyViews", async function (require: any) {
     registerView(name, action);
   }
   legacyViewRegistry.onAdd(registerView);
-});
-
-odoo.define("wowl.legacySystrayMenuItems", function (require: any) {
-  require("wowl.legacySetup");
-  const { ComponentAdapter } = require("web.OwlCompatibility");
-  const legacySystrayMenu = require("web.SystrayMenu");
-
-  class SystrayItemAdapter extends ComponentAdapter {
-    env = Component.env;
-  }
-
-  const legacySystrayMenuItems = legacySystrayMenu.Items as any[];
-  // registers the legacy systray menu items from the legacy systray registry
-  // to the wowl one, but wrapped into Owl components
-  legacySystrayMenuItems.forEach((item, index) => {
-    // blacklisting already wowl converted items
-    const blacklist = ["UserMenu"];
-    if (!blacklist.includes(item.prototype.template)) {
-      const name = `_legacy_systray_item_${index}`;
-
-      class SystrayItem extends Component {
-        static template = tags.xml`<SystrayItemAdapter Component="Widget" />`;
-        static components = { SystrayItemAdapter };
-        Widget = item;
-      }
-
-      systrayRegistry.add(name, {
-        name,
-        Component: SystrayItem,
-        sequence: item.prototype.sequence,
-      });
-    }
-  });
 });

@@ -2,6 +2,8 @@ import { Component } from "@odoo/owl";
 import { Context, Domain, Service, OdooEnv } from "../types";
 import { RPC } from "./rpc";
 
+export type ORMCommand = [0 | 1 | 2 | 3 | 4 | 5 | 6, false | number, Partial<DBRecord> | number[]];
+
 export interface DBRecord {
   id: number;
   [field: string]: any;

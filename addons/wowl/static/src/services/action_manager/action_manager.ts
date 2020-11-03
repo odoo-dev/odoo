@@ -159,7 +159,7 @@ interface DoActionButtonParams {
   type: "object" | "action";
 }
 
-interface ActionManager {
+export interface ActionManager {
   doAction(action: ActionRequest, options?: ActionOptions): Promise<void>;
   doActionButton(params: DoActionButtonParams): Promise<void>;
   switchView(viewType: string, options?: ViewOptions): void;
@@ -710,7 +710,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
     actionRequest: ActionRequest,
     options: ActionOptions = {}
   ): Promise<void> {
-    const { active_id = null, active_ids = null, active_model = null } = options.additionalContext || {};
+    const { active_id = null, active_ids = null, active_model = null } =
+      options.additionalContext || {};
     const action = await _loadAction(actionRequest, { active_id, active_ids, active_model });
     switch (action.type) {
       case "ir.actions.act_url":

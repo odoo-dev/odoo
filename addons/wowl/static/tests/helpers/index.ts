@@ -1,5 +1,7 @@
 import * as owl from "@odoo/owl";
 import { setTemplates } from "./utility";
+import { legacyUtilsProm } from "./legacy_utils";
+
 const { whenReady, loadFile } = owl.utils;
 
 let templates: string;
@@ -10,7 +12,7 @@ export async function setupTests(): Promise<void> {
   const templatesUrl = `/wowl/templates/${new Date().getTime()}`;
   templates = await loadFile(templatesUrl);
   setTemplates(templates);
-  await whenReady();
+  await Promise.all([whenReady(), legacyUtilsProm]);
 }
 
 export { OdooEnv } from "../../src/types";

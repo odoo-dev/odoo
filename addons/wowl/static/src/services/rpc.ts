@@ -7,7 +7,7 @@ import { Service, OdooEnv } from "../types";
 
 type Params = { [key: string]: any };
 
-export type RPC = (route: string, params?: Params) => Promise<any>;
+export type RPC = (route: string, params?: Params, settings?: RPCSettings) => Promise<any>;
 
 export interface RPCServerError {
   type: "server";
@@ -64,7 +64,17 @@ function handleLostConnection(env: OdooEnv) {
 // Main RPC method
 // -----------------------------------------------------------------------------
 
-function jsonrpc(env: OdooEnv, url: string, params: Params, rpcId: number): Promise<any> {
+interface RPCSettings {
+  shadow?: boolean;
+}
+
+function jsonrpc(
+  env: OdooEnv,
+  url: string,
+  params: Params,
+  rpcId: number,
+  settings: RPCSettings = {}
+): Promise<any> {
   const bus = env.bus;
   const XHR = env.browser.XMLHttpRequest;
 
@@ -77,7 +87,9 @@ function jsonrpc(env: OdooEnv, url: string, params: Params, rpcId: number): Prom
 
   return new Promise((resolve, reject) => {
     const request = new XHR();
-    bus.trigger("RPC:REQUEST", data.id);
+    if (!settings.shadow) {
+      bus.trigger("RPC:REQUEST", data.id);
+    }
 
     // handle success
     request.addEventListener("load", () => {
@@ -136,19 +148,20 @@ export const rpcService: Service<RPC> = {
     return async function (
       this: Component | null,
       route: string,
-      params: Params = {}
+      params: Params = {},
+      settings?
     ): Promise<any> {
       if (this instanceof Component) {
         if (this.__owl__.isDestroyed) {
           throw new Error("A destroyed component should never initiate a RPC");
         }
-        const result = await jsonrpc(env, route, params, rpcId++);
+        const result = await jsonrpc(env, route, params, rpcId++, settings);
         if (this instanceof Component && this.__owl__.isDestroyed) {
           return new Promise(() => {});
         }
         return result;
       }
-      return jsonrpc(env, route, params, rpcId++);
+      return jsonrpc(env, route, params, rpcId++, settings);
     };
   },
 };

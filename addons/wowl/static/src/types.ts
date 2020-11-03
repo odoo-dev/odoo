@@ -233,13 +233,21 @@ export interface SystrayItem {
  *  MODELS AND FIELDS DEFINITION
  */
 
-export type FieldType = "char" | "one2many" | "many2many" | "number";
+export type FieldType =
+  | "char"
+  | "one2many"
+  | "many2many"
+  | "many2one"
+  | "number"
+  | "date"
+  | "datetime";
 
 export interface FieldDefinition {
   relation?: string;
   relation_field?: string;
   string: string;
   type: FieldType;
+  default?: any;
 }
 
 export interface ModelFields {
@@ -251,8 +259,11 @@ export interface ModelData {
   fields: ModelFields;
   records: DBRecord[];
   methods?: ModelMethods;
+  onchanges?: {
+    [fieldName: string]: (record: DBRecord) => void;
+  };
 }
-export type ModelMethod = (args: any[], kwargs: any) => any;
+export type ModelMethod = (args: any[], kwargs: any, model?: string) => any;
 export interface ModelMethods {
   [methodName: string]: ModelMethod;
 }

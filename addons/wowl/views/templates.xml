@@ -69,6 +69,14 @@
         </xpath>
     </template>
 
+    <template id="web_test_assets_compat" inherit_id="web.tests_assets" primary="True">
+        <xpath expr="//script[@src='/web/static/lib/qunit/qunit-2.9.1.js']" position="replace" ></xpath>
+<!--         <xpath expr="//script[@src='/web/static/tests/helpers/test_utils.js']" position="replace" ></xpath> -->
+        <xpath expr="//script[@src='/web/static/tests/helpers/qunit_asserts.js']" position="replace" ></xpath>
+        <xpath expr="//script[@src='/web/static/tests/helpers/qunit_config.js']" position="replace" ></xpath>
+        <xpath expr="//script[@src='/web/static/tests/main_tests.js']" position="replace" ></xpath>
+    </template>
+
     <template id="wowl.qunit_suite">
         <html>
             <head>
@@ -83,6 +91,7 @@
 
                 <t t-call-assets="wowl.test_assets" t-js="False"/>
                 <t t-call-assets="wowl.test_assets" t-css="False"/>
+                <t t-call-assets="wowl.web_test_assets_compat" t-css="false"/>
             </head>
             <body>
                 <div id="qunit"/>

@@ -1,14 +1,15 @@
 import * as owl from "@odoo/owl";
 import { WebClient } from "./components/webclient/webclient";
 import { fetchLocalization } from "./core/localization";
-import { makeEnv } from "./env";
+import { makeEnv, makeRAMLocalStorage } from "./env";
 import * as registries from "./registries";
 import { Odoo, RuntimeOdoo, OdooBrowser } from "./types";
 
 // remove some day
 import "./demo_data";
-import "./views/legacy/legacy";
-import "./views/legacy/root_widget";
+import { legacySetupProm } from "./legacy/legacy_setup";
+import { mapLegacyEnvToWowlEnv } from "./legacy/legacy";
+import "./legacy/root_widget";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -18,12 +19,21 @@ declare const odoo: Odoo;
   // prepare browser object
   const c = new owl.Component();
   const baseEnv = c.env;
+  let localStorage: Window["localStorage"] = baseEnv.browser.localStorage || window.localStorage;
+  try {
+    // Safari crashes in Private Browsing
+    localStorage.setItem("__localStorage__", "true");
+    localStorage.removeItem("__localStorage__");
+  } catch (e) {
+    localStorage = makeRAMLocalStorage();
+  }
   const browser: OdooBrowser = Object.assign({}, baseEnv.browser, {
     console: window.console,
     location: window.location,
     navigator: navigator,
     open: window.open.bind(window),
     XMLHttpRequest: window.XMLHttpRequest,
+    localStorage,
   });
 
   // load templates and localization
@@ -52,6 +62,9 @@ declare const odoo: Odoo;
   // start web client
   const root = new WebClient();
   await whenReady();
+  const legacyEnv = await legacySetupProm;
+  mapLegacyEnvToWowlEnv(legacyEnv, env);
+
   await root.mount(document.body, { position: "self" });
   // the chat window and dialog services listen to 'web_client_ready' event in order to initialize themselves:
   env.bus.trigger("WEB_CLIENT_READY");

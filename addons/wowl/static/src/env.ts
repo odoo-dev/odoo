@@ -77,3 +77,29 @@ async function deployServices(env: OdooEnv, config: OdooConfig): Promise<void> {
     return null;
   }
 }
+
+import { OdooBrowser } from "./types";
+
+export function makeRAMLocalStorage(): OdooBrowser["localStorage"] {
+  let store: any = {};
+  return {
+    setItem(key: string, value: string): void {
+      store[key] = value;
+    },
+    getItem(key) {
+      return store[key];
+    },
+    clear() {
+      store = {};
+    },
+    removeItem(key) {
+      delete store[key];
+    },
+    get length() {
+      return Object.keys(store).length;
+    },
+    key() {
+      return "";
+    },
+  };
+}

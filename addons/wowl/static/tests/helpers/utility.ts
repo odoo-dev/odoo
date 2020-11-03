@@ -57,7 +57,7 @@ function makeTestConfig(config: TestConfig = {}): OdooConfig {
     systray: config.systray || new Registry(),
     errorDialogs: config.errorDialogs || new Registry(),
     userMenu: config.userMenu || new Registry(),
-    views: new Registry(),
+    views: config.views || new Registry(),
     odoo,
   };
 }
@@ -123,4 +123,8 @@ let templates: string;
 
 export function setTemplates(xml: string) {
   templates = xml;
+}
+
+export async function legacyExtraNextTick() {
+  return nextTick();
 }

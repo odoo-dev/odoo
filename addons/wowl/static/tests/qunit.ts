@@ -89,6 +89,36 @@ function doesNotHaveClass(el: HTMLElement, classNames: string, msg?: string) {
   _checkClass(el, classNames, false, msg);
 }
 
+/**
+ * Helper function, to check if a given element
+ * - is unique (if it is a jquery node set)
+ * - is (or not) visible
+ *
+ * @private
+ * @param {HTMLElement} el
+ * @param {boolean} shouldBeVisible
+ * @param {string} [msg]
+ */
+function _checkVisible(el: HTMLElement, shouldBeVisible: boolean, msg?: string): void {
+  msg = msg || `target should ${shouldBeVisible ? "" : "not"} be visible`;
+  let isVisible = el && el.offsetWidth && el.offsetHeight;
+  if (isVisible) {
+    // This computation is a little more heavy and we only want to perform it
+    // if the above assertion has failed.
+    const rect = el.getBoundingClientRect();
+    isVisible = rect.width + rect.height;
+  }
+  const condition = shouldBeVisible ? isVisible : !isVisible;
+  QUnit.assert.ok(condition, msg);
+}
+
+function isVisible(el: HTMLElement, msg?: string) {
+  return _checkVisible(el, true, msg);
+}
+function isNotVisible(el: HTMLElement, msg?: string) {
+  return _checkVisible(el, false, msg);
+}
+
 declare global {
   interface Assert {
     containsN: typeof containsN;
@@ -96,6 +126,8 @@ declare global {
     containsOnce: typeof containsOnce;
     doesNotHaveClass: typeof doesNotHaveClass;
     hasClass: typeof hasClass;
+    isVisible: typeof isVisible;
+    isNotVisible: typeof isNotVisible;
   }
 }
 
@@ -104,6 +136,8 @@ QUnit.assert.containsNone = containsNone;
 QUnit.assert.containsOnce = containsOnce;
 QUnit.assert.doesNotHaveClass = doesNotHaveClass;
 QUnit.assert.hasClass = hasClass;
+QUnit.assert.isVisible = isVisible;
+QUnit.assert.isNotVisible = isNotVisible;
 
 // -----------------------------------------------------------------------------
 // QUnit debug
