@@ -21,3 +21,7 @@ class ImportController(http.Controller):
         })
 
         return 'window.top.%s(%s)' % (misc.html_escape(jsonp), json.dumps({'result': written}))
+
+    @http.route('/base_import/get_selection_values', type='json', auth='user')
+    def get_selection_values(self, model, field):
+        return [value for (key, value) in request.env[model].fields_get([field])[field]['selection']]

@@ -5,12 +5,14 @@ import base64
 import binascii
 import codecs
 import collections
+import copy
 import unicodedata
 
 import chardet
 import datetime
 import io
 import itertools
+import Levenshtein
 import logging
 import psycopg2
 import operator
@@ -40,6 +42,7 @@ BOM_MAP = {
     'utf-32le': codecs.BOM_UTF32_LE,
     'utf-32be': codecs.BOM_UTF32_BE,
 }
+FUZZY_MATCH_DISTANCE = 0.3
 
 try:
     import xlrd
@@ -65,6 +68,26 @@ EXTENSIONS = {
     '.' + ext: handler
     for mime, (ext, handler, req) in FILE_TYPE_DICT.items()
 }
+
+
+class BaseImportError(Exception):
+
+    def __init__(self, message, error_type='error', field=None, field_type=None):
+        error = {
+            'messages': [{
+                'type': error_type,
+                'message': str(message),
+                'record': False,
+                'not_matching_error': True
+            }]
+        }
+        if field:
+            error['messages'][0]['field_path'] = [field]
+        if field_type:
+            error['messages'][0]['field_type'] = field_type
+        self.error = error
+        super(BaseImportError, self).__init__(message)
+
 
 class Base(models.AbstractModel):
     _inherit = 'base'
@@ -167,6 +190,13 @@ class Import(models.TransientModel):
                 Fields with no sub-fields will have an empty list of
                 sub-fields.
 
+            .. attribute:: related_model (str)
+
+                Used in the Tooltip of the related mapped field
+                or to get the model of the field of the related field(s).
+                (notably to get possible values of selection fields)
+                    E.g. : child_ids/user_ids/type -> related_model = res.users
+
         :param str model: name of the model to get fields form
         :param int depth: depth of recursion into o2m fields
         """
@@ -214,15 +244,32 @@ class Import(models.TransientModel):
                     dict(field_value, name='id', string=_("External ID"), type='id'),
                     dict(field_value, name='.id', string=_("Database ID"), type='id'),
                 ]
+                field_value['related_model'] = Model[name]._name
             elif field['type'] == 'one2many':
                 field_value['fields'] = self.get_fields(field['relation'], depth=depth-1)
                 if self.user_has_groups('base.group_no_one'):
                     field_value['fields'].append({'id': '.id', 'name': '.id', 'string': _("Database ID"), 'required': False, 'fields': [], 'type': 'id'})
+                field_value['related_model'] = Model[name]._name
+            else:
+                field_value['related_model'] = Model._name
 
             importable_fields.append(field_value)
 
         # TODO: cache on model?
         return importable_fields
+
+    def _get_most_likely_fields(self, fields, header_types):
+        """ Remove from fields param all the fields and subfields that do not match the allowed types in header_types """
+        most_likely_fields = []
+        for field in fields:
+            subfields = field.get('fields')
+            if subfields:
+                filtered_field = copy.deepcopy(field)  # Avoid modifying fields.
+                filtered_field['fields'] = self._get_most_likely_fields(subfields, header_types)
+                most_likely_fields.append(filtered_field)
+            elif field['type'] in header_types:
+                most_likely_fields.append(field)
+        return most_likely_fields
 
     def _read_file(self, options):
         """ Dispatch to specific method to read file content, according to its mimetype or file type
@@ -270,6 +317,7 @@ class Import(models.TransientModel):
 
     def _read_xls_book(self, book, sheet_name):
         sheet = book.sheet_by_name(sheet_name)
+        yield sheet.nrows
         # emulate Sheet.get_rows for pre-0.9.4
         for rowx, row in enumerate(map(sheet.row, range(sheet.nrows)), 1):
             values = []
@@ -314,11 +362,13 @@ class Import(models.TransientModel):
         sheets = options['sheets'] = list(doc.SHEETS.keys())
         sheet = options['sheet'] = options.get('sheet') or sheets[0]
 
-        return (
+        content = [
             row
             for row in doc.getSheet(sheet)
             if any(x for x in row if x.strip())
-        )
+        ]
+
+        return [len(content)] + content
 
     def _read_csv(self, options):
         """ Returns a CSV-parsed iterator of all non-empty lines in the file
@@ -367,14 +417,26 @@ class Import(models.TransientModel):
             quotechar=options['quoting'],
             delimiter=separator)
 
-        return (
+        content = [
             row for row in csv_iterator
             if any(x for x in row if x.strip())
-        )
+        ]
+
+        return [len(content)] + content
 
     @api.model
     def _try_match_column(self, preview_values, options):
         """ Returns the potential field types, based on the preview values, using heuristics
+            This methods is only used for suggested mapping at 2 levels:
+            1. for fuzzy mapping at file load -> Execute the fuzzy mapping only on "most likely field types"
+            2. For "Suggested fields" section in the fields mapping dropdown list at UI side.
+            The following heuristic is used: If all preview values
+                - Start with '__export__': return id + relational field types
+                - Can be cast into integer: return id + relational field types, integer, float and monetary
+                - Can be cast into Boolean: return boolean
+                - Can be cast into float: return float, monetary
+                - Can be cast into date/datetime: return date / datetime
+                - Cannot be cast into any of the previous types: return only text based fields
             :param preview_values : list of value for the column to determine
             :param options : parsing options
         """
@@ -390,7 +452,7 @@ class Import(models.TransientModel):
         # If all values can be cast to int type is either id, float or monetary
         # Exception: if we only have 1 and 0, it can also be a boolean
         if all(v.isdigit() for v in values if v):
-            field_type = ['id', 'integer', 'char', 'float', 'monetary', 'many2one', 'many2many', 'one2many']
+            field_type = ['integer', 'float', 'monetary']
             if {'0', '1', ''}.issuperset(values):
                 field_type.append('boolean')
             return field_type
@@ -400,7 +462,6 @@ class Import(models.TransientModel):
             return ['boolean']
 
         # If all values can be cast to float, type is either float or monetary
-        results = []
         try:
             thousand_separator = decimal_separator = False
             for val in preview_values:
@@ -433,15 +494,16 @@ class Import(models.TransientModel):
             if thousand_separator and not options.get('float_decimal_separator'):
                 options['float_thousand_separator'] = thousand_separator
                 options['float_decimal_separator'] = decimal_separator
-            results = ['float', 'monetary']
+            return ['float', 'monetary']  # Allow float to be mapped on a text field.
         except ValueError:
             pass
 
-        results += self._try_match_date_time(preview_values, options)
+        results = self._try_match_date_time(preview_values, options)
         if results:
             return results
 
-        return ['id', 'text', 'boolean', 'char', 'datetime', 'selection', 'many2one', 'one2many', 'many2many', 'html']
+        # If not boolean, date/datetime, float or integer, only suggest text based fields.
+        return ['text', 'char', 'binary', 'selection', 'html']
 
 
     def _try_match_date_time(self, preview_values, options):
@@ -480,95 +542,147 @@ class Import(models.TransientModel):
         type_fields = []
         if preview:
             for column in range(0, len(preview[0])):
-                preview_values = [value[column].strip() for value in preview]
+                preview_values = [value[column].strip() for value in preview if len(value) > column]
                 type_field = self._try_match_column(preview_values, options)
                 type_fields.append(type_field)
         return type_fields
 
-    def _match_header(self, header, fields, options):
+    def _match_header(self, header, fields, header_types):
         """ Attempts to match a given header to a field of the
             imported model.
+            First try to make an exact match with all the field of the model.
+            If no exact match can be found, try the "fuzzy match" (using word distance) on the most likely field types.
+            For subfields, use the same logic.
 
-            :param str header: header name from the CSV file
-            :param fields:
-            :param dict options:
+            :param (str) header: header name from the CSV file
+            :param (list) fields: list of all the field of the target model
+            :param (list) header_types: Allowed types for each column in the parsed file.
             :returns: an empty list if the header couldn't be matched, or
                       all the fields to traverse
-            :rtype: list(Field)
+            :rtype: dict(field_name(s) + Levenshtein distance)
+                    In case of simple matching : {'name': [field_name], distance: Levenshtein_distance}
+                    In case of hierarchy matching : {'name': [parent_field_name, child_field_name, subchild_field_name]}
         """
-        string_match = None
-        IrTranslation = self.env['ir.translation']
-        for field in fields:
-            # FIXME: should match all translations & original
-            # TODO: use string distance (levenshtein? hamming?)
-            if header.lower() == field['name'].lower():
-                return [field]
-            if header.lower() == field['string'].lower():
-                # matching string are not reliable way because
-                # strings have no unique constraint
-                string_match = field
-            translated_header = IrTranslation._get_source('ir.model.fields,field_description', 'model', self.env.lang, header).lower()
-            if translated_header == field['string'].lower():
-                string_match = field
-        if string_match:
-            # this behavior is only applied if there is no matching field['name']
-            return [string_match]
+        if not fields:
+            return {}
 
         if '/' not in header:
-            return []
+            # First, try exact match
+            IrTranslation = self.env['ir.translation']
+            for field in fields:
+                # FIXME: should match all translations & original
+                string_match = None
+                if header.lower() == field['name'].lower():
+                    return {
+                        'name': [field['name']],
+                        'distance': 0
+                    }
+                field_string = field.get('string', '').lower()
+                if header.lower() == field_string:
+                    # matching string are not reliable way because
+                    # strings have no unique constraint
+                    string_match = field
+                translated_header = IrTranslation._get_source('ir.model.fields,field_description', 'model', self.env.lang, header).lower()
+                if translated_header == field_string:
+                    string_match = field
+                if string_match:
+                    # this behavior is only applied if there is no matching field['name']
+                    return {
+                        'name': [string_match['name']],
+                        'distance': 0
+                    }
+
+            # If no match found, try fuzzy match on most likely fields (based on header type)
+            # Filter out fields with types that does not match corresponding header types.
+            most_likely_fields = self._get_most_likely_fields(fields, header_types)
+            if not most_likely_fields:
+                return {}
+
+            fields_matching_distance = {}
+            for field in most_likely_fields:
+                # use string distance for fuzzy match only on most likely field types
+                name_field_dist = Levenshtein.distance(header.lower(), field['name'].lower()) / max(len(field['name'].lower()), len(header.lower()))
+                string_field_dist = Levenshtein.distance(header.lower(), field_string) / max(len(field_string), len(header.lower()))
+                fields_matching_distance[field['name']] = min([name_field_dist, string_field_dist])
+
+            min_dist_field = min(fields_matching_distance, key=fields_matching_distance.get)
+            distance = fields_matching_distance[min_dist_field]
+            if distance < FUZZY_MATCH_DISTANCE:
+                return {
+                    'name': [next(field['name'] for field in most_likely_fields if field['name'] == min_dist_field)],
+                    'distance': distance
+                }
+            else:
+                return {}
 
         # relational field path
-        traversal = []
+        hierarchy_map = []
         subfields = fields
         # Iteratively dive into fields tree
         for section in header.split('/'):
             # Strip section in case spaces are added around '/' for
             # readability of paths
-            match = self._match_header(section.strip(), subfields, options)
+            match = self._match_header(section.strip(), subfields, header_types)
             # Any match failure, exit
             if not match:
-                return []
-            # prep subfields for next iteration within match[0]
-            field = match[0]
-            subfields = field['fields']
-            traversal.append(field)
-        return traversal
+                return {}
+            # prep subfields for next iteration within match['name'][0]
+            field = match['name'][0]
+            subfields = next(item['fields'] for item in subfields if item['name'] == field)
+            hierarchy_map.append(field)
+        # No need to return distance for hierarchy mapping
+        return {'name': hierarchy_map}
 
-    def _match_headers(self, rows, fields, options):
+    def _match_headers(self, headers, header_types, fields):
         """ Attempts to match the imported model's fields to the
             titles of the parsed CSV file, if the file is supposed to have
             headers.
 
-            Will consume the first line of the ``rows`` iterator.
+            Returns a dict mapping cell indices to key paths in the ``fields`` tree.
 
-            Returns the list of headers and a dict mapping cell indices
-            to key paths in the ``fields`` tree. If headers were not
-            requested, both collections are empty.
-
-            :param Iterator rows:
-            :param dict fields:
-            :param dict options:
-            :rtype: (list(str), dict(int: list(str)))
+            :param (list) headers: titles of the parsed file
+            :param (list) header_types: Allowed types for each column in the parsed file.
+            :param (list) fields: list of the target model's fields
+            :rtype: (dict(int: list(str)))
         """
-        if not options.get('headers'):
-            return [], {}
-
-        headers = next(rows, None)
-        if not headers:
-            return [], {}
-
         matches = {}
         mapping_records = self.env['base_import.mapping'].search_read([('res_model', '=', self.res_model)], ['column_name', 'field_name'])
         mapping_fields = {rec['column_name']: rec['field_name'] for rec in mapping_records}
+        matched_fields = []  # keep only the first field occurrence
         for index, header in enumerate(headers):
             match_field = []
             mapping_field_name = mapping_fields.get(header.lower())
-            if mapping_field_name:
-                match_field = mapping_field_name.split('/')
+            if mapping_field_name and mapping_field_name not in matched_fields:
+                matched_fields.append(mapping_field_name)
+                match_field = {
+                    'name': [name for name in mapping_field_name.split('/')],
+                    'distance': -1
+                }
             if not match_field:
-                match_field = [field['name'] for field in self._match_header(header, fields, options)]
+                match_field = self._match_header(header, fields, header_types[index])
             matches[index] = match_field or None
-        return headers, matches
+
+        # avoid multiple column to be matched on the same field
+        new_matches = {}
+        fields_min_dist = {}
+        for index, field in matches.items():
+            if field is None:
+                continue
+            if len(field['name']) > 1:  # ignore hierarchy mapping
+                new_matches[index] = field['name']
+                continue
+            field_name = field['name'][0]
+            field_distance = field['distance']
+            if field_distance < fields_min_dist.get(field_name, {}).get('distance', 1):
+                fields_min_dist[field_name] = {
+                    'distance': field_distance,
+                    'index': index
+                }
+
+        for field, values in fields_min_dist.items():
+            new_matches[values['index']] = [field]
+
+        return new_matches
 
     def parse_preview(self, options, count=10):
         """ Generates a preview of the uploaded files, and performs
@@ -589,12 +703,32 @@ class Import(models.TransientModel):
         fields = self.get_fields(self.res_model)
         try:
             rows = self._read_file(options)
-            headers, matches = self._match_headers(rows, fields, options)
-            # Match should have consumed the first row (iif headers), get
-            # the ``count`` next rows for preview
-            preview = list(itertools.islice(rows, count))
-            assert preview, "file seems to have no content"
-            header_types = self._find_type_from_preview(options, preview)
+
+            # As the generator returns the count in first position,
+            # add 1 to preview count and remove the first result to get the file length
+            preview = list(itertools.islice(rows, count+1))
+            file_length = preview.pop(0)
+            assert file_length > 0, "file seems to have no content"
+
+            # We need the header types before matching columns to fields
+            if options.get('headers'):
+                header_types = self._find_type_from_preview(options, preview)
+                headers = preview.pop(0)
+                matches = self._match_headers(headers, header_types, fields)
+            else:
+                header_types, headers, matches = [], [], {}
+
+            # Take the first non null value for each column to display example to user
+            column_example = []
+            record_length = len(preview[0])
+            for idx in range(0, record_length):
+                for record in preview:
+                    if record[idx]:
+                        column_example.append("%s%s" % (record[idx][:50], "..." if len(record[idx]) > 50 else ""))
+                        break
+                if len(column_example) == idx:
+                    column_example.append("")
+
             if options.get('keep_matches') and len(options.get('fields', [])):
                 matches = {}
                 for index, match in enumerate(options.get('fields')):
@@ -626,11 +760,12 @@ class Import(models.TransientModel):
                 'matches': matches or False,
                 'headers': headers or False,
                 'headers_type': header_types or False,
-                'preview': preview,
+                'preview': column_example,
                 'options': options,
                 'advanced_mode': advanced_mode,
                 'debug': self.user_has_groups('base.group_no_one'),
                 'batch': batch,
+                'file_length': file_length
             }
         except Exception as error:
             # Due to lazy generators, UnicodeDecodeError (for
@@ -664,7 +799,7 @@ class Import(models.TransientModel):
         # Get indices for non-empty fields
         indices = [index for index, field in enumerate(fields) if field]
         if not indices:
-            raise ValueError(_("You must configure at least one field to import"))
+            raise BaseImportError(_("You must configure at least one field to import"))
         # If only one index, itemgetter will return an atom rather
         # than a 1-tuple
         if len(indices) == 1:
@@ -675,6 +810,8 @@ class Import(models.TransientModel):
         import_fields = [f for f in fields if f]
 
         rows_to_import = self._read_file(options)
+        # remove the file length
+        rows_to_import = itertools.islice(rows_to_import, 1, None)
         if options.get('headers'):
             rows_to_import = itertools.islice(rows_to_import, 1, None)
         data = [
@@ -738,7 +875,7 @@ class Import(models.TransientModel):
             old_value = line[index]
             line[index] = self._remove_currency_symbol(line[index])
             if line[index] is False:
-                raise ValueError(_("Column %s contains incorrect values (value: %s)", name, old_value))
+                raise BaseImportError(_("Column %s contains incorrect values (value: %s)", name, old_value), field=name)
 
     def _infer_separators(self, value, options):
         """ Try to infer the shape of the separators: if there are two
@@ -803,14 +940,16 @@ class Import(models.TransientModel):
                     for num, line in enumerate(data):
                         if re.match(config.get("import_image_regex", DEFAULT_IMAGE_REGEX), line[index]):
                             if not self.env.user._can_import_remote_urls():
-                                raise AccessError(_("You can not import images via URL, check with your administrator or support for the reason."))
+                                raise BaseImportError(_("You can not import images via URL, check with your administrator or support for the reason."),
+                                    field=name, field_type=field['type'])
 
                             line[index] = self._import_image_by_url(line[index], session, name, num)
                         else:
                             try:
                                 base64.b64decode(line[index], validate=True)
                             except binascii.Error:
-                                raise ValueError(_("Found invalid image data, images should be imported as either URLs or base64-encoded data."))
+                                raise BaseImportError(_("Found invalid image data, images should be imported as either URLs or base64-encoded data."),
+                                    field=name, field_type=field['type'])
 
         return data
 
@@ -836,9 +975,9 @@ class Import(models.TransientModel):
                 # or datetime
                 line[index] = fmt(dt.strptime(v, d_fmt))
             except ValueError as e:
-                raise ValueError(_("Column %s contains incorrect values. Error in line %d: %s") % (name, num + 1, e))
+                raise BaseImportError(_("Column %s contains incorrect values. Error in line %d: %s") % (name, num + 1, e), field=name, field_type=field_type)
             except Exception as e:
-                raise ValueError(_("Error Parsing Date [%s:L%d]: %s") % (name, num + 1, e))
+                raise BaseImportError(_("Error Parsing Date [%s:L%d]: %s") % (name, num + 1, e), field=name, field_type=field_type)
 
     def _import_image_by_url(self, url, session, field, line_number):
         """ Imports an image by URL
@@ -857,30 +996,31 @@ class Import(models.TransientModel):
             response.raise_for_status()
 
             if response.headers.get('Content-Length') and int(response.headers['Content-Length']) > maxsize:
-                raise ValueError(_("File size exceeds configured maximum (%s bytes)", maxsize))
+                raise BaseImportError(_("File size exceeds configured maximum (%s bytes)", maxsize), field=field)
 
             content = bytearray()
             for chunk in response.iter_content(DEFAULT_IMAGE_CHUNK_SIZE):
                 content += chunk
                 if len(content) > maxsize:
-                    raise ValueError(_("File size exceeds configured maximum (%s bytes)", maxsize))
+                    raise BaseImportError(_("File size exceeds configured maximum (%s bytes)", maxsize), field=field)
 
             image = Image.open(io.BytesIO(content))
             w, h = image.size
             if w * h > 42e6:  # Nokia Lumia 1020 photo resolution
-                raise ValueError(
-                    u"Image size excessive, imported images must be smaller "
-                    u"than 42 million pixel")
+                raise BaseImportError(_("Image size excessive, imported images must be smaller than 42 million pixel"), field=field)
 
             return base64.b64encode(content)
         except Exception as e:
             _logger.exception(e)
-            raise ValueError(_("Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s") % {
-                'url': url,
-                'field_name': field,
-                'line_number': line_number + 1,
-                'error': e
-            })
+            raise BaseImportError(
+                _("Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s") % {
+                    'url': url,
+                    'field_name': field,
+                    'line_number': line_number + 1,
+                    'error': e
+                },
+                field=field
+            )
 
     def do(self, fields, columns, options, dryrun=False):
         """ Actual execution of the import
@@ -911,21 +1051,22 @@ class Import(models.TransientModel):
             data, import_fields = self._convert_import_data(fields, options)
             # Parse date and float field
             data = self._parse_import_data(data, import_fields, options)
-        except ValueError as error:
-            return {
-                'messages': [{
-                    'type': 'error',
-                    'message': str(error),
-                    'record': False,
-                }]
-            }
+        except BaseImportError as error:
+            return error.error
 
         _logger.info('importing %d rows...', len(data))
 
+        import_fields, merged_data = self._handle_multi_mapping(import_fields, data)
+
         name_create_enabled_fields = options.pop('name_create_enabled_fields', {})
         import_limit = options.pop('limit', None)
-        model = self.env[self.res_model].with_context(import_file=True, name_create_enabled_fields=name_create_enabled_fields, _import_limit=import_limit)
-        import_result = model.load(import_fields, data)
+        model = self.env[self.res_model].with_context(
+            import_file=True,
+            name_create_enabled_fields=name_create_enabled_fields,
+            skip_import_fields=options.get('skip_import_fields'),
+            import_fallback_values=options.get('fallback_values', {}),
+            _import_limit=import_limit)
+        import_result = model.load(import_fields, merged_data)
         _logger.info('done')
 
         # If transaction aborted, RELEASE SAVEPOINT is going to raise
@@ -981,6 +1122,46 @@ class Import(models.TransientModel):
             import_result['nextrow'] += skip
 
         return import_result
+
+    def _handle_multi_mapping(self, fields, data):
+        """ This method handles multiple mapping on the same field.
+        It will return the list of the mapped fields and the concatenated data for each field:
+            -> if two column are mapped on the same text or char field, they will end up
+            in only one column, concatenated via space (char) or new line (text).
+        """
+        # Get fields and their occurrences indexes
+        mapping_indexes = collections.defaultdict(list)
+        for idx, field in enumerate(field for field in fields if field):
+            mapping_indexes[field].append(idx)
+        import_fields = list(mapping_indexes.keys())
+
+        # recreate data and merge duplicates (applies only on text or char fields)
+        # Also handles multi-mapping on "field of relation fields".
+        merged_data = []
+        for record in data:
+            new_record = []
+            for fields, indexes in mapping_indexes.items():
+                split_fields = fields.split('/')
+                target_field = split_fields[-1]
+
+                # get target_field type (on target model)
+                target_model = self.res_model
+                for field in split_fields:
+                    if field != target_field:  # if not on the last hierarchy level, retarget the model
+                        target_model = self.env[target_model][field]._name
+                field_type = self.env[target_model].fields_get().get(target_field, {}).get('type', '')
+
+                # merge data if necessary
+                if field_type == 'char':
+                    new_record.append(' '.join(record[idx] for idx in indexes if record[idx]))
+                elif field_type == 'text':
+                    new_record.append('\n'.join(record[idx] for idx in indexes if record[idx]))
+                else:
+                    new_record.append(record[indexes[0]])
+
+            merged_data.append(new_record)
+
+        return import_fields, merged_data
 
 _SEPARATORS = [' ', '/', '-', '']
 _PATTERN_BASELINE = [

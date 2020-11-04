@@ -42,6 +42,49 @@ class IrFieldsConverter(models.AbstractModel):
                 error_params = tuple(sanitize(v) for v in error_params)
         return error_type(error_msg % error_params, error_args)
 
+    def _get_import_field_path(self, field, value):
+        """ Rebuild field path for import error attribution to the right field.
+        This method uses the 'parent_fields_hierarchy' context key built during treatment of one2many fields
+        (_str_to_one2many). As the field to import is the last of the chain (child_id/child_id2/field_to_import),
+        we need to retrieve the complete hierarchy in case of error in order to assign the error to the correct
+        column in the import UI.
+        """
+        field_path = [field]
+        parent_fields_hierarchy = self._context.get('parent_fields_hierarchy')
+        if parent_fields_hierarchy:
+            field_path = parent_fields_hierarchy + field_path
+
+        field_path_value = value
+        while isinstance(field_path_value, list):
+            key = list(field_path_value[0].keys())[0]
+            if key:
+                field_path.append(key)
+            field_path_value = field_path_value[0][key]
+        return field_path
+
+    def _get_fallback_value(self, field_path, value):
+        """
+        This method is used during import.
+        It checks if given value is one of the possible values for the given field.
+        If not, the method replace the value by the fallback value defined during import configuration.
+        :param field_path: '/' separated string giving field path from the target import model.
+            E.g: "child_id/type" represent the field 'type' of the model behind 'child_id' field of the target model.
+        :param value: value imported for the given field.
+        :return: value or fallback value
+        """
+        fallback_values = self.env.context.get('import_fallback_values', {})
+        if not fallback_values or not field_path in fallback_values:
+            return value
+        fallback_value = fallback_values[field_path]['fallback_value']
+        # Boolean
+        if "selection_values" not in fallback_values[field_path]:
+            return value if value.lower() in ('0', '1', 'true', 'false') else fallback_value
+        # Selection
+        elif value.lower() in fallback_values[field_path]["selection_values"]:
+            return value
+        else:
+            return fallback_value if fallback_value != 'skip' else False
+
     @api.model
     def for_model(self, model, fromtype=str):
         """ Returns a converter object for the model. A converter is a
@@ -70,6 +113,10 @@ class IrFieldsConverter(models.AbstractModel):
                     converted[field] = False
                     continue
                 try:
+                    field_path = self._get_import_field_path(field, value)
+                    value = self._get_fallback_value('/'.join(field_path), value)
+                    if not value and self.env.context.get('skip_import_fields', {}).get('/'.join(field_path)):
+                        continue
                     converted[field], ws = converters[field](value)
                     for w in ws:
                         if isinstance(w, str):
@@ -78,6 +125,8 @@ class IrFieldsConverter(models.AbstractModel):
                             w = ImportWarning(w)
                         log(field, w)
                 except ValueError as e:
+                    if len(e.args) > 1 and e.args[1] and not e.args[1].get('field_path'):  # only raise the deepest child in error
+                        e.args = (e.args[0], {**e.args[1], **{'field_path': field_path}})
                     log(field, e)
             return converted
 
@@ -134,7 +183,6 @@ class IrFieldsConverter(models.AbstractModel):
     @api.model
     def _str_to_boolean(self, model, field, value):
         # all translatables used for booleans
-        true, yes, false, no = _(u"true"), _(u"yes"), _(u"false"), _(u"no")
         # potentially broken casefolding? What about locales?
         trues = set(word.lower() for word in itertools.chain(
             [u'1', u"true", u"yes"], # don't use potentially translated values
@@ -154,9 +202,9 @@ class IrFieldsConverter(models.AbstractModel):
             return False, []
 
         return True, [self._format_import_error(
-            ImportWarning,
-            _(u"Unknown value '%s' for boolean field '%%(field)s', assuming '%s'"),
-            (value, yes),
+            ValueError,
+            _(u"Unknown value '%s' for boolean field '%%(field)s'"),
+            value,
             {'moreinfo': _(u"Use '1' for yes and '0' for no")}
         )]
 
@@ -263,7 +311,7 @@ class IrFieldsConverter(models.AbstractModel):
         for item, label in selection:
             label = ustr(label)
             labels = [label] + self._get_translations(('selection', 'model', 'code'), label)
-            if value == str(item) or value in labels:
+            if value.lower() == str(item).lower() or any(label for label in labels if value.lower() == label.lower()):
                 return item, []
 
         raise self._format_import_error(
@@ -347,8 +395,8 @@ class IrFieldsConverter(models.AbstractModel):
             if ids:
                 if len(ids) > 1:
                     warnings.append(ImportWarning(
-                        _(u"Found multiple matches for field '%%(field)s' (%d matches)")
-                        % (len(ids))))
+                        _(u"Found multiple matches for value '%s' in field '%%(field)s' (%d matches)")
+                        % (value, len(ids))))
                 id, _name = ids[0]
             else:
                 name_create_enabled_fields = self.env.context.get('name_create_enabled_fields') or {}
@@ -364,16 +412,23 @@ class IrFieldsConverter(models.AbstractModel):
                 subfield
             )
 
-        if id is None:
+        skip_import_fields = self.env.context.get('skip_import_fields') or {}
+        field_path = "/".join((self.env.context.get('parent_fields_hierarchy', []) + [field.name]))
+        if id is None and not skip_import_fields.get(field_path):
             if error_msg:
                 message = _("No matching record found for %(field_type)s '%(value)s' in field '%%(field)s' and the following error was encountered when we attempted to create one: %(error_message)s")
             else:
                 message = _("No matching record found for %(field_type)s '%(value)s' in field '%%(field)s'")
+            # limit to 50 char to avoid too long error messages.
+            value = value[:50] if isinstance(value, str) else value
+            error_info_dict = {'moreinfo': action, 'value': value, 'field_type': field_type}
+            if error_msg:
+                error_info_dict['error_message'] = error_msg
             raise self._format_import_error(
                 ValueError,
                 message,
                 {'field_type': field_type, 'value': value, 'error_message': error_msg},
-                {'moreinfo': action})
+                error_info_dict)
         return id, field_type, warnings
 
     def _xmlid_to_record_id(self, xmlid, model):
@@ -485,7 +540,14 @@ class IrFieldsConverter(models.AbstractModel):
                 raise exception
             warnings.append(exception)
 
-        convert = self.with_context(name_create_enabled_fields=relative_name_create_enabled_fields).for_model(self.env[field.comodel_name])
+        # Complete the field hierarchy path
+        # E.g. For "parent/child/subchild", field hierarchy path for "subchild" is ['parent', 'child']
+        parent_fields_hierarchy = self._context.get('parent_fields_hierarchy', []) + [field.name]
+
+        convert = self.with_context(
+            name_create_enabled_fields=relative_name_create_enabled_fields,
+            parent_fields_hierarchy=parent_fields_hierarchy
+        ).for_model(self.env[field.comodel_name])
 
         for record in records:
             id = None

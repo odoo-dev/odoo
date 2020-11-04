@@ -74,6 +74,12 @@ function dataFilteredQuery(q) {
     q.callback({results: suggestions});
 }
 
+var fieldTooltip = `Label: %s
+Name: %s
+Type: %s`;
+var relatedFieldTooltip = `
+Related Model: %s`;
+
 var DataImport = AbstractAction.extend({
     hasControlPanel: true,
     contentTemplate: 'ImportView',
@@ -94,19 +100,15 @@ var DataImport = AbstractAction.extend({
         {name: 'float_decimal_separator', label: _lt("Decimal Separator:"), value: '.'}
     ],
     events: {
-        // 'change .oe_import_grid input': 'import_dryrun',
         'change .oe_import_file': 'loaded_file',
         'change input.oe_import_has_header, .js_import_options input': 'settings_changed',
         'change input.oe_import_advanced_mode': function (e) {
             this.do_not_change_match = true;
             this['settings_changed']();
         },
-        'click a.oe_import_toggle': function (e) {
-            e.preventDefault();
-            this.$('.oe_import_options').toggle();
-        },
         'click .oe_import_report a.oe_import_report_count': function (e) {
             e.preventDefault();
+            $(e.target).parent().find('i.arrow').toggleClass('up').toggleClass('down');
             $(e.target).parent().parent().toggleClass('oe_import_report_showmore');
         },
         'click .oe_import_report_see_possible_value': function (e) {
@@ -150,6 +152,7 @@ var DataImport = AbstractAction.extend({
         this._title = _t('Import a File'); // Displayed in the breadcrumbs
         this.do_not_change_match = false;
         this.sheets = [];
+        this.selectionFields = {};  // Used to compute fallback values in backend.
     },
     /**
      * @override
@@ -292,7 +295,7 @@ var DataImport = AbstractAction.extend({
     setup_sheets_picker: function () {
         var data = this.sheets.map(_make_option);
         this.$('input.oe_import_sheet').select2({
-            width: '50%',
+            width: '100%',
             data: data,
             query: dataFilteredQuery,
             initSelection: function ($e, c) {
@@ -309,6 +312,8 @@ var DataImport = AbstractAction.extend({
             advanced: this.$('input.oe_import_advanced_mode').prop('checked'),
             keep_matches: this.do_not_change_match,
             name_create_enabled_fields: {},
+            skip_import_fields: {},
+            fallback_values: {},
             // start at row 1 = skip 0 lines
             skip: Number(this.$('#oe_import_row_start').val()) - 1 || 0,
             limit: Number(this.$('#oe_import_batch_limit').val()) || null,
@@ -323,17 +328,40 @@ var DataImport = AbstractAction.extend({
         _(this.parse_opts_separators).each(function (opt) {
             options[opt.name] = self.$('input.oe_import_' + opt.name).val();
         });
+
         options['fields'] = [];
         if (this.do_not_change_match) {
-            options['fields'] = this.$('.oe_import_fields input.oe_import_match_field').map(function (index, el) {
+            options['fields'] = this.$('input.oe_import_match_field').map(function (index, el) {
                 return $(el).select2('val') || false;
             }).get();
         }
         this.do_not_change_match = false;
-        this.$('input.o_import_create_option').each(function () {
+        this.$('select.o_import_create_option').each(function () {
             var field = this.getAttribute('field');
+            var type = this.getAttribute('type');
+            var hasFallbackValue = this.value !== 'prevent';
             if (field) {
-                options.name_create_enabled_fields[field] = this.checked;
+                if (type === 'many2one' || type === "many2many") {
+                    if (this.value === 'skip') {
+                        options.skip_import_fields[field] = true;
+                    } else {
+                        options.name_create_enabled_fields[field] = this.value === 'create';
+                    }
+                } else if (type === 'boolean' && hasFallbackValue) {
+                    options.fallback_values[field] = {
+                        fallback_value: this.value === 'true' ? '1': '0'
+                    };
+                } else if (type === 'selection' && hasFallbackValue) {
+                    if (this.value === 'skip') {
+                        options.skip_import_fields[field] = true;
+                    }
+                    // For selection, need to return fallback_values in every case as we need to check if the value
+                    // from the file is in the selection values. (See  _get_fallback_value in ir_fields.py)
+                    options.fallback_values[field] = {
+                        fallback_value: this.value,
+                        selection_values: self.selectionFields[field].map(v => v.toLowerCase())
+                    }
+                }
             }
         });
         return options;
@@ -356,10 +384,18 @@ var DataImport = AbstractAction.extend({
         var import_toggle = false;
         var file = this.$('input.oe_import_file')[0].files[0];
         // some platforms send text/csv, application/csv, or other things if Excel is prevent
-        if ((file.type && _.last(file.type.split('/')) === "csv") || ( _.last(file.name.split('.')) === "csv")) {
-            import_toggle = true;
-        }
-        this.$form.find('.oe_import_box').toggle(import_toggle);
+        var isCSV = ((file.type && _.last(file.type.split('/')) === "csv") || ( _.last(file.name.split('.')) === "csv"))
+        this.$form.find('.o_import_formatting').toggleClass('d-none', !isCSV);
+
+        // get file name and extension separately, to apply ellipsis to the name and still keep the extension visible.
+        // E.g. : superLongFileName.csv -> "superLongFi....csv" instead of "superLongFileNa..."
+        var fileName = file.name.split('.');
+        var fileExtension = fileName.pop();
+        fileName = fileName.join('.');
+        this.$('#oe_imported_file').text(fileName);
+        this.$('#oe_imported_file_extension').text('.' + fileExtension);
+
+        this.$form.find('.oe_import_box').toggle(true);
         jsonp(this.$form, {
             url: '/base_import/set_file'
         }, this.proxy('settings_changed'));
@@ -371,12 +407,20 @@ var DataImport = AbstractAction.extend({
         // TODO: test that write // succeeded?
         this.$form.removeClass('oe_import_preview_error oe_import_error');
         this.$form.toggleClass(
-            'oe_import_noheaders text-muted',
+            'oe_import_noheaders',
             !this.$('input.oe_import_has_header').prop('checked'));
 
         // Clear the input value to allow onchange to be triggered
         // if the file is the same (for all browsers)
-        self.$('input.oe_import_file').val('');
+        this.$('input.oe_import_file').val('');
+        this.$('.oe_import_options_cell,.oe_import_options_header').addClass('d-none');
+
+        this._cleanComments();
+
+        // Block UI during loading file.
+        $.blockUI({message: QWeb.render('Throbber')});
+        $(document.body).addClass('o_ui_blocked');
+        $('.oe_throbber_message').text(_t("Loading file..."));
 
         this._rpc({
                 model: 'base_import.import',
@@ -386,6 +430,8 @@ var DataImport = AbstractAction.extend({
             }).then(function (result) {
                 var signal = result.error ? 'preview_failed' : 'preview_succeeded';
                 self[signal](result);
+                $(document.body).removeClass('o_ui_blocked');
+                $.unblockUI();
             });
     },
     onpreview_error: function (event, from, to, result) {
@@ -409,6 +455,7 @@ var DataImport = AbstractAction.extend({
         this.$('input.oe_import_advanced_mode').prop('checked', result.advanced_mode);
         this.$('.oe_import_grid').html(QWeb.render('ImportView.preview', result));
 
+        this.$('.o_import_batch').toggleClass('d-none', !(result.file_length > 2000));
         this.$('.o_import_batch_alert').toggleClass('d-none', !result.batch);
 
         var messages = [];
@@ -438,9 +485,9 @@ var DataImport = AbstractAction.extend({
         // hide all "true debug" options when not in debug mode
         this.$('.oe_import_debug_option').toggleClass('d-none', !result.debug);
 
-        var $fields = this.$('.oe_import_fields input');
+        var $fields = this.$('.oe_import_match_field');
         this.render_fields_matches(result, $fields);
-        var data = this.generate_fields_completion(result);
+        var data = this._generate_fields_completion(result);
         var item_finder = function (id, items) {
             items = items || data;
             for (var i=0; i < items.length; ++i) {
@@ -456,23 +503,58 @@ var DataImport = AbstractAction.extend({
             return '';
         };
         $fields.each(function (k,v) {
-            var filtered_data = self.generate_fields_completion(result, k);
+            var filtered_data = self._generate_fields_completion(result, k);
 
-            var $thing = $();
-            var bind = function (d) {};
-            if (config.isDebug()) {
-                $thing = $(QWeb.render('ImportView.create_record_option')).insertAfter(v).hide();
-                bind = function (data) {
-                    switch (data.type) {
-                    case 'many2one': case 'many2many':
-                        $thing.find('input').attr('field', data.id);
-                        $thing.show();
-                        break;
-                    default:
-                        $thing.find('input').attr('field', '').prop('checked', false);
-                        $thing.hide();
-                    }
+            var bind = function (data) {
+                var $commentCell = $(v).parent().parent().find('.oe_import_comment_cell');
+                var $optionsDiv = $commentCell.find('.oe_import_options_div');
+                var is_relational = data.type === 'many2many' || data.type === 'many2one';
+                var show_skip = !data.required && (is_relational || data.type === 'selection');
+
+                // get options cell related to that field
+                if (is_relational || data.type === 'boolean') {
+                    $optionsDiv.html(
+                        QWeb.render('ImportView.create_record_option', {
+                            data: data,
+                            is_relational: is_relational,
+                            show_skip: show_skip,
+                        })
+                    );
+                } else if (data.type === 'selection') {
+                    self._rpc({
+                        route: '/base_import/get_selection_values',
+                        params: {
+                            model: data.related_model || self.res_model,
+                            field: data.id.split('/').pop()
+                        },
+                    }).then(function (values) {
+                        $optionsDiv.html(
+                            QWeb.render('ImportView.create_record_option', {
+                                data: data,
+                                values: values,
+                                show_skip: show_skip,
+                            })
+                        );
+                        self.selectionFields[data.id] = values;
+                    });
+                } else if ($optionsDiv.find('.o_import_create_option').length == 1) {
+                    $optionsDiv.empty();
                 }
+
+                // re-attribute comment cell to the new selected field
+                $commentCell.attr('field', data.id || "");
+
+                // assign class for field icon
+                var $mapping_field = $(v).parent().find('.select2-choice');
+                var oldType = $mapping_field.getAttributes()['type'];
+                $(v).parent().find('.select2-choice').removeClass('o_import_field_' + oldType).addClass('o_import_field_' + data.type).addClass('o_import_field_icon');
+                $mapping_field.attr('type', data.type);
+            };
+
+            var default_value = $(v).val();
+            var data = item_finder(default_value);
+            if (!data) {
+                $(v).val('');
             }
 
             $(v).select2({
@@ -480,29 +562,124 @@ var DataImport = AbstractAction.extend({
                 minimumInputLength: 0,
                 data: filtered_data,
                 initSelection: function (element, callback) {
-                    var default_value = element.val();
                     if (!default_value) {
                         callback('');
                         return;
                     }
 
-                    var data = item_finder(default_value);
                     bind(data);
                     callback(data);
+                    self._handleMappingComments(v, data);
                 },
-                placeholder: _t('Don\'t import'),
+                // Format the tooltip.
+                formatSelection: function (object, container) {
+                    var tooltip = _.str.sprintf(fieldTooltip, object.text, object.id, object.type);
+                    if (object.related_model) {
+                        tooltip += _.str.sprintf(relatedFieldTooltip, object.related_model);
+                    }
+                    $(container[0]).closest('a').attr('title', tooltip);
+                    return object.text;
+                },
+                // For each choice, if field is required, make it bold in the list
+                formatResultCssClass: function (object) {
+                    if (object.required) { return "font-weight-bold text-decoration-underline"; }
+                    return "";
+                },
+                placeholder: _t('To import, select a field...'),
                 width: 'resolve',
                 dropdownCssClass: 'oe_import_selector'
             }).on('change', function (e) {
-                bind(item_finder(e.currentTarget.value));
+                self._cleanFieldComments(e);
+                var data = item_finder(e.currentTarget.value);
+                bind(data);
+                self._handleMappingComments(e.currentTarget, data);
+                if (!e.val) {
+                    var $matchingCell = $(e.target).closest('.oe_import_match_cell')
+                    $matchingCell.find('.o_import_field_icon').removeClass('o_import_field_icon');
+                    $matchingCell.find('a.select2-choice').removeAttr("title");
+                }
             });
+
+            $(v).parent().find('.select2-input').attr('placeholder', _t('Search for a field...'));
         });
     },
-    generate_fields_completion: function (root, index) {
+
+    /**
+    * This method is called when changing the field to map with a file column, or when removing it.
+    * It will clean the eventual comments, errors and the mapping options related to the previously selected field.
+    *
+    * @private
+    */
+    _cleanFieldComments: function (e) {
+        // Check that the column was not mapped to same field than another column
+        if (e.removed) {
+            var $sameMappedFields = self.$('.oe_import_comment_cell[field="' + e.removed.id + '"]').find('.oe_import_same_mapped_field');
+            if ($sameMappedFields.length == 2) {
+                // remove all same mapped field comments
+                $sameMappedFields.remove();
+            }
+        }
+        // remove all comments for this column
+        $(e.currentTarget).parent().parent().find('.oe_import_comments_div').empty();
+        $(e.currentTarget).parent().parent().find('.oe_import_options_div').addClass("d-none");
+    },
+
+    /**
+    * This method is called when selecting a sheet or a new file to import, but also when running to import or the
+    * import test. It will remove all the general comments and/or field specific warnings and errors
+    *
+    * @private
+    */
+    _cleanComments: function () {
+        this.$('.oe_import_error_report').empty();
+        this.$('.oe_import_comments_div').find('.alert-error,.alert-warning').remove();
+        this.$form.removeClass('oe_import_error');
+    },
+
+   /**
+    * This method is called when selecting a new mapping field, or when changing/removing an already selected mapping
+    * field. It will check if multiple field columns are/were mapped on the same field.
+    * 1. In case the field type is char or text:
+    *   This method will display / remove the comments informing the user that two columns content will be
+    *   concatenated on the field they have chosen.
+    * 2. Else:
+    *  This method will remove the field mapping from the old column, as each field, except for the case 1., can only
+    *  be mapped once.
+    *
+    * @private
+    */
+    _handleMappingComments: function (currentTarget, data) {
+        // check if two columns are mapped on the same fields (for char/text fields)
+        var $sameMappedFields = self.$('.oe_import_comment_cell[field="' + data.id + '"]');
+        if (data.type == 'many2many') {
+            $sameMappedFields.find(".oe_import_comments_div").empty().append(QWeb.render('ImportView.comment_m2m_field'));
+        } else if ($sameMappedFields.length >= 2) {
+            if (data.type === 'char' || data.type === 'text') {
+                $sameMappedFields.find(".oe_import_comments_div").each(function (idx, fieldComment) {
+                    $(fieldComment).html(
+                        QWeb.render('ImportView.comment_same_mapped_field', {
+                            field: data.text,
+                        })
+                    );
+                });
+            } else {  // if column is mapped on an already mapped field, remove that field from the old column.
+                var $targetMappedFieldId = $(currentTarget).parent().find('div.oe_import_match_field').getAttributes()['id'];
+                _.each($sameMappedFields, function(fieldComment) {
+                    var $mappingCell = $(fieldComment).parent().find('div.oe_import_match_field');
+                    if ($mappingCell.getAttributes()['id'] !== $targetMappedFieldId) {
+                        $mappingCell.find('.select2-search-choice-close').trigger('mousedown').trigger('click');
+                    }
+                });
+            }
+        }
+    },
+
+    _generate_fields_completion: function (root, index) {
         var self = this;
         var basic = [];
         var regulars = [];
         var o2m = [];
+        var suggested = [];
         var headers_type = root.headers_type;
         function traverse(field, ancestors, collection, type) {
             var subfields = field.fields;
@@ -510,27 +687,27 @@ var DataImport = AbstractAction.extend({
             var field_path = ancestors.concat(field);
             var label = _(field_path).pluck('string').join(' / ');
             var id = _(field_path).pluck('name').join('/');
-            if (type === undefined || (type !== undefined && (type.indexOf('all') !== -1 || type.indexOf(field['type']) !== -1))){
-                // If non-relational, m2o or m2m, collection is regulars
-                if (!collection) {
-                    if (field.name === 'id') {
-                        collection = basic;
-                    } else if (_.isEmpty(subfields)
-                            || _.isEqual(_.pluck(subfields, 'name'), ['id', '.id'])) {
-                        collection = regulars;
-                    } else {
-                        collection = o2m;
-                    }
+            // If non-relational, m2o or m2m, collection is either suggested if field type is in header_types, either regulars if type does not match
+            if (!collection) {
+                if (field.name === 'id') {
+                    collection = basic;
+                } else if (_.isEmpty(subfields)
+                        || _.isEqual(_.pluck(subfields, 'name'), ['id', '.id'])) {
+                    collection = (type && type.indexOf(field['type']) !== -1) ? suggested : regulars;
+                } else {
+                    collection = o2m;
                 }
-
-                collection.push({
-                    id: id,
-                    text: label,
-                    required: field.required,
-                    type: field.type
-                });
-
             }
+
+            collection.push({
+                id: id,
+                text: label,
+                required: field.required,
+                type: field.type,
+                default_value: field.default_value,
+                related_model: field.related_model,
+            });
+
             if (advanced_mode){
                 for(var i=0, end=subfields.length; i<end; ++i) {
                     traverse(subfields[i], field_path, collection, type);
@@ -555,19 +732,27 @@ var DataImport = AbstractAction.extend({
             return field1.text.localeCompare(field2.text);
 
         };
+        suggested.sort(cmp);
         regulars.sort(cmp);
         o2m.sort(cmp);
         if (!_.isEmpty(regulars) && !_.isEmpty(o2m)){
+            if (!_.isEmpty(suggested)) {
+                basic = basic.concat({ text: _t("Suggested Fields"), children: suggested });
+            }
             basic = basic.concat([
-                { text: _t("Normal Fields"), children: regulars },
+                { text: _t(!_.isEmpty(suggested) ? "Additional Fields" : "Standard Fields"), children: regulars },
                 { text: _t("Relation Fields"), children: o2m },
             ]);
-        }
-        else if (!_.isEmpty(regulars)) {
-            basic = basic.concat(regulars);
-        }
-        else if (!_.isEmpty(o2m)) {
-            basic = basic.concat(o2m);
+        } else {
+            if (!_.isEmpty(suggested)) {
+                basic = basic.concat(suggested);
+            }
+            if (!_.isEmpty(regulars)) {
+                basic = basic.concat(regulars);
+            }
+            if (!_.isEmpty(o2m)) {
+                basic = basic.concat(o2m);
+            }
         }
         return basic;
     },
@@ -594,14 +779,14 @@ var DataImport = AbstractAction.extend({
 
     //- import itself
     call_import: function (kwargs) {
-        var fields = this.$('.oe_import_fields input.oe_import_match_field').map(function (index, el) {
+        var fields = this.$('input.oe_import_match_field').map(function (index, el) {
             return $(el).select2('val') || false;
         }).get();
-        var columns = this.$('.oe_import_grid-header .oe_import_grid-cell .o_import_header_name').map(function () {
+        var columns = this.$('.o_import_header_name').map(function () {
             return $(this).text().trim().toLowerCase() || false;
         }).get();
 
-        var tracking_disable = 'tracking_disable' in kwargs ? kwargs.tracking_disable : !this.$('#oe_import_tracking').prop('checked')
+        var tracking_disable = 'tracking_disable' in kwargs ? kwargs.tracking_disable : !this.$('#oe_import_tracking').prop('checked');
         delete kwargs.tracking_disable;
         kwargs.context = _.extend(
             {}, this.parent_context,
@@ -619,7 +804,11 @@ var DataImport = AbstractAction.extend({
         var msg = kwargs.dryrun ? _t("%d records tested...")
                                 : _t("%d records successfully imported...");
         opts.callback = function (count) {
-            $el.text(_.str.sprintf(msg, count));
+            if (count) {
+                $el.text(_.str.sprintf(msg, count));
+            } else {
+                $el.text(kwargs.dryrun ? _t("Testing...") : _t("Importing..."));
+            }
         };
 
         return this._batchedImport(opts, [this.id, fields, columns], kwargs, {done: 0, prev: 0})
@@ -753,10 +942,12 @@ var DataImport = AbstractAction.extend({
         this.trigger_up('history_back');
     },
     onresults: function (event, from, to, results) {
-        var fields = this.$('.oe_import_fields input.oe_import_match_field').map(function (index, el) {
+        var self = this;
+        var fields = this.$('input.oe_import_match_field').map(function (index, el) {
             return $(el).select2('val') || false;
         }).get();
 
+        var error_type = "warning";
         var message = results.messages;
         var no_messages = _.isEmpty(message);
         if (no_messages) {
@@ -764,6 +955,7 @@ var DataImport = AbstractAction.extend({
                 type: 'info',
                 message: _t("Everything seems valid.")
             });
+            error_type = false;
         } else if (event === 'import_failed' && results.ids) {
             // both ids in a failed import -> partial import
             this.toggle_partial(results);
@@ -783,7 +975,7 @@ var DataImport = AbstractAction.extend({
             // sort by gravity, then, order of field in list
             var order = 0;
             switch (group[0].type) {
-            case 'error': order = 0; break;
+            case 'error': order = 0; error_type = 'error'; break;
             case 'warning': order = fields.length + 1; break;
             case 'info': order = 2 * (fields.length + 1); break;
             default: order = 3 * (fields.length + 1); break;
@@ -791,71 +983,65 @@ var DataImport = AbstractAction.extend({
             return order + _.indexOf(fields, group[0].field);
         });
 
-        this.$form.addClass('oe_import_error');
-        this.$('.oe_import_error_report').html(
-            QWeb.render('ImportView.error', {
-                errors: messagesSorted,
-                at: function (rows) {
-                    var from = rows.from + offset;
-                    var to = rows.to + offset;
-                    var rowName = '';
-                    if (results.name.length > rows.from && results.name[rows.from] !== '') {
-                        rowName = _.str.sprintf(' (%s)', results.name[rows.from]);
-                    }
-                    if (from === to) {
-                        return _.str.sprintf(_t("at row %d%s"), from, rowName);
-                    }
-                    return _.str.sprintf(_t("between rows %d and %d"),
-                                         from, to);
-                },
-                at_multi: function (rows) {
-                    var from = rows.from + offset;
-                    var to = rows.to + offset;
-                    var rowName = '';
-                    if (results.name.length > rows.from && results.name[rows.from] !== '') {
-                        rowName = _.str.sprintf(' (%s)', results.name[rows.from]);
-                    }
-                    if (from === to) {
-                        return _.str.sprintf(_t("Row %d%s"), from, rowName);
-                    }
-                    return _.str.sprintf(_t("Between rows %d and %d"),
-                                         from, to);
-                },
-                at_multi_header: function (numberLines) {
-                    return _.str.sprintf(_t("at %d different rows:"),
-                                         numberLines);
-                },
-                more: function (n) {
-                    return _.str.sprintf(_t("(%d more)"), n);
-                },
-                info: function (msg) {
-                    if (typeof msg === 'string') {
-                        return _.str.sprintf(
-                            '<div class="oe_import_moreinfo oe_import_moreinfo_message">%s</div>',
-                            _.str.escapeHTML(msg));
-                    }
-                    if (msg instanceof Array) {
-                        return _.str.sprintf(
-                            '<div class="oe_import_moreinfo oe_import_moreinfo_choices"><a href="#" class="oe_import_report_see_possible_value oe_import_see_all"><i class="fa fa-arrow-right"/> %s </a><ul class="oe_import_report_more">%s</ul></div>',
-                            _.str.escapeHTML(_t("See possible values")),
-                            _(msg).map(function (msg) {
-                                return '<li>'
-                                    + _.str.escapeHTML(msg)
-                                + '</li>';
-                            }).join(''));
-                    }
-                    // Final should be object, action descriptor
-                    return [
-                        '<div class="oe_import_moreinfo oe_import_moreinfo_action">',
-                            _.str.sprintf('<a href="#" data-action="%s" class="oe_import_see_all"><i class="fa fa-arrow-right"/> ',
-                                    _.str.escapeHTML(JSON.stringify(msg))),
-                                _.str.escapeHTML(
-                                    _t("See possible values")),
-                            '</a>',
-                        '</div>'
-                    ].join('');
-                },
-            }));
+
+        // regroup error message by field
+        var messagesGroupedByField = {};
+        _.each(messagesSorted, function (errors) {
+            var field = errors[0].field_path ? errors[0].field_path.join('/') : errors[0].field || 0;
+            [errors] = errors.length > 1 ? [errors] : errors;
+            // regroup errors for same value at different rows in the same error.
+            if (Array.isArray(errors) && errors[0].rows) {
+                var row_from = errors[0].rows.from;
+                var row_to = errors[errors.length - 1].rows.to;
+                errors = errors[0];
+                errors.rows.from = row_from;
+                errors.rows.to = row_to;
+            }
+            if (!messagesGroupedByField[field]) {
+                messagesGroupedByField[field] = [errors];
+            } else {
+                messagesGroupedByField[field].push(errors);
+            }
+        });
+
+        // If no general comments, add general warning that there are some errors/warnings
+        if (!messagesGroupedByField[0] && error_type) {
+            var message = error_type === "warning" ?
+                _t("The file contains non-blocking warnings (see below)") :
+                _t("The file contains blocking errors (see below)");
+            messagesGroupedByField[0] = [{
+                'type': error_type,
+                'message': message,
+            }];
+        }
+
+        // Clean old comments
+        self._cleanComments();
+
+        // Add new comments
+        _.each(messagesGroupedByField, function (errors, field) {
+            var $errorCell = self.$('.oe_import_comment_cell[field="'+ field +'"]');
+            var $errorDiv = $errorCell.find(".oe_import_comments_div");
+            var errorTemplate = 'ImportView.fieldError';
+            // If error not linked to a targeted Odoo field, show in global error div
+            if ($errorDiv.length === 0) {
+                $errorDiv = self.$('.oe_import_error_report');
+                self.$form.addClass('oe_import_error');
+                field = 0;
+                errorTemplate = 'ImportView.error';
+            }
+            $errorDiv.append(
+                QWeb.render(errorTemplate, {
+                    errors: errors,
+                    field: field,
+                    result_names: results.name,
+                    offset: offset,
+                })
+            );
+            if (!errors[0].not_matching_error) {
+                $errorCell.find(".oe_import_options_div").removeClass('d-none');
+            }
+        });
     },
     toggle_partial: function (result) {
         var $form = this.$('.oe_import');

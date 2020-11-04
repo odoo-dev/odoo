@@ -22,6 +22,7 @@ Re-implement Odoo's file import system:
   need or want an online import can avoid it being available to users.
 """,
     'depends': ['web'],
+    'version': '2.0',
     'category': 'Hidden/Tools',
     'installable': True,
     'auto_install': True,

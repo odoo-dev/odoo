@@ -3,12 +3,14 @@
 import base64
 import difflib
 import io
+import Levenshtein
 import pprint
 import unittest
 
 from odoo.tests.common import TransactionCase, can_import
 from odoo.modules.module import get_module_resource
 from odoo.tools import mute_logger, pycompat
+from odoo.addons.base_import.models.base_import import BaseImportError
 
 ID_FIELD = {
     'id': 'id',
@@ -21,10 +23,15 @@ ID_FIELD = {
 }
 
 
-def make_field(name='value', string='Value', required=False, fields=[], field_type='id'):
+def make_field(name='value', string='Value', required=False, fields=None, field_type='id', related_model=None):
+    if fields is None:
+        fields = []
+    field = {'id': name, 'name': name, 'string': string, 'required': required, 'fields': fields, 'type': field_type}
+    if related_model:
+        field['related_model'] = related_model
     return [
         ID_FIELD,
-        {'id': name, 'name': name, 'string': string, 'required': required, 'fields': fields, 'type': field_type},
+        field,
     ]
 
 
@@ -44,6 +51,7 @@ class BaseImportCase(TransactionCase):
             pprint.pformat(f2).splitlines()
         ))
 
+
 class TestBasicFields(BaseImportCase):
 
     def get_fields(self, field):
@@ -51,11 +59,11 @@ class TestBasicFields(BaseImportCase):
 
     def test_base(self):
         """ A basic field is not required """
-        self.assertEqualFields(self.get_fields('char'), make_field(field_type='char'))
+        self.assertEqualFields(self.get_fields('char'), make_field(field_type='char', related_model='base_import.tests.models.char'))
 
     def test_required(self):
         """ Required fields should be flagged (so they can be fill-required) """
-        self.assertEqualFields(self.get_fields('char.required'), make_field(required=True, field_type='char'))
+        self.assertEqualFields(self.get_fields('char.required'), make_field(required=True, field_type='char', related_model='base_import.tests.models.char.required'))
 
     def test_readonly(self):
         """ Readonly fields should be filtered out"""
@@ -63,7 +71,7 @@ class TestBasicFields(BaseImportCase):
 
     def test_readonly_states(self):
         """ Readonly fields with states should not be filtered out"""
-        self.assertEqualFields(self.get_fields('char.states'), make_field(field_type='char'))
+        self.assertEqualFields(self.get_fields('char.states'), make_field(field_type='char', related_model='base_import.tests.models.char.states'))
 
     def test_readonly_states_noreadonly(self):
         """ Readonly fields with states having nothing to do with
@@ -78,9 +86,11 @@ class TestBasicFields(BaseImportCase):
     def test_m2o(self):
         """ M2O fields should allow import of themselves (name_get),
         their id and their xid"""
-        self.assertEqualFields(self.get_fields('m2o'), make_field(field_type='many2one', fields=[
-            {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': False, 'fields': [], 'type': 'id'},
-            {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id'},
+        self.assertEqualFields(self.get_fields('m2o'), make_field(
+            field_type='many2one', related_model='base_import.tests.models.m2o.related',
+            fields=[
+                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': False, 'fields': [], 'type': 'id'},
+                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id'},
         ]))
 
     def test_m2o_required(self):
@@ -88,9 +98,11 @@ class TestBasicFields(BaseImportCase):
         required as well (the client has to handle that: requiredness
         is id-based)
         """
-        self.assertEqualFields(self.get_fields('m2o.required'), make_field(field_type='many2one', required=True, fields=[
-            {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': True, 'fields': [], 'type': 'id'},
-            {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': True, 'fields': [], 'type': 'id'},
+        self.assertEqualFields(self.get_fields('m2o.required'), make_field(
+            field_type='many2one', required=True, related_model='base_import.tests.models.m2o.required.related',
+            fields=[
+                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': True, 'fields': [], 'type': 'id'},
+                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': True, 'fields': [], 'type': 'id'},
         ]))
 
 
@@ -103,15 +115,15 @@ class TestO2M(BaseImportCase):
         self.assertEqualFields(
             self.get_fields('o2m'), [
                 ID_FIELD,
-                {'id': 'name', 'name': 'name', 'string': "Name", 'required': False, 'fields': [], 'type': 'char',},
+                {'id': 'name', 'name': 'name', 'string': "Name", 'required': False, 'fields': [], 'type': 'char', 'related_model': 'base_import.tests.models.o2m'},
                 {
                     'id': 'value', 'name': 'value', 'string': 'Value',
-                    'required': False, 'type': 'one2many',
+                    'required': False, 'type': 'one2many', 'related_model': 'base_import.tests.models.o2m.child',
                     'fields': [
                         ID_FIELD,
                         {
                             'id': 'parent_id', 'name': 'parent_id',
-                            'string': 'Parent', 'type': 'many2one',
+                            'string': 'Parent', 'type': 'many2one', 'related_model': 'base_import.tests.models.o2m',
                             'required': False, 'fields': [
                                 {'id': 'parent_id', 'name': 'id',
                                  'string': 'External ID', 'required': False,
@@ -122,7 +134,7 @@ class TestO2M(BaseImportCase):
                             ]
                         },
                         {'id': 'value', 'name': 'value', 'string': 'Value',
-                         'required': False, 'fields': [], 'type': 'integer'
+                         'required': False, 'fields': [], 'type': 'integer', 'related_model': 'base_import.tests.models.o2m.child'
                         },
                     ]
                 }
@@ -133,16 +145,27 @@ class TestO2M(BaseImportCase):
 class TestMatchHeadersSingle(TransactionCase):
 
     def test_match_by_name(self):
-        match = self.env['base_import.import']._match_header('f0', [{'name': 'f0'}], {})
-        self.assertEqual(match, [{'name': 'f0'}])
+        match = self.env['base_import.import']._match_header('f0', [{'name': 'f0'}])
+        self.assertEqual(match, {'name': ['f0'], 'distance': 0})
 
     def test_match_by_string(self):
-        match = self.env['base_import.import']._match_header('some field', [{'name': 'bob', 'string': "Some Field"}], {})
-        self.assertEqual(match, [{'name': 'bob', 'string': "Some Field"}])
+        match = self.env['base_import.import']._match_header('some field', [{'name': 'bob', 'string': "Some Field"}])
+        self.assertEqual(match, {'name': ['bob'], 'distance': 0})
 
     def test_nomatch(self):
-        match = self.env['base_import.import']._match_header('should not be', [{'name': 'bob', 'string': "wheee"}], {})
-        self.assertEqual(match, [])
+        match = self.env['base_import.import']._match_header('should not be', [{'name': 'bob', 'string': "wheee"}])
+        self.assertEqual(match, {})
+
+    def test_close_match(self):
+        match = self.env['base_import.import']._match_header('bobe', [{'name': 'bob'}])
+        self.assertEqual(match, {'name': ['bob'], 'distance': 0.25})
+
+    def test_distant_match(self):
+        header, field_string = 'same Folding', 'Some Field'
+        match = self.env['base_import.import']._match_header(header, [{'name': 'bob', 'string': field_string}])
+        string_field_dist = Levenshtein.distance(header.lower(), field_string.lower()) / max(len(field_string.lower()), len(header.lower()))
+        self.assertEqual(string_field_dist, 0.5)
+        self.assertEqual(match, {})  # if distance >= 0.5, no match returned
 
     def test_recursive_match(self):
         f = {
@@ -153,8 +176,8 @@ class TestMatchHeadersSingle(TransactionCase):
                 {'name': 'f1', 'string': "Sub field 2", 'fields': []},
             ]
         }
-        match = self.env['base_import.import']._match_header('f0/f1', [f], {})
-        self.assertEqual(match, [f, f['fields'][1]])
+        match = self.env['base_import.import']._match_header('f0/f1', [f])
+        self.assertEqual(match, {'name': [f['name'], f['fields'][1]['name']]})
 
     def test_recursive_nomatch(self):
         """ Match first level, fail to match second level
@@ -167,50 +190,43 @@ class TestMatchHeadersSingle(TransactionCase):
                 {'name': 'f1', 'string': "Sub field 2", 'fields': []},
             ]
         }
-        match = self.env['base_import.import']._match_header('f0/f2', [f], {})
-        self.assertEqual(match, [])
+        match = self.env['base_import.import']._match_header('f0/f2', [f])
+        self.assertEqual(match, {})
 
 
 class TestMatchHeadersMultiple(TransactionCase):
 
     def test_noheaders(self):
         self.assertEqual(
-            self.env['base_import.import']._match_headers([], [], {}), ([], {})
+            self.env['base_import.import']._match_headers([], [], []), {}
         )
 
     def test_nomatch(self):
         self.assertEqual(
             self.env['base_import.import']._match_headers(
-                iter([
-                    ['foo', 'bar', 'baz', 'qux'],
-                    ['v1', 'v2', 'v3', 'v4'],
-                ]),
-                [],
-                {'headers': True}),
-            (
                 ['foo', 'bar', 'baz', 'qux'],
-                dict.fromkeys(range(4))
-            )
+                [['int'], ['char'], ['text'], ['many2one']],
+                []),
+            {}
         )
 
     def test_mixed(self):
         self.assertEqual(
             self.env['base_import.import']._match_headers(
-                iter(['foo bar baz qux/corge'.split()]),
+                'foo bar baz qux/corge'.split(),
+                [['int'], ['char'], ['text'], ['text']],
                 [
-                    {'name': 'bar', 'string': 'Bar'},
-                    {'name': 'bob', 'string': 'Baz'},
-                    {'name': 'qux', 'string': 'Qux', 'fields': [
-                        {'name': 'corge', 'fields': []},
+                    {'name': 'bar', 'string': 'Bar', 'type': 'char'},
+                    {'name': 'bob', 'string': 'Baz', 'type': 'text'},
+                    {'name': 'qux', 'string': 'Qux', 'type': 'many2one', 'fields': [
+                        {'name': 'corge', 'type': 'text', 'fields': []},
                      ]}
-                ],
-                {'headers': True}),
-            (['foo', 'bar', 'baz', 'qux/corge'], {
-                0: None,
+                ]),
+            {
                 1: ['bar'],
                 2: ['bob'],
                 3: ['qux', 'corge'],
-            })
+            }
         )
 
 
@@ -279,8 +295,8 @@ class TestPreview(TransactionCase):
         import_wizard = self.env['base_import.import'].create({
             'res_model': 'base_import.tests.models.preview',
             'file': b'name,Some Value,Counter\n'
-                    b'foo,1,2\n'
-                    b'bar,3,4\n'
+                    b'foo,,\n'
+                    b'bar,,4\n'
                     b'qux,5,6\n',
             'file_type': 'text/csv'
         })
@@ -291,20 +307,16 @@ class TestPreview(TransactionCase):
             'headers': True,
         })
         self.assertIsNone(result.get('error'))
-        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue'], 2: None})
+        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
         self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
         # Order depends on iteration order of fields_get
         self.assertItemsEqual(result['fields'], [
             ID_FIELD,
-            {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char'},
-            {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer'},
-            {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer'},
+            {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'related_model': 'base_import.tests.models.preview'},
+            {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer','related_model': 'base_import.tests.models.preview'},
+            {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer', 'related_model': 'base_import.tests.models.preview'},
         ])
-        self.assertEqual(result['preview'], [
-            ['foo', '1', '2'],
-            ['bar', '3', '4'],
-            ['qux', '5', '6'],
-        ])
+        self.assertEqual(result['preview'], ['foo', '5', '4'])
 
     @unittest.skipUnless(can_import('xlrd'), "XLRD module not available")
     def test_xls_success(self):
@@ -320,19 +332,15 @@ class TestPreview(TransactionCase):
             'headers': True,
         })
         self.assertIsNone(result.get('error'))
-        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue'], 2: None})
+        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
         self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
         self.assertItemsEqual(result['fields'], [
             ID_FIELD,
-            {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char'},
-            {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer'},
-            {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer'},
+            {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'related_model': 'base_import.tests.models.preview'},
+            {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'related_model': 'base_import.tests.models.preview'},
+            {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer', 'related_model': 'base_import.tests.models.preview'},
         ])
-        self.assertEqual(result['preview'], [
-            ['foo', '1', '2'],
-            ['bar', '3', '4'],
-            ['qux', '5', '6'],
-        ])
+        self.assertEqual(result['preview'], ['foo', '1', '2'])
 
     @unittest.skipUnless(can_import('xlrd.xlsx'), "XLRD/XLSX not available")
     def test_xlsx_success(self):
@@ -348,19 +356,15 @@ class TestPreview(TransactionCase):
             'headers': True,
         })
         self.assertIsNone(result.get('error'))
-        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue'], 2: None})
+        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
         self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
         self.assertItemsEqual(result['fields'], [
             ID_FIELD,
-            {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char'},
-            {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer'},
-            {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer'},
+            {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'related_model': 'base_import.tests.models.preview'},
+            {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'related_model': 'base_import.tests.models.preview'},
+            {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer', 'related_model': 'base_import.tests.models.preview'},
         ])
-        self.assertEqual(result['preview'], [
-            ['foo', '1', '2'],
-            ['bar', '3', '4'],
-            ['qux', '5', '6'],
-        ])
+        self.assertEqual(result['preview'], ['foo', '1', '2'])
 
     @unittest.skipUnless(can_import('odf'), "ODFPY not available")
     def test_ods_success(self):
@@ -376,19 +380,16 @@ class TestPreview(TransactionCase):
             'headers': True,
         })
         self.assertIsNone(result.get('error'))
-        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue'], 2: None})
+        self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
         self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
         self.assertItemsEqual(result['fields'], [
             ID_FIELD,
-            {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char'},
-            {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer'},
-            {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer'},
+            {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'related_model': 'base_import.tests.models.preview'},
+            {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'related_model': 'base_import.tests.models.preview'},
+            {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer', 'related_model': 'base_import.tests.models.preview'},
         ])
-        self.assertEqual(result['preview'], [
-            ['foo', '1', '2'],
-            ['bar', '3', '4'],
-            ['aux', '5', '6'],
-        ])
+        self.assertEqual(result['preview'], ['foo', '1', '2'])
+
 
 class test_convert_import_data(TransactionCase):
     """ Tests conversion of base_import.import input into data which
@@ -566,7 +567,7 @@ class test_convert_import_data(TransactionCase):
             'file_type': 'text/csv'
 
         })
-        self.assertRaises(ValueError, import_wizard._convert_import_data, [], {'quoting': '"', 'separator': ',', 'headers': True})
+        self.assertRaises(BaseImportError, import_wizard._convert_import_data, [], {'quoting': '"', 'separator': ',', 'headers': True})
 
     def test_falsefields(self):
         import_wizard = self.env['base_import.import'].create({
@@ -577,7 +578,7 @@ class test_convert_import_data(TransactionCase):
         })
 
         self.assertRaises(
-            ValueError,
+            BaseImportError,
             import_wizard._convert_import_data,
             [False, False, False],
             {'quoting': '"', 'separator': ',', 'headers': True})
@@ -605,6 +606,7 @@ class test_convert_import_data(TransactionCase):
         )
 
         self.assertItemsEqual(data, [data_row])
+
 
 class TestBatching(TransactionCase):
     def _makefile(self, rows):
@@ -732,6 +734,7 @@ g,g@example.com
         self.assertEqual(results['nextrow'], 0)
         partners_3 = self.env['res.partner'].search([]) - (partners_before | partners_1 | partners_2)
         self.assertEqual(partners_3.mapped('name'), ['d', 'e', 'f', 'g'])
+
 
 class test_failures(TransactionCase):
     def test_big_attachments(self):
