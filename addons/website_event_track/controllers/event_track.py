@@ -11,7 +11,7 @@ import babel.dates
 import base64
 import pytz
 
-from odoo import exceptions, http, fields, _
+from odoo import exceptions, http, fields, tools, _
 from odoo.http import request
 from odoo.osv import expression
 from odoo.tools import is_html_empty, plaintext2html
@@ -392,30 +392,58 @@ class EventTrackController(http.Controller):
 
     @http.route(['''/event/<model("event.event"):event>/track_proposal/post'''], type='http', auth="public", methods=['POST'], website=True)
     def event_track_proposal_post(self, event, **post):
-        tags = []
-        for tag in event.allowed_track_tag_ids:
-            if post.get('tag_' + str(tag.id)):
-                tags.append(tag.id)
+        if not event.can_access_from_current_website():
+            raise NotFound()
 
-        track = request.env['event.track'].sudo().create({
+        #  Only accept existing tag indices.
+        input_tag_indices = [int(tag_id) for tag_id in post['tags'].split(',') if tag_id]
+        valid_tag_indices = request.env['event.track.tag'].search([('id', 'in', input_tag_indices)]).ids
+
+        #  Contact name is required. Therefore, empty contacts are not considered here. At least one of contact_phone
+        #  and contact_email must be filled. Email is verified. If the post tries to create contact with no valid entry,
+        #  raise exception.
+        contact = request.env['res.partner']
+        if 'add_contact_information' in post:
+            valid_contact_emails = tools.email_split(post['contact_email'])
+            valid_contact_email = valid_contact_emails[0] if valid_contact_emails else False
+            if valid_contact_email or post['contact_phone']:
+                contact = request.env['res.partner'].sudo().create({
+                    'email': valid_contact_email,
+                    'name': post['contact_name'],
+                    'phone': post['contact_phone'],
+                })
+            else:
+                raise exceptions.ValidationError(_("Format Error : please enter a valid contact phone or contact email."))
+
+        track = request.env['event.track'].with_context({'mail_create_nosubscribe': True}).sudo().create({
             'name': post['track_name'],
+            'partner_id': contact.id,
             'partner_name': post['partner_name'],
-            'partner_email': post['email_from'],
-            'partner_phone': post['phone'],
-            'partner_biography': plaintext2html(post['biography']),
+            'partner_email': post['partner_email'],
+            'partner_phone': post['partner_phone'],
+            'partner_biography': plaintext2html(post['partner_biography']),
+            'partner_company_name': post['partner_company_name'],
+            'partner_function': post['partner_function'],
+            'contact_phone': contact.phone,
+            'contact_email': contact.email,
             'event_id': event.id,
-            'tag_ids': [(6, 0, tags)],
-            'user_id': False,
+            'tag_ids': [(6, 0, valid_tag_indices)],
             'description': plaintext2html(post['description']),
-            'image': base64.b64encode(post['image'].read()) if post.get('image') else False
+            'user_id': False,
+            'image': base64.b64encode(post['image'].read()) if post.get('image') else False,
         })
+
         if request.env.user != request.website.user_id:
             track.sudo().message_subscribe(partner_ids=request.env.user.partner_id.ids)
-        else:
-            partner = request.env['res.partner'].sudo().search([('email', '=', post['email_from'])])
-            if partner:
-                track.sudo().message_subscribe(partner_ids=partner.ids)
-        return request.render("website_event_track.event_track_proposal", {'track': track, 'event': event})
+        if contact and contact.email:
+            track.sudo().message_subscribe(partner_ids=[contact.id])
+
+        return request.render("website_event_track.event_track_proposal", {'track': track, 'event': event, 'main_object': event})
+
+    # ACL : This route is necessary since rpc search_read method in js is not accessible to all users (e.g. public user).
+    @http.route(['''/event/track_proposal/fetch_tags'''], type='json', auth="public", website=True)
+    def website_event_track_fetch_tags(self, fields, domain):
+        return request.env['event.track.tag'].search_read(domain, fields)
 
     # ------------------------------------------------------------
     # TOOLS
