@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from unittest.mock import patch, call, ANY
+
 from odoo.addons.test_mail_full.tests.common import TestMailFullCommon
 from odoo.tests.common import users
-from odoo.tools import config, mute_logger
+from odoo.tools import config, mute_logger, TestingSMTPSession, MockValidator
 from odoo.tests import tagged
 
 
@@ -13,6 +15,32 @@ class TestMassMailing(TestMailFullCommon):
     @classmethod
     def setUpClass(cls):
         super(TestMassMailing, cls).setUpClass()
+
+        cls.env['ir.config_parameter'].sudo().set_param('mail.catchall.domain', 'odoo.com')
+        cls.env['ir.config_parameter'].sudo().set_param('mail.default.from', 'notifications')
+        ir_mail_server_values = {
+            'smtp_host': 'smtp_host',
+            'smtp_encryption': 'none',
+        }
+        cls.env['ir.mail_server'].create([
+            {
+                'name': 'Server Odoo',
+                'from_filter': 'odoo.com',
+                ** ir_mail_server_values,
+            }, {
+                'name': 'Server STD account',
+                'from_filter': 'std@odoo.com',
+                ** ir_mail_server_values,
+            },  {
+                'name': 'Server Notifications',
+                'from_filter': 'notifications@odoo.com',
+                ** ir_mail_server_values,
+            },  {
+                'name': 'Server No From Filter',
+                'from_filter': False,
+                ** ir_mail_server_values,
+            },
+        ])
 
     @users('user_marketing')
     @mute_logger('odoo.addons.mail.models.mail_mail')
@@ -78,3 +106,109 @@ class TestMassMailing(TestMailFullCommon):
             self.assertMailTraces([recipient_info], mailing, recipient, check_mail=True)
 
         self.assertEqual(mailing.ignored, 4)
+
+    def test_mass_mailing_server_choice(self):
+        """Test that the right mail server is chosen to send the mailing.
+
+        Test also the envelop and the SMTP headers.
+        """
+        IrMailServer = type(self.env['ir.mail_server'])
+        find_mail_server = self.env['ir.mail_server']._find_mail_server
+
+        # Sanity check
+        self.assertEqual(self.env['ir.mail_server'].search_count([]), 4)
+
+        # Send one mailing
+        mailing = self.env['mailing.mailing'].create({
+            'subject': 'Mailing',
+            'email_from': 'std@odoo.com',
+        })
+        with patch.object(TestingSMTPSession, 'send_email') as send_email, \
+             patch.object(IrMailServer, '_find_mail_server', side_effect=find_mail_server) as patched_find_mail_server:
+            mailing.action_send_mail()
+        self.assertEqual(patched_find_mail_server.call_count, 1, 'Must be called only once')
+        send_email.assert_called_with(
+            smtp_from='std@odoo.com',
+            smtp_to_list=ANY,
+            message_from='std@odoo.com',
+            from_filter='std@odoo.com',
+        )
+
+        # Test sending mailing in batch
+        mailings = self.env['mailing.mailing'].create([{
+            'subject': 'Mailing',
+            'email_from': 'std@odoo.com',
+        }, {
+            'subject': 'Mailing',
+            'email_from': 'sqli@odoo.com',
+        }])
+        with patch.object(TestingSMTPSession, 'send_email') as send_email, \
+             patch.object(IrMailServer, '_find_mail_server', side_effect=find_mail_server) as patched_find_mail_server:
+            mailings.action_send_mail()
+        self.assertEqual(patched_find_mail_server.call_count, 2, 'Must be called only once per mail from')
+        send_email.assert_has_calls(
+            calls=[
+                call(
+                    smtp_from='std@odoo.com',
+                    smtp_to_list=ANY,
+                    message_from='std@odoo.com',
+                    from_filter='std@odoo.com',
+                ), call(
+                    # Must use the bounce address here because the mail server
+                    # is configured for the entire domain "odoo.com"
+                    smtp_from=MockValidator(lambda x: 'bounce' in x),
+                    smtp_to_list=ANY,
+                    message_from='sqli@odoo.com',
+                    from_filter='odoo.com',
+                ),
+            ],
+            any_order=True,
+        )
+
+        # We force a mail server on one mailing
+        mailings = self.env['mailing.mailing'].create([{
+            'subject': 'Mailing',
+            'email_from': 'std@odoo.com',
+        }, {
+            'subject': 'Mailing',
+            'email_from': 'test_force_mail_server@gmail.com',
+            'mail_server_id': self.env['ir.mail_server'].search([('from_filter', '=', 'notifications@odoo.com')]).id,
+        }])
+        with patch.object(TestingSMTPSession, 'send_email') as send_email, \
+             patch.object(IrMailServer, '_find_mail_server', side_effect=find_mail_server) as patched_find_mail_server:
+            mailings.action_send_mail()
+        self.assertEqual(patched_find_mail_server.call_count, 1, 'Must not be called when mail server is forced')
+        send_email.assert_has_calls(
+            calls=[
+                call(
+                    smtp_from='std@odoo.com',
+                    smtp_to_list=ANY,
+                    message_from='std@odoo.com',
+                    from_filter='std@odoo.com',
+                ), call(
+                    # The mail server is forced, we do not change the SMTP headers / envelop
+                    smtp_from='test_force_mail_server@gmail.com',
+                    smtp_to_list=ANY,
+                    message_from='test_force_mail_server@gmail.com',
+                    from_filter='notifications@odoo.com',
+                ),
+            ],
+            any_order=True,
+        )
+
+        # We do not have a mail server for this address email, so fall back to the
+        # "notifications@domain" email.
+        mailings = self.env['mailing.mailing'].create([{
+            'subject': 'Mailing',
+            'email_from': '"Testing" <unknow_email@unknow_domain.com>',
+        }])
+        with patch.object(TestingSMTPSession, 'send_email') as send_email, \
+             patch.object(IrMailServer, '_find_mail_server', side_effect=find_mail_server) as patched_find_mail_server:
+            mailings.action_send_mail()
+        self.assertEqual(patched_find_mail_server.call_count, 1)
+        send_email.assert_called_with(
+            smtp_from='notifications@odoo.com',
+            smtp_to_list=ANY,
+            message_from='"Testing (unknow_email@unknow_domain.com)" <notifications@odoo.com>',
+            from_filter='notifications@odoo.com',
+        )

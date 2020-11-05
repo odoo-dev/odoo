@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from unittest.mock import patch
+
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.tests.common import TransactionCase, users, warmup
 from odoo.tests import tagged
@@ -51,7 +53,7 @@ class TestMassMailPerformance(TestMassMailPerformanceBase):
         })
 
         # runbot needs +50 compared to local
-        with self.assertQueryCount(__system__=1714, marketing=1715):
+        with self.assertQueryCount(__system__=1716, marketing=1717):
             mailing.action_send_mail()
 
         self.assertEqual(mailing.sent, 50)
@@ -77,10 +79,18 @@ class TestMassMailBlPerformance(TestMassMailPerformanceBase):
             })
         self.env['mailing.performance.blacklist'].flush()
 
+        self.env['ir.mail_server'].create({
+            'name': 'Testing mail server',
+            'smtp_host': 'qsd',
+        })
+
     @users('__system__', 'marketing')
     @warmup
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink', 'odoo.tests')
     def test_send_mailing_w_bl(self):
+        IrMailServer = type(self.env['ir.mail_server'])
+        find_mail_server = self.env['ir.mail_server']._find_mail_server
+
         mailing = self.env['mailing.mailing'].create({
             'name': 'Test',
             'subject': 'Test',
@@ -91,8 +101,10 @@ class TestMassMailBlPerformance(TestMassMailPerformanceBase):
         })
 
         # runbot needs +62 compared to local
-        with self.assertQueryCount(__system__=1993, marketing=1994):
+        with self.assertQueryCount(__system__=1996, marketing=1999), \
+             patch.object(IrMailServer, '_find_mail_server', side_effect=find_mail_server) as patched_find_mail_server:
             mailing.action_send_mail()
 
+        self.assertEqual(patched_find_mail_server.call_count, 1, 'Must be called only once')
         self.assertEqual(mailing.sent, 50)
         self.assertEqual(mailing.delivered, 50)

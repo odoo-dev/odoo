@@ -2,12 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import psycopg2
+from unittest.mock import patch
 
 from odoo import api
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.addons.test_mail.tests.common import TestMailCommon
 from odoo.tests import common
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, TestingSMTPSession
 
 
 class TestMailMail(TestMailCommon):
@@ -24,6 +25,43 @@ class TestMailMail(TestMailCommon):
             mail.send()
         self.assertSentEmail(mail.env.user.partner_id, ['test@example.com'])
         self.assertEqual(len(self._mails), 1)
+
+    def test_mail_mail_sending_batch(self):
+        """Test that the mails are send in batch.
+
+        Batch are defined by the mail server and the email from field.
+        """
+        mail_server = self.env['ir.mail_server'].create({'name': 'server', 'smtp_host': 'qsd'})
+        IrMailServer = type(self.env['ir.mail_server'])
+        find_mail_server = self.env['ir.mail_server']._find_mail_server
+        connect = self.env['ir.mail_server'].connect
+
+        mails = self.env['mail.mail'].create([{
+            'body_html': '<p>Test</p>',
+            'email_to': 'test@example.com',
+            'email_from': 'test@example.com',
+            'partner_ids': [(4, self.user_employee.partner_id.id)]
+        } for _ in range(5)]) | self.env['mail.mail'].create([{
+            'body_html': '<p>Test</p>',
+            'email_to': 'test@odoo.com',
+            'email_from': 'test@odoo.com',
+            'partner_ids': [(4, self.user_employee.partner_id.id)]
+        } for _ in range(5)]) | self.env['mail.mail'].create([{
+            'body_html': '<p>Test</p>',
+            'email_to': 'test@odoo.com',
+            'email_from': 'test@odoo.com',
+            'partner_ids': [(4, self.user_employee.partner_id.id)],
+            'mail_server_id': mail_server.id,
+        } for _ in range(5)])
+
+        with patch.object(TestingSMTPSession, 'send_email') as patched_send_email,\
+             patch.object(IrMailServer, '_find_mail_server', side_effect=find_mail_server) as patched_find_mail_server,\
+             patch.object(IrMailServer, 'connect', side_effect=connect) as patched_connect:
+            mails.send()
+
+        self.assertEqual(patched_find_mail_server.call_count, 2, 'Must be called only once per mail from')
+        self.assertEqual(patched_connect.call_count, 3, 'Must be called once per batch')
+        self.assertEqual(patched_send_email.call_count, 15)
 
 
 class TestMailMailRace(common.TransactionCase):

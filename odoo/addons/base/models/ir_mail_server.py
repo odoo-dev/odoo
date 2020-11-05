@@ -23,7 +23,8 @@ import idna
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
-from odoo.tools import ustr, pycompat, formataddr
+from odoo.osv import expression
+from odoo.tools import ustr, pycompat, formataddr, email_normalize, email_domain_normalize, email_domain
 
 _logger = logging.getLogger(__name__)
 _test_logger = logging.getLogger('odoo.tests')
@@ -112,6 +113,12 @@ class IrMailServer(models.Model):
                                                                   "is used. Default priority is 10 (smaller number = higher priority)")
     active = fields.Boolean(default=True)
 
+    from_filter = fields.Char(
+      "From Filter",
+      help="Define for which email address this server can be used.\n"
+      "e.g.: notification@odoo.com\n"
+      "e.g.: odoo.com")
+
     @api.constrains('smtp_ssl_certificate', 'smtp_ssl_private_key')
     def _check_ssl_files(self):
         """We must provided both files or none."""
@@ -185,7 +192,7 @@ class IrMailServer(models.Model):
         }
 
     def connect(self, host=None, port=None, user=None, password=None, encryption=None,
-                smtp_debug=False, mail_server_id=None, ssl_certificate=None, ssl_private_key=None):
+                smtp_debug=False, mail_server_id=None, smtp_from=None, ssl_certificate=None, ssl_private_key=None):
         """Returns a new SMTP connection to the given SMTP server.
            When running in test mode, this method does nothing and returns `None`.
 
@@ -197,18 +204,16 @@ class IrMailServer(models.Model):
            :param bool smtp_debug: toggle debugging of SMTP sessions (all i/o
                               will be output in logs)
            :param mail_server_id: ID of specific mail server to use (overrides other parameters)
+           :param smtp_from: FROM SMTP envelop, used to find the best mail server
            :param ssl_certificate: filename of the SSL certificate used for authentication
            :param ssl_private_key: filename of the SSL private key used for authentication
         """
-        # Do not actually connect while running in test mode
-        if getattr(threading.currentThread(), 'testing', False):
-            return None
-
         mail_server = smtp_encryption = None
         if mail_server_id:
             mail_server = self.sudo().browse(mail_server_id)
+            smtp_from = False  # Mail server forced, do not change mail FROM
         elif not host:
-            mail_server = self.sudo().search([], order='sequence', limit=1)
+            mail_server, smtp_from = self.sudo()._find_mail_server(smtp_from)
 
         if mail_server:
             smtp_server = mail_server.smtp_host
@@ -217,6 +222,7 @@ class IrMailServer(models.Model):
             smtp_password = mail_server.smtp_pass
             smtp_encryption = mail_server.smtp_encryption
             smtp_debug = smtp_debug or mail_server.smtp_debug
+            from_filter = mail_server.from_filter
 
             smtp_ssl_certificate = mail_server.smtp_ssl_certificate
             smtp_ssl_private_key = mail_server.smtp_ssl_private_key
@@ -246,6 +252,8 @@ class IrMailServer(models.Model):
             if smtp_encryption is None and tools.config.get('smtp_ssl'):
                 smtp_encryption = 'starttls' # smtp_ssl => STARTTLS as of v7
 
+            from_filter = tools.config.get('from_filter')
+
             smtp_ssl_certificate = ssl_certificate or tools.config.get('smtp_ssl_certificate')
             smtp_ssl_private_key = ssl_private_key or tools.config.get('smtp_ssl_private_key')
             if smtp_ssl_certificate and smtp_ssl_private_key:
@@ -253,6 +261,10 @@ class IrMailServer(models.Model):
                 ssl_context.load_cert_chain(smtp_ssl_certificate, keyfile=smtp_ssl_private_key)
             else:
                 ssl_context = None
+
+        # Do not actually connect while running in test mode
+        if getattr(threading.currentThread(), 'testing', False):
+            return tools.TestingSMTPSession(from_filter, smtp_from)
 
         if not smtp_server:
             raise UserError(
@@ -290,6 +302,11 @@ class IrMailServer(models.Model):
         # Some methods of SMTP don't check whether EHLO/HELO was sent.
         # Anyway, as it may have been sent by login(), all subsequent usages should consider this command as sent.
         connection.ehlo_or_helo_if_needed()
+
+        # Store the "from_filter" of the mail server / odoo-bin argument to  know if we
+        # need to change the FROM headers or not when we will prepare the mail message
+        connection.from_filter = from_filter
+        connection.smtp_from = smtp_from
 
         return connection
 
@@ -415,24 +432,20 @@ class IrMailServer(models.Model):
             return "%s@%s" % (email_from, domain)
         return tools.config.get("email_from")
 
-    def _prepare_email_message(self, message):
+    def _prepare_email_message(self, message, smtp_session):
         # Use the default bounce address **only if** no Return-Path was
         # provided by caller.  Caller may be using Variable Envelope Return
         # Path (VERP) to detect no-longer valid email addresses.
-        smtp_from = message['Return-Path'] or self._get_default_bounce_address() or message['From']
+        bounce_address = message['Return-Path'] or self._get_default_bounce_address() or message['From']
+        smtp_from = message['From'] or bounce_address
         assert smtp_from, "The Return-Path or From header is required for any outbound email"
 
-        # The email's "Envelope From" (Return-Path), and all recipient addresses must only contain ASCII characters.
-        from_rfc2822 = extract_rfc2822_addresses(smtp_from)
-        assert from_rfc2822, ("Malformed 'Return-Path' or 'From' address: %r - "
-                              "It should contain one valid plain ASCII email") % smtp_from
-        # use last extracted email, to support rarities like 'Support@MyComp <support@mycompany.com>'
-        smtp_from = from_rfc2822[-1]
         email_to = message['To']
         email_cc = message['Cc']
         email_bcc = message['Bcc']
         del message['Bcc']
 
+        # All recipient addresses must only contain ASCII characters
         smtp_to_list = [
             address
             for base in [email_to, email_cc, email_bcc]
@@ -447,6 +460,27 @@ class IrMailServer(models.Model):
             del message['X-Forge-To']
             del message['To']           # avoid multiple To: headers!
             message['To'] = x_forge_to
+
+        # Try to not spoof the mail from headers
+        from_filter = getattr(smtp_session, 'from_filter', False)
+        smtp_from = getattr(smtp_session, 'smtp_from', False) or smtp_from
+
+        if message['From'] != smtp_from:
+            del message['From']
+            message['From'] = smtp_from
+
+        # Check if it's still possible to put the bounce address as smtp_from
+        if self._match_from_filter(bounce_address, from_filter):
+            # Mail headers FROM will be spoofed to be able to receive bounce notifications
+            # Because the mail server support the domain of the bounce address
+            smtp_from = bounce_address
+
+        # The email's "Envelope From" (Return-Path) must only contain ASCII characters.
+        smtp_from_rfc2822 = extract_rfc2822_addresses(smtp_from)
+        assert smtp_from_rfc2822, (
+            f"Malformed 'Return-Path' or 'From' address: {smtp_from} - "
+            "It should contain one valid plain ASCII email")
+        smtp_from = smtp_from_rfc2822[-1]
 
         return smtp_from, smtp_to_list, message
 
@@ -486,20 +520,31 @@ class IrMailServer(models.Model):
         :return: the Message-ID of the message that was just sent, if successfully sent, otherwise raises
                  MailDeliveryException and logs root cause.
         """
-        smtp_from, smtp_to_list, message = self._prepare_email_message(message)
+        smtp = smtp_session
+        if not smtp:
+            smtp = self.connect(
+                smtp_server, smtp_port, smtp_user, smtp_password,
+                smtp_encryption, smtp_debug, mail_server_id=mail_server_id, smtp_from=message['From'],
+                ssl_certificate=smtp_ssl_certificate, ssl_private_key=smtp_ssl_private_key)
+
+        smtp_from, smtp_to_list, message = self._prepare_email_message(message, smtp)
 
         # Do not actually send emails in testing mode!
         if getattr(threading.currentThread(), 'testing', False) or self.env.registry.in_test_mode():
             _test_logger.info("skip sending email in test mode")
+            if isinstance(smtp, tools.TestingSMTPSession):
+                # call "send_email" on the testing object
+                # so we can test properly the emails sending
+                smtp.send_email(
+                    smtp_from=smtp_from,
+                    smtp_to_list=smtp_to_list,
+                    message_from=message['From'],
+                    from_filter=getattr(smtp, 'from_filter', None),
+                )
             return message['Message-Id']
 
         try:
             message_id = message['Message-Id']
-            smtp = smtp_session
-            smtp = smtp or self.connect(
-                smtp_server, smtp_port, smtp_user, smtp_password,
-                smtp_encryption, smtp_debug, mail_server_id=mail_server_id,
-                ssl_certificate=smtp_ssl_certificate, ssl_private_key=smtp_ssl_private_key)
 
             if sys.version_info < (3, 7, 4):
                 # header folding code is buggy and adds redundant carriage
@@ -527,6 +572,94 @@ class IrMailServer(models.Model):
             _logger.info(msg)
             raise MailDeliveryException(_("Mail Delivery Failed"), msg)
         return message_id
+
+    @api.model
+    def _encapsulate_email(self, old_email, new_email):
+        """Change the FROM of the message and use the old one as name.
+
+        e.g.
+            Old From: "Admin" <admin@gmail.com>
+            New From: notifications@odoo.com
+            Output:   "Admin (admin@gmail.com)" <notifications@odoo.com>
+        """
+        if not old_email:
+            return new_email
+        old_email = old_email.replace('<', '(').replace('>', ')').replace('"', '')
+        return f'"{old_email}" <{new_email}>'
+
+    @api.model
+    def _find_mail_server(self, mail_from):
+        """Find the appropriate mail server for the given email address.
+
+        Returns: Record<ir.mail_server>, mail_from
+        - Mail server to use to send the email (None if we use the odoo-bin arguments)
+        - Email FROM to use to send the email (in some case, it might be impossible
+          to use the given email address directly if no mail server is configured for)
+        """
+        normalized_mail_from = email_normalize(mail_from)
+        mail_from_domain = email_domain(normalized_mail_from)
+        notifications_email = email_normalize(self._get_default_from_address())
+        notifications_domain = email_domain(notifications_email)
+        notifications_email_full = self._encapsulate_email(mail_from, notifications_email)
+
+        mail_servers = self.sudo().search([], order='sequence')
+
+        # 1. Try to find a mail server for the right mail from
+        mail_server = mail_servers.filtered(lambda m: email_normalize(m.from_filter) == normalized_mail_from)
+        if mail_server:
+            return mail_server[0], mail_from
+
+        mail_server = mail_servers.filtered(lambda m: email_domain_normalize(m.from_filter) == mail_from_domain)
+        if mail_server:
+            return mail_server[0], mail_from
+
+        # 2. Try to find a mail server for <notifications@domain.com>
+        if notifications_email:
+            mail_server = mail_servers.filtered(lambda m: email_normalize(m.from_filter) == notifications_email)
+            if mail_server:
+                return mail_server[0], notifications_email_full
+
+            mail_server = mail_servers.filtered(lambda m: email_domain_normalize(m.from_filter) == notifications_domain)
+            if mail_server:
+                return mail_server[0], notifications_email_full
+
+        # 3. Take the first mail server without "from_filter" because
+        # nothing else has been found... Will spoof the FROM because
+        # we have no other choices
+        mail_server = mail_servers.filtered(lambda m: not m.from_filter)
+        if mail_server:
+            return mail_server[0], mail_from
+
+        # 4. Return the first mail server even if it was configured for another domain
+        if mail_servers:
+            return mail_servers[0], mail_from
+
+        # 5: SMTP config in odoo-bin arguments
+        from_filter = tools.config.get('from_filter')
+
+        if self._match_from_filter(mail_from, from_filter):
+            return None, mail_from
+
+        if notifications_email and self._match_from_filter(notifications_email, from_filter):
+            return None, notifications_email_full
+
+        return None, mail_from
+
+    @api.model
+    def _match_from_filter(self, mail_from, from_filter):
+        """Return True is the given email address match the "from_filter" field.
+
+        The from filter can be Falsy (always match),
+        a domain name or an full email address.
+        """
+        if not from_filter:
+            return True
+
+        normalized_mail_from = email_normalize(mail_from)
+        if '@' in from_filter:
+            return email_normalize(from_filter) == normalized_mail_from
+
+        return email_domain(normalized_mail_from) == email_domain_normalize(from_filter)
 
     @api.onchange('smtp_encryption')
     def _onchange_encryption(self):

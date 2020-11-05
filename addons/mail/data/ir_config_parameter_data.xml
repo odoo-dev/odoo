@@ -13,4 +13,10 @@
         <field name="value">bounce</field>
     </record>
 
+    <!-- Notifications -->
+    <record id="icp_mail_default_from" model="ir.config_parameter">
+        <field name="key">mail.default.from</field>
+        <field name="value">notifications</field>
+    </record>
+
 </data></odoo>

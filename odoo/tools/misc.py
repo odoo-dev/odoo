@@ -1603,3 +1603,17 @@ def hmac(env, scope, message, hash_function=hashlib.sha256):
         message.encode(),
         hash_function,
     ).hexdigest()
+
+
+class MockValidator:
+    """Class used to validate input in testing with lambda.
+
+    Usage:
+        function.assert_called_with(MockValidator(lambda x: 'test' in x))
+    """
+
+    def __init__(self, validator):
+        self.validator = validator
+
+    def __eq__(self, value):
+        return bool(self.validator(value))

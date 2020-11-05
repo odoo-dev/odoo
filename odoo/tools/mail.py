@@ -535,6 +535,23 @@ def email_split_and_format(text):
         return []
     return [formataddr((name, email)) for (name, email) in email_split_tuples(text)]
 
+
+def email_domain(email):
+    """Return the domain of the given email."""
+    if not email:
+        return
+    *_, domain = email.rpartition('@')
+    return domain
+
+
+def email_domain_normalize(email_domain):
+    """Normalize a domain name to be able to compare it with another value."""
+    if not email_domain or '@' in email_domain:
+        return
+
+    return email_domain.lower()
+
+
 def email_normalize(text):
     """ Sanitize and standardize email address entries.
         A normalized email is considered as :
@@ -622,3 +639,23 @@ def formataddr(pair, charset='utf-8'):
             name = email_addr_escapes_re.sub(r'\\\g<0>', name)
             return f'"{name}" <{local}@{domain}>'
     return f"{local}@{domain}"
+
+
+class TestingSMTPSession:
+    """SMTP session object returned during the testing.
+
+    So we do not connect to real SMTP server. Store the mail
+    server id used for the SMTP connection and other information.
+
+    Can be mocked for testing to know which with arguments the email was sent.
+    """
+
+    def __init__(self, from_filter, smtp_from):
+        self.from_filter = from_filter
+        self.smtp_from = smtp_from
+
+    def quit(self):
+        pass
+
+    def send_email(self, smtp_from, smtp_to_list, message_from, from_filter=None):
+        pass

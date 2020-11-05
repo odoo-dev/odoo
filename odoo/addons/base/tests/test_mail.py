@@ -464,6 +464,7 @@ class TestEmailMessage(TransactionCase):
             """SMTP stub"""
             def __init__(this):
                 this.email_sent = False
+                this.from_filter = 'example.com'
 
             # Python 3 before 3.7.4
             def sendmail(this, smtp_from, smtp_to_list, message_str,
