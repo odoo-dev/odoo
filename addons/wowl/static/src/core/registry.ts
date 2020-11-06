@@ -11,8 +11,11 @@
  * 3. it provides a chained API to add items to the registry.
  */
 
+type Callback<T> = (key: string, value: T) => void;
+
 export class Registry<T> {
   content: { [key: string]: T } = {};
+  onAddCallbacks: Callback<T>[] = [];
 
   /**
    * Add an entry (key, value) to the registry if key is not already used. If
@@ -26,7 +29,12 @@ export class Registry<T> {
       throw new Error(`Cannot add '${key}' in this registry: it already exists`);
     }
     this.content[key] = value;
+    this.onAddCallbacks.forEach((cb) => cb(key, value));
     return this;
+  }
+
+  onAdd(cb: Callback<T>) {
+    this.onAddCallbacks.push(cb);
   }
 
   /**
