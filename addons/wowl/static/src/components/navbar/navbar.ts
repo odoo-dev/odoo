@@ -5,6 +5,7 @@ import { MenuTree } from "../../services/menus";
 import { OdooEnv } from "../../types";
 import { Dropdown } from "../dropdown/dropdown";
 import { DropdownItem } from "../dropdown/dropdown_item";
+const { useExternalListener } = hooks;
 
 export interface NavBarState {
   selectedApp: null | MenuTree;
@@ -13,26 +14,49 @@ export interface NavBarState {
 export class NavBar extends Component<{}, OdooEnv> {
   static template = "wowl.NavBar";
   static components = { Dropdown, DropdownItem };
+  currentAppSectionsExtra: MenuTree[] = [];
   actionManager = useService("action_manager");
   menuRepo = useService("menus");
 
   constructor(...args: any[]) {
     super(...args);
-    hooks.onMounted(async () => {
-      this._adapt();
-      this.env.bus.on("MENUS:APP-CHANGED", this, async () => {
-        await this.render();
-        this._adapt();
-      });
+    this.env.registries.systray.onAdd(() => {
+      this.render();
     });
-
-    const _debouncedAdapt = utils.debounce(this._adapt.bind(this), 250);
-    hooks.useExternalListener(window, "resize", _debouncedAdapt);
+    const debouncedAdapt = utils.debounce(this.adapt.bind(this), 250);
+    useExternalListener(window, "resize", debouncedAdapt);
   }
 
-  systrayItems = this._getSystrayItems();
+  mounted() {
+    this.adapt();
+    this.env.bus.on("MENUS:APP-CHANGED", this, this.render);
+  }
 
-  private async _adapt() {
+  patched() {
+    this.adapt();
+  }
+
+  willUnmount() {
+    this.env.bus.off("MENUS:APP-CHANGED", this);
+  }
+
+  get currentApp() {
+    return this.menuRepo.getCurrentApp();
+  }
+
+  get currentAppSections() {
+    return (this.currentApp && this.menuRepo.getMenuAsTree(this.currentApp.id).childrenTree) || [];
+  }
+
+  get systrayItems() {
+    return this.env.registries.systray.getAll().sort((x, y) => {
+      const xSeq = x.sequence ?? 50;
+      const ySeq = y.sequence ?? 50;
+      return ySeq - xSeq;
+    });
+  }
+
+  private async adapt() {
     // ------- Initialize -------
     // Check actual "more" dropdown state
     const moreDropdown = this.el!.querySelector<HTMLElement>(".o_menu_sections_more");
@@ -86,28 +110,10 @@ export class NavBar extends Component<{}, OdooEnv> {
     return this.render();
   }
 
-  _getSystrayItems() {
-    return this.env.registries.systray.getAll().sort((x, y) => {
-      const xSeq = x.sequence ?? 50;
-      const ySeq = y.sequence ?? 50;
-      return ySeq - xSeq;
-    });
-  }
-
   onNavBarDropdownItemSelection(ev: OwlEvent<{ payload: any }>) {
     const { payload: menu } = ev.detail;
     if (menu) {
       this.menuRepo.selectMenu(menu);
     }
   }
-
-  get currentApp() {
-    return this.menuRepo.getCurrentApp();
-  }
-
-  get currentAppSections() {
-    return (this.currentApp && this.menuRepo.getMenuAsTree(this.currentApp.id).childrenTree) || [];
-  }
-
-  currentAppSectionsExtra: MenuTree[] = [];
 }
