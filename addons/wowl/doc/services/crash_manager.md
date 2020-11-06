@@ -13,13 +13,7 @@ to some event and opens the appropriate dialogs when needed.
 
 ## API
 
-The crash_manager service does not export anything:
-
-```js
-useService("crash_manager");
-```
-
-returns `{}`.
+The crash_manager service does not export anything.
 
 ## Channels
 

@@ -3,12 +3,10 @@ import { RPCError } from "./rpc";
 import { ErrorDialog } from "../components/error_dialogs/error_dialogs";
 import { isBrowserChromium } from "../utils/ts/utility";
 
-export interface CrashManagerService {}
-
-export const crashManagerService: Service<CrashManagerService> = {
+export const crashManagerService: Service<void> = {
   name: "crash_manager",
   dependencies: ["dialog_manager"],
-  deploy(env: OdooEnv): CrashManagerService {
+  deploy(env: OdooEnv): void {
     window.addEventListener("error", (ev: ErrorEvent) => {
       const { colno, error: eventError, filename, lineno, message } = ev;
       let error;
@@ -54,7 +52,5 @@ export const crashManagerService: Service<CrashManagerService> = {
       }
       env.services.dialog_manager.open(dialogClass || ErrorDialog, { error });
     });
-
-    return {};
   },
 };
