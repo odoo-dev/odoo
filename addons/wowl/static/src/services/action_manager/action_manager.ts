@@ -32,6 +32,7 @@ export type ActionDescription = any;
 
 export type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
 export interface ActionOptions {
+  additionalContext?: { [key: string]: any };
   clearBreadcrumbs?: boolean;
   viewType?: ViewType;
   resId?: number;
@@ -227,10 +228,13 @@ function makeActionManager(env: OdooEnv): ActionManager {
    *
    * @private
    * @param {ActionRequest} actionRequest
-   * @param {ActionOptions} options
+   * @param {Context} [additionalContext={}]
    * @returns {Promise<Action>}
    */
-  async function _loadAction(actionRequest: ActionRequest, context: Context): Promise<Action> {
+  async function _loadAction(
+    actionRequest: ActionRequest,
+    additionalContext: Context = {}
+  ): Promise<Action> {
     let action;
     const jsId = `action_${++id}`;
     if (typeof actionRequest === "string" && env.registries.actions.contains(actionRequest)) {
@@ -247,7 +251,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       if (!actionCache[key]) {
         actionCache[key] = env.services.rpc("/web/action/load", {
           action_id: actionRequest,
-          context,
+          additional_context: additionalContext,
         });
       }
       action = await actionCache[key];
@@ -262,10 +266,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action.target = action.target || "current";
     }
     if (action.type === "ir.actions.act_window") {
-      if (typeof action.context === "string") {
-        const evalContext = makeContext(env.services.user.context, context, action.context);
-        action.context = evaluateExpr(action.context, evalContext);
-      }
+      action.context = makeContext(env.services.user.context, additionalContext, action.context);
       let domain = action.domain || [];
       action.domain = typeof domain === "string" ? evaluateExpr(domain, action.context) : domain;
     }
@@ -697,7 +698,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
     actionRequest: ActionRequest,
     options: ActionOptions = {}
   ): Promise<void> {
-    const action = await _loadAction(actionRequest, options);
+    const { active_id, active_ids, active_model } = options.additionalContext || {};
+    const action = await _loadAction(actionRequest, { active_id, active_ids, active_model });
     switch (action.type) {
       case "ir.actions.act_url":
         return _executeActURLAction(action);
@@ -895,7 +897,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         context.params = state;
         action = state.action;
         options = Object.assign(options, {
-          additional_context: context,
+          additionalContext: context,
           resId: state.id ? parseInt(state.id, 10) : undefined, // empty string from router state
           viewType: state.view_type,
         });
