@@ -5,7 +5,6 @@ import logging
 import re
 
 from binascii import Error as binascii_error
-from collections import defaultdict
 from operator import itemgetter
 
 from odoo import _, api, Command, fields, models, modules, tools
@@ -19,8 +18,83 @@ _image_dataurl = re.compile(r'(data:image/[a-z]+?);base64,([a-z0-9+/\n]{3,}=*)\n
 
 
 class Message(models.Model):
-    """ Messages model: system notification (replacing res.log notifications),
-        comments (OpenChatter discussion) and incoming emails. """
+    """ Message model: notification (system, replacing res.log notifications),
+    comment (user input), email (incoming emails) and user_notification
+    (user-specific notification)
+
+    Note:: Error codes / Failure types summary
+
+    * mail.notification
+      * notification_status
+        'ready', 'sent', 'bounce', 'exception', 'canceled'
+      * notification_type
+            'inbox', 'email', 'sms', 'snail'
+      * failure_type
+            # mail
+            "SMTP", "RECIPIENT", "BOUNCE", "UNKNOWN"
+            # sms
+            'sms_number_missing', 'sms_number_format', 'sms_credit',
+            'sms_server', 'sms_acc'
+            # snailmail
+            'sn_credit', 'sn_trial', 'sn_price', 'sn_fields',
+            'sn_format', 'sn_error'
+
+    * mail.mail
+      * state
+            'outgoing', 'sent', 'received', 'exception', 'cancel'
+      * failure_reason: text
+
+    * sms.sms
+      * state
+            'outgoing', 'sent', 'error', 'canceled'
+      * error_code
+            'sms_number_missing', 'sms_number_format', 'sms_credit',
+            'sms_server', 'sms_acc',
+            # mass mode specific codes
+            'sms_blacklist', 'sms_duplicate'
+
+    * snailmail.letter
+      * state
+            'pending', 'sent', 'error', 'canceled'
+      * error_code
+            'CREDIT_ERROR', 'TRIAL_ERROR', 'NO_PRICE_AVAILABLE', 'FORMAT_ERROR',
+            'UNKNOWN_ERROR',
+
+    * mailing.trace
+      * state
+        'outgoing', 'sent', 'opened', 'replied',
+        'exception', 'bounced', 'ignored'
+      * failure_type
+        # mass_mailing
+        "SMTP", "RECIPIENT", "BOUNCE", "UNKNOWN"
+        # mass_mailing_sms
+        'sms_number_missing', 'sms_number_format', 'sms_credit',
+        'sms_server', 'sms_acc'
+        # mass_mailing_sms mass mode specific codes
+        'sms_blacklist', 'sms_duplicate'
+      * ignored:
+        * mail: set in get_mail_values in composer, if email is blacklisted
+          (mail) or in opt_out / seen list (mass_mailing) or email_to is void
+          or incorrectly formatted (mass_mailing) - based on mail cancel state
+        * sms: set in _prepare_mass_sms_trace_values in composer if sms is
+          in cancel state; either blacklisted (sms) or in opt_out / seen list
+          (sms);
+        * difference: void mail -> cancel -> ignore, void sms -> error
+          sms_number_missing -> exception
+        * difference: invalid mail -> cancel -> ignore, invalid sms -> error
+          sms_number_format -> sent + bounce;
+      * exception: set in  _postprocess_sent_message (_postprocess_iap_sent_sms)
+        if mail (sms) not sent with failure type, reset if sent; also set for
+        sms in _prepare_mass_sms_trace_values if void number
+      * sent: set in _postprocess_sent_message (_postprocess_iap_sent_sms) if
+        mail (sms) sent
+      * clicked: triggered by add_click
+      * opened: triggered by add_click + blank gif (mail) + gateway reply (mail)
+      * replied: triggered by gateway reply (mail)
+      * bounced: triggered by gateway bounce (mail) or in _prepare_mass_sms_trace_values
+        if sms_number_format error when sending sms (sms)
+
+    """
     _name = 'mail.message'
     _description = 'Message'
     _order = 'id desc'
