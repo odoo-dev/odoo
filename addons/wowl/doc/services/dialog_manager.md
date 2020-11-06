@@ -29,4 +29,3 @@ class CustomDialog extends owl.Component {
     ...
 }
 ```
-
