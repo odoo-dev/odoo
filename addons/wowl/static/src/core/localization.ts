@@ -34,7 +34,7 @@ const translatedTerms: TranslatedTerms = {};
 /**
  * Eager translation function, performs translation immediately at call.
  */
-export function _t(str: string): string {
+function _t(str: string): string {
   return translatedTerms[str] || str;
 }
 
