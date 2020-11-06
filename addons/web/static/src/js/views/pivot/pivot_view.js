@@ -123,6 +123,10 @@ odoo.define('web.PivotView', function (require) {
 
             this.rendererParams.widgets = widgets;
             this.rendererParams.disableLinking = disableLinking;
+            const { searchModel } = this.controllerParams;
+            this.rendererParams.searchModel = searchModel;
+            this.rendererParams.fields = this.fields;
+            
 
             this.controllerParams.disableLinking = disableLinking;
             this.controllerParams.title = params.title || this.arch.attrs.string || _t("Untitled");

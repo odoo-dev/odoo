@@ -220,9 +220,12 @@ odoo.define('web.PivotController', function (require) {
          * @param {CustomEvent} ev
          * @private
          * */
-        _onOpenedHeaderClicked: function (ev) {
+        _onOpenedHeaderClicked: async function (ev) {
             this.model.closeGroup(ev.data.cell.groupId, ev.data.type);
-            this.update({}, { reload: false });
+            await this.update({}, { reload: false });
+            if (ev.data.callback) {
+                ev.data.callback();
+            }
         },
         /**
          * @param {CustomEvent} ev
