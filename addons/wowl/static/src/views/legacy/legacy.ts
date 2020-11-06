@@ -8,9 +8,9 @@ import {
   View,
   ViewId,
   ViewType,
-} from "../types";
-import { actionRegistry, serviceRegistry, viewRegistry } from "../registries";
-import { useService } from "../core/hooks";
+} from "../../types";
+import { actionRegistry, serviceRegistry, viewRegistry } from "../../registries";
+import { useService } from "../../core/hooks";
 
 const { whenReady } = utils;
 const odoo = (window as any).odoo;

@@ -7,7 +7,7 @@ import { Odoo, RuntimeOdoo, OdooBrowser } from "./types";
 
 // remove some day
 import "./demo_data";
-import "./views/legacy";
+import "./views/legacy/legacy";
 
 const { whenReady, loadFile } = owl.utils;
 
