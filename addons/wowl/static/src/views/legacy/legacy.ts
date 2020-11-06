@@ -57,8 +57,21 @@ odoo.define("wowl.legacySetup", async function (require: any) {
   };
   serviceRegistry.add(legacyRpcService.name, legacyRpcService);
 
+  let webClientReady = new Promise((resolve) => {
+    const busToOwlLegacyBus: Service<void> = {
+      name: "bus_to_owl_legacy_bus",
+      deploy(env: OdooEnv): void {
+        env.bus.on("WEB_CLIENT_READY", null, resolve);
+      },
+    };
+    serviceRegistry.add(busToOwlLegacyBus.name, busToOwlLegacyBus);
+  });
+
   await Promise.all([whenReady(), session.is_bound]);
   legacyEnv.qweb.addTemplates(session.owlTemplates);
+
+  await webClientReady;
+  legacyEnv.bus.trigger("web_client_ready");
 });
 
 odoo.define("wowl.ActionAdapters", function (require: any) {

@@ -52,6 +52,8 @@ declare const odoo: Odoo;
   const root = new WebClient();
   await whenReady();
   await root.mount(document.body, { position: "self" });
+  // the chat window and dialog services listen to 'web_client_ready' event in order to initialize themselves:
+  env.bus.trigger("WEB_CLIENT_READY");
 
   // prepare runtime Odoo object
   const sessionInfo = odoo.session_info;
