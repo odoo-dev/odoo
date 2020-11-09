@@ -52,7 +52,7 @@ async function deployServices(env: OdooEnv, config: OdooConfig): Promise<void> {
           })
         );
       } else {
-        services[service.name] = value;
+        services[service.name] = value || null;
       }
     }
     return Promise.all(proms);
