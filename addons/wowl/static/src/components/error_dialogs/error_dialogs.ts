@@ -103,7 +103,7 @@ export class RedirectWarningDialog extends Component<RedirectWarningDialogProps,
   message: string;
   actionId: ActionRequest;
   buttonText: string;
-  additional_context?: Object | undefined;
+  additionalContext?: Object | undefined;
   actionManager = useService("action_manager");
 
   constructor() {
@@ -114,13 +114,11 @@ export class RedirectWarningDialog extends Component<RedirectWarningDialogProps,
     this.message = message;
     this.actionId = actionId;
     this.buttonText = buttonText;
-    this.additional_context = additional_context;
+    this.additionalContext = additional_context;
   }
 
   onClick() {
-    this.actionManager.doAction(this.actionId, {
-      /** @todo before there was additional_context --> add it to ActionOptions? */
-    });
+    this.actionManager.doAction(this.actionId, { additionalContext: this.additionalContext });
   }
 
   onCancel() {
