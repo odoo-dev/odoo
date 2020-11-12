@@ -25,6 +25,10 @@
         </t>
     </template>
 
+    <template id="wowl.assets_backend" inherit_id="web.assets_backend" primary="True">
+        <xpath expr="//script[@src='/web/static/src/js/chrome/root_widget.js']" position="replace"/>
+    </template>
+
     <template id="wowl.root">&lt;!DOCTYPE html&gt;
         <html>
             <head>
@@ -41,7 +45,7 @@
                 <t t-call-assets="wowl.assets" t-js="False"/>
 
                 <t t-call-assets="web.assets_common" t-js="false"/>
-                <t t-call-assets="web.assets_backend" t-js="false"/>
+                <t t-call-assets="wowl.assets_backend" t-js="false"/>
                 <t t-call-assets="web.assets_common" t-css="false"/>
                 <t t-call-assets="web.assets_backend" t-css="false"/>
                 <t t-call-assets="wowl.assets_backend_prod_only" t-css="false"/>
