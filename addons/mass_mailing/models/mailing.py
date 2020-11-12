@@ -76,6 +76,23 @@ class MassMailing(models.Model):
         except ValueError:
             return False
 
+    @api.model
+    def _get_default_email_from(self):
+        """Return the default mail FROM for the mailing.
+
+        Can be either the email of the user who created the mailing, either the
+        notifications email if no mail server is configured for the current user email
+        address.
+        """
+        server_id = self._get_default_mail_server_id()
+        if server_id:
+            # Mail server is forced, do not change the mail FROM
+            return self.env.user.email_formatted
+
+        __, mail_from = self.env['ir.mail_server'].sudo()._find_mail_server(self.env.user.email_formatted)
+
+        return mail_from
+
     active = fields.Boolean(default=True, tracking=True)
     subject = fields.Char('Subject', help='Subject of your Mailing', required=True, translate=True)
     preview = fields.Char(
@@ -84,7 +101,7 @@ class MassMailing(models.Model):
              'In most inboxes, this is displayed next to the subject.\n'
              'Keep it empty if you prefer the first characters of your email content to appear instead.')
     email_from = fields.Char(string='Send From', required=True,
-        default=lambda self: self.env.user.email_formatted)
+        default=_get_default_email_from)
     sent_date = fields.Datetime(string='Sent Date', copy=False)
 
     schedule_type = fields.Selection([('now', 'Send now'), ('scheduled', 'Send on')], string='Schedule',
@@ -163,6 +180,10 @@ class MassMailing(models.Model):
     clicks_ratio = fields.Integer(compute="_compute_clicks_ratio", string="Number of Clicks")
     next_departure = fields.Datetime(compute="_compute_next_departure", string='Scheduled date')
 
+    warning_message = fields.Char(
+        'Warning Message', compute='_compute_warning_message',
+        help='Warning message displayed in the mailing form view')
+
     def _compute_total(self):
         for mass_mailing in self:
             total = self.env[mass_mailing.mailing_model_real].search_count(mass_mailing._parse_mailing_domain())
@@ -235,6 +256,18 @@ class MassMailing(models.Model):
                 mass_mailing.next_departure = max(schedule_date, cron_time)
             else:
                 mass_mailing.next_departure = cron_time
+
+    @api.depends('email_from', 'mail_server_id')
+    def _compute_warning_message(self):
+        for mailing in self:
+            mail_server = mailing.mail_server_id
+            if mail_server and not mail_server._match_from_filter(mailing.email_from, mail_server.from_filter):
+                mailing.warning_message = _(
+                    'This email from can not be used with this mail server.\n'
+                    'Your emails might be marked as spam on the mail clients.'
+                )
+            else:
+                mailing.warning_message = False
 
     @api.depends('mailing_type')
     def _compute_medium_id(self):
