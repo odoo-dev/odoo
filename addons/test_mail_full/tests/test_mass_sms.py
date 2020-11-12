@@ -161,7 +161,7 @@ class TestMassSMS(TestMailFullCommon):
         # wrong values
         self.assertSMSTraces(
             [{'partner': self.env['res.partner'], 'number': record.phone_nbr,
-              'content': 'Dear %s this is a mass SMS.' % record.display_name, 'state': 'bounced',
+              'content': 'Dear %s this is a mass SMS.' % record.display_name, 'state': 'exception',
               'failure_type': 'sms_number_format'}
              for record in falsy_record_1 | falsy_record_2],
             self.mailing, falsy_record_1 | falsy_record_2, check_sms=True

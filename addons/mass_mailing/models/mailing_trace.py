@@ -62,6 +62,10 @@ class MailingTrace(models.Model):
         ("RECIPIENT", "Invalid email address"),
         ("BOUNCE", "Email address rejected by destination"),
         ("UNKNOWN", "Unknown error"),
+        # mass mode
+        ("mail_bl", "Blacklisted Email"),
+        ("mail_optout", "Opted Out"),
+        ("mail_dup", "Duplicated Email"),
     ], string='Failure type')
     state_update = fields.Datetime(compute="_compute_state", string='State Update',
                                    help='Last state update of the mail',

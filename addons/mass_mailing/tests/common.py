@@ -51,11 +51,13 @@ class MassMailCase(MailCase, MockLinkTracker):
                 len(recipient_trace) == 1,
                 'MailTrace: email %s (recipient %s, state: %s, record: %s): found %s records (1 expected)' % (email, partner, state, record, len(recipient_trace))
             )
+            if 'failure_type' in recipient_info:
+                self.assertEqual(recipient_trace.failure_type, recipient_info['failure_type'])
 
             if check_mail:
                 fields_values = {'mailing_id': mailing}
-                if 'failure_type' in recipient_info:
-                    fields_values['failure_type'] = recipient_info['failure_type']
+                # if 'failure_type' in recipient_info:
+                #     fields_values['failure_type'] = recipient_info['failure_type']
                 if content:
                     fields_values['body_html_content'] = content
 
