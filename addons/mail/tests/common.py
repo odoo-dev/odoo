@@ -200,7 +200,7 @@ class MockEmail(common.BaseCase):
                 continue
             if status and mail.state != status:
                 continue
-            if (mail.email_to == email_to and not mail.recipient_ids) or (not mail.email_to and mail.recipient_ids.email) == email_to:
+            if (mail.email_to == email_to and not mail.recipient_ids) or (not mail.email_to and mail.recipient_ids.email == email_to):
                 break
         else:
             raise AssertionError('mail.mail not found for email_to %s / status %s in %s' % (email_to, status, repr([m.email_to for m in self._new_mails])))

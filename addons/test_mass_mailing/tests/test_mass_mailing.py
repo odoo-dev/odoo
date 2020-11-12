@@ -16,7 +16,7 @@ class TestMassMailing(TestMassMailCommon):
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_mailing_w_blacklist(self):
         mailing = self.mailing_bl.with_user(self.env.user)
-        recipients = self._create_test_blacklist_records(count=5)
+        recipients = self._create_mailing_test_records(count=5)
 
         # blacklist records 3 and 4
         self.env['mail.blacklist'].create({'email': recipients[3].email_normalized})
@@ -41,7 +41,7 @@ class TestMassMailing(TestMassMailCommon):
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_mailing_w_opt_out(self):
         mailing = self.mailing_bl.with_user(self.env.user)
-        recipients = self._create_test_blacklist_records(model='mailing.test.optout', count=5)
+        recipients = self._create_mailing_test_records(model='mailing.test.optout', count=5)
 
         # optout records 0 and 1
         (recipients[0] | recipients[1]).write({'opt_out': True})

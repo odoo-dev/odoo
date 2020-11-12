@@ -39,27 +39,49 @@ class TestMassMailing(TestMailFullCommon):
             'body_html': jinja_html,
             'mailing_model_id': self.env['ir.model']._get('mailing.test.optout').id,
         })
-        recipients = self._create_test_blacklist_records(model='mailing.test.optout', count=10)
+        recipients = self._create_mailing_test_records(model='mailing.test.optout', count=10)
 
         # optout records 1 and 2
         (recipients[1] | recipients[2]).write({'opt_out': True})
         # blacklist records 3 and 4
         self.env['mail.blacklist'].create({'email': recipients[3].email_normalized})
         self.env['mail.blacklist'].create({'email': recipients[4].email_normalized})
+        # have a duplicate email for 9
+        recipient_dup_1 = recipients[9].copy()
+        # have a void mail
+        recipient_void_1 = self.env['mailing.test.optout'].create({'name': 'TestRecord_void_1'})
+        # have a falsy mail
+        recipient_falsy_1 = self.env['mailing.test.optout'].create({
+            'name': 'TestRecord_falsy_1',
+            'email_from': 'falsymail'
+        })
+        recipients_all = recipients + recipient_dup_1 + recipient_void_1 + recipient_falsy_1
 
-        mailing.write({'mailing_domain': [('id', 'in', recipients.ids)]})
+        mailing.write({'mailing_domain': [('id', 'in', recipients_all.ids)]})
         mailing.action_put_in_queue()
         with self.mock_mail_gateway(mail_unlink_sent=False):
             mailing._process_mass_mailing_queue()
 
-        for recipient in recipients:
+        for recipient in recipients_all:
             recipient_info = {
                 'email': recipient.email_normalized,
                 'content': 'Hello <span class="text-muted">%s</span' % recipient.name}
+            # opt-out: ignored (cancel mail)
             if recipient in recipients[1] | recipients[2]:
                 recipient_info['state'] = 'ignored'
+            # blacklisted: ignored (cancel mail)
             elif recipient in recipients[3] | recipients[4]:
                 recipient_info['state'] = 'ignored'
+            # duplicates: ignored (cancel mail)
+            elif recipient == recipient_dup_1:
+                recipient_info['state'] = 'ignored'
+            # void: ignored (cancel mail)
+            elif recipient == recipient_void_1:
+                recipient_info['state'] = 'ignored'
+            # falsy: ignored (cancel mail)
+            elif recipient == recipient_falsy_1:
+                recipient_info['state'] = 'ignored'
+                recipient_info['email'] = recipient.email_from  # normalized is False but email should be falsymail
             else:
                 email = self._find_sent_mail_wemail(recipient.email_normalized)
                 # preview correctly integrated rendered jinja
@@ -77,4 +99,9 @@ class TestMassMailing(TestMailFullCommon):
 
             self.assertMailTraces([recipient_info], mailing, recipient, check_mail=True)
 
-        self.assertEqual(mailing.ignored, 4)
+        self.assertEqual(mailing.sent, 0, 'Mailing: sent: 0 (still outgoing mails)')
+        self.assertEqual(mailing.scheduled, 6, 'Mailing: scheduled: 10 valid - 2 bl - 2 optout')
+        self.assertEqual(mailing.ignored, 7, 'Mailing: ignored: 2 bl + 2 optout + 3 invalid')
+        self.assertEqual(mailing.failed, 0)
+        self.assertEqual(mailing.expected, 6)
+        self.assertEqual(mailing.delivered, 0)

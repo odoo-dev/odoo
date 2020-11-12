@@ -13,7 +13,7 @@ class MassMailCase(MailCase, MockLinkTracker):
         :param recipients_info: list[{
             'partner': res.partner record (may be empty),
             'email': email used when sending email (may be empty, computed based on partner),
-            'state': outgoing / sent / open / reply / error / cancel (sent by default),
+            'state': outgoing / sent / ignored / bounced / exception / opened (sent by default) (sent by default),
             'record: linked record,
             'content': UDPATE ME
             'failure_type': optional: UPDATE ME
@@ -33,7 +33,7 @@ class MassMailCase(MailCase, MockLinkTracker):
             partner = recipient_info.get('partner', self.env['res.partner'])
             email = recipient_info.get('email')
             state = recipient_info.get('state', 'sent')
-            record = recipient_info.get('record')
+            record = recipient_info.get('record', records[0] if records and len(records) == 1 else None)
             content = recipient_info.get('content')
             if email is None and partner:
                 email = partner.email_normalized
@@ -53,13 +53,15 @@ class MassMailCase(MailCase, MockLinkTracker):
 
                 if state == 'sent':
                     self.assertMailMailWEmails([email], 'sent', content, fields_values=fields_values)
-                elif state == 'replied':  # replied imply something has been sent
+                elif state in ['opened', 'replied']:  # replied imply something has been sent
                     self.assertMailMailWEmails([email], 'sent', content, fields_values=fields_values)
                 elif state == 'ignored':
                     self.assertMailMailWEmails([email], 'cancel', content, fields_values=fields_values)
                 elif state == 'exception':
                     self.assertMailMailWEmails([email], 'exception', content, fields_values=fields_values)
                 elif state == 'canceled':
+                    self.assertMailMailWEmails([email], 'canceled', content, fields_values=fields_values)
+                elif state == 'bounced':
                     self.assertMailMailWEmails([email], 'canceled', content, fields_values=fields_values)
                 else:
                     raise NotImplementedError()

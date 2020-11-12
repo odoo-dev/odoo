@@ -23,16 +23,24 @@ class TestMassMailCommon(MassMailCommon, TestMailCommon):
         })
 
     @classmethod
-    def _create_test_blacklist_records(cls, model='mailing.test.blacklist', count=1):
+    def _create_mailing_test_records(cls, model='mailing.test.blacklist', partners=None, count=1):
         """ Helper to create data. Currently simple, to be improved. """
         Model = cls.env[model]
         email_field = 'email' if 'email' in Model else 'email_from'
+        partner_field = 'customer_id' if 'customer_id' in Model else 'partner_id'
 
-        records = cls.env[model].create([{
-            'name': 'TestRecord_%02d' % x,
-            email_field: '"TestCustomer %02d" <test.record.%02d@test.example.com>' % (x, x),
-        } for x in range(0, count)])
-        return records
+        vals_list = []
+        for x in range(0, count):
+            vals = {
+                'name': 'TestRecord_%02d' % x,
+                email_field: '"TestCustomer %02d" <test.record.%02d@test.example.com>' % (x, x),
+            }
+            if partners:
+                vals[partner_field] = partners[x % len(partners)]
+
+            vals_list.append(vals)
+
+        return cls.env[model].create(vals_list)
 
     @classmethod
     def _create_bounce_trace(cls, record, dt=None):

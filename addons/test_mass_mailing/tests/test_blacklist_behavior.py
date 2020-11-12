@@ -17,7 +17,7 @@ class TestAutoBlacklist(common.TestMassMailCommon):
             'bounced_partner': self.env['res.partner'].sudo(), 'bounced_message': self.env['mail.message'].sudo()
         }
 
-        target = self._create_test_blacklist_records()[0]
+        target = self._create_mailing_test_records()[0]
         # create bounced history of 4 statistics
         for idx in range(4):
             trace = self._create_bounce_trace(target, dt=datetime.datetime.now() - datetime.timedelta(weeks=idx+2))

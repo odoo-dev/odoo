@@ -54,18 +54,22 @@ class MassSMSCase(SMSCase):
         self.assertEqual(set(found_traces.mapped('res_id')), set(records.ids))
         self.assertTrue(all(s.mass_mailing_id == mailing for s in found_traces))
 
-    def assertSMSStatistics(self, recipients_info, mailing, records, check_sms=True):
+    def assertSMSTraces(self, recipients_info, mailing, records, check_sms=True):
         """ Check content of notifications.
 
         :param recipients_info: list[{
           'partner': res.partner record (may be empty),
           'number': number used for notification (may be empty, computed based on partner),
-          'state': outgoing / sent / ignored / exception / opened (sent by default),
+          'state': outgoing / sent / ignored / bounced / exception / opened (sent by default),
           'record: linked record,
           'content': optional: if set, check content of sent SMS
           'failure_type': optional: sms_number_missing / sms_number_format / sms_credit / sms_server
           },
           { ... }
+        :param mailing: a mailing.mailing record on which traces have been
+          generated;
+        :param records: records on which we search for traces using their IDs;
+        :param check_sms: if set, check sms.sms records matching traces;
         ]
         """
         traces = self.env['mailing.trace'].search([
@@ -94,9 +98,11 @@ class MassSMSCase(SMSCase):
                 elif state == 'outgoing':
                     self.assertSMSOutgoing(partner, number, content)
                 elif state == 'exception':
-                    self.assertSMSFailed(partner, number, recipient_info.get('failure_type'), content)
+                    self.assertSMSFailed(partner, number, recipient_info['failure_type'], content)
                 elif state == 'ignored':
-                    self.assertSMSCanceled(partner, number, recipient_info.get('failure_type', False), content)
+                    self.assertSMSCanceled(partner, number, recipient_info['failure_type'], content)
+                elif state == 'bounced':
+                    self.assertSMSFailed(partner, number, recipient_info['failure_type'], content)
                 else:
                     raise NotImplementedError()
 
