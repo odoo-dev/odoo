@@ -47,7 +47,7 @@
                 <t t-call-assets="web.assets_common" t-js="false"/>
                 <t t-call-assets="wowl.assets_backend" t-js="false"/>
                 <t t-call-assets="web.assets_common" t-css="false"/>
-                <t t-call-assets="web.assets_backend" t-css="false"/>
+                <t t-call-assets="wowl.assets_backend" t-css="false"/>
                 <t t-call-assets="wowl.assets_backend_prod_only" t-css="false"/>
 
                 <t t-call-assets="wowl.assets" t-css="False"/>
