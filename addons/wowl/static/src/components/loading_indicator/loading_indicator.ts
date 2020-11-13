@@ -16,10 +16,11 @@ export class LoadingIndicator extends Component<{}, OdooEnv> {
   static template = "wowl.LoadingIndicator";
   state = useState({
     count: 0,
-    isShown: false,
+    show: false,
   });
   rpcIds = new Set();
   blockUITimer?: number;
+  debugMode = true;
 
   constructor() {
     super(...arguments);
@@ -29,7 +30,7 @@ export class LoadingIndicator extends Component<{}, OdooEnv> {
 
   requestCall(rpcId: number) {
     if (this.state.count === 0) {
-      this.state.isShown = true;
+      this.state.show = true;
       this.blockUITimer = this.env.browser.setTimeout(this.env.services.ui.block, 3000);
     }
     this.rpcIds.add(rpcId);
@@ -42,7 +43,7 @@ export class LoadingIndicator extends Component<{}, OdooEnv> {
     if (this.state.count === 0) {
       clearTimeout(this.blockUITimer);
       this.env.services.ui.unblock();
-      this.state.isShown = false;
+      this.state.show = false;
     }
   }
 }
