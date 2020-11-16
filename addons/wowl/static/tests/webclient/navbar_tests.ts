@@ -17,6 +17,7 @@ class MySystrayItem extends Component {
 }
 
 let baseConfig: TestConfig;
+let navbar: NavBar;
 
 QUnit.module("Navbar", {
   async beforeEach() {
@@ -44,11 +45,14 @@ QUnit.module("Navbar", {
     };
     baseConfig = { browser, serviceRegistry, serverData, systrayRegistry };
   },
+  afterEach() {
+    // navbar.destroy();
+  },
 });
 
 QUnit.test("can be rendered", async (assert) => {
   const env = await makeTestEnv(baseConfig);
-  const navbar = await mount(NavBar, { env });
+  navbar = await mount(NavBar, { env });
   assert.containsOnce(
     navbar.el!,
     ".o_navbar_apps_menu button.o_dropdown_toggler",
@@ -58,7 +62,7 @@ QUnit.test("can be rendered", async (assert) => {
 
 QUnit.test("dropdown menu can be toggled", async (assert) => {
   const env = await makeTestEnv(baseConfig);
-  const navbar = await mount(NavBar, { env });
+  navbar = await mount(NavBar, { env });
 
   const dropdown = navbar.el!.querySelector<HTMLElement>(".o_navbar_apps_menu")!;
   await click(dropdown, "button.o_dropdown_toggler");
@@ -67,9 +71,34 @@ QUnit.test("dropdown menu can be toggled", async (assert) => {
   assert.containsNone(dropdown, "ul.o_dropdown_menu");
 });
 
+QUnit.test("data-menu-xmlid attribute on AppsMenu items", async (assert) => {
+  const newMenus: any = {
+    root: { id: "root", children: [1, 2], name: "root", appID: "root" },
+    1: { id: 1, children: [], name: "App0 with xmlid", appID: 1, xmlid: "wowl" },
+    2: { id: 2, children: [], name: "App1 without xmlid", appID: 2 },
+  };
+  baseConfig.serverData!.menus = newMenus;
+  const env = await makeTestEnv(baseConfig);
+  navbar = await mount(NavBar, { env });
+
+  const appsMenu = navbar.el!.querySelector<HTMLElement>(".o_navbar_apps_menu")!;
+  await click(appsMenu, "button.o_dropdown_toggler");
+  const menuItems = appsMenu.querySelectorAll("li");
+  assert.strictEqual(
+    menuItems[0].dataset.menuXmlid,
+    "wowl",
+    "first menu item should have the correct data-menu-xmlid attribute set"
+  );
+  assert.strictEqual(
+    menuItems[1].dataset.menuXmlid,
+    undefined,
+    "second menu item should not have any data-menu-xmlid attribute set"
+  );
+});
+
 QUnit.test("navbar can display systray items", async (assert) => {
   const env = await makeTestEnv(baseConfig);
-  const navbar = await mount(NavBar, { env });
+  navbar = await mount(NavBar, { env });
   assert.containsOnce(navbar.el!, "li.my-item");
 });
 
@@ -112,7 +141,7 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
   systrayRegistry.add(item4.name, item4);
 
   const env = await makeTestEnv({ ...baseConfig, systrayRegistry });
-  const navbar = await mount(NavBar, { env });
+  navbar = await mount(NavBar, { env });
 
   const menuSystray = navbar.el!.getElementsByClassName("o_menu_systray")[0] as HTMLElement;
 
@@ -145,7 +174,7 @@ QUnit.test("can adapt with 'more' menu sections behavior", async (assert) => {
 
   // Set menu and mount
   env.services.menus.setCurrentMenu(1);
-  const navbar = await mount(MyNavbar, { env });
+  navbar = await mount(MyNavbar, { env });
   assert.containsN(
     navbar.el!,
     ".o_menu_sections > *:not(.o_menu_sections_more):not(.d-none)",

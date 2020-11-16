@@ -6,15 +6,26 @@ import { OdooEnv } from "../../types";
 import { Dropdown } from "../../components/dropdown/dropdown";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { debounce } from "../../utils/misc";
-const { useExternalListener } = hooks;
+const { onMounted, useExternalListener } = hooks;
 
 export interface NavBarState {
   selectedApp: null | MenuTree;
 }
 
+class AppsMenuItem extends DropdownItem {
+  constructor() {
+    super(...arguments);
+    onMounted(() => {
+      if (this.props.payload.xmlid) {
+        this.el!.dataset.menuXmlid = this.props.payload.xmlid;
+      }
+    });
+  }
+}
+
 export class NavBar extends Component<{}, OdooEnv> {
   static template = "wowl.NavBar";
-  static components = { Dropdown, DropdownItem };
+  static components = { Dropdown, DropdownItem, AppsMenuItem };
   currentAppSectionsExtra: MenuTree[] = [];
   actionManager = useService("action_manager");
   menuRepo = useService("menus");
