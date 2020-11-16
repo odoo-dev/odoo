@@ -1,12 +1,8 @@
 import { Component } from "@odoo/owl";
 
-const odoo = (window as any).odoo;
-
-odoo.define("root.widget", function (require: any) {
-  "use strict";
-
+(window as any).odoo.define("root.widget", function (require: any) {
   require("wowl.legacySetup");
 
-  const AbstractService = require("web.AbstractService");
-  return new AbstractService(Component.env);
+  const { ComponentAdapter } = require("web.OwlCompatibility");
+  return new ComponentAdapter(null, { Component }); // for its method _trigger_up
 });

@@ -26,7 +26,18 @@
     </template>
 
     <template id="wowl.assets_backend" inherit_id="web.assets_backend" primary="True">
+        <xpath expr="//script[@src='/web/static/src/js/chrome/abstract_web_client.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/action_manager.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/action_manager_act_window.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/action_manager_report.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/apps_menu.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/menu.js']" position="replace"/>
         <xpath expr="//script[@src='/web/static/src/js/chrome/root_widget.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/systray_menu.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/user_menu.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/web_client.js']" position="replace"/>
+
+        <xpath expr="//script[@src='/web/static/src/js/services/crash_manager_service.js']" position="replace"/>
     </template>
 
     <template id="wowl.root">&lt;!DOCTYPE html&gt;

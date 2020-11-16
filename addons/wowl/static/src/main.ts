@@ -10,6 +10,8 @@ import "./demo_data";
 import { legacySetupProm } from "./legacy/legacy_setup";
 import { mapLegacyEnvToWowlEnv } from "./legacy/legacy";
 import "./legacy/root_widget";
+import "./legacy/systray_menu";
+import "./legacy/web_client";
 
 const { whenReady, loadFile } = owl.utils;
 

@@ -21,6 +21,7 @@ odoo.define("wowl.legacySetup", async function (require: any) {
   const AbstractService = require("web.AbstractService");
   const legacyEnv = require("web.env");
   const session = require("web.session");
+  const makeLegacyWebClientService = require("wowl.pseudo_web_client");
 
   config.mode = legacyEnv.isDebug() ? "dev" : "prod";
   AbstractService.prototype.deployServices(legacyEnv);
@@ -35,6 +36,9 @@ odoo.define("wowl.legacySetup", async function (require: any) {
 
   const legacySessionService = makeLegacySessionService(legacyEnv, session);
   serviceRegistry.add(legacySessionService.name, legacySessionService);
+
+  const legacyWebClientService = makeLegacyWebClientService(legacyEnv);
+  serviceRegistry.add(legacyWebClientService.name, legacyWebClientService);
 
   await Promise.all([whenReady(), session.is_bound]);
   legacyEnv.qweb.addTemplates(session.owlTemplates);
@@ -54,22 +58,18 @@ odoo.define("wowl.legacySystrayMenuItems", function (require: any) {
   // registers the legacy systray menu items from the legacy systray registry
   // to the wowl one, but wrapped into Owl components
   legacySystrayMenuItems.forEach((item, index) => {
-    // blacklisting already wowl converted items
-    const blacklist = ["UserMenu"];
-    if (!blacklist.includes(item.prototype.template)) {
-      const name = `_legacy_systray_item_${index}`;
+    const name = `_legacy_systray_item_${index}`;
 
-      class SystrayItem extends Component {
-        static template = tags.xml`<SystrayItemAdapter Component="Widget" />`;
-        static components = { SystrayItemAdapter };
-        Widget = item;
-      }
-
-      systrayRegistry.add(name, {
-        name,
-        Component: SystrayItem,
-        sequence: item.prototype.sequence,
-      });
+    class SystrayItem extends Component {
+      static template = tags.xml`<SystrayItemAdapter Component="Widget" />`;
+      static components = { SystrayItemAdapter };
+      Widget = item;
     }
+
+    systrayRegistry.add(name, {
+      name,
+      Component: SystrayItem,
+      sequence: item.prototype.sequence,
+    });
   });
 });
