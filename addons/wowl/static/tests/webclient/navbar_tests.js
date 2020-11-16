@@ -69,6 +69,46 @@ QUnit.test("dropdown menu can be toggled", async (assert) => {
   navbar.destroy();
 });
 
+QUnit.test("data-menu-xmlid attribute on AppsMenu items", async (assert) => {
+  baseConfig.serverData.menus = {
+    root: { id: "root", children: [1, 2], name: "root", appID: "root" },
+    1: { id: 1, children: [3, 4], name: "App0 with xmlid", appID: 1, xmlid: "wowl" },
+    2: { id: 2, children: [], name: "App1 without xmlid", appID: 2 },
+    3: { id: 3, children: [], name: "Menu without children", appID: 1, xmlid: "menu_3" },
+    4: { id: 4, children: [5], name: "Menu with children", appID: 1 },
+    5: { id: 5, children: [], name: "Sub menu", appID: 1, xmlid: "menu_5" },
+  };
+  const env = await makeTestEnv(baseConfig);
+  const target = getFixture();
+  const navbar = await mount(NavBar, { env, target });
+
+  // check apps
+  const appsMenu = navbar.el.querySelector(".o_navbar_apps_menu");
+  await click(appsMenu, "button.o_dropdown_toggler");
+  const menuItems = appsMenu.querySelectorAll("li");
+  assert.strictEqual(
+    menuItems[0].dataset.menuXmlid,
+    "wowl",
+    "first menu item should have the correct data-menu-xmlid attribute set"
+  );
+  assert.strictEqual(
+    menuItems[1].dataset.menuXmlid,
+    undefined,
+    "second menu item should not have any data-menu-xmlid attribute set"
+  );
+
+  // check menus
+  env.services.menu.setCurrentMenu(1);
+  await nextTick();
+  assert.containsOnce(navbar, '.o_menu_sections .o_dropdown_item[data-menu-xmlid=menu_3]');
+
+  // check sub menus
+  await click(navbar.el.querySelector('.o_menu_sections .o_dropdown_toggler'));
+  assert.containsOnce(navbar, '.o_menu_sections .o_dropdown_item[data-menu-xmlid=menu_5]');
+
+  navbar.destroy();
+});
+
 QUnit.test("navbar can display current active app", async (assert) => {
   const env = await makeTestEnv(baseConfig);
   const target = getFixture();

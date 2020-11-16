@@ -1,10 +1,22 @@
 /** @odoo-module **/
 
 import { useService } from "../../core/hooks";
+import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { debounce } from "../../utils/misc";
 
 const { Component, hooks } = owl;
-const { useExternalListener } = hooks;
+const { onMounted, useExternalListener } = hooks;
+
+class MenuItem extends DropdownItem {
+  setup() {
+    super.setup();
+    onMounted(() => {
+      if (this.props.payload.xmlid) {
+        this.el.dataset.menuXmlid = this.props.payload.xmlid;
+      }
+    });
+  }
+}
 
 export class NavBar extends Component {
   setup() {
@@ -124,3 +136,4 @@ export class NavBar extends Component {
   }
 }
 NavBar.template = "wowl.NavBar";
+NavBar.components = { MenuItem };
