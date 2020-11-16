@@ -31,6 +31,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             onChangeOrder(this._onPrevOrder, this._onNewOrder);
             useErrorHandlers();
             this.payment_interface = null;
+            this.error = false;
         }
         get currentOrder() {
             return this.env.pos.get_order();
@@ -167,6 +168,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                     syncedOrderBackendIds = await this.env.pos.push_single_order(this.currentOrder);
                 }
             } catch (error) {
+                this.error = true;
                 if (error instanceof Error) {
                     throw error;
                 } else {
@@ -207,7 +209,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             }
         }
         get nextScreen() {
-            return 'ReceiptScreen';
+            return !this.error? 'ReceiptScreen' : 'PaymentScreen';
         }
         async _isOrderValid(isForceValidate) {
             if (this.currentOrder.get_orderlines().length === 0) {
