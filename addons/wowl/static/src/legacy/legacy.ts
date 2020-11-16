@@ -220,7 +220,7 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
         controllerRef = hooks.useRef("controller");
 
         Widget = action;
-        widgetArgs = [this, this.props.action, {}];
+        widgetArgs = [this.props.action, {}];
         widget = this.props.state && this.props.state.__legacy_widget__;
 
         constructor() {
