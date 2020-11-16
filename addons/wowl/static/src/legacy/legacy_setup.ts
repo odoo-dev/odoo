@@ -1,6 +1,10 @@
-import { Component, config, utils } from "@odoo/owl";
-import { serviceRegistry } from "../registries";
-import { makeLegacyActionManagerService, makeLegacyRpcService } from "./legacy";
+import { Component, config, tags, utils } from "@odoo/owl";
+import { serviceRegistry, systrayRegistry } from "../registries";
+import {
+  makeLegacyActionManagerService,
+  makeLegacyRpcService,
+  makeLegacySessionService,
+} from "./legacy";
 
 let legacySetupResolver: (...args: any[]) => void;
 
@@ -29,7 +33,43 @@ odoo.define("wowl.legacySetup", async function (require: any) {
   const legacyRpcService = makeLegacyRpcService(legacyEnv);
   serviceRegistry.add(legacyRpcService.name, legacyRpcService);
 
+  const legacySessionService = makeLegacySessionService(legacyEnv, session);
+  serviceRegistry.add(legacySessionService.name, legacySessionService);
+
   await Promise.all([whenReady(), session.is_bound]);
   legacyEnv.qweb.addTemplates(session.owlTemplates);
   legacySetupResolver(legacyEnv);
+});
+
+odoo.define("wowl.legacySystrayMenuItems", function (require: any) {
+  require("wowl.legacySetup");
+  const { ComponentAdapter } = require("web.OwlCompatibility");
+  const legacySystrayMenu = require("web.SystrayMenu");
+
+  class SystrayItemAdapter extends ComponentAdapter {
+    env = Component.env;
+  }
+
+  const legacySystrayMenuItems = legacySystrayMenu.Items as any[];
+  // registers the legacy systray menu items from the legacy systray registry
+  // to the wowl one, but wrapped into Owl components
+  legacySystrayMenuItems.forEach((item, index) => {
+    // blacklisting already wowl converted items
+    const blacklist = ["UserMenu"];
+    if (!blacklist.includes(item.prototype.template)) {
+      const name = `_legacy_systray_item_${index}`;
+
+      class SystrayItem extends Component {
+        static template = tags.xml`<SystrayItemAdapter Component="Widget" />`;
+        static components = { SystrayItemAdapter };
+        Widget = item;
+      }
+
+      systrayRegistry.add(name, {
+        name,
+        Component: SystrayItem,
+        sequence: item.prototype.sequence,
+      });
+    }
+  });
 });

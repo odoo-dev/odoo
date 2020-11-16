@@ -45,6 +45,19 @@ export function makeLegacyRpcService(legacyEnv: any): Service<void> {
   };
 }
 
+export function makeLegacySessionService(legacyEnv: any, session: any): Service<void> {
+  return {
+    name: "legacy_session",
+    deploy(env: OdooEnv): void {
+      // userContext
+      const userContext = Object.create(env.services.user.context);
+      legacyEnv.session.userContext = userContext;
+      // usually core.session
+      session.user_context = userContext;
+    },
+  };
+}
+
 export function mapLegacyEnvToWowlEnv(legacyEnv: any, wowlEnv: OdooEnv) {
   // rpc
   legacyEnv.session.rpc = (...args: any[]) => {
