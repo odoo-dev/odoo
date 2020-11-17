@@ -103,11 +103,13 @@ export type Action =
 type ReportType = "html" | "pdf" | "text";
 type WkhtmltopdfState = "ok" | "broken" | "install" | "upgrade" | "workers";
 
+type ControllerProps = ActionProps | ViewProps | ClientActionProps;
+
 interface Controller {
   jsId: string;
   Component: Type<Component<{}, OdooEnv>>;
   action: ClientAction | ActWindowAction;
-  props: ActionProps | ViewProps | ClientActionProps;
+  props: ControllerProps;
   exportedState?: any;
 }
 interface ViewController extends Controller {
@@ -128,7 +130,7 @@ interface ActionManagerUpdateInfo {
   type: "MAIN" | "OPEN_DIALOG" | "CLOSE_DIALOG";
   id?: number;
   Component?: Type<Component<{}, OdooEnv>>;
-  props?: Controller;
+  props?: ControllerProps;
   dialogProps?: {
     title: string;
   };
