@@ -20,15 +20,13 @@ export class NavBar extends Component<{}, OdooEnv> {
 
   constructor(...args: any[]) {
     super(...args);
-    this.env.registries.systray.onAdd(() => {
-      this.render();
-    });
     const debouncedAdapt = utils.debounce(this.adapt.bind(this), 250);
     useExternalListener(window, "resize", debouncedAdapt);
   }
 
   mounted() {
     this.adapt();
+    this.env.registries.systray.on("UPDATE", this, this.render);
     this.env.bus.on("MENUS:APP-CHANGED", this, this.render);
   }
 
@@ -37,6 +35,7 @@ export class NavBar extends Component<{}, OdooEnv> {
   }
 
   willUnmount() {
+    this.env.registries.systray.off("UPDATE", this);
     this.env.bus.off("MENUS:APP-CHANGED", this);
   }
 

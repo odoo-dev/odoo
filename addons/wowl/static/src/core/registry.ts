@@ -1,3 +1,12 @@
+import { core } from "@odoo/owl";
+const { EventBus } = core;
+
+export interface Payload<T> {
+  operation: "add" | "delete";
+  key: string;
+  value: T;
+}
+
 /**
  * Registry
  *
@@ -11,11 +20,8 @@
  * 3. it provides a chained API to add items to the registry.
  */
 
-type Callback<T> = (key: string, value: T) => void;
-
-export class Registry<T> {
+export class Registry<T> extends EventBus {
   content: { [key: string]: T } = {};
-  onAddCallbacks: Callback<T>[] = [];
 
   /**
    * Add an entry (key, value) to the registry if key is not already used. If
@@ -29,12 +35,9 @@ export class Registry<T> {
       throw new Error(`Cannot add '${key}' in this registry: it already exists`);
     }
     this.content[key] = value;
-    this.onAddCallbacks.forEach((cb) => cb(key, value));
+    const payload: Payload<T> = { operation: "add", key, value };
+    this.trigger("UPDATE", payload);
     return this;
-  }
-
-  onAdd(cb: Callback<T>) {
-    this.onAddCallbacks.push(cb);
   }
 
   /**
@@ -69,6 +72,9 @@ export class Registry<T> {
    * Remove an item from the registry
    */
   remove(key: string) {
+    const value = this.content[key];
     delete this.content[key];
+    const payload: Payload<T> = { operation: "delete", key, value };
+    this.trigger("UPDATE", payload);
   }
 }
