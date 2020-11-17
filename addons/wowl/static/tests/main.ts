@@ -24,6 +24,7 @@ import "./core/utils_tests";
 import "./services/crash_manager_tests";
 import "./components/error_dialogs_tests";
 import "./services/dialog_manager_tests";
+import "./services/title_tests";
 
 (async () => {
   await setupTests();

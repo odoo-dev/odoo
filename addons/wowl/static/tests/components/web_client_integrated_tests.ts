@@ -10,7 +10,7 @@ import {
   actionManagerService,
 } from "../../src/services/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
-import { makeFakeRouterService } from "../helpers/mocks";
+import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";
 
 import { viewManagerService } from "../../src/services/view_manager";
@@ -57,13 +57,15 @@ function beforeEachActionManager(): TestConfig {
   const actionsRegistry = new Registry<any>();
   actionsRegistry.add("clientAction", ClientAction);
   const services = new Registry<any>();
-  services.add("user", makeFakeUserService());
-  services.add(notificationService.name, notificationService);
-  services.add("menus", menusService);
-  services.add("action_manager", actionManagerService);
-  services.add("router", makeFakeRouterService());
-  services.add("view_manager", viewManagerService);
-  services.add("model", modelService);
+  services
+    .add("user", makeFakeUserService())
+    .add(notificationService.name, notificationService)
+    .add("menus", menusService)
+    .add("action_manager", actionManagerService)
+    .add("router", makeFakeRouterService())
+    .add("view_manager", viewManagerService)
+    .add("model", modelService)
+    .add(fakeTitleService.name, fakeTitleService);
 
   const browser = {
     setTimeout: window.setTimeout.bind(window),

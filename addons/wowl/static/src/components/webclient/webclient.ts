@@ -10,12 +10,14 @@ export class WebClient extends Component<{}, OdooEnv> {
   static template = "wowl.WebClient";
   menus = useService("menus");
   actionManager = useService("action_manager");
+  title = useService("title");
   router = useService("router");
   user = useService("user");
   Components = this.env.registries.Components.getEntries();
 
   constructor(...args: any[]) {
     super(...args);
+    this.title.setParts({ zopenerp: "Odoo" }); // zopenerp is easy to grep
     hooks.onMounted(() => {
       this.env.bus.on("ROUTE_CHANGE", this, this.loadRouterState);
       this.env.bus.on("ACTION_MANAGER:MAIN-ACTION-PUSHED", this, this.replaceRouterState);

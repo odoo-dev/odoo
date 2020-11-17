@@ -4,6 +4,7 @@ import { RPC } from "../../src/services/rpc";
 import type { Deferred } from "./utility";
 import { Query, Route, Router, makePushState } from "../../src/services/router";
 import { Cookie, cookieService } from "../../src/services/cookie";
+import { titleService } from "../../src/services/title";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -268,6 +269,21 @@ export const fakeCookieService: typeof cookieService = {
       deleteCookie(key) {
         delete cookie[key];
       },
+    };
+  },
+};
+
+export const fakeTitleService: typeof titleService = {
+  name: "title",
+  deploy() {
+    return {
+      get current() {
+        return "";
+      },
+      getParts() {
+        return {};
+      },
+      setParts() {},
     };
   },
 };

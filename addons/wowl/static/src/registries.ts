@@ -35,6 +35,7 @@ import {
 import { dialogManagerService } from "./services/dialog_manager";
 import { crashManagerService } from "./services/crash_manager";
 import { cookieService } from "./services/cookie";
+import { titleService } from "./services/title";
 
 // -----------------------------------------------------------------------------
 // Services
@@ -50,6 +51,7 @@ const services = [
   crashManagerService,
   cookieService,
   dialogManagerService,
+  titleService,
   menusService,
   modelService,
   notificationService,
