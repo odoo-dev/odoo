@@ -430,7 +430,7 @@ class MailRenderMixin(models.AbstractModel):
             for lang, lang_res_ids in lang_to_res_ids.items()
         )
 
-    def _render_field(self, field, res_ids, compute_lang=False, set_lang=False, post_process=False):
+    def _render_field(self, field, res_ids, compute_lang=False, set_lang=False, post_process=False, engine=None):
         """ Given some record ids, render a given field of template rendered on
         all records.
 
@@ -451,11 +451,15 @@ class MailRenderMixin(models.AbstractModel):
         else:
             templates_res_ids = {self._context.get('lang'): (self, res_ids)}
 
+        if engine is None:
+            engine = 'qweb' if issubclass(type(self[field]), self.env['ir.ui.view']) else 'jinja'
+
         return dict(
             (res_id, rendered)
             for lang, (template, tpl_res_ids) in templates_res_ids.items()
             for res_id, rendered in template._render_template(
                 template[field], template.model, tpl_res_ids,
+                engine=engine,
                 post_process=post_process
             ).items()
         )
