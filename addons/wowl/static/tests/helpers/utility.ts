@@ -51,6 +51,7 @@ function makeTestConfig(config: TestConfig = {}): OdooConfig {
     localization,
     _t,
     templates,
+    debug: config.debug || "",
     services: config.services || new Registry(),
     Components: config.Components || new Registry(),
     actions: config.actions || new Registry(),

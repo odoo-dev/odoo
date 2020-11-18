@@ -22,7 +22,7 @@ export function makeFakeUserService(
   values?: Partial<UserService>,
   fullContext: boolean = false
 ): Service<UserService> {
-  const { uid, name, username, is_admin, user_companies, partner_id } = odoo.session_info;
+  const { uid, name, username, is_admin, user_companies, partner_id, db } = odoo.session_info;
   const { user_context } = odoo.session_info;
   return {
     name: "user",
@@ -47,6 +47,7 @@ export function makeFakeUserService(
         current_company: user_companies.current_company,
         lang: user_context.lang,
         tz: "Europe/Brussels",
+        db: db,
       };
       Object.assign(result, values);
       return result;

@@ -11,6 +11,7 @@ export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
     templates,
     views,
     _t,
+    debug,
     systray,
     errorDialogs,
     userMenu,
@@ -26,6 +27,7 @@ export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
     registries,
     services: {} as any,
     _t,
+    debug,
   };
 
   await deployServices(env, config);

@@ -68,6 +68,7 @@ export interface SessionInfo {
 export interface Odoo {
   browser: OdooBrowser;
   session_info: SessionInfo;
+  debug: string;
 }
 
 interface DBInfo {
@@ -109,6 +110,7 @@ export interface OdooEnv extends Env {
   services: Services;
   registries: Registries;
   bus: EventBus;
+  debug: string;
   _t: (str: string) => string;
 }
 
@@ -127,6 +129,7 @@ interface Registries {
 
 export interface OdooConfig extends Registries {
   localization: Localization;
+  debug: string;
   templates: string;
   _t: (str: string) => string;
 }

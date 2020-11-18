@@ -33,6 +33,7 @@ class WowlClient(http.Controller):
                 "session_info": session_info,
                 "scssFiles": get_files('style'),
                 'live_reload': 'all' in config['dev_mode'],
+                "debug": request.session.debug,
             }
             response = request.render('wowl.root', qcontext=context)
             response.headers['X-Frame-Options'] = 'DENY'

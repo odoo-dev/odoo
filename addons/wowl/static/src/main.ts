@@ -43,6 +43,7 @@ declare const odoo: Odoo;
   // setup environment
   const env = await makeEnv({
     localization,
+    debug: odoo.debug,
     views: registries.viewRegistry,
     Components: registries.mainComponentRegistry,
     services: registries.serviceRegistry,
@@ -68,6 +69,7 @@ declare const odoo: Odoo;
   // prepare runtime Odoo object
   const sessionInfo = odoo.session_info;
   // delete (odoo as any).session_info; // FIXME: some legacy code rely on this (e.g. ajax.js)
+  delete (odoo as any).debug;
   ((odoo as any) as RuntimeOdoo).__WOWL_DEBUG__ = { root };
   ((odoo as any) as RuntimeOdoo).info = {
     db: sessionInfo.db,

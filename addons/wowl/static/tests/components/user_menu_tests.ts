@@ -8,6 +8,7 @@ import {
   mount,
   OdooEnv,
 } from "../helpers/index";
+import { TestConfig } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
 import { OdooBrowser, Service } from "./../../src/types";
 
@@ -15,6 +16,7 @@ let target: HTMLElement;
 let env: OdooEnv;
 let services: Registry<Service>;
 let userMenu: UserMenu;
+let baseConfig: TestConfig;
 
 QUnit.module("UserMenu", {
   async beforeEach() {
@@ -26,7 +28,7 @@ QUnit.module("UserMenu", {
         origin: "http://lordofthering",
       },
     } as OdooBrowser;
-    env = await makeTestEnv({ browser, services });
+    baseConfig = { browser, services };
   },
   afterEach() {
     userMenu.unmount();
@@ -34,6 +36,8 @@ QUnit.module("UserMenu", {
 });
 
 QUnit.test("can be rendered", async (assert) => {
+  env = await makeTestEnv(baseConfig);
+
   env.registries.userMenu.add("bad_item", function () {
     return {
       description: "Bad",
@@ -97,4 +101,14 @@ QUnit.test("can be rendered", async (assert) => {
     click(item as HTMLElement);
   }
   assert.verifySteps(["callback ring_item", "callback bad_item", "callback eye_item"]);
+});
+
+QUnit.test("display the correct name in debug mode", async (assert) => {
+  env = await makeTestEnv(Object.assign(baseConfig, { debug: "1" }));
+  userMenu = await mount(UserMenu, { env, target });
+  let userMenuEl = userMenu.el as HTMLElement;
+
+  assert.containsOnce(userMenuEl, "img.o_user_avatar");
+  assert.containsOnce(userMenuEl, "span.o_user_name");
+  assert.strictEqual(userMenuEl.querySelector(".o_user_name")?.textContent, "Sauron (test)");
 });

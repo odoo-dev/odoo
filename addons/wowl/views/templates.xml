@@ -50,6 +50,7 @@
                 <script>
                     window.odoo = {
                         session_info: <t t-raw="json.dumps(session_info)"/>,
+                        debug: "<t t-esc="debug"/>",
                     };
                 </script>
 
