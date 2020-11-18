@@ -1,6 +1,7 @@
 import { Component, hooks, tags } from "@odoo/owl";
 import { Dialog } from "../../components/dialog/dialog";
 import type {
+  ActionContext,
   OdooEnv,
   Service,
   ComponentAction,
@@ -8,13 +9,12 @@ import type {
   Type,
   View,
   ViewId,
-  ActionProps,
   ViewProps,
   ViewType,
   Domain,
+  ControllerProps,
 } from "../../types";
 import { Route } from "../router";
-import { ActionContext, ClientActionProps } from "../../types";
 import { evaluateExpr } from "../../core/py/index";
 import { makeContext } from "../../core/utils";
 
@@ -102,8 +102,6 @@ export type Action =
 
 type ReportType = "html" | "pdf" | "text";
 type WkhtmltopdfState = "ok" | "broken" | "install" | "upgrade" | "workers";
-
-type ControllerProps = ActionProps | ViewProps | ClientActionProps;
 
 interface Controller {
   jsId: string;
