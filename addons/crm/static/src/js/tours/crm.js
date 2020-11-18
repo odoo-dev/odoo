@@ -7,7 +7,7 @@ var tour = require('web_tour.tour');
 var _t = core._t;
 
 tour.register('crm_tour', {
-    url: "/web",
+    url: "/wowl",
     rainbowManMessage: _t("Congrats, best of luck catching such big fish! :)"),
     sequence: 5,
 }, [tour.stepUtils.showAppsMenuItem(), {
