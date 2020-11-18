@@ -36,7 +36,7 @@ QUnit.test("displays the loading indicator for one rpc", async (assert) => {
   assert.notStrictEqual(loadingIndicator, null, "the loading indicator should be displayed");
   assert.strictEqual(
     loadingIndicator!.textContent,
-    " Loading (1) ",
+    " Loading (1)",
     "the loading indicator should indicate 1 request in progress"
   );
 
@@ -61,7 +61,7 @@ QUnit.test("displays the loading indicator for multi rpc", async (assert) => {
   assert.notStrictEqual(loadingIndicator, null, "the loading indicator should be displayed");
   assert.strictEqual(
     loadingIndicator!.textContent,
-    " Loading (2) ",
+    " Loading (2)",
     "the loading indicator should indicate 2 requests in progress."
   );
 
@@ -70,7 +70,7 @@ QUnit.test("displays the loading indicator for multi rpc", async (assert) => {
   loadingIndicator = target.querySelector(".o_loading");
   assert.strictEqual(
     loadingIndicator!.textContent,
-    " Loading (3) ",
+    " Loading (3)",
     "the loading indicator should indicate 3 requests in progress."
   );
 
@@ -79,7 +79,7 @@ QUnit.test("displays the loading indicator for multi rpc", async (assert) => {
   loadingIndicator = target.querySelector(".o_loading");
   assert.strictEqual(
     loadingIndicator!.textContent,
-    " Loading (2) ",
+    " Loading (2)",
     "the loading indicator should indicate 2 requests in progress."
   );
 
@@ -88,7 +88,7 @@ QUnit.test("displays the loading indicator for multi rpc", async (assert) => {
   loadingIndicator = target.querySelector(".o_loading");
   assert.strictEqual(
     loadingIndicator!.textContent,
-    " Loading (3) ",
+    " Loading (3)",
     "the loading indicator should indicate 3 requests in progress."
   );
 
@@ -98,7 +98,7 @@ QUnit.test("displays the loading indicator for multi rpc", async (assert) => {
   loadingIndicator = target.querySelector(".o_loading");
   assert.strictEqual(
     loadingIndicator!.textContent,
-    " Loading (1) ",
+    " Loading (1)",
     "the loading indicator should indicate 1 request in progress."
   );
 
