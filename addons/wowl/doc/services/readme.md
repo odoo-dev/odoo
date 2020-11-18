@@ -28,6 +28,7 @@ available to the interface (and to other services).
 | [`notifications`](notifications.md)   | display a notification (or error)                          |
 | [`router`](router.md)                 | manage the url                                             |
 | [`rpc`](rpc.md)                       | perform a RPC (in other word, call the server)             |
+| [`title`](title.md)                   | allow to read/modify the document title                    |
 | [`ui`](ui.md)                         | miscellaneous ui features (block/unblock)                  |
 | [`user`](user.md)                     | keep track of user main properties (lang, ...) and context |
 | [`view_manager`](view_manager.md)     | load (and keep in cache) views information                 |
@@ -48,11 +49,9 @@ The name is simply a short unique string representing the service, such as `rpc`
 It may define some `dependencies`. In that case, the dependent services will be
 started first, and ready when the current service is started.
 
-The `deploy` method is the most important: it will be executed as soon
-as the service infrastructure is deployed (so, even before the web client is
-instantiated), and the return value of the `deploy` method will be the value of
-the service. This method can also be asynchronous, in which case the value of
-the service will be the result of that promise.
+The `deploy` method is the most important: the return value of the `deploy`
+method will be the value of the service. This method can be asynchronous,
+in which case the value of the service will be the result of that promise.
 
 Some services do not export any value. They may just do their work without a
 need to be directly called by other code. In that case, their value will be
@@ -85,6 +84,9 @@ const counterService = {
 };
 serviceRegistry.add(counterService.name, counterService);
 ```
+
+The services listed [above](./#list-of-all-services) are deployed before the web client is mounted but it
+is allowed to add a service to the `serviceRegistry` after that moment. It will be automatically deployed.
 
 ## Using a service
 

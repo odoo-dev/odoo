@@ -25,7 +25,7 @@ not be styled properly.
 ## Adding a systray item
 
 Once a systray item is defined, adding it to the web client is only a matter of
-registering it to the systray registry.
+registering it to the `systrayRegistry`.
 
 For example:
 
