@@ -9,3 +9,4 @@ class View(models.Model):
     type = fields.Selection(selection_add=[('activity', 'Activity')])
     # views used for notification and mailing
     is_mail_template = fields.Boolean("Used as mail template body")
+    is_mail_layout = fields.Boolean("Use for email notification layout")
