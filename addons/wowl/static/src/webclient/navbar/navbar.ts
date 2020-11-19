@@ -26,12 +26,12 @@ export class NavBar extends Component<{}, OdooEnv> {
 
   mounted() {
     this.adapt();
-    this.env.registries.systray.on("UPDATE", this, this.render);
-    this.env.bus.on("MENUS:APP-CHANGED", this, this.render);
-  }
-
-  patched() {
-    this.adapt();
+    const renderAndAdapt = async () => {
+      await this.render();
+      await this.adapt();
+    };
+    this.env.registries.systray.on("UPDATE", this, renderAndAdapt);
+    this.env.bus.on("MENUS:APP-CHANGED", this, renderAndAdapt);
   }
 
   willUnmount() {
@@ -59,15 +59,15 @@ export class NavBar extends Component<{}, OdooEnv> {
     // ------- Initialize -------
     // Check actual "more" dropdown state
     const moreDropdown = this.el!.querySelector<HTMLElement>(".o_menu_sections_more");
-    const initialMoreMenuVisible = !moreDropdown!.classList.contains("d-none");
+    const initialAppSectionsExtra = this.currentAppSectionsExtra;
 
     // Restore (needed to get offset widths)
     const sections = [
       ...this.el!.querySelectorAll<HTMLElement>(".o_menu_sections > *:not(.o_menu_sections_more)")!,
     ];
     sections.forEach((s) => s.classList.remove("d-none"));
+    this.currentAppSectionsExtra = [];
     moreDropdown!.classList.add("d-none");
-    let actualMoreMenuVisible = false;
 
     // ------- Check overflowing sections -------
     const sectionsMenu = this.el!.querySelector<HTMLElement>(".o_menu_sections")!;
@@ -77,13 +77,11 @@ export class NavBar extends Component<{}, OdooEnv> {
     if (sectionsAvailableWidth < sectionsTotalWidth) {
       // Sections are overflowing, show "more" menu
       moreDropdown!.classList.remove("d-none");
-      actualMoreMenuVisible = true;
 
       let width = moreDropdown!.offsetWidth;
       for (const section of sections) {
         if (sectionsAvailableWidth < width + section.offsetWidth) {
           // Last sections are overflowing
-          this.currentAppSectionsExtra = [];
           const overflowingSections = sections.slice(sections.indexOf(section));
           overflowingSections.forEach((s) => {
             // Hide from normal menu
@@ -102,8 +100,8 @@ export class NavBar extends Component<{}, OdooEnv> {
     }
 
     // ------- Final rendering -------
-    if (!initialMoreMenuVisible && !actualMoreMenuVisible) {
-      // Do not render if there is no need.
+    if (initialAppSectionsExtra.length === this.currentAppSectionsExtra.length) {
+      // Do not render if more menu items stayed the same.
       return;
     }
     return this.render();
