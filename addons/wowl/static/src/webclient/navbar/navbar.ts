@@ -56,7 +56,7 @@ export class NavBar extends Component<{}, OdooEnv> {
     });
   }
 
-  private async adapt() {
+  protected async adapt() {
     // ------- Initialize -------
     // Check actual "more" dropdown state
     const moreDropdown = this.el!.querySelector<HTMLElement>(".o_menu_sections_more");
