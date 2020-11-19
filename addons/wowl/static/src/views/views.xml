@@ -47,6 +47,33 @@
         </div>
     </t>
 
+    <t t-name="wowl.AbstractController" owl="1">
+        <t t-if="env.inDialog">
+            <Dialog>
+                <t t-call="wowl.ControlPanel">
+                    <t t-set="topRight" t-value="cpSubTemplates.topRight"/>
+                    <t t-set="bottomLeft" t-value="cpSubTemplates.bottomLeft"/>
+                    <t t-set="bottomRight" t-value="cpSubTemplates.bottomRight"/>
+                </t>
+                <Renderer t-props="rendererProps"/>
+                <t t-set="buttons">
+                    <t t-call="{{footerButtons}}"/>
+                </t>
+            </Dialog>
+        </t>
+        <t t-else="">
+            <div>
+                <t t-call="wowl.ControlPanel">
+                    <t t-set="topLeft" t-value="cpSubTemplates.topLeft"/>
+                    <t t-set="topRight" t-value="cpSubTemplates.topRight"/>
+                    <t t-set="bottomLeft" t-value="cpSubTemplates.bottomLeft"/>
+                    <t t-set="bottomRight" t-value="cpSubTemplates.bottomRight"/>
+                </t>
+                <Renderer t-props="rendererProps"/>
+            </div>
+        </t>
+    </t>
+
     <t t-name="wowl.ViewSwitcher" owl="1">
         <nav t-if="props.viewSwitcherEntries and props.viewSwitcherEntries.length > 1"
              class="btn-group o_cp_switch_buttons">
