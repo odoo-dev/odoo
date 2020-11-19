@@ -14,9 +14,6 @@ export const titleService: Service<Title> = {
   name: "title",
   deploy(): Title {
     const titleParts: { [key: string]: string } = {};
-    function makeTitle(): string {
-      return Object.values(titleParts).join(" - ");
-    }
     function getParts(): Parts {
       return Object.assign({}, titleParts);
     }
@@ -29,11 +26,11 @@ export const titleService: Service<Title> = {
           titleParts[key] = val;
         }
       }
-      document.title = makeTitle();
+      document.title = Object.values(titleParts).join(" - ");
     }
     return {
       get current() {
-        return makeTitle();
+        return document.title;
       },
       getParts,
       setParts,
