@@ -5,6 +5,7 @@ import datetime
 import logging
 import time
 from pprint import pformat
+import re
 
 import requests
 from lxml import etree, objectify
@@ -12,11 +13,12 @@ from werkzeug import urls
 
 from odoo import api, fields, models, _
 from odoo.addons.payment.models.payment_acquirer import ValidationError
-from odoo.addons.payment_ogone.data import ogone
 from odoo.addons.payment.utils import singularize_reference_prefix
+from odoo.addons.payment_ogone.controllers.main import OgoneController
+from odoo.addons.payment_ogone.data import ogone
 from odoo.http import request
-from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, ustr
-from odoo.tools.float_utils import float_compare
+from odoo.tools import ustr
+from odoo.tools.float_utils import float_repr, float_round
 
 _logger = logging.getLogger(__name__)
 
@@ -45,89 +47,128 @@ class PaymentTxOgone(models.Model):
         return super()._compute_reference(provider, prefix, separator, **kwargs)
 
     # --------------------------------------------------
-    # FORM RELATED METHODS
+    # BUSINESS METHODS
     # --------------------------------------------------
 
     @api.model
+    def _ogone_clean_keys(self, data):
+        # clean dict keys for coherence with directlink API.
+        # Thanks to Ogone, the dict keys are different from one API to another but the correct keys are needed
+        # to check the signature...
+        # 1) Pass keys to uppercase
+        # 2) Remove prefix with the dot line "CARD."; "ALIAS." etc
+        return {re.sub(r'.*\.', '', key.upper()): val for key, val in data.items()}
+
+    def _ogone_ncerrors_verification(self, data):
+        """
+        Check that the incoming data coming from the FlexCheckout API are correct.
+        :param data: GET parameters of the feedback URL
+        :return: None
+        """
+        # check for errors before using values
+        errors = {k: int(v) for k, v in data.items() if k.startswith('NCError') and int(v)}
+        if errors:
+            self._set_canceled()
+            error_fields = ", ".join([ogone.FLEXCHECKOUT_ERROR[key] for key in errors.keys()])
+            error_msg = "Ogone: " + _(f"The following parameters could not be validated by Ogone: {error_fields}.")
+            raise ValidationError(error_msg)
+
+
+
+
+
+    @api.model
     def _get_tx_from_feedback_data(self, provider, data):
-        """ Given a data dict coming from ogone, verify it and find the related
-        transaction record. Create a payment token if an alias is returned."""
+        """
+        Given a data dict coming from ogone, verify it and find the related
+        transaction record. Create a payment token if an alias is returned.
+
+        This method is called from two different API: Flexcheckout for token (Alias) creation on Ingenico servers
+        and from the DirectLink API when a 3DSV1 verification occurs (with redirection).
+        Unfortunately, these two API don't share the same keywords and conventions.
+
+        At this point, the data signature has been validated and we can homogenize the data.
+        :param str provider: The provider of the acquirer that handled the transaction
+        :param dict data: The feedback data sent by the acquirer
+        :return: The transaction if found
+        :rtype: recordset of `payment.transaction`
+        """
         if provider != 'ogone':
             return super()._get_tx_from_feedback_data(provider, data)
-        reference, pay_id, shasign, alias = data.get('orderID'), data.get('PAYID'), data.get('SHASIGN'), data.get('ALIAS')
-        if not reference or not pay_id or not shasign:
-            error_msg = _('Ogone: received data with missing reference (%s) or pay_id (%s) or shasign (%s)') % (reference, pay_id, shasign)
-            _logger.info(error_msg)
+        if data.get('TYPE') == 'flexcheckout':
+            data['ALIAS'] = data['ALIASID']
+            reference = data.get('REFERENCE')
+            # pay_id is not present when returning from fleckcheckout because we just created an alias.
+            # Therefore, this field is not blocking
+            pay_id = True
+        else:
+            # type is directlink
+            pay_id = data.get('PAYID')
+            reference = data.get('ORDERID')
+
+        alias = data.get('ALIAS')
+        data_checked = alias and reference and pay_id
+        if not data_checked:
+            error_msg = "Ogone: " + _('received data with missing values (%s) (%s)') % (reference, alias)
             raise ValidationError(error_msg)
 
-        # find tx -> @TDENOTE use pay_id ?
         tx = self.search([('reference', '=', reference)])
         if not tx or len(tx) > 1:
-            error_msg = _('Ogone: received data for reference %s') % (reference)
+            error_msg = "Ogone: " + _('received data for reference %s', reference)
             if not tx:
-                error_msg += _('; no order found')
+                error_msg += _(': no order found')
             else:
-                error_msg += _('; multiple order found')
-            _logger.info(error_msg)
+                error_msg += _(': multiple order found')
             raise ValidationError(error_msg)
-
-        # verify shasign
-        shasign_check = tx.acquirer_id._ogone_generate_shasign('out', data)
-        if shasign_check.upper() != shasign.upper():
-            error_msg = _('Ogone: invalid shasign, received %s, computed %s, for data %s') % (shasign, shasign_check, data)
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
-
-        if not tx.acquirer_reference:
-            tx.acquirer_reference = pay_id
-
         return tx
 
-        #  _get_invalid_parameters est supprimé et à merger à _get_tx_from_data et _process_feedback_data qui doivent raise des ValidationError si besoin
-    def _get_invalid_parameters(self, data):
-        if self.provider != 'ogone':
-            return super()._get_invalid_parameters(data)
-        invalid_parameters = []
-        if self.acquirer_reference and data.get('PAYID') != self.acquirer_reference:
-            invalid_parameters.append(('PAYID', data.get('PAYID'), self.acquirer_reference))
-        # check what is bought
-        if float_compare(float(data.get('amount', '0.0')), self.amount, 2) != 0:
-            invalid_parameters.append(('amount', data.get('amount'), '%.2f' % self.amount))
-        if data.get('currency') != self.currency_id.name:
-            invalid_parameters.append(('currency', data.get('currency'), self.currency_id.name))
-
-        return invalid_parameters
-
     def _process_feedback_data(self, data):
+        """ Update the transaction state and the acquirer reference based on the feedback data.
+        For an acquirer to handle transaction post-processing, it must overwrite this method and
+        process the feedback data.
+
+        Note: self.ensure_one()
+
+        :param dict data: The feedback data sent by the acquirer
+        :return: None
+        """
+        self.ensure_one()
         if self.provider != 'ogone':
             return super()._process_feedback_data(data)
 
-        if self.state not in ['draft', 'pending']:
-            _logger.info('Ogone: trying to validate an already validated tx (ref %s)', self.reference)
-            return True
-
-        status = int(data.get('STATUS', '0'))
-        if status in self._ogone_valid_tx_status:
-            self.write({
-                'acquirer_reference': data.get('PAYID'),
-            })
-            if self.token_id:
-                self.token_id.verified = True
-            self._set_done()
-            return True
-        elif status in self._ogone_cancel_tx_status:
-            self._set_canceled()
-        elif status in self._ogone_pending_tx_status or status in self._ogone_wait_tx_status:
-            self._set_pending()
-        else:
-            error = 'Ogone: feedback error: %(error_str)s\n\n%(error_code)s: %(error_msg)s' % {
-                'error_str': data.get('NCERRORPLUS'),
-                'error_code': data.get('NCERROR'),
-                'error_msg': ogone.OGONE_ERROR_MAP.get(data.get('NCERROR')),
+        self._ogone_ncerrors_verification(data)
+        if all(key in data for key in ['CARDNUMBER', 'CARDHOLDERNAME']) and data.get('TYPE') == 'flexcheckout':
+            # First case: # We are coming back from the flexkcheckout API
+            # The token (alias) was created on the Ogone server, we create it here before performing the payment request
+            token_vals = {
+                'acquirer_id': self.acquirer_id.id,
+                'acquirer_ref': data['ALIAS'],
+                'partner_id': self.partner_id.id,
+                'name': '%s - %s' % (data.get('CARDNUMBER')[-4:], data.get('CARDHOLDERNAME')),
+                'verified': False
             }
-            _logger.info(error)
-            self._set_canceled()
-            return False
+            if data.get('STOREPERMANENTLY') == 'N':
+                # The token shall not be reused, we archive it to avoid listing it
+                token_vals.update({'active': False})
+            token_id = self.env['payment.token'].create(token_vals)
+            self.write({'token_id': token_id})
+
+        else:
+            # Second case: we are coming back from the Direct link API with a 3DS redirection
+            status = int(data.get('STATUS', '0'))
+            if status in self._ogone_valid_tx_status:
+                self.write({'acquirer_reference': data.get('PAYID')})
+                if self.token_id:
+                    self.token_id.verified = True
+                    self._set_done()
+            elif status in self._ogone_cancel_tx_status:
+                self._set_canceled()
+            elif status in self._ogone_pending_tx_status or status in self._ogone_wait_tx_status:
+                self._set_pending()
+            else:
+                # There was probably an NCERROR
+                _logger.error("Ogone: Could not falidate these data for %s" % pformat(data))
+                self._set_canceled()
 
     # --------------------------------------------------
     # Ogone API RELATED METHODS
@@ -138,12 +179,13 @@ class PaymentTxOgone(models.Model):
             return
         account = self.acquirer_id
         reference = self.reference or "ODOO-%s-%s" % (datetime.datetime.now().strftime('%y%m%d_%H%M%S'), self.partner_id.id)
+        base_url = self.acquirer_id.get_base_url()
         data = {
             'PSPID': account.ogone_pspid,
             'USERID': account.ogone_userid,
             'PSWD': account.ogone_password,
             'ORDERID': reference,
-            'AMOUNT': int(self.amount * 100),
+            'AMOUNT': float_repr(float_round(self.amount, 2) * 100, 0),
             'CURRENCY': self.currency_id.name,
             'OPERATION': 'SAL',
             'ECI': 9,   # Recurring (from eCommerce)
@@ -151,7 +193,23 @@ class PaymentTxOgone(models.Model):
             'RTIMEOUT': 30,
             'EMAIL': self.partner_id.email or '',
             'CN': self.partner_id.name or '',
+            'ACCEPTURL': urls.url_join(base_url, OgoneController._accept_url),
+            'DECLINEURL': urls.url_join(base_url, OgoneController._decline_url),
+            'EXCEPTIONURL': urls.url_join(base_url, OgoneController._exception_url),
+            'CANCELURL': urls.url_join(base_url, OgoneController._cancel_url),
+            'HOMEURL': urls.url_join(base_url, OgoneController._fleckcheckout_final_url),
+            'CATALOGURL': urls.url_join(base_url, OgoneController._fleckcheckout_final_url),
         }
+        # arj fixme: check if these values can be used to trigger a 3dsv2
+        # ogone_tx_values = {
+        #     'LANGUAGE': values.get('partner_lang'),
+        #     'CN': values.get('partner_name'),
+        #     'EMAIL': values.get('partner_email'),
+        #     'OWNERZIP': values.get('partner_zip'),
+        #     'OWNERADDRESS': values.get('partner_address'),
+        #     'OWNERTOWN': values.get('partner_city'),
+        #     'OWNERCTY': values.get('partner_country') and values.get('partner_country').code or '',
+        # }
         data.update({
             'FLAG3D': 'Y',
             'LANGUAGE': self.partner_id.lang or 'en_US',
@@ -176,7 +234,6 @@ class PaymentTxOgone(models.Model):
             _logger.exception('Invalid xml response from ogone')
             _logger.info('ogone_payment_request: Values received:\n%s', result)
             raise
-
         return self._ogone_validate_tree(tree)
 
     def _send_refund_request(self, **kwargs):

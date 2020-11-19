@@ -10,12 +10,12 @@ _logger = logging.getLogger(__name__)
 
 
 class OgoneController(http.Controller):
-    _accept_url = '/payment/ogone/test/accept'
-    _decline_url = '/payment/test/ogonedecline'
-    _exception_url = '/payment/test/ogone/exception'
-    _cancel_url = '/payment/ogone/test/cancel'
+    _accept_url = '/payment/ogone/accept'
+    _decline_url = '/payment/ogone/ogonedecline'
+    _exception_url = '/payment/ogone/exception'
+    _cancel_url = '/payment/ogone/cancel'
     _fleckcheckout_url = '/payment/ogone/flexchekout/feedback'
-
+    _fleckcheckout_final_url = "/payment/ogone/flexchekout/final"
 
     @http.route('/payment/ogone/payment_setup', type='json', auth='public')
     def payment_setup(
@@ -28,19 +28,19 @@ class OgoneController(http.Controller):
         :param float|None amount: The transaction amount
         :param int|None currency_id: The transaction currency, as a `res.currency` id
         :param int|None partner_id: The partner making the transaction, as a `res.partner` id
-        :param
+        :param data: the param_plus values used to generate the ifram URL
+        See: https://epayments-support.ingenico.com/en/integration/all-sales-channels/integrate-with-e-commerce/guide#e_commerce_integration_guides_use_of_payment_page_in_iframe
         :return: The JSON-formatted content of the response
         :rtype: dict
         """
         acquirer_sudo = request.env['payment.acquirer'].sudo().browse(acquirer_id)
         currency = request.env['res.currency'].browse(currency_id)
-        converted_amount = amount
         partner_sudo = partner_id and request.env['res.partner'].browse(partner_id).sudo()
         partner_country_code = partner_sudo and partner_sudo.country_id.code
         lang_code = request.context.get('lang', 'en-US')
         shopper_reference = partner_sudo and f'ODOO_PARTNER_{partner_sudo.id}'
         form_data = {
-            'amount': converted_amount,
+            'amount': amount,
             'currency': currency,
             'countryCode': partner_country_code,
             'partner_lang': lang_code,  # IETF language tag (e.g.: 'fr-BE')
@@ -61,68 +61,59 @@ class OgoneController(http.Controller):
                 First after the FlexcheckoutAPI has created the Alias
                 Secondly Once the send_payment_request has had the 3DS verification.
         """
-
-        _logger.info('Ogone: entering form_feedback with post data %s', pprint.pformat(kwargs))  # debug
+        _logger.info('Ogone: entering flexchekout feedback with data %s', pprint.pformat(kwargs))
         return request.render("payment_ogone.ogone_feedback", kwargs)
 
     @http.route(['/payment/ogone/payments'], type='json', auth='public', csrf=False)
-    def ogone_process_payments(self, **kwargs):
+    def ogone_process_payments(self, **data):
         """ Make a payment request and handle the response.
         :return: The JSON-formatted content of the response
         :rtype: dict
         """
-        acquirer_id = kwargs.get('acquirer_id')
-        reference = kwargs.get('reference')
-        ogone_values = kwargs.get('ogone_values')
-        partner_id = kwargs.get('partner_id')
-        acquirer_sudo = request.env['payment.acquirer'].sudo().browse(acquirer_id)
-        tx_sudo = request.env['payment.transaction'].sudo().search([('reference', '=', reference)])
-        ogone_values['acquirer_id'] = acquirer_id
-        ogone_values['partner_id'] = partner_id
-        ogone_values['BROWSERACCEPTHEADER'] = request.httprequest.headers.environ['HTTP_ACCEPT']
-        result = acquirer_sudo._ogone_handle_alias_feedback(ogone_values)
-        token_id = result.get('token_id')
-        if not token_id and not ogone_values['AliasId']:
-            _logger.error("The Ogone Alias could not be created.")
-            _logger.error(result.get('error_msg'))
-            # The transaction cannot be completed because we don't have a valid Ogone Alias
-            tx_sudo._set_canceled()
-            return {'tx_status': tx_sudo.state}
-        if result.get('token_id'):
-            tx_sudo.update({'token_id': token_id.id})
+        acquirer_sudo = request.env['payment.acquirer'].sudo().browse(data.get('acquirer_id'))
+        shasign_check = acquirer_sudo._ogone_generate_shasign('out', data['ogone_values'])
+        if shasign_check.upper() != data['ogone_values'].get('SHASign'):
+            # The data could not be verificated
+            error_msg = _('Ogone: invalid shasign, received %s, computed %s, for data %s') % (
+                data['ogone_values'].get('SHASign'), shasign_check, pprint.pformat(data['ogone_values']))
+            _logger.info(error_msg)
+            return {'ogone_user_error': _("The transaction signature could not be verified")}
+        data['ogone_values']['BROWSERACCEPTHEADER'] = request.httprequest.headers.environ['HTTP_ACCEPT']
+        PaymentTransaction = request.env['payment.transaction'].sudo()
+        ogone_data = PaymentTransaction._ogone_clean_keys(data['ogone_values'])
+        tx_sudo = PaymentTransaction._handle_feedback_data('ogone', ogone_data)
+        if tx_sudo.token_id:
             tx_sudo._send_payment_request()
             return {'tx_status': tx_sudo.state, 'html_3ds': tx_sudo.ogone_html_3ds,
                     'ogone_user_error': tx_sudo.ogone_user_error}
         else:
-            return {'status': _("The transaction could not be performed")}
-
-    # ARJ FIXME: REMOVE LATER
-    @http.route('/payment/ogone/test/<state>/<int:debug>', type='http', auth='public', website=True)
-    def ogone_test(self, state, debug):
-        import random
-        import string
-        if state == 'success':
-            amount = random.randint(1, 1000)
-        elif state == 'uncertain':
-            amount = 9999
-        elif state == 'fail':
-            amount = random.randint(9001, 15000)
-        letters = string.ascii_lowercase
-        reference = 'ARJ' + ''.join(random.choice(letters) for letter in range(10))
-        currency_id = 7
-        debug_str = '' if not debug else "&debug=assets"
-        return werkzeug.utils.redirect(f"/website_payment/pay?amount={amount}&currency_id={currency_id}&reference={reference}{debug_str}")
+            _logger.error("Ogone: The payment token could not be created from data %s" % pprint.pformat(data))
+            return {'ogone_user_error': _("The payment token could not be created.")}
 
     @http.route([
-        '/payment/ogone/accept', '/payment/ogone/test/accept',
-        '/payment/ogone/decline', '/payment/ogone/test/decline',
-        '/payment/ogone/exception', '/payment/ogone/test/exception',
-        '/payment/ogone/cancel', '/payment/ogone/test/cancel',
+        '/payment/ogone/accept',
+        '/payment/ogone/decline',
+        '/payment/ogone/exception',
+        '/payment/ogone/cancel',
     ], type='http', auth='public', csrf=False, method=['GET', 'POST'])
     def ogone_transaction_feedback(self, **post):
         """ Handle redirection from Ingenico (GET) and s2s notification (POST/GET) """
-        # arj fixme: We could avoid this redirect and hanle everything here with our template
-        # arj fixme: by adding a route to /payment/ogone/flexchekout/feedback
-        _logger.info('Ogone: entering s2s feedback with post data %s', pprint.pformat(post))
-        request.env['payment.transaction'].sudo()._handle_feedback_data('ogone', post)
-        return werkzeug.utils.redirect("/payment/ogone/flexchekout/final")
+        _logger.info('Ogone: entering transaction server to server feedback with post data %s', pprint.pformat(post))
+        post['type'] = 'directlink'
+        PaymentTransaction = request.env['payment.transaction'].sudo()
+        ogone_data = PaymentTransaction._ogone_clean_keys(post)
+        # We validate the data before parsing them
+        acquirer_sudo = request.env['payment.acquirer'].sudo().search([('provider', '=', 'ogone')], limit=1)
+        shasign_check = acquirer_sudo._ogone_generate_shasign('out', ogone_data)
+        if shasign_check.upper() == post.get('SHASIGN'):
+            # The data matches, we can handle them
+            PaymentTransaction._handle_feedback_data('ogone', ogone_data)
+        else:
+            error_msg = _('Ogone: invalid shasign, received %s, computed %s, for data %s') % (
+                post.get('SHASIGN'), shasign_check, pprint.pformat(post))
+            _logger.error(error_msg)
+        # ARJ todo: investigations
+        # When coming back from the 3dsv1 authentication, Ogone don't use HTTPS. It triggers an error if the Odoo instance
+        # is hosted behind a reverse proxy with https. Ongoing investigations...
+        fleckcheckout_back_url = werkzeug.urls.url_join(acquirer_sudo.get_base_url(), self._fleckcheckout_final_url)
+        return werkzeug.utils.redirect(fleckcheckout_back_url)
