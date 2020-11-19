@@ -1,10 +1,11 @@
-import { Component, hooks, utils } from "@odoo/owl";
+import { Component, hooks } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
 import { useService } from "../../core/hooks";
 import { MenuTree } from "../../services/menus";
 import { OdooEnv } from "../../types";
 import { Dropdown } from "../../components/dropdown/dropdown";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
+import { debounce } from "../../utils/ts/utility";
 const { useExternalListener } = hooks;
 
 export interface NavBarState {
@@ -20,7 +21,7 @@ export class NavBar extends Component<{}, OdooEnv> {
 
   constructor(...args: any[]) {
     super(...args);
-    const debouncedAdapt = utils.debounce(this.adapt.bind(this), 250);
+    const debouncedAdapt = debounce(this.adapt.bind(this), 250);
     useExternalListener(window, "resize", debouncedAdapt);
   }
 
