@@ -24,6 +24,9 @@
         <record id="nil_rated_group" model="account.tax.group">
             <field name="name">Nil Rated</field>
         </record>
+        <record id="tcs_group" model="account.tax.group">
+            <field name="name">TCS</field>
+        </record>
 
     </data>
 </odoo>
