@@ -192,6 +192,15 @@ class MrpWorkcenter(models.Model):
             self.resource_id.company_id = vals['company_id']
         return super(MrpWorkcenter, self).write(vals)
 
+    def action_show_operations(self):
+        self.ensure_one()
+        action = self.env['ir.actions.actions']._for_xml_id('mrp.mrp_routing_action')
+        action['domain'] = [('workcenter_id', '=', self.id)]
+        action['context'] = {
+            'default_workcenter_id': self.id,
+        }
+        return action
+
     def action_work_order(self):
         action = self.env["ir.actions.actions"]._for_xml_id("mrp.action_work_orders")
         return action

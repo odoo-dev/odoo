@@ -1,0 +1,12 @@
+<odoo>
+    <record id="mrp_workcenter_tree_view_inherited" model="ir.ui.view">
+        <field name="name">mrp.workcenter.tree.inherited</field>
+        <field name="model">mrp.workcenter</field>
+        <field name="inherit_id" ref="mrp.mrp_workcenter_tree_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='costs_hour']" position="after">
+                <field name="costs_hour_account_id" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
