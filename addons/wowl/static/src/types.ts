@@ -3,15 +3,19 @@ import { Env } from "@odoo/owl/dist/types/component/component";
 import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import { Localization } from "./core/localization";
 import type { Registry } from "./core/registry";
-import type { actionManagerService } from "./services/action_manager/action_manager";
-import type { menusService } from "./services/menus";
-import { DBRecord, modelService } from "./services/model";
-import type { notificationService } from "./services/notifications";
-import { routerService } from "./services/router";
 // add here each service type to have better typing for useService
+import type { actionManagerService } from "./services/action_manager/action_manager";
+import type { cookieService } from "./services/cookie";
+import type { dialogManagerService } from "./services/dialog_manager";
+import type { menusService } from "./services/menus";
+import type { DBRecord, modelService } from "./services/model";
+import type { notificationService } from "./services/notifications";
+import type { routerService } from "./services/router";
 import type { rpcService } from "./services/rpc";
+import type { titleService } from "./services/title";
+import type { uiService } from "./services/ui/ui";
 import type { userService } from "./services/user";
-import { viewManagerService } from "./services/view_manager";
+import type { viewManagerService } from "./services/view_manager";
 import { Breadcrumb } from "./services/action_manager/action_manager";
 import { AbstractController } from "./views/abstract_controller";
 import { UserMenuItemFactory } from "./components/user_menu/user_menu";
@@ -140,11 +144,15 @@ type ServiceType<T extends (...args: any[]) => any> = Nullify<Unwrap<ReturnType<
 
 export interface Services {
   action_manager: ServiceType<typeof actionManagerService["deploy"]>;
+  cookie: ServiceType<typeof cookieService["deploy"]>;
+  dialog_manager: ServiceType<typeof dialogManagerService["deploy"]>;
   menus: ServiceType<typeof menusService["deploy"]>;
   model: ServiceType<typeof modelService["deploy"]>;
   notifications: ServiceType<typeof notificationService["deploy"]>;
   rpc: ServiceType<typeof rpcService["deploy"]>;
   router: ServiceType<typeof routerService["deploy"]>;
+  title: ServiceType<typeof titleService["deploy"]>;
+  ui: ServiceType<typeof uiService["deploy"]>;
   user: ServiceType<typeof userService["deploy"]>;
   view_manager: ServiceType<typeof viewManagerService["deploy"]>;
 

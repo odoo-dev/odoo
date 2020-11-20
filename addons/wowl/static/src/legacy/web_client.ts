@@ -18,22 +18,22 @@ interface State extends Query {
       name: "legacy_web_client",
       dependencies: ["title", "router"],
       deploy(env: OdooEnv): void {
-        function setTitlePart(part: string, title?: string) {
+        function setTitlePart(part: string, title: string | null = null) {
           env.services.title.setParts({ [part]: title });
         }
         legacyEnv.bus.on("set_title_part", null, (params: { part: string; title?: string }) => {
           const { part, title } = params;
-          setTitlePart(part, title);
+          setTitlePart(part, title || null);
         });
         Object.assign(FakeWebClient, {
           do_push_state(state: State) {
             if ("title" in state) {
-              setTitlePart("action", state.title);
+              setTitlePart("action", state.title!);
               delete state.title;
             }
             env.services.router.replaceState(state);
           },
-          set_title(title?: string) {
+          set_title(title: string) {
             setTitlePart("action", title);
           },
         });
