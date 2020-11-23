@@ -519,10 +519,12 @@ class Meeting(models.Model):
         """
         self.ensure_one()
         date = fields.Datetime.from_string(self.start)
+        end_date = fields.Datetime.from_string(self.stop)
 
         if tz:
             timezone = pytz.timezone(tz or 'UTC')
             date = date.replace(tzinfo=pytz.timezone('UTC')).astimezone(timezone)
+            end_date = end_date.replace(tzinfo=pytz.timezone('UTC')).astimezone(timezone)
 
         if interval == 'day':
             # Day number (1-31)
@@ -537,10 +539,13 @@ class Meeting(models.Model):
             result = babel.dates.format_date(date=date, format='EEEE', locale=get_lang(self.env).code)
 
         elif interval == 'time':
-            # Localized time
-            # FIXME: formats are specifically encoded to bytes, maybe use babel?
-            dummy, format_time = self._get_date_formats()
-            result = tools.ustr(date.strftime(format_time + " %Z"))
+            result = tools.ustr(date.strftime("%H:%M %Z"))
+
+        elif interval == 'end_day':
+            result = tools.format_date(self.env, end_date, date_format='d MMM')
+
+        elif interval == 'end_time':
+            result = "%s %s" % (tools.format_time(self.env, end_date, time_format='HH:mm'), tools.ustr(end_date.strftime(" %Z")))
 
         return result
 
@@ -710,12 +715,16 @@ class Meeting(models.Model):
         current_attendees = self.filtered('active').attendee_ids
         if 'partner_ids' in values:
             (current_attendees - previous_attendees)._send_mail_to_attendees('calendar.calendar_template_meeting_invitation')
-        if 'start' in values:
+        if 'start' in values or 'allday' in values or 'duration' in values:
             start_date = fields.Datetime.to_datetime(values.get('start'))
             # Only notify on future events
-            if start_date and start_date >= fields.Datetime.now():
+            if (start_date and start_date >= fields.Datetime.now()) or values.get('allday') is False or values.get('duration'):
                 (current_attendees & previous_attendees)._send_mail_to_attendees('calendar.calendar_template_meeting_changedate', ignore_recurrence=not update_recurrence)
-
+        if 'location' in values or 'description' in values:
+            (current_attendees & previous_attendees).with_context(
+                location=bool(values.get('location', False)),
+                description=bool(values.get('description', False))
+            )._send_mail_to_attendees('calendar.calendar_template_meeting_change_location_description', ignore_recurrence=not update_recurrence)
         return True
 
     def _get_trigger_alarm_types(self):
