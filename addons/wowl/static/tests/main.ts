@@ -20,6 +20,7 @@ import "./components/user_menu_tests";
 import "./core/localization_tests";
 import "./components/dialog_tests";
 import "./core/py_tests";
+import "./core/domain_tests";
 import "./core/utils_tests";
 import "./services/crash_manager_tests";
 import "./components/error_dialogs_tests";

@@ -134,57 +134,59 @@ export type AST =
 const chainedOperators = new Set(comparators);
 const infixOperators = new Set(binaryOperators.concat(comparators));
 
-function bindingPower(token: Token): number {
-  if (token.type === TOKEN_TYPE.Symbol) {
-    switch (token.value) {
-      case "=":
-        return 10;
-      case "if":
-        return 20;
-      case "in":
-      case "not in":
-      case "is":
-      case "is not":
-      case "<":
-      case "<=":
-      case ">":
-      case ">=":
-      case "<>":
-      case "==":
-      case "!=":
-        return 60;
-      case "or":
-        return 30;
-      case "and":
-        return 40;
-      case "not":
-        return 50;
-      case "|":
-        return 70;
-      case "^":
-        return 80;
-      case "&":
-        return 90;
-      case "<<":
-      case ">>":
-        return 100;
-      case "+":
-      case "-":
-        return 110;
-      case "*":
-      case "/":
-      case "//":
-      case "%":
-        return 120;
-      case "**":
-        return 140;
-      case ".":
-      case "(":
-      case "[":
-        return 150;
-    }
+export function bp(symbol: string): number {
+  switch (symbol) {
+    case "=":
+      return 10;
+    case "if":
+      return 20;
+    case "in":
+    case "not in":
+    case "is":
+    case "is not":
+    case "<":
+    case "<=":
+    case ">":
+    case ">=":
+    case "<>":
+    case "==":
+    case "!=":
+      return 60;
+    case "or":
+      return 30;
+    case "and":
+      return 40;
+    case "not":
+      return 50;
+    case "|":
+      return 70;
+    case "^":
+      return 80;
+    case "&":
+      return 90;
+    case "<<":
+    case ">>":
+      return 100;
+    case "+":
+    case "-":
+      return 110;
+    case "*":
+    case "/":
+    case "//":
+    case "%":
+      return 120;
+    case "**":
+      return 140;
+    case ".":
+    case "(":
+    case "[":
+      return 150;
   }
   return 0;
+}
+
+function bindingPower(token: Token): number {
+  return token.type === TOKEN_TYPE.Symbol ? bp(token.value) : 0;
 }
 
 function isSymbol(token: Token, value: string): boolean {
@@ -311,6 +313,7 @@ function parseInfix(left: AST, current: Token, tokens: Token[]): AST {
           right,
         };
         while (
+          chainedOperators.has(current.value) &&
           tokens[0] &&
           tokens[0].type === TOKEN_TYPE.Symbol &&
           chainedOperators.has(tokens[0].value)

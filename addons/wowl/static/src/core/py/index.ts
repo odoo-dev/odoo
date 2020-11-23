@@ -5,6 +5,7 @@ import { evaluate, EvalContext } from "./interpreter";
 export { tokenize, TOKEN_TYPE } from "./tokenizer";
 export { parse, AST_TYPE } from "./parser";
 export { evaluate } from "./interpreter";
+export { formatAST } from "./utils";
 
 export function parseExpr(expr: string): AST {
   const tokens = tokenize(expr);
