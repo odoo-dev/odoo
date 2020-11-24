@@ -27,7 +27,7 @@ interface CacheHashes {
 
 // todo: check & improve Domain types
 type DomainOperator = "=";
-type DomainAtom = [string, DomainOperator, number | string] | "&" | "|";
+type DomainAtom = [string, DomainOperator, number | string | boolean] | "&" | "|";
 export type Domain = DomainAtom[];
 
 export interface Context {
@@ -271,7 +271,7 @@ export interface ModelData {
     [fieldName: string]: (record: DBRecord) => void;
   };
 }
-export type ModelMethod = (args: any[], kwargs: any, model?: string) => any;
+export type ModelMethod = (model: string, args: any[], kwargs: any) => any;
 export interface ModelMethods {
   [methodName: string]: ModelMethod;
 }
