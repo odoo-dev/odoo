@@ -20,7 +20,12 @@ export class WebClient extends Component<{}, OdooEnv> {
     this.title.setParts({ zopenerp: "Odoo" }); // zopenerp is easy to grep
     hooks.onMounted(() => {
       this.env.bus.on("ROUTE_CHANGE", this, this.loadRouterState);
-      this.env.bus.on("ACTION_MANAGER:MAIN-ACTION-PUSHED", this, this.replaceRouterState);
+      this.env.bus.on("ACTION_MANAGER:UI-UPDATED", this, (mode) => {
+        if (mode !== "new") {
+          this.el!.classList.toggle("o_fullscreen", mode === "fullscreen");
+          setTimeout(() => this.replaceRouterState());
+        }
+      });
       this.loadRouterState();
     });
   }

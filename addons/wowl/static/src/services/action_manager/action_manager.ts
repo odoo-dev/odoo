@@ -395,8 +395,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
     controller: Controller,
     options: UpdateStackOptions = {}
   ): Promise<void> {
-    let resolve: () => any;
-    let dialogCloseResolve: () => any;
+    let resolve: (v?: any) => any;
+    let dialogCloseResolve: (v?: any) => any;
     const currentActionProm: Promise<void> = new Promise((_r) => {
       resolve = _r;
     });
@@ -417,6 +417,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         }
       }
       mounted() {
+        let mode: "new" | "current" | "fullscreen";
         if (action.target !== "new") {
           // LEGACY CODE COMPATIBILITY: remove when controllers will be written in owl
           // we determine here which actions no longer occur in the nextStack,
@@ -444,14 +445,20 @@ function makeActionManager(env: OdooEnv): ActionManager {
           controllerStack = nextStack; // the controller is mounted, commit the new stack
           // wait Promise callbacks to be executed
           pushState(controller);
-          env.browser.setTimeout(() => env.bus.trigger("ACTION_MANAGER:MAIN-ACTION-PUSHED"));
+          mode = "current";
+          if (controllerStack.some((c) => c.action.target === "fullscreen")) {
+            mode = "fullscreen";
+          }
         } else {
           dialogCloseProm = new Promise((_r) => {
             dialogCloseResolve = _r;
           }).then(() => {
             dialogCloseProm = undefined;
           });
+          mode = "new";
         }
+        env.bus.trigger("ACTION_MANAGER:UI-UPDATED", mode);
+
         resolve();
       }
       willUnmount() {
