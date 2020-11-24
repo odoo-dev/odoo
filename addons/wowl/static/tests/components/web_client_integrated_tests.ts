@@ -19,7 +19,7 @@ import { ServerData } from "../helpers/mock_server";
 import { makeRAMLocalStorage } from "../../src/env";
 import { RPC } from "../../src/services/rpc";
 import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "../../src/legacy/legacy";
-import { getLegacyUtils } from "../helpers/legacy_utils";
+import { getLegacy } from "../helpers/legacy";
 import { actionRegistry, viewRegistry } from "../../src/registries";
 
 // JQuery :visible selector
