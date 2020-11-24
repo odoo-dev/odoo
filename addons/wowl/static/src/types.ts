@@ -19,7 +19,6 @@ import type { viewManagerService } from "./services/view_manager";
 import { Breadcrumb } from "./services/action_manager/action_manager";
 import { AbstractController } from "./views/abstract_controller";
 import { UserMenuItemFactory } from "./components/user_menu/user_menu";
-// import type { ComponentAction, FunctionAction } from "./services/action_manager/helpers";
 
 interface CacheHashes {
   load_menus: string;
@@ -115,7 +114,7 @@ export interface OdooEnv extends Env {
 }
 
 export type ComponentAction = Type<Component<{}, OdooEnv>>;
-export type FunctionAction = () => void;
+export type FunctionAction = (env: OdooEnv, action: any) => any;
 
 interface Registries {
   Components: Registry<Type<Component>>;

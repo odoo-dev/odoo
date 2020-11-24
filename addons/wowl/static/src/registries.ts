@@ -36,6 +36,7 @@ import { dialogManagerService } from "./services/dialog_manager";
 import { crashManagerService } from "./services/crash_manager";
 import { cookieService } from "./services/cookie";
 import { titleService } from "./services/title";
+import { displayNotificationAction } from "./services/action_manager/client_actions";
 
 // -----------------------------------------------------------------------------
 // Services
@@ -85,6 +86,8 @@ mainComponentRegistry.add("LoadingIndicator", LoadingIndicator);
 // instantiated and mounted in the DOM. In the latter, the function will be
 // executed
 export const actionRegistry: Registry<ComponentAction | FunctionAction> = new Registry();
+
+actionRegistry.add("display_notification", displayNotificationAction);
 
 // -----------------------------------------------------------------------------
 // Views

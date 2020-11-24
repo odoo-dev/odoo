@@ -622,7 +622,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       };
       return _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
     } else {
-      return (clientAction as FunctionAction)();
+      return (clientAction as FunctionAction)(env, action);
     }
   }
 
@@ -946,7 +946,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     let action: ActionRequest | undefined;
     if (state.action) {
       // ClientAction
-      if (Number.isNaN(state.action) && env.registries.actions.contains(state.action)) {
+      if (env.registries.actions.contains(state.action)) {
         action = {
           params: state,
           tag: state.action,

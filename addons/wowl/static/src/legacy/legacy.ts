@@ -239,7 +239,9 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
 
   // register action already in the legacy registry, and listens to future registrations
   for (const [name, action] of Object.entries(action_registry.entries())) {
-    registerClientAction(name, action);
+    if (!actionRegistry.contains(name)) {
+      registerClientAction(name, action);
+    }
   }
   action_registry.onAdd(registerClientAction);
 });
