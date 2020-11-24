@@ -4,7 +4,6 @@ import { actionManagerService } from "../../src/services/action_manager/action_m
 import { notificationService } from "./../../src/services/notifications";
 import { makeTestEnv, nextTick } from "../helpers/index";
 import { ComponentAction, FunctionAction, OdooEnv, Service } from "../../src/types";
-import { makeMockServer } from "../helpers/mock_server";
 import { makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 
 let env: OdooEnv;
@@ -38,14 +37,17 @@ QUnit.module("Action Manager Service", {
     actionsRegistry.add("client_action_by_xml_id", () => assert.step("client_action_xml_id"));
     actionsRegistry.add("client_action_by_object", () => assert.step("client_action_object"));
     services = new Registry<Service>();
-    makeMockServer({ services }, { models, actions: serverSideActions });
 
     services.add(actionManagerService.name, actionManagerService);
     services.add(notificationService.name, notificationService);
     services.add("router", makeFakeRouterService());
     services.add("user", makeFakeUserService());
 
-    env = await makeTestEnv({ actions: actionsRegistry, services });
+    env = await makeTestEnv({
+      actions: actionsRegistry,
+      serverData: { models, actions: serverSideActions },
+      services,
+    });
   },
 });
 
