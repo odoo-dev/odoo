@@ -3,7 +3,7 @@ import { WebClient } from "./components/webclient/webclient";
 import { fetchLocalization } from "./core/localization";
 import { makeEnv, makeRAMLocalStorage } from "./env";
 import * as registries from "./registries";
-import { Odoo, RuntimeOdoo, OdooBrowser } from "./types";
+import { Odoo, RuntimeOdoo } from "./types";
 
 // remove some day
 import "./demo_data";
@@ -19,9 +19,7 @@ declare const odoo: Odoo;
 
 (async () => {
   // prepare browser object
-  const c = new owl.Component();
-  const baseEnv = c.env;
-  let localStorage: Window["localStorage"] = baseEnv.browser.localStorage || window.localStorage;
+  let localStorage: Window["localStorage"] = owl.browser.localStorage;
   try {
     // Safari crashes in Private Browsing
     localStorage.setItem("__localStorage__", "true");
@@ -29,7 +27,8 @@ declare const odoo: Odoo;
   } catch (e) {
     localStorage = makeRAMLocalStorage();
   }
-  const browser: OdooBrowser = Object.assign({}, baseEnv.browser, {
+  odoo.browser = odoo.browser || {};
+  odoo.browser = Object.assign(odoo.browser, owl.browser, {
     console: window.console,
     location: window.location,
     navigator: navigator,
@@ -39,16 +38,11 @@ declare const odoo: Odoo;
   });
 
   // load templates and localization
-  let [templates, { localization, _t }] = await Promise.all([
-    loadTemplates(),
-    fetchLocalization(browser, odoo),
-  ]);
+  let [templates, { localization, _t }] = await Promise.all([loadTemplates(), fetchLocalization()]);
 
   // setup environment
   const env = await makeEnv({
-    browser,
     localization,
-    odoo,
     views: registries.viewRegistry,
     Components: registries.mainComponentRegistry,
     services: registries.serviceRegistry,

@@ -5,7 +5,6 @@ import { OdooBrowser } from "./types";
 
 export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
   const {
-    browser,
     services,
     Components,
     actions,
@@ -21,7 +20,7 @@ export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
   qweb.addTemplates(templates);
 
   const env: OdooEnv = {
-    browser,
+    browser: owl.browser,
     qweb,
     bus: new owl.core.EventBus(),
     registries,

@@ -1,5 +1,6 @@
 import { Component, core, tags, useState } from "@odoo/owl";
-import type { OdooEnv, Service } from "../../types";
+import type { Odoo, OdooEnv, Service } from "../../types";
+declare const odoo: Odoo;
 
 const { EventBus } = core;
 
@@ -54,7 +55,7 @@ class BlockUI extends Component<{}, OdooEnv> {
     this.state.line1 = message.l1;
     this.state.line2 = message.l2 || "";
     if (message.time !== null) {
-      this.msgTimer = this.env.browser.setTimeout(() => {
+      this.msgTimer = odoo.browser.setTimeout(() => {
         this.replaceMessage(index + 1);
       }, message.time * 1000);
     }

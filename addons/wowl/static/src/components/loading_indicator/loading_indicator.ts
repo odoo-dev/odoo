@@ -1,5 +1,6 @@
 import { Component, useState } from "@odoo/owl";
-import type { OdooEnv } from "../../types";
+import type { Odoo, OdooEnv } from "../../types";
+declare const odoo: Odoo;
 
 export class LoadingIndicator extends Component<{}, OdooEnv> {
   /**
@@ -31,7 +32,7 @@ export class LoadingIndicator extends Component<{}, OdooEnv> {
   requestCall(rpcId: number) {
     if (this.state.count === 0) {
       this.state.show = true;
-      this.blockUITimer = this.env.browser.setTimeout(this.env.services.ui.block, 3000);
+      this.blockUITimer = odoo.browser.setTimeout(this.env.services.ui.block, 3000);
     }
     this.rpcIds.add(rpcId);
     this.state.count++;

@@ -1,9 +1,9 @@
 import { Component, core, tags } from "@odoo/owl";
-import type { OdooEnv, Service } from "../types";
+import type { Odoo, OdooEnv, Service } from "../types";
 import { Notification as NotificationComponent } from "../components/notification/notification";
 
+declare const odoo: Odoo;
 const { EventBus } = core;
-
 const AUTOCLOSE_DELAY: number = 4000;
 
 interface DisplayOptions {
@@ -70,7 +70,7 @@ export const notificationService: Service<NotificationService> = {
       notifications.push(notif);
       bus.trigger("UPDATE");
       if (!notif.sticky) {
-        env.browser.setTimeout(() => close(notif.id), AUTOCLOSE_DELAY);
+        odoo.browser.setTimeout(() => close(notif.id), AUTOCLOSE_DELAY);
       }
       return notif.id;
     }

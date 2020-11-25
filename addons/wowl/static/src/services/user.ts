@@ -1,5 +1,6 @@
 import { Localization } from "../core/localization";
-import type { OdooConfig, UserCompany, Service, OdooEnv } from "../types";
+import type { UserCompany, Service, OdooEnv, Odoo } from "../types";
+declare const odoo: Odoo;
 
 interface Context {
   lang: string;
@@ -23,9 +24,9 @@ export interface UserService extends Localization {
   home_action_id?: number | false;
 }
 
-function computeAllowedCompanyIds(env: OdooEnv, config: OdooConfig): number[] {
+function computeAllowedCompanyIds(env: OdooEnv): number[] {
   const { cookie, router } = env.services;
-  const { user_companies } = config.odoo.session_info;
+  const { user_companies } = odoo.session_info;
   let cids: string | undefined;
   if ("cids" in router.current.hash) {
     cids = router.current.hash.cids!;
@@ -47,7 +48,7 @@ export const userService: Service<UserService> = {
   name: "user",
   dependencies: ["router", "cookie"],
   deploy(env: OdooEnv, config): UserService {
-    const { odoo, localization } = config;
+    const { localization } = config;
     const info = odoo.session_info;
     const {
       user_context,
@@ -59,7 +60,7 @@ export const userService: Service<UserService> = {
       home_action_id,
     } = info;
 
-    const allowedCompanies = computeAllowedCompanyIds(env, config);
+    const allowedCompanies = computeAllowedCompanyIds(env);
     let context: Context = {
       lang: user_context.lang,
       tz: user_context.tz,

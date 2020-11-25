@@ -1,14 +1,14 @@
 import * as QUnit from "qunit";
 import { LoadingIndicator } from "../../src/components/loading_indicator/loading_indicator";
 import { uiService } from "../../src/services/ui/ui";
-import { OdooEnv, Service } from "../../src/types";
+import { Odoo, Service } from "../../src/types";
 import { Registry } from "../../src/core/registry";
 import { getFixture, makeTestEnv, mount, nextTick } from "../helpers/index";
 import { TestConfig } from "../helpers/utility";
 
 let target: HTMLElement;
 let services: Registry<Service>;
-let browser: Partial<OdooEnv["browser"]>;
+let browser: Partial<Odoo["browser"]>;
 
 let baseConfig: TestConfig;
 

@@ -1,9 +1,10 @@
 import { Component } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
 import { useService } from "../../core/hooks";
-import { OdooEnv, SystrayItem } from "../../types";
+import { Odoo, OdooEnv, SystrayItem } from "../../types";
 import { Dropdown } from "../dropdown/dropdown";
 import { DropdownItem } from "../dropdown/dropdown_item";
+declare const odoo: Odoo;
 
 type Callback = () => void | Promise<any>;
 interface UserMenuItem {
@@ -30,7 +31,7 @@ export class UserMenu extends Component<{}, OdooEnv> {
 
   constructor() {
     super(...arguments);
-    const { origin } = this.env.browser.location;
+    const { origin } = odoo.browser.location;
     const { userId } = this.user;
     this.source = `${origin}/web/image?model=res.users&field=image_128&id=${userId}`;
   }

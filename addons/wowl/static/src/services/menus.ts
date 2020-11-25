@@ -1,4 +1,5 @@
-import { OdooEnv, Service } from "../types";
+import { Odoo, OdooEnv, Service } from "../types";
+declare const odoo: Odoo;
 
 export interface Menu {
   id: number | string;
@@ -29,8 +30,8 @@ export interface MenuService {
 
 const loadMenusUrl = `/wowl/load_menus`;
 
-async function fetchLoadMenus(env: OdooEnv, url: string): Promise<MenuData> {
-  const res = await env.browser.fetch(url);
+async function fetchLoadMenus(url: string): Promise<MenuData> {
+  const res = await odoo.browser.fetch(url);
   if (!res.ok) {
     throw new Error("Error while fetching menus");
   }
@@ -83,11 +84,10 @@ function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
 export const menusService: Service<MenuService> = {
   name: "menus",
   dependencies: ["action_manager"],
-  async deploy(env: OdooEnv, config): Promise<MenuService> {
-    const { odoo } = config;
+  async deploy(env: OdooEnv): Promise<MenuService> {
     const cacheHashes = odoo.session_info.cache_hashes;
     const loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
-    const menusData: MenuData = await fetchLoadMenus(env, `${loadMenusUrl}/${loadMenusHash}`);
+    const menusData: MenuData = await fetchLoadMenus(`${loadMenusUrl}/${loadMenusHash}`);
     return makeMenus(env, menusData);
   },
 };

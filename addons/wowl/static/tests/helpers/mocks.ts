@@ -1,10 +1,12 @@
 import { UserService } from "../../src/services/user";
 import { Odoo, OdooEnv, OdooConfig, Service } from "../../src/types";
 import { RPC } from "../../src/services/rpc";
-import type { Deferred } from "./utility";
+import { Deferred, TestConfig } from "./utility";
 import { Query, Route, Router, makePushState } from "../../src/services/router";
 import { Cookie, cookieService } from "../../src/services/cookie";
 import { titleService } from "../../src/services/title";
+
+declare const odoo: Odoo;
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -20,7 +22,6 @@ export function makeFakeUserService(
   values?: Partial<UserService>,
   fullContext: boolean = false
 ): Service<UserService> {
-  const odoo = makeTestOdoo();
   const { uid, name, username, is_admin, user_companies, partner_id } = odoo.session_info;
   const { user_context } = odoo.session_info;
   return {
@@ -102,8 +103,9 @@ export function makeFakeRPCService(mockRPC?: MockRPC): Service<RPC> {
   };
 }
 
-export function makeTestOdoo(): Odoo {
-  return {
+export function makeTestOdoo(config: TestConfig = {}): Odoo {
+  return Object.assign({}, odoo, {
+    browser: (config.browser || {}) as Odoo["browser"],
     session_info: {
       cache_hashes: {
         load_menus: "161803",
@@ -128,7 +130,7 @@ export function makeTestOdoo(): Odoo {
       server_version: "1.0",
       server_version_info: ["1.0"],
     },
-  };
+  });
 }
 
 export function makeMockXHR(

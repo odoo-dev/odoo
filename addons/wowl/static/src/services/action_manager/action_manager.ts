@@ -13,10 +13,12 @@ import type {
   ViewType,
   Domain,
   ControllerProps,
+  Odoo,
 } from "../../types";
 import { Route } from "../router";
 import { evaluateExpr } from "../../core/py/index";
 import { makeContext } from "../../core/utils";
+declare const odoo: Odoo;
 
 // -----------------------------------------------------------------------------
 // Types
@@ -520,7 +522,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (action.target === "self") {
       // framework.redirect(action.url); // TODO
     } else {
-      const w = env.browser.open(action.url, "_blank");
+      const w = odoo.browser.open(action.url, "_blank");
       if (!w || w.closed || typeof w.closed === "undefined") {
         const msg = env._t(
           "A popup window has been blocked. You may need to change your " +
@@ -836,7 +838,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
           // maybe we should force escaping in xml or do a better parse of the args array
           additionalArgs = JSON.parse(params.args.replace(/'/g, '"'));
         } catch (e) {
-          env.browser.console.error("Could not JSON.parse arguments", params.args);
+          odoo.browser.console.error("Could not JSON.parse arguments", params.args);
         }
         args = args.concat(additionalArgs);
       }

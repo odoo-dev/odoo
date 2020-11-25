@@ -13,7 +13,7 @@ import { actionRegistry, viewRegistry } from "../registries";
 import { useService } from "../core/hooks";
 import { useSetupAction } from "../services/action_manager/action_manager";
 
-const odoo = (window as any).odoo;
+declare const odoo: any;
 
 export function makeLegacyActionManagerService(legacyEnv: any): Service<void> {
   // add a service to redirect 'do-action' events triggered on the bus in the
@@ -72,7 +72,7 @@ export function mapLegacyEnvToWowlEnv(legacyEnv: any, wowlEnv: OdooEnv) {
     return prom;
   };
   // localStorage
-  const localStorage = wowlEnv.browser.localStorage;
+  const localStorage = odoo.browser.localStorage;
   legacyEnv.services.local_storage = Object.assign(Object.create(localStorage), {
     getItem(key: string, defaultValue: any) {
       const val = localStorage.getItem(key);

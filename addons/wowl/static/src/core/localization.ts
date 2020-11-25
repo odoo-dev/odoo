@@ -1,4 +1,5 @@
-import { Odoo, OdooBrowser } from "../types";
+import { Odoo } from "../types";
+declare const odoo: Odoo;
 
 export interface Localization {
   dateFormat: string;
@@ -58,7 +59,7 @@ interface Result {
   _t: (str: string) => string;
 }
 
-export async function fetchLocalization(browser: OdooBrowser, odoo: Odoo): Promise<Result> {
+export async function fetchLocalization(): Promise<Result> {
   const cacheHashes = odoo.session_info.cache_hashes;
   const translationsHash = cacheHashes.translations || new Date().getTime().toString();
   const lang = odoo.session_info.user_context.lang || null;
@@ -68,7 +69,7 @@ export async function fetchLocalization(browser: OdooBrowser, odoo: Odoo): Promi
     url += `?lang=${lang}`;
   }
 
-  let res = await browser.fetch(url);
+  let res = await odoo.browser.fetch(url);
   if (!res.ok) {
     throw new Error("Error while fetching translations");
   }

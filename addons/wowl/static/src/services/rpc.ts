@@ -1,5 +1,6 @@
 import { Component } from "@odoo/owl";
-import { Service, OdooEnv } from "../types";
+import { Service, OdooEnv, Odoo } from "../types";
+declare const odoo: Odoo;
 
 // -----------------------------------------------------------------------------
 // Types
@@ -76,7 +77,7 @@ function jsonrpc(
   settings: RPCSettings = {}
 ): Promise<any> {
   const bus = env.bus;
-  const XHR = env.browser.XMLHttpRequest;
+  const XHR = odoo.browser.XMLHttpRequest;
 
   const data = {
     id: rpcId,

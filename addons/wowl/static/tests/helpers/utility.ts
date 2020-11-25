@@ -6,6 +6,8 @@ import { Odoo, OdooConfig, OdooEnv, Type } from "../../src/types";
 import { MockRPC, makeTestOdoo } from "./mocks";
 import { ServerData, makeMockServer } from "./mock_server";
 
+declare let odoo: Odoo;
+
 // export { OdooEnv } from "../../src/types";
 
 // -----------------------------------------------------------------------------
@@ -36,18 +38,16 @@ type _TestConfig = Partial<
 >;
 
 export interface TestConfig extends _TestConfig {
+  browser?: Partial<Odoo["browser"]>;
   serverData?: ServerData;
   mockRPC?: MockRPC;
   activateMockServer?: boolean;
 }
 
 function makeTestConfig(config: TestConfig = {}): OdooConfig {
-  const browser = (config.browser || {}) as OdooConfig["browser"];
   const localization = config.localization || (getDefaultLocalization() as any);
-  const odoo: Odoo = makeTestOdoo();
   const _t = config._t || (((str: string) => str) as any);
-  return {
-    browser,
+  return Object.assign(config, {
     localization,
     _t,
     templates,
@@ -58,17 +58,17 @@ function makeTestConfig(config: TestConfig = {}): OdooConfig {
     errorDialogs: config.errorDialogs || new Registry(),
     userMenu: config.userMenu || new Registry(),
     views: config.views || new Registry(),
-    odoo,
-  };
+  });
 }
 
 export async function makeTestEnv(config: TestConfig = {}): Promise<OdooEnv> {
-  const testConfig = makeTestConfig(config);
+  const testConfig: TestConfig = makeTestConfig(config);
   if (config.serverData || config.mockRPC || config.activateMockServer) {
-    testConfig.services.remove("rpc");
+    testConfig.services!.remove("rpc");
     makeMockServer(testConfig, config.serverData, config.mockRPC);
   }
-  return await makeEnv(testConfig);
+  odoo = makeTestOdoo(testConfig);
+  return await makeEnv(testConfig as OdooConfig);
 }
 
 export function getFixture(): HTMLElement {

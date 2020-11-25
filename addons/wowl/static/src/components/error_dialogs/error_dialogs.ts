@@ -1,9 +1,10 @@
 import { Component, hooks } from "@odoo/owl";
-import { OdooEnv } from "../../types";
+import { Odoo, OdooEnv } from "../../types";
 import { Dialog } from "../dialog/dialog";
 import { ActionRequest } from "../../services/action_manager/action_manager";
 import { useService } from "../../core/hooks";
 import { Stringifiable, _lt } from "../../core/localization";
+declare const odoo: Odoo;
 const { useState } = hooks;
 
 function capitalize(s: string | undefined): string {
@@ -47,7 +48,7 @@ export class ErrorDialog extends Component<ErrorDialogProps, OdooEnv> {
   }
 
   onClickClipboard() {
-    this.env.browser.navigator.clipboard.writeText(`${this.traceback}`);
+    odoo.browser.navigator.clipboard.writeText(`${this.traceback}`);
   }
 }
 
@@ -138,6 +139,6 @@ export class SessionExpiredDialog extends Component<{}, OdooEnv> {
   title: Stringifiable = _lt("Odoo Session Expired");
 
   onClick() {
-    this.env.browser.location.reload();
+    odoo.browser.location.reload();
   }
 }
