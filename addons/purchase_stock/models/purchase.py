@@ -27,9 +27,14 @@ class PurchaseOrder(models.Model):
         help="Technical field used to display the Drop Ship Address", readonly=True)
     group_id = fields.Many2one('procurement.group', string="Procurement Group", copy=False)
     is_shipped = fields.Boolean(compute="_compute_is_shipped")
-    effective_date = fields.Datetime("Effective Date", compute='_compute_effective_date', store=True, copy=False,
+    effective_date = fields.Datetime("Arrival", compute='_compute_effective_date', store=True, copy=False,
         help="Completion date of the first receipt order.")
     on_time_rate = fields.Float(related='partner_id.on_time_rate', compute_sudo=False)
+    receipt_status = fields.Selection([
+        ('pending', 'Not Received'),
+        ('partially', 'Partially Received'),
+        ('fully', 'Fully Received'),
+    ], string='Receipt Status', compute='_get_receipt_status', store=True, readonly=True, copy=False, default='pending')
 
     @api.depends('order_line.move_ids.picking_id')
     def _compute_picking(self):
@@ -51,6 +56,15 @@ class PurchaseOrder(models.Model):
                 order.is_shipped = True
             else:
                 order.is_shipped = False
+
+    @api.depends('picking_ids', 'picking_ids.state')
+    def _get_receipt_status(self):
+        for order in self.filtered(lambda o: o.state not in ('done', 'cancel')):
+            if order.picking_ids:
+                if all(x.state == 'done' for x in order.picking_ids.filtered(lambda x: x.state != 'cancel')):
+                    order.receipt_status = 'fully'
+                elif order.picking_ids and any(x.state == 'done' for x in order.picking_ids):
+                    order.receipt_status = 'partially'
 
     @api.onchange('picking_type_id')
     def _onchange_picking_type_id(self):

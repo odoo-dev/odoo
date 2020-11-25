@@ -19,6 +19,7 @@
                     icon="fa-truck" attrs="{'invisible':[('picking_ids','=',[])]}">
                     <field name="picking_count" widget="statinfo" string="Receipt" help="Incoming Shipments"/>
                     <field name="picking_ids" invisible="1"/>
+                    <field name="date_planned_date" invisible="1"/>
                 </button>
             </xpath>
             <xpath expr="//field[@name='currency_id']" position="after">
@@ -47,11 +48,17 @@
             <xpath expr="//field[@name='order_line']/form//field[@name='invoice_lines']" position="after">
                 <field name="move_ids"/>
             </xpath>
+            <xpath expr="//field[@name='invoice_status']" position="before">
+                <field name="receipt_status" attrs="{'invisible': [('state', 'in', ('draft', 'sent', 'to approve', 'cancel'))]}"/>
+            </xpath>
             <xpath expr="//field[@name='order_line']/form//field[@name='account_analytic_id']" position="before">
                 <field name="propagate_cancel" groups="base.group_no_one"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree//field[@name='qty_received']" position="attributes">
                 <attribute name="attrs">{'column_invisible': [('parent.state', 'not in', ('purchase', 'done'))], 'readonly': [('product_type', 'in', ('consu', 'product'))]}</attribute>
+                <attribute name="decoration-warning">qty_received &lt; product_qty and date_planned &gt; current_date and qty_received &gt;0 and parent.receipt_status !='fully'</attribute>
+                <attribute name="decoration-danger">qty_received &lt; product_qty and date_planned &lt; current_date and parent.receipt_status !='fully'</attribute>
+                <attribute name="decoration-success">qty_received &gt;= product_qty or parent.receipt_status=='fully'</attribute>
             </xpath>
             <xpath expr="//page[@name='purchase_delivery_invoice']/group/group" position="inside">
                 <field name="picking_type_id" domain="[('code','=','incoming'), '|', ('warehouse_id', '=', False), ('warehouse_id.company_id', '=', company_id)]" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
@@ -74,4 +81,14 @@
         </field>
     </record>
 
+    <record id="purchase_order_view_tree_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_status']" position="before">
+                <field name="receipt_status" widget="badge" decoration-success="date_planned_date &gt;=current_date or receipt_status=='fully'" decoration-danger="current_date&gt;date_planned_date and receipt_status !='fully'" decoration-warning="date_planned_date==current_date and receipt_status !='fully'"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>
