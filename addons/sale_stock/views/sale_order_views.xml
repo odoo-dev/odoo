@@ -37,12 +37,20 @@
                     </div>
                     <field name="effective_date" attrs="{'invisible': [('effective_date', '=', False)]}"/>
                 </xpath>
+                <xpath expr="//field[@name='effective_date']" position="after">
+                    <field name="delivery_status"/>
+                </xpath>
                 <xpath expr="//page[@name='other_information']//field[@name='expected_date']" position="after">
                     <field name="show_json_popover" invisible="1"/>
                     <field string=" " name="json_popover" widget="stock_rescheduling_popover" attrs="{'invisible': [('show_json_popover', '=', False)]}"/>
                 </xpath>
                 <xpath expr="//page/field[@name='order_line']/form/group/group/field[@name='price_unit']" position="before">
                     <field name="product_packaging" attrs="{'invisible': [('product_id', '=', False)]}" context="{'default_product_id': product_id, 'tree_view_ref':'product.product_packaging_tree_view', 'form_view_ref':'product.product_packaging_form_view'}" domain="[('product_id','=',product_id)]" groups="product.group_stock_packaging" />
+                </xpath>
+                <xpath expr="//page/field[@name='order_line']/tree/field[@name='qty_delivered']" position="attributes">
+                    <attribute name="decoration-warning">qty_delivered &lt; product_uom_qty and parent.commitment_date_date &gt;= current_date and qty_delivered &gt;0 and parent.delivery_status !='fully'</attribute>
+                    <attribute name="decoration-danger">qty_delivered &lt; product_uom_qty and parent.commitment_date_date &lt; current_date and parent.commitment_date_date != False and parent.delivery_status!='fully'</attribute>
+                    <attribute name="decoration-success">qty_delivered &gt;= product_uom_qty or parent.delivery_status=='fully'</attribute>
                 </xpath>
                 <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_unit']" position="before">
                     <field name="product_packaging" attrs="{'invisible': [('product_id', '=', False)]}" context="{'default_product_id': product_id, 'tree_view_ref':'product.product_packaging_tree_view', 'form_view_ref':'product.product_packaging_form_view'}" domain="[('product_id','=',product_id)]" groups="product.group_stock_packaging" optional="show"/>
@@ -74,6 +82,9 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='team_id']" position="after">
                     <field name="warehouse_id" options="{'no_create': True}" groups="stock.group_stock_multi_warehouses" optional="hide"/>
+                </xpath>
+                <xpath expr="//field[@name='state']" position="after">
+                    <field name="delivery_status" widget="badge" decoration-success="commitment_date_date&gt;current_date or delivery_status=='fully'" decoration-warning="current_date==commitment_date_date and delivery_status!='fully'" decoration-danger="current_date&gt;commitment_date_date and commitment_date_date != False and delivery_status!='fully'"/>
                 </xpath>
             </field>
         </record>

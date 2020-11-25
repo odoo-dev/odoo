@@ -255,6 +255,7 @@ class SaleOrder(models.Model):
                                            help="Technical Field, True if the pricelist was changed;\n"
                                                 " this will then display a recomputation button")
     tag_ids = fields.Many2many('crm.tag', 'sale_order_tag_rel', 'order_id', 'tag_id', string='Tags')
+    commitment_date_date = fields.Date(compute='_compute_commitment_date_date')
 
     _sql_constraints = [
         ('date_order_conditional_required', "CHECK( (state IN ('sale', 'done') AND date_order IS NOT NULL) OR state NOT IN ('sale', 'done') )", "A confirmed sales order requires a confirmation date."),
@@ -329,6 +330,11 @@ class SaleOrder(models.Model):
     def _compute_type_name(self):
         for record in self:
             record.type_name = _('Quotation') if record.state in ('draft', 'sent', 'cancel') else _('Sales Order')
+
+    @api.depends('commitment_date')
+    def _compute_commitment_date_date(self):
+        for order in self:
+            order.commitment_date_date = order.commitment_date.date() if order.commitment_date else False
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_draft_or_cancel(self):

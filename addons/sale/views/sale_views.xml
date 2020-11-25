@@ -212,6 +212,7 @@
                     <field name="currency_id" invisible="1"/>
                     <field name="invoice_status" decoration-success="invoice_status == 'invoiced'" decoration-info="invoice_status == 'to invoice'" decoration-warning="invoice_status == 'upselling'" widget="badge" optional="show"/>
                     <field name="tag_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                    <field name="commitment_date_date" invisible="1"/>
                     <field name="state" invisible="1"/>
                 </tree>
             </field>
@@ -344,6 +345,7 @@
                             </div>
                             <field name="currency_id" invisible="1"/>
                             <field name="payment_term_id" options="{'no_open':True,'no_create': True}"/>
+                            <field name="commitment_date_date" invisible="1"/>
                         </group>
                     </group>
                     <notebook>
@@ -518,7 +520,6 @@
                                     />
                                     <field
                                         name="qty_delivered"
-                                        decoration-info="(not display_type and invoice_status == 'to invoice')" decoration-bf="(not display_type and invoice_status == 'to invoice')"
                                         string="Delivered"
                                         attrs="{
                                             'column_invisible': [('parent.state', 'not in', ['sale', 'done'])],
