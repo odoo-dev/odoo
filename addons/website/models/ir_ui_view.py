@@ -348,15 +348,6 @@ class View(models.Model):
             return view.id
         return super(View, self.sudo()).get_view_id(xml_id)
 
-    def _get_original_view(self):
-        """Given a view, retrieve the original view it was COW'd from.
-        The given view might already be the original one. In that case it will
-        (and should) return itself.
-        """
-        self.ensure_one()
-        domain = [('key', '=', self.key), ('model_data_id', '!=', None)]
-        return self.with_context(active_test=False).search(domain, limit=1)  # Useless limit has multiple xmlid should not be possible
-
     def _handle_visibility(self, do_raise=True):
         """ Check the visibility set on the main view and raise 403 if you should not have access.
             Order is: Public, Connected, Has group, Password
