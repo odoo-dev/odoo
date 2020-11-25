@@ -6,7 +6,11 @@ import { makeFakeUserService, nextTick, OdooEnv } from "../helpers/index";
 import { click, legacyExtraNextTick, makeTestEnv, mount, TestConfig } from "../helpers/utility";
 import { notificationService } from "../../src/notifications/notification_service";
 import { menusService } from "../../src/services/menus";
-import { ActionManager, actionManagerService } from "../../src/action_manager/action_manager";
+import {
+  ActionManager,
+  actionManagerService,
+  clearUncommittedChanges,
+} from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
 import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";
@@ -20,43 +24,136 @@ import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "../../src
 import { getLegacy } from "../helpers/legacy";
 import { actionRegistry } from "../../src/action_manager/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
-import { Registries } from "../../src/types";
+import { Route } from "../../src/services/router";
+import type { Context } from "../../src/core/context";
 
 // JQuery :visible selector
 // https://stackoverflow.com/questions/13388616/firefox-query-selector-and-the-visible-pseudo-selector
 
-let baseConfig: TestConfig;
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
 
-// UTILS
+interface LegacyMockParams {
+  dataManager?: any;
+}
+
+interface CreateParams {
+  baseConfig: TestConfig;
+  legacyParams?: LegacyMockParams;
+  mockRPC?: RPC;
+}
+
+// -----------------------------------------------------------------------------
+// Utils
+// -----------------------------------------------------------------------------
+
 async function doAction(env: Component | OdooEnv, ...args: Parameters<ActionManager["doAction"]>) {
   if (env instanceof Component) {
     env = env.env as OdooEnv;
   }
-  await env.services.action_manager.doAction(...args);
-  return legacyExtraNextTick();
+  try {
+    await env.services.action_manager.doAction(...args);
+  } finally {
+    await legacyExtraNextTick();
+  }
 }
-interface CreateParams {
-  baseConfig: TestConfig;
-  legacyEnv?: any;
-  mockRPC?: RPC;
+async function loadState(env: Component | OdooEnv, state: Route["hash"]) {
+  if (env instanceof Component) {
+    env = env.env as OdooEnv;
+  }
+  env.bus.trigger("test:hashchange", state);
+  await nextTick();
+  await legacyExtraNextTick();
 }
+
+function addLegacyMockEnvironment(
+  comp: Component<{}, OdooEnv>,
+  baseConfig: TestConfig,
+  legacyParams: LegacyMockParams = {}
+) {
+  const cleanUps: (() => void)[] = [];
+  const legacy = getLegacy() as any;
+
+  // setup a legacy env
+  const dataManager = Object.assign(
+    {
+      load_action: (actionID: number, context: Context) => {
+        return comp.env.services.rpc("/web/action/load", {
+          action_id: actionID,
+          additional_context: context,
+        });
+      },
+      load_views: async (params: any, options: any) => {
+        const result = await comp.env.services.rpc(`/web/dataset/call_kw/${params.model}`, {
+          args: [],
+          kwargs: {
+            context: params.context,
+            options: options,
+            views: params.views_descr,
+          },
+          method: "load_views",
+          model: params.model,
+        });
+        const views = result.fields_views;
+        for (const [_, viewType] of params.views_descr) {
+          const fvg = views[viewType];
+          fvg.viewFields = fvg.fields;
+          fvg.fields = result.fields;
+        }
+        if (params.favoriteFilters && "search" in views) {
+          views.search.favoriteFilters = params.favoriteFilters;
+        }
+        return views;
+      },
+      load_filters: (params: any) => {
+        if (QUnit.config.debug) {
+          console.log("[mock] load_filters", params);
+        }
+        return Promise.resolve([]);
+      },
+    },
+    legacyParams.dataManager
+  );
+  const legacyEnv = legacy.makeTestEnvironment({ dataManager });
+  Component.env = legacyEnv;
+  mapLegacyEnvToWowlEnv(legacyEnv, comp.env);
+
+  // deploy the legacyActionManagerService (in Wowl env)
+  const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
+  baseConfig.serviceRegistry!.add("legacy_action_manager", legacyActionManagerService);
+
+  // patch DebouncedField delay
+  const debouncedField = legacy.basicFields.DebouncedField;
+  const initialDebouncedVal = debouncedField.prototype.DEBOUNCE;
+  debouncedField.prototype.DEBOUNCE = 0;
+  cleanUps.push(() => (debouncedField.prototype.DEBOUNCE = initialDebouncedVal));
+
+  // clean up at end of test
+  const compDestroy = comp.destroy.bind(comp);
+  comp.destroy = () => {
+    cleanUps.forEach((fn) => fn());
+    compDestroy();
+  };
+}
+
 async function createWebClient(params: CreateParams) {
   const mockRPC = params.mockRPC || undefined;
   const env = await makeTestEnv({
     ...params.baseConfig,
     mockRPC,
   });
-  if (params.legacyEnv) {
-    mapLegacyEnvToWowlEnv(params.legacyEnv, env);
-  }
-  return mount(WebClient, { env });
+  const wc = await mount(WebClient, { env });
+
+  addLegacyMockEnvironment(wc, params.baseConfig, params.legacyParams);
+  await legacyExtraNextTick();
+
+  return wc;
 }
 
 // PREPARE AND DATA
 function beforeEachActionManager(): TestConfig {
-  const actionRegistry: Registries["actionRegistry"] = new Registry();
-  actionRegistry.add("clientAction", ClientAction);
-  const serviceRegistry: Registries["serviceRegistry"] = new Registry();
+  const serviceRegistry = new Registry<any>();
   serviceRegistry
     .add("user", makeFakeUserService())
     .add(notificationService.name, notificationService)
@@ -75,21 +172,15 @@ function beforeEachActionManager(): TestConfig {
 
   const serverData = makeServerData();
 
-  return { serverData, actionRegistry, serviceRegistry, browser };
+  return { serverData, serviceRegistry, browser };
 }
 
-class ClientAction extends Component<{}, OdooEnv> {
-  static template = tags.xml`
-    <div class="test_client_action">
-      ClientAction_<t t-esc="props.params?.description" />
-    </div>`;
-}
 function makeServerData(): ServerData {
   // action_manager_tests.js
   const recordData: ServerData["models"] = {
     partner: {
       fields: {
-        id: { string: "Id", type: "number" },
+        id: { string: "Id", type: "integer" },
         foo: { string: "Foo", type: "char" },
         bar: { string: "Bar", type: "many2one", relation: "partner" },
         o2m: { string: "One2Many", type: "one2many", relation: "partner", relation_field: "bar" },
@@ -105,7 +196,7 @@ function makeServerData(): ServerData {
     },
     pony: {
       fields: {
-        id: { string: "Id", type: "number" },
+        id: { string: "Id", type: "integer" },
         name: { string: "Name", type: "char" },
       },
       records: [
@@ -318,9 +409,32 @@ function makeServerData(): ServerData {
   };
 }
 
+// -----------------------------------------------------------------------------
+// Tests
+// -----------------------------------------------------------------------------
+
+let baseConfig: TestConfig;
+
+// legacy stuff
+let AbstractAction: any;
+let cpHelpers: any;
+let core: any;
+let ListController: any;
+let testUtils: any;
+let Widget: any;
+
 QUnit.module("web client integrated tests", (hooks) => {
   hooks.beforeEach(() => {
     baseConfig = beforeEachActionManager();
+    const actionsRegistry = new Registry<any>();
+    class ClientAction extends Component<{}, OdooEnv> {
+      static template = tags.xml`
+        <div class="test_client_action">
+          ClientAction_<t t-esc="props.params?.description" />
+        </div>`;
+    }
+    actionsRegistry.add("clientAction", ClientAction);
+    baseConfig.actionRegistry = actionsRegistry;
   });
 
   QUnit.module("Basic rendering");
@@ -630,14 +744,14 @@ QUnit.module("web client integrated tests", (hooks) => {
     assert.expect(1);
 
     baseConfig.serverData!.actions![1001].target = "new";
-    baseConfig.serviceRegistry!.remove("router");
     baseConfig.serviceRegistry!.add(
       "router",
       makeFakeRouterService({
         onPushState(mode, newState) {
           throw new Error("should not push state");
         },
-      })
+      }),
+      true
     );
     const env = await makeTestEnv(baseConfig);
     const webClient = await mount(WebClient, { env });
@@ -649,29 +763,20 @@ QUnit.module("web client integrated tests", (hooks) => {
 });
 
 QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
-  let testUtils: any;
-  let AbstractAction: any;
-  let Widget: any;
-  let cpHelpers: any;
-  let makeTestEnvironment: any;
-  let core: any;
+  hooks.before(() => {
+    const legacy = getLegacy() as any;
+    AbstractAction = legacy.AbstractAction;
+    core = legacy.core;
+    ListController = legacy.ListController;
+    testUtils = legacy.testUtils;
+    cpHelpers = testUtils.controlPanel;
+    Widget = legacy.Widget;
+  });
 
-  let legacyEnv: any;
   hooks.beforeEach(async (assert) => {
     baseConfig = beforeEachActionManager();
-    const legacy = getLegacy() as any;
-    testUtils = legacy.testUtils;
-    AbstractAction = legacy.AbstractAction;
-    Widget = legacy.Widget;
-    core = legacy.core;
-    cpHelpers = testUtils.controlPanel;
-    makeTestEnvironment = legacy.makeTestEnvironment;
-    Component.env = legacyEnv = makeTestEnvironment();
     baseConfig.actionRegistry = actionRegistry;
     baseConfig.viewRegistry = viewRegistry;
-    // in principle, we already have a testEnv on Component...
-    const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
-    baseConfig.serviceRegistry!.add("legacy_action_manager", legacyActionManagerService);
   });
 
   QUnit.module("Misc");
@@ -682,10 +787,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig.serverData!.actions![4].views = [[false, "form"]];
     baseConfig.serverData!.actions![4].target = "inline";
 
-    const webClient = await createWebClient({
-      baseConfig,
-      legacyEnv,
-    });
+    const webClient = await createWebClient({ baseConfig });
 
     await doAction(webClient, 4);
     assert.containsNone(webClient.el!, ".o_control_panel");
@@ -717,7 +819,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     });
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 8);
 
     const n = delta;
@@ -755,7 +857,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     });
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     const n = delta;
 
     await doAction(webClient, 5);
@@ -790,7 +892,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
           await Promise.resolve(def);
         }
       };
-      const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+      const webClient = await createWebClient({ baseConfig, mockRPC });
 
       await doAction(webClient, 4);
       const n = delta;
@@ -838,7 +940,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
           await Promise.resolve(def);
         }
       };
-      const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+      const webClient = await createWebClient({ baseConfig, mockRPC });
 
       // execute action 4 to know the number of widgets it instantiates
       await doAction(webClient, 4);
@@ -883,7 +985,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
           await Promise.resolve(def);
         }
       };
-      const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+      const webClient = await createWebClient({ baseConfig, mockRPC });
 
       // execute action 4 to know the number of widgets it instantiates
       await doAction(webClient, 4);
@@ -911,7 +1013,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig.serverData!.actions![4].context = { no_breadcrumbs: true };
     const webClient = await createWebClient({
       baseConfig,
-      legacyEnv,
     });
     await doAction(webClient, 3);
     assert.containsOnce(webClient.el!, ".o_control_panel .breadcrumb-item");
@@ -926,62 +1027,69 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.skip("document's title is updated when an action is executed", async function (assert) {
     assert.expect(3);
 
-    // TODO: this is a new test to write, because before it was tied to the push state stuff
-    /*
-    const stateDescriptions = [
-      { action: 4, model: "partner", title: "Partners Action 4", view_type: "kanban" },
-      { action: 8, model: "pony", title: "Favorite Ponies", view_type: "list" },
-      { action: 8, id: 4, model: "pony", title: "Twilight Sparkle", view_type: "form" },
-    ];
-
-    baseConfig.services!.remove("router");
-    baseConfig.services!.add("router", makeFakeRouterService({
-      onPushState(mode, newState) {
-        debugger
-          const expectedState = stateDescriptions.shift() as any;
-          assert.deepEqual(newState, expectedState);
+    const mockedTitleService = {
+      name: "title",
+      deploy() {
+        return {
+          get current() {
+            return "";
+          },
+          getParts() {
+            return {};
+          },
+          setParts(parts: { [key: string]: string }) {
+            assert.step(JSON.stringify(parts));
+          },
+        };
       },
-    }));
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    };
+    baseConfig.serviceRegistry!.add("title", mockedTitleService, true);
+
+    const webClient = await createWebClient({ baseConfig });
 
     await doAction(webClient, 4);
     await doAction(webClient, 8);
     await testUtils.dom.click($(webClient.el!).find("tr.o_data_row:first"));
     await legacyExtraNextTick();
 
+    // TODO: fill verifySteps: should set the title of each action as document title
+    assert.verifySteps([]);
+    // const stateDescriptions = [
+    //   { action: 4, model: "partner", title: "Partners Action 4", view_type: "kanban" },
+    //   { action: 8, model: "pony", title: "Favorite Ponies", view_type: "list" },
+    //   { action: 8, id: 4, model: "pony", title: "Twilight Sparkle", view_type: "form" },
+    // ];
+
     webClient.destroy();
-    */
   });
 
   QUnit.skip("on_reverse_breadcrumb handler is correctly called", async function (assert) {
     /*
     assert.expect(3);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
+    const webClient = await createWebClient({ baseConfig });
 
     // execute action 3 and open a record in form view
-    await actionManager.doAction(3);
-    testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
+    await doAction(webClient, 3);
+    testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
 
     // execute action 4 without 'on_reverse_breadcrumb' handler, then go back
-    await actionManager.doAction(4);
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a:first"));
+    await doAction(webClient, 4);
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:first"));
+    await legacyExtraNextTick();
     assert.verifySteps([]);
 
     // execute action 4 with an 'on_reverse_breadcrumb' handler, then go back
-    await actionManager.doAction(4, {
+    await doAction(webClient, 4, {
       on_reverse_breadcrumb: function () {
         assert.step("on_reverse_breadcrumb");
       },
     });
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a:first"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:first"));
+    await legacyExtraNextTick();
     assert.verifySteps(["on_reverse_breadcrumb"]);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -989,19 +1097,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     /*
     assert.expect(2);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
+    const webClient = await createWebClient({ baseConfig });
 
-    await actionManager.doAction(4);
-    await actionManager.doAction(3);
+    await doAction(webClient, 4);
+    await doAction(webClient, 3);
     actionManager.trigger_up("history_back");
 
     await testUtils.nextTick();
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item",
       1,
       "there should be one controller in the breadcrumbs"
     );
@@ -1011,7 +1114,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "breadcrumbs should display the display_name of the action"
     );
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -1038,17 +1141,18 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     // execute a first action and simulate a scroll
     assert.step("execute action 3");
-    await actionManager.doAction(3);
+    await doAction(webClient, 3);
     left = 50;
     top = 100;
 
     // execute a second action (in which we don't scroll)
     assert.step("execute action 4");
-    await actionManager.doAction(4);
+    await doAction(webClient, 4);
 
     // go back using the breadcrumbs
     assert.step("go back to action 3");
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a"));
+    await legacyExtraNextTick();
 
     assert.verifySteps([
       "execute action 3",
@@ -1059,7 +1163,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "scrollTo left 50, top 100", // restore scroll position of action 3
     ]);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -1076,7 +1180,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         </field>
       </form>`;
 
-      const webClient = await createWebClient({ baseConfig, legacyEnv });
+      const webClient = await createWebClient({ baseConfig });
 
       await doAction(webClient, 3);
       assert.containsOnce(webClient.el!, ".o_list_view");
@@ -1109,7 +1213,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         </field>
       </form>`;
 
-      const webClient = await createWebClient({ baseConfig, legacyEnv });
+      const webClient = await createWebClient({ baseConfig });
 
       await doAction(webClient, 3);
       assert.containsOnce(webClient.el!, ".o_list_view");
@@ -1134,7 +1238,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test("properly push state", async function (assert) {
     assert.expect(3);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
 
     await doAction(webClient, 4);
     assert.deepEqual(webClient.env.services.router.current.hash, {
@@ -1171,7 +1275,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await def;
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     doAction(webClient, 4);
     await testUtils.nextTick();
@@ -1192,7 +1296,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("do not push state when action fails", async function (assert) {
+  QUnit.test("do not push state when action fails", async function (assert) {
     assert.expect(3);
 
     const mockRPC: RPC = async function (route, args) {
@@ -1200,7 +1304,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return Promise.reject();
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     await doAction(webClient, 8);
     assert.deepEqual(webClient.env.services.router.current.hash, {
@@ -1230,9 +1334,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
-    webClient.env.bus.trigger("test:hashchange", {
+    await loadState(webClient, {
       res_model: "partner", // the valid key for the model is 'model', not 'res_model'
     });
 
@@ -1253,7 +1357,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     webClient.env.bus.trigger("test:hashchange", {
       action: "HelloWorldTest",
@@ -1278,7 +1382,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     webClient.env.bus.trigger("test:hashchange", {
       action: 1,
     });
@@ -1304,7 +1408,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     webClient.env.bus.trigger("test:hashchange", {
       id: 2,
       model: "partner",
@@ -1330,7 +1434,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     webClient.env.bus.trigger("test:hashchange", {
       action: 3,
       id: "", // might happen with bbq and id=& in URL
@@ -1353,7 +1457,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     webClient.env.bus.trigger("test:hashchange", {
       action: 3,
       view_type: "kanban",
@@ -1382,7 +1486,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       const mockRPC: RPC = async function (route, args) {
         assert.step((args && args.method) || route);
       };
-      const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+      const webClient = await createWebClient({ baseConfig, mockRPC });
       webClient.env.bus.trigger("test:hashchange", {
         action: 3,
         id: 2,
@@ -1401,7 +1505,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       );
 
       // go back to Lst
-      await testUtils.dom.click($(".o_control_panel .breadcrumb a"));
+      await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a"));
       await legacyExtraNextTick();
       assert.containsOnce(webClient.el!, ".o_list_view");
       assert.containsNone(webClient.el!, ".o_form_view");
@@ -1421,7 +1525,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test("lazy load multi record view with previous action", async function (assert) {
     assert.expect(6);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 4);
 
     assert.containsOnce(
@@ -1453,7 +1557,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     );
 
     // go back to List
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a:last"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:last"));
     await legacyExtraNextTick();
 
     assert.containsN(
@@ -1471,44 +1575,30 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("lazy loaded multi record view with failing mono record one", async function (assert) {
-    /*
-    assert.expect(4);
+  QUnit.test("lazy loaded multi record view with failing mono record one", async function (assert) {
+    assert.expect(3);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
-        if (args.method === "read") {
-          return Promise.reject();
-        }
-        return this._super.apply(this, arguments);
-      },
+    const mockRPC: RPC = async function (route, args) {
+      if (args && args.method === "read") {
+        return Promise.reject();
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+
+    await loadState(webClient, {
+      action: "3",
+      id: "2",
+      view_type: "form",
     });
 
-    await actionManager
-      .loadState({
-        action: 3,
-        id: 2,
-        view_type: "form",
-      })
-      .then(function () {
-        assert.ok(false, "should not resolve the deferred");
-      })
-      .catch(function () {
-        assert.ok(true, "should reject the deferred");
-      });
+    assert.containsNone(webClient.el!, ".o_form_view");
+    assert.containsNone(webClient.el!, ".o_list_view");
 
-    assert.containsNone(actionManager, ".o_form_view");
-    assert.containsNone(actionManager, ".o_list_view");
+    await doAction(webClient, 1);
 
-    await actionManager.doAction(1);
+    assert.containsOnce(webClient.el!, ".o_kanban_view");
 
-    assert.containsOnce(actionManager, ".o_kanban_view");
-
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.test("change the viewType of the current action", async function (assert) {
@@ -1517,7 +1607,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 3);
 
     assert.containsOnce(webClient.el!, ".o_list_view");
@@ -1577,7 +1667,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // execute action 3 and open the first record in a form view
     await doAction(webClient, 3);
@@ -1628,30 +1718,46 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("should not push a loaded state", async function (assert) {
-    /*
-    assert.expect(3);
+  // LPE was: should not push a loaded state
+  QUnit.test("should push the correct state at the right time", async function (assert) {
+    assert.expect(7);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      intercepts: {
-        push_state: function () {
+    baseConfig.serviceRegistry!.add(
+      "router",
+      makeFakeRouterService({
+        onPushState() {
           assert.step("push_state");
         },
-      },
+      }),
+      true
+    );
+
+    const webClient = await createWebClient({ baseConfig });
+    let currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {});
+
+    await loadState(webClient, { action: "3" });
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {
+      action: "3",
+      model: "partner",
+      view_type: "list",
     });
-    await actionManager.loadState({ action: 3 });
+    assert.verifySteps(["push_state"], "should have pushed the final state");
 
-    assert.verifySteps([], "should not push the loaded state");
-
-    await testUtils.dom.click(actionManager.$("tr.o_data_row:first"));
+    await testUtils.dom.click($(webClient.el!).find("tr.o_data_row:first"));
+    await legacyExtraNextTick();
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {
+      action: "3",
+      id: "1",
+      model: "partner",
+      view_type: "form",
+    });
 
     assert.verifySteps(["push_state"], "should push the state of it changes afterwards");
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip("should not push a loaded state of a client action", async function (assert) {
@@ -1697,11 +1803,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     assert.verifySteps([], "should not push the loaded state");
 
-    await testUtils.dom.click(actionManager.$("button"));
+    await testUtils.dom.click($(webClient.el!).find("button"));
+    await legacyExtraNextTick();
 
     assert.verifySteps(["push_state"], "should push the state of it changes afterwards");
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -1729,22 +1836,17 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
     core.action_registry.add("ClientAction", ClientAction);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
+    const webClient = await createWebClient({ baseConfig });
 
     // execute the client action
-    await actionManager.doAction(9);
+    await doAction(webClient, 9);
 
     assert.strictEqual(
-      actionManager.$(".o_client_action .o_content").text(),
+      $(webClient.el!).find(".o_client_action .o_content").text(),
       "default value",
       "should have rendered the client action"
     );
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item",
       1,
       "there should be one controller in the breadcrumbs"
     );
@@ -1756,12 +1858,11 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
 
     assert.strictEqual(
-      actionManager.$(".o_client_action .o_content").text(),
+      $(webClient.el!).find(".o_client_action .o_content").text(),
       "new value",
       "should have rerendered the client action with the correct param"
     );
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item",
       1,
       "there should still be one controller in the breadcrumbs"
     );
@@ -1769,66 +1870,61 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     // should have executed the client action twice
     assert.verifySteps(["start", "start"]);
 
-    actionManager.destroy();
+    webClient.destroy();
     delete core.action_registry.map.ClientAction;
     */
   });
 
   QUnit.skip("load a window action without id (in a multi-record view)", async function (assert) {
-    /*
+    // unskip: need to store the action in session storage and implement the restore
     assert.expect(14);
 
-    var RamStorageService = AbstractStorageService.extend({
-      storage: new RamStorage(),
-    });
+    // var RamStorageService = AbstractStorageService.extend({
+    //   storage: new RamStorage(),
+    // });
+    // services: {
+    //   session_storage: RamStorageService,
+    // },
+    // testUtils.mock.intercept(
+    //   actionManager,
+    //   "call_service",
+    //   function (ev) {
+    //     if (ev.data.service === "session_storage") {
+    //       assert.step(ev.data.method);
+    //     }
+    //   },
+    //   true
+    // );
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        session_storage: RamStorageService,
-      },
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        return this._super.apply(this, arguments);
-      },
-    });
+    const mockRPC: RPC = async (route, args) => {
+      assert.step((args && args.method) || route);
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
-    testUtils.mock.intercept(
-      actionManager,
-      "call_service",
-      function (ev) {
-        if (ev.data.service === "session_storage") {
-          assert.step(ev.data.method);
-        }
-      },
-      true
-    );
+    await doAction(webClient, 4);
 
-    await actionManager.doAction(4);
-
-    assert.containsOnce(actionManager, ".o_kanban_view", "should display a kanban view");
+    assert.containsOnce(webClient.el!, ".o_kanban_view", "should display a kanban view");
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
       "Partners Action 4",
       "breadcrumbs should display the display_name of the action"
     );
 
-    await actionManager.loadState({
+    await loadState(webClient, {
       model: "partner",
       view_type: "list",
     });
 
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
       "Partners Action 4",
       "should still be in the same action"
     );
-    assert.containsNone(actionManager, ".o_kanban_view", "should no longer display a kanban view");
-    assert.containsOnce(actionManager, ".o_list_view", "should display a list view");
+    assert.containsNone(webClient.el!, ".o_kanban_view", "should no longer display a kanban view");
+    assert.containsOnce(webClient.el!, ".o_list_view", "should display a list view");
 
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // action 3
       "/web/dataset/search_read", // action 3
@@ -1839,8 +1935,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "setItem", // loaded action
     ]);
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.module("Concurrency management");
@@ -1855,7 +1950,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await def;
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     doAction(webClient, 4);
     doAction(webClient, 8);
@@ -1890,7 +1985,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await defs.shift();
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 4);
 
     // kanban view is loaded, switch to list view
@@ -1932,7 +2027,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return 1;
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     doAction(webClient, 2);
     doAction(webClient, 4);
 
@@ -1959,7 +2054,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await def;
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // create a situation with 3 breadcrumbs: kanban/form/list
     await doAction(webClient, 4);
@@ -1974,9 +2069,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     // click on the breadcrumbs for the form view, then on the kanban view
     // before the form view is fully reloaded
-    await testUtils.dom.click($(".o_control_panel .breadcrumb-item:eq(1)"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb-item:eq(1)"));
     await legacyExtraNextTick();
-    await testUtils.dom.click($(".o_control_panel .breadcrumb-item:eq(0)"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb-item:eq(0)"));
     await legacyExtraNextTick();
 
     // resolve the form view read
@@ -2005,7 +2100,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
           await def;
         }
       };
-      const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+      const webClient = await createWebClient({ baseConfig, mockRPC });
 
       webClient.env.bus.trigger("test:hashchange", {
         action: 4,
@@ -2026,6 +2121,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       await testUtils.nextTick();
       await legacyExtraNextTick();
       await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a"));
+      await legacyExtraNextTick();
 
       assert.containsOnce(
         webClient.el!,
@@ -2079,7 +2175,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return baseConfig.serverData!.actions![1];
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // execute action 3 and open a record in form view
     await doAction(webClient, 3);
@@ -2150,7 +2246,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await def;
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     await doAction(webClient, 3);
 
@@ -2220,7 +2316,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await def;
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // execute a first action (its 'load_views' RPC is blocked)
     doAction(webClient, 3);
@@ -2277,7 +2373,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await def;
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // execute a first action (its 'search_read' RPC is blocked)
     doAction(webClient, 3);
@@ -2333,7 +2429,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await def;
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     await doAction(webClient, 3);
 
@@ -2370,6 +2466,40 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
+  QUnit.test("properly drop client actions after new action is initiated", async function (assert) {
+    assert.expect(3);
+
+    const slowWillStartDef = testUtils.makeTestPromise();
+
+    const actionsRegistry = new Registry<any>();
+    class ClientAction extends Component<{}, OdooEnv> {
+      static template = tags.xml`<div class="client_action">ClientAction</div>`;
+      willStart() {
+        return slowWillStartDef;
+      }
+    }
+    actionsRegistry.add("slowAction", ClientAction);
+    baseConfig.actionRegistry = actionsRegistry;
+
+    const webClient = await createWebClient({ baseConfig });
+    doAction(webClient, "slowAction");
+    await nextTick();
+    await legacyExtraNextTick();
+    assert.containsNone(webClient.el!, ".client_action", "client action isn't ready yet");
+
+    doAction(webClient, 4);
+    await nextTick();
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_kanban_view", "should have loaded a kanban view");
+
+    slowWillStartDef.resolve();
+    await testUtils.nextTick();
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_kanban_view", "should still display the kanban view");
+
+    webClient.destroy();
+  });
+
   QUnit.module("Client Actions");
 
   QUnit.test("can execute client actions from tag name (legacy)", async function (assert) {
@@ -2387,7 +2517,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, "HelloWorldTestLeg");
 
     assert.containsNone(
@@ -2417,7 +2547,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, "HelloWorldTest");
 
     assert.containsNone(
@@ -2452,15 +2582,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     core.action_registry.add("HelloWorldTest", ClientAction);
 
     var actionManager = await createActionManager();
-    await actionManager.doAction("HelloWorldTest");
+    await doAction(webClient, "HelloWorldTest");
 
     assert.strictEqual(
       $(".o_control_panel:visible").length,
       1,
       "should have rendered a control panel"
     );
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item",
       1,
       "there should be one controller in the breadcrumbs"
     );
@@ -2470,12 +2599,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "breadcrumbs should still display the title of the controller"
     );
     assert.strictEqual(
-      actionManager.$(".o_client_action_test .o_content").text(),
+      $(webClient.el!).find(".o_client_action_test .o_content").text(),
       "Hello World",
       "should have correctly rendered the client action"
     );
 
-    actionManager.destroy();
+    webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
     */
   });
@@ -2507,11 +2636,11 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
     core.action_registry.add("HelloWorldTest", ClientAction);
 
-    await actionManager.doAction("HelloWorldTest");
+    await doAction(webClient, "HelloWorldTest");
 
     assert.verifySteps(["push state"]);
 
-    actionManager.destroy();
+    webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
     */
   });
@@ -2532,14 +2661,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
     const actionManager = await createActionManager();
     core.action_registry.add("HelloWorldTest", ClientAction);
-    await actionManager.doAction("HelloWorldTest");
+    await doAction(webClient, "HelloWorldTest");
     assert.containsOnce(
       actionManager,
       ".custom-control-panel",
       "should have a custom control panel"
     );
 
-    actionManager.destroy();
+    webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
     */
   });
@@ -2564,7 +2693,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
     var actionManager = await createActionManager();
     core.action_registry.add("HelloWorldTest", ClientAction);
-    await actionManager.doAction("HelloWorldTest");
+    await doAction(webClient, "HelloWorldTest");
 
     assert.strictEqual(
       $("ol.breadcrumb").text(),
@@ -2572,14 +2701,15 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "should have initial title as breadcrumb content"
     );
 
-    await testUtils.dom.click(actionManager.$(".o_client_action_test"));
+    await testUtils.dom.click($(webClient.el!).find(".o_client_action_test"));
+    await legacyExtraNextTick();
     assert.strictEqual(
       $("ol.breadcrumb").text(),
       "new title",
       "should have updated title as breadcrumb content"
     );
 
-    actionManager.destroy();
+    webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
     */
   });
@@ -2589,7 +2719,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     baseConfig!.serviceRegistry!.add("notification", notificationService);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
 
     await doAction(webClient, 1);
     assert.containsOnce(webClient.el!, ".o_kanban_view");
@@ -2640,7 +2770,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return Promise.resolve(1); // execute action 1
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 2);
 
     assert.containsOnce(webClient.el!, ".o_control_panel", "should have rendered a control panel");
@@ -2658,6 +2788,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.skip("handle server actions returning false", async function (assert) {
+    // unskip: on_close option?
     assert.expect(9);
 
     const mockRPC: RPC = async (route, args) => {
@@ -2666,7 +2797,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return Promise.resolve(false);
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // execute an action in target="new"
     await doAction(webClient, 5);
@@ -2723,7 +2854,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         },
       },
     });
-    await actionManager.doAction(7, {
+    await doAction(webClient, 7, {
       on_close: function () {
         assert.step("on_close");
       },
@@ -2736,7 +2867,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "on_close",
     ]);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -2768,7 +2899,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
 
     // load modal
-    await actionManager.doAction(5, {
+    await doAction(webClient, 5, {
       on_close: function () {
         assert.step("on_close");
       },
@@ -2780,7 +2911,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "should have rendered a form view in a modal"
     );
 
-    await actionManager.doAction(7, {
+    await doAction(webClient, 7, {
       on_close: function () {
         assert.step("on_printed");
       },
@@ -2792,7 +2923,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "The modal should still exist"
     );
 
-    await actionManager.doAction(11);
+    await doAction(webClient, 11);
 
     assert.strictEqual(
       $(".o_technical_modal .o_form_view").length,
@@ -2802,7 +2933,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     assert.verifySteps(["/report/download", "on_printed", "/report/download", "on_close"]);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -2838,7 +2969,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         },
       },
     });
-    await actionManager.doAction(7);
+    await doAction(webClient, 7);
     assert.verifySteps([
       "/web/action/load",
       "/report/check_wkhtmltopdf",
@@ -2846,7 +2977,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/report/download",
     ]);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -2900,14 +3031,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         },
       },
     });
-    await actionManager.doAction(7);
+    await doAction(webClient, 7);
 
     assert.containsOnce(
       actionManager,
       ".o_report_iframe",
       "should have opened the report client action"
     );
-    assert.containsOnce(actionManager, ".o_cp_buttons .o_report_buttons .o_report_print");
+    assert.containsOnce(webClient.el!, ".o_cp_buttons .o_report_buttons .o_report_print");
 
     assert.verifySteps([
       "/web/action/load",
@@ -2916,7 +3047,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/report/html/some_report?context=%7B%7D", // report client action's iframe
     ]);
 
-    actionManager.destroy();
+    webClient.destroy();
     testUtils.mock.unpatch(ReportClientAction);
     */
     }
@@ -2966,7 +3097,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         },
       },
     });
-    await actionManager.doAction(12);
+    await doAction(webClient, 12);
 
     assert.containsOnce(
       actionManager,
@@ -2979,7 +3110,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/report/html/some_report?context=%7B%22some_key%22%3A2%7D", // report client action's iframe
     ]);
 
-    actionManager.destroy();
+    webClient.destroy();
     testUtils.mock.unpatch(ReportClientAction);
     */
   });
@@ -3016,14 +3147,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
 
     try {
-      await actionManager.doAction(11);
+      await doAction(webClient, 11);
     } catch (e) {
       // e is undefined if we land here because of a rejected promise,
       // otherwise, it is an Error, which is not what we expect
       assert.strictEqual(e, undefined);
     }
 
-    actionManager.destroy();
+    webClient.destroy();
     */
     }
   );
@@ -3036,7 +3167,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     await doAction(webClient, 1);
 
@@ -3064,7 +3195,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         assert.strictEqual(args.kwargs.options.toolbar, true, "should ask for toolbar information");
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     await doAction(webClient, 3);
 
@@ -3089,7 +3220,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 3);
 
     assert.containsOnce(webClient.el!, ".o_list_view", "should display the list view");
@@ -3141,72 +3272,71 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip(
+  QUnit.test(
     "orderedBy in context is not propagated when executing another action",
     async function (assert) {
-      /*
       assert.expect(6);
 
-      this.data.partner.fields.foo.sortable = true;
-
-      this.archs["partner,false,form"] =
-        "<header>" + '<button name="8" string="Execute action" type="action"/>' + "</header>";
-
-      var searchReadCount = 1;
-      var actionManager = await createActionManager({
-        actions: this.actions,
-        archs: this.archs,
-        data: this.data,
-        mockRPC: function (route, args) {
-          if (route === "/web/dataset/search_read") {
-            if (searchReadCount === 1) {
-              assert.strictEqual(args.model, "partner");
-              assert.notOk(args.sort);
-            }
-            if (searchReadCount === 2) {
-              assert.strictEqual(args.model, "partner");
-              assert.strictEqual(args.sort, "foo ASC");
-            }
-            if (searchReadCount === 3) {
-              assert.strictEqual(args.model, "pony");
-              assert.notOk(args.sort);
-            }
-            searchReadCount += 1;
-          }
-          return this._super.apply(this, arguments);
+      baseConfig.serverData!.models!.partner.fields.foo.sortable = true;
+      baseConfig.serverData!.views!["partner,false,form"] = `
+        <form>
+          <header>
+            <button name="8" string="Execute action" type="action"/>
+          </header>
+        </form>`;
+      baseConfig.serverData!.models!.partner.filters = [
+        {
+          id: 1,
+          context: "{}",
+          domain: "[]",
+          sort: "[]",
+          is_default: true,
+          name: "My filter",
         },
-      });
-      await actionManager.doAction(3);
+      ];
 
-      // Simulate the activation of a filter
-      var searchData = {
-        domains: [[["foo", "=", "yop"]]],
-        contexts: [
-          {
-            orderedBy: [],
-          },
-        ],
+      let searchReadCount = 1;
+      const mockRPC: RPC = async (route, args) => {
+        if (route === "/web/dataset/search_read") {
+          args = args || {};
+          if (searchReadCount === 1) {
+            assert.strictEqual(args.model, "partner");
+            assert.notOk(args.sort);
+          }
+          if (searchReadCount === 2) {
+            assert.strictEqual(args.model, "partner");
+            assert.strictEqual(args.sort, "foo ASC");
+          }
+          if (searchReadCount === 3) {
+            assert.strictEqual(args.model, "pony");
+            assert.notOk(args.sort);
+          }
+          searchReadCount += 1;
+        }
       };
-      actionManager.trigger_up("search", searchData);
+      const webClient = await createWebClient({ baseConfig, mockRPC });
+      await doAction(webClient, 3);
 
       // Sort records
-      await testUtils.dom.click(actionManager.$(".o_list_view th.o_column_sortable"));
+      await testUtils.dom.click($(webClient.el!).find(".o_list_view th.o_column_sortable"));
+      await legacyExtraNextTick();
 
-      // get to the form view of the model, on the first record
-      await testUtils.dom.click(actionManager.$(".o_data_cell:first"));
+      // Get to the form view of the model, on the first record
+      await testUtils.dom.click($(webClient.el!).find(".o_data_cell:first"));
+      await legacyExtraNextTick();
 
-      // Change model by clicking on the button within the form
-      await testUtils.dom.click(actionManager.$(".o_form_view button"));
+      // Execute another action by clicking on the button within the form
+      await testUtils.dom.click($(webClient.el!).find("button[name=8]"));
+      await legacyExtraNextTick();
 
-      actionManager.destroy();
-      */
+      webClient.destroy();
     }
   );
 
   QUnit.test("breadcrumbs are updated when switching between views", async function (assert) {
     assert.expect(15);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 3);
 
     assert.containsOnce(
@@ -3311,7 +3441,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test("switch buttons are updated when switching between views", async function (assert) {
     assert.expect(13);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 3);
 
     assert.containsN(
@@ -3386,7 +3516,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     );
 
     // go back to list view using the breadcrumbs
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a"));
     await legacyExtraNextTick();
     assert.containsN(
       webClient.el!,
@@ -3406,7 +3536,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test("pager is updated when switching between views", async function (assert) {
     assert.expect(10);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 4);
 
     assert.strictEqual(
@@ -3479,13 +3609,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     // webClient.destroy();
   });
 
-  QUnit.skip("domain is kept when switching between views", async function (assert) {
-    // skipped because MockServer is not able yet to evaluate a domain
+  QUnit.test("domain is kept when switching between views", async function (assert) {
     assert.expect(5);
 
     baseConfig.serverData!.actions![3].search_view_id = [1, "a custom search view"];
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
 
     await doAction(webClient, 3);
     assert.containsN(webClient.el!, ".o_data_row", 5);
@@ -3514,94 +3643,98 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("there is no flickering when switching between views", async function (assert) {
-    /*
+  QUnit.test("there is no flickering when switching between views", async function (assert) {
     assert.expect(20);
 
-    var def;
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function () {
-        var result = this._super.apply(this, arguments);
-        return Promise.resolve(def).then(_.constant(result));
-      },
-    });
-    await actionManager.doAction(3);
+    let def: any;
+    const mockRPC: RPC = async (route, args) => {
+      await def;
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+
+    await doAction(webClient, 3);
 
     // switch to kanban view
     def = testUtils.makeTestPromise();
-    await cpHelpers.switchView(actionManager, "kanban");
-    assert.containsOnce(actionManager, ".o_list_view", "should still display the list view");
-    assert.containsNone(actionManager, ".o_kanban_view", "shouldn't display the kanban view yet");
+    await cpHelpers.switchView(webClient.el!, "kanban");
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_list_view", "should still display the list view");
+    assert.containsNone(webClient.el!, ".o_kanban_view", "shouldn't display the kanban view yet");
     def.resolve();
     await testUtils.nextTick();
-    assert.containsNone(actionManager, ".o_list_view", "shouldn't display the list view anymore");
-    assert.containsOnce(actionManager, ".o_kanban_view", "should now display the kanban view");
+    await legacyExtraNextTick();
+    assert.containsNone(webClient.el!, ".o_list_view", "shouldn't display the list view anymore");
+    assert.containsOnce(webClient.el!, ".o_kanban_view", "should now display the kanban view");
 
     // switch back to list view
     def = testUtils.makeTestPromise();
-    await cpHelpers.switchView(actionManager, "list");
-    assert.containsOnce(actionManager, ".o_kanban_view", "should still display the kanban view");
-    assert.containsNone(actionManager, ".o_list_view", "shouldn't display the list view yet");
+    await cpHelpers.switchView(webClient.el!, "list");
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_kanban_view", "should still display the kanban view");
+    assert.containsNone(webClient.el!, ".o_list_view", "shouldn't display the list view yet");
     def.resolve();
     await testUtils.nextTick();
+    await legacyExtraNextTick();
     assert.containsNone(
-      actionManager,
+      webClient.el!,
       ".o_kanban_view",
       "shouldn't display the kanban view anymore"
     );
-    assert.containsOnce(actionManager, ".o_list_view", "should now display the list view");
+    assert.containsOnce(webClient.el!, ".o_list_view", "should now display the list view");
 
     // open a record in form view
     def = testUtils.makeTestPromise();
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
-    assert.containsOnce(actionManager, ".o_list_view", "should still display the list view");
-    assert.containsNone(actionManager, ".o_form_view", "shouldn't display the form view yet");
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
-      1,
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_list_view", "should still display the list view");
+    assert.containsNone(webClient.el!, ".o_form_view", "shouldn't display the form view yet");
+    assert.containsOnce(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       "there should still be one controller in the breadcrumbs"
     );
     def.resolve();
     await testUtils.nextTick();
-    assert.containsNone(actionManager, ".o_list_view", "should no longer display the list view");
-    assert.containsOnce(actionManager, ".o_form_view", "should display the form view");
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    await legacyExtraNextTick();
+    assert.containsNone(webClient.el!, ".o_list_view", "should no longer display the list view");
+    assert.containsOnce(webClient.el!, ".o_form_view", "should display the form view");
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       2,
       "there should be two controllers in the breadcrumbs"
     );
 
     // go back to list view using the breadcrumbs
     def = testUtils.makeTestPromise();
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a"));
-    assert.containsOnce(actionManager, ".o_form_view", "should still display the form view");
-    assert.containsNone(actionManager, ".o_list_view", "shouldn't display the list view yet");
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a"));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_form_view", "should still display the form view");
+    assert.containsNone(webClient.el!, ".o_list_view", "shouldn't display the list view yet");
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       2,
       "there should still be two controllers in the breadcrumbs"
     );
     def.resolve();
     await testUtils.nextTick();
-    assert.containsNone(actionManager, ".o_form_view", "should no longer display the form view");
-    assert.containsOnce(actionManager, ".o_list_view", "should display the list view");
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
-      1,
+    await legacyExtraNextTick();
+    assert.containsNone(webClient.el!, ".o_form_view", "should no longer display the form view");
+    assert.containsOnce(webClient.el!, ".o_list_view", "should display the list view");
+    assert.containsOnce(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       "there should be one controller in the breadcrumbs"
     );
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.test("breadcrumbs are updated when display_name changes", async function (assert) {
     assert.expect(4);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 3);
 
     // open a record in form view
@@ -3620,7 +3753,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     );
 
     // switch to edit mode and change the display_name
-    await testUtils.dom.click($(".o_control_panel .o_form_button_edit"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .o_form_button_edit"));
     await testUtils.fields.editInput(
       webClient.el!.querySelector(".o_field_widget[name=display_name]"),
       "New name"
@@ -3645,7 +3778,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test('reverse breadcrumb works on accesskey "b"', async function (assert) {
     assert.expect(4);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 3);
 
     // open a record in form view
@@ -3684,16 +3817,17 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.skip("reload previous controller when discarding a new record", async function (assert) {
+    // unskip: doesn't go back to previous controller when discarding
     assert.expect(9);
 
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 3);
 
     // create a new record
-    await testUtils.dom.click($(".o_control_panel .o_list_button_add"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .o_list_button_add"));
     await legacyExtraNextTick();
     assert.containsOnce(
       webClient.el!,
@@ -3702,7 +3836,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     );
 
     // discard
-    await testUtils.dom.click($(".o_control_panel .o_form_button_cancel"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .o_form_button_cancel"));
     await legacyExtraNextTick();
     assert.containsOnce(
       webClient.el!,
@@ -3725,13 +3859,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.skip("requests for execute_action of type object are handled", async function (assert) {
     assert.expect(10);
 
-    // FIXME: better way to mock user_context?
-    baseConfig.serviceRegistry!.remove("user");
     baseConfig.serviceRegistry!.add(
       "user",
       makeFakeUserService({
         context: Object.assign({}, { some_key: 2 } as any),
-      })
+      }),
+      true
     );
 
     const mockRPC: RPC = async (route, args) => {
@@ -3754,8 +3887,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return Promise.resolve(false);
       }
     };
-
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 3);
 
     // open a record in form view
@@ -3789,43 +3921,44 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("requests for execute_action of type action are handled", async function (assert) {
-    /*
-    assert.expect(11);
+  QUnit.test("requests for execute_action of type action are handled", async function (assert) {
+    assert.expect(12);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        return this._super.apply(this, arguments);
-      },
-    });
-    await actionManager.doAction(3);
+    const mockRPC: RPC = async (route, args) => {
+      assert.step((args && args.method) || route);
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    await doAction(webClient, 3);
 
     // open a record in form view
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await legacyExtraNextTick();
 
     // click on 'Execute action' button (should execute an action)
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       2,
       "there should be two parts in the breadcrumbs"
     );
-    await testUtils.dom.click(actionManager.$(".o_form_view button:contains(Execute action)"));
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    await testUtils.dom.click(
+      $(webClient.el!).find(".o_form_view button:contains(Execute action)")
+    );
+    await legacyExtraNextTick();
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       3,
       "the returned action should have been stacked over the previous one"
     );
     assert.containsOnce(
-      actionManager,
+      webClient.el!,
       ".o_kanban_view",
       "the returned action should have been executed"
     );
 
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load",
       "load_views",
       "/web/dataset/search_read", // list for action 3
@@ -3835,109 +3968,101 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/web/dataset/search_read", // kanban for action 4
     ]);
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip(
     "requests for execute_action of type object: disable buttons",
     async function (assert) {
-      /*
-    assert.expect(2);
+      // unskip: buttons aren't re-enabled
+      assert.expect(2);
 
-    var def;
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
+      let def: any;
+      const mockRPC: RPC = async (route, args) => {
         if (route === "/web/dataset/call_button") {
           return Promise.resolve(false);
-        } else if (args.method === "read") {
-          // Block the 'read' call
-          var result = this._super.apply(this, arguments);
-          return Promise.resolve(def).then(_.constant(result));
+        } else if (args && args.method === "read") {
+          await def; // block the 'read' call
         }
-        return this._super.apply(this, arguments);
-      },
-    });
-    await actionManager.doAction(3);
+      };
+      const webClient = await createWebClient({ baseConfig, mockRPC });
+      await doAction(webClient, 3);
 
-    // open a record in form view
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
+      // open a record in form view
+      await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+      await legacyExtraNextTick();
 
-    // click on 'Call method' button (should call an Object method)
-    def = testUtils.makeTestPromise();
-    await testUtils.dom.click(actionManager.$(".o_form_view button:contains(Call method)"));
+      // click on 'Call method' button (should call an Object method)
+      def = testUtils.makeTestPromise();
+      await testUtils.dom.click($(webClient.el!).find(".o_form_view button:contains(Call method)"));
+      await legacyExtraNextTick();
 
-    // Buttons should be disabled
-    assert.strictEqual(
-      actionManager.$(".o_form_view button:contains(Call method)").attr("disabled"),
-      "disabled",
-      "buttons should be disabled"
-    );
+      // Buttons should be disabled
+      assert.strictEqual(
+        $(webClient.el!).find(".o_form_view button:contains(Call method)").attr("disabled"),
+        "disabled",
+        "buttons should be disabled"
+      );
 
-    // Release the 'read' call
-    def.resolve();
-    await testUtils.nextTick();
+      // Release the 'read' call
+      def.resolve();
+      await testUtils.nextTick();
+      await legacyExtraNextTick();
 
-    // Buttons should be enabled after the reload
-    assert.strictEqual(
-      actionManager.$(".o_form_view button:contains(Call method)").attr("disabled"),
-      undefined,
-      "buttons should be disabled"
-    );
+      // Buttons should be enabled after the reload
+      assert.strictEqual(
+        $(webClient.el!).find(".o_form_view button:contains(Call method)").attr("disabled"),
+        undefined,
+        "buttons should not be disabled anymore"
+      );
 
-    actionManager.destroy();
-    */
+      webClient.destroy();
     }
   );
 
-  QUnit.skip("can open different records from a multi record view", async function (assert) {
-    /*
-    assert.expect(11);
+  QUnit.test("can open different records from a multi record view", async function (assert) {
+    assert.expect(12);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        return this._super.apply(this, arguments);
-      },
-    });
-    await actionManager.doAction(3);
+    const mockRPC: RPC = async (route, args) => {
+      assert.step((args && args.method) || route);
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    await doAction(webClient, 3);
 
     // open the first record in form view
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await legacyExtraNextTick();
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item:last").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item:last").text(),
       "First record",
       "breadcrumbs should contain the display_name of the opened record"
     );
     assert.strictEqual(
-      actionManager.$(".o_field_widget[name=foo]").text(),
+      $(webClient.el!).find(".o_field_widget[name=foo]").text(),
       "yop",
       "should have opened the correct record"
     );
 
     // go back to list view using the breadcrumbs
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a"));
+    await legacyExtraNextTick();
 
     // open the second record in form view
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:nth(1)"));
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:nth(1)"));
+    await legacyExtraNextTick();
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item:last").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item:last").text(),
       "Second record",
       "breadcrumbs should contain the display_name of the opened record"
     );
     assert.strictEqual(
-      actionManager.$(".o_field_widget[name=foo]").text(),
+      $(webClient.el!).find(".o_field_widget[name=foo]").text(),
       "blip",
       "should have opened the correct record"
     );
 
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load",
       "load_views",
       "/web/dataset/search_read", // list
@@ -3946,208 +4071,198 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "read", // form
     ]);
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
-  QUnit.skip("restore previous view state when switching back", async function (assert) {
-    /*
+  QUnit.test("restore previous view state when switching back", async function (assert) {
     assert.expect(5);
 
-    this.actions[2].views.unshift([false, "graph"]);
-    this.archs["partner,false,graph"] = "<graph></graph>";
+    baseConfig.serverData!.actions![3].views.unshift([false, "graph"]);
+    baseConfig.serverData!.views!["partner,false,graph"] = "<graph/>";
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(3);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 3);
 
-    assert.hasClass($(".o_control_panel  .fa-bar-chart-o"), "active", "bar chart button is active");
+    assert.hasClass(
+      $(webClient.el!).find(".o_control_panel  .fa-bar-chart-o")[0],
+      "active",
+      "bar chart button is active"
+    );
     assert.doesNotHaveClass(
-      $(".o_control_panel  .fa-area-chart"),
+      $(webClient.el!).find(".o_control_panel  .fa-area-chart")[0],
       "active",
       "line chart button is not active"
     );
 
     // display line chart
-    await testUtils.dom.click($(".o_control_panel  .fa-area-chart"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel  .fa-area-chart"));
+    await legacyExtraNextTick();
     assert.hasClass(
-      $(".o_control_panel  .fa-area-chart"),
+      $(webClient.el!).find(".o_control_panel  .fa-area-chart")[0],
       "active",
       "line chart button is now active"
     );
 
     // switch to kanban and back to graph view
-    await cpHelpers.switchView(actionManager, "kanban");
-    assert.strictEqual(
-      $(".o_control_panel  .fa-area-chart").length,
-      0,
+    await cpHelpers.switchView(webClient.el, "kanban");
+    await legacyExtraNextTick();
+    assert.containsNone(
+      webClient.el!,
+      ".o_control_panel  .fa-area-chart",
       "graph buttons are no longer in control panel"
     );
 
-    await cpHelpers.switchView(actionManager, "graph");
+    await cpHelpers.switchView(webClient.el, "graph");
+    await legacyExtraNextTick();
     assert.hasClass(
-      $(".o_control_panel  .fa-area-chart"),
+      $(webClient.el!).find(".o_control_panel  .fa-area-chart")[0],
       "active",
       "line chart button is still active"
     );
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
-  QUnit.skip("view switcher is properly highlighted in graph view", async function (assert) {
-    /*
+  QUnit.test("view switcher is properly highlighted in graph view", async function (assert) {
     assert.expect(4);
 
-    // note: this test should be moved to graph tests ?
+    baseConfig.serverData!.actions![3].views.splice(1, 1, [false, "graph"]);
+    baseConfig.serverData!.views!["partner,false,graph"] = "<graph/>";
 
-    this.actions[2].views.splice(1, 1, [false, "graph"]);
-    this.archs["partner,false,graph"] = "<graph></graph>";
-
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(3);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 3);
 
     assert.hasClass(
-      $(".o_control_panel .o_switch_view.o_list"),
+      $(webClient.el!).find(".o_control_panel .o_switch_view.o_list")[0],
       "active",
       "list button in control panel is active"
     );
     assert.doesNotHaveClass(
-      $(".o_control_panel .o_switch_view.o_graph"),
+      $(webClient.el!).find(".o_control_panel .o_switch_view.o_graph")[0],
       "active",
       "graph button in control panel is not active"
     );
 
     // switch to graph view
-    await cpHelpers.switchView(actionManager, "graph");
+    await cpHelpers.switchView(webClient.el!, "graph");
+    await legacyExtraNextTick();
     assert.doesNotHaveClass(
-      $(".o_control_panel .o_switch_view.o_list"),
+      $(webClient.el!).find(".o_control_panel .o_switch_view.o_list")[0],
       "active",
       "list button in control panel is not active"
     );
     assert.hasClass(
-      $(".o_control_panel .o_switch_view.o_graph"),
+      $(webClient.el!).find(".o_control_panel .o_switch_view.o_graph")[0],
       "active",
       "graph button in control panel is active"
     );
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
-  QUnit.skip("can interact with search view", async function (assert) {
-    /*
+  QUnit.test("can interact with search view", async function (assert) {
     assert.expect(2);
 
-    this.archs["partner,false,search"] =
-      "<search>" +
-      "<group>" +
-      '<filter name="foo" string="foo" context="{\'group_by\': \'foo\'}"/>' +
-      "</group>" +
-      "</search>";
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(3);
+    baseConfig.serverData!.views!["partner,false,search"] = `
+      <search>
+        <group>
+          <filter name="foo" string="foo" context="{'group_by': 'foo'}"/>
+        </group>
+      </search>`;
+
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 3);
 
     assert.doesNotHaveClass(
-      actionManager.$(".o_list_table"),
+      $(webClient.el!).find(".o_list_table")[0],
       "o_list_table_grouped",
       "list view is not grouped"
     );
 
     // open group by dropdown
-    await testUtils.dom.click($(".o_control_panel .o_cp_bottom_right button:contains(Group By)"));
+    await testUtils.dom.click(
+      $(webClient.el!).find(".o_control_panel .o_cp_bottom_right button:contains(Group By)")
+    );
 
     // click on first link
-    await testUtils.dom.click($(".o_control_panel .o_group_by_menu a:first"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .o_group_by_menu a:first"));
+    await legacyExtraNextTick();
 
     assert.hasClass(
-      actionManager.$(".o_list_table"),
+      $(webClient.el!).find(".o_list_table")[0],
       "o_list_table_grouped",
       "list view is now grouped"
     );
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip("can open a many2one external window", async function (assert) {
-    /*
-    // AAB: this test could be merged with 'many2ones in form views' in relational_fields_tests.js
-    assert.expect(8);
+    // unskip: dialog remains in the dom at end of test
+    assert.expect(9);
 
-    this.data.partner.records[0].bar = 2;
-    this.archs["partner,false,search"] =
-      "<search>" +
-      "<group>" +
-      '<filter name="foo" string="foo" context="{\'group_by\': \'foo\'}"/>' +
-      "</group>" +
-      "</search>";
-    this.archs["partner,false,form"] =
-      "<form>" + "<group>" + '<field name="foo"/>' + '<field name="bar"/>' + "</group>" + "</form>";
+    baseConfig.serverData!.models!.partner.records[0].bar = 2;
+    baseConfig.serverData!.views!["partner,false,search"] = `
+      <search>
+        <group>
+          <filter name="foo" string="foo" context="{'group_by': 'foo'}"/>
+        </group>
+      </search>`;
+    baseConfig.serverData!.views!["partner,false,form"] = `
+      <form>
+        <field name="foo"/>
+        <field name="bar"/>
+      </form>`;
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
-        assert.step(route);
-        if (args.method === "get_formview_id") {
-          return Promise.resolve(false);
-        }
-        return this._super.apply(this, arguments);
-      },
-    });
-    await actionManager.doAction(3);
+    const mockRPC: RPC = async (route, args) => {
+      assert.step(route);
+      if (args && args.method === "get_formview_id") {
+        return Promise.resolve(false);
+      }
+    };
+
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    await doAction(webClient, 3);
 
     // open first record in form view
-    await testUtils.dom.click(actionManager.$(".o_data_row:first"));
+    await testUtils.dom.click($(webClient.el!).find(".o_data_row:first"));
+    await legacyExtraNextTick();
     // click on edit
-    await testUtils.dom.click($(".o_control_panel .o_form_button_edit"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .o_form_button_edit"));
+    await legacyExtraNextTick();
 
     // click on external button for m2o
-    await testUtils.dom.click(actionManager.$(".o_external_button"));
+    await testUtils.dom.click($(webClient.el!).find(".o_external_button"));
+    await legacyExtraNextTick();
+
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load", // initial load action
-      "/web/dataset/call_kw/partner", // load views
+      "/web/dataset/call_kw/partner/load_views", // load views
       "/web/dataset/search_read", // read list view data
       "/web/dataset/call_kw/partner/read", // read form view data
       "/web/dataset/call_kw/partner/get_formview_id", // get form view id
       "/web/dataset/call_kw/partner", // load form view for modal
       "/web/dataset/call_kw/partner/read", // read data for m2o record
     ]);
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
-  QUnit.skip('ask for confirmation when leaving a "dirty" view', async function (assert) {
-    /*
+  QUnit.test('ask for confirmation when leaving a "dirty" view', async function (assert) {
     assert.expect(4);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(4);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 4);
 
     // open record in form view
-    await testUtils.dom.click(actionManager.$(".o_kanban_record:first"));
+    await testUtils.dom.click($(webClient.el!).find(".o_kanban_record:first")[0]);
+    await legacyExtraNextTick();
 
     // edit record
-    await testUtils.dom.click($(".o_control_panel button.o_form_button_edit"));
-    await testUtils.fields.editInput(actionManager.$('input[name="foo"]'), "pinkypie");
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel button.o_form_button_edit"));
+    await testUtils.fields.editInput($(webClient.el!).find('input[name="foo"]'), "pinkypie");
 
     // go back to kanban view
-    await testUtils.dom.click($(".o_control_panel .breadcrumb-item:first a"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb-item:first a"));
+    await legacyExtraNextTick();
 
     assert.strictEqual(
       $(".modal .modal-body").text(),
@@ -4157,216 +4272,208 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     // cancel
     await testUtils.dom.click($(".modal .modal-footer button.btn-secondary"));
+    await legacyExtraNextTick();
 
-    assert.containsOnce(actionManager, ".o_form_view", "should still be in form view");
+    assert.containsOnce(webClient.el!, ".o_form_view", "should still be in form view");
 
     // go back again to kanban view
-    await testUtils.dom.click($(".o_control_panel .breadcrumb-item:first a"));
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb-item:first a"));
+    await legacyExtraNextTick();
 
     // confirm discard
     await testUtils.dom.click($(".modal .modal-footer button.btn-primary"));
+    await legacyExtraNextTick();
 
-    assert.containsNone(actionManager, ".o_form_view", "should no longer be in form view");
-    assert.containsOnce(actionManager, ".o_kanban_view", "should be in kanban view");
+    assert.containsNone(webClient.el!, ".o_form_view", "should no longer be in form view");
+    assert.containsOnce(webClient.el!, ".o_kanban_view", "should be in kanban view");
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
-  QUnit.skip("limit set in action is passed to each created controller", async function (assert) {
-    /*
+  QUnit.test("limit set in action is passed to each created controller", async function (assert) {
     assert.expect(2);
 
-    _.findWhere(this.actions, { id: 3 }).limit = 2;
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(3);
+    baseConfig.serverData!.actions![3].limit = 2;
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 3);
 
-    assert.containsN(actionManager, ".o_data_row", 2, "should only display 2 record");
+    assert.containsN(webClient.el!, ".o_data_row", 2);
 
     // switch to kanban view
-    await cpHelpers.switchView(actionManager, "kanban");
+    await cpHelpers.switchView(webClient.el!, "kanban");
+    await legacyExtraNextTick();
 
-    assert.strictEqual(
-      actionManager.$(".o_kanban_record:not(.o_kanban_ghost)").length,
-      2,
-      "should only display 2 record"
-    );
+    assert.containsN(webClient.el!, ".o_kanban_record:not(.o_kanban_ghost)", 2);
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
-  QUnit.skip("go back to a previous action using the breadcrumbs", async function (assert) {
-    /*
+  QUnit.test("go back to a previous action using the breadcrumbs", async function (assert) {
     assert.expect(10);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(3);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 3);
 
     // open a record in form view
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await legacyExtraNextTick();
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       2,
       "there should be two controllers in the breadcrumbs"
     );
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item:last").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item:last").text(),
       "First record",
       "breadcrumbs should contain the display_name of the opened record"
     );
 
     // push another action on top of the first one, and come back to the form view
-    await actionManager.doAction(4);
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    await doAction(webClient, 4);
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       3,
       "there should be three controllers in the breadcrumbs"
     );
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item:last").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item:last").text(),
       "Partners Action 4",
       "breadcrumbs should contain the name of the current action"
     );
     // go back using the breadcrumbs
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a:nth(1)"));
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:nth(1)"));
+    await legacyExtraNextTick();
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       2,
       "there should be two controllers in the breadcrumbs"
     );
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item:last").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item:last").text(),
       "First record",
       "breadcrumbs should contain the display_name of the opened record"
     );
 
     // push again the other action on top of the first one, and come back to the list view
-    await actionManager.doAction(4);
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    await doAction(webClient, 4);
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       3,
       "there should be three controllers in the breadcrumbs"
     );
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item:last").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item:last").text(),
       "Partners Action 4",
       "breadcrumbs should contain the name of the current action"
     );
     // go back using the breadcrumbs
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a:first"));
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:first"));
+    await legacyExtraNextTick();
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       1,
       "there should be one controller in the breadcrumbs"
     );
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item:last").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item:last").text(),
       "Partners",
       "breadcrumbs should contain the name of the current action"
     );
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip(
     "form views are restored in readonly when coming back in breadcrumbs",
     async function (assert) {
-      /*
-    assert.expect(2);
+      // unskip: view is still editable when coming back
+      assert.expect(2);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(3);
+      const webClient = await createWebClient({ baseConfig });
+      await doAction(webClient, 3);
 
-    // open a record in form view
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
-    // switch to edit mode
-    await testUtils.dom.click($(".o_control_panel .o_form_button_edit"));
+      // open a record in form view
+      await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+      await legacyExtraNextTick();
+      // switch to edit mode
+      await testUtils.dom.click($(webClient.el!).find(".o_control_panel .o_form_button_edit"));
+      await legacyExtraNextTick();
 
-    assert.hasClass(actionManager.$(".o_form_view"), "o_form_editable");
-    // do some other action
-    await actionManager.doAction(4);
-    // go back to form view
-    await testUtils.dom.clickLast($(".o_control_panel .breadcrumb a"));
-    await testUtils.nextTick();
-    assert.hasClass(actionManager.$(".o_form_view"), "o_form_readonly");
+      assert.hasClass($(webClient.el!).find(".o_form_view")[0], "o_form_editable");
+      // do some other action
+      await doAction(webClient, 4);
+      // go back to form view
+      await testUtils.dom.clickLast($(webClient.el!).find(".o_control_panel .breadcrumb a"));
+      await legacyExtraNextTick();
+      assert.hasClass($(webClient.el!).find(".o_form_view")[0], "o_form_readonly");
 
-    actionManager.destroy();
-    */
+      webClient.destroy();
     }
   );
 
-  QUnit.skip("honor group_by specified in actions context", async function (assert) {
-    /*
+  QUnit.test("honor group_by specified in actions context", async function (assert) {
     assert.expect(5);
 
-    _.findWhere(this.actions, { id: 3 }).context = "{'group_by': 'bar'}";
-    this.archs["partner,false,search"] =
-      "<search>" +
-      "<group>" +
-      '<filter name="foo" string="foo" context="{\'group_by\': \'foo\'}"/>' +
-      "</group>" +
-      "</search>";
+    baseConfig.serverData!.actions![3].context = "{'group_by': 'bar'}";
+    baseConfig.serverData!.views!["partner,false,search"] = `
+      <search>
+        <group>
+          <filter name="foo" string="foo" context="{'group_by': 'foo'}"/>
+        </group>
+      </search>`;
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(3);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 3);
 
-    assert.containsOnce(actionManager, ".o_list_table_grouped", "should be grouped");
+    assert.containsOnce(webClient.el!, ".o_list_table_grouped", "should be grouped");
     assert.containsN(
-      actionManager,
+      webClient.el!,
       ".o_group_header",
       2,
       "should be grouped by 'bar' (two groups) at first load"
     );
 
     // groupby 'bar' using the searchview
-    await testUtils.dom.click($(".o_control_panel .o_cp_bottom_right button:contains(Group By)"));
-    await testUtils.dom.click($(".o_control_panel .o_group_by_menu a:first"));
+    await testUtils.dom.click(
+      $(webClient.el!).find(".o_control_panel .o_cp_bottom_right button:contains(Group By)")
+    );
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .o_group_by_menu a:first"));
+    await legacyExtraNextTick();
 
     assert.containsN(
-      actionManager,
+      webClient.el!,
       ".o_group_header",
       5,
       "should be grouped by 'foo' (five groups)"
     );
 
     // remove the groupby in the searchview
-    await testUtils.dom.click($(".o_control_panel .o_searchview .o_facet_remove"));
+    await testUtils.dom.click(
+      $(webClient.el!).find(".o_control_panel .o_searchview .o_facet_remove")
+    );
+    await legacyExtraNextTick();
 
-    assert.containsOnce(actionManager, ".o_list_table_grouped", "should still be grouped");
+    assert.containsOnce(webClient.el!, ".o_list_table_grouped", "should still be grouped");
     assert.containsN(
-      actionManager,
+      webClient.el!,
       ".o_group_header",
       2,
       "should be grouped by 'bar' (two groups) at reload"
     );
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip("switch request to unknown view type", async function (assert) {
-    /*
+    // unskip: case not handled yet in ActionManager
     assert.expect(7);
 
-    this.actions.push({
+    baseConfig.serverData!.actions![33] = {
       id: 33,
       name: "Partners",
       res_model: "partner",
@@ -4375,34 +4482,30 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         [false, "list"],
         [1, "kanban"],
       ], // no form view
-    });
+    };
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        return this._super.apply(this, arguments);
-      },
-    });
-    await actionManager.doAction(33);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 33);
 
-    assert.containsOnce(actionManager, ".o_list_view", "should display the list view");
+    assert.containsOnce(webClient.el!, ".o_list_view", "should display the list view");
 
     // try to open a record in a form view
-    testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
-    assert.containsOnce(actionManager, ".o_list_view", "should still display the list view");
-    assert.containsNone(actionManager, ".o_form_view", "should not display the form view");
+    testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_list_view", "should still display the list view");
+    assert.containsNone(webClient.el!, ".o_form_view", "should not display the form view");
 
-    assert.verifySteps(["/web/action/load", "load_views", "/web/dataset/search_read"]);
+    assert.verifySteps([
+      "/wowl/load_menus",
+      "/web/action/load",
+      "load_views",
+      "/web/dataset/search_read",
+    ]);
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
-  QUnit.skip("save current search", async function (assert) {
-    /*
+  QUnit.test("save current search", async function (assert) {
     assert.expect(4);
 
     testUtils.mock.patch(ListController, {
@@ -4415,7 +4518,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     });
 
-    this.actions.push({
+    baseConfig.serverData!.actions![33] = {
       id: 33,
       context: {
         shouldNotBeInFilterContext: false,
@@ -4425,48 +4528,40 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       search_view_id: [1, "a custom search view"],
       type: "ir.actions.act_window",
       views: [[false, "list"]],
-    });
+    };
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      env: {
-        dataManager: {
-          create_filter: function (filter) {
-            assert.strictEqual(
-              filter.domain,
-              `[("bar", "=", 1)]`,
-              "should save the correct domain"
-            );
-            const expectedContext = {
-              group_by: [], // default groupby is an empty list
-              shouldBeInFilterContext: true,
-            };
-            assert.deepEqual(filter.context, expectedContext, "should save the correct context");
-          },
+    const legacyParams = {
+      dataManager: {
+        create_filter: function (filter: any) {
+          assert.strictEqual(filter.domain, `[("bar", "=", 1)]`, "should save the correct domain");
+          const expectedContext = {
+            group_by: [], // default groupby is an empty list
+            shouldBeInFilterContext: true,
+          };
+          assert.deepEqual(filter.context, expectedContext, "should save the correct context");
         },
       },
-    });
-    await actionManager.doAction(33);
+    };
+    const webClient = await createWebClient({ baseConfig, legacyParams });
+    await doAction(webClient, 33);
 
-    assert.containsN(actionManager, ".o_data_row", 5, "should contain 5 records");
+    assert.containsN(webClient.el!, ".o_data_row", 5, "should contain 5 records");
 
     // filter on bar
-    await cpHelpers.toggleFilterMenu(actionManager);
-    await cpHelpers.toggleMenuItem(actionManager, "Bar");
+    await cpHelpers.toggleFilterMenu(webClient.el!);
+    await cpHelpers.toggleMenuItem(webClient.el!, "Bar");
 
-    assert.containsN(actionManager, ".o_data_row", 2);
+    assert.containsN(webClient.el!, ".o_data_row", 2);
 
     // save filter
-    await cpHelpers.toggleFavoriteMenu(actionManager);
-    await cpHelpers.toggleSaveFavorite(actionManager);
-    await cpHelpers.editFavoriteName(actionManager, "some name");
-    await cpHelpers.saveFavorite(actionManager);
+    await cpHelpers.toggleFavoriteMenu(webClient.el!);
+    await cpHelpers.toggleSaveFavorite(webClient.el!);
+    await cpHelpers.editFavoriteName(webClient.el!, "some name");
+    await cpHelpers.saveFavorite(webClient.el!);
+    await legacyExtraNextTick();
 
     testUtils.mock.unpatch(ListController);
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip(
@@ -4503,33 +4598,35 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         },
       ],
     });
-    await actionManager.doAction(100);
+    await doAction(webClient, 100);
 
     assert.strictEqual(
-      actionManager.$(".o_list_view tr.o_data_row .o_data_cell").text(),
+      $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
       "zoupyopplopgnapblip",
       "record should be in descending order as default_order applies"
     );
 
-    await cpHelpers.toggleFavoriteMenu(actionManager);
-    await cpHelpers.toggleMenuItem(actionManager, "favorite filter");
+    await cpHelpers.toggleFavoriteMenu(webClient.el!);
+    await cpHelpers.toggleMenuItem(webClient.el!, "favorite filter");
 
     assert.strictEqual(
-      actionManager.$(".o_control_panel .o_facet_values").text().trim(),
+      $(webClient.el!).find(".o_control_panel .o_facet_values").text().trim(),
       "favorite filter",
       "favorite filter should be applied"
     );
     assert.strictEqual(
-      actionManager.$(".o_list_view tr.o_data_row .o_data_cell").text(),
+      $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
       "gnapblip",
       "record should still be in descending order after default_order applied"
     );
 
     // go to formview and come back to listview
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
-    await testUtils.dom.click(actionManager.$(".o_control_panel .breadcrumb a:eq(0)"));
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await legacyExtraNextTick();
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:eq(0)"));
+    await legacyExtraNextTick();
     assert.strictEqual(
-      actionManager.$(".o_list_view tr.o_data_row .o_data_cell").text(),
+      $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
       "gnapblip",
       "order of records should not be changed, while coming back through breadcrumb"
     );
@@ -4537,49 +4634,44 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     // remove filter
     await cpHelpers.removeFacet(actionManager, 0);
     assert.strictEqual(
-      actionManager.$(".o_list_view tr.o_data_row .o_data_cell").text(),
+      $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
       "zoupyopplopgnapblip",
       "order of records should not be changed, after removing current filter"
     );
 
-    actionManager.destroy();
+    webClient.destroy();
     */
     }
   );
 
-  QUnit.skip(
+  QUnit.test(
     "search menus are still available when switching between actions",
     async function (assert) {
-      /*
-    assert.expect(3);
+      assert.expect(3);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
+      const webClient = await createWebClient({ baseConfig });
 
-    await actionManager.doAction(1);
-    assert.isVisible(
-      actionManager.el.querySelector(".o_search_options .o_dropdown.o_filter_menu"),
-      "the search options should be available"
-    );
+      await doAction(webClient, 1);
+      assert.isVisible(
+        webClient.el!.querySelector(".o_search_options .o_dropdown.o_filter_menu") as HTMLElement,
+        "the search options should be available"
+      );
 
-    await actionManager.doAction(3);
-    assert.isVisible(
-      actionManager.el.querySelector(".o_search_options .o_dropdown.o_filter_menu"),
-      "the search options should be available"
-    );
+      await doAction(webClient, 3);
+      assert.isVisible(
+        webClient.el!.querySelector(".o_search_options .o_dropdown.o_filter_menu") as HTMLElement,
+        "the search options should be available"
+      );
 
-    // go back using the breadcrumbs
-    await testUtils.dom.click($(".o_control_panel .breadcrumb a:first"));
-    assert.isVisible(
-      actionManager.el.querySelector(".o_search_options .o_dropdown.o_filter_menu"),
-      "the search options should be available"
-    );
+      // go back using the breadcrumbs
+      await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:first"));
+      await legacyExtraNextTick();
+      assert.isVisible(
+        webClient.el!.querySelector(".o_search_options .o_dropdown.o_filter_menu") as HTMLElement,
+        "the search options should be available"
+      );
 
-    actionManager.destroy();
-    */
+      webClient.destroy();
     }
   );
 
@@ -4607,9 +4699,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     });
 
-    await actionManager.doAction(3);
+    await doAction(webClient, 3);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -4650,112 +4742,119 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
 
     // execute an action and open a record in form view
-    await actionManager.doAction(3);
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
+    await doAction(webClient, 3);
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await legacyExtraNextTick();
 
     // click on 'Execute action' button (it executes an action with a CompoundContext as context)
     checkSessionStorage = true;
-    await testUtils.dom.click(actionManager.$(".o_form_view button:contains(Execute action)"));
+    await testUtils.dom.click($(webClient.el!).find(".o_form_view button:contains(Execute action)"));
+    await legacyExtraNextTick();
 
-    actionManager.destroy();
+    webClient.destroy();
     */
     }
   );
 
-  QUnit.skip("destroy action with lazy loaded controller", async function (assert) {
-    /*
+  QUnit.test("destroy action with lazy loaded controller", async function (assert) {
     assert.expect(6);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.loadState({
-      action: 3,
-      id: 2,
+    const webClient = await createWebClient({ baseConfig });
+    await loadState(webClient, {
+      action: "3",
+      id: "2",
       view_type: "form",
     });
-    assert.containsNone(actionManager, ".o_list_view");
-    assert.containsOnce(actionManager, ".o_form_view");
-    assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").length,
+    assert.containsNone(webClient.el!, ".o_list_view");
+    assert.containsOnce(webClient.el!, ".o_form_view");
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       2,
       "there should be two controllers in the breadcrumbs"
     );
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item:last").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item:last").text(),
       "Second record",
       "breadcrumbs should contain the display_name of the opened record"
     );
 
-    await actionManager.doAction(1, { clear_breadcrumbs: true });
+    await doAction(webClient, 1, { clearBreadcrumbs: true });
 
-    assert.containsNone(actionManager, ".o_form_view");
-    assert.containsOnce(actionManager, ".o_kanban_view");
+    assert.containsNone(webClient.el!, ".o_form_view");
+    assert.containsOnce(webClient.el!, ".o_kanban_view");
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip("execute action from dirty, new record, and come back", async function (assert) {
-    /*
-    assert.expect(17);
+    // unskip: field isn't readonly (???) + contaisnOnce doens't accept jquery selectors
+    assert.expect(18);
 
-    this.data.partner.fields.bar.default = 1;
-    this.archs["partner,false,form"] =
-      "<form>" + '<field name="foo"/>' + '<field name="bar" readonly="1"/>' + "</form>";
+    baseConfig.serverData!.models!.partner.fields.bar.default = 1;
+    baseConfig.serverData!.views!["partner,false,form"] = `
+      <form>
+        <field name="foo"/>
+        <field name="bar" readonly="1"/>
+      </form>`;
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        if (args.method === "get_formview_action") {
-          return Promise.resolve({
-            res_id: 1,
-            res_model: "partner",
-            type: "ir.actions.act_window",
-            views: [[false, "form"]],
-          });
-        }
-        return this._super.apply(this, arguments);
-      },
-      intercepts: {
-        do_action: function (ev) {
-          actionManager.doAction(ev.data.action, {});
-        },
-      },
-    });
+    const mockRPC: RPC = async (route, args) => {
+      assert.step((args && args.method) || route);
+      if (args && args.method === "get_formview_action") {
+        return Promise.resolve({
+          res_id: 1,
+          res_model: "partner",
+          type: "ir.actions.act_window",
+          views: [[false, "form"]],
+        });
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    // unskip: i think this won't be necessary anymore
+    // intercepts: {
+    // do_action: function (ev) {
+    // doAction(webClient, ev.data.action, {});
+    // },
+    // },
 
     // execute an action and create a new record
-    await actionManager.doAction(3);
-    await testUtils.dom.click(actionManager.$(".o_list_button_add"));
-    assert.containsOnce(actionManager, ".o_form_view.o_form_editable");
-    assert.containsOnce(actionManager, ".o_form_uri:contains(First record)");
-    assert.strictEqual(actionManager.$(".o_control_panel .breadcrumb-item").text(), "PartnersNew");
+    await doAction(webClient, 3);
+    await testUtils.dom.click($(webClient.el!).find(".o_list_button_add"));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_form_view.o_form_editable");
+    assert.containsOnce(webClient.el!, ".o_form_uri:contains(First record)");
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
+      "PartnersNew"
+    );
 
     // set form view dirty and open m2o record
-    await testUtils.fields.editInput(actionManager.$("input[name=foo]"), "val");
-    await testUtils.dom.click(actionManager.$(".o_form_uri:contains(First record)"));
-    assert.containsOnce($("body"), ".modal"); // confirm discard dialog
+    await testUtils.fields.editInput($(webClient.el!).find("input[name=foo]"), "val");
+    await testUtils.dom.click($(webClient.el!).find(".o_form_uri:contains(First record)"));
+    await legacyExtraNextTick();
+    assert.containsOnce(document.body, ".modal"); // confirm discard dialog
 
     // confirm discard changes
     await testUtils.dom.click($(".modal .modal-footer .btn-primary"));
+    await legacyExtraNextTick();
 
-    assert.containsOnce(actionManager, ".o_form_view.o_form_readonly");
+    assert.containsOnce(webClient.el!, ".o_form_view.o_form_readonly");
     assert.strictEqual(
-      actionManager.$(".o_control_panel .breadcrumb-item").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
       "PartnersNewFirst record"
     );
 
     // go back to New using the breadcrumbs
-    await testUtils.dom.click(actionManager.$(".o_control_panel .breadcrumb-item:nth(1) a"));
-    assert.containsOnce(actionManager, ".o_form_view.o_form_editable");
-    assert.strictEqual(actionManager.$(".o_control_panel .breadcrumb-item").text(), "PartnersNew");
+    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb-item:nth(1) a"));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_form_view.o_form_editable");
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
+      "PartnersNew"
+    );
 
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // views of action 3
       "/web/dataset/search_read", // list
@@ -4766,56 +4865,40 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "onchange", // form (create)
     ]);
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
-  QUnit.skip("execute a contextual action from a form view", async function (assert) {
-    /*
+  QUnit.test("execute a contextual action from a form view", async function (assert) {
     assert.expect(4);
 
-    const contextualAction = this.actions.find((action) => action.id === 8);
+    const contextualAction = baseConfig.serverData!.actions![8];
     contextualAction.context = "{}"; // need a context to evaluate
+    baseConfig.serverData!.models!.partner.toolbar = {
+      action: [contextualAction],
+      print: [],
+    };
 
-    const actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: async function (route, args) {
-        const res = await this._super(...arguments);
-        if (args.method === "load_views" && args.model === "partner") {
-          assert.strictEqual(
-            args.kwargs.options.toolbar,
-            true,
-            "should ask for toolbar information"
-          );
-          res.form.toolbar = {
-            action: [contextualAction],
-            print: [],
-          };
-        }
-        return res;
-      },
-      intercepts: {
-        do_action: function (ev) {
-          actionManager.doAction(ev.data.action, {});
-        },
-      },
-    });
+    const mockRPC: RPC = async (route, args) => {
+      if (args && args.method === "load_views" && args.model === "partner") {
+        assert.strictEqual(args.kwargs.options.toolbar, true, "should ask for toolbar information");
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // execute an action and open a record
-    await actionManager.doAction(3);
-    assert.containsOnce(actionManager, ".o_list_view");
-    await testUtils.dom.click(actionManager.$(".o_data_row:first"));
-    assert.containsOnce(actionManager, ".o_form_view");
+    await doAction(webClient, 3);
+    assert.containsOnce(webClient.el!, ".o_list_view");
+    await testUtils.dom.click($(webClient.el!).find(".o_data_row:first"));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_form_view");
 
     // execute the custom action from the action menu
-    await cpHelpers.toggleActionMenu(actionManager);
-    await cpHelpers.toggleMenuItem(actionManager, "Favorite Ponies");
-    assert.containsOnce(actionManager, ".o_list_view");
+    await cpHelpers.toggleActionMenu(webClient.el!);
+    await cpHelpers.toggleMenuItem(webClient.el!, "Favorite Ponies");
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_list_view");
 
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.module('Actions in target="new"');
@@ -4826,7 +4909,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 5);
 
     assert.containsOnce(
@@ -4858,22 +4941,18 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       assert.step("Close Action");
     }
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction(5, { on_close: on_close });
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 5, { on_close: on_close });
 
     // a target=new action shouldn't activate the on_close
-    await actionManager.doAction(5);
+    await doAction(webClient, 5);
     assert.verifySteps([]);
 
     // An act_window_close should trigger the on_close
-    await actionManager.doAction(10);
+    await doAction(webClient, 10);
     assert.verifySteps(["Close Action"]);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -4888,7 +4967,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         </footer>
       </form>`;
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 5);
 
     assert.containsNone(
@@ -4962,12 +5041,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     });
 
-    await actionManager.doAction(4);
+    await doAction(webClient, 4);
     await testUtils.dom.click(`button[name="5"]`);
     assert.strictEqual($(".modal").length, 1, "It should display a modal");
     await testUtils.dom.click(`button[name="some_method"]`);
     assert.strictEqual($(".modal").length, 0, "It should have closed the modal");
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -4989,12 +5068,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
     core.action_registry.add("test", ClientAction);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction({
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, {
       tag: "test",
       target: "new",
       type: "ir.actions.client",
@@ -5007,7 +5082,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     );
     assert.verifySteps(["on_attach_callback"]);
 
-    actionManager.destroy();
+    webClient.destroy();
     delete core.action_registry.map.test;
     */
   });
@@ -5020,16 +5095,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       /*
     assert.expect(5);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        return this._super.apply(this, arguments);
-      },
-    });
-    await actionManager.doAction(6);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 6);
 
     assert.containsOnce(
       actionManager,
@@ -5039,7 +5106,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     assert.verifySteps(["/web/action/load", "load_views", "read"]);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
     }
   );
@@ -5053,7 +5120,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
       baseConfig.serverData!.actions![1].target = "fullscreen";
 
-      const webClient = await createWebClient({ baseConfig, legacyEnv });
+      const webClient = await createWebClient({ baseConfig });
       await doAction(webClient, 1);
 
       assert.containsOnce(
@@ -5076,7 +5143,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "partner,false,form"
     ] = `<form><button name="1" type="action" class="oe_stat_button" /></form>`;
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 6);
     assert.isVisible(webClient.el!.querySelector(".o_main_navbar") as HTMLElement);
 
@@ -5099,7 +5166,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "partner,false,form"
     ] = `<form><button name="1" type="action" class="oe_stat_button" /></form>`;
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 6);
     assert.isNotVisible(webClient.el!.querySelector(".o_main_navbar") as HTMLElement);
 
@@ -5119,7 +5186,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test("close the currently opened dialog", async function (assert) {
     assert.expect(2);
 
-    const webClient = await createWebClient({ baseConfig, legacyEnv });
+    const webClient = await createWebClient({ baseConfig });
 
     // execute an action in target="new"
     await doAction(webClient, 5);
@@ -5142,31 +5209,27 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     /*
     assert.expect(3);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
+    const webClient = await createWebClient({ baseConfig });
 
     // execute an action in target="new"
-    await actionManager.doAction(5);
+    await doAction(webClient, 5);
 
     var options = {
       on_close: assert.step.bind(assert, "on_close"),
     };
     // execute an 'ir.actions.act_window_close' action
     // should not call 'on_close' as there is a dialog to close
-    await actionManager.doAction({ type: "ir.actions.act_window_close" }, options);
+    await doAction(webClient, { type: "ir.actions.act_window_close" }, options);
 
     assert.verifySteps([]);
 
     // execute again an 'ir.actions.act_window_close' action
     // should call 'on_close' as there is no dialog to close
-    await actionManager.doAction({ type: "ir.actions.act_window_close" }, options);
+    await doAction(webClient, { type: "ir.actions.act_window_close" }, options);
 
     assert.verifySteps(["on_close"]);
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -5180,13 +5243,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       type: "ir.actions.act_window_close",
     });
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
+    const webClient = await createWebClient({ baseConfig });
 
-    await actionManager.doAction(21).then(function (action) {
+    await doAction(webClient, 21).then(function (action) {
       assert.ok(action, "doAction should be resolved with an action");
       assert.strictEqual(action.id, 21, "should be resolved with correct action id");
       assert.strictEqual(
@@ -5199,7 +5258,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         "ir.actions.act_window_close",
         "should be resolved with correct action type"
       );
-      actionManager.destroy();
+      webClient.destroy();
     });
     */
   });
@@ -5208,11 +5267,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     /*
     assert.expect(1);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
+    const webClient = await createWebClient({ baseConfig });
 
     var options = {
       on_close: function (infos) {
@@ -5220,7 +5275,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     };
 
-    await actionManager.doAction(
+    await doAction(webClient, 
       {
         type: "ir.actions.act_window_close",
         infos: "just for testing",
@@ -5228,7 +5283,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       options
     );
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -5236,14 +5291,10 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     /*
     assert.expect(2);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
+    const webClient = await createWebClient({ baseConfig });
 
     // open a new dialog form
-    await actionManager.doAction(this.actions[4], {
+    await doAction(webClient, this.actions[4], {
       on_close: function () {
         assert.step("on_close");
       },
@@ -5252,37 +5303,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     actionManager.trigger_up("history_back");
     assert.verifySteps(["on_close"], "should have called the on_close handler");
 
-    actionManager.destroy();
-    */
-  });
-
-  QUnit.skip("properly drop client actions after new action is initiated", async function (assert) {
-    /*
-    assert.expect(1);
-
-    var slowWillStartDef = testUtils.makeTestPromise();
-
-    var ClientAction = AbstractAction.extend({
-      willStart: function () {
-        return slowWillStartDef;
-      },
-    });
-
-    core.action_registry.add("slowAction", ClientAction);
-
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    actionManager.doAction("slowAction");
-    actionManager.doAction(4);
-    slowWillStartDef.resolve();
-    await testUtils.nextTick();
-    assert.containsOnce(actionManager, ".o_kanban_view", "should have loaded a kanban view");
-
-    actionManager.destroy();
-    delete core.action_registry.map.slowAction;
+    webClient.destroy();
     */
   });
 
@@ -5291,16 +5312,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.expect(1);
     var ClientAction = AbstractAction.extend({});
     core.action_registry.add("ClientAction", ClientAction);
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction("ClientAction");
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, "ClientAction");
     actionManager.trigger_up("navigation_move", { direction: "down" });
 
     assert.ok(true); // no error so it's good
-    actionManager.destroy();
+    webClient.destroy();
     delete core.action_registry.ClientAction;
     */
   });
@@ -5347,12 +5364,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     });
     core.action_registry.add("ClientAction", ClientAction);
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-    await actionManager.doAction("ClientAction");
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, "ClientAction");
     inputWidget.$el[0].focus();
     var event = $.Event("keydown", {
       which: $.ui.keyCode.TAB,
@@ -5361,7 +5374,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     $(inputWidget.$el[0]).trigger(event);
 
     assert.notOk(event.isDefaultPrevented(), "the keyboard event default should not be prevented"); // no crash is good
-    actionManager.destroy();
+    webClient.destroy();
     delete core.action_registry.ClientAction;
     */
     }
@@ -5385,24 +5398,26 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     });
 
-    await actionManager.doAction(3);
+    await doAction(webClient, 3);
 
     // open first record in form view. this will crash and will not
     // display a form view
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await legacyExtraNextTick();
 
     readOnFirstRecordDef.reject("not working as intended");
 
-    assert.containsOnce(actionManager, ".o_list_view", "there should still be a list view in dom");
+    assert.containsOnce(webClient.el!, ".o_list_view", "there should still be a list view in dom");
 
     // open another record, the read will not crash
-    await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:eq(2)"));
+    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:eq(2)"));
+    await legacyExtraNextTick();
 
-    assert.containsNone(actionManager, ".o_list_view", "there should not be a list view in dom");
+    assert.containsNone(webClient.el!, ".o_list_view", "there should not be a list view in dom");
 
-    assert.containsOnce(actionManager, ".o_form_view", "there should be a form view in dom");
+    assert.containsOnce(webClient.el!, ".o_form_view", "there should be a form view in dom");
 
-    actionManager.destroy();
+    webClient.destroy();
     */
   });
 
@@ -5447,19 +5462,18 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       data: this.data,
     });
 
-    await actionManager.doAction(100, {});
-    await testUtils.dom.click(actionManager.$("button[data-mobile]:first"));
+    await doAction(webClient, 100, {});
+    await testUtils.dom.click($(webClient.el!).find("button[data-mobile]:first"));
+    await legacyExtraNextTick();
 
-    actionManager.destroy();
+    webClient.destroy();
     testUtils.mock.unpatch(ActionManager);
     */
   });
 
   QUnit.module("Search View Action");
 
-  QUnit.skip("search view should keep focus during do_search", async function (assert) {
-    // FIXME: to unskip this one, need to reimplement something like in main_test.js to catch
-    // unhandled rejection errors, probably
+  QUnit.test("search view should keep focus during do_search", async function (assert) {
     assert.expect(5);
 
     // One should be able to type something in the search view, press on enter to
@@ -5478,7 +5492,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         }
       }
     };
-    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 3);
 
     await cpHelpers.editSearch(webClient.el!, "m");
@@ -5500,47 +5514,39 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip(
+  QUnit.test(
     "Call twice clearUncommittedChanges in a row does not display twice the discard warning",
     async function (assert) {
-      /*
       assert.expect(4);
 
-      var actionManager = await createActionManager({
-        actions: this.actions,
-        archs: this.archs,
-        data: this.data,
-        intercepts: {
-          clear_uncommitted_changes: function () {
-            actionManager.clearUncommittedChanges();
-          },
-        },
-      });
+      const webClient = await createWebClient({ baseConfig });
 
       // execute an action and edit existing record
-      await actionManager.doAction(3);
+      await doAction(webClient, 3);
 
-      await testUtils.dom.click(actionManager.$(".o_list_view .o_data_row:first"));
-      assert.containsOnce(actionManager, ".o_form_view.o_form_readonly");
+      await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+      await legacyExtraNextTick();
+      assert.containsOnce(webClient.el!, ".o_form_view.o_form_readonly");
 
-      await testUtils.dom.click($(".o_control_panel .o_form_button_edit"));
-      assert.containsOnce(actionManager, ".o_form_view.o_form_editable");
+      await testUtils.dom.click($(webClient.el!).find(".o_control_panel .o_form_button_edit"));
+      assert.containsOnce(webClient.el!, ".o_form_view.o_form_editable");
 
-      await testUtils.fields.editInput(actionManager.$("input[name=foo]"), "val");
-      actionManager.trigger_up("clear_uncommitted_changes");
+      await testUtils.fields.editInput($(webClient.el!).find("input[name=foo]"), "val");
+      clearUncommittedChanges(webClient.env);
       await testUtils.nextTick();
+      await legacyExtraNextTick();
 
-      assert.containsOnce($("body"), ".modal"); // confirm discard dialog
+      assert.containsOnce(document.body, ".modal"); // confirm discard dialog
       // confirm discard changes
       await testUtils.dom.click($(".modal .modal-footer .btn-primary"));
 
-      actionManager.trigger_up("clear_uncommitted_changes");
+      clearUncommittedChanges(webClient.env);
       await testUtils.nextTick();
+      await legacyExtraNextTick();
 
-      assert.containsNone($("body"), ".modal");
+      assert.containsNone(document.body, ".modal");
 
-      actionManager.destroy();
-      */
+      webClient.destroy();
     }
   );
 });

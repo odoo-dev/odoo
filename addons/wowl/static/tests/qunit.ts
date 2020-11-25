@@ -276,6 +276,26 @@ QUnitCopy.debug = (name: string, cb: TestCallback) => {
   QUnit.only(name, cb);
 };
 
+// Override global UnhandledRejection that is assigned wayyy before this file
+// Do not really crash on non-errors rejections
+const qunitUnhandledReject = QUnitCopy.onUnhandledRejection;
+QUnitCopy.onUnhandledRejection = (reason: PromiseRejectionEvent["reason"]) => {
+  if (reason instanceof Error) {
+    qunitUnhandledReject(reason);
+  }
+};
+// Essntially prevents default error logging when the rejection was
+// not due to an actual error
+const windowUnhandledReject = window.onunhandledrejection;
+window.onunhandledrejection = (ev: PromiseRejectionEvent) => {
+  if (!(ev.reason instanceof Error)) {
+    ev.stopImmediatePropagation();
+    ev.preventDefault();
+  } else if (windowUnhandledReject) {
+    windowUnhandledReject.call(window, ev);
+  }
+};
+
 // -----------------------------------------------------------------------------
 // Check leftovers
 // -----------------------------------------------------------------------------
@@ -339,7 +359,7 @@ const validElements = [
   }
 
   // remove unwanted elements if not in debug
-  if (!document.body.classList.contains("debug")) {
+  if (!QUnit.config.debug) {
     for (const el of toRemove) {
       el.remove();
     }

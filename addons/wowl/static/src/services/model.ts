@@ -1,7 +1,7 @@
 import { Component } from "@odoo/owl";
 import { Service, OdooEnv } from "../types";
+import { DomainListRepr } from "../core/domain";
 import { RPC } from "./rpc";
-import { DomainListRepr as Domain } from "../core/domain";
 import { Context } from "../core/context";
 
 export type ORMCommand = [0 | 1 | 2 | 3 | 4 | 5 | 6, false | number, Partial<DBRecord> | number[]];
@@ -43,7 +43,7 @@ export interface Model {
   create(state: Partial<DBRecord>, ctx?: Context): Promise<number>;
   read(ids: number[], fields: string[], ctx?: Context): Promise<DBRecord[]>;
   readGroup(
-    domain: Domain,
+    domain: DomainListRepr,
     fields: string[],
     groupby: string[],
     options?: GroupByOptions,
@@ -51,7 +51,7 @@ export interface Model {
   ): Promise<ReadGroupResult>;
   search(domain: Domain, options?: SearchReadOptions, ctx?: Context): Promise<number[]>;
   searchRead(
-    domain: Domain,
+    domain: DomainListRepr,
     fields: string[],
     options?: SearchReadOptions,
     ctx?: Context

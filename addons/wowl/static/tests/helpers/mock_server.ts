@@ -1,4 +1,5 @@
 import { ActionDescription } from "../../src/action_manager/action_manager";
+import * as utils from "../../src/utils/utils";
 import { Service, ViewId, ViewType } from "../../src/types";
 import { MockRPC, makeFakeRPCService, makeMockFetch } from "./mocks";
 import { MenuData } from "../../src/services/menus";
@@ -7,7 +8,7 @@ import { Context } from "../../src/core/context";
 import { Registry } from "../../src/core/registry";
 import { evaluateExpr } from "../../src/py/index";
 import { DBRecord, ORMCommand } from "../../src/services/model";
-import { DomainListRepr as Domain } from "../../src/core/domain";
+import { combineDomains, Domain, DomainListRepr } from "../../src/core/domain";
 
 // Aims:
 // - Mock service model high level
@@ -30,7 +31,9 @@ export type FieldType =
   | "one2many"
   | "many2many"
   | "many2one"
-  | "number"
+  | "integer"
+  | "float"
+  | "monetary"
   | "date"
   | "datetime";
 
@@ -40,6 +43,7 @@ export interface FieldDefinition {
   string: string;
   type: FieldType;
   default?: any;
+  sortable?: boolean;
 }
 
 export interface ModelFields {
@@ -69,11 +73,20 @@ export interface ServerData {
 interface Actions {
   [key: string]: ActionDescription;
 }
+interface Filter {
+  id: number;
+  name: string;
+  domain: string;
+  context: string;
+  sort: string;
+  is_default: boolean;
+}
 interface ToolbarInfo {
   print?: any[];
   action?: any[];
 }
 interface MockedModelData extends ModelData {
+  filters?: Filter[];
   toolbar?: ToolbarInfo;
 }
 interface Models {
@@ -126,13 +139,14 @@ interface LoadViewsReturnType {
       fields: FVG["fields"];
     };
   };
+  filters?: Filter[];
 }
 
 type ReadArgs = [number[] | number, string[]?];
 
 interface SearchReadControllerParams {
   model: string;
-  domain?: Domain;
+  domain?: DomainListRepr;
   fields?: string[];
   offset?: number;
   limit?: number;
@@ -144,14 +158,40 @@ interface SearchReadControllerReturnType {
   records: DBRecord[];
 }
 
-type SearchReadArgs = [Domain, string[], number, number, string];
+type SearchReadArgs = [DomainListRepr, string[], number, number, string];
 interface SearchReadKwargs {
   context: Context;
-  domain?: Domain;
+  domain?: DomainListRepr;
   fields?: string[];
   offset?: number;
   limit?: number;
   order?: string;
+}
+
+interface ReadGroupKwargs {
+  groupby: string[];
+  fields: string[];
+  domain: DomainListRepr;
+  lazy?: boolean;
+  orderby?: string;
+  limit?: number;
+  offset?: number;
+}
+interface Group {
+  __count?: number;
+  __domain?: DomainListRepr;
+  __data?: SearchReadControllerReturnType;
+
+  [key: string]: any;
+}
+interface WebReadGroupKwargs extends ReadGroupKwargs {
+  expand: boolean;
+  expand_limit: number;
+  expand_orderby: string;
+}
+interface WebReadGroupReturnType {
+  length: number;
+  groups: Object[];
 }
 
 interface OnchangeSpec {
@@ -190,7 +230,7 @@ class MockServer {
 
     Object.entries(this.models).forEach(([modelName, model]) => {
       if (!("id" in model.fields)) {
-        model.fields.id = { string: "ID", type: "number" };
+        model.fields.id = { string: "ID", type: "integer" };
       }
       if (!("display_name" in model.fields)) {
         model.fields.display_name = { string: "Display Name", type: "char" };
@@ -353,7 +393,7 @@ class MockServer {
         return false;
       }
       const modifiers: {
-        [name: string]: Domain | any;
+        [name: string]: DomainListRepr | any;
       } = {};
 
       const isField = node.tagName === "field";
@@ -575,6 +615,10 @@ class MockServer {
         return Promise.resolve(this.mockOnchange(args.model, args.args, args.kwargs));
       case "read":
         return Promise.resolve(this.mockRead(args.model, args.args));
+      case "read_group":
+        return Promise.resolve(this.mockReadGroup(args.model, args.kwargs));
+      case "web_read_group":
+        return Promise.resolve(this.mockWebReadGroup(args.model, args.kwargs));
       case "write":
         return Promise.resolve(this.mockWrite(args.model, args.args));
     }
@@ -669,10 +713,14 @@ class MockServer {
     kwargs.views.forEach(([viewId, viewType]) => {
       fieldsViews[viewType] = this.fieldsViewGet(modelName, [viewId, viewType], kwargs);
     });
-    return {
+    const result: LoadViewsReturnType = {
       fields: this.mockFieldsGet(modelName),
       fields_views: fieldsViews,
     };
+    if (kwargs.options.load_filters) {
+      result.filters = this.models[modelName].filters || [];
+    }
+    return result;
   }
 
   mockOnchange(modelName: string, args: OnchangeArgs, kwargs: any) {
@@ -771,6 +819,211 @@ class MockServer {
     });
   }
 
+  mockReadGroup(modelName: string, kwargs: ReadGroupKwargs): Group[] {
+    if (!("lazy" in kwargs)) {
+      kwargs.lazy = true;
+    }
+
+    const fields = this.models[modelName].fields;
+    const records = this.getRecords(modelName, kwargs.domain);
+
+    let groupBy: string[] = [];
+    if (kwargs.groupby.length) {
+      groupBy = kwargs.lazy ? [kwargs.groupby[0]] : kwargs.groupby;
+    }
+    const groupByFieldNames = groupBy.map((groupByField: string) => {
+      return groupByField.split(":")[0];
+    });
+
+    let aggregatedFields: string[] = [];
+    // if no fields have been given, the server picks all stored fields
+    if (kwargs.fields.length === 0) {
+      aggregatedFields = Object.keys(this.models[modelName].fields).filter(
+        (fieldName) => !groupByFieldNames.includes(fieldName)
+      );
+    } else {
+      kwargs.fields.forEach((field: string) => {
+        var split = field.split(":");
+        var fieldName = split[0];
+        if (!fields[fieldName]) {
+          return;
+        }
+        if (groupByFieldNames.includes(fieldName)) {
+          // grouped fields are not aggregated
+          return;
+        }
+        if (
+          fields[fieldName] &&
+          fields[fieldName].type === "many2one" &&
+          split[1] !== "count_distinct"
+        ) {
+          return;
+        }
+        aggregatedFields.push(fieldName);
+      });
+    }
+
+    function aggregateFields(group: Group, records: DBRecord[]) {
+      let type;
+      for (let i = 0; i < aggregatedFields.length; i++) {
+        type = fields[aggregatedFields[i]].type;
+        if (type === "float" || type === "integer") {
+          group[aggregatedFields[i]] = null;
+          for (let j = 0; j < records.length; j++) {
+            const value = group[aggregatedFields[i]] || 0;
+            group[aggregatedFields[i]] = value + records[j][aggregatedFields[i]];
+          }
+        }
+        if (type === "many2one") {
+          const ids = records.map((record) => record[aggregatedFields[i]]);
+          group[aggregatedFields[i]] = [...new Set(ids)].length || null;
+        }
+      }
+    }
+    function formatValue(groupByField: string, val: any) {
+      const fieldName = groupByField.split(":")[0];
+      // var aggregateFunction = groupByField.split(':')[1] || 'month';
+      if (fields[fieldName].type === "date") {
+        if (!val) {
+          return false;
+        }
+        console.warn("MockServer: read group not fully implemented (moment stuff)");
+        // } else if (aggregateFunction === 'day') {
+        //     return moment(val).format('YYYY-MM-DD');
+        // } else if (aggregateFunction === 'week') {
+        //     return moment(val).format('ww YYYY');
+        // } else if (aggregateFunction === 'quarter') {
+        //     return 'Q' + moment(val).format('Q YYYY');
+        // } else if (aggregateFunction === 'year') {
+        //     return moment(val).format('Y');
+        // } else {
+        //     return moment(val).format('MMMM YYYY');
+        // }
+      } else {
+        return val instanceof Array ? val[0] : val || false;
+      }
+    }
+    function groupByFunction(record: DBRecord) {
+      let value = "";
+      groupBy.forEach((groupByField) => {
+        value = (value ? value + "," : value) + groupByField + "#";
+        const fieldName = groupByField.split(":")[0];
+        if (fields[fieldName].type === "date") {
+          value += formatValue(groupByField, record[fieldName]);
+        } else {
+          value += JSON.stringify(record[groupByField]);
+        }
+      });
+      return value;
+    }
+
+    if (!groupBy.length) {
+      const group = { __count: records.length };
+      aggregateFields(group, records);
+      return [group];
+    }
+
+    const groups = utils.groupBy(records, groupByFunction);
+    let result = Object.values(groups).map((records) => {
+      const res: Group = {
+        __domain: kwargs.domain || [],
+      };
+      groupBy.forEach((groupByField) => {
+        const fieldName = groupByField.split(":")[0];
+        const val = formatValue(groupByField, records[0][fieldName]);
+        const field = fields[fieldName];
+        if (field.type === "many2one" && !Array.isArray(val)) {
+          const relRecord = this.models[field.relation!].records.find((r) => r.id === val);
+          if (relRecord) {
+            res[groupByField] = [val, relRecord.display_name];
+          } else {
+            res[groupByField] = false;
+          }
+        } else {
+          res[groupByField] = val;
+        }
+
+        if (field.type === "date" && val) {
+          console.warn("Mock Server: read group not fully implemented (moment stuff)");
+          // const aggregateFunction = groupByField.split(':')[1];
+          // let startDate;
+          // let endDate;
+          // if (aggregateFunction === 'day') {
+          //     startDate = moment(val, 'YYYY-MM-DD');
+          //     endDate = startDate.clone().add(1, 'days');
+          // } else if (aggregateFunction === 'week') {
+          //     startDate = moment(val, 'ww YYYY');
+          //     endDate = startDate.clone().add(1, 'weeks');
+          // } else if (aggregateFunction === 'year') {
+          //     startDate = moment(val, 'Y');
+          //     endDate = startDate.clone().add(1, 'years');
+          // } else {
+          //     startDate = moment(val, 'MMMM YYYY');
+          //     endDate = startDate.clone().add(1, 'months');
+          // }
+          // res.__domain = [[fieldName, '>=', startDate.format('YYYY-MM-DD')], [fieldName, '<', endDate.format('YYYY-MM-DD')]].concat(res.__domain);
+        } else {
+          res.__domain = combineDomains(
+            [[[fieldName, "=", val]], res.__domain as DomainListRepr],
+            "AND"
+          ).toList();
+        }
+      });
+
+      // compute count key to match dumb server logic...
+      let countKey;
+      if (kwargs.lazy) {
+        countKey = groupBy[0].split(":")[0] + "_count";
+      } else {
+        countKey = "__count";
+      }
+      res[countKey] = records.length;
+      aggregateFields(res, records);
+
+      return res;
+    });
+
+    if (kwargs.orderby) {
+      // only consider first sorting level
+      kwargs.orderby = kwargs.orderby.split(",")[0];
+      const fieldName = kwargs.orderby.split(" ")[0];
+      const order = kwargs.orderby.split(" ")[1] as "ASC" | "DESC";
+      result = this.sortByField(result as any, modelName, fieldName, order);
+    }
+
+    if (kwargs.limit) {
+      const offset = kwargs.offset || 0;
+      result = result.slice(offset, kwargs.limit + offset);
+    }
+
+    return result;
+  }
+
+  mockWebReadGroup(modelName: string, kwargs: WebReadGroupKwargs): WebReadGroupReturnType {
+    const groups = this.mockReadGroup(modelName, kwargs);
+    if (kwargs.expand && kwargs.groupby.length === 1) {
+      groups.forEach((group) => {
+        group.__data = this.mockSearchReadController({
+          domain: group.__domain,
+          model: modelName,
+          fields: kwargs.fields,
+          limit: kwargs.expand_limit,
+          sort: kwargs.expand_orderby,
+        });
+      });
+    }
+    const allGroups = this.mockReadGroup(modelName, {
+      domain: kwargs.domain,
+      fields: ["display_name"],
+      groupby: kwargs.groupby,
+      lazy: kwargs.lazy,
+    });
+    return {
+      groups: groups,
+      length: allGroups.length,
+    };
+  }
+
   mockSearchRead(modelName: string, args: SearchReadArgs, kwargs: SearchReadKwargs): DBRecord[] {
     const result = this.mockSearchReadController({
       model: modelName,
@@ -817,16 +1070,15 @@ class MockServer {
   // Private
   //////////////////////////////////////////////////////////////////////////////
 
-  evaluateDomain(domain: Domain, record: DBRecord) {
-    console.warn("MOCK SERVER: cannot evaluate domain yet");
-    return true; // TODO
+  evaluateDomain(domain: DomainListRepr, record: DBRecord) {
+    return new Domain(domain).contains(record);
   }
   /**
    * Get all records from a model matching a domain.  The only difficulty is
    * that if we have an 'active' field, we implicitely add active = true in
    * the domain.
    */
-  getRecords(modelName: string, domain: Domain, { active_test = true } = {}): DBRecord[] {
+  getRecords(modelName: string, domain: DomainListRepr, { active_test = true } = {}): DBRecord[] {
     if (!Array.isArray(domain)) {
       throw new Error("MockServer._getRecords: given domain has to be an array.");
     }

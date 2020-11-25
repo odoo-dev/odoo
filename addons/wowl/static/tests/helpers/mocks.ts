@@ -2,7 +2,7 @@ import { UserService } from "../../src/services/user";
 import { Odoo, OdooEnv, OdooConfig, Service } from "../../src/types";
 import { RPC } from "../../src/services/rpc";
 import { Deferred, TestConfig } from "./utility";
-import { Query, Route, Router, makePushState } from "../../src/services/router";
+import { Query, Route, Router, makePushState, routeToUrl } from "../../src/services/router";
 import { Cookie, cookieService } from "../../src/services/cookie";
 import { titleService } from "../../src/services/title";
 
@@ -246,10 +246,13 @@ export function makeFakeRouterService(params?: FakeRouterParams): Service<Router
       }
 
       function doPush(mode: "push" | "replace" = "push", route: Route) {
-        if (params && params.onPushState) {
+        const oldUrl = routeToUrl(current);
+        const newRoute = getRoute(route);
+        const newUrl = routeToUrl(newRoute);
+        if (params && params.onPushState && oldUrl !== newUrl) {
           params.onPushState(mode, route.hash);
         }
-        current = getRoute(route);
+        current = newRoute;
       }
       return {
         get current(): Route {
