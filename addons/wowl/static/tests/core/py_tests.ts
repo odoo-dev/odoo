@@ -925,7 +925,6 @@ QUnit.module("py", {}, () => {
   function checkAST(expr: string, message: string = expr) {
     const ast = parseExpr(expr);
     const str = formatAST(ast);
-    debugger;
     if (str !== expr) {
       throw new Error(`Mismatch: ${str} !== ${expr} (${message});`);
     }
