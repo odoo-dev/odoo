@@ -10,7 +10,7 @@ import {
 } from "../types";
 import { actionRegistry, viewRegistry } from "../registries";
 import { useService } from "../core/hooks";
-import { useSetupAction } from "../services/action_manager/action_manager";
+import { useSetupAction } from "../action_manager/action_manager";
 
 declare const odoo: any;
 

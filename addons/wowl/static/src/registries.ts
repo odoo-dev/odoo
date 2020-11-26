@@ -9,7 +9,7 @@ import {
 import { userMenu, UserMenuItemFactory } from "./components/user_menu/user_menu";
 import { _lt } from "./core/localization";
 import { Registry } from "./core/registry";
-import { actionManagerService } from "./services/action_manager/action_manager";
+import { actionManagerService } from "./action_manager/action_manager";
 import { menusService } from "./services/menus";
 import { modelService } from "./services/model";
 import { notificationService } from "./services/notifications";
@@ -36,7 +36,7 @@ import { dialogManagerService } from "./services/dialog_manager";
 import { crashManagerService } from "./services/crash_manager";
 import { cookieService } from "./services/cookie";
 import { titleService } from "./services/title";
-import { displayNotificationAction } from "./services/action_manager/client_actions";
+import { displayNotificationAction } from "./action_manager/client_actions";
 
 // -----------------------------------------------------------------------------
 // Services

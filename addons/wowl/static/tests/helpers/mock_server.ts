@@ -1,4 +1,4 @@
-import { ActionDescription } from "../../src/services/action_manager/action_manager";
+import { ActionDescription } from "../../src/action_manager/action_manager";
 import { Context, Domain, ModelData, Service, ViewId, ViewType } from "../../src/types";
 import { MockRPC, makeFakeRPCService, makeMockFetch } from "./mocks";
 import { MenuData } from "../../src/services/menus";

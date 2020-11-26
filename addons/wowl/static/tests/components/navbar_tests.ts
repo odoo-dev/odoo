@@ -4,7 +4,7 @@ import { NavBar } from "../../src/components/navbar/navbar";
 import { click } from "../helpers/index";
 import { makeTestEnv, mount, TestConfig } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
-import { actionManagerService } from "./../../src/services/action_manager/action_manager";
+import { actionManagerService } from "../../src/action_manager/action_manager";
 import { menusService } from "./../../src/services/menus";
 import { notificationService } from "./../../src/services/notifications";
 import { makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";

@@ -1,5 +1,5 @@
 import { Component, hooks, tags } from "@odoo/owl";
-import { Dialog } from "../../components/dialog/dialog";
+import { Dialog } from "../components/dialog/dialog";
 import type {
   ActionContext,
   OdooEnv,
@@ -14,10 +14,10 @@ import type {
   Domain,
   ControllerProps,
   Odoo,
-} from "../../types";
-import { Route } from "../router";
-import { evaluateExpr } from "../../core/py/index";
-import { makeContext } from "../../core/utils";
+} from "../types";
+import { Route } from "../services/router";
+import { evaluateExpr } from "../core/py/index";
+import { makeContext } from "../core/utils";
 declare const odoo: Odoo;
 
 // -----------------------------------------------------------------------------

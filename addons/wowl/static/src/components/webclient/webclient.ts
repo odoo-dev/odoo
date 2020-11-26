@@ -1,4 +1,4 @@
-import { ActionContainer, ActionOptions } from "../../services/action_manager/action_manager";
+import { ActionContainer, ActionOptions } from "../../action_manager/action_manager";
 import { Component, hooks } from "@odoo/owl";
 import { NavBar } from "../navbar/navbar";
 import { OdooEnv } from "../../types";
