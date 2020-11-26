@@ -1,5 +1,5 @@
 import * as owl from "@odoo/owl";
-import { WebClient } from "./webclient/webclient/webclient";
+import { WebClient } from "./webclient/webclient";
 import { fetchLocalization } from "./core/localization";
 import { makeEnv, makeRAMLocalStorage } from "./env";
 import * as registries from "./registries";

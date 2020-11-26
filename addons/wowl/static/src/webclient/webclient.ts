@@ -1,9 +1,9 @@
-import { ActionContainer, ActionOptions } from "../../action_manager/action_manager";
+import { ActionContainer, ActionOptions } from "../action_manager/action_manager";
 import { Component, hooks } from "@odoo/owl";
-import { NavBar } from "../navbar/navbar";
-import { OdooEnv } from "../../types";
-import { useService } from "../../core/hooks";
-import { Route } from "../../services/router";
+import { NavBar } from "./navbar/navbar";
+import { OdooEnv } from "../types";
+import { useService } from "../core/hooks";
+import { Route } from "../services/router";
 
 export class WebClient extends Component<{}, OdooEnv> {
   static components = { ActionContainer, NavBar };

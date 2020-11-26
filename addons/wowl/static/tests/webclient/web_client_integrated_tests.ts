@@ -1,6 +1,6 @@
 import * as QUnit from "qunit";
 import $ from "jquery";
-import { WebClient } from "../../src/webclient/webclient/webclient";
+import { WebClient } from "../../src/webclient/webclient";
 import { Registry } from "../../src/core/registry";
 import { makeFakeUserService, nextTick, OdooEnv } from "../helpers/index";
 import { click, legacyExtraNextTick, makeTestEnv, mount, TestConfig } from "../helpers/utility";
