@@ -17,7 +17,7 @@ import type {
 } from "../types";
 import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
-import { makeContext } from "../core/utils";
+import { makeContext } from "../core/context";
 declare const odoo: Odoo;
 
 // -----------------------------------------------------------------------------

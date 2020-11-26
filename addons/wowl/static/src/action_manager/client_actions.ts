@@ -1,6 +1,6 @@
 import { utils } from "@odoo/owl";
 import { OdooEnv } from "../types";
-import { sprintf } from "../core/utils";
+import { sprintf } from "../utils/utils";
 
 const { escape } = utils;
 
