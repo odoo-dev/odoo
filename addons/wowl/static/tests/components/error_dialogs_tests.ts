@@ -7,7 +7,7 @@ import {
   RedirectWarningDialog,
   SessionExpiredDialog,
   WarningDialog,
-} from "../../src/components/error_dialogs/error_dialogs";
+} from "../../src/crash_manager/error_dialogs";
 import { Registry } from "../../src/core/registry";
 import { OdooBrowser, Service } from "../../src/types";
 

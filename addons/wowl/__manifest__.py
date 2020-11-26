@@ -23,7 +23,8 @@ Odoo Web core module written in Owl.
         'static/src/components',
         'static/src/notifications',
         'static/src/webclient',
-        'static/src/views'
+        'static/src/crash_manager',
+        'static/src/views',
     ],
     'style': [
         'static/src/utils',
@@ -31,6 +32,7 @@ Odoo Web core module written in Owl.
         'static/src/notifications',
         'static/src/webclient',
         'static/src/views',
+        'static/src/crash_manager'
         'static/src/services',
     ]
 }

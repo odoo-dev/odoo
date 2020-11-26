@@ -6,10 +6,7 @@ import { makeFakeUserService, nextTick, OdooEnv } from "../helpers/index";
 import { click, legacyExtraNextTick, makeTestEnv, mount, TestConfig } from "../helpers/utility";
 import { notificationService } from "../../src/notifications/notification_service";
 import { menusService } from "../../src/services/menus";
-import {
-  ActionManager,
-  actionManagerService,
-} from "../../src/action_manager/action_manager";
+import { ActionManager, actionManagerService } from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
 import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";
