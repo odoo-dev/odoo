@@ -1,7 +1,7 @@
 import { Component } from "@odoo/owl";
 import { Stringifiable, _lt } from "../../core/localization";
 import { Odoo, OdooEnv } from "../../types";
-import { Dialog } from "../dialog/dialog";
+import { Dialog } from "../../components/dialog/dialog";
 declare const odoo: Odoo;
 
 export function documentationItem(env: OdooEnv) {

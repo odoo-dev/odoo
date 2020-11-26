@@ -6,8 +6,8 @@ import {
   SessionExpiredDialog,
   WarningDialog
 } from "./components/error_dialogs/error_dialogs";
-import { LoadingIndicator } from "./components/loading_indicator/loading_indicator";
-import { userMenu, UserMenuItemFactory } from "./components/user_menu/user_menu";
+import { LoadingIndicator } from "./webclient/loading_indicator/loading_indicator";
+import { userMenu, UserMenuItemFactory } from "./webclient/user_menu/user_menu";
 // import { FormView } from "./views/form_view";
 // import { GraphView } from "./views/graph_view";
 // import { KanbanView } from "./views/kanban_view";
@@ -20,14 +20,14 @@ import {
   preferencesItem,
   shortCutsItem,
   supportItem
-} from "./components/user_menu_items/user_menu_items";
+} from "./webclient/user_menu_items/user_menu_items";
 import { Registry } from "./core/registry";
 import { cookieService } from "./services/cookie";
 import { crashManagerService } from "./services/crash_manager";
 import { dialogManagerService } from "./services/dialog_manager";
 import { menusService } from "./services/menus";
 import { modelService } from "./services/model";
-import { notificationService } from "./services/notifications";
+import { notificationService } from "./notifications/notification_service";
 import { routerService } from "./services/router";
 import { rpcService } from "./services/rpc";
 import { titleService } from "./services/title";

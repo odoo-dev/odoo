@@ -3,8 +3,8 @@ import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
 import { useService } from "../../core/hooks";
 import { MenuTree } from "../../services/menus";
 import { OdooEnv } from "../../types";
-import { Dropdown } from "../dropdown/dropdown";
-import { DropdownItem } from "../dropdown/dropdown_item";
+import { Dropdown } from "../../components/dropdown/dropdown";
+import { DropdownItem } from "../../components/dropdown/dropdown_item";
 const { useExternalListener } = hooks;
 
 export interface NavBarState {

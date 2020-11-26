@@ -1,5 +1,5 @@
 import * as QUnit from "qunit";
-import { UserMenu } from "../../src/components/user_menu/user_menu";
+import { UserMenu } from "../../src/webclient/user_menu/user_menu";
 import {
   click,
   getFixture,

@@ -1,12 +1,12 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
-import { NavBar } from "../../src/components/navbar/navbar";
+import { NavBar } from "../../src/webclient/navbar/navbar";
 import { click } from "../helpers/index";
 import { makeTestEnv, mount, TestConfig } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
 import { menusService } from "./../../src/services/menus";
-import { notificationService } from "./../../src/services/notifications";
+import { notificationService } from "../../src/notifications/notification_service";
 import { makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 
 const { xml } = tags;
