@@ -9,7 +9,7 @@ import { menusService } from "../../src/services/menus";
 import {
   ActionManager,
   actionManagerService,
-} from "../../src/services/action_manager/action_manager";
+} from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
 import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";

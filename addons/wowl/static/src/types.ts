@@ -4,7 +4,7 @@ import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import { Localization } from "./core/localization";
 import type { Registry } from "./core/registry";
 // add here each service type to have better typing for useService
-import type { actionManagerService } from "./services/action_manager/action_manager";
+import type { actionManagerService } from "./action_manager/action_manager";
 import type { cookieService } from "./services/cookie";
 import type { dialogManagerService } from "./services/dialog_manager";
 import type { menusService } from "./services/menus";
@@ -16,7 +16,7 @@ import type { titleService } from "./services/title";
 import type { uiService } from "./services/ui/ui";
 import type { userService } from "./services/user";
 import type { viewManagerService } from "./services/view_manager";
-import { Breadcrumb } from "./services/action_manager/action_manager";
+import { Breadcrumb } from "./action_manager/action_manager";
 import { UserMenuItemFactory } from "./components/user_menu/user_menu";
 
 interface CacheHashes {

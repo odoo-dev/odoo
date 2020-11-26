@@ -1,6 +1,6 @@
 import { Component } from "@odoo/owl";
 import { useService } from "../core/hooks";
-import { ActionRequest } from "../services/action_manager/action_manager";
+import { ActionRequest } from "../action_manager/action_manager";
 import { ViewDefinition } from "../services/view_manager";
 import { OdooEnv, ViewProps, ViewType } from "../types";
 
