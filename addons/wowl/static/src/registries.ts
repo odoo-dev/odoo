@@ -1,24 +1,13 @@
 import { Component } from "@odoo/owl";
-import { LoadingIndicator } from "./components/loading_indicator/loading_indicator";
+import { actionManagerService } from "./action_manager/action_manager";
 import {
   Error504Dialog,
   RedirectWarningDialog,
   SessionExpiredDialog,
-  WarningDialog,
+  WarningDialog
 } from "./components/error_dialogs/error_dialogs";
+import { LoadingIndicator } from "./components/loading_indicator/loading_indicator";
 import { userMenu, UserMenuItemFactory } from "./components/user_menu/user_menu";
-import { _lt } from "./core/localization";
-import { Registry } from "./core/registry";
-import { actionManagerService } from "./action_manager/action_manager";
-import { menusService } from "./services/menus";
-import { modelService } from "./services/model";
-import { notificationService } from "./services/notifications";
-import { routerService } from "./services/router";
-import { rpcService } from "./services/rpc";
-import { uiService } from "./services/ui/ui";
-import { userService } from "./services/user";
-import { viewManagerService } from "./services/view_manager";
-import { ComponentAction, FunctionAction, Service, SystrayItem, Type } from "./types";
 // import { FormView } from "./views/form_view";
 // import { GraphView } from "./views/graph_view";
 // import { KanbanView } from "./views/kanban_view";
@@ -30,13 +19,22 @@ import {
   odooAccountItem,
   preferencesItem,
   shortCutsItem,
-  supportItem,
+  supportItem
 } from "./components/user_menu_items/user_menu_items";
-import { dialogManagerService } from "./services/dialog_manager";
-import { crashManagerService } from "./services/crash_manager";
+import { Registry } from "./core/registry";
 import { cookieService } from "./services/cookie";
+import { crashManagerService } from "./services/crash_manager";
+import { dialogManagerService } from "./services/dialog_manager";
+import { menusService } from "./services/menus";
+import { modelService } from "./services/model";
+import { notificationService } from "./services/notifications";
+import { routerService } from "./services/router";
+import { rpcService } from "./services/rpc";
 import { titleService } from "./services/title";
-import { displayNotificationAction } from "./action_manager/client_actions";
+import { uiService } from "./services/ui/ui";
+import { userService } from "./services/user";
+import { viewManagerService } from "./services/view_manager";
+import { Service, SystrayItem, Type } from "./types";
 
 // -----------------------------------------------------------------------------
 // Services
@@ -81,21 +79,13 @@ mainComponentRegistry.add("LoadingIndicator", LoadingIndicator);
 // Client Actions
 // -----------------------------------------------------------------------------
 
-// This registry contains client actions. A client action can be either a
-// Component or a function. In the former case, the given Component will be
-// instantiated and mounted in the DOM. In the latter, the function will be
-// executed
-export const actionRegistry: Registry<ComponentAction | FunctionAction> = new Registry();
-
-actionRegistry.add("display_notification", displayNotificationAction);
-
+export { actionRegistry } from "./action_manager/action_registry";
 // -----------------------------------------------------------------------------
 // Views
 // -----------------------------------------------------------------------------
-
 // const views: View[] = [FormView, GraphView, KanbanView, ListView, PivotView];
-
 export { viewRegistry } from "./views/view_registry";
+
 
 // for (let view of views) {
 //   viewRegistry.add(view.name, view);
