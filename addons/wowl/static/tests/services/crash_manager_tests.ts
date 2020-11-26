@@ -2,10 +2,10 @@ import * as QUnit from "qunit";
 import { makeTestEnv, OdooEnv } from "../helpers/index";
 import { Registry } from "../../src/core/registry";
 import { Service, Type } from "../../src/types";
-import { crashManagerService } from "../../src/services/crash_manager";
+import { crashManagerService } from "../../src/crash_manager/crash_manager_service";
 import { DialogManagerService } from "../../src/services/dialog_manager";
 import { Component, tags } from "@odoo/owl";
-import { ErrorDialog } from "../../src/components/error_dialogs/error_dialogs";
+import { ErrorDialog } from "../../src/crash_manager/error_dialogs";
 import { RPCError } from "../../src/services/rpc";
 import { Dialog } from "../../src/components/dialog/dialog";
 

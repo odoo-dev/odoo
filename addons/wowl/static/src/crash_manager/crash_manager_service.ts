@@ -1,6 +1,6 @@
 import { OdooEnv, Service } from "../types";
-import { RPCError } from "./rpc";
-import { ErrorDialog } from "../components/error_dialogs/error_dialogs";
+import { RPCError } from "../services/rpc";
+import { ErrorDialog } from "./error_dialogs";
 import { isBrowserChromium } from "../utils/ts/utility";
 
 export const crashManagerService: Service<void> = {
