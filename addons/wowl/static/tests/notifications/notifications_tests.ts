@@ -1,5 +1,5 @@
 import * as QUnit from "qunit";
-import { notificationService } from "../../src/services/notifications";
+import { notificationService } from "../../src/notifications/notification_service";
 import { OdooEnv, Service } from "../../src/types";
 import { Registry } from "../../src/core/registry";
 import { click, getFixture, makeTestEnv, mount, nextTick } from "../helpers/index";

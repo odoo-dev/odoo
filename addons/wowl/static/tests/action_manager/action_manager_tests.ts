@@ -1,10 +1,10 @@
 import * as QUnit from "qunit";
-import { Registry } from "../src/core/registry";
-import { actionManagerService } from "../src/action_manager/action_manager";
-import { notificationService } from "../src/services/notifications";
-import { makeTestEnv, nextTick } from "./helpers/index";
-import { ComponentAction, FunctionAction, OdooEnv, Service } from "../src/types";
-import { makeFakeRouterService, makeFakeUserService } from "./helpers/mocks";
+import { Registry } from "../../src/core/registry";
+import { actionManagerService } from "../../src/action_manager/action_manager";
+import { makeTestEnv, nextTick } from "../helpers/index";
+import { ComponentAction, FunctionAction, OdooEnv, Service } from "../../src/types";
+import { makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
+import { notificationService } from "../../src/notifications/notification_service";
 
 let env: OdooEnv;
 let services: Registry<Service>;

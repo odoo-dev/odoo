@@ -1,6 +1,6 @@
 import { Component, core, tags } from "@odoo/owl";
 import type { Odoo, OdooEnv, Service } from "../types";
-import { Notification as NotificationComponent } from "../components/notification/notification";
+import { Notification as NotificationComponent } from "./notification";
 
 declare const odoo: Odoo;
 const { EventBus } = core;

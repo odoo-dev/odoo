@@ -12,7 +12,7 @@ import {
   mount,
   nextTick,
 } from "../helpers/index";
-import { notificationService } from "../../src/services/notifications";
+import { notificationService } from "../../src/notifications/notification_service";
 
 const { xml } = tags;
 // -----------------------------------------------------------------------------

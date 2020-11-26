@@ -1,5 +1,5 @@
 import * as QUnit from "qunit";
-import { LoadingIndicator } from "../../src/components/loading_indicator/loading_indicator";
+import { LoadingIndicator } from "../../src/webclient/loading_indicator/loading_indicator";
 import { uiService } from "../../src/services/ui/ui";
 import { Odoo, Service } from "../../src/types";
 import { Registry } from "../../src/core/registry";

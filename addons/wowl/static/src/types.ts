@@ -9,7 +9,7 @@ import type { cookieService } from "./services/cookie";
 import type { dialogManagerService } from "./services/dialog_manager";
 import type { menusService } from "./services/menus";
 import type { DBRecord, modelService } from "./services/model";
-import type { notificationService } from "./services/notifications";
+import type { notificationService } from "./notifications/notification_service";
 import type { routerService } from "./services/router";
 import type { rpcService } from "./services/rpc";
 import type { titleService } from "./services/title";
@@ -17,7 +17,7 @@ import type { uiService } from "./services/ui/ui";
 import type { userService } from "./services/user";
 import type { viewManagerService } from "./services/view_manager";
 import { Breadcrumb } from "./action_manager/action_manager";
-import { UserMenuItemFactory } from "./components/user_menu/user_menu";
+import { UserMenuItemFactory } from "./webclient/user_menu/user_menu";
 
 interface CacheHashes {
   load_menus: string;

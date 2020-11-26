@@ -5,18 +5,18 @@ import "./qunit";
 
 // import here every test suite files
 import "./components/dropdown_tests";
-import "./components/navbar_tests";
-import "./action_manager_tests";
+import "./webclient/navbar_tests";
+import "./action_manager/action_manager_tests";
 import "./services/model_tests";
-import "./services/notifications_tests";
+import "./notifications/notifications_tests";
 import "./services/router_tests";
 import "./services/rpc_tests";
 import "./services/services_tests";
 import "./services/ui_tests";
-import "./components/loading_indicator_tests";
-import "./components/webclient_tests";
-import "./components/web_client_integrated_tests";
-import "./components/user_menu_tests";
+import "./webclient/loading_indicator_tests";
+import "./webclient/webclient_tests";
+import "./webclient/web_client_integrated_tests";
+import "./webclient/user_menu_tests";
 import "./core/localization_tests";
 import "./components/dialog_tests";
 import "./core/py_tests";

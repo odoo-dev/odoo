@@ -21,11 +21,15 @@ Odoo Web core module written in Owl.
     ],
     'owl_qweb': [
         'static/src/components',
+        'static/src/notifications',
+        'static/src/webclient',
         'static/src/views'
     ],
     'style': [
         'static/src/utils',
         'static/src/components',
+        'static/src/notifications',
+        'static/src/webclient',
         'static/src/views',
         'static/src/services',
     ]

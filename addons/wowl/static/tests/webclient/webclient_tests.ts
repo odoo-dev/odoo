@@ -1,9 +1,9 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
-import { WebClient } from "../../src/components/webclient/webclient";
+import { WebClient } from "../../src/webclient/webclient/webclient";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
-import { notificationService } from "./../../src/services/notifications";
+import { notificationService } from "../../src/notifications/notification_service";
 import { makeFakeUserService } from "../helpers/index";
 import { Service, Type } from "../../src/types";
 import { mount, makeTestEnv, TestConfig } from "../helpers/utility";

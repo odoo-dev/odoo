@@ -1,10 +1,10 @@
 import * as QUnit from "qunit";
 import $ from "jquery";
-import { WebClient } from "../../src/components/webclient/webclient";
+import { WebClient } from "../../src/webclient/webclient/webclient";
 import { Registry } from "../../src/core/registry";
 import { makeFakeUserService, nextTick, OdooEnv } from "../helpers/index";
 import { click, legacyExtraNextTick, makeTestEnv, mount, TestConfig } from "../helpers/utility";
-import { notificationService } from "../../src/services/notifications";
+import { notificationService } from "../../src/notifications/notification_service";
 import { menusService } from "../../src/services/menus";
 import {
   ActionManager,
