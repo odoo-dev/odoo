@@ -28,7 +28,7 @@ import {
   preferencesItem,
   shortCutsItem,
   supportItem,
-} from "./webclient/user_menu_items/user_menu_items";
+} from "./webclient/user_menu/user_menu_items";
 
 export { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
 // -----------------------------------------------------------------------------
