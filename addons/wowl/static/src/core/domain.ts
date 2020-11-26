@@ -1,6 +1,6 @@
-import { evaluate, formatAST, parseExpr } from "./py/index";
-import { AST, AST_TYPE } from "./py/parser";
-import { toPyValue } from "./py/utils";
+import { evaluate, formatAST, parseExpr } from "../py/index";
+import { AST, AST_TYPE } from "../py/parser";
+import { toPyValue } from "../py/utils";
 
 type Record = { [field: string]: any };
 

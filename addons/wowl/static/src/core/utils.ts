@@ -1,5 +1,5 @@
 import { Context } from "../types";
-import { evaluateExpr } from "./py/index";
+import { evaluateExpr } from "../py/index";
 
 type ContextDescription = Context | string | undefined;
 

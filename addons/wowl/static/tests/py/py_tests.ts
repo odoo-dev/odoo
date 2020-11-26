@@ -5,7 +5,7 @@ import {
   parseExpr,
   tokenize,
   TOKEN_TYPE,
-} from "../../src/core/py/index";
+} from "../../src/py/index";
 
 QUnit.module("py", {}, () => {
   QUnit.module("tokenizer");

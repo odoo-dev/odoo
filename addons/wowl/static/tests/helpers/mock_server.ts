@@ -4,7 +4,7 @@ import { MockRPC, makeFakeRPCService, makeMockFetch } from "./mocks";
 import { MenuData } from "../../src/services/menus";
 import { TestConfig } from "./utility";
 import { Registry } from "../../src/core/registry";
-import { evaluateExpr } from "../../src/core/py/index";
+import { evaluateExpr } from "../../src/py/index";
 import { DBRecord, ORMCommand } from "../../src/services/model";
 
 // Aims:
