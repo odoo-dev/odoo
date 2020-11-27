@@ -22,6 +22,9 @@ class AccountTaxGroup(models.Model):
 
     name = fields.Char(required=True, translate=True)
     sequence = fields.Integer(default=10)
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True,
+                                 default=lambda self: self.env.company.country_id.id,
+                                 help="Country for which this group is available.")
     property_tax_payable_account_id = fields.Many2one('account.account', company_dependent=True, string='Tax current account (payable)')
     property_tax_receivable_account_id = fields.Many2one('account.account', company_dependent=True, string='Tax current account (receivable)')
     property_advance_tax_payment_account_id = fields.Many2one('account.account', company_dependent=True, string='Advance Tax payment account')
@@ -42,7 +45,8 @@ class AccountTax(models.Model):
 
     @api.model
     def _default_tax_group(self):
-        return self.env['account.tax.group'].search([], limit=1)
+        country_id = self.country_id.id or self.env.company.country_id.id
+        return self.env['account.tax.group'].search([('country_id', 'in', (country_id, False))], limit=1)
 
     name = fields.Char(string='Tax Name', required=True)
     type_tax_use = fields.Selection(TYPE_TAX_USE, string='Tax Type', required=True, default="sale",
@@ -75,7 +79,8 @@ class AccountTax(models.Model):
     include_base_amount = fields.Boolean(string='Affect Base of Subsequent Taxes', default=False,
         help="If set, taxes which are computed after this one will be computed based on the price tax included.")
     analytic = fields.Boolean(string="Include in Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
-    tax_group_id = fields.Many2one('account.tax.group', string="Tax Group", default=_default_tax_group, required=True)
+    tax_group_id = fields.Many2one('account.tax.group', string="Tax Group", default=_default_tax_group,
+                                   domain="[('country_id', 'in', (country_id, False))]")
     # Technical field to make the 'tax_exigibility' field invisible if the same named field is set to false in 'res.company' model
     hide_tax_exigibility = fields.Boolean(string='Hide Use Cash Basis Option', related='company_id.tax_exigibility', readonly=True)
     tax_exigibility = fields.Selection(
@@ -92,7 +97,8 @@ class AccountTax(models.Model):
     invoice_repartition_line_ids = fields.One2many(string="Distribution for Invoices", comodel_name="account.tax.repartition.line", inverse_name="invoice_tax_id", copy=True, help="Distribution when the tax is used on an invoice")
     refund_repartition_line_ids = fields.One2many(string="Distribution for Refund Invoices", comodel_name="account.tax.repartition.line", inverse_name="refund_tax_id", copy=True, help="Distribution when the tax is used on a refund")
     tax_fiscal_country_id = fields.Many2one(string='Fiscal Country', comodel_name='res.country', related='company_id.account_tax_fiscal_country_id', help="Technical field used to restrict the domain of account tags for tax repartition lines created for this tax.")
-    country_code = fields.Char(related='company_id.country_id.code', readonly=True)
+    country_id = fields.Many2one(related='company_id.country_id', readonly=True)
+    country_code = fields.Char(related='country_id.code', readonly=True)
 
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id, type_tax_use, tax_scope)', 'Tax names must be unique !'),

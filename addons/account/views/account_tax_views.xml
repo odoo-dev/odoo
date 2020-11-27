@@ -136,6 +136,7 @@
                         <page string="Definition" name="definition">
                             <div attrs="{'invisible': [('amount_type', '=', 'group')]}">
                                 <field name="tax_fiscal_country_id" invisible="1"/>
+                                <field name="country_id" invisible="1"/>
                                 <field name="country_code" invisible="1"/>
                                 <group string="Distribution for Invoices">
                                     <field name="invoice_repartition_line_ids" nolabel="1" context="{'default_company_id': company_id}"/>
@@ -190,6 +191,18 @@
             </field>
         </record>
 
+        <record id="account_tax_group_view_search" model="ir.ui.view">
+            <field name="name">account.tax.group.search.filters</field>
+            <field name="model">account.tax.group</field>
+            <field name="arch" type="xml">
+                <search string="Search Group">
+                    <field name="name"/>
+                    <field name="country_id"/>
+                    <filter string="Country" name="group_by_country_id" context="{'group_by':'country_id'}"/>
+                </search>
+            </field>
+        </record>
+
         <record id="view_tax_group_tree" model="ir.ui.view">
             <field name="name">account.tax.group.tree</field>
             <field name="model">account.tax.group</field>
@@ -197,6 +210,7 @@
                 <tree string="Account Tax Group" editable="bottom" create="false">
                     <field name="sequence" widget="handle"/>
                     <field name="name"/>
+                    <field name="country_id"/>
                     <field name="property_tax_payable_account_id"/>
                     <field name="property_tax_receivable_account_id"/>
                     <field name="property_advance_tax_payment_account_id"/>
