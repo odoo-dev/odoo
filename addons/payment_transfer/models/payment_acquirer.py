@@ -25,7 +25,8 @@ class PaymentAcquirer(models.Model):
 
         # Pick the Bank journal
         bank_journal = self.env['account.journal'].search(
-            [('type', '=', 'bank'), ('company_id', '=', company.id)], limit=1)
+            [('type', '=', 'bank'), ('company_id', '=', (company or self.env.company).id)], limit=1
+        )
         if bank_journal:
             transfer_acquirers.write({'journal_id': bank_journal.id})
 
