@@ -1,9 +1,10 @@
 import { Component } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
 import { useService } from "../../core/hooks";
-import { Odoo, OdooEnv, SystrayItem } from "../../types";
+import { Odoo, OdooEnv } from "../../types";
 import { Dropdown } from "../../components/dropdown/dropdown";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
+import { SystrayItem } from "../systray_registry";
 declare const odoo: Odoo;
 
 type Callback = () => void | Promise<any>;

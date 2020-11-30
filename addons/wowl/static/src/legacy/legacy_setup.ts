@@ -1,10 +1,12 @@
 import { Component, config, tags, utils } from "@odoo/owl";
-import { serviceRegistry, systrayRegistry } from "../registries";
+import { serviceRegistry } from "../services/service_registry";
+import { systrayRegistry } from "../webclient/systray_registry";
 import {
   makeLegacyActionManagerService,
   makeLegacyRpcService,
   makeLegacySessionService,
 } from "./legacy";
+
 
 let legacySetupResolver: (...args: any[]) => void;
 

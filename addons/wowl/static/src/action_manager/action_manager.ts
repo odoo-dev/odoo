@@ -11,10 +11,11 @@ import type {
   ViewId,
   ViewProps,
   ViewType,
-  Domain,
   ControllerProps,
   Odoo,
 } from "../types";
+import { DomainListRepr as Domain } from "../core/domain";
+
 import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";

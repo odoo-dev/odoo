@@ -1,33 +1,46 @@
 import type { Component } from "@odoo/owl";
 import { Env } from "@odoo/owl/dist/types/component/component";
 import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
-import { Localization } from "./core/localization";
-import type { Registry } from "./core/registry";
 // add here each service type to have better typing for useService
 import type { actionManagerService } from "./action_manager/action_manager";
+import { Breadcrumb } from "./action_manager/action_manager";
+import { actionRegistry } from "./action_manager/action_registry";
+import { DomainListRepr as Domain } from "./core/domain";
+import { Localization } from "./core/localization";
+import type { Registry } from "./core/registry";
+import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
+import type { notificationService } from "./notifications/notification_service";
 import type { cookieService } from "./services/cookie";
 import type { dialogManagerService } from "./services/dialog_manager";
 import type { menusService } from "./services/menus";
 import type { DBRecord, modelService } from "./services/model";
-import type { notificationService } from "./notifications/notification_service";
 import type { routerService } from "./services/router";
 import type { rpcService } from "./services/rpc";
 import type { titleService } from "./services/title";
 import type { uiService } from "./services/ui/ui";
 import type { userService } from "./services/user";
 import type { viewManagerService } from "./services/view_manager";
-import { Breadcrumb } from "./action_manager/action_manager";
-import { UserMenuItemFactory } from "./webclient/user_menu/user_menu";
+import { viewRegistry } from "./views/view_registry";
+import { mainComponentRegistry } from "./webclient/main_component_registry";
+import type { systrayRegistry } from "./webclient/systray_registry";
+import { userMenuRegistry } from "./webclient/user_menu_registry";
+
+
+interface Registries {
+  Components: typeof mainComponentRegistry;
+  services: Registry<Service<any>>;
+  actions: typeof actionRegistry;
+  views: typeof viewRegistry;
+  systray: typeof systrayRegistry;
+  errorDialogs: typeof errorDialogRegistry;
+  userMenu: typeof userMenuRegistry;
+}
+
 
 interface CacheHashes {
   load_menus: string;
   translations: string;
 }
-
-// todo: check & improve Domain types
-type DomainOperator = "=";
-type DomainAtom = [string, DomainOperator, number | string | boolean] | "&" | "|";
-export type Domain = DomainAtom[];
 
 export interface Context {
   [key: string]: any;
@@ -117,16 +130,6 @@ export interface OdooEnv extends Env {
 export type ComponentAction = Type<Component<{}, OdooEnv>>;
 export type FunctionAction = (env: OdooEnv, action: any) => any;
 
-interface Registries {
-  Components: Registry<Type<Component>>;
-  services: Registry<Service<any>>;
-  actions: Registry<ComponentAction | FunctionAction>;
-  views: Registry<View>;
-  systray: Registry<SystrayItem>;
-  errorDialogs: Registry<Type<Component>>;
-  userMenu: Registry<UserMenuItemFactory>;
-}
-
 export interface OdooConfig extends Registries {
   localization: Localization;
   debug: string;
@@ -213,12 +216,6 @@ interface ViewInfo {
 }
 
 export type View = Type<Component<ViewProps, OdooEnv>> & ViewInfo;
-
-export interface SystrayItem {
-  name: string;
-  Component: Type<Component>;
-  sequence?: number;
-}
 
 /*
  *  MODELS AND FIELDS DEFINITION

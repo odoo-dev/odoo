@@ -6,11 +6,11 @@ type Record = { [field: string]: any };
 
 type Condition = [string, string, any];
 
-type ListRepr = ("&" | "|" | "!" | Condition)[];
-type StringRepr = string;
-type ClassRepr = Domain;
+export type DomainListRepr = ("&" | "|" | "!" | Condition)[];
+type DomainStringRepr = string;
+type DomainClassRepr = Domain;
 
-export type DomainRepr = ListRepr | StringRepr | ClassRepr;
+export type DomainRepr = DomainListRepr | DomainStringRepr | DomainClassRepr;
 
 export class Domain {
   ast: AST;
@@ -33,7 +33,7 @@ export class Domain {
     return formatAST(this.ast!);
   }
 
-  toList(context?: any): ListRepr {
+  toList(context?: any): DomainListRepr {
     return evaluate(this.ast, context);
   }
 }
@@ -56,7 +56,7 @@ export function combineDomains(domains: DomainRepr[], operator: "AND" | "OR"): D
   return result;
 }
 
-function toAST(domain: ListRepr): AST {
+function toAST(domain: DomainListRepr): AST {
   const elems: AST[] = domain.map((elem) => {
     switch (elem) {
       case "!":
@@ -93,7 +93,7 @@ function normalizeDomainAST(domain: AST, op: "&" | "|" = "&"): AST {
   return { type: AST_TYPE.List, value: values };
 }
 
-function matchDomain(record: Record, domain: ListRepr): boolean {
+function matchDomain(record: Record, domain: DomainListRepr): boolean {
   if (domain.length === 0) {
     return true;
   }

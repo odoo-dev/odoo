@@ -18,7 +18,8 @@ import { makeRAMLocalStorage } from "../../src/env";
 import { RPC } from "../../src/services/rpc";
 import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "../../src/legacy/legacy";
 import { getLegacy } from "../helpers/legacy";
-import { actionRegistry, viewRegistry } from "../../src/registries";
+import { actionRegistry } from "../../src/action_manager/action_registry";
+import { viewRegistry } from "../../src/views/view_registry";
 
 // JQuery :visible selector
 // https://stackoverflow.com/questions/13388616/firefox-query-selector-and-the-visible-pseudo-selector

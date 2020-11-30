@@ -1,11 +1,12 @@
 import { ActionDescription } from "../../src/action_manager/action_manager";
-import { Context, Domain, ModelData, Service, ViewId, ViewType } from "../../src/types";
+import { Context, ModelData, Service, ViewId, ViewType } from "../../src/types";
 import { MockRPC, makeFakeRPCService, makeMockFetch } from "./mocks";
 import { MenuData } from "../../src/services/menus";
 import { TestConfig } from "./utility";
 import { Registry } from "../../src/core/registry";
 import { evaluateExpr } from "../../src/py/index";
 import { DBRecord, ORMCommand } from "../../src/services/model";
+import { DomainListRepr as Domain } from "../../src/core/domain";
 
 // Aims:
 // - Mock service model high level

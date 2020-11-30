@@ -1,6 +1,7 @@
 import { Component } from "@odoo/owl";
-import { Context, Domain, Service, OdooEnv } from "../types";
+import { Context, Service, OdooEnv } from "../types";
 import { RPC } from "./rpc";
+import { DomainListRepr as Domain } from "../core/domain";
 
 export type ORMCommand = [0 | 1 | 2 | 3 | 4 | 5 | 6, false | number, Partial<DBRecord> | number[]];
 

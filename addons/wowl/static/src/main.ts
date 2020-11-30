@@ -1,17 +1,23 @@
 import * as owl from "@odoo/owl";
-import { WebClient } from "./webclient/webclient";
+import { actionRegistry } from "./action_manager/action_registry";
 import { fetchLocalization } from "./core/localization";
-import { makeEnv, makeRAMLocalStorage } from "./env";
-import * as registries from "./registries";
-import { Odoo, RuntimeOdoo } from "./types";
-
+import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
 // remove some day
 import "./demo_data";
-import { legacySetupProm } from "./legacy/legacy_setup";
+import { makeEnv, makeRAMLocalStorage } from "./env";
 import { mapLegacyEnvToWowlEnv } from "./legacy/legacy";
+import { legacySetupProm } from "./legacy/legacy_setup";
 import "./legacy/root_widget";
 import "./legacy/systray_menu";
 import "./legacy/web_client";
+import { serviceRegistry } from "./services/service_registry";
+import { Odoo, RuntimeOdoo } from "./types";
+import { viewRegistry } from "./views/view_registry";
+import { mainComponentRegistry } from "./webclient/main_component_registry";
+import { systrayRegistry } from "./webclient/systray_registry";
+import { userMenuRegistry } from "./webclient/user_menu_registry";
+import { WebClient } from "./webclient/webclient";
+
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -44,13 +50,13 @@ declare const odoo: Odoo;
   const env = await makeEnv({
     localization,
     debug: odoo.debug,
-    views: registries.viewRegistry,
-    Components: registries.mainComponentRegistry,
-    services: registries.serviceRegistry,
-    actions: registries.actionRegistry,
-    systray: registries.systrayRegistry,
-    errorDialogs: registries.errorDialogRegistry,
-    userMenu: registries.userMenuRegistry,
+    views: viewRegistry,
+    Components: mainComponentRegistry,
+    services: serviceRegistry,
+    actions: actionRegistry,
+    systray: systrayRegistry,
+    errorDialogs: errorDialogRegistry,
+    userMenu: userMenuRegistry,
     templates,
     _t,
   });

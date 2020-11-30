@@ -8,9 +8,10 @@ import {
   ViewId,
   ViewType,
 } from "../types";
-import { actionRegistry, viewRegistry } from "../registries";
 import { useService } from "../core/hooks";
 import { useSetupAction } from "../action_manager/action_manager";
+import { actionRegistry } from "../action_manager/action_registry";
+import { viewRegistry } from "../views/view_registry";
 
 declare const odoo: any;
 
