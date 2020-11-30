@@ -3,9 +3,10 @@ import { Odoo, OdooEnv } from "../types";
 import { Dialog } from "../components/dialog/dialog";
 import { ActionRequest } from "../action_manager/action_manager";
 import { useService } from "../core/hooks";
-import { Stringifiable, _lt } from "../core/localization";
+import { _lt } from "../core/localization";
 declare const odoo: Odoo;
 const { useState } = hooks;
+
 function capitalize(s: string | undefined): string {
   return s ? s[0].toUpperCase() + s.slice(1) : "";
 }
@@ -19,7 +20,7 @@ interface ErrorDialogProps {
 export class ErrorDialog extends Component<ErrorDialogProps, OdooEnv> {
   static template = "wowl.ErrorDialog";
   static components = { Dialog };
-  title = _lt("Odoo Error");
+  title = this.env._t("Odoo Error");
 
   state = useState({
     showTraceback: false,
@@ -33,15 +34,15 @@ export class ErrorDialog extends Component<ErrorDialogProps, OdooEnv> {
 }
 
 export class ClientErrorDialog extends ErrorDialog {
-  title = _lt("Odoo Client Error");
+  title = this.env._t("Odoo Client Error");
 }
 
 export class ServerErrorDialog extends ErrorDialog {
-  title = _lt("Odoo Server Error");
+  title = this.env._t("Odoo Server Error");
 }
 
 export class NetworkErrorDialog extends ErrorDialog {
-  title = _lt("Odoo Network Error");
+  title = this.env._t("Odoo Network Error");
 }
 
 interface RPCErrorDialogProps {
@@ -58,7 +59,7 @@ interface RPCErrorDialogProps {
 export class RPCErrorDialog extends Component<RPCErrorDialogProps, OdooEnv> {
   static template = "wowl.ErrorDialog";
   static components = { Dialog };
-  title = _lt("Odoo Error");
+  title = this.env._t("Odoo Error");
   traceback?: string;
 
   state = useState({
@@ -168,13 +169,13 @@ export class RedirectWarningDialog extends Component<RedirectWarningDialogProps,
 export class Error504Dialog extends Component<{}, OdooEnv> {
   static template = "wowl.Error504Dialog";
   static components = { Dialog };
-  title: Stringifiable = _lt("Request timeout");
+  title = this.env._t("Request timeout");
 }
 
 export class SessionExpiredDialog extends Component<{}, OdooEnv> {
   static template = "wowl.SessionExpiredDialog";
   static components = { Dialog };
-  title: Stringifiable = _lt("Odoo Session Expired");
+  title = this.env._t("Odoo Session Expired");
 
   onClick() {
     odoo.browser.location.reload();

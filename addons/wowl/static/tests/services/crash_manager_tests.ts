@@ -39,7 +39,6 @@ QUnit.test("does not handle RPC_ERROR with type='network'", async (assert) => {
   env = await makeTestEnv({ services });
   const error = new RPCError();
   error.type = "network";
-  error.mute = true;
   env.bus.trigger("ERROR_DISPATCH", error);
   assert.verifySteps([]);
 });
