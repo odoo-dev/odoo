@@ -231,6 +231,7 @@ class ProjectTask(models.Model):
 
     # TODO: [XBO] remove me in master
     non_allow_billable = fields.Boolean("Non-Billable", help="Your timesheets linked to this task will not be billed.")
+    delivery_info = fields.Char(string="Delivery Info", related="sale_line_id.delivery_info")
 
     @api.depends(
         'allow_billable', 'allow_timesheets', 'sale_order_id')

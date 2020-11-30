@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.osv import expression
+from odoo.tools import float_round
 
 
 class SaleOrder(models.Model):
@@ -78,6 +79,29 @@ class SaleOrderLine(models.Model):
 
     qty_delivered_method = fields.Selection(selection_add=[('timesheet', 'Timesheets')])
     analytic_line_ids = fields.One2many(domain=[('project_id', '=', False)])  # only analytic lines, not timesheets (since this field determine if SO line came from expense)
+    delivery_info = fields.Char(compute='_compute_delivery_info')
+
+    def name_get(self):
+        res = super(SaleOrderLine, self).name_get()
+        if self.env.context.get('with_remaining_hours'):
+            for index, name_get in enumerate(res):
+                id , name = name_get
+                sol = self.filtered(lambda sol: sol.id == id)
+                if sol.product_id and sol.product_id.service_policy == 'ordered_timesheet':
+                    name = "%(name)s - %(delivery_info)s" % {
+                        'name': name,
+                        'delivery_info': sol.delivery_info
+                    }
+                res[index] = (id, name)
+        return res
+
+    @api.depends('qty_delivered', 'product_uom_qty')
+    def _compute_delivery_info(self):
+        for sol in self:
+            sol.delivery_info = _('Delivered %g / %g') % (
+                float_round(sol.qty_delivered, precision_digits=2) or 0.0,
+                float_round(sol.product_uom_qty, precision_digits=2) or 0.0,
+            )
 
     @api.depends('product_id')
     def _compute_qty_delivered_method(self):

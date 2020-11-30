@@ -148,9 +148,13 @@
             <field name="inherit_id" ref="sale_project.view_sale_project_inherit_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='sale_line_id']" position="attributes">
+                    <attribute name="context">{'with_remaining_hours': True}</attribute>
                     <attribute name="attrs">
                         {'invisible': ['|', '|', '|', ('allow_billable', '=', False), ('sale_order_id', '=', False), '&amp;', ('bill_type', '=', 'customer_project'), ('pricing_type', '=', 'employee_rate'), ('partner_id', '=', False)]}
                     </attribute>
+                </xpath>
+                <xpath expr="//field[@name='sale_line_id']" position="after">
+                    <field name="delivery_info" attrs="{'invisible': ['|', '|', '|', '|', '|', ('allow_billable', '=', False), ('sale_order_id', '=', False), '&amp;', ('bill_type', '=', 'customer_project'), ('pricing_type', '=', 'employee_rate'), ('partner_id', '=', False), ('sale_line_id', '=', False), ('delivery_info', '=', False)]}"></field>
                 </xpath>
             </field>
         </record>
