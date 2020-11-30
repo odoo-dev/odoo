@@ -1,8 +1,9 @@
 import { ActionDescription } from "../../src/action_manager/action_manager";
-import { Context, ModelData, Service, ViewId, ViewType } from "../../src/types";
+import { Service, ViewId, ViewType } from "../../src/types";
 import { MockRPC, makeFakeRPCService, makeMockFetch } from "./mocks";
 import { MenuData } from "../../src/services/menus";
 import { TestConfig } from "./utility";
+import { Context } from "../../src/core/context";
 import { Registry } from "../../src/core/registry";
 import { evaluateExpr } from "../../src/py/index";
 import { DBRecord, ORMCommand } from "../../src/services/model";
@@ -19,6 +20,45 @@ import { DomainListRepr as Domain } from "../../src/core/domain";
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
+
+/*
+ *  MODELS AND FIELDS DEFINITION
+ */
+
+export type FieldType =
+  | "char"
+  | "one2many"
+  | "many2many"
+  | "many2one"
+  | "number"
+  | "date"
+  | "datetime";
+
+export interface FieldDefinition {
+  relation?: string;
+  relation_field?: string;
+  string: string;
+  type: FieldType;
+  default?: any;
+}
+
+export interface ModelFields {
+  id: FieldDefinition;
+  [fieldName: string]: FieldDefinition;
+}
+export interface ModelData {
+  defaults?: keyof ModelFields;
+  fields: ModelFields;
+  records: DBRecord[];
+  methods?: ModelMethods;
+  onchanges?: {
+    [fieldName: string]: (record: DBRecord) => void;
+  };
+}
+export type ModelMethod = (model: string, args: any[], kwargs: any) => any;
+export interface ModelMethods {
+  [methodName: string]: ModelMethod;
+}
 
 export interface ServerData {
   models?: Models;

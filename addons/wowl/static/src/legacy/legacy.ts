@@ -1,17 +1,10 @@
 import { Component, hooks, tags } from "@odoo/owl";
-import {
-  ClientActionProps,
-  OdooEnv,
-  ViewProps,
-  Context,
-  Service,
-  ViewId,
-  ViewType,
-} from "../types";
+import { ClientActionProps, OdooEnv, ViewProps, Service, ViewId, ViewType } from "../types";
 import { useService } from "../core/hooks";
 import { useSetupAction } from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
 import { viewRegistry } from "../views/view_registry";
+import { Context } from "../core/context";
 
 declare const odoo: any;
 

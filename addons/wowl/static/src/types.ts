@@ -5,6 +5,7 @@ import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import type { actionManagerService } from "./action_manager/action_manager";
 import { Breadcrumb } from "./action_manager/action_manager";
 import { actionRegistry } from "./action_manager/action_registry";
+import { Context } from "./core/context";
 import { DomainListRepr as Domain } from "./core/domain";
 import { Localization } from "./core/localization";
 import type { Registry } from "./core/registry";
@@ -13,7 +14,7 @@ import type { notificationService } from "./notifications/notification_service";
 import type { cookieService } from "./services/cookie";
 import type { dialogManagerService } from "./services/dialog_manager";
 import type { menusService } from "./services/menus";
-import type { DBRecord, modelService } from "./services/model";
+import type { modelService } from "./services/model";
 import type { routerService } from "./services/router";
 import type { rpcService } from "./services/rpc";
 import type { titleService } from "./services/title";
@@ -25,7 +26,6 @@ import { mainComponentRegistry } from "./webclient/main_component_registry";
 import type { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
 
-
 interface Registries {
   Components: typeof mainComponentRegistry;
   services: Registry<Service<any>>;
@@ -36,14 +36,9 @@ interface Registries {
   userMenu: typeof userMenuRegistry;
 }
 
-
 interface CacheHashes {
   load_menus: string;
   translations: string;
-}
-
-export interface Context {
-  [key: string]: any;
 }
 
 interface UserContext {
@@ -216,42 +211,3 @@ interface ViewInfo {
 }
 
 export type View = Type<Component<ViewProps, OdooEnv>> & ViewInfo;
-
-/*
- *  MODELS AND FIELDS DEFINITION
- */
-
-export type FieldType =
-  | "char"
-  | "one2many"
-  | "many2many"
-  | "many2one"
-  | "number"
-  | "date"
-  | "datetime";
-
-export interface FieldDefinition {
-  relation?: string;
-  relation_field?: string;
-  string: string;
-  type: FieldType;
-  default?: any;
-}
-
-export interface ModelFields {
-  id: FieldDefinition;
-  [fieldName: string]: FieldDefinition;
-}
-export interface ModelData {
-  defaults?: keyof ModelFields;
-  fields: ModelFields;
-  records: DBRecord[];
-  methods?: ModelMethods;
-  onchanges?: {
-    [fieldName: string]: (record: DBRecord) => void;
-  };
-}
-export type ModelMethod = (model: string, args: any[], kwargs: any) => any;
-export interface ModelMethods {
-  [methodName: string]: ModelMethod;
-}

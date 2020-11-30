@@ -1,6 +1,13 @@
 import { Registry } from "../core/registry";
 import { UserMenuItemFactory } from "./user_menu/user_menu";
-import { documentationItem, logOutItem, odooAccountItem, preferencesItem, shortCutsItem, supportItem } from "./user_menu/user_menu_items";
+import {
+  documentationItem,
+  logOutItem,
+  odooAccountItem,
+  preferencesItem,
+  shortCutsItem,
+  supportItem,
+} from "./user_menu/user_menu_items";
 
 // -----------------------------------------------------------------------------
 // Default UserMenu items

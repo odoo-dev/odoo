@@ -14,7 +14,6 @@ import { userService } from "./user";
 import { viewManagerService } from "./view_manager";
 import { Service } from "../types";
 
-
 export const serviceRegistry: Registry<Service<any>> = new Registry();
 
 const services = [

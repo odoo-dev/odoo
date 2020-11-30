@@ -1,5 +1,8 @@
-import { Context } from "../types";
 import { evaluateExpr } from "../py/index";
+
+export interface Context {
+  [key: string]: any;
+}
 
 type ContextDescription = Context | string | undefined;
 

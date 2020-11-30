@@ -1,4 +1,5 @@
-import { Context, Service, OdooEnv, ViewId, ViewType } from "../types";
+import { Context } from "../core/context";
+import { Service, OdooEnv, ViewId, ViewType } from "../types";
 
 export interface ViewDefinition {
   arch: string;

@@ -7,7 +7,6 @@ import {
   makeLegacySessionService,
 } from "./legacy";
 
-
 let legacySetupResolver: (...args: any[]) => void;
 
 export const legacySetupProm = new Promise((resolve) => {

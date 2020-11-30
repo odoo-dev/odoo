@@ -18,7 +18,6 @@ import { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
 import { WebClient } from "./webclient/webclient";
 
-
 const { whenReady, loadFile } = owl.utils;
 
 declare const odoo: Odoo;
