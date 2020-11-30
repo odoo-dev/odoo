@@ -117,11 +117,10 @@ function jsonrpc(
     // handle failure
     request.addEventListener("error", () => {
       handleLostConnection(env);
-      const error = new RPCError();
-      error.type = "network";
-      error.mute = true;
       bus.trigger("RPC:RESPONSE", data.id);
-      reject(error);
+      // We do not throw an error as it is handled in the handleLostConnection
+      // If we wanted to throw an error anyway but not display it with the crash manager,
+      // a "mute" argument had been proposed on the OdooError object. It is not implemented currently.
     });
 
     // configure and send request

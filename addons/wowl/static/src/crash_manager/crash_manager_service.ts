@@ -9,18 +9,7 @@ import { isBrowserChromium } from "../utils/utils";
 import { Component } from "@odoo/owl";
 import { Env } from "@odoo/owl/dist/types/component/component";
 import { RPCError } from "../services/rpc";
-
-export class OdooError extends Error {
-  public traceback?: string;
-  public name: string;
-  public alternativeComponent?: Type<Component<any, Env>>;
-  public mute = false;
-
-  constructor(name: string) {
-    super();
-    this.name = name;
-  }
-}
+import OdooError from "./odoo_error"
 
 export const crashManagerService: Service<void> = {
   name: "crash_manager",
@@ -91,7 +80,6 @@ export const crashManagerService: Service<void> = {
     });
 
     env.bus.on("ERROR_DISPATCH", null, (error: OdooError) => {
-      if (error.mute) return;
       const type = error.name;
       let dialogComponent: Type<Component<any, Env>> = ErrorDialog;
       // If an error has been defined to have a custom dialog
@@ -125,7 +113,6 @@ export const crashManagerService: Service<void> = {
             traceback: error.traceback ?? error.stack,
             message: error.message,
             name: error.name,
-            mute: error.mute,
             exceptionName: (error as RPCError).exceptionName,
             data: (error as RPCError).data,
             subType: (error as RPCError).subType,
