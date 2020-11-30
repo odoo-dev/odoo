@@ -5,6 +5,7 @@ import { crashManagerService } from "./crash_manager/crash_manager_service";
 import { notificationService } from "./notifications/notification_service";
 import { cookieService } from "./services/cookie";
 import { dialogManagerService } from "./services/dialog_manager";
+import { downloadService } from "./services/download";
 import { menusService } from "./services/menus";
 import { modelService } from "./services/model";
 import { routerService } from "./services/router";
@@ -54,6 +55,7 @@ const services = [
   uiService,
   userService,
   viewManagerService,
+  downloadService
 ];
 
 for (let service of services) {

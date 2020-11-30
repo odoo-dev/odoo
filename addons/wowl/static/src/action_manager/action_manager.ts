@@ -19,7 +19,6 @@ import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
 declare const odoo: Odoo;
-import { downloadFile } from "../core/download";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -696,7 +695,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     const url = _getReportUrl(action, type);
     env.services.ui.block();
     try {
-      await downloadFile({
+      await env.services.download.file({
         url: "report/dowload",
         data: {
           data: JSON.stringify([url, action.report_type]),

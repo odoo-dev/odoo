@@ -18,6 +18,7 @@ import type { userService } from "./services/user";
 import type { viewManagerService } from "./services/view_manager";
 import { Breadcrumb } from "./action_manager/action_manager";
 import { UserMenuItemFactory } from "./webclient/user_menu/user_menu";
+import { downloadService } from "./services/download";
 
 interface CacheHashes {
   load_menus: string;
@@ -155,6 +156,7 @@ export interface Services {
   ui: ServiceType<typeof uiService["deploy"]>;
   user: ServiceType<typeof userService["deploy"]>;
   view_manager: ServiceType<typeof viewManagerService["deploy"]>;
+  download: ServiceType<typeof downloadService["deploy"]>;
 
   [key: string]: any;
 }
