@@ -19,6 +19,7 @@ import { RPC } from "../../src/services/rpc";
 import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "../../src/legacy/legacy";
 import { getLegacy } from "../helpers/legacy";
 import { actionRegistry, viewRegistry } from "../../src/registries";
+import { uiService } from "../../src/services/ui/ui";
 
 // JQuery :visible selector
 // https://stackoverflow.com/questions/13388616/firefox-query-selector-and-the-visible-pseudo-selector
@@ -2694,10 +2695,33 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
   QUnit.module("Report actions");
 
-  QUnit.skip("can execute report actions from db ID", async function (assert) {
-    /*
-    assert.expect(5);
+  QUnit.only("can execute report actions from db ID", async function (assert) {
+    
+    assert.expect(2);
 
+    baseConfig!.services!.add("ui", uiService);
+
+    const mockRPC: RPC = async (route, args) => {
+      if (route === "/report/check_wkhtmltopdf") {
+        assert.step(args?.method || route);
+      }
+      return Promise.resolve();
+    };
+
+    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC })
+
+    await doAction(webClient, 7)
+
+    await testUtils.nextTick();
+
+    assert.verifySteps([
+      "/web/action/load",
+      "/report/check_wkhtmltopdf",
+    ]);
+
+    webClient.destroy();
+
+    /*
     var actionManager = await createActionManager({
       actions: this.actions,
       archs: this.archs,
