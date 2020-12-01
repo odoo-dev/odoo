@@ -63,6 +63,8 @@ def singularize_reference_prefix(prefix='tx', separator='-', max_length=None):
     :return: The singularized prefix
     :rtype: str
     """
+    if prefix is None:
+        prefix = 'tx'
     if max_length:
         DATETIME_LENGTH = 14
         assert max_length >= 1 + len(separator) + DATETIME_LENGTH  # 1 char + separator + datetime
