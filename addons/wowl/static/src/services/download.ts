@@ -4,16 +4,16 @@ import parse from '../libs/content-disposition';
 import download from '../libs/download';
 import { Odoo, Service } from '../types';
 
-interface DowloadReportOptionsFromForm {
+interface DowloadFileReportFromForm {
   form: HTMLFormElement;
 }
 
-interface DowloadReportOptionsFromParams {
+interface DowloadFileReportFromParams {
   url: string;
   data: object;
 }
 
-type DowloadReportOptions = DowloadReportOptionsFromForm | DowloadReportOptionsFromParams;
+type DowloadFileReport = DowloadFileReportFromForm | DowloadFileReportFromParams;
 
 /**
  * Cooperative file download implementation, for ajaxy APIs.
@@ -40,22 +40,22 @@ type DowloadReportOptions = DowloadReportOptionsFromForm | DowloadReportOptionsF
 declare const odoo: Odoo;
 
 interface Download {
-    file: (options: DowloadReportOptions) => Promise<unknown>;
+    file: (options: DowloadFileReport) => Promise<unknown>;
 }
 
 export const downloadService: Service<Download> = {
   name: "download",
   deploy(): Download {
-    function file(options: DowloadReportOptions) {
+    function file(options: DowloadFileReport) {
       return new Promise((resolve, reject) => {
         const xhr: XMLHttpRequest = new XMLHttpRequest();
         let data: FormData;
         if (options.hasOwnProperty("form")) {
-          options = options as DowloadReportOptionsFromForm;
+          options = options as DowloadFileReportFromForm;
           xhr.open(options.form.method, options.form.action);
           data = new FormData(options.form);
         } else {
-          options = options as DowloadReportOptionsFromParams;
+          options = options as DowloadFileReportFromParams;
           xhr.open("POST", options.url);
           data = new FormData();
           Object.entries(options.data).forEach((entry) => {
@@ -63,16 +63,12 @@ export const downloadService: Service<Download> = {
             data.append(key, value);
           });
         }
-
         data.append("token", "dummy-because-api-expects-one");
-
         if (odoo.csrf_token) {
           data.append("csrf_token", odoo.csrf_token);
         }
-
         // IE11 wants this after xhr.open or it throws
         xhr.responseType = "blob";
-
         xhr.onload = () => {
           const mimetype = xhr.response.type;
           if (xhr.status === 200 && mimetype !== "text/html") {
