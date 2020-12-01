@@ -35,9 +35,9 @@ class AdyenController(http.Controller):
         """ Query the available payment methods based on the transaction context.
 
         :param int acquirer_id: The acquirer handling the transaction, as a `payment.acquirer` id
-        :param float|None amount: The transaction amount
-        :param int|None currency_id: The transaction currency, as a `res.currency` id
-        :param int|None partner_id: The partner making the transaction, as a `res.partner` id
+        :param float amount: The transaction amount
+        :param int currency_id: The transaction currency, as a `res.currency` id
+        :param int partner_id: The partner making the transaction, as a `res.partner` id
         :return: The JSON-formatted content of the response
         :rtype: dict
         """
