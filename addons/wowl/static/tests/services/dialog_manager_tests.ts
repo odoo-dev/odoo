@@ -1,13 +1,13 @@
 import * as QUnit from "qunit";
 import { click, getFixture, makeTestEnv, mount, nextTick, OdooEnv } from "../helpers/index";
 import { Registry } from "../../src/core/registry";
-import { Service } from "../../src/types";
+import { Registries } from "../../src/types";
 import { dialogManagerService } from "../../src/services/dialog_manager";
 import { Component, tags } from "@odoo/owl";
 import { Dialog } from "../../src/components/dialog/dialog";
 
 let env: OdooEnv;
-let services: Registry<Service>;
+let serviceRegistry: Registries["serviceRegistry"];
 let target: HTMLElement;
 let pseudoWebClient: Component;
 
@@ -16,20 +16,22 @@ class PseudoWebClient extends Component {
         <div>
             <div class="o_dialog_container"/>
             <div>
-                <t t-foreach="env.registries.Components.getEntries()" t-as="Component" t-key="Component[0]">
+                <t t-foreach="Components" t-as="Component" t-key="Component[0]">
                     <t t-component="Component[1]"/>
                 </t>
             </div>
         </div>
     `;
+
+  Components = odoo.mainComponentRegistry.getEntries();
 }
 
 QUnit.module("DialogManager", {
   async beforeEach() {
     target = getFixture();
-    services = new Registry();
-    services.add(dialogManagerService.name, dialogManagerService);
-    env = await makeTestEnv({ services });
+    serviceRegistry = new Registry();
+    serviceRegistry.add(dialogManagerService.name, dialogManagerService);
+    env = await makeTestEnv({ serviceRegistry });
   },
   afterEach() {
     pseudoWebClient.unmount();

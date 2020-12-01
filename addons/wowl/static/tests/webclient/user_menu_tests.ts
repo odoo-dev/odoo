@@ -10,25 +10,25 @@ import {
 } from "../helpers/index";
 import { TestConfig } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
-import { OdooBrowser, Service } from "./../../src/types";
+import { OdooBrowser, Registries } from "./../../src/types";
 
 let target: HTMLElement;
 let env: OdooEnv;
-let services: Registry<Service>;
+let serviceRegistry: Registries["serviceRegistry"];
 let userMenu: UserMenu;
 let baseConfig: TestConfig;
 
 QUnit.module("UserMenu", {
   async beforeEach() {
-    services = new Registry();
-    services.add("user", makeFakeUserService({ name: "Sauron" }));
+    serviceRegistry = new Registry();
+    serviceRegistry.add("user", makeFakeUserService({ name: "Sauron" }));
     target = getFixture();
     const browser = {
       location: {
         origin: "http://lordofthering",
       },
     } as OdooBrowser;
-    baseConfig = { browser, services };
+    baseConfig = { browser, serviceRegistry };
   },
   afterEach() {
     userMenu.unmount();
@@ -38,7 +38,7 @@ QUnit.module("UserMenu", {
 QUnit.test("can be rendered", async (assert) => {
   env = await makeTestEnv(baseConfig);
 
-  env.registries.userMenu.add("bad_item", function () {
+  odoo.userMenuRegistry.add("bad_item", function () {
     return {
       description: "Bad",
       callback: () => {
@@ -47,7 +47,7 @@ QUnit.test("can be rendered", async (assert) => {
       sequence: 10,
     };
   });
-  env.registries.userMenu.add("ring_item", function () {
+  odoo.userMenuRegistry.add("ring_item", function () {
     return {
       description: "Ring",
       callback: () => {
@@ -56,7 +56,7 @@ QUnit.test("can be rendered", async (assert) => {
       sequence: 5,
     };
   });
-  env.registries.userMenu.add("invisible_item", function () {
+  odoo.userMenuRegistry.add("invisible_item", function () {
     return {
       description: "Hidden Power",
       callback: () => {},
@@ -64,7 +64,7 @@ QUnit.test("can be rendered", async (assert) => {
       hide: true,
     };
   });
-  env.registries.userMenu.add("eye_item", function () {
+  odoo.userMenuRegistry.add("eye_item", function () {
     return {
       description: "Eye",
       callback: () => {

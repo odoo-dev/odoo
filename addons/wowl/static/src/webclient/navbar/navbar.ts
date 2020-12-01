@@ -31,12 +31,12 @@ export class NavBar extends Component<{}, OdooEnv> {
       await this.render();
       await this.adapt();
     };
-    this.env.registries.systray.on("UPDATE", this, renderAndAdapt);
+    odoo.systrayRegistry.on("UPDATE", this, renderAndAdapt);
     this.env.bus.on("MENUS:APP-CHANGED", this, renderAndAdapt);
   }
 
   willUnmount() {
-    this.env.registries.systray.off("UPDATE", this);
+    odoo.systrayRegistry.off("UPDATE", this);
     this.env.bus.off("MENUS:APP-CHANGED", this);
   }
 
@@ -49,7 +49,7 @@ export class NavBar extends Component<{}, OdooEnv> {
   }
 
   get systrayItems() {
-    return this.env.registries.systray.getAll().sort((x, y) => {
+    return odoo.systrayRegistry.getAll().sort((x, y) => {
       const xSeq = x.sequence ?? 50;
       const ySeq = y.sequence ?? 50;
       return ySeq - xSeq;

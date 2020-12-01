@@ -1,8 +1,7 @@
 import { Component, core, tags } from "@odoo/owl";
-import type { Odoo, OdooEnv, Service } from "../types";
+import type { OdooEnv, Service } from "../types";
 import { Notification as NotificationComponent } from "./notification";
 
-declare const odoo: Odoo;
 const { EventBus } = core;
 const AUTOCLOSE_DELAY: number = 4000;
 
@@ -52,7 +51,7 @@ export const notificationService: Service<NotificationService> = {
         });
       }
     }
-    env.registries.Components.add("NotificationManager", ReactiveNotificationManager);
+    odoo.mainComponentRegistry.add("NotificationManager", ReactiveNotificationManager);
 
     function close(id: number): void {
       const index = notifications.findIndex((n) => n.id === id);

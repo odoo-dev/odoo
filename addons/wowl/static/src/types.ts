@@ -8,7 +8,6 @@ import { actionRegistry } from "./action_manager/action_registry";
 import { Context } from "./core/context";
 import { DomainListRepr as Domain } from "./core/domain";
 import { Localization } from "./core/localization";
-import type { Registry } from "./core/registry";
 import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
 import type { notificationService } from "./notifications/notification_service";
 import type { cookieService } from "./services/cookie";
@@ -17,6 +16,7 @@ import type { menusService } from "./services/menus";
 import type { modelService } from "./services/model";
 import type { routerService } from "./services/router";
 import type { rpcService } from "./services/rpc";
+import { serviceRegistry } from "./services/service_registry";
 import type { titleService } from "./services/title";
 import type { uiService } from "./services/ui/ui";
 import type { userService } from "./services/user";
@@ -26,14 +26,14 @@ import { mainComponentRegistry } from "./webclient/main_component_registry";
 import type { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
 
-interface Registries {
-  Components: typeof mainComponentRegistry;
-  services: Registry<Service<any>>;
-  actions: typeof actionRegistry;
-  views: typeof viewRegistry;
-  systray: typeof systrayRegistry;
-  errorDialogs: typeof errorDialogRegistry;
-  userMenu: typeof userMenuRegistry;
+export interface Registries {
+  mainComponentRegistry: typeof mainComponentRegistry;
+  serviceRegistry: typeof serviceRegistry;
+  actionRegistry: typeof actionRegistry;
+  viewRegistry: typeof viewRegistry;
+  systrayRegistry: typeof systrayRegistry;
+  errorDialogRegistry: typeof errorDialogRegistry;
+  userMenuRegistry: typeof userMenuRegistry;
 }
 
 interface CacheHashes {
@@ -73,10 +73,12 @@ export interface SessionInfo {
   home_action_id?: number | false;
 }
 
-export interface Odoo {
+export interface Odoo extends Registries {
   browser: OdooBrowser;
   session_info: SessionInfo;
-  debug: string;
+  debug?: string;
+  __WOWL_DEBUG__: Debug;
+  info: DBInfo;
 }
 
 interface DBInfo {
@@ -87,11 +89,6 @@ interface DBInfo {
 
 interface Debug {
   root: Component;
-}
-
-export interface RuntimeOdoo {
-  __WOWL_DEBUG__: Debug;
-  info: DBInfo;
 }
 
 export interface Type<T> extends Function {
@@ -116,7 +113,6 @@ export interface OdooBrowser extends Browser {
 
 export interface OdooEnv extends Env {
   services: Services;
-  registries: Registries;
   bus: EventBus;
   debug: string;
   _t: (str: string) => string;
@@ -125,7 +121,7 @@ export interface OdooEnv extends Env {
 export type ComponentAction = Type<Component<{}, OdooEnv>>;
 export type FunctionAction = (env: OdooEnv, action: any) => any;
 
-export interface OdooConfig extends Registries {
+export interface OdooConfig {
   localization: Localization;
   debug: string;
   templates: string;

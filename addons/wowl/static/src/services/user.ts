@@ -1,7 +1,5 @@
 import { Localization } from "../core/localization";
-import type { UserCompany, Service, OdooEnv, Odoo } from "../types";
-declare const odoo: Odoo;
-
+import type { UserCompany, Service, OdooEnv } from "../types";
 interface Context {
   lang: string;
   tz: string;

@@ -4,19 +4,7 @@ import { OdooConfig, OdooEnv } from "./types";
 import { OdooBrowser } from "./types";
 
 export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
-  const {
-    services,
-    Components,
-    actions,
-    templates,
-    views,
-    _t,
-    debug,
-    systray,
-    errorDialogs,
-    userMenu,
-  } = config;
-  const registries = { services, Components, views, actions, systray, errorDialogs, userMenu };
+  const { templates, _t, debug } = config;
   const qweb = new owl.QWeb({ translateFn: _t });
   qweb.addTemplates(templates);
 
@@ -24,7 +12,6 @@ export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
     browser: owl.browser,
     qweb,
     bus: new owl.core.EventBus(),
-    registries,
     services: {} as any,
     _t,
     debug,

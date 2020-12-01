@@ -11,7 +11,6 @@ import "./legacy/root_widget";
 import "./legacy/systray_menu";
 import "./legacy/web_client";
 import { serviceRegistry } from "./services/service_registry";
-import { Odoo, RuntimeOdoo } from "./types";
 import { viewRegistry } from "./views/view_registry";
 import { mainComponentRegistry } from "./webclient/main_component_registry";
 import { systrayRegistry } from "./webclient/systray_registry";
@@ -19,8 +18,6 @@ import { userMenuRegistry } from "./webclient/user_menu_registry";
 import { WebClient } from "./webclient/webclient";
 
 const { whenReady, loadFile } = owl.utils;
-
-declare const odoo: Odoo;
 
 (async () => {
   // prepare browser object
@@ -42,20 +39,21 @@ declare const odoo: Odoo;
     localStorage,
   });
 
+  odoo.userMenuRegistry = userMenuRegistry;
+  odoo.mainComponentRegistry = mainComponentRegistry;
+  odoo.actionRegistry = actionRegistry;
+  odoo.viewRegistry = viewRegistry;
+  odoo.systrayRegistry = systrayRegistry;
+  odoo.errorDialogRegistry = errorDialogRegistry;
+  odoo.serviceRegistry = serviceRegistry;
+
   // load templates and localization
   let [templates, { localization, _t }] = await Promise.all([loadTemplates(), fetchLocalization()]);
 
   // setup environment
   const env = await makeEnv({
     localization,
-    debug: odoo.debug,
-    views: viewRegistry,
-    Components: mainComponentRegistry,
-    services: serviceRegistry,
-    actions: actionRegistry,
-    systray: systrayRegistry,
-    errorDialogs: errorDialogRegistry,
-    userMenu: userMenuRegistry,
+    debug: odoo.debug!,
     templates,
     _t,
   });
@@ -74,9 +72,9 @@ declare const odoo: Odoo;
   // prepare runtime Odoo object
   const sessionInfo = odoo.session_info;
   // delete (odoo as any).session_info; // FIXME: some legacy code rely on this (e.g. ajax.js)
-  delete (odoo as any).debug;
-  ((odoo as any) as RuntimeOdoo).__WOWL_DEBUG__ = { root };
-  ((odoo as any) as RuntimeOdoo).info = {
+  delete odoo.debug;
+  odoo.__WOWL_DEBUG__ = { root };
+  odoo.info = {
     db: sessionInfo.db,
     server_version: sessionInfo.server_version,
     server_version_info: sessionInfo.server_version_info,

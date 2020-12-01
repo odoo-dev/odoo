@@ -47,8 +47,8 @@ export const crashManagerService: Service<void> = {
         return;
       }
       let dialogClass;
-      if (error.name && env.registries.errorDialogs.contains(error.name)) {
-        dialogClass = env.registries.errorDialogs.get(error.name);
+      if (error.name && odoo.errorDialogRegistry.contains(error.name)) {
+        dialogClass = odoo.errorDialogRegistry.get(error.name);
       }
       env.services.dialog_manager.open(dialogClass || ErrorDialog, { error });
     });

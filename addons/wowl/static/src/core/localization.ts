@@ -1,6 +1,3 @@
-import { Odoo } from "../types";
-declare const odoo: Odoo;
-
 export interface Localization {
   dateFormat: string;
   decimalPoint: string;

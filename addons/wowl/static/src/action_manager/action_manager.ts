@@ -12,14 +12,12 @@ import type {
   ViewProps,
   ViewType,
   ControllerProps,
-  Odoo,
 } from "../types";
 import { DomainListRepr as Domain } from "../core/domain";
 
 import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
-declare const odoo: Odoo;
 
 // -----------------------------------------------------------------------------
 // Types
@@ -275,7 +273,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
   ): Promise<Action> {
     let action;
     const jsId = `action_${++id}`;
-    if (typeof actionRequest === "string" && env.registries.actions.contains(actionRequest)) {
+    if (typeof actionRequest === "string" && odoo.actionRegistry.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
       return {
         jsId,
@@ -551,8 +549,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
   function _executeActWindowAction(action: ActWindowAction, options: ActionOptions): Promise<void> {
     const views: View[] = [];
     for (const [, type] of action.views) {
-      if (env.registries.views.contains(type)) {
-        views.push(env.registries.views.get(type));
+      if (odoo.viewRegistry.contains(type)) {
+        views.push(odoo.viewRegistry.get(type));
       }
     }
     if (!views.length) {
@@ -612,7 +610,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {ActionOptions} options
    */
   async function _executeClientAction(action: ClientAction, options: ActionOptions): Promise<void> {
-    const clientAction = env.registries.actions.get(action.tag);
+    const clientAction = odoo.actionRegistry.get(action.tag);
     if (clientAction.prototype instanceof Component) {
       const controller: Controller = {
         jsId: `controller_${++id}`,
@@ -949,7 +947,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     let action: ActionRequest | undefined;
     if (state.action) {
       // ClientAction
-      if (env.registries.actions.contains(state.action)) {
+      if (odoo.actionRegistry.contains(state.action)) {
         action = {
           params: state,
           tag: state.action,

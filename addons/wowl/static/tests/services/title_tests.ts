@@ -1,7 +1,7 @@
 import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
 import { titleService } from "../../src/services/title";
-import { OdooEnv, Service } from "../../src/types";
+import { OdooEnv, Registries } from "../../src/types";
 import { makeTestEnv } from "../helpers/index";
 
 // -----------------------------------------------------------------------------
@@ -9,7 +9,7 @@ import { makeTestEnv } from "../helpers/index";
 // -----------------------------------------------------------------------------
 
 let env: OdooEnv;
-let serviceRegistry: Registry<Service<any>>;
+let serviceRegistry: Registries["serviceRegistry"];
 let title: string;
 
 QUnit.module("Title", {
@@ -17,7 +17,7 @@ QUnit.module("Title", {
     title = document.title;
     serviceRegistry = new Registry();
     serviceRegistry.add(titleService.name, titleService);
-    env = await makeTestEnv({ services: serviceRegistry });
+    env = await makeTestEnv({ serviceRegistry });
   },
   afterEach() {
     document.title = title;

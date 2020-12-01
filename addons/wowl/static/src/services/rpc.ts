@@ -1,6 +1,5 @@
 import { Component } from "@odoo/owl";
-import { Service, OdooEnv, Odoo } from "../types";
-declare const odoo: Odoo;
+import { Service, OdooEnv } from "../types";
 
 // -----------------------------------------------------------------------------
 // Types

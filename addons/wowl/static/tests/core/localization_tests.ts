@@ -1,6 +1,6 @@
 import * as owl from "@odoo/owl";
 import * as QUnit from "qunit";
-import { OdooEnv, Service } from "../../src/types";
+import { OdooEnv, Registries } from "../../src/types";
 import { useService } from "../../src/core/hooks";
 import { getFixture, makeFakeUserService, makeTestEnv, mount } from "../helpers/index";
 import { Registry } from "./../../src/core/registry";
@@ -42,9 +42,9 @@ QUnit.test("components can access lang parameters via user service", async (asse
     decimalPoint: string = this.userService.decimalPoint;
   }
   const decimalPoint = ",";
-  const services = new Registry() as Registry<Service>;
-  services.add("user", makeFakeUserService());
-  env = await makeTestEnv({ localization: { decimalPoint }, services });
+  const serviceRegistry: Registries["serviceRegistry"] = new Registry();
+  serviceRegistry.add("user", makeFakeUserService());
+  env = await makeTestEnv({ localization: { decimalPoint }, serviceRegistry });
   await mount(TestComponent, { env, target });
   assert.strictEqual(target.innerText, decimalPoint);
 });

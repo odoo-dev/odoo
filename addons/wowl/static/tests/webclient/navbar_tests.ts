@@ -8,7 +8,7 @@ import { actionManagerService } from "../../src/action_manager/action_manager";
 import { menusService } from "./../../src/services/menus";
 import { notificationService } from "../../src/notifications/notification_service";
 import { makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
-import { OdooBrowser } from "../../src/types";
+import { OdooBrowser, Registries } from "../../src/types";
 
 const { xml } = tags;
 
@@ -20,28 +20,28 @@ let baseConfig: TestConfig;
 
 QUnit.module("Navbar", {
   async beforeEach() {
-    const services = new Registry<any>();
-    services.add("menus", menusService);
-    services.add(actionManagerService.name, actionManagerService);
-    services.add(notificationService.name, notificationService);
-    services.add("router", makeFakeRouterService());
-    services.add("user", makeFakeUserService());
+    const serviceRegistry: Registries["serviceRegistry"] = new Registry();
+    serviceRegistry.add("menus", menusService);
+    serviceRegistry.add(actionManagerService.name, actionManagerService);
+    serviceRegistry.add(notificationService.name, notificationService);
+    serviceRegistry.add("router", makeFakeRouterService());
+    serviceRegistry.add("user", makeFakeUserService());
     const menus = {
       root: { id: "root", children: [1], name: "root", appID: "root" },
       1: { id: 1, children: [], name: "App0", appID: 1 },
     };
     const serverData = { menus };
-    const systray = new Registry<any>();
+    const systrayRegistry: Registries["systrayRegistry"] = new Registry();
     const item = {
       name: "addon.myitem",
       Component: MySystrayItem,
     };
-    systray.add(item.name, item);
+    systrayRegistry.add(item.name, item);
     const browser: Partial<OdooBrowser> = {
       setTimeout: (handler: Function, delay, ...args) => handler(...args),
       clearTimeout: () => {},
     };
-    baseConfig = { browser, services, serverData, systray };
+    baseConfig = { browser, serviceRegistry, serverData, systrayRegistry };
   },
 });
 
@@ -97,12 +97,12 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
     Component: MyItem3,
     sequence: 100,
   };
-  const systray = new Registry<any>();
-  systray.add(item2.name, item2);
-  systray.add(item1.name, item1);
-  systray.add(item3.name, item3);
+  const systrayRegistry: Registries["systrayRegistry"] = new Registry();
+  systrayRegistry.add(item2.name, item2);
+  systrayRegistry.add(item1.name, item1);
+  systrayRegistry.add(item3.name, item3);
 
-  const env = await makeTestEnv({ ...baseConfig, systray });
+  const env = await makeTestEnv({ ...baseConfig, systrayRegistry });
   const navbar = await mount(NavBar, { env });
 
   const menuSystray = navbar.el!.getElementsByClassName("o_menu_systray")[0] as HTMLElement;

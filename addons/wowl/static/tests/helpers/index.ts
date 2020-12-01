@@ -1,10 +1,7 @@
 import * as owl from "@odoo/owl";
 import { setTemplates } from "./utility";
 import { legacyProm } from "./legacy";
-import { Odoo } from "../../src/types";
 import { makeTestOdoo } from "./mocks";
-
-declare let odoo: Odoo;
 
 const { whenReady, loadFile } = owl.utils;
 

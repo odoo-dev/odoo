@@ -6,8 +6,6 @@ import { Query, Route, Router, makePushState } from "../../src/services/router";
 import { Cookie, cookieService } from "../../src/services/cookie";
 import { titleService } from "../../src/services/title";
 
-declare const odoo: Odoo;
-
 // // -----------------------------------------------------------------------------
 // // Mock Services
 // // -----------------------------------------------------------------------------
@@ -131,6 +129,13 @@ export function makeTestOdoo(config: TestConfig = {}): Odoo {
       server_version: "1.0",
       server_version_info: ["1.0"],
     },
+    serviceRegistry: config.serviceRegistry,
+    mainComponentRegistry: config.mainComponentRegistry,
+    actionRegistry: config.actionRegistry,
+    systrayRegistry: config.systrayRegistry,
+    errorDialogRegistry: config.errorDialogRegistry,
+    userMenuRegistry: config.userMenuRegistry,
+    viewRegistry: config.viewRegistry,
   });
 }
 

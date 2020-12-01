@@ -1,6 +1,5 @@
 import { Component, core, tags, useState } from "@odoo/owl";
-import type { Odoo, OdooEnv, Service } from "../../types";
-declare const odoo: Odoo;
+import type { OdooEnv, Service } from "../../types";
 
 const { EventBus } = core;
 
@@ -94,7 +93,7 @@ export const uiService: Service<UIService> = {
         bus.on("UNBLOCK", this, this.unblock);
       }
     }
-    env.registries.Components.add("BlockUI", ReactiveBlockUI);
+    odoo.mainComponentRegistry.add("BlockUI", ReactiveBlockUI);
 
     function block(): void {
       bus.trigger("BLOCK");

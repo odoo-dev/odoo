@@ -1,8 +1,7 @@
 import { Component } from "@odoo/owl";
 import { Stringifiable, _lt } from "../../core/localization";
-import { Odoo, OdooEnv } from "../../types";
+import { OdooEnv } from "../../types";
 import { Dialog } from "../../components/dialog/dialog";
-declare const odoo: Odoo;
 
 export function documentationItem(env: OdooEnv) {
   const documentationURL = "https://www.odoo.com/documentation/user";

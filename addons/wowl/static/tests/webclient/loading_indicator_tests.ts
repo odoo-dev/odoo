@@ -1,13 +1,13 @@
 import * as QUnit from "qunit";
 import { LoadingIndicator } from "../../src/webclient/loading_indicator/loading_indicator";
 import { uiService } from "../../src/services/ui/ui";
-import { Odoo, Service } from "../../src/types";
+import { Odoo, Registries } from "../../src/types";
 import { Registry } from "../../src/core/registry";
 import { getFixture, makeTestEnv, mount, nextTick } from "../helpers/index";
 import { TestConfig } from "../helpers/utility";
 
 let target: HTMLElement;
-let services: Registry<Service>;
+let serviceRegistry: Registries["serviceRegistry"];
 let browser: Partial<Odoo["browser"]>;
 
 let baseConfig: TestConfig;
@@ -15,11 +15,11 @@ let baseConfig: TestConfig;
 QUnit.module("LoadingIndicator", {
   async beforeEach() {
     target = getFixture();
-    services = new Registry<Service>();
-    services.add(uiService.name, uiService);
+    serviceRegistry = new Registry();
+    serviceRegistry.add(uiService.name, uiService);
     browser = { setTimeout: () => 1 };
 
-    baseConfig = { services, browser };
+    baseConfig = { serviceRegistry, browser };
   },
 });
 

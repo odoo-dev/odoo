@@ -1,6 +1,5 @@
 import { Component, useState } from "@odoo/owl";
-import type { Odoo, OdooEnv } from "../../types";
-declare const odoo: Odoo;
+import type { OdooEnv } from "../../types";
 
 export class LoadingIndicator extends Component<{}, OdooEnv> {
   /**

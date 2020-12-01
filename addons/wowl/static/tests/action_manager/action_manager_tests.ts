@@ -2,13 +2,13 @@ import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
 import { makeTestEnv, nextTick } from "../helpers/index";
-import { ComponentAction, FunctionAction, OdooEnv, Service } from "../../src/types";
+import { ComponentAction, FunctionAction, OdooEnv, Service, Registries } from "../../src/types";
 import { makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 import { notificationService } from "../../src/notifications/notification_service";
 
 let env: OdooEnv;
-let services: Registry<Service>;
-let actionsRegistry: Registry<ComponentAction | FunctionAction>;
+let serviceRegistry: Registries["serviceRegistry"];
+let actionRegistry: Registries["actionRegistry"];
 
 const serverSideActions: any = {
   1: {
@@ -32,21 +32,21 @@ const models: any = {
 
 QUnit.module("Action Manager Service", {
   async beforeEach(assert) {
-    actionsRegistry = new Registry<ComponentAction | FunctionAction>();
-    actionsRegistry.add("client_action_by_db_id", () => assert.step("client_action_db_id"));
-    actionsRegistry.add("client_action_by_xml_id", () => assert.step("client_action_xml_id"));
-    actionsRegistry.add("client_action_by_object", () => assert.step("client_action_object"));
-    services = new Registry<Service>();
+    actionRegistry = new Registry<ComponentAction | FunctionAction>();
+    actionRegistry.add("client_action_by_db_id", () => assert.step("client_action_db_id"));
+    actionRegistry.add("client_action_by_xml_id", () => assert.step("client_action_xml_id"));
+    actionRegistry.add("client_action_by_object", () => assert.step("client_action_object"));
+    serviceRegistry = new Registry<Service>();
 
-    services.add(actionManagerService.name, actionManagerService);
-    services.add(notificationService.name, notificationService);
-    services.add("router", makeFakeRouterService());
-    services.add("user", makeFakeUserService());
+    serviceRegistry.add(actionManagerService.name, actionManagerService);
+    serviceRegistry.add(notificationService.name, notificationService);
+    serviceRegistry.add("router", makeFakeRouterService());
+    serviceRegistry.add("user", makeFakeUserService());
 
     env = await makeTestEnv({
-      actions: actionsRegistry,
+      actionRegistry,
       serverData: { models, actions: serverSideActions },
-      services,
+      serviceRegistry,
     });
   },
 });

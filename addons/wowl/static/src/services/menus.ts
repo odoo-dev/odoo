@@ -1,5 +1,4 @@
-import { Odoo, OdooEnv, Service } from "../types";
-declare const odoo: Odoo;
+import { OdooEnv, Service } from "../types";
 
 export interface Menu {
   id: number | string;

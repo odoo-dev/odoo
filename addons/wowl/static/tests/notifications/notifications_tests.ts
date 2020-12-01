@@ -1,26 +1,26 @@
 import * as QUnit from "qunit";
 import { notificationService } from "../../src/notifications/notification_service";
-import { OdooEnv, Service } from "../../src/types";
+import { OdooEnv, Registries, Service } from "../../src/types";
 import { Registry } from "../../src/core/registry";
 import { click, getFixture, makeTestEnv, mount, nextTick } from "../helpers/index";
 
 let target: HTMLElement;
 let browser: Partial<OdooEnv["browser"]>;
-let services: Registry<Service>;
+let serviceRegistry: Registries["serviceRegistry"];
 
 QUnit.module("Notifications", {
   async beforeEach() {
     target = getFixture();
-    services = new Registry<Service>();
-    services.add(notificationService.name, notificationService);
+    serviceRegistry = new Registry<Service>();
+    serviceRegistry.add(notificationService.name, notificationService);
     browser = { setTimeout: () => 1 };
   },
 });
 
 QUnit.test("can display a basic notification", async (assert) => {
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  await mount(env.registries.Components.get("NotificationManager"), { env, target });
+  await mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   notifications.create("I'm a basic notification");
   await nextTick();
@@ -31,9 +31,9 @@ QUnit.test("can display a basic notification", async (assert) => {
 });
 
 QUnit.test("can display a notification of type danger", async (assert) => {
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  await mount(env.registries.Components.get("NotificationManager"), { env, target });
+  await mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   notifications.create("I'm a danger notification", { type: "danger" });
   await nextTick();
@@ -44,9 +44,9 @@ QUnit.test("can display a notification of type danger", async (assert) => {
 });
 
 QUnit.test("can display a danger notification with a title", async (assert) => {
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  await mount(env.registries.Components.get("NotificationManager"), { env, target });
+  await mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   notifications.create("I'm a danger notification", { title: "Some title", type: "danger" });
   await nextTick();
@@ -70,9 +70,9 @@ QUnit.test("notifications aren't sticky by default", async (assert) => {
     timeoutCB = cb;
     return 1;
   };
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  await mount(env.registries.Components.get("NotificationManager"), { env, target });
+  await mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   notifications.create("I'm a notification");
   await nextTick();
@@ -88,9 +88,9 @@ QUnit.test("can display a sticky notification", async (assert) => {
     throw new Error("Should not register a callback for sticky notifications");
     return 1;
   };
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  await mount(env.registries.Components.get("NotificationManager"), { env, target });
+  await mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   notifications.create("I'm a sticky notification", { sticky: true });
   await nextTick();
@@ -98,9 +98,9 @@ QUnit.test("can display a sticky notification", async (assert) => {
 });
 
 QUnit.test("can close sticky notification", async (assert) => {
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  await mount(env.registries.Components.get("NotificationManager"), { env, target });
+  await mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   let id = notifications.create("I'm a sticky notification", { sticky: true });
   await nextTick();
@@ -126,9 +126,9 @@ QUnit.test("can close a non-sticky notification", async (assert) => {
     timeoutCB = cb;
     return 1;
   };
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  await mount(env.registries.Components.get("NotificationManager"), { env, target });
+  await mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   const id = notifications.create("I'm a sticky notification");
   await nextTick();
@@ -151,9 +151,9 @@ QUnit.test("close a non-sticky notification while another one remains", async (a
     timeoutCB = cb;
     return 1;
   };
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  await mount(env.registries.Components.get("NotificationManager"), { env, target });
+  await mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   const id1 = notifications.create("I'm a non-sticky notification");
   const id2 = notifications.create("I'm a sticky notification", { sticky: true });
@@ -177,9 +177,9 @@ QUnit.test("close a non-sticky notification while another one remains", async (a
 });
 
 QUnit.test("notification coming when NotificationManager not mounted yet", async (assert) => {
-  const env = await makeTestEnv({ browser, services });
+  const env = await makeTestEnv({ browser, serviceRegistry });
   const notifications = env.services.notifications;
-  mount(env.registries.Components.get("NotificationManager"), { env, target });
+  mount(odoo.mainComponentRegistry.get("NotificationManager"), { env, target });
 
   notifications.create("I'm a non-sticky notification");
   await nextTick();

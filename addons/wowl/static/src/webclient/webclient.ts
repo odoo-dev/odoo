@@ -13,7 +13,7 @@ export class WebClient extends Component<{}, OdooEnv> {
   title = useService("title");
   router = useService("router");
   user = useService("user");
-  Components = this.env.registries.Components.getEntries();
+  Components = odoo.mainComponentRegistry.getEntries();
 
   constructor(...args: any[]) {
     super(...args);

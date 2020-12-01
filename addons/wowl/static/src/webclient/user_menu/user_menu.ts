@@ -1,11 +1,10 @@
 import { Component } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
-import { useService } from "../../core/hooks";
-import { Odoo, OdooEnv } from "../../types";
 import { Dropdown } from "../../components/dropdown/dropdown";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
+import { useService } from "../../core/hooks";
+import { OdooEnv } from "../../types";
 import { SystrayItem } from "../systray_registry";
-declare const odoo: Odoo;
 
 type Callback = () => void | Promise<any>;
 interface UserMenuItem {
@@ -39,7 +38,7 @@ export class UserMenu extends Component<{}, OdooEnv> {
 
   getItemGroups(): UserMenuItem[][] {
     const filteredItems = [];
-    for (const itemFactory of this.env.registries.userMenu.getAll()) {
+    for (const itemFactory of odoo.userMenuRegistry.getAll()) {
       const item = itemFactory(this.env);
       const { hide } = item;
       if (!hide) {

@@ -1,30 +1,30 @@
 import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
-import { Service } from "../../src/types";
+import { Registries } from "../../src/types";
 import { makeDeferred, makeTestEnv, nextTick } from "../helpers/index";
 
-let registry: Registry<Service>;
+let serviceRegistry: Registries["serviceRegistry"];
 
 QUnit.module("deployServices", {
   beforeEach() {
-    registry = new Registry();
+    serviceRegistry = new Registry();
   },
 });
 
 QUnit.test("can deploy a service", async (assert) => {
-  registry.add("test", {
+  serviceRegistry.add("test", {
     name: "test",
     deploy() {
       return 17;
     },
   });
-  const env = await makeTestEnv({ services: registry });
+  const env = await makeTestEnv({ serviceRegistry });
   assert.strictEqual(env.services.test, 17);
 });
 
 QUnit.test("can deploy an asynchronous service", async (assert) => {
   const def = makeDeferred();
-  registry.add("test", {
+  serviceRegistry.add("test", {
     name: "test",
     async deploy() {
       assert.step("before");
@@ -33,7 +33,7 @@ QUnit.test("can deploy an asynchronous service", async (assert) => {
       return result;
     },
   });
-  const prom = makeTestEnv({ services: registry });
+  const prom = makeTestEnv({ serviceRegistry });
   assert.verifySteps(["before"]);
   def.resolve(15);
   const env = await prom;
@@ -45,7 +45,7 @@ QUnit.test("can deploy two sequentially dependant asynchronous services", async 
   const def1 = makeDeferred();
   const def2 = makeDeferred();
 
-  registry.add("test2", {
+  serviceRegistry.add("test2", {
     dependencies: ["test1"],
     name: "test2",
     deploy() {
@@ -53,21 +53,21 @@ QUnit.test("can deploy two sequentially dependant asynchronous services", async 
       return def2;
     },
   });
-  registry.add("test1", {
+  serviceRegistry.add("test1", {
     name: "test1",
     deploy() {
       assert.step("test1");
       return def1;
     },
   });
-  registry.add("test3", {
+  serviceRegistry.add("test3", {
     dependencies: ["test2"],
     name: "test3",
     deploy() {
       assert.step("test3");
     },
   });
-  const promise = makeTestEnv({ services: registry });
+  const promise = makeTestEnv({ serviceRegistry });
   await nextTick();
   assert.verifySteps(["test1"]);
   def2.resolve();
@@ -83,28 +83,28 @@ QUnit.test("can deploy two independant asynchronous services in parallel", async
   const def1 = makeDeferred();
   const def2 = makeDeferred();
 
-  registry.add("test1", {
+  serviceRegistry.add("test1", {
     name: "test1",
     deploy() {
       assert.step("test1");
       return def1;
     },
   });
-  registry.add("test2", {
+  serviceRegistry.add("test2", {
     name: "test2",
     deploy() {
       assert.step("test2");
       return def2;
     },
   });
-  registry.add("test3", {
+  serviceRegistry.add("test3", {
     dependencies: ["test1", "test2"],
     name: "test3",
     deploy() {
       assert.step("test3");
     },
   });
-  const promise = makeTestEnv({ services: registry });
+  const promise = makeTestEnv({ serviceRegistry });
   await nextTick();
   assert.verifySteps(["test1", "test2"]);
 
@@ -119,20 +119,20 @@ QUnit.test("can deploy two independant asynchronous services in parallel", async
 });
 
 QUnit.test("can deploy a service with a dependency", async (assert) => {
-  registry.add("aang", {
+  serviceRegistry.add("aang", {
     dependencies: ["appa"],
     name: "aang",
     deploy() {
       assert.step("aang");
     },
   });
-  registry.add("appa", {
+  serviceRegistry.add("appa", {
     name: "appa",
     deploy() {
       assert.step("appa");
     },
   });
 
-  await makeTestEnv({ services: registry });
+  await makeTestEnv({ serviceRegistry });
   assert.verifySteps(["appa", "aang"]);
 });

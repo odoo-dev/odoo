@@ -2,13 +2,9 @@ import { Component } from "@odoo/owl";
 import { getDefaultLocalization } from "../../src/core/localization";
 import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
-import { Odoo, OdooConfig, OdooEnv, Type } from "../../src/types";
-import { MockRPC, makeTestOdoo } from "./mocks";
-import { ServerData, makeMockServer } from "./mock_server";
-
-declare let odoo: Odoo;
-
-// export { OdooEnv } from "../../src/types";
+import { Odoo, OdooConfig, OdooEnv, Registries, Type } from "../../src/types";
+import { makeTestOdoo, MockRPC } from "./mocks";
+import { makeMockServer, ServerData } from "./mock_server";
 
 // -----------------------------------------------------------------------------
 // Main Helpers
@@ -37,7 +33,7 @@ type _TestConfig = Partial<
   }
 >;
 
-export interface TestConfig extends _TestConfig {
+export interface TestConfig extends _TestConfig, Partial<Registries> {
   browser?: Partial<Odoo["browser"]>;
   serverData?: ServerData;
   mockRPC?: MockRPC;
@@ -52,20 +48,20 @@ function makeTestConfig(config: TestConfig = {}): OdooConfig {
     _t,
     templates,
     debug: config.debug || "",
-    services: config.services || new Registry(),
-    Components: config.Components || new Registry(),
-    actions: config.actions || new Registry(),
-    systray: config.systray || new Registry(),
-    errorDialogs: config.errorDialogs || new Registry(),
-    userMenu: config.userMenu || new Registry(),
-    views: config.views || new Registry(),
+    serviceRegistry: config.serviceRegistry || new Registry(),
+    mainComponentRegistry: config.mainComponentRegistry || new Registry(),
+    actionRegistry: config.actionRegistry || new Registry(),
+    systrayRegistry: config.systrayRegistry || new Registry(),
+    errorDialogRegistry: config.errorDialogRegistry || new Registry(),
+    userMenuRegistry: config.userMenuRegistry || new Registry(),
+    viewRegistry: config.viewRegistry || new Registry(),
   });
 }
 
 export async function makeTestEnv(config: TestConfig = {}): Promise<OdooEnv> {
   const testConfig: TestConfig = makeTestConfig(config);
   if (config.serverData || config.mockRPC || config.activateMockServer) {
-    testConfig.services!.remove("rpc");
+    testConfig.serviceRegistry!.remove("rpc");
     makeMockServer(testConfig, config.serverData, config.mockRPC);
   }
   odoo = makeTestOdoo(testConfig);

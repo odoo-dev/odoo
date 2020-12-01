@@ -9,7 +9,7 @@ import {
   WarningDialog,
 } from "../../src/crash_manager/error_dialogs";
 import { Registry } from "../../src/core/registry";
-import { OdooBrowser, Service } from "../../src/types";
+import { OdooBrowser, Registries, Service } from "../../src/types";
 
 let target: HTMLElement;
 let env: OdooEnv;
@@ -147,7 +147,7 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
       assert.step("dialog-closed");
     }
   }
-  const services: Registry<Service> = new Registry();
+  const serviceRegistry: Registries["serviceRegistry"] = new Registry();
   const fakeActionManagerService: Service = {
     name: "action_manager",
     deploy(): { doAction: Function } {
@@ -158,8 +158,8 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
       };
     },
   };
-  services.add("action_manager", fakeActionManagerService);
-  env = await makeTestEnv({ services });
+  serviceRegistry.add("action_manager", fakeActionManagerService);
+  env = await makeTestEnv({ serviceRegistry });
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");

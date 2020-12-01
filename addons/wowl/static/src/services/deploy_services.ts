@@ -1,11 +1,12 @@
 import { Payload } from "../core/registry";
 import { OdooConfig, OdooEnv, Service } from "../types";
+import { serviceRegistry } from "./service_registry";
 
 export async function deployServices(env: OdooEnv, config: OdooConfig): Promise<void> {
   const toDeploy: Set<Service> = new Set();
   let timeoutId: number | undefined;
 
-  env.registries.services.on("UPDATE", null, async (payload: Payload<Service>) => {
+  serviceRegistry.on("UPDATE", null, async (payload: Payload<Service>) => {
     const { operation, value } = payload;
     if (operation === "delete") {
       // We hardly see why it would be usefull to remove a service.
@@ -30,8 +31,8 @@ async function _deployServices(
   timeoutId: number | undefined
 ): Promise<number | undefined> {
   const services = env.services;
-  const serviceRegistry = config.services;
-  for (const service of serviceRegistry.getAll()) {
+  odoo.serviceRegistry;
+  for (const service of odoo.serviceRegistry.getAll()) {
     if (!(service.name in services)) {
       toDeploy.add(service);
     }

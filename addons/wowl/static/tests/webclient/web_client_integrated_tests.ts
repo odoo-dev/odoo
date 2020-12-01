@@ -20,6 +20,7 @@ import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "../../src
 import { getLegacy } from "../helpers/legacy";
 import { actionRegistry } from "../../src/action_manager/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
+import { Registries } from "../../src/types";
 
 // JQuery :visible selector
 // https://stackoverflow.com/questions/13388616/firefox-query-selector-and-the-visible-pseudo-selector
@@ -53,10 +54,10 @@ async function createWebClient(params: CreateParams) {
 
 // PREPARE AND DATA
 function beforeEachActionManager(): TestConfig {
-  const actionsRegistry = new Registry<any>();
-  actionsRegistry.add("clientAction", ClientAction);
-  const services = new Registry<any>();
-  services
+  const actionRegistry: Registries["actionRegistry"] = new Registry();
+  actionRegistry.add("clientAction", ClientAction);
+  const serviceRegistry: Registries["serviceRegistry"] = new Registry();
+  serviceRegistry
     .add("user", makeFakeUserService())
     .add(notificationService.name, notificationService)
     .add("menus", menusService)
@@ -74,7 +75,7 @@ function beforeEachActionManager(): TestConfig {
 
   const serverData = makeServerData();
 
-  return { serverData, actions: actionsRegistry, services, browser };
+  return { serverData, actionRegistry, serviceRegistry, browser };
 }
 
 class ClientAction extends Component<{}, OdooEnv> {
@@ -537,7 +538,7 @@ QUnit.module("web client integrated tests", (hooks) => {
         this.router.pushState({ arbitrary: "actionPushed" });
       }
     }
-    baseConfig.actions!.add("client_action_pushes", ClientActionPushes);
+    baseConfig.actionRegistry!.add("client_action_pushes", ClientActionPushes);
 
     const env = await makeTestEnv(baseConfig);
     const webClient = await mount(WebClient, { env });
@@ -569,7 +570,7 @@ QUnit.module("web client integrated tests", (hooks) => {
         this.router.pushState({ arbitrary: "actionPushed" });
       }
     }
-    baseConfig.actions!.add("client_action_pushes", ClientActionPushes);
+    baseConfig.actionRegistry!.add("client_action_pushes", ClientActionPushes);
 
     const env = await makeTestEnv(baseConfig);
     const webClient = await mount(WebClient, { env });
@@ -604,7 +605,7 @@ QUnit.module("web client integrated tests", (hooks) => {
         this.router.pushState({ arbitrary: "actionPushed" });
       }
     }
-    baseConfig.actions!.add("client_action_pushes", ClientActionPushes);
+    baseConfig.actionRegistry!.add("client_action_pushes", ClientActionPushes);
 
     const env = await makeTestEnv(baseConfig);
     const webClient = await mount(WebClient, { env });
@@ -629,8 +630,8 @@ QUnit.module("web client integrated tests", (hooks) => {
     assert.expect(1);
 
     baseConfig.serverData!.actions![1001].target = "new";
-    baseConfig.services!.remove("router");
-    baseConfig.services!.add(
+    baseConfig.serviceRegistry!.remove("router");
+    baseConfig.serviceRegistry!.add(
       "router",
       makeFakeRouterService({
         onPushState(mode, newState) {
@@ -666,11 +667,11 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     cpHelpers = testUtils.controlPanel;
     makeTestEnvironment = legacy.makeTestEnvironment;
     Component.env = legacyEnv = makeTestEnvironment();
-    baseConfig.actions = actionRegistry;
-    baseConfig.views = viewRegistry;
+    baseConfig.actionRegistry = actionRegistry;
+    baseConfig.viewRegistry = viewRegistry;
     // in principle, we already have a testEnv on Component...
     const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
-    baseConfig.services!.add("legacy_action_manager", legacyActionManagerService);
+    baseConfig.serviceRegistry!.add("legacy_action_manager", legacyActionManagerService);
   });
 
   QUnit.module("Misc");
@@ -1247,7 +1248,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     class ClientAction extends Component<{}, OdooEnv> {
       static template = tags.xml`<div class="o_client_action_test">Hello World</div>`;
     }
-    baseConfig!.actions!.add("HelloWorldTest", ClientAction);
+    baseConfig!.actionRegistry!.add("HelloWorldTest", ClientAction);
 
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
@@ -1268,7 +1269,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.verifySteps(["/wowl/load_menus"]);
 
     webClient.destroy();
-    baseConfig!.actions!.remove("HelloWorldTest");
+    baseConfig!.actionRegistry!.remove("HelloWorldTest");
   });
 
   QUnit.test("properly load act window actions", async function (assert) {
@@ -2411,7 +2412,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     class ClientAction extends Component<{}, OdooEnv> {
       static template = tags.xml`<div class="o_client_action_test">Hello World</div>`;
     }
-    baseConfig!.actions!.add("HelloWorldTest", ClientAction);
+    baseConfig!.actionRegistry!.add("HelloWorldTest", ClientAction);
 
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
@@ -2432,7 +2433,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.verifySteps(["/wowl/load_menus"]);
 
     webClient.destroy();
-    baseConfig!.actions!.remove("HelloWorldTest");
+    baseConfig!.actionRegistry!.remove("HelloWorldTest");
   });
 
   QUnit.skip("client action with control panel", async function (assert) {
@@ -2586,7 +2587,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test("test display_notification client action", async function (assert) {
     assert.expect(6);
 
-    baseConfig!.services!.add("notification", notificationService);
+    baseConfig!.serviceRegistry!.add("notification", notificationService);
 
     const webClient = await createWebClient({ baseConfig, legacyEnv });
 
@@ -3725,8 +3726,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.expect(10);
 
     // FIXME: better way to mock user_context?
-    baseConfig.services!.remove("user");
-    baseConfig.services!.add(
+    baseConfig.serviceRegistry!.remove("user");
+    baseConfig.serviceRegistry!.add(
       "user",
       makeFakeUserService({
         context: Object.assign({}, { some_key: 2 } as any),

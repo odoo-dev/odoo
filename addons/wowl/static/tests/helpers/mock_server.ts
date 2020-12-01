@@ -1032,6 +1032,6 @@ export function makeMockServer(
   const rpcService = makeFakeRPCService(_mockRPC);
   config.browser = config.browser || {};
   config.browser.fetch = makeMockFetch(_mockRPC);
-  config.services = config.services || new Registry<Service>();
-  config.services.add("rpc", rpcService);
+  config.serviceRegistry = config.serviceRegistry || new Registry<Service>();
+  config.serviceRegistry.add("rpc", rpcService);
 }

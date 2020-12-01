@@ -1,7 +1,7 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
-import { Service } from "../../src/types";
+import { Registries, Service } from "../../src/types";
 import { useService } from "../../src/core/hooks";
 import { modelService } from "../../src/services/model";
 import { RPC } from "../../src/services/rpc";
@@ -9,13 +9,13 @@ import { getFixture, makeFakeUserService, makeTestEnv, mount } from "../helpers/
 
 const { xml } = tags;
 
-let services: Registry<Service>;
+let serviceRegistry: Registries["serviceRegistry"];
 
 QUnit.module("Model Service", {
   async beforeEach() {
-    services = new Registry<Service>();
-    services.add("user", makeFakeUserService());
-    services.add(modelService.name, modelService);
+    serviceRegistry = new Registry();
+    serviceRegistry.add("user", makeFakeUserService());
+    serviceRegistry.add(modelService.name, modelService);
   },
 });
 
@@ -40,8 +40,8 @@ function makeFakeRPC(): [Query, Service<RPC>] {
 
 QUnit.test("add user context to a simple read request", async (assert) => {
   const [query, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
-  const env = await makeTestEnv({ services });
+  serviceRegistry.add("rpc", rpc);
+  const env = await makeTestEnv({ serviceRegistry });
   await env.services.model("my.model").read([3], ["id", "descr"]);
 
   assert.strictEqual(query.route, "/web/dataset/call_kw/my.model/read");
@@ -55,8 +55,8 @@ QUnit.test("add user context to a simple read request", async (assert) => {
 
 QUnit.test("context is combined with user context in read request", async (assert) => {
   const [query, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
-  const env = await makeTestEnv({ services });
+  serviceRegistry.add("rpc", rpc);
+  const env = await makeTestEnv({ serviceRegistry });
   await env.services.model("my.model").read([3], ["id", "descr"], { earth: "isfucked" });
 
   assert.strictEqual(query.route, "/web/dataset/call_kw/my.model/read");
@@ -70,8 +70,8 @@ QUnit.test("context is combined with user context in read request", async (asser
 
 QUnit.test("basic method call of model", async (assert) => {
   const [query, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
-  const env = await makeTestEnv({ services });
+  serviceRegistry.add("rpc", rpc);
+  const env = await makeTestEnv({ serviceRegistry });
   await env.services.model("partner").call("test", [], { context: { a: 1 } });
   assert.strictEqual(query.route, "/web/dataset/call_kw/partner/test");
   assert.deepEqual(query.params, {
@@ -84,8 +84,8 @@ QUnit.test("basic method call of model", async (assert) => {
 
 QUnit.test("create method", async (assert) => {
   const [query, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
-  const env = await makeTestEnv({ services });
+  serviceRegistry.add("rpc", rpc);
+  const env = await makeTestEnv({ serviceRegistry });
   await env.services.model("partner").create({ color: "red" });
   assert.strictEqual(query.route, "/web/dataset/call_kw/partner/create");
   assert.deepEqual(query.params, {
@@ -102,8 +102,8 @@ QUnit.test("create method", async (assert) => {
 
 QUnit.test("unlink method", async (assert) => {
   const [query, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
-  const env = await makeTestEnv({ services });
+  serviceRegistry.add("rpc", rpc);
+  const env = await makeTestEnv({ serviceRegistry });
   await env.services.model("partner").unlink([43]);
   assert.strictEqual(query.route, "/web/dataset/call_kw/partner/unlink");
   assert.deepEqual(query.params, {
@@ -116,8 +116,8 @@ QUnit.test("unlink method", async (assert) => {
 
 QUnit.test("write method", async (assert) => {
   const [query, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
-  const env = await makeTestEnv({ services });
+  serviceRegistry.add("rpc", rpc);
+  const env = await makeTestEnv({ serviceRegistry });
   await env.services.model("partner").write([43, 14], { active: false });
   assert.strictEqual(query.route, "/web/dataset/call_kw/partner/write");
   assert.deepEqual(query.params, {
@@ -130,8 +130,8 @@ QUnit.test("write method", async (assert) => {
 
 QUnit.test("readGroup method", async (assert) => {
   const [query, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
-  const env = await makeTestEnv({ services });
+  serviceRegistry.add("rpc", rpc);
+  const env = await makeTestEnv({ serviceRegistry });
   await env.services
     .model("sale.order")
     .readGroup([["user_id", "=", 2]], ["amount_total:sum"], ["date_order"], { offset: 1 });
@@ -146,8 +146,8 @@ QUnit.test("readGroup method", async (assert) => {
 
 QUnit.test("searchRead method", async (assert) => {
   const [query, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
-  const env = await makeTestEnv({ services });
+  serviceRegistry.add("rpc", rpc);
+  const env = await makeTestEnv({ serviceRegistry });
   await env.services.model("sale.order").searchRead([["user_id", "=", 2]], ["amount_total"]);
   assert.strictEqual(query.route, "/web/dataset/search_read");
   assert.deepEqual(query.params, {
@@ -165,9 +165,9 @@ QUnit.test("useModel take proper reference to rpc service", async (assert) => {
     model = useService("model");
   }
   const [, rpc] = makeFakeRPC();
-  services.add("rpc", rpc);
+  serviceRegistry.add("rpc", rpc);
 
-  const env = await makeTestEnv({ services });
+  const env = await makeTestEnv({ serviceRegistry });
 
   const component = await mount(MyComponent, { env, target: getFixture() });
 

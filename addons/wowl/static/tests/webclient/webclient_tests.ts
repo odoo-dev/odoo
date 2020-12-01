@@ -5,7 +5,7 @@ import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
 import { notificationService } from "../../src/notifications/notification_service";
 import { makeFakeUserService } from "../helpers/index";
-import { Service, Type } from "../../src/types";
+import { Registries } from "../../src/types";
 import { mount, makeTestEnv, TestConfig } from "../helpers/utility";
 import { menusService } from "../../src/services/menus";
 import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
@@ -16,15 +16,15 @@ let baseConfig: TestConfig;
 
 QUnit.module("Web Client", {
   async beforeEach() {
-    const services = new Registry<Service<any>>();
-    services
+    const serviceRegistry: Registries["serviceRegistry"] = new Registry();
+    serviceRegistry
       .add("user", makeFakeUserService())
       .add(actionManagerService.name, actionManagerService)
       .add(notificationService.name, notificationService)
       .add(fakeTitleService.name, fakeTitleService)
       .add("menus", menusService)
       .add("router", makeFakeRouterService());
-    baseConfig = { services, activateMockServer: true };
+    baseConfig = { serviceRegistry, activateMockServer: true };
   },
 });
 
@@ -40,9 +40,9 @@ QUnit.test("can render a main component", async (assert) => {
   class MyComponent extends Component {
     static template = xml`<span class="chocolate">MyComponent</span>`;
   }
-  const componentRegistry = new Registry<Type<Component>>();
-  componentRegistry.add("mycomponent", MyComponent);
-  const env = await makeTestEnv({ ...baseConfig, Components: componentRegistry });
+  const mainComponentRegistry: Registries["mainComponentRegistry"] = new Registry();
+  mainComponentRegistry.add("mycomponent", MyComponent);
+  const env = await makeTestEnv({ ...baseConfig, mainComponentRegistry });
   const webClient = await mount(WebClient, { env });
   assert.containsOnce(webClient.el!, ".chocolate");
 });

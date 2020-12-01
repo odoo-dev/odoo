@@ -1,7 +1,7 @@
 import * as QUnit from "qunit";
 import { makeTestEnv, OdooEnv } from "../helpers/index";
 import { Registry } from "../../src/core/registry";
-import { Service, Type } from "../../src/types";
+import { Registries, Service, Type } from "../../src/types";
 import { crashManagerService } from "../../src/crash_manager/crash_manager_service";
 import { DialogManagerService } from "../../src/services/dialog_manager";
 import { Component, tags } from "@odoo/owl";
@@ -21,12 +21,12 @@ function makeFakeDialogManagerService(
 }
 
 let env: OdooEnv;
-let services: Registry<Service>;
+let serviceRegistry: Registries["serviceRegistry"];
 
 QUnit.module("CrashManager", {
   async beforeEach() {
-    services = new Registry();
-    services.add(crashManagerService.name, crashManagerService);
+    serviceRegistry = new Registry();
+    serviceRegistry.add(crashManagerService.name, crashManagerService);
   },
 });
 
@@ -35,8 +35,8 @@ QUnit.test("does not handle RPC_ERROR with type='network'", async (assert) => {
   function open() {
     assert.step("no dialog should open");
   }
-  services.add("dialog_manager", makeFakeDialogManagerService(open));
-  env = await makeTestEnv({ services });
+  serviceRegistry.add("dialog_manager", makeFakeDialogManagerService(open));
+  env = await makeTestEnv({ serviceRegistry });
   env.bus.trigger("RPC_ERROR", {
     type: "network",
   });
@@ -58,8 +58,8 @@ QUnit.test("handle RPC_ERROR of type='server' and no associated dialog class", a
     assert.strictEqual(dialogClass, ErrorDialog);
     assert.deepEqual(props, { error });
   }
-  services.add("dialog_manager", makeFakeDialogManagerService(open));
-  env = await makeTestEnv({ services });
+  serviceRegistry.add("dialog_manager", makeFakeDialogManagerService(open));
+  env = await makeTestEnv({ serviceRegistry });
   env.bus.trigger("RPC_ERROR", error);
 });
 
@@ -81,9 +81,9 @@ QUnit.test(
       assert.strictEqual(dialogClass, CustomDialog);
       assert.deepEqual(props, { error });
     }
-    services.add("dialog_manager", makeFakeDialogManagerService(open));
-    env = await makeTestEnv({ services });
-    env.registries.errorDialogs.add("strange_error", CustomDialog);
+    serviceRegistry.add("dialog_manager", makeFakeDialogManagerService(open));
+    env = await makeTestEnv({ serviceRegistry });
+    odoo.errorDialogRegistry.add("strange_error", CustomDialog);
     env.bus.trigger("RPC_ERROR", error);
   }
 );

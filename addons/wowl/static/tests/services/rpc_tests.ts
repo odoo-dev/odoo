@@ -1,20 +1,23 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
-import { Registry } from "../../src/core/registry";
-import { Service } from "../../src/types";
 import { useService } from "../../src/core/hooks";
+import { Registry } from "../../src/core/registry";
+import { notificationService } from "../../src/notifications/notification_service";
 import { rpcService } from "../../src/services/rpc";
+import { Registries } from "../../src/types";
 import {
-  makeMockXHR,
   getFixture,
   makeDeferred,
+  makeMockXHR,
   makeTestEnv,
   mount,
   nextTick,
 } from "../helpers/index";
-import { notificationService } from "../../src/notifications/notification_service";
 
 const { xml } = tags;
+
+let serviceRegistry: Registries["serviceRegistry"];
+
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
@@ -32,7 +35,7 @@ async function testRPC(route: string, params?: any): Promise<RPCInfo> {
     url = this.url;
   });
   const env = await makeTestEnv({
-    services: serviceRegistry,
+    serviceRegistry,
     browser: { XMLHttpRequest: MockXHR },
   });
   await env.services.rpc(route, params);
@@ -42,7 +45,6 @@ async function testRPC(route: string, params?: any): Promise<RPCInfo> {
 // -----------------------------------------------------------------------------
 // Tests
 // -----------------------------------------------------------------------------
-let serviceRegistry: Registry<Service<any>>;
 
 QUnit.module("RPC", {
   beforeEach() {
@@ -61,7 +63,7 @@ QUnit.test("can perform a simple rpc", async (assert) => {
   });
 
   const env = await makeTestEnv({
-    services: serviceRegistry,
+    serviceRegistry,
     browser: { XMLHttpRequest: MockXHR },
   });
   const result = await env.services.rpc("/test/");
@@ -81,7 +83,7 @@ QUnit.test("trigger an error on bus when response has 'error' key", async (asser
   let MockXHR = makeMockXHR({ error });
 
   const env = await makeTestEnv({
-    services: serviceRegistry,
+    serviceRegistry,
     browser: { XMLHttpRequest: MockXHR },
   });
 
@@ -125,7 +127,7 @@ QUnit.test("rpc coming from destroyed components are left pending", async (asser
   let MockXHR = makeMockXHR({ result: "1" }, () => {}, def);
 
   const env = await makeTestEnv({
-    services: serviceRegistry,
+    serviceRegistry,
     browser: { XMLHttpRequest: MockXHR },
   });
 
@@ -159,7 +161,7 @@ QUnit.test("rpc initiated from destroyed components throw exception", async (ass
   }
 
   const env = await makeTestEnv({
-    services: serviceRegistry,
+    serviceRegistry,
   });
 
   const component = await mount(MyComponent, { env, target: getFixture() });
@@ -174,7 +176,7 @@ QUnit.test("rpc initiated from destroyed components throw exception", async (ass
 QUnit.test("check trigger RPC:REQUEST and RPC:RESPONSE for a simple rpc", async (assert) => {
   let MockXHR = makeMockXHR({ test: true }, () => 1);
   const env = await makeTestEnv({
-    services: serviceRegistry,
+    serviceRegistry,
     browser: { XMLHttpRequest: MockXHR },
   });
 
@@ -206,7 +208,7 @@ QUnit.test("check trigger RPC:REQUEST and RPC:RESPONSE for a rpc with an error",
   };
   let MockXHR = makeMockXHR({ error });
   const env = await makeTestEnv({
-    services: serviceRegistry,
+    serviceRegistry,
     browser: { XMLHttpRequest: MockXHR },
   });
 

@@ -1,7 +1,3 @@
-import { Odoo } from "../types";
-
-declare const odoo: Odoo;
-
 /**
  * Returns a string formatted using given values.
  * If the value is an object, its keys will replace `%(key)s` expressions.
