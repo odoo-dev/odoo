@@ -1,6 +1,5 @@
 import { Component, core, tags, hooks } from "@odoo/owl";
 import type { OdooEnv, Service, Type } from "../types";
-import { mainComponentRegistry } from "../webclient/main_component_registry";
 
 const { EventBus } = core;
 const { useState } = hooks;
