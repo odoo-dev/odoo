@@ -5,6 +5,7 @@ import { Deferred, TestConfig } from "./utility";
 import { Query, Route, Router, makePushState } from "../../src/services/router";
 import { Cookie, cookieService } from "../../src/services/cookie";
 import { titleService } from "../../src/services/title";
+import { DowloadFileOptions, Download } from "../../src/services/download";
 
 declare const odoo: Odoo;
 
@@ -290,3 +291,18 @@ export const fakeTitleService: typeof titleService = {
     };
   },
 };
+
+export function makeFakeDownloadService(resolver: CallableFunction): Service<Download>  {
+  return {
+  name: "download",
+  deploy(): Download {
+    function file(options: DowloadFileOptions) {
+      return resolver();
+    }
+    return {
+        file,
+    };
+  },
+}
+};
+

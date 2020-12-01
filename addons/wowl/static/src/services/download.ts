@@ -4,16 +4,16 @@ import parse from '../libs/content-disposition';
 import download from '../libs/download';
 import { Odoo, Service } from '../types';
 
-interface DowloadFileReportFromForm {
+interface DowloadFileOptionsFromForm {
   form: HTMLFormElement;
 }
 
-interface DowloadFileReportFromParams {
+interface DowloadFileOptionsFromParams {
   url: string;
   data: object;
 }
 
-type DowloadFileReport = DowloadFileReportFromForm | DowloadFileReportFromParams;
+export type DowloadFileOptions = DowloadFileOptionsFromForm | DowloadFileOptionsFromParams;
 
 /**
  * Cooperative file download implementation, for ajaxy APIs.
@@ -39,23 +39,23 @@ type DowloadFileReport = DowloadFileReportFromForm | DowloadFileReportFromParams
 
 declare const odoo: Odoo;
 
-interface Download {
-    file: (options: DowloadFileReport) => Promise<unknown>;
+export interface Download {
+    file: (options: DowloadFileOptions) => Promise<unknown>;
 }
 
 export const downloadService: Service<Download> = {
   name: "download",
   deploy(): Download {
-    function file(options: DowloadFileReport) {
+    function file(options: DowloadFileOptions) {
       return new Promise((resolve, reject) => {
         const xhr: XMLHttpRequest = new XMLHttpRequest();
         let data: FormData;
         if (options.hasOwnProperty("form")) {
-          options = options as DowloadFileReportFromForm;
+          options = options as DowloadFileOptionsFromForm;
           xhr.open(options.form.method, options.form.action);
           data = new FormData(options.form);
         } else {
-          options = options as DowloadFileReportFromParams;
+          options = options as DowloadFileOptionsFromParams;
           xhr.open("POST", options.url);
           data = new FormData();
           Object.entries(options.data).forEach((entry) => {

@@ -8,7 +8,7 @@ import { notificationService } from "../../src/notifications/notification_servic
 import { menusService } from "../../src/services/menus";
 import { ActionManager, actionManagerService } from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
-import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
+import { makeFakeRouterService, fakeTitleService, makeFakeDownloadService } from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";
 
 import { viewManagerService } from "../../src/services/view_manager";
@@ -2695,71 +2695,31 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
   QUnit.module("Report actions");
 
-  QUnit.only("can execute report actions from db ID", async function (assert) {
-    
-    assert.expect(2);
-
+  QUnit.test("can execute report actions from db ID", async function (assert) {
     baseConfig!.services!.add("ui", uiService);
+    baseConfig!.services!.add("download", makeFakeDownloadService(function() {
+      assert.step("/report/download")
+      return Promise.resolve();
+    }));
 
     const mockRPC: RPC = async (route, args) => {
+      assert.step(args?.method || route);
       if (route === "/report/check_wkhtmltopdf") {
-        assert.step(args?.method || route);
+        return Promise.resolve('ok');
       }
-      return Promise.resolve();
     };
 
     const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC })
-
-    await doAction(webClient, 7)
-
-    await testUtils.nextTick();
-
-    assert.verifySteps([
-      "/web/action/load",
-      "/report/check_wkhtmltopdf",
-    ]);
-
-    webClient.destroy();
-
-    /*
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        report: ReportService,
-      },
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        if (route === "/report/check_wkhtmltopdf") {
-          return Promise.resolve("ok");
-        }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        get_file: async function (params) {
-          assert.step(params.url);
-          params.success();
-          params.complete();
-          return true;
-        },
-      },
-    });
-    await actionManager.doAction(7, {
-      on_close: function () {
-        assert.step("on_close");
-      },
-    });
+    await doAction(webClient, 7) // TODO on close param
     await testUtils.nextTick();
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load",
       "/report/check_wkhtmltopdf",
       "/report/download",
-      "on_close",
+      // TODO on close 
     ]);
-
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip("report actions can close modals and reload views", async function (assert) {
