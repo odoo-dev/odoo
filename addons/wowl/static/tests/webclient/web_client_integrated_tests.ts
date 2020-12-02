@@ -2686,6 +2686,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.module("Report actions");
 
   QUnit.test("can execute report actions from db ID", async function (assert) {
+
+    assert.expect(5); // TODO on close param
+
     baseConfig!.services!.add("ui", uiService);
     baseConfig!.services!.add(
       "download",
@@ -2715,70 +2718,47 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("report actions can close modals and reload views", async function (assert) {
-    /*
-    assert.expect(8);
-
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        report: ReportService,
-      },
-      mockRPC: function (route, args) {
-        if (route === "/report/check_wkhtmltopdf") {
-          return Promise.resolve("ok");
-        }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        get_file: async function (params) {
-          assert.step(params.url);
-          params.success();
-          params.complete();
-          return true;
-        },
-      },
-    });
-
-    // load modal
-    await actionManager.doAction(5, {
-      on_close: function () {
-        assert.step("on_close");
-      },
-    });
-
+  QUnit.only("report actions can close modals and reload views", async function (assert) {
+    assert.expect(6); // TODO on close param
+    baseConfig!.services!.add("ui", uiService);
+    baseConfig!.services!.add(
+      "download",
+      makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
+        assert.step(options.url);
+        return Promise.resolve();
+      })
+    );
+    const mockRPC: RPC = async (route, args) => {
+      if (route === "/report/check_wkhtmltopdf") {
+        return Promise.resolve("ok");
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC });
+    await doAction(webClient, 5);   // TODO on close
     assert.strictEqual(
       $(".o_technical_modal .o_form_view").length,
       1,
       "should have rendered a form view in a modal"
     );
-
-    await actionManager.doAction(7, {
-      on_close: function () {
-        assert.step("on_printed");
-      },
-    });
-
+    await doAction(webClient, 7); // TODO on close
     assert.strictEqual(
       $(".o_technical_modal .o_form_view").length,
       1,
       "The modal should still exist"
     );
-
-    await actionManager.doAction(11);
-
+    await doAction(webClient, 11);   // TODO on close
     assert.strictEqual(
       $(".o_technical_modal .o_form_view").length,
       0,
       "the modal should have been closed after the action report"
     );
-
-    assert.verifySteps(["/report/download", "on_printed", "/report/download", "on_close"]);
-
-    actionManager.destroy();
-    */
+    assert.verifySteps([
+      "/report/download",
+      "/report/download",
+      // TODO on close
+    ]);
+    // old test with on close expected : assert.verifySteps(["/report/download", "on_printed", "/report/download", "on_close"]);
+    webClient.destroy();
   });
 
   QUnit.skip("should trigger a notification if wkhtmltopdf is to upgrade", async function (assert) {
