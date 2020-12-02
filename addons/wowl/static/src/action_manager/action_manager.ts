@@ -316,9 +316,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (action.type === "ir.actions.act_window" || action.type === "ir.actions.client") {
       action.target = action.target || "current";
     }
+    action.context = makeContext(env.services.user.context, additionalContext, action.context);
     if (action.type === "ir.actions.act_window") {
       action.controllers = {};
-      action.context = makeContext(env.services.user.context, additionalContext, action.context);
       let domain = action.domain || [];
       action.domain = typeof domain === "string" ? evaluateExpr(domain, action.context) : domain;
     }
@@ -822,7 +822,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
   ): Promise<void> {
     const { active_id = null, active_ids = null, active_model = null } =
       options.additionalContext || {};
-    const action = await _loadAction(actionRequest, { active_id, active_ids, active_model });
+    const additionalContext = Object.assign(
+      { active_id, active_ids, active_model },
+      options.additionalContext
+    );
+    const action = await _loadAction(actionRequest, additionalContext);
     switch (action.type) {
       case "ir.actions.act_url":
         return _executeActURLAction(action);

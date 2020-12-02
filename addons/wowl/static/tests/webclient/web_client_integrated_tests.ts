@@ -1760,21 +1760,19 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("should not push a loaded state of a client action", async function (assert) {
-    /*
-    assert.expect(4);
+  QUnit.test("should not push a loaded state of a legacy client action", async function (assert) {
+    assert.expect(6);
 
-    var ClientAction = AbstractAction.extend({
-      init: function (parent, action, options) {
+    const ClientAction = AbstractAction.extend({
+      init: function (parent: any, action: any, options: any) {
         this._super.apply(this, arguments);
         this.controllerID = options.controllerID;
       },
       start: function () {
-        var self = this;
-        var $button = $("<button>").text("Click Me!");
-        $button.on("click", function () {
-          self.trigger_up("push_state", {
-            controllerID: self.controllerID,
+        const $button = $("<button id='client_action_button'>").text("Click Me!");
+        $button.on("click", () => {
+          this.trigger_up("push_state", {
+            controllerID: this.controllerID,
             state: { someValue: "X" },
           });
         });
@@ -1784,43 +1782,48 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
     core.action_registry.add("ClientAction", ClientAction);
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      intercepts: {
-        push_state: function (ev) {
+    baseConfig.serviceRegistry!.add(
+      "router",
+      makeFakeRouterService({
+        onPushState() {
           assert.step("push_state");
-          assert.deepEqual(ev.data.state, {
-            action: 9,
-            someValue: "X",
-            title: "A Client Action",
-          });
         },
-      },
-    });
-    await actionManager.loadState({ action: 9 });
+      }),
+      true
+    );
 
+    const webClient = await createWebClient({ baseConfig });
+    let currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {});
+    await loadState(webClient, { action: "9" });
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {
+      action: "9",
+    });
     assert.verifySteps([], "should not push the loaded state");
 
-    await testUtils.dom.click($(webClient.el!).find("button"));
+    await testUtils.dom.click($(webClient.el!).find("#client_action_button"));
     await legacyExtraNextTick();
-
     assert.verifySteps(["push_state"], "should push the state of it changes afterwards");
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {
+      action: "9",
+      someValue: "X",
+    });
 
     webClient.destroy();
-    */
+    baseConfig.actionRegistry!.remove("ClientAction");
+    delete core.action_registry.map.ClientAction;
   });
 
-  QUnit.skip("change a param of an ir.actions.client in the url", async function (assert) {
-    /*
-    assert.expect(7);
+  QUnit.test("change a param of an ir.actions.client in the url", async function (assert) {
+    assert.expect(15);
 
-    var ClientAction = AbstractAction.extend({
+    const ClientAction = AbstractAction.extend({
       hasControlPanel: true,
-      init: function (parent, action) {
+      init: function (parent: any, action: any) {
         this._super.apply(this, arguments);
-        var context = action.context;
+        const context = action.context;
         this.a = (context.params && context.params.a) || "default value";
       },
       start: function () {
@@ -1836,43 +1839,65 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     });
     core.action_registry.add("ClientAction", ClientAction);
 
-    const webClient = await createWebClient({ baseConfig });
+    baseConfig.serviceRegistry!.add(
+      "router",
+      makeFakeRouterService({
+        onPushState(mode) {
+          assert.step(`push_state ${mode}`);
+        },
+      }),
+      true
+    );
 
+    const webClient = await createWebClient({ baseConfig });
+    let currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {});
     // execute the client action
     await doAction(webClient, 9);
-
+    assert.verifySteps(["start", "push_state push", "push_state replace"]);
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {
+      action: "9",
+      a: "default value",
+    });
     assert.strictEqual(
       $(webClient.el!).find(".o_client_action .o_content").text(),
       "default value",
       "should have rendered the client action"
     );
-    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item",
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       1,
       "there should be one controller in the breadcrumbs"
     );
 
     // update param 'a' in the url
-    await actionManager.loadState({
-      action: 9,
+    await loadState(webClient, {
+      action: "9",
       a: "new value",
     });
-
+    assert.verifySteps(["start", "push_state push", "push_state replace"]);
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {
+      action: "9",
+      a: "new value",
+    });
     assert.strictEqual(
       $(webClient.el!).find(".o_client_action .o_content").text(),
       "new value",
       "should have rerendered the client action with the correct param"
     );
-    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item",
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       1,
       "there should still be one controller in the breadcrumbs"
     );
 
-    // should have executed the client action twice
-    assert.verifySteps(["start", "start"]);
-
     webClient.destroy();
     delete core.action_registry.map.ClientAction;
-    */
+    baseConfig.actionRegistry!.remove("ClientAction");
   });
 
   QUnit.skip("load a window action without id (in a multi-record view)", async function (assert) {

@@ -113,6 +113,33 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
   }: { ComponentAdapter: Type<ComponentAdapter> } = require("web.OwlCompatibility");
   class ActionAdapter extends ComponentAdapter {
     am = useService("action_manager");
+    router = useService("router");
+
+    constructor(...args: any[]) {
+      super(...args);
+      const _trigger_up = this._trigger_up.bind(this);
+      let pushedState: any;
+      this._trigger_up = (ev: any) => {
+        if (ev.name === "push_state") {
+          pushedState = Object.assign(pushedState || {}, ev.data.state);
+          return;
+        }
+        return _trigger_up(ev);
+      };
+      hooks.onMounted(() => {
+        if (pushedState) {
+          // push the state after the actionManager to avoid being wiped out by it
+          setTimeout(() => {
+            const formattedPusedState: any = {};
+            Object.entries(pushedState).forEach(([k, v]) => {
+              formattedPusedState[k] = v ? `${v}` : v;
+            });
+            this.router.replaceState(formattedPusedState);
+          });
+        }
+        this._trigger_up = _trigger_up;
+      });
+    }
 
     _trigger_up(ev: any) {
       const payload = ev.data;
@@ -120,6 +147,8 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         this.am.doAction(payload.action);
       } else if (ev.name === "breadcrumb_clicked") {
         this.am.restore(payload.controllerID);
+      } else if (ev.name === "push_state") {
+        this.router.pushState(payload.state);
       } else {
         super._trigger_up(ev);
       }
