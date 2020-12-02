@@ -629,7 +629,16 @@ var FieldDateRange = InputField.extend({
      * @returns {Moment|false}
      */
     _getValue: function () {
-        return field_utils.parse[this.formatType](this.$input.val(), this.field, { timezone: true });
+        try {
+            // user may enter manual value in input and it may not be parsed as date/datetime value
+            this.removeInvalidClass();
+            return field_utils.parse[this.formatType](this.$input.val(), this.field, { timezone: true });
+        } catch (error) {
+            this.do_warn(_t("Invalid fields!"), _t("Please enter a valid date / date & time."));
+            this.$input.val('');
+            this.setInvalidClass();
+            return false;
+        }
     },
 
     //--------------------------------------------------------------------------
