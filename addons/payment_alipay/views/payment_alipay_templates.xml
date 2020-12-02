@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    
     <template id="redirect_template">
         <form t-att-action="tx_url" method="post">
             <input type="hidden" name="_input_charset" t-att-value="_input_charset"/>
@@ -18,4 +19,5 @@
             <input t-if="seller_email" type="hidden" name="seller_email" t-att-value="seller_email"/>
         </form>
     </template>
+    
 </odoo>

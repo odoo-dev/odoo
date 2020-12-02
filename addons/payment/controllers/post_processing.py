@@ -69,12 +69,14 @@ class PaymentPostProcessing(http.Controller):
                 **tx._get_post_processing_values(),
             })
 
-        # Stop monitoring already processed transactions
-        finalized_txs = monitored_txs.filtered('is_post_processed')
-        self.remove_transactions(finalized_txs)
+        # Stop monitoring already post-processed transactions
+        post_processed_txs = monitored_txs.filtered('is_post_processed')
+        self.remove_transactions(post_processed_txs)
 
         # Finalize post-processing of transactions before displaying them to the user
-        txs_to_post_process = (monitored_txs - finalized_txs).filtered(lambda t: t.state == 'done')
+        txs_to_post_process = (monitored_txs - post_processed_txs).filtered(
+            lambda t: t.state == 'done'
+        )
         success, error = True, None
         try:
             txs_to_post_process._finalize_post_processing()

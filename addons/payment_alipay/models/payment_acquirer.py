@@ -12,19 +12,20 @@ _logger = logging.getLogger(__name__)
 class PaymentAcquirer(models.Model):
     _inherit = 'payment.acquirer'
 
-    provider = fields.Selection(selection_add=[
-        ('alipay', 'Alipay')
-    ], ondelete={'alipay': 'set default'})
-    alipay_payment_method = fields.Selection([
-        ('express_checkout', 'Express Checkout (only for Chinese Merchant)'),
-        ('standard_checkout', 'Cross-border'),
-    ], string='Account', default='express_checkout',
-        help='* Cross-border: For the overseas seller \n* Express Checkout: For the Chinese Seller')
+    provider = fields.Selection(
+        selection_add=[('alipay', "Alipay")], ondelete={'alipay': 'set default'})
+    alipay_payment_method = fields.Selection(
+        string="Account",
+        help="* Cross-border: For the overseas seller \n* Express Checkout: For the Chinese Seller",
+        selection=[
+            ('express_checkout', 'Express Checkout (only for Chinese Merchant)'),
+            ('standard_checkout', 'Cross-border')
+        ], default='express_checkout')
     alipay_merchant_partner_id = fields.Char(
-        string='Merchant Partner ID', required_if_provider='alipay', groups='base.group_system')
+        string="Merchant Partner ID", required_if_provider='alipay', groups='base.group_system')
     alipay_md5_signature_key = fields.Char(
-        string='MD5 Signature Key', required_if_provider='alipay', groups='base.group_system')
-    alipay_seller_email = fields.Char(string='Alipay Seller Email', groups='base.group_system')
+        string="MD5 Signature Key", required_if_provider='alipay', groups='base.group_system')
+    alipay_seller_email = fields.Char(string="Alipay Seller Email", groups='base.group_system')
 
     def _compute_fees(self, amount, currency, country):
         """ Compute alipay fees.

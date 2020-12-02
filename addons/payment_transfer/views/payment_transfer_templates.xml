@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    
     <data noupdate="1">
         <template id="redirect_form">
             <form t-att-action="tx_url" method="post">
@@ -23,4 +24,5 @@
             </t>
         </xpath>
     </template>
+    
 </odoo>

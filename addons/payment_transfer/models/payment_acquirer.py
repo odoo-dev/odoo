@@ -7,11 +7,11 @@ from odoo import _, api, fields, models
 class PaymentAcquirer(models.Model):
     _inherit = 'payment.acquirer'
 
-    provider = fields.Selection(selection_add=[
-        ('transfer', 'Manual Payment')
-    ], default='transfer', ondelete={'transfer': 'set default'})
+    provider = fields.Selection(
+        selection_add=[('transfer', "Wire Transfer")], default='transfer',
+        ondelete={'transfer': 'set default'})
     qr_code = fields.Boolean(
-        'Enable QR Codes', help="Enable the use of QR-codes for payments made on this provider.")
+        string="Enable QR Codes", help="Enable the use of QR-codes when paying by wire transfer.")
 
     @api.model
     def _create_missing_journals(self, company=None):

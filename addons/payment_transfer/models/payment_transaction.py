@@ -15,7 +15,7 @@ class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
     def _get_specific_rendering_values(self, processing_values):
-        if self.provider != "transfer":
+        if self.provider != 'transfer':
             return super()._get_specific_rendering_values(processing_values)
 
         return {
@@ -25,7 +25,7 @@ class PaymentTransaction(models.Model):
 
     @api.model
     def _get_tx_from_feedback_data(self, provider, data):
-        if provider != "transfer":
+        if provider != 'transfer':
             return super()._get_tx_from_feedback_data(provider, data)
 
         reference = data.get('reference')
@@ -40,7 +40,7 @@ class PaymentTransaction(models.Model):
         return tx
 
     def _process_feedback_data(self, data):
-        if self.provider != "transfer":
+        if self.provider != 'transfer':
             return super()._process_feedback_data(data)
 
         _logger.info(
