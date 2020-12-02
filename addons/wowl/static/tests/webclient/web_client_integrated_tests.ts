@@ -869,7 +869,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     testUtils.mock.unpatch(Widget);
   });
 
-  QUnit.skip(
+  QUnit.test(
     "no memory leaks when executing an action while switching view",
     async function (assert) {
       assert.expect(1);

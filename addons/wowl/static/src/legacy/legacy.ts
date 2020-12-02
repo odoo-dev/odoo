@@ -196,6 +196,12 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
       } else {
         const view = new this.props.View(this.props.viewInfo, this.props.viewParams);
         this.widget = await view.getController(this);
+        if (this.__owl__.isDestroyed) {
+          // the component might have been destroyed meanwhile, but if so, `this.widget` wasn't
+          // destroyed by OwlCompatibility layer as it wasn't set yet, so destroy it now
+          this.widget.destroy();
+          return Promise.resolve();
+        }
         return this.widget._widgetRenderAndInsert(() => {});
       }
     }
