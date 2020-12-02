@@ -9,7 +9,7 @@ import { isBrowserChromium } from "../utils/utils";
 import { Component } from "@odoo/owl";
 import { Env } from "@odoo/owl/dist/types/component/component";
 import { RPCError } from "../services/rpc";
-import OdooError from "./odoo_error"
+import OdooError from "./odoo_error";
 
 export const crashManagerService: Service<void> = {
   name: "crash_manager",

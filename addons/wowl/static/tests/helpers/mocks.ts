@@ -292,17 +292,16 @@ export const fakeTitleService: typeof titleService = {
   },
 };
 
-export function makeFakeDownloadService(resolver: CallableFunction): Service<Download>  {
+export function makeFakeDownloadService(callback: CallableFunction): Service<Download> {
   return {
-  name: "download",
-  deploy(): Download {
-    function file(options: DowloadFileOptions) {
-      return resolver();
-    }
-    return {
+    name: "download",
+    deploy(): Download {
+      function file(options: DowloadFileOptions) {
+        return callback(options);
+      }
+      return {
         file,
-    };
-  },
+      };
+    },
+  };
 }
-};
-

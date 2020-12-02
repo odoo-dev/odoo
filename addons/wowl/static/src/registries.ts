@@ -55,7 +55,7 @@ const services = [
   uiService,
   userService,
   viewManagerService,
-  downloadService
+  downloadService,
 ];
 
 for (let service of services) {

@@ -1,14 +1,14 @@
-import { NetworkErrorDialog, ServerErrorDialog } from '../crash_manager/error_dialogs';
-import OdooError from '../crash_manager/odoo_error';
-import parse from '../libs/content-disposition';
-import download from '../libs/download';
-import { Odoo, Service } from '../types';
+import { NetworkErrorDialog, ServerErrorDialog } from "../crash_manager/error_dialogs";
+import OdooError from "../crash_manager/odoo_error";
+import parse from "../libs/content-disposition";
+import download from "../libs/download";
+import { Odoo, Service } from "../types";
 
-interface DowloadFileOptionsFromForm {
+export interface DowloadFileOptionsFromForm {
   form: HTMLFormElement;
 }
 
-interface DowloadFileOptionsFromParams {
+export interface DowloadFileOptionsFromParams {
   url: string;
   data: object;
 }
@@ -40,7 +40,7 @@ export type DowloadFileOptions = DowloadFileOptionsFromForm | DowloadFileOptions
 declare const odoo: Odoo;
 
 export interface Download {
-    file: (options: DowloadFileOptions) => Promise<unknown>;
+  file: (options: DowloadFileOptions) => Promise<unknown>;
 }
 
 export const downloadService: Service<Download> = {
@@ -113,7 +113,7 @@ export const downloadService: Service<Download> = {
       });
     }
     return {
-        file,
+      file,
     };
   },
 };
