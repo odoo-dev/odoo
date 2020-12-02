@@ -108,6 +108,7 @@ interface ComponentAdapter extends Component {
 interface ActionAdapter extends ComponentAdapter {
   exportState(): any;
   canBeRemoved(): Promise<void>;
+  documentState(): any;
 }
 
 odoo.define("wowl.ActionAdapters", function (require: any) {
@@ -174,6 +175,12 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     }
     canBeRemoved() {
       return this.widget.canBeRemoved();
+    }
+    documentState() {
+      return {
+        title: this.widget.getTitle(),
+        ...this.widget.getState(),
+      };
     }
   }
 
@@ -300,7 +307,7 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
         static template = tags.xml`<ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget" t-ref="controller"/>`;
         static components = { ClientActionAdapter };
 
-        controllerRef = hooks.useRef("controller");
+        controllerRef = hooks.useRef<ActionAdapter>("controller");
 
         Widget = action;
         widgetArgs = [this.props.action, {}];
@@ -309,7 +316,10 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
         constructor() {
           super(...arguments);
           useSetupAction({
-            export: () => (this.controllerRef.comp! as any).exportState(),
+            export: () => this.controllerRef.comp!.exportState(),
+            documentState: () => {
+              return this.controllerRef.comp!.documentState();
+            },
           });
         }
       }
@@ -378,6 +388,9 @@ odoo.define("wowl.legacyViews", async function (require: any) {
           export: () => this.controllerRef.comp!.exportState(),
           beforeLeave: () => {
             return this.controllerRef.comp!.widget!.canBeRemoved();
+          },
+          documentState: () => {
+            return this.controllerRef.comp!.documentState();
           },
         });
       }

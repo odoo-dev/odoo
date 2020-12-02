@@ -2566,6 +2566,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     webClient.destroy();
     delete core.action_registry.map.HelloWorldTestLeg;
+    baseConfig.actionRegistry!.remove("HelloWorldTestLeg");
   });
 
   QUnit.test("can execute client actions from tag name", async function (assert) {
@@ -2598,22 +2599,21 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig!.actionRegistry!.remove("HelloWorldTest");
   });
 
-  QUnit.skip("client action with control panel", async function (assert) {
-    /*
+  QUnit.test("client action with control panel (legacy)", async function (assert) {
     assert.expect(4);
-
-    var ClientAction = AbstractAction.extend({
+    // LPE Fixme: at this time we don't really know the API that wowl ClientActions implement
+    const ClientAction = AbstractAction.extend({
       hasControlPanel: true,
-      start: async function () {
+      start() {
         this.$(".o_content").text("Hello World");
         this.$el.addClass("o_client_action_test");
         this.controlPanelProps.title = "Hello";
-        await this._super.apply(this, arguments);
+        return this._super.apply(this, arguments);
       },
     });
     core.action_registry.add("HelloWorldTest", ClientAction);
 
-    var actionManager = await createActionManager();
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, "HelloWorldTest");
 
     assert.strictEqual(
@@ -2621,7 +2621,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       1,
       "should have rendered a control panel"
     );
-    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item",
+    assert.containsN(
+      webClient.el!,
+      ".o_control_panel .breadcrumb-item",
       1,
       "there should be one controller in the breadcrumbs"
     );
@@ -2638,12 +2640,11 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
-    */
+    baseConfig.actionRegistry!.remove("HelloWorldTest");
   });
 
-  QUnit.skip("state is pushed for client actions", async function (assert) {
-    /*
-    assert.expect(3);
+  QUnit.test("state is pushed for client action (legacy)", async function (assert) {
+    assert.expect(6);
 
     const ClientAction = AbstractAction.extend({
       getTitle: function () {
@@ -2653,28 +2654,37 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return { foo: "baz" };
       },
     });
-    const actionManager = await createActionManager({
-      intercepts: {
-        push_state: function (ev) {
-          const expectedState = { action: "HelloWorldTest", foo: "baz", title: "a title" };
-          assert.deepEqual(
-            ev.data.state,
-            expectedState,
-            "should include a complete state description, including custom state"
-          );
-          assert.step("push state");
-        },
-      },
-    });
     core.action_registry.add("HelloWorldTest", ClientAction);
 
-    await doAction(webClient, "HelloWorldTest");
+    baseConfig.serviceRegistry!.add(
+      "router",
+      makeFakeRouterService({
+        onPushState() {
+          assert.step("push_state");
+        },
+      }),
+      true
+    );
 
-    assert.verifySteps(["push state"]);
+    const webClient = await createWebClient({ baseConfig });
+    let currentTitle = webClient.env.services.title.current;
+    assert.strictEqual(currentTitle, '{"zopenerp":"Odoo"}');
+    let currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {});
+
+    await doAction(webClient, "HelloWorldTest");
+    currentTitle = webClient.env.services.title.current;
+    assert.strictEqual(currentTitle, '{"zopenerp":"Odoo","action":"a title"}');
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {
+      action: "HelloWorldTest",
+      foo: "baz",
+    });
+    assert.verifySteps(["push_state"]);
 
     webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
-    */
+    actionRegistry.remove("HelloWorldTest");
   });
 
   QUnit.skip("action can use a custom control panel", async function (assert) {

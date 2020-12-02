@@ -288,14 +288,17 @@ export const fakeCookieService: typeof cookieService = {
 export const fakeTitleService: typeof titleService = {
   name: "title",
   deploy() {
+    let current = {};
     return {
       get current() {
-        return "";
+        return JSON.stringify(current);
       },
       getParts() {
-        return {};
+        return current;
       },
-      setParts() {},
+      setParts(parts) {
+        current = Object.assign({}, current, parts);
+      },
     };
   },
 };
