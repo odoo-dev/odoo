@@ -6,6 +6,7 @@ import { Query, Route, Router, makePushState } from "../../src/services/router";
 import { Cookie, cookieService } from "../../src/services/cookie";
 import { titleService } from "../../src/services/title";
 import { DowloadFileOptions, Download } from "../../src/services/download";
+import { NotificationService } from "../../src/notifications/notification_service";
 
 declare const odoo: Odoo;
 
@@ -296,11 +297,28 @@ export function makeFakeDownloadService(callback: CallableFunction): Service<Dow
   return {
     name: "download",
     deploy(): Download {
-      function file(options: DowloadFileOptions) {
-        return callback(options);
+      async function file(options: DowloadFileOptions) {
+        return await callback(options);
       }
       return {
         file,
+      };
+    },
+  };
+}
+
+export function makeFakeNotificationService(createMock: CallableFunction, closeMock: CallableFunction): Service<NotificationService> {
+  return {
+    name: "notifications",
+    deploy(): NotificationService {
+      function create() {
+        return createMock();
+      }
+      function close() {
+        return closeMock();
+      }
+      return {
+        create, close
       };
     },
   };

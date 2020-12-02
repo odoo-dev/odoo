@@ -8,7 +8,7 @@ import { notificationService } from "../../src/notifications/notification_servic
 import { menusService } from "../../src/services/menus";
 import { ActionManager, actionManagerService } from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
-import { makeFakeRouterService, fakeTitleService, makeFakeDownloadService } from "../helpers/mocks";
+import { makeFakeRouterService, fakeTitleService, makeFakeDownloadService, makeFakeNotificationService } from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";
 
 import { viewManagerService } from "../../src/services/view_manager";
@@ -60,12 +60,13 @@ function beforeEachActionManager(): TestConfig {
   services
     .add("user", makeFakeUserService())
     .add(notificationService.name, notificationService)
-    .add("menus", menusService)
+    .add(menusService.name, menusService)
     .add("action_manager", actionManagerService)
     .add("router", makeFakeRouterService())
     .add("view_manager", viewManagerService)
     .add("model", modelService)
-    .add(fakeTitleService.name, fakeTitleService);
+    .add(fakeTitleService.name, fakeTitleService)
+    .add(uiService.name, uiService);
 
   const browser = {
     setTimeout: window.setTimeout.bind(window),
@@ -2689,7 +2690,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     assert.expect(5); // TODO on close param
 
-    baseConfig!.services!.add("ui", uiService);
     baseConfig!.services!.add(
       "download",
       makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
@@ -2718,9 +2718,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.only("report actions can close modals and reload views", async function (assert) {
+  QUnit.test("report actions can close modals and reload views", async function (assert) {
     assert.expect(6); // TODO on close param
-    baseConfig!.services!.add("ui", uiService);
     baseConfig!.services!.add(
       "download",
       makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
@@ -2761,48 +2760,36 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("should trigger a notification if wkhtmltopdf is to upgrade", async function (assert) {
-    /*
-    assert.expect(5);
-
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        report: ReportService,
-        notification: NotificationService.extend({
-          notify: function (params) {
-            assert.step(params.type || "notification");
-          },
-        }),
+  QUnit.test("should trigger a notification if wkhtmltopdf is to upgrade", async function (assert) {
+    baseConfig.services!.add(notificationService.name, makeFakeNotificationService( 
+      () => {
+        assert.step('notify')
       },
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        if (route === "/report/check_wkhtmltopdf") {
-          return Promise.resolve("upgrade");
-        }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        get_file: async function (params) {
-          assert.step(params.url);
-          params.success();
-          params.complete();
-          return true;
-        },
-      },
-    });
-    await actionManager.doAction(7);
+      () => {} 
+    ), true);
+   baseConfig.services!.add(
+    "download",
+    makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
+      assert.step(options.url);
+      return Promise.resolve();
+    })
+  );
+    const mockRPC: RPC = async (route, args) => {
+      assert.step(args?.method || route);
+      if (route === "/report/check_wkhtmltopdf") {
+        return Promise.resolve("upgrade");
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, legacyEnv, mockRPC })
+    await doAction(webClient, 7);
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load",
       "/report/check_wkhtmltopdf",
-      "warning",
+      "notify",
       "/report/download",
     ]);
-
-    actionManager.destroy();
-    */
+    webClient.destroy();
   });
 
   QUnit.skip("should open the report client action if wkhtmltopdf is broken", async function (
