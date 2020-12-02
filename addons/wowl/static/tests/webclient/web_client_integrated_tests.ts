@@ -918,7 +918,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip(
+  QUnit.test(
     "no memory leaks when executing an action while loading views",
     async function (assert) {
       assert.expect(1);
@@ -950,11 +950,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       // execute a first action (its 'load_views' RPC is blocked)
       def = testUtils.makeTestPromise();
       doAction(webClient, 3, { clearBreadcrumbs: true });
+      await testUtils.nextTick();
+      await legacyExtraNextTick();
 
       // execute another action meanwhile (and unlock the RPC)
       doAction(webClient, 4, { clearBreadcrumbs: true });
       def.resolve();
       await testUtils.nextTick();
+      await legacyExtraNextTick();
 
       assert.strictEqual(n, delta, "all widgets of action 3 should have been destroyed");
 
@@ -963,7 +966,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip(
+  QUnit.test(
     "no memory leaks when executing an action while loading data of default view",
     async function (assert) {
       assert.expect(1);
@@ -995,11 +998,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       // execute a first action (its 'search_read' RPC is blocked)
       def = testUtils.makeTestPromise();
       doAction(webClient, 3, { clearBreadcrumbs: true });
+      await testUtils.nextTick();
+      await legacyExtraNextTick();
 
       // execute another action meanwhile (and unlock the RPC)
       doAction(webClient, 4, { clearBreadcrumbs: true });
       def.resolve();
       await testUtils.nextTick();
+      await legacyExtraNextTick();
 
       assert.strictEqual(n, delta, "all widgets of action 3 should have been destroyed");
 
