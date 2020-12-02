@@ -23,6 +23,8 @@
     "typescript": "^4.0.3",
     "@types/qunit": "^2.9.5",
     "@types/jquery": "^3.3.1",
+    "@types/chart.js": "^2.9.3",
+    "@types/luxon": "^1.25.0",
     "ws": "^7.3.1"
   },
   "dependencies": {
