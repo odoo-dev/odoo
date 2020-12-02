@@ -168,6 +168,7 @@ function beforeEachActionManager(): TestConfig {
     setTimeout: window.setTimeout.bind(window),
     clearTimeout: window.clearTimeout.bind(window),
     localStorage: makeRAMLocalStorage(),
+    sessionStorage: makeRAMLocalStorage(),
   };
 
   const serverData = makeServerData();
@@ -1900,26 +1901,32 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig.actionRegistry!.remove("ClientAction");
   });
 
-  QUnit.skip("load a window action without id (in a multi-record view)", async function (assert) {
-    // unskip: need to store the action in session storage and implement the restore
-    assert.expect(14);
+  QUnit.test("load a window action without id (in a multi-record view)", async function (assert) {
+    assert.expect(15);
 
-    // var RamStorageService = AbstractStorageService.extend({
-    //   storage: new RamStorage(),
-    // });
-    // services: {
-    //   session_storage: RamStorageService,
-    // },
-    // testUtils.mock.intercept(
-    //   actionManager,
-    //   "call_service",
-    //   function (ev) {
-    //     if (ev.data.service === "session_storage") {
-    //       assert.step(ev.data.method);
-    //     }
-    //   },
-    //   true
-    // );
+    const localStorage = baseConfig.browser!.localStorage;
+    baseConfig.browser!.localStorage = Object.assign(Object.create(localStorage!), {
+      getItem(k: any) {
+        assert.step(`getItem local ${k}`);
+        return localStorage!.getItem(k);
+      },
+      setItem(k: any, v: any) {
+        assert.step(`setItem local ${k}`);
+        return localStorage!.setItem(k, v);
+      },
+    });
+
+    const sessionStorage = baseConfig.browser!.sessionStorage;
+    baseConfig.browser!.sessionStorage = Object.assign(Object.create(sessionStorage!), {
+      getItem(k: any) {
+        assert.step(`getItem session ${k}`);
+        return sessionStorage!.getItem(k);
+      },
+      setItem(k: any, v: any) {
+        assert.step(`setItem session ${k}`);
+        return sessionStorage!.setItem(k, v);
+      },
+    });
 
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
@@ -1953,11 +1960,11 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/web/action/load", // action 3
       "load_views", // action 3
       "/web/dataset/search_read", // action 3
-      "setItem", // action 3
-      "getItem", // loadState
-      "load_views", // loaded action
+      "setItem session current_action", // action 3
+      "getItem session current_action", // loadState
       "/web/dataset/search_read", // loaded action
-      "setItem", // loaded action
+      "getItem local optional_fields,partner,list,2,foo",
+      "setItem session current_action", // loaded action
     ]);
 
     webClient.destroy();

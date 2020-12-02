@@ -22,6 +22,7 @@ const { whenReady, loadFile } = owl.utils;
 
 (async () => {
   // prepare browser object
+  let sessionStorage: Window["sessionStorage"] = window.sessionStorage;
   let localStorage: Window["localStorage"] = owl.browser.localStorage;
   try {
     // Safari crashes in Private Browsing
@@ -29,6 +30,7 @@ const { whenReady, loadFile } = owl.utils;
     localStorage.removeItem("__localStorage__");
   } catch (e) {
     localStorage = makeRAMLocalStorage();
+    sessionStorage = makeRAMLocalStorage();
   }
   odoo.browser = odoo.browser || {};
   odoo.browser = Object.assign(odoo.browser, owl.browser, {
@@ -38,6 +40,7 @@ const { whenReady, loadFile } = owl.utils;
     open: window.open.bind(window),
     XMLHttpRequest: window.XMLHttpRequest,
     localStorage,
+    sessionStorage,
   });
 
   odoo.userMenuRegistry = userMenuRegistry;

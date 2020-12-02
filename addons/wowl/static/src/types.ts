@@ -112,6 +112,7 @@ export interface OdooBrowser extends Browser {
   navigator: typeof navigator;
   open: typeof window["open"];
   XMLHttpRequest: typeof window["XMLHttpRequest"];
+  sessionStorage: typeof window["sessionStorage"];
 }
 
 export interface OdooEnv extends Env {

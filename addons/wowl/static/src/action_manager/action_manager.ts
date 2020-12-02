@@ -50,6 +50,7 @@ interface ActionCommonInfo {
   name?: string;
   context?: Context;
   type: ActionType;
+  _originalAction?: string;
 }
 export interface ClientAction extends ActionCommonInfo {
   res_model?: string;
@@ -311,7 +312,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action = actionRequest;
     }
 
-    action = JSON.parse(JSON.stringify(action)); // manipulate a deep copy
+    const originalAction = JSON.stringify(action);
+    action = JSON.parse(originalAction); // manipulate a deep copy
+    action._originalAction = originalAction;
     action.jsId = `action_${++id}`;
     if (action.type === "ir.actions.act_window" || action.type === "ir.actions.client") {
       action.target = action.target || "current";
@@ -483,6 +486,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
           if (controllerStack.some((c) => c.action.target === "fullscreen")) {
             mode = "fullscreen";
           }
+          odoo.browser.sessionStorage.setItem("current_action", action._originalAction!);
         } else {
           dialogCloseProm = new Promise((_r: any) => {
             dialogCloseResolve = _r;
@@ -1058,8 +1062,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       } else if (state.view_type) {
         // this is a window action on a multi-record view, so restore it
         // from the session storage
-        // const storedAction = this.call('session_storage', 'getItem', 'current_action');
-        const lastAction = JSON.parse(/*storedAction ||*/ "{}");
+        const storedAction = odoo.browser.sessionStorage.getItem("current_action");
+        const lastAction = JSON.parse(storedAction || "{}");
         if (lastAction.res_model === state.model) {
           action = lastAction;
           options.viewType = state.view_type;

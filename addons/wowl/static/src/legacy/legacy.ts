@@ -80,17 +80,20 @@ export function mapLegacyEnvToWowlEnv(legacyEnv: any, wowlEnv: OdooEnv) {
     (prom as any).abort = rejection;
     return prom;
   };
-  // localStorage
-  const localStorage = odoo.browser.localStorage;
-  legacyEnv.services.local_storage = Object.assign(Object.create(localStorage), {
-    getItem(key: string, defaultValue: any) {
-      const val = localStorage.getItem(key);
-      return val ? JSON.parse(val) : defaultValue;
-    },
-    setItem(key: string, value: any) {
-      localStorage.setItem(key, JSON.stringify(value));
-    },
-  });
+  // Storages
+  function mapStorage(storage: Storage) {
+    return Object.assign(Object.create(storage), {
+      getItem(key: string, defaultValue: any) {
+        const val = storage.getItem(key);
+        return val ? JSON.parse(val) : defaultValue;
+      },
+      setItem(key: string, value: any) {
+        storage.setItem(key, JSON.stringify(value));
+      },
+    });
+  }
+  legacyEnv.services.local_storage = mapStorage(odoo.browser.localStorage);
+  legacyEnv.services.session_storage = mapStorage(odoo.browser.sessionStorage);
   // map WebClientReady
   wowlEnv.bus.on("WEB_CLIENT_READY", null, () => {
     legacyEnv.bus.trigger("web_client_ready");
