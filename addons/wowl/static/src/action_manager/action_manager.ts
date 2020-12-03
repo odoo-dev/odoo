@@ -283,21 +283,21 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
   /**
    * Given an id, xmlid, tag (key of the client action registry) or directly an
-   * object describing an action, this function returns an action description
-   * with a unique jsId.
+   * object describing an action.
    *
    * @private
    * @param {ActionRequest} actionRequest
    * @param {Context} [context={}]
    * @returns {Promise<Action>}
    */
-  async function _loadAction(actionRequest: ActionRequest, context: Context = {}): Promise<Action> {
+  async function _loadAction(
+    actionRequest: ActionRequest,
+    context: Context = {}
+  ): Promise<ActionRequest> {
     let action;
-    const jsId = `action_${++id}`;
     if (typeof actionRequest === "string" && odoo.actionRegistry.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
       return {
-        jsId,
         target: "current",
         tag: actionRequest,
         type: "ir.actions.client",
@@ -320,21 +320,32 @@ function makeActionManager(env: OdooEnv): ActionManager {
       // actionRequest is an object describing the action
       action = actionRequest;
     }
+    return action;
+  }
+
+  /*this function returns an action description
+   * with a unique jsId.
+   */
+  function _preprocessAction(action: ActionRequest, context: Context = {}): Action {
+    const jsId = `action_${++id}`;
+    action.context = makeContext(env.services.user.context, context, action.context);
+    if (action.domain) {
+      const domain = action.domain || [];
+      action.domain = typeof domain === "string" ? evaluateExpr(domain, action.context) : domain;
+    }
 
     const originalAction = JSON.stringify(action);
     action = JSON.parse(originalAction); // manipulate a deep copy
     action._originalAction = originalAction;
-    action.jsId = `action_${++id}`;
+
+    action.jsId = jsId;
+    if (action.type === "ir.actions.act_window") {
+      action.controllers = {};
+    }
+
     if (action.type === "ir.actions.act_window" || action.type === "ir.actions.client") {
       action.target = action.target || "current";
     }
-    action.context = makeContext(env.services.user.context, context, action.context);
-    if (action.type === "ir.actions.act_window") {
-      action.controllers = {};
-      let domain = action.domain || [];
-      action.domain = typeof domain === "string" ? evaluateExpr(domain, action.context) : domain;
-    }
-
     return action;
   }
 
@@ -845,7 +856,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
     actionRequest: ActionRequest,
     options: ActionOptions = {}
   ): Promise<void> {
-    const action = await _loadAction(actionRequest, options.additionalContext);
+    let action = await _loadAction(actionRequest, options.additionalContext);
+    action = _preprocessAction(action, options.additionalContext);
     switch (action.type) {
       case "ir.actions.act_url":
         return _executeActURLAction(action);

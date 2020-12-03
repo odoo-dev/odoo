@@ -1907,19 +1907,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.test("load a window action without id (in a multi-record view)", async function (assert) {
-    assert.expect(15);
-
-    const localStorage = baseConfig.browser!.localStorage;
-    baseConfig.browser!.localStorage = Object.assign(Object.create(localStorage!), {
-      getItem(k: any) {
-        assert.step(`getItem local ${k}`);
-        return localStorage!.getItem(k);
-      },
-      setItem(k: any, v: any) {
-        assert.step(`setItem local ${k}`);
-        return localStorage!.setItem(k, v);
-      },
-    });
+    assert.expect(14);
 
     const sessionStorage = baseConfig.browser!.sessionStorage;
     baseConfig.browser!.sessionStorage = Object.assign(Object.create(sessionStorage!), {
@@ -1968,7 +1956,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "setItem session current_action", // action 3
       "getItem session current_action", // loadState
       "/web/dataset/search_read", // loaded action
-      "getItem local optional_fields,partner,list,2,foo",
       "setItem session current_action", // loaded action
     ]);
 
@@ -4720,84 +4707,76 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip("current act_window action is stored in session_storage", async function (assert) {
-    /*
+  QUnit.test("current act_window action is stored in session_storage", async function (assert) {
     assert.expect(1);
 
-    var expectedAction = _.extend({}, _.findWhere(this.actions, { id: 3 }), {
-      context: {},
+    const expectedAction = {
+      ...baseConfig.serverData!.actions![3],
+      context: {
+        uid: 2,
+      },
+    };
+    const sessionStorage = baseConfig.browser!.sessionStorage;
+    baseConfig.browser!.sessionStorage = Object.assign(Object.create(sessionStorage!), {
+      setItem(k: any, value: any) {
+        assert.strictEqual(
+          value,
+          JSON.stringify(expectedAction),
+          "should store the executed action in the sessionStorage"
+        );
+      },
     });
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        session_storage: SessionStorageService.extend({
-          setItem: function (key, value) {
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 3);
+    webClient.destroy();
+  });
+
+  QUnit.test(
+    "store evaluated context of current action in session_storage",
+    async function (assert) {
+      // this test ensures that we don't store stringified instances of
+      // CompoundContext in the session_storage, as they would be meaningless
+      // once restored
+      assert.expect(1);
+
+      const expectedAction = {
+        ...baseConfig.serverData!.actions![4],
+        context: {
+          uid: 2,
+          active_model: "partner",
+          active_id: 1,
+          active_ids: [1],
+        },
+      };
+      let checkSessionStorage = false;
+
+      const sessionStorage = baseConfig.browser!.sessionStorage;
+      baseConfig.browser!.sessionStorage = Object.assign(Object.create(sessionStorage!), {
+        setItem(k: any, value: any) {
+          if (checkSessionStorage) {
             assert.strictEqual(
               value,
               JSON.stringify(expectedAction),
               "should store the executed action in the sessionStorage"
             );
-          },
-        }),
-      },
-    });
+          }
+        },
+      });
+      const webClient = await createWebClient({ baseConfig });
 
-    await doAction(webClient, 3);
+      // execute an action and open a record in form view
+      await doAction(webClient, 3);
+      await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+      await legacyExtraNextTick();
 
-    webClient.destroy();
-    */
-  });
+      // click on 'Execute action' button (it executes an action with a CompoundContext as context)
+      checkSessionStorage = true;
+      await testUtils.dom.click(
+        $(webClient.el!).find(".o_form_view button:contains(Execute action)")
+      );
+      await legacyExtraNextTick();
 
-  QUnit.skip(
-    "store evaluated context of current action in session_storage",
-    async function (assert) {
-      /*
-    // this test ensures that we don't store stringified instances of
-    // CompoundContext in the session_storage, as they would be meaningless
-    // once restored
-    assert.expect(1);
-
-    var expectedAction = _.extend({}, _.findWhere(this.actions, { id: 4 }), {
-      context: {
-        active_model: "partner",
-        active_id: 1,
-        active_ids: [1],
-      },
-    });
-    var checkSessionStorage = false;
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        session_storage: SessionStorageService.extend({
-          setItem: function (key, value) {
-            if (checkSessionStorage) {
-              assert.strictEqual(
-                value,
-                JSON.stringify(expectedAction),
-                "should correctly store the executed action in the sessionStorage"
-              );
-            }
-          },
-        }),
-      },
-    });
-
-    // execute an action and open a record in form view
-    await doAction(webClient, 3);
-    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
-    await legacyExtraNextTick();
-
-    // click on 'Execute action' button (it executes an action with a CompoundContext as context)
-    checkSessionStorage = true;
-    await testUtils.dom.click($(webClient.el!).find(".o_form_view button:contains(Execute action)"));
-    await legacyExtraNextTick();
-
-    webClient.destroy();
-    */
+      webClient.destroy();
     }
   );
 
