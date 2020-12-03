@@ -437,7 +437,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
         __exportState__="exportState"
         __beforeLeave__="beforeLeave"
         __documentState__="documentState"
-          t-ref="component"/>`;
+          t-ref="component"
+          t-on-history-back="onHistoryBack"/>`;
       Component = controller.Component;
       componentProps = this.props;
       componentRef = hooks.useRef("component");
@@ -518,6 +519,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
           dialogCloseResolve();
         }
         this.env.bus.off("CLEAR-UNCOMMITTED-CHANGES", this);
+      }
+      onHistoryBack() {
+        // FIXME: close dialog instead if one is open
+        restore(controllerStack[controllerStack.length - 2].jsId);
       }
     }
     if (action.target === "new") {

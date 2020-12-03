@@ -1100,29 +1100,28 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     */
   });
 
-  QUnit.skip('handles "history_back" event', async function (assert) {
-    /*
-    assert.expect(2);
+  QUnit.test('handles "history_back" event', async function (assert) {
+    assert.expect(3);
 
     const webClient = await createWebClient({ baseConfig });
 
     await doAction(webClient, 4);
     await doAction(webClient, 3);
-    actionManager.trigger_up("history_back");
+    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item", 2);
 
+    // simulate an "history-back" event
+    const ev = new Event("history-back", { bubbles: true, cancelable: true });
+    webClient.el!.querySelector(".o_view_controller")!.dispatchEvent(ev);
     await testUtils.nextTick();
-    assert.containsN(webClient.el!, ".o_control_panel .breadcrumb-item",
-      1,
-      "there should be one controller in the breadcrumbs"
-    );
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_control_panel .breadcrumb-item");
     assert.strictEqual(
-      $(".o_control_panel .breadcrumb-item").text(),
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
       "Partners Action 4",
       "breadcrumbs should display the display_name of the action"
     );
 
     webClient.destroy();
-    */
   });
 
   QUnit.skip("stores and restores scroll position", async function (assert) {
@@ -3864,8 +3863,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("reload previous controller when discarding a new record", async function (assert) {
-    // unskip: doesn't go back to previous controller when discarding
+  QUnit.test("reload previous controller when discarding a new record", async function (assert) {
     assert.expect(9);
 
     const mockRPC: RPC = async (route, args) => {
