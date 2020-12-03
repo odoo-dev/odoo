@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="gstr_3b_report" model="account.tax.report">
+        <field name="name">GSTR 3B</field>
+        <field name="country_id" ref="base.in"/>
+    </record>
+
+    <record id="gstr_3b_report_line_details_of_outward_supplies_and_inward_supplies_liable_to_reverse_charge" model="account.tax.report.line">
+        <field name="name">3.1 Details of Outward Supplies and inward supplies liable to reverse charge</field>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_eligible_itc" model="account.tax.report.line">
+        <field name="name">4. Eligible ITC</field>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_values_of_exempt_nil_rated_and_non_gst_inward_supplies" model="account.tax.report.line">
+        <field name="name">5. Values of exempt, Nil-rated and non-GST inward supplies</field>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_interest_late_fee_payable" model="account.tax.report.line">
+        <field name="name">5.1 Interest &amp; late fee payable</field>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_details_of_inter_state_supplies_made_to_unregistered_persons" model="account.tax.report.line">
+        <field name="name">3.2 Of the supplies shown in 3.1 (a), details of inter-state supplies made to unregistered persons, composition taxable person and UIN holders</field>
+        <field name="sequence">5</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+
+    <record id="gstr_3b_report_line_outward_taxable_supplies0" model="account.tax.report.line">
+        <field name="name">(a) Outward Taxable supplies (other than zero rated, nil rated and exempted)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_details_of_outward_supplies_and_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="outward_taxable_supplies0_total_taxable_value" model="account.tax.report.line">
+        <field name="name">Total Taxable value</field>
+        <field name="tag_name">Total Taxable value (3b)(3.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_outward_taxable_supplies0"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="outward_taxable_supplies0_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(3.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_outward_taxable_supplies0"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="outward_taxable_supplies0_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(3.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_outward_taxable_supplies0"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="outward_taxable_supplies0_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(3.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_outward_taxable_supplies0"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="outward_taxable_supplies0_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(3.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_outward_taxable_supplies0"/>
+        <field name="sequence">5</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_outward_taxable_supplies1" model="account.tax.report.line">
+        <field name="name">(b) Outward Taxable supplies (zero rated)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_details_of_outward_supplies_and_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="outward_taxable_supplies1_total_taxable_value" model="account.tax.report.line">
+        <field name="name">Total Taxable value</field>
+        <field name="tag_name">Total Taxable value (3b)(3.1-b)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_outward_taxable_supplies1"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="outward_taxable_supplies1_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(3.1-b)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_outward_taxable_supplies1"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="outward_taxable_supplies1_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(3.1-b)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_outward_taxable_supplies1"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_other_outward_taxable_supplies" model="account.tax.report.line">
+        <field name="name">(c) Other Outward Taxable supplies (Nil rated, exempted)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_details_of_outward_supplies_and_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="other_outward_taxable_supplies_total_taxable_value" model="account.tax.report.line">
+        <field name="name">Total Taxable value</field>
+        <field name="tag_name">Total Taxable value (3b)(3.1-c)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_other_outward_taxable_supplies"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_inward_supplies" model="account.tax.report.line">
+        <field name="name">(d) Inward supplies (liable to reverse charge)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_details_of_outward_supplies_and_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_total_taxable_value" model="account.tax.report.line">
+        <field name="name">Total Taxable value</field>
+        <field name="tag_name">Total Taxable value (3b)(3.1-d)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_inward_supplies"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(3.1-d)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_inward_supplies"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(3.1-d)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_inward_supplies"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(3.1-d)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_inward_supplies"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(3.1-d)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_inward_supplies"/>
+        <field name="sequence">5</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_non_gst_outward_supplies" model="account.tax.report.line">
+        <field name="name">(e) Non-GST Outward supplies</field>
+        <field name="parent_id" ref="gstr_3b_report_line_details_of_outward_supplies_and_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">5</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="non_gst_outward_supplies_total_taxable_value" model="account.tax.report.line">
+        <field name="name">Total Taxable value</field>
+        <field name="tag_name">Total Taxable value (3b)(3.1-e)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_non_gst_outward_supplies"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_itc_available" model="account.tax.report.line">
+        <field name="name">(A) ITC Available (Whether in full or part)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_eligible_itc"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="itc_available_import_of_goods" model="account.tax.report.line">
+        <field name="name">(1) Import of goods</field>
+        <field name="parent_id" ref="gstr_3b_report_line_itc_available"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="import_of_goods_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-a(1))</field>
+        <field name="parent_id" ref="itc_available_import_of_goods"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="import_of_goods_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-a(1))</field>
+        <field name="parent_id" ref="itc_available_import_of_goods"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="itc_available_import_of_services" model="account.tax.report.line">
+        <field name="name">(2) Import of services</field>
+        <field name="parent_id" ref="gstr_3b_report_line_itc_available"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="import_of_services_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-a(2))</field>
+        <field name="parent_id" ref="itc_available_import_of_services"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="import_of_services_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-a(2))</field>
+        <field name="parent_id" ref="itc_available_import_of_services"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="itc_available_inward_supplies_liable_to_reverse_charge" model="account.tax.report.line">
+        <field name="name">(3) Inward supplies liable to reverse charge (other than 1&amp;2 above)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_itc_available"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_liable_to_reverse_charge_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-a(3))</field>
+        <field name="parent_id" ref="itc_available_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_liable_to_reverse_charge_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(4-a(3))</field>
+        <field name="parent_id" ref="itc_available_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_liable_to_reverse_charge_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(4-a(3))</field>
+        <field name="parent_id" ref="itc_available_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_liable_to_reverse_charge_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-a(3))</field>
+        <field name="parent_id" ref="itc_available_inward_supplies_liable_to_reverse_charge"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="itc_available_inward_supplies_from_isd" model="account.tax.report.line">
+        <field name="name">(4) Inward supplies from ISD</field>
+        <field name="parent_id" ref="gstr_3b_report_line_itc_available"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_from_isd_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-a(2))</field>
+        <field name="parent_id" ref="itc_available_inward_supplies_from_isd"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_from_isd_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(4-a(2))</field>
+        <field name="parent_id" ref="itc_available_inward_supplies_from_isd"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_from_isd_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(4-a(2))</field>
+        <field name="parent_id" ref="itc_available_inward_supplies_from_isd"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="inward_supplies_from_isd_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-a(2))</field>
+        <field name="parent_id" ref="itc_available_inward_supplies_from_isd"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="itc_available_all_other_itc" model="account.tax.report.line">
+        <field name="name">(5) All other ITC</field>
+        <field name="parent_id" ref="gstr_3b_report_line_itc_available"/>
+        <field name="sequence">5</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="all_other_itc_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-a(5))</field>
+        <field name="parent_id" ref="itc_available_all_other_itc"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="all_other_itc_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(4-a(5))</field>
+        <field name="parent_id" ref="itc_available_all_other_itc"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="all_other_itc_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(4-a(5))</field>
+        <field name="parent_id" ref="itc_available_all_other_itc"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="all_other_itc_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-a(5))</field>
+        <field name="parent_id" ref="itc_available_all_other_itc"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_itc_reversed" model="account.tax.report.line">
+        <field name="name">(B) ITC Reversed</field>
+        <field name="parent_id" ref="gstr_3b_report_line_eligible_itc"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="itc_reversed_as_per_rule_42_43_of_sgst_cgst_rules" model="account.tax.report.line">
+        <field name="name">(1) As per Rule 42 &amp; 43 of SGST/CGST rules</field>
+        <field name="parent_id" ref="gstr_3b_report_line_itc_reversed"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="as_per_rule_42_43_of_sgst_cgst_rules_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-b(1))</field>
+        <field name="parent_id" ref="itc_reversed_as_per_rule_42_43_of_sgst_cgst_rules"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="as_per_rule_42_43_of_sgst_cgst_rules_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(4-b(1))</field>
+        <field name="parent_id" ref="itc_reversed_as_per_rule_42_43_of_sgst_cgst_rules"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="as_per_rule_42_43_of_sgst_cgst_rules_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(4-b(1))</field>
+        <field name="parent_id" ref="itc_reversed_as_per_rule_42_43_of_sgst_cgst_rules"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="as_per_rule_42_43_of_sgst_cgst_rules_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-b(1))</field>
+        <field name="parent_id" ref="itc_reversed_as_per_rule_42_43_of_sgst_cgst_rules"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="itc_reversed_others" model="account.tax.report.line">
+        <field name="name">(2) Others</field>
+        <field name="parent_id" ref="gstr_3b_report_line_itc_reversed"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="others0_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-b(2))</field>
+        <field name="parent_id" ref="itc_reversed_others"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="others0_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(4-b(2))</field>
+        <field name="parent_id" ref="itc_reversed_others"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="others0_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(4-b(2))</field>
+        <field name="parent_id" ref="itc_reversed_others"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="others0_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-b(2))</field>
+        <field name="parent_id" ref="itc_reversed_others"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_net_itc_available" model="account.tax.report.line">
+        <field name="name">(C) Net ITC Available (A)-(B)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_eligible_itc"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="net_itc_available_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-c)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_net_itc_available"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="net_itc_available_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(4-c)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_net_itc_available"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="net_itc_available_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(4-c)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_net_itc_available"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="net_itc_available_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-c)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_net_itc_available"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_ineligible_itc" model="account.tax.report.line">
+        <field name="name">(D) Ineligible ITC</field>
+        <field name="parent_id" ref="gstr_3b_report_line_eligible_itc"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="ineligible_itc_as_per_section_17_5_of_cgst_sgst_act" model="account.tax.report.line">
+        <field name="name">(1) As per section 17(5) of CGST/SGST Act</field>
+        <field name="parent_id" ref="gstr_3b_report_line_ineligible_itc"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="as_per_section_17_5_of_cgst_sgst_act_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-d(1))</field>
+        <field name="parent_id" ref="ineligible_itc_as_per_section_17_5_of_cgst_sgst_act"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="as_per_section_17_5_of_cgst_sgst_act_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(4-d(1))</field>
+        <field name="parent_id" ref="ineligible_itc_as_per_section_17_5_of_cgst_sgst_act"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="as_per_section_17_5_of_cgst_sgst_act_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(4-d(1))</field>
+        <field name="parent_id" ref="ineligible_itc_as_per_section_17_5_of_cgst_sgst_act"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="as_per_section_17_5_of_cgst_sgst_act_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(4-d(1))</field>
+        <field name="parent_id" ref="ineligible_itc_as_per_section_17_5_of_cgst_sgst_act"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="ineligible_itc_others" model="account.tax.report.line">
+        <field name="name">(2) Others</field>
+        <field name="parent_id" ref="gstr_3b_report_line_ineligible_itc"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="others1_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(4-d(2))</field>
+        <field name="parent_id" ref="ineligible_itc_others"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="others1_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(4-d(2))</field>
+        <field name="parent_id" ref="ineligible_itc_others"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="others1_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(4-d(2))</field>
+        <field name="parent_id" ref="ineligible_itc_others"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="others1_cess" model="account.tax.report.line">
+        <field name="name">Cess (3b)(4-d(2))</field>
+        <field name="tag_name">Cess</field>
+        <field name="parent_id" ref="ineligible_itc_others"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_from_a_supplier_under_composition_scheme_exempt_and_nil_rated_supply" model="account.tax.report.line">
+        <field name="name">(a) From a supplier under composition scheme, Exempt  and Nil rated supply</field>
+        <field name="parent_id" ref="gstr_3b_report_line_values_of_exempt_nil_rated_and_non_gst_inward_supplies"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="from_a_supplier_under_composition_scheme_exempt_and_nil_rated_supply_inter_state_supplies" model="account.tax.report.line">
+        <field name="name">Inter-State supplies</field>
+        <field name="tag_name">Inter-State supplies (3b)(5-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_from_a_supplier_under_composition_scheme_exempt_and_nil_rated_supply"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="from_a_supplier_under_composition_scheme_exempt_and_nil_rated_supply_intra_state_supplies" model="account.tax.report.line">
+        <field name="name">Intra-State supplies</field>
+        <field name="tag_name">Intra-State supplies (3b)(5-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_from_a_supplier_under_composition_scheme_exempt_and_nil_rated_supply"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_non_gst_supply" model="account.tax.report.line">
+        <field name="name">(b) Non GST supply</field>
+        <field name="parent_id" ref="gstr_3b_report_line_values_of_exempt_nil_rated_and_non_gst_inward_supplies"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="non_gst_supply_inter_state_supplies" model="account.tax.report.line">
+        <field name="name">Inter-State supplies</field>
+        <field name="tag_name">Inter-State supplies (3b)(5-b)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_non_gst_supply"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="non_gst_supply_intra_state_supplies" model="account.tax.report.line">
+        <field name="name">Intra-State supplies</field>
+        <field name="tag_name">Intra-State supplies (3b)(5-b)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_non_gst_supply"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_interest" model="account.tax.report.line">
+        <field name="name">(a) Interest</field>
+        <field name="parent_id" ref="gstr_3b_report_line_interest_late_fee_payable"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="interest_integrated_tax" model="account.tax.report.line">
+        <field name="name">Integrated Tax</field>
+        <field name="tag_name">Integrated Tax (3b)(5.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_interest"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="interest_central_tax" model="account.tax.report.line">
+        <field name="name">Central Tax</field>
+        <field name="tag_name">Central Tax (3b)(5.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_interest"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="interest_state_ut_tax" model="account.tax.report.line">
+        <field name="name">State/UT Tax</field>
+        <field name="tag_name">State/UT Tax (3b)(5.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_interest"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="interest_cess" model="account.tax.report.line">
+        <field name="name">Cess</field>
+        <field name="tag_name">Cess (3b)(5.1-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_interest"/>
+        <field name="sequence">4</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_supplies_made_to_unregistered_persons" model="account.tax.report.line">
+        <field name="name">(a) Supplies made to Unregistered Persons</field>
+        <field name="parent_id" ref="gstr_3b_report_line_details_of_inter_state_supplies_made_to_unregistered_persons"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_unregistered_persons_total_taxable_value" model="account.tax.report.line">
+        <field name="name">Total Taxable value</field>
+        <field name="tag_name">Total Taxable value (3b)(3.2-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_unregistered_persons"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_unregistered_persons_amount_of_integrated_tax" model="account.tax.report.line">
+        <field name="name">Amount of Integrated Tax</field>
+        <field name="tag_name">Amount of Integrated Tax (3b)(3.2-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_unregistered_persons"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_unregistered_persons_place_of_supply" model="account.tax.report.line">
+        <field name="name">Place of Supply(State/UT)</field>
+        <field name="tag_name">Place of Supply(State/UT) (3b)(3.2-a)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_unregistered_persons"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_supplies_made_to_domposition_taxable_persons" model="account.tax.report.line">
+        <field name="name">(b) Supplies made to Composition Taxable Persons</field>
+        <field name="parent_id" ref="gstr_3b_report_line_details_of_inter_state_supplies_made_to_unregistered_persons"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_domposition_taxable_persons_total_taxable_value" model="account.tax.report.line">
+        <field name="name">Total Taxable value</field>
+        <field name="tag_name">Total Taxable value (3b)(3.2-b)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_domposition_taxable_persons"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_domposition_taxable_persons_amount_of_integrated_tax" model="account.tax.report.line">
+        <field name="name">Amount of Integrated Tax</field>
+        <field name="tag_name">Amount of Integrated Tax (3b)(3.2-b)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_domposition_taxable_persons"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_domposition_taxable_persons_place_of_supply" model="account.tax.report.line">
+        <field name="name">Place of Supply(State/UT)</field>
+        <field name="tag_name">Place of Supply(State/UT) (3b)(3.2-b)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_domposition_taxable_persons"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="gstr_3b_report_line_supplies_made_to_uin_holders" model="account.tax.report.line">
+        <field name="name">(c) Supplies made to UIN holders</field>
+        <field name="parent_id" ref="gstr_3b_report_line_details_of_inter_state_supplies_made_to_unregistered_persons"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_uin_holders_total_taxable_value" model="account.tax.report.line">
+        <field name="name">Total Taxable value</field>
+        <field name="tag_name">Total Taxable value (3b)(3.2-c)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_uin_holders"/>
+        <field name="sequence">1</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_uin_holders_amount_of_integrated_tax" model="account.tax.report.line">
+        <field name="name">Amount of Integrated Tax</field>
+        <field name="tag_name">Amount of Integrated Tax (3b)(3.2-c)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_uin_holders"/>
+        <field name="sequence">2</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+    <record id="supplies_made_to_uin_holders_place_of_supply" model="account.tax.report.line">
+        <field name="name">Place of Supply(State/UT)</field>
+        <field name="tag_name">Place of Supply(State/UT) (3b)(3.2-c)</field>
+        <field name="parent_id" ref="gstr_3b_report_line_supplies_made_to_uin_holders"/>
+        <field name="sequence">3</field>
+        <field name="report_id" ref="gstr_3b_report"/>
+    </record>
+
+</odoo>
