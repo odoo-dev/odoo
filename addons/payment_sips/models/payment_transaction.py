@@ -23,7 +23,7 @@ class PaymentTransaction(models.Model):
     def _compute_reference(self, provider, prefix=None, separator='-', **kwargs):
         """ Override of payment to ensure that Sips requirements for references are satisfied.
 
-        Sips requirements for transaction are as follows:
+        Sips requirements for references are as follows:
         - References can only be made of alphanumeric characters.
           This is satisfied by forcing the custom separator to 'x' to ensure that no '-' character
           will be used to append a suffix. Additionally, the prefix is sanitized if it was provided,

@@ -184,7 +184,7 @@ odoo.define('payment_adyen.payment_form', require => {
                         };
                         const checkout = new AdyenCheckout(configuration);
                         this.adyenDropin = checkout.create('dropin').mount(
-                            `#adyen-dropin-container_${paymentOptionId}`
+                            `#adyen_dropin_container_${paymentOptionId}`
                         );
                         this.adyenDropin.acquirerId = paymentOptionId;
                     });

@@ -2,7 +2,7 @@
 <odoo>
     
     <template id="inline_form">
-        <div t-attf-id="adyen-dropin-container_{{acquirer_id}}"/>
+        <div t-attf-id="adyen_dropin_container_{{acquirer_id}}"/>
     </template>
     
 </odoo>

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-FLEXCHECKOUT_ERROR = {'NCError': "Token",
-                      'NCErrorCN': "Card holder name",
-                      'NCErrorCVC': "Card Verification Code (CVC)",
-                      'NCErrorCardNo': "The card number",
-                      'NCErrorED': "Expiracy Date"
-                      }
+FLEXCHECKOUT_ERROR = {
+    'NCError': "Token",
+    'NCErrorCN': "Card holder name",
+    'NCErrorCVC': "Card Verification Code (CVC)",
+    'NCErrorCardNo': "The card number",
+    'NCErrorED': "Expiry Date",
+}
 
 OGONE_ERROR_MAP = {
     '0020001001': "Authorization failed, please retry",
@@ -486,19 +487,102 @@ OGONE_ERROR_MAP = {
 DATA_VALIDATION_ERROR = '50001111'
 
 
-def retryable(error):
-    return error in [
-        '0020001001', '0020001002', '0020001003', '0020001004', '0020001005',
-        '0020001006', '0020001007', '0020001008', '0020001009', '0020001010',
-        '30001010', '30001011', '30001015',
-        '30001057', '30001058',
-        '30001998', '30001999',
-        # '30611001',     # amount exceeds card limit
-        '30961001',
-        '40001001', '40001002', '40001003', '40001004', '40001005',
-        '40001006', '40001007', '40001008', '40001009', '40001010',
-        '40001012',
-        '40001018', '40001019', '40001020',
-        '40001134', '40001135', '40001136', '40001137',
-        # '50001174',      # cardholder name too long
-    ]
+# SHA-OUT keys
+# source https://payment-services.ingenico.com/int/en/ogone/support/guides/integration guides/e-commerce/transaction-feedback
+
+SHA_OUT_KEYS = [
+    'AAVADDRESS',
+    'AAVCHECK',
+    'AAVMAIL',
+    'AAVNAME',
+    'AAVPHONE',
+    'AAVZIP',
+    'ACCEPTANCE',
+    'ALIAS',
+    'AMOUNT',
+    'BIC',
+    'BIN',
+    'BRAND',
+    'CARDNO',
+    'CCCTY',
+    'CN',
+    'COLLECTOR_BIC',
+    'COLLECTOR_IBAN',
+    'COMPLUS',
+    'CREATION_STATUS',
+    'CREDITDEBIT',
+    'CURRENCY',
+    'CVCCHECK',
+    'DCC_COMMPERCENTAGE',
+    'DCC_CONVAMOUNT',
+    'DCC_CONVCCY',
+    'DCC_EXCHRATE',
+    'DCC_EXCHRATESOURCE',
+    'DCC_EXCHRATETS',
+    'DCC_INDICATOR',
+    'DCC_MARGINPERCENTAGE',
+    'DCC_VALIDHOURS',
+    'DEVICEID',
+    'DIGESTCARDNO',
+    'ECI',
+    'ED',
+    'EMAIL',
+    'ENCCARDNO',
+    'FXAMOUNT',
+    'FXCURRENCY',
+    'IP',
+    'IPCTY',
+    'MANDATEID',
+    'MOBILEMODE',
+    'NBREMAILUSAGE',
+    'NBRIPUSAGE',
+    'NBRIPUSAGE_ALLTX',
+    'NBRUSAGE',
+    'NCERROR',
+    'ORDERID',
+    'PAYID',
+    'PAYIDSUB',
+    'PAYMENT_REFERENCE',
+    'PM',
+    'SCO_CATEGORY',
+    'SCORING',
+    'SEQUENCETYPE',
+    'SIGNDATE',
+    'STATUS',
+    'SUBBRAND',
+    'SUBSCRIPTION_ID',
+    'TICKET',
+    'TRXDATE',
+    'VC',
+]
+
+# Source https://epayments-support.ingenico.com/en/integration/all-sales-channels/flexcheckout/guide#flexcheckout_integration_guides_sha_out
+FLEXCHECKOUT_KEYS = [
+    'ALIAS.ALIASID',
+    'ALIAS.NCERROR',
+    'ALIAS.NCERRORCARDNO',
+    'ALIAS.NCERRORCN',
+    'ALIAS.NCERRORCVC',
+    'ALIAS.NCERRORED',
+    'ALIAS.ORDERID',
+    'ALIAS.STATUS',
+    'ALIAS.STOREPERMANENTLY',
+    'CARD.BIC',
+    'CARD.BIN',
+    'CARD.BRAND',
+    'CARD.CARDHOLDERNAME',
+    'CARD.CARDNUMBER',
+    'CARD.CVC',
+    'CARD.EXPIRYDATE'
+]
+
+
+VALID_KEYS = SHA_OUT_KEYS + FLEXCHECKOUT_KEYS
+
+
+PAYMENT_STATUS_MAPPING = {
+    'wait': (41, 50, 51, 52, 55, 56, 91, 92, 99),
+    'pending': (46, 81, 82),  # 46 = 3DS HTML response
+    'done': (5, 8, 9),
+    'cancel': (1,),
+}

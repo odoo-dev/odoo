@@ -1,12 +1,15 @@
 # coding: utf-8
+
 import logging
 import time
 from hashlib import sha256
+
 from werkzeug import urls
 
-from odoo import api, fields, models, _
-from odoo.addons.payment_ogone.controllers.main import OgoneController
+from odoo import api, fields, models
 
+from odoo.addons.payment_ogone.controllers.main import OgoneController
+from . import const
 
 _logger = logging.getLogger(__name__)
 
@@ -14,222 +17,128 @@ _logger = logging.getLogger(__name__)
 class PaymentAcquirer(models.Model):
     _inherit = 'payment.acquirer'
 
-    provider = fields.Selection(selection_add=[
-        ('ogone', 'Ogone')
-    ], ondelete={'ogone': 'set default'})
-    ogone_pspid = fields.Char('PSPID', required_if_provider='ogone', groups='base.group_user')
-    ogone_userid = fields.Char('API User ID', required_if_provider='ogone', groups='base.group_user')
-    ogone_password = fields.Char('API User Password', required_if_provider='ogone', groups='base.group_user')
-    ogone_shakey_in = fields.Char('SHA Key IN', size=32, required_if_provider='ogone', groups='base.group_user')
-    ogone_shakey_out = fields.Char('SHA Key OUT', size=32, required_if_provider='ogone', groups='base.group_user')
+    provider = fields.Selection(
+        selection_add=[('ogone', "Ogone")], ondelete={'ogone': 'set default'})
+    ogone_pspid = fields.Char(
+        string="PSPID", required_if_provider='ogone', groups='base.group_system')
+    ogone_userid = fields.Char(
+        string="API User ID", required_if_provider='ogone', groups='base.group_system')
+    ogone_password = fields.Char(
+        string="API User Password", required_if_provider='ogone', groups='base.group_system')
+    ogone_shakey_in = fields.Char(
+        string="SHA Key IN", size=32, required_if_provider='ogone', groups='base.group_system')
+    ogone_shakey_out = fields.Char(
+        string="SHA Key OUT", size=32, required_if_provider='ogone', groups='base.group_system')
 
     def _get_validation_amount(self):
         """ Get the amount to transfer in a payment method validation operation.
 
-        For an acquirer to support tokenization, it must override this method and return the amount
-        to be transferred in a payment method validation operation.
-
-        Note: self.ensure_one()
-
         :return: The validation amount
         :rtype: float
         """
-        # fixme QUESTION TO ANV: the /my/payment_method should not say that a small amount will be taken from the card and refund after?
-        # ogone says that the payment is accepted with the amount = 1. That could be missleading for the customer.
-        self.ensure_one()
+        if self.provider != 'ogone':
+            return super()._get_validation_amount()
         return 1.0
 
-
-
-    @api.model
-    def _ogone_get_urls(self):
-        """ Ogone URLS:
-         - standard order: POST address for form-based """
-        # https://ogone.test.v-psp.com/Tokenization/HostedPage
-        # https://secure.ogone.com/Tokenization/HostedPage
-        environment = 'prod' if self.state == 'enabled' else 'test'
-        if environment == 'prod':
-            flexcheckout_url = "https://secure.ogone.com/Tokenization/HostedPage"
-            direct_order_url = "https://secure.ogone.com/ncol/prod/orderdirect.asp"
-            maintenance_direct_url = "https://secure.ogone.com/ncol/prod/maintenancedirect.asp"
-        else:
-            flexcheckout_url = "https://ogone.test.v-psp.com/Tokenization/HostedPage"
-            direct_order_url = "https://ogone.test.v-psp.com/ncol/test/orderdirect.asp"
-            maintenance_direct_url = "https://ogone.test.v-psp.com/ncol/test/maintenancedirect.asp"
-        return {
-            'ogone_direct_order_url': direct_order_url,
-            'ogone_flexcheckout_url': flexcheckout_url,
-            'ogone_maintenance_url': maintenance_direct_url,
-        }
-
-    def _ogone_generate_shasign(self, inout, values):
+    def _ogone_generate_shasign(self, values, incoming=True):
         """ Generate the shasign for incoming or outgoing communications.
 
-        :param string inout: 'in' (odoo contacting ogone) or 'out' (ogone
-                             contacting odoo). In this last case only some
-                             fields should be contained (see e-Commerce basic)
-        :param dict values: transaction values
-
-        :return string: shasign
+        :param dict values: The values used to generate the signature
+        :param bool incoming: Whether the signature must be generate for an incoming (ogone to odoo)
+                              or outgoing (odoo to ogone) communication.
+        :return: The shasign
+        :rtype: str
         """
-        assert inout in ('in', 'out')
-        assert self.provider == 'ogone'
-        key = getattr(self, 'ogone_shakey_' + inout)
+        key = self.ogone_shakey_in if incoming else self.ogone_shakey_out
+        sorted_sign_items = sorted((k.upper(), v) for k, v in values.items())
+        # For outgoing communications, only some fields must be included (see e-Commerce basic)
+        filtered_sign_items = [(k, v) for k, v in sorted_sign_items
+                               if v and (incoming or k in const.VALID_KEYS)]
+        sign_string = ''.join(f'{k}={v}{key}' for k, v in filtered_sign_items)
+        sign = sign_string.encode('utf-8')
+        return sha256(sign).hexdigest()
 
-        def filter_key(key):
-            if inout == 'in':
-                return True
-            else:
-                # SHA-OUT keys
-                # source https://payment-services.ingenico.com/int/en/ogone/support/guides/integration guides/e-commerce/transaction-feedback
-                keys = [
-                    'AAVADDRESS',
-                    'AAVCHECK',
-                    'AAVMAIL',
-                    'AAVNAME',
-                    'AAVPHONE',
-                    'AAVZIP',
-                    'ACCEPTANCE',
-                    'ALIAS',
-                    'AMOUNT',
-                    'BIC',
-                    'BIN',
-                    'BRAND',
-                    'CARDNO',
-                    'CCCTY',
-                    'CN',
-                    'COLLECTOR_BIC',
-                    'COLLECTOR_IBAN',
-                    'COMPLUS',
-                    'CREATION_STATUS',
-                    'CREDITDEBIT',
-                    'CURRENCY',
-                    'CVCCHECK',
-                    'DCC_COMMPERCENTAGE',
-                    'DCC_CONVAMOUNT',
-                    'DCC_CONVCCY',
-                    'DCC_EXCHRATE',
-                    'DCC_EXCHRATESOURCE',
-                    'DCC_EXCHRATETS',
-                    'DCC_INDICATOR',
-                    'DCC_MARGINPERCENTAGE',
-                    'DCC_VALIDHOURS',
-                    'DEVICEID',
-                    'DIGESTCARDNO',
-                    'ECI',
-                    'ED',
-                    'EMAIL',
-                    'ENCCARDNO',
-                    'FXAMOUNT',
-                    'FXCURRENCY',
-                    'IP',
-                    'IPCTY',
-                    'MANDATEID',
-                    'MOBILEMODE',
-                    'NBREMAILUSAGE',
-                    'NBRIPUSAGE',
-                    'NBRIPUSAGE_ALLTX',
-                    'NBRUSAGE',
-                    'NCERROR',
-                    'ORDERID',
-                    'PAYID',
-                    'PAYIDSUB',
-                    'PAYMENT_REFERENCE',
-                    'PM',
-                    'SCO_CATEGORY',
-                    'SCORING',
-                    'SEQUENCETYPE',
-                    'SIGNDATE',
-                    'STATUS',
-                    'SUBBRAND',
-                    'SUBSCRIPTION_ID',
-                    'TICKET',
-                    'TRXDATE',
-                    'VC',
-                ]
-                # Source https://epayments-support.ingenico.com/en/integration/all-sales-channels/flexcheckout/guide#flexcheckout_integration_guides_sha_out
-                flexcheckout_out = ['ALIAS.ALIASID',
-                                    'ALIAS.NCERROR',
-                                    'ALIAS.NCERRORCARDNO',
-                                    'ALIAS.NCERRORCN',
-                                    'ALIAS.NCERRORCVC',
-                                    'ALIAS.NCERRORED',
-                                    'ALIAS.ORDERID',
-                                    'ALIAS.STATUS',
-                                    'ALIAS.STOREPERMANENTLY',
-                                    'CARD.BIC',
-                                    'CARD.BIN',
-                                    'CARD.BRAND',
-                                    'CARD.CARDHOLDERNAME',
-                                    'CARD.CARDNUMBER',
-                                    'CARD.CVC',
-                                    'CARD.EXPIRYDATE'
-                                    ]
-                keys += flexcheckout_out
-                return key.upper() in keys
+    def _ogone_setup_iframe(self, data):  # TODO ANV review this + rename
+        """ Setup the ogone Iframe.
 
-        items = sorted((k.upper(), v) for k, v in values.items())
-        sign = ''.join('%s=%s%s' % (k, v, key) for k, v in items if v and filter_key(k.upper()))
-        sign = sign.encode("utf-8")
-        shasign = sha256(sign).hexdigest()
-        return shasign
+        The url and its GET parameters setup the form used by the client to enter his payment
+        details.
 
-    def ogone_form_generate_values(self, values):
+        :param data: Ogone dict  # TODO ANV
+        :return: The url of the Ogone iframe
+        :rtype: str
         """
-        :param values: dict of Ogone values
-        :return: dict of values ready to be url encoded
+        # VFE FIXME one clear url_join with all the params ?
+        ogone_values = self._ogone_form_generate_values(data)
+        url_parameters = urls.url_encode(ogone_values)
+        base_url = self._ogone_get_urls()['ogone_flexcheckout_url']
+        full_checkout_url = base_url + '?' + url_parameters
+        return full_checkout_url
+
+    def _ogone_form_generate_values(self, values):  # TODO ANV review this
+        """
+
+        :param dict values: The Ogone values  # TODO ANV what kind of values?
+        :return: The values ready to be url encoded
+        :rtype: dict
         """
         base_url = self.get_base_url()
         # The param_plus is a list of values that are not useful for the Ogone Alias creation but that we need to use
         # once we come back to our feedback endpoint. We need to do this because the endpoint is public and these values
         # are needed to continue the flow.
-        param_plus = {
+        additional_params = values.get('param_plus', dict())
+        param_plus = {  # TODO ANV yet another 'param_plus' ?
             'acquirerId': self.id,
             'partnerId': values.get('partner_id'),
             'currencyId': values.get('currency_id'),
             'orderId': values.get('order_id'),
             'amount': values.get('amount'),
-            'paymentOptionId': values.get('param_plus').get('payment_option_id'),
-            'referencePrefix': values.get('param_plus').get('reference_prefix'),
-            'flow': values.get('param_plus').get('flow'),
-            'landingRoute': values.get('param_plus').get('landing_route'),
-            'initTxRoute': values.get('param_plus').get('init_tx_route'),
-            'access_token': values.get('param_plus').get('access_token'),
+            'paymentOptionId': additional_params.get('payment_option_id'),
+            'referencePrefix': additional_params.get('reference_prefix'),
+            'flow': additional_params.get('flow'),
+            'landingRoute': additional_params.get('landing_route'),
+            'transactionRoute': additional_params.get('transaction_route'),
+            'access_token': additional_params.get('access_token'),
         }
-        if values.get('param_plus').get('isValidation'):
+        if additional_params.get('isValidation'):
             # We set the validation key only if true otherwise javascript will receive isValidation = "False"
             # that will be parsed to true ¯\_(ツ)_/¯
             param_plus.update({'isValidation': True})
-        if values.get('param_plus').get('validation_route'):
+        if additional_params.get('validation_route'):
             # Set validation data
             # arj fixme: /my/payment_method has still some bugs with ingenico (data verification without 3ds and final redirect with 3ds)
             param_plus.update({'validationRoute': True})
             param_plus.update({'isValidation': True})
 
+        return_url = urls.url_join(base_url, OgoneController._fleckcheckout_url)
         ogone_tx_values = {
             'ACCOUNT.PSPID': self.ogone_pspid,
             'ALIAS.ORDERID': values['reference'],
             'LAYOUT.LANGUAGE': values.get('partner_lang'),
             'CARD.PAYMENTMETHOD': 'CreditCard',
-            'PARAMETERS.ACCEPTURL': urls.url_join(base_url, OgoneController._fleckcheckout_url),
-            'PARAMETERS.EXCEPTIONURL': urls.url_join(base_url, OgoneController._fleckcheckout_url),
+            'PARAMETERS.ACCEPTURL': return_url,
+            'PARAMETERS.EXCEPTIONURL': return_url,
             'ALIAS.ALIASID': 'ODOO-NEW-ALIAS-%s' % time.time(),  # something unique,
             'PARAMPLUS': urls.url_encode(param_plus),
         }
-        shasign = self._ogone_generate_shasign('in', ogone_tx_values)
+        shasign = self._ogone_generate_shasign(ogone_tx_values, incoming=True)
         ogone_tx_values['SHASIGNATURE.SHASIGN'] = shasign
-        ogone_tx_values.update(ogone_tx_values)
+        # ogone_tx_values.update(ogone_tx_values) # FIXME VFE strange code...
         return ogone_tx_values
 
-    def _ogone_setup_iframe(self, data):
-        """
-            Setup the ogone Iframe. The url and his GET parameters setup the form used by the client to enter his
-            Credit card information.
-        :param data: Ogone dict
-        :return: string: the url of the Ogone IFRAME
-        """
-        ogone_values = self.ogone_form_generate_values(data)
-        url_parameters = urls.url_encode(ogone_values)
-        base_url = self._ogone_get_urls()['ogone_flexcheckout_url']
-        full_checkout_url = base_url + '?' + url_parameters
-        return full_checkout_url
+    @api.model
+    def _ogone_get_urls(self):
+        # standard order: POST address for form-based
+        if self.state == 'enabled':
+            return {
+                'ogone_flexcheckout_url': 'https://secure.ogone.com/Tokenization/HostedPage',
+                'ogone_direct_order_url': 'https://secure.ogone.com/ncol/prod/orderdirect.asp',
+                'ogone_maintenance_url': 'https://secure.ogone.com/ncol/prod/maintenancedirect.asp',
+            }
+        else:  # 'test'
+            return {
+                'ogone_flexcheckout_url': 'https://ogone.test.v-psp.com/Tokenization/HostedPage',
+                'ogone_direct_order_url': 'https://ogone.test.v-psp.com/ncol/test/orderdirect.asp',
+                'ogone_maintenance_url': 'https://ogone.test.v-psp.com/ncol/test'
+                                         '/maintenancedirect.asp',
+            }

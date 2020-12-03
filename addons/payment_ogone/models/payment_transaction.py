@@ -3,79 +3,53 @@
 import base64
 import datetime
 import logging
+import re
 import time
 from pprint import pformat
-import re
 
 import requests
 from lxml import etree, objectify
 from werkzeug import urls
 
-from odoo import api, fields, models, _
-from odoo.addons.payment.models.payment_acquirer import ValidationError
-from odoo.addons.payment.utils import singularize_reference_prefix
-from odoo.addons.payment_ogone.controllers.main import OgoneController
-from odoo.addons.payment_ogone.data import ogone
+from odoo import _, api, fields, models
 from odoo.http import request
 from odoo.tools import ustr
 from odoo.tools.float_utils import float_repr, float_round
 
+from odoo.addons.payment import utils as payment_utils
+from odoo.addons.payment.models.payment_acquirer import ValidationError
+from odoo.addons.payment_ogone.controllers.main import OgoneController
+from . import const
+
 _logger = logging.getLogger(__name__)
 
 
-class PaymentTxOgone(models.Model):
+class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
-    # ogone status
-    _ogone_valid_tx_status = [5, 9, 8]
-    _ogone_wait_tx_status = [41, 50, 51, 52, 55, 56, 91, 92, 99]
-    _ogone_pending_tx_status = [46, 81, 82]   # 46 = 3DS HTML response
-    _ogone_cancel_tx_status = [1]
 
-    ogone_html_3ds = fields.Char('3D Secure HTML')
-    ogone_user_error = fields.Char('User Friendly State message ')
-
-    @api.model
-    def _compute_reference(self, provider, prefix=None, separator='-', **kwargs):
-        # Ogone needs singularized references to avoid triggering errors.
-        # They only check the ORDERID to detect duplicate transactions, not the buyer, amount, card etc.
-        # We could have problems by using multiple Odoo instances using the same Ogone account.
-        # Or if the same reference is used several times
-        if provider != 'ogone':
-            return super()._compute_reference(provider, prefix, separator, **kwargs)
-
-        prefix = prefix and singularize_reference_prefix(prefix)
-        return super()._compute_reference(provider, prefix, separator, **kwargs)
+    # TODO ANV what are these fields used for?
+    ogone_html_3ds = fields.Char(string="3D Secure HTML")
+    ogone_user_error = fields.Char(string="User Friendly State message")
 
     # --------------------------------------------------
     # BUSINESS METHODS
     # --------------------------------------------------
 
     @api.model
-    def _ogone_clean_keys(self, data):
-        # clean dict keys for coherence with directlink API.
-        # Thanks to Ogone, the dict keys are different from one API to another but the correct keys are needed
-        # to check the signature...
-        # 1) Pass keys to uppercase
-        # 2) Remove prefix with the dot line "CARD."; "ALIAS." etc
-        return {re.sub(r'.*\.', '', key.upper()): val for key, val in data.items()}
+    def _compute_reference(self, provider, prefix=None, **kwargs):
+        """ Override of payment to ensure that Ogone requirements for references are satisfied.
 
-    def _ogone_ncerrors_verification(self, data):
+        Ogone requirements for references are as follows:
+        - References must be unique at provider level for a given merchant account.
+          This is satisfied by singularizing the prefix with the current datetime. If two
+          transactions are created simultaneously, `_compute_reference` ensures the uniqueness of
+          references by suffixing a sequence number.
         """
-        Check that the incoming data coming from the FlexCheckout API are correct.
-        :param data: GET parameters of the feedback URL
-        :return: None
-        """
-        # check for errors before using values
-        errors = {k: int(v) for k, v in data.items() if k.startswith('NCError') and int(v)}
-        if errors:
-            self._set_canceled()
-            error_fields = ", ".join([ogone.FLEXCHECKOUT_ERROR[key] for key in errors.keys()])
-            error_msg = "Ogone: " + _(f"The following parameters could not be validated by Ogone: {error_fields}.")
-            raise ValidationError(error_msg)
+        if provider != 'ogone':
+            return super()._compute_reference(provider, prefix=prefix, **kwargs)
 
-
-
-
+        prefix = prefix and payment_utils.singularize_reference_prefix(prefix=prefix)
+        return super()._compute_reference(provider, prefix=prefix, **kwargs)
 
     @api.model
     def _get_tx_from_feedback_data(self, provider, data):
@@ -95,31 +69,26 @@ class PaymentTxOgone(models.Model):
         """
         if provider != 'ogone':
             return super()._get_tx_from_feedback_data(provider, data)
+
         if data.get('TYPE') == 'flexcheckout':
-            data['ALIAS'] = data['ALIASID']
+            alias = data['ALIASID']
             reference = data.get('REFERENCE')
             # pay_id is not present when returning from fleckcheckout because we just created an alias.
             # Therefore, this field is not blocking
             pay_id = True
         else:
+            alias = data.get('ALIAS')
             # type is directlink
             pay_id = data.get('PAYID')
             reference = data.get('ORDERID')
 
-        alias = data.get('ALIAS')
         data_checked = alias and reference and pay_id
         if not data_checked:
-            error_msg = "Ogone: " + _('received data with missing values (%s) (%s)') % (reference, alias)
-            raise ValidationError(error_msg)
+            raise ValidationError(_("Ogone: received data with missing values (%s) (%s)", reference, alias))
 
         tx = self.search([('reference', '=', reference)])
-        if not tx or len(tx) > 1:
-            error_msg = "Ogone: " + _('received data for reference %s', reference)
-            if not tx:
-                error_msg += _(': no order found')
-            else:
-                error_msg += _(': multiple order found')
-            raise ValidationError(error_msg)
+        if not tx:
+            raise ValidationError(_("Ogone: no order found matching reference %s", reference))
         return tx
 
     def _process_feedback_data(self, data):
@@ -138,7 +107,7 @@ class PaymentTxOgone(models.Model):
 
         self._ogone_ncerrors_verification(data)
         if all(key in data for key in ['CARDNUMBER', 'CARDHOLDERNAME']) and data.get('TYPE') == 'flexcheckout':
-            # First case: # We are coming back from the flexkcheckout API
+            # First case: # We are coming back from the flexcheckout API
             # The token (alias) was created on the Ogone server, we create it here before performing the payment request
             token_vals = {
                 'acquirer_id': self.acquirer_id.id,
@@ -150,40 +119,37 @@ class PaymentTxOgone(models.Model):
             if data.get('STOREPERMANENTLY') == 'N':
                 # The token shall not be reused, we archive it to avoid listing it
                 token_vals.update({'active': False})
-            token_id = self.env['payment.token'].create(token_vals)
-            self.write({'token_id': token_id})
-
+            token = self.env['payment.token'].create(token_vals)
+            self.write({'token_id': token.id})
         else:
             # Second case: we are coming back from the Direct link API with a 3DS redirection
             status = int(data.get('STATUS', '0'))
-            if status in self._ogone_valid_tx_status:
+            if status in const.PAYMENT_STATUS_MAPPING['done']:
                 self.write({'acquirer_reference': data.get('PAYID')})
                 if self.token_id:
                     self.token_id.verified = True
                     self._set_done()
-            elif status in self._ogone_cancel_tx_status:
+            elif status in const.PAYMENT_STATUS_MAPPING['cancel']:
                 self._set_canceled()
-            elif status in self._ogone_pending_tx_status or status in self._ogone_wait_tx_status:
+            elif status in const.PAYMENT_STATUS_MAPPING['wait'] \
+                    or status in const.PAYMENT_STATUS_MAPPING['pending']:
                 self._set_pending()
-            else:
-                # There was probably an NCERROR
-                _logger.error("Ogone: Could not falidate these data for %s" % pformat(data))
+            else:  # There was probably an NCERROR
+                _logger.error("could not validate these data for:\n%s", pformat(data))  # TODO ANV check if data aren't logged twice
                 self._set_canceled()
 
-    # --------------------------------------------------
-    # Ogone API RELATED METHODS
-    # --------------------------------------------------
     def _send_payment_request(self):
         super()._send_payment_request()  # Log the 'sent' message
         if self.provider != 'ogone':
             return
-        account = self.acquirer_id
+        acquirer = self.acquirer_id
+        # FIXME VFE can we have a falsy ref at this point ?
         reference = self.reference or "ODOO-%s-%s" % (datetime.datetime.now().strftime('%y%m%d_%H%M%S'), self.partner_id.id)
-        base_url = self.acquirer_id.get_base_url()
+        base_url = acquirer.get_base_url()
         data = {
-            'PSPID': account.ogone_pspid,
-            'USERID': account.ogone_userid,
-            'PSWD': account.ogone_password,
+            'PSPID': acquirer.ogone_pspid,
+            'USERID': acquirer.ogone_userid,
+            'PSWD': acquirer.ogone_password,
             'ORDERID': reference,
             'AMOUNT': float_repr(float_round(self.amount, 2) * 100, 0),
             'CURRENCY': self.currency_id.name,
@@ -213,13 +179,14 @@ class PaymentTxOgone(models.Model):
         data.update({
             'FLAG3D': 'Y',
             'LANGUAGE': self.partner_id.lang or 'en_US',
+            # FIXME VFE incoherent language acquisition: partner or en here, context or EN in other places
             'WIN3DS': 'MAINW',
         })
         if request:
             data['REMOTE_ADDR'] = request.httprequest.remote_addr
-        data['SHASIGN'] = self.acquirer_id._ogone_generate_shasign('in', data)
+        data['SHASIGN'] = acquirer._ogone_generate_shasign(data, incoming=True)
 
-        direct_order_url = self.acquirer_id._ogone_get_urls()['ogone_direct_order_url']
+        direct_order_url = acquirer._ogone_get_urls()['ogone_direct_order_url']
 
         logged_data = data.copy()
         logged_data.pop('PSWD')
@@ -228,29 +195,34 @@ class PaymentTxOgone(models.Model):
 
         try:
             tree = objectify.fromstring(result)
-            _logger.info('ogone_payment_request: Values received:\n%s', etree.tostring(tree, pretty_print=True, encoding='utf-8'))
         except etree.XMLSyntaxError:
             # invalid response from ogone
             _logger.exception('Invalid xml response from ogone')
             _logger.info('ogone_payment_request: Values received:\n%s', result)
             raise
+
+        _logger.info('ogone_payment_request: Values received:\n%s', etree.tostring(tree, pretty_print=True, encoding='utf-8'))
         return self._ogone_validate_tree(tree)
 
     def _send_refund_request(self, **kwargs):
-        account = self.acquirer_id
-        reference = self.reference or "ODOO-%s-%s" % (datetime.datetime.now().strftime('%y%m%d_%H%M%S'), self.partner_id.id)
+        if self.provider != 'ogone':
+            return super()._send_refund_request(**kwargs)
+        acquirer = self.acquirer_id
+        # FIXME VFE can we really have a falsy reference at this point ?
+        reference = self.reference #or "ODOO-%s-%s" % (datetime.datetime.now().strftime('%y%m%d_%H%M%S'), self.partner_id.id)
         data = {
-            'PSPID': account.sudo().ogone_pspid,
-            'USERID': account.sudo().ogone_userid,
-            'PSWD': account.sudo().ogone_password,
+            'PSPID': acquirer.ogone_pspid,
+            'USERID': acquirer.ogone_userid,
+            'PSWD': acquirer.ogone_password,
             'ORDERID': reference,
             'AMOUNT': int(self.amount * 100),
             'CURRENCY': self.currency_id.name,
             'OPERATION': 'RFS',
             'PAYID': self.acquirer_reference,
         }
-        data['SHASIGN'] = self.acquirer_id.sudo()._ogone_generate_shasign('in', data)
-        refund_order_url = self.acquirer_id._ogone_get_urls()['ogone_maintenance_url']
+        data['SHASIGN'] = acquirer._ogone_generate_shasign(data, incoming=True)
+        refund_order_url = acquirer._ogone_get_urls()['ogone_maintenance_url']
+
         logged_data = data.copy()
         logged_data.pop('PSWD')
         _logger.info("ogone_s2s_do_refund: Sending values to URL %s, values:\n%s", refund_order_url, pformat(logged_data))
@@ -258,7 +230,6 @@ class PaymentTxOgone(models.Model):
 
         try:
             tree = objectify.fromstring(result)
-            _logger.info('ogone_s2s_do_refund: Values received:\n%s', etree.tostring(tree, pretty_print=True, encoding='utf-8'))
         except etree.XMLSyntaxError:
             # invalid response from ogone
             _logger.exception('Invalid xml response from ogone')
@@ -266,7 +237,37 @@ class PaymentTxOgone(models.Model):
             self.state_message = str(result)
             raise
 
+        _logger.info('ogone_s2s_do_refund: Values received:\n%s', etree.tostring(tree, pretty_print=True, encoding='utf-8'))
         return self._ogone_validate_tree(tree)
+
+    # --------------------------------------------------
+    # OGONE API RELATED METHODS
+    # --------------------------------------------------
+
+    @api.model
+    def _ogone_clean_keys(self, data):  # TODO ANV rename
+        """ Clean dict keys for coherence with directlink API.
+
+        The dict keys are different from one API to another but the correct keys are needed.
+        """
+        # to check the signature...
+        # 1) Pass keys to uppercase
+        # 2) Remove prefix with the dot line "CARD."; "ALIAS." etc
+        return {re.sub(r'.*\.', '', key.upper()): val for key, val in data.items()}
+
+    def _ogone_ncerrors_verification(self, data):
+        """
+        Check that the incoming data coming from the FlexCheckout API are correct.
+        :param data: GET parameters of the feedback URL
+        :return: None
+        """
+        # check for errors before using values
+        errors = {k: int(v) for k, v in data.items() if k.startswith('NCError') and int(v)}
+        if errors:
+            self._set_canceled()
+            error_fields = ", ".join([const.FLEXCHECKOUT_ERROR[key] for key in errors.keys()])
+            error_msg = "Ogone: " + _(f"The following parameters could not be validated by Ogone: {error_fields}.")
+            raise ValidationError(error_msg)
 
     def _ogone_validate_tree(self, tree, tries=2):
         if self.state not in ['draft', 'pending']:
@@ -274,18 +275,17 @@ class PaymentTxOgone(models.Model):
             return True
 
         status = int(tree.get('STATUS') or 0)
-        if status in self._ogone_valid_tx_status:
-            self.write({
-                'acquirer_reference': tree.get('PAYID'),
-            })
+        if status in const.PAYMENT_STATUS_MAPPING['done']:
+            self.write({'acquirer_reference': tree.get('PAYID')})
             if self.token_id:
                 self.token_id.verified = True
             self._set_done()
             return True
-        elif status in self._ogone_cancel_tx_status:
+        elif status in const.PAYMENT_STATUS_MAPPING['cancel']:
             self.write({'acquirer_reference': tree.get('PAYID')})
             self._set_canceled()
-        elif status in self._ogone_pending_tx_status:
+            # TODO VFE return False ?
+        elif status in const.PAYMENT_STATUS_MAPPING['pending']:
             vals = {
                 'acquirer_reference': tree.get('PAYID'),
             }
@@ -294,7 +294,7 @@ class PaymentTxOgone(models.Model):
             self.write(vals)
             self._set_pending()
             return False
-        elif status in self._ogone_wait_tx_status and tries > 0:
+        elif status in const.PAYMENT_STATUS_MAPPING['wait'] and tries > 0:
             time.sleep(0.5)
             self.write({'acquirer_reference': tree.get('PAYID')})
             tree = self._ogone_api_get_tx_status()
@@ -303,14 +303,14 @@ class PaymentTxOgone(models.Model):
             error = 'Ogone: feedback error: %(error_str)s\n\n%(error_code)s: %(error_msg)s' % {
                 'error_str': tree.get('NCERRORPLUS'),
                 'error_code': tree.get('NCERROR'),
-                'error_msg': ogone.OGONE_ERROR_MAP.get(tree.get('NCERROR')),
+                'error_msg': const.OGONE_ERROR_MAP.get(tree.get('NCERROR')),
             }
 
             _logger.info(error)
             self.write({
                 'state_message': error,
                 'acquirer_reference': tree.get('PAYID'),
-                'ogone_user_error':  _("%s" % ogone.OGONE_ERROR_MAP.get(tree.get('NCERROR'))),
+                'ogone_user_error':  const.OGONE_ERROR_MAP.get(tree.get('NCERROR')),
             })
             self._set_canceled()
             return False
@@ -325,6 +325,7 @@ class PaymentTxOgone(models.Model):
             'PSWD': account.ogone_password,
         }
 
+        # TODO move this url logic on the acquirer model
         query_direct_url = 'https://secure.ogone.com/ncol/%s/querydirect.asp' % ('prod' if self.acquirer_id.state == 'enabled' else 'test')
 
         logged_data = data.copy()
@@ -335,11 +336,11 @@ class PaymentTxOgone(models.Model):
 
         try:
             tree = objectify.fromstring(result)
-            _logger.info('_ogone_api_get_tx_status: Values received:\n%s', etree.tostring(tree, pretty_print=True, encoding='utf-8'))
         except etree.XMLSyntaxError:
             # invalid response from ogone
             _logger.exception('Invalid xml response from ogone')
             _logger.info('_ogone_api_get_tx_status: Values received:\n%s', result)
             raise
 
+        _logger.info('_ogone_api_get_tx_status: Values received:\n%s', etree.tostring(tree, pretty_print=True, encoding='utf-8'))
         return tree

@@ -1,5 +1,5 @@
-odoo.define('payment_ogone.payment_feedback', function (require) {
-    "use strict";
+odoo.define('payment_ogone.payment_feedback', require => {
+    'use strict';
     const publicWidget = require('web.public.widget');
     const PaymentCheckoutForm = require('payment.checkout_form');
     const core = require('web.core');
@@ -13,7 +13,7 @@ odoo.define('payment_ogone.payment_feedback', function (require) {
             } else {
                 const urlParameters = this._getUrlParameters(document.URL);
                 // Extract contextual values from the radio button
-                const paymentOptionId = parseInt(urlParameters['paymentOptionId'], 10);
+                // FIXME VFE unused-variable const paymentOptionId = parseInt(urlParameters['paymentOptionId'], 10);
                 const provider = 'ogone';
                 const flow = 'direct';
                 const feedbackParams = Object.assign({}, urlParameters, {provider: provider, flow: flow});
@@ -49,7 +49,7 @@ odoo.define('payment_ogone.payment_feedback', function (require) {
                 currencyId: data.currencyId,
                 partnerId: data.partnerId !== undefined ? parseInt(data.partnerId) : null,
                 flow: data.flow,
-                tokenizationRequested: data['Alias.StorePermanently'] === 'Y' ? true : false,
+                tokenizationRequested: data['Alias.StorePermanently'] === 'Y',
                 accessToken: data.access_token,
                 csrf_token: core.csrf_token,
             };
@@ -92,7 +92,7 @@ odoo.define('payment_ogone.payment_feedback', function (require) {
             }).then(processingValues => {
                 ogoneValues['reference'] = processingValues.reference;
                 ogoneValues['partner_id'] = processingValues.partner_id;
-                return this._rpc({
+                return self._rpc({
                     route: '/payment/ogone/payments',
                     params: {
                         'acquirer_id': acquirerId,
@@ -107,7 +107,7 @@ odoo.define('payment_ogone.payment_feedback', function (require) {
                     const downloadform3D = document.getElementById("downloadform3D");
                     downloadform3D.submit();
                 } else if (result.ogone_user_error) {
-                    // We display a translated error messag corresponding to the backlog of Ogone
+                    // We display a translated error message corresponding to the backlog of Ogone
                     document.getElementsByClassName("o_ogone_spinner")[0].style.display = 'none';
                     document.getElementsByClassName("o_ogone_error_message")[0].style.display = 'block';
                     document.getElementsByClassName("o_ogone_error_name")[0].innerText = result.ogone_user_error;
@@ -119,7 +119,5 @@ odoo.define('payment_ogone.payment_feedback', function (require) {
                 }
             });
         },
-
-
     });
 });
