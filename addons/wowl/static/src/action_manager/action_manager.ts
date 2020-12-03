@@ -288,13 +288,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
    *
    * @private
    * @param {ActionRequest} actionRequest
-   * @param {Context} [additionalContext={}]
+   * @param {Context} [context={}]
    * @returns {Promise<Action>}
    */
-  async function _loadAction(
-    actionRequest: ActionRequest,
-    additionalContext: Context = {}
-  ): Promise<Action> {
+  async function _loadAction(actionRequest: ActionRequest, context: Context = {}): Promise<Action> {
     let action;
     const jsId = `action_${++id}`;
     if (typeof actionRequest === "string" && odoo.actionRegistry.contains(actionRequest)) {
@@ -311,7 +308,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
       if (!actionCache[key]) {
         actionCache[key] = env.services.rpc("/web/action/load", {
           action_id: actionRequest,
-          additional_context: additionalContext,
+          additional_context: {
+            active_id: context.active_id,
+            active_ids: context.active_ids,
+            active_model: context.active_model,
+          },
         });
       }
       action = await keepLast.add(actionCache[key]);
@@ -327,7 +328,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (action.type === "ir.actions.act_window" || action.type === "ir.actions.client") {
       action.target = action.target || "current";
     }
-    action.context = makeContext(env.services.user.context, additionalContext, action.context);
+    action.context = makeContext(env.services.user.context, context, action.context);
     if (action.type === "ir.actions.act_window") {
       action.controllers = {};
       let domain = action.domain || [];
@@ -844,13 +845,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     actionRequest: ActionRequest,
     options: ActionOptions = {}
   ): Promise<void> {
-    const { active_id = null, active_ids = null, active_model = null } =
-      options.additionalContext || {};
-    const additionalContext = Object.assign(
-      { active_id, active_ids, active_model },
-      options.additionalContext
-    );
-    const action = await _loadAction(actionRequest, additionalContext);
+    const action = await _loadAction(actionRequest, options.additionalContext);
     switch (action.type) {
       case "ir.actions.act_url":
         return _executeActURLAction(action);
