@@ -3902,8 +3902,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("requests for execute_action of type object are handled", async function (assert) {
-    assert.expect(10);
+  QUnit.test("requests for execute_action of type object are handled", async function (assert) {
+    assert.expect(11);
 
     baseConfig.serviceRegistry!.add(
       "user",
@@ -4017,10 +4017,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip(
+  QUnit.test(
     "requests for execute_action of type object: disable buttons",
     async function (assert) {
-      // unskip: buttons aren't re-enabled
       assert.expect(2);
 
       let def: any;

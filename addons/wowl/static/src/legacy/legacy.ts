@@ -196,9 +196,16 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     async willStart() {
       if (this.props.widget) {
         this.widget = this.props.widget;
-        return this.widget.do_show();
+        return this.updateWidget();
       }
       return super.willStart();
+    }
+
+    /**
+     * @override
+     */
+    updateWidget() {
+      return this.widget.do_show();
     }
 
     do_push_state() {}
@@ -228,10 +235,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     async willStart() {
       if (this.props.widget) {
         this.widget = this.props.widget;
-        const options = Object.assign({}, this.props.viewParams, {
-          shouldUpdateSearchComponents: true,
-        });
-        return this.widget.reload(options);
+        return this.updateWidget(this.props.viewParams);
       } else {
         const view = new this.props.View(this.props.viewInfo, this.props.viewParams);
         this.widget = await view.getController(this);
@@ -243,6 +247,16 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         }
         return this.widget._widgetRenderAndInsert(() => {});
       }
+    }
+
+    /**
+     * @override
+     */
+    updateWidget(nextProps: ViewProps) {
+      const options = Object.assign({}, this.props.viewParams, {
+        shouldUpdateSearchComponents: true,
+      });
+      return this.widget.reload(options);
     }
 
     /**
