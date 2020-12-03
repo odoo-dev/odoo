@@ -18,6 +18,7 @@ import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
 import { DialogAction } from "./dialog_action";
+import { KeepLast } from "../utils/utils";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -268,6 +269,7 @@ export class ActionContainer extends Component<{}, OdooEnv> {
 // -----------------------------------------------------------------------------
 
 function makeActionManager(env: OdooEnv): ActionManager {
+  const keepLast = new KeepLast();
   let id = 0;
   let controllerStack: ControllerStack = [];
   let dialogCloseProm: Promise<any> | undefined = undefined;
@@ -312,7 +314,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
           additional_context: additionalContext,
         });
       }
-      action = await actionCache[key];
+      action = await keepLast.add(actionCache[key]);
     } else {
       // actionRequest is an object describing the action
       action = actionRequest;
@@ -813,10 +815,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @returns {Promise<void>}
    */
   async function _executeServerAction(action: ServerAction, options: ActionOptions): Promise<void> {
-    let nextAction = await env.services.rpc("/web/action/run", {
+    const runProm = env.services.rpc("/web/action/run", {
       action_id: action.id,
       context: action.context || {},
     });
+    let nextAction = await keepLast.add(runProm);
     nextAction = nextAction || { type: "ir.actions.act_window_close" };
     return doAction(nextAction, options);
   }
@@ -883,7 +886,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    */
   async function doActionButton(params: DoActionButtonParams) {
     // determine the action to execute according to the params
-    let action;
+    let action: ActionDescription;
     const context = makeContext(params.context, params.buttonContext);
     if (params.special) {
       action = { type: "ir.actions.act_window_close" }; // FIXME: infos: { special : true } ?
@@ -901,12 +904,13 @@ function makeActionManager(env: OdooEnv): ActionManager {
         }
         args = args.concat(additionalArgs);
       }
-      action = await env.services.rpc("/web/dataset/call_button", {
+      const callProm = env.services.rpc("/web/dataset/call_button", {
         args,
         kwargs: { context },
         method: params.name,
         model: params.model,
       });
+      action = await keepLast.add(callProm);
       action = action || { type: "ir.actions.act_window_close" };
     } else if (params.type === "action") {
       // execute a given action, so load it first

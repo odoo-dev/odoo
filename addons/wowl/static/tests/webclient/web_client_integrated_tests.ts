@@ -1725,8 +1725,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  // LPE was: should not push a loaded state
   QUnit.test("should push the correct state at the right time", async function (assert) {
+    // formerly "should not push a loaded state"
     assert.expect(7);
 
     baseConfig.serviceRegistry!.add(
@@ -2054,7 +2054,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("when an server action takes too much time...", async function (assert) {
+  QUnit.test("when an server action takes too much time...", async function (assert) {
     assert.expect(1);
 
     const def = testUtils.makeTestPromise();
@@ -2202,8 +2202,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip("execute a new action while handling a call_button", async function (assert) {
-    assert.expect(16);
+  QUnit.test("execute a new action while handling a call_button", async function (assert) {
+    assert.expect(17);
 
     const def = testUtils.makeTestPromise();
     const mockRPC: RPC = async function (route, args) {
