@@ -1,4 +1,6 @@
+import { Component } from "@odoo/owl";
 import * as QUnit from "qunit";
+import $ from "jquery";
 
 const odoo = (window as any).odoo;
 
@@ -15,41 +17,51 @@ QUnit.config.hidepassed = window.location.href.match(/[?&]testId=/) === null;
 // -----------------------------------------------------------------------------
 
 /**
- * Checks that the target element contains exactly n matches for the selector.
+ * Checks that the target contains exactly n matches for the selector.
  *
  * Example: assert.containsN(document.body, '.modal', 0)
- *
- * @param {HTMLElement} el
- * @param {string} selector
- * @param {number} n
- * @param {string} [msg]
  */
-function containsN(el: HTMLElement, selector: string, n: number, msg?: string): void {
+function containsN(
+  target: Component | HTMLElement | JQuery,
+  selector: string,
+  n: number,
+  msg?: string
+): void {
+  let $el: JQuery;
+  if (target instanceof Component) {
+    if (!target.el) {
+      throw new Error(
+        `containsN assert with selector '${selector}' called on an unmounted component`
+      );
+    }
+    $el = $((target as Component).el!);
+  } else {
+    $el = target instanceof HTMLElement ? $(target) : target;
+  }
   msg = msg || `Selector '${selector}' should have exactly ${n} matches inside the target`;
-  const matches = el.querySelectorAll(selector);
-  QUnit.assert.strictEqual(matches.length, n, msg);
+  QUnit.assert.strictEqual($el.find(selector).length, n, msg);
 }
 
 /**
- * Checks that the target element contains exactly 0 match for the selector.
+ * Checks that the target contains exactly 0 match for the selector.
  *
  * @param {HTMLElement} el
  * @param {string} selector
  * @param {string} [msg]
  */
-function containsNone(el: HTMLElement, selector: string, msg?: string) {
-  containsN(el, selector, 0, msg);
+function containsNone(target: Component | HTMLElement | JQuery, selector: string, msg?: string) {
+  containsN(target, selector, 0, msg);
 }
 
 /**
- * Checks that the target element contains exactly 1 match for the selector.
+ * Checks that the target contains exactly 1 match for the selector.
  *
  * @param {HTMLElement} el
  * @param {string} selector
  * @param {string} [msg]
  */
-function containsOnce(el: HTMLElement, selector: string, msg?: string) {
-  containsN(el, selector, 1, msg);
+function containsOnce(target: Component | HTMLElement | JQuery, selector: string, msg?: string) {
+  containsN(target, selector, 1, msg);
 }
 
 /**
