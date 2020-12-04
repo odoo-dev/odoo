@@ -138,12 +138,49 @@ function addLegacyMockEnvironment(
 }
 
 async function createWebClient(params: CreateParams) {
+  const { AbstractAction, AbstractController, testUtils } = getLegacy() as any;
+  const { patch, unpatch } = testUtils.mock;
+
+  // With the compatibility layer, the action manager keeps legacy alive if they
+  // are still acessible from the breacrumbs. They are manually destroyed as soon
+  // as they are no longer referenced in the stack. This works fine in production,
+  // because the webclient is never destroyed. However, at the end of each test,
+  // we destroy the webclient and expect every legacy that has been instantiated
+  // to be destroyed. We thus need to manually destroy them here.
+  const controllers: any[] = [];
+  patch(AbstractAction, {
+    init() {
+      this._super(...arguments);
+      controllers.push(this);
+    },
+  });
+  patch(AbstractController, {
+    init() {
+      this._super(...arguments);
+      controllers.push(this);
+    },
+  });
+
   const mockRPC = params.mockRPC || undefined;
   const env = await makeTestEnv({
     ...params.baseConfig,
     mockRPC,
   });
   const wc = await mount(WebClient, { env });
+
+  const _destroy = wc.destroy;
+  wc.destroy = () => {
+    _destroy.call(wc);
+    for (const controller of controllers) {
+      if (!controller.isDestroyed()) {
+        controller.destroy();
+      }
+    }
+    unpatch(AbstractAction);
+    unpatch(AbstractController);
+  };
+
+  (wc as any)._____testname = QUnit.config.current.testName;
 
   addLegacyMockEnvironment(wc, params.baseConfig, params.legacyParams);
   await legacyExtraNextTick();
@@ -454,6 +491,7 @@ QUnit.module("web client integrated tests", (hooks) => {
     await nextTick();
     assert.containsOnce(webClient.el!, ".modal .test_client_action");
     assert.strictEqual(webClient.el!.querySelector(".modal-title")!.textContent, "Dialog Test");
+    webClient.destroy();
   });
 
   QUnit.test("can display client actions as main, then in Dialog", async function (assert) {
@@ -473,6 +511,7 @@ QUnit.module("web client integrated tests", (hooks) => {
     await nextTick();
     assert.containsOnce(webClient.el!, ".o_action_manager .test_client_action");
     assert.containsOnce(webClient.el!, ".modal .test_client_action");
+    webClient.destroy();
   });
 
   QUnit.test(
@@ -494,6 +533,7 @@ QUnit.module("web client integrated tests", (hooks) => {
       await nextTick();
       assert.containsOnce(webClient.el!, ".test_client_action");
       assert.containsNone(webClient.el!, ".modal .test_client_action");
+      webClient.destroy();
     }
   );
 
@@ -511,6 +551,7 @@ QUnit.module("web client integrated tests", (hooks) => {
     await nextTick();
     assert.containsOnce(webClient.el!, ".test_client_action");
     assert.strictEqual(webClient.el!.querySelector(".o_menu_brand")!.textContent, "App1");
+    webClient.destroy();
   });
 
   QUnit.test("menu loading", async (assert) => {
@@ -528,6 +569,7 @@ QUnit.module("web client integrated tests", (hooks) => {
       "ClientAction_Id 2"
     );
     assert.strictEqual(webClient.el!.querySelector(".o_menu_brand")!.textContent, "App2");
+    webClient.destroy();
   });
 
   QUnit.test("action and menu loading", async (assert) => {
@@ -546,6 +588,7 @@ QUnit.module("web client integrated tests", (hooks) => {
       "ClientAction_Id 1"
     );
     assert.strictEqual(webClient.el!.querySelector(".o_menu_brand")!.textContent, "App2");
+    webClient.destroy();
   });
 
   QUnit.test("supports action as xmlId", async (assert) => {
@@ -563,6 +606,7 @@ QUnit.module("web client integrated tests", (hooks) => {
       "ClientAction_xmlId"
     );
     assert.containsNone(webClient.el!, ".o_menu_brand");
+    webClient.destroy();
   });
 
   QUnit.test("supports opening action in dialog", async (assert) => {
@@ -579,6 +623,7 @@ QUnit.module("web client integrated tests", (hooks) => {
     assert.containsOnce(webClient.el!, ".test_client_action");
     assert.containsOnce(webClient.el!, ".modal .test_client_action");
     assert.containsNone(webClient.el!, ".o_menu_brand");
+    webClient.destroy();
   });
 
   QUnit.module("push state to router");
@@ -3640,7 +3685,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "limit should be correct for kanban"
     );
 
-    // webClient.destroy();
+    webClient.destroy();
   });
 
   QUnit.test("domain is kept when switching between views", async function (assert) {
@@ -4227,8 +4272,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("can open a many2one external window", async function (assert) {
-    // unskip: dialog remains in the dom at end of test
+  QUnit.test("can open a many2one external window", async function (assert) {
     assert.expect(9);
 
     baseConfig.serverData!.models!.partner.records[0].bar = 2;
@@ -4420,10 +4464,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip(
+  QUnit.test(
     "form views are restored in readonly when coming back in breadcrumbs",
     async function (assert) {
-      // unskip: view is still editable when coming back
       assert.expect(2);
 
       const webClient = await createWebClient({ baseConfig });

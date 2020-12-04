@@ -12,6 +12,7 @@ export const legacyProm: Promise<any> = new Promise((resolve) => {
       basicFields: require("web.basic_fields"),
       Widget: require("web.Widget"),
       AbstractAction: require("web.AbstractAction"),
+      AbstractController: require("web.AbstractController"),
       ListController: require("web.ListController"),
       core: require("web.core"),
     });

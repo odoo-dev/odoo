@@ -252,7 +252,8 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     /**
      * @override
      */
-    updateWidget(nextProps: ViewProps) {
+    async updateWidget(nextProps: ViewProps) {
+      await this.widget.willRestore();
       const options = Object.assign({}, this.props.viewParams, {
         shouldUpdateSearchComponents: true,
       });
