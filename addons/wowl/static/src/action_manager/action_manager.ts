@@ -185,7 +185,6 @@ export function clearUncommittedChanges(env: OdooEnv): Promise<void[]> {
 interface useSetupActionParams {
   export?: () => any;
   beforeLeave?: ClearUncommittedChanges;
-  documentState?: CallableFunction;
 }
 
 type ClearUncommittedChanges = () => Promise<void>;
@@ -209,11 +208,6 @@ export function useSetupAction(params: useSetupActionParams) {
   if (params.beforeLeave && component.props.__beforeLeave__) {
     hooks.onMounted(() => {
       component.props.__beforeLeave__(params.beforeLeave);
-    });
-  }
-  if (params.documentState && component.props.__documentState__) {
-    hooks.onMounted(() => {
-      component.props.__documentState__(params.documentState);
     });
   }
 }
@@ -442,13 +436,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
       reject = _rej;
     });
     const action = controller.action;
-    let documentState: any;
 
     class ControllerComponent extends Component<{}, OdooEnv> {
       static template = tags.xml`<t t-component="Component" t-props="props"
         __exportState__="exportState"
         __beforeLeave__="beforeLeave"
-        __documentState__="documentState"
           t-ref="component"
           t-on-history-back="onHistoryBack"/>`;
       Component = controller.Component;
@@ -456,7 +448,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
       componentRef = hooks.useRef("component");
       exportState: ((state: any) => void) | null = null;
       beforeLeave: ((state: any) => void) | null = null;
-      documentState: ((state: any) => void) | null = null;
 
       constructor() {
         super(...arguments);
@@ -467,9 +458,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
           const beforeLeaveFns: ClearUncommittedChanges[] = [];
           this.beforeLeave = (callback: ClearUncommittedChanges) => {
             beforeLeaveFns.push(callback);
-          };
-          this.documentState = (callBack: CallableFunction) => {
-            documentState = Object.assign(documentState || {}, callBack());
           };
           this.env.bus.on("CLEAR-UNCOMMITTED-CHANGES", this, (callbacks) => {
             beforeLeaveFns.forEach((fn) => callbacks.push(fn));
@@ -508,7 +496,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
           controllerStack = nextStack; // the controller is mounted, commit the new stack
           // wait Promise callbacks to be executed
-          pushState(controller, documentState);
+          pushState(controller);
           mode = "current";
           if (controllerStack.some((c) => c.action.target === "fullscreen")) {
             mode = "fullscreen";
@@ -522,9 +510,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
           });
           mode = "new";
         }
-        env.bus.trigger("ACTION_MANAGER:UI-UPDATED", mode);
-
         resolve();
+        env.bus.trigger("ACTION_MANAGER:UI-UPDATED", mode);
       }
       willUnmount() {
         if (action.target === "new" && dialogCloseResolve) {
@@ -1105,7 +1092,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     return false;
   }
 
-  function pushState(controller: Controller, documentState?: any) {
+  function pushState(controller: Controller) {
     const newState: Route["hash"] = {};
     const action = controller.action;
     if (action.id) {
@@ -1119,15 +1106,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
       newState.model = actionProps.model;
       newState.view_type = actionProps.type;
       newState.id = actionProps.recordId ? `${actionProps.recordId}` : undefined;
-    }
-    let title;
-    if (documentState) {
-      title = documentState.title;
-      delete documentState.title;
-      Object.assign(newState, documentState);
-    }
-    if (title) {
-      env.services.title.setParts({ action: title });
     }
     env.services.router.pushState(newState, true);
   }
@@ -1143,7 +1121,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["notifications", "rpc", "user", "router", "title"],
+  dependencies: ["notifications", "rpc", "user", "router"],
   deploy(env: OdooEnv): ActionManager {
     return makeActionManager(env);
   },

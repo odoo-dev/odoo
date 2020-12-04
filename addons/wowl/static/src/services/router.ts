@@ -91,13 +91,24 @@ export function makePushState(
   getCurrent: () => Route,
   doPush: (route: Route) => void
 ): Router["pushState"] {
+  let _replace: boolean = false;
+  let timeoutId: number | undefined;
+  let tempHash: any;
   return (hash: Query, replace: boolean = false) => {
-    const current = getCurrent();
-    if (!replace) {
-      hash = Object.assign({}, current.hash, hash);
-    }
-    const route = Object.assign({}, current, { hash });
-    doPush(route);
+    clearTimeout(timeoutId);
+    _replace = _replace || replace;
+    tempHash = Object.assign(tempHash || {}, hash);
+    timeoutId = setTimeout(() => {
+      const current = getCurrent();
+      if (!_replace) {
+        tempHash = Object.assign({}, current.hash, tempHash);
+      }
+      const route = Object.assign({}, current, { hash: tempHash });
+      doPush(route);
+      tempHash = undefined;
+      timeoutId = undefined;
+      _replace = false;
+    });
   };
 }
 
@@ -107,3 +118,11 @@ export const routerService: Service<Router> = {
     return makeRouter(env);
   },
 };
+
+export function objectToQuery(obj: {[k: string]: any}): Query {
+  const query: Query = {};
+  Object.entries(obj).forEach(([k, v]) => {
+    query[k] = v ? `${v}` : v;
+  });
+  return query;
+}

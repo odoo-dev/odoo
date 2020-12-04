@@ -23,7 +23,7 @@ export class WebClient extends Component<{}, OdooEnv> {
       this.env.bus.on("ACTION_MANAGER:UI-UPDATED", this, (mode) => {
         if (mode !== "new") {
           this.el!.classList.toggle("o_fullscreen", mode === "fullscreen");
-          setTimeout(() => this.replaceRouterState());
+          this.replaceRouterState();
         }
       });
       this.loadRouterState();
@@ -87,6 +87,6 @@ export class WebClient extends Component<{}, OdooEnv> {
     if (allowedCompanyIds) {
       persistentHash.cids = allowedCompanyIds.join(",");
     }
-    this.router.replaceState(persistentHash);
+    this.router.pushState(persistentHash);
   }
 }

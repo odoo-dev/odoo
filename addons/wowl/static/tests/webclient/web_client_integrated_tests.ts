@@ -1868,7 +1868,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.test("change a param of an ir.actions.client in the url", async function (assert) {
-    assert.expect(15);
+    assert.expect(13);
 
     const ClientAction = AbstractAction.extend({
       hasControlPanel: true,
@@ -1905,7 +1905,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.deepEqual(currentHash, {});
     // execute the client action
     await doAction(webClient, 9);
-    assert.verifySteps(["start", "push_state push", "push_state replace"]);
+    assert.verifySteps(["start", "push_state push"]);
     currentHash = webClient.env.services.router.current.hash;
     assert.deepEqual(currentHash, {
       action: "9",
@@ -1928,7 +1928,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       action: "9",
       a: "new value",
     });
-    assert.verifySteps(["start", "push_state push", "push_state replace"]);
+    assert.verifySteps(["start", "push_state push"]);
     currentHash = webClient.env.services.router.current.hash;
     assert.deepEqual(currentHash, {
       action: "9",

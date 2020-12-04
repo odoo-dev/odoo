@@ -31,7 +31,7 @@ interface State extends Query {
               setTitlePart("action", state.title!);
               delete state.title;
             }
-            env.services.router.replaceState(state);
+            env.services.router.pushState(state);
           },
           set_title(title: string) {
             setTitlePart("action", title);

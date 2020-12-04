@@ -21,6 +21,7 @@ import { Dialog } from "../components/dialog/dialog";
 import { json_node_to_xml } from "../utils/utils";
 import { formatDateTime, formatMany2one, parseDateTime } from "../utils/fields_utils";
 const { useState } = hooks;
+import { Query, objectToQuery } from '../services/router';
 
 declare const odoo: any;
 
@@ -118,30 +119,21 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
   class ActionAdapter extends ComponentAdapter {
     am = useService("action_manager");
     router = useService("router");
+    title = useService("title");
+
+    // a legacy widget widget can push_state anytime including during its async rendering
+    // In Wowl, we want to have all states pushed during the same setTimeout.
+    // This is protected in legacy (backward compatibility) but should not e supported in Wowl
+    tempQuery: Query|null = {};
 
     constructor(...args: any[]) {
       super(...args);
-      const _trigger_up = this._trigger_up.bind(this);
-      let pushedState: any;
-      this._trigger_up = (ev: any) => {
-        if (ev.name === "push_state") {
-          pushedState = Object.assign(pushedState || {}, ev.data.state);
-          return;
-        }
-        return _trigger_up(ev);
-      };
       hooks.onMounted(() => {
-        if (pushedState) {
-          // push the state after the actionManager to avoid being wiped out by it
-          setTimeout(() => {
-            const formattedPusedState: any = {};
-            Object.entries(pushedState).forEach(([k, v]) => {
-              formattedPusedState[k] = v ? `${v}` : v;
-            });
-            this.router.replaceState(formattedPusedState);
-          });
-        }
-        this._trigger_up = _trigger_up;
+        this.title.setParts({ action: this.widget.getTitle() });
+        const query = objectToQuery(this.widget.getState());
+        Object.assign(query, this.tempQuery);
+        this.tempQuery = null;
+        this.router.pushState(query);
       });
     }
 
@@ -152,7 +144,12 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
       } else if (ev.name === "breadcrumb_clicked") {
         this.am.restore(payload.controllerID);
       } else if (ev.name === "push_state") {
-        this.router.pushState(payload.state);
+        const query = objectToQuery(payload.state);
+        if (this.tempQuery) {
+          Object.assign(this.tempQuery, query);
+          return;
+        }
+        this.router.pushState(query);
       } else {
         super._trigger_up(ev);
       }
@@ -175,12 +172,6 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     }
     canBeRemoved() {
       return this.widget.canBeRemoved();
-    }
-    documentState() {
-      return {
-        title: this.widget.getTitle(),
-        ...this.widget.getState(),
-      };
     }
   }
 
@@ -332,9 +323,6 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
           super(...arguments);
           useSetupAction({
             export: () => this.controllerRef.comp!.exportState(),
-            documentState: () => {
-              return this.controllerRef.comp!.documentState();
-            },
           });
         }
       }
@@ -403,9 +391,6 @@ odoo.define("wowl.legacyViews", async function (require: any) {
           export: () => this.controllerRef.comp!.exportState(),
           beforeLeave: () => {
             return this.controllerRef.comp!.widget!.canBeRemoved();
-          },
-          documentState: () => {
-            return this.controllerRef.comp!.documentState();
           },
         });
       }
