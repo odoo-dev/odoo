@@ -1076,41 +1076,44 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("document's title is updated when an action is executed", async function (assert) {
-    assert.expect(3);
+  QUnit.test("document's title is updated when an action is executed", async function (assert) {
+    assert.expect(8);
 
-    const mockedTitleService = {
-      name: "title",
-      deploy() {
-        return {
-          get current() {
-            return "";
-          },
-          getParts() {
-            return {};
-          },
-          setParts(parts: { [key: string]: string }) {
-            assert.step(JSON.stringify(parts));
-          },
-        };
-      },
-    };
-    baseConfig.serviceRegistry!.add("title", mockedTitleService, true);
+    const defaultTitle: any = {zopenerp: 'Odoo'};
 
     const webClient = await createWebClient({ baseConfig });
+    let currentTitle = webClient.env.services.title.getParts();
+    assert.deepEqual(currentTitle, defaultTitle);
+    let currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, {});
 
     await doAction(webClient, 4);
+    currentTitle = webClient.env.services.title.getParts();
+    assert.deepEqual(currentTitle, {
+      ...defaultTitle,
+      action: 'Partners Action 4',
+    });
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash,  { action: '4', model: "partner", view_type: "kanban" });
+
     await doAction(webClient, 8);
+    currentTitle = webClient.env.services.title.getParts();
+    assert.deepEqual(currentTitle, {
+      ...defaultTitle,
+      action: 'Favorite Ponies',
+    });
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, { action: '8', model: "pony", view_type: "list" });
+
     await testUtils.dom.click($(webClient.el!).find("tr.o_data_row:first"));
     await legacyExtraNextTick();
-
-    // TODO: fill verifySteps: should set the title of each action as document title
-    assert.verifySteps([]);
-    // const stateDescriptions = [
-    //   { action: 4, model: "partner", title: "Partners Action 4", view_type: "kanban" },
-    //   { action: 8, model: "pony", title: "Favorite Ponies", view_type: "list" },
-    //   { action: 8, id: 4, model: "pony", title: "Twilight Sparkle", view_type: "form" },
-    // ];
+    currentTitle = webClient.env.services.title.getParts();
+    assert.deepEqual(currentTitle, {
+      ...defaultTitle,
+      action: 'Twilight Sparkle',
+    });
+    currentHash = webClient.env.services.router.current.hash;
+    assert.deepEqual(currentHash, { action: '8', id: '4', model: "pony", view_type: "form" });
 
     webClient.destroy();
   });
@@ -4544,9 +4547,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("switch request to unknown view type", async function (assert) {
-    // unskip: case not handled yet in ActionManager
-    assert.expect(7);
+  QUnit.test("switch request to unknown view type", async function (assert) {
+    assert.expect(8);
 
     baseConfig.serverData!.actions![33] = {
       id: 33,
@@ -4559,7 +4561,10 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       ], // no form view
     };
 
-    const webClient = await createWebClient({ baseConfig });
+    const mockRPC: RPC = async (route, args) => {
+      assert.step((args && args.method) || route);
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 33);
 
     assert.containsOnce(webClient.el!, ".o_list_view", "should display the list view");
@@ -4639,83 +4644,79 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip(
+  QUnit.test(
     "list with default_order and favorite filter with no orderedBy",
     async function (assert) {
-      /*
-    assert.expect(5);
+      assert.expect(5);
 
-    this.archs["partner,1,list"] = '<tree default_order="foo desc"><field name="foo"/></tree>';
-
-    this.actions.push({
-      id: 100,
-      name: "Partners",
-      res_model: "partner",
-      type: "ir.actions.act_window",
-      views: [
-        [1, "list"],
-        [false, "form"],
-      ],
-    });
-
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      favoriteFilters: [
+      baseConfig.serverData!.views!["partner,1,list"] =
+        '<tree default_order="foo desc"><field name="foo"/></tree>';
+      baseConfig.serverData!.actions![100] = {
+        id: 100,
+        name: "Partners",
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [
+          [1, "list"],
+          [false, "form"],
+        ],
+      };
+      baseConfig.serverData!.models!.partner.filters = [
         {
-          user_id: [2, "Mitchell Admin"],
           name: "favorite filter",
           id: 5,
-          context: {},
+          context: "{}",
           sort: "[]",
           domain: '[("bar", "=", 1)]',
+          is_default: false,
         },
-      ],
-    });
-    await doAction(webClient, 100);
+      ];
 
-    assert.strictEqual(
-      $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
-      "zoupyopplopgnapblip",
-      "record should be in descending order as default_order applies"
-    );
+      const webClient = await createWebClient({ baseConfig });
+      await doAction(webClient, 100);
 
-    await cpHelpers.toggleFavoriteMenu(webClient.el!);
-    await cpHelpers.toggleMenuItem(webClient.el!, "favorite filter");
+      assert.strictEqual(
+        $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
+        "zoupyopplopgnapblip",
+        "record should be in descending order as default_order applies"
+      );
 
-    assert.strictEqual(
-      $(webClient.el!).find(".o_control_panel .o_facet_values").text().trim(),
-      "favorite filter",
-      "favorite filter should be applied"
-    );
-    assert.strictEqual(
-      $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
-      "gnapblip",
-      "record should still be in descending order after default_order applied"
-    );
+      await cpHelpers.toggleFavoriteMenu(webClient.el!);
+      await cpHelpers.toggleMenuItem(webClient.el!, "favorite filter");
+      await legacyExtraNextTick();
 
-    // go to formview and come back to listview
-    await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
-    await legacyExtraNextTick();
-    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:eq(0)"));
-    await legacyExtraNextTick();
-    assert.strictEqual(
-      $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
-      "gnapblip",
-      "order of records should not be changed, while coming back through breadcrumb"
-    );
+      assert.strictEqual(
+        $(webClient.el!).find(".o_control_panel .o_facet_values").text().trim(),
+        "favorite filter",
+        "favorite filter should be applied"
+      );
+      assert.strictEqual(
+        $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
+        "gnapblip",
+        "record should still be in descending order after default_order applied"
+      );
 
-    // remove filter
-    await cpHelpers.removeFacet(actionManager, 0);
-    assert.strictEqual(
-      $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
-      "zoupyopplopgnapblip",
-      "order of records should not be changed, after removing current filter"
-    );
+      // go to formview and come back to listview
+      await testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+      await legacyExtraNextTick();
+      await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:eq(0)"));
+      await legacyExtraNextTick();
+      assert.strictEqual(
+        $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
+        "gnapblip",
+        "order of records should not be changed, while coming back through breadcrumb"
+      );
 
-    webClient.destroy();
-    */
+      // remove filter
+      await cpHelpers.removeFacet(webClient.el!, 0);
+      await legacyExtraNextTick();
+      assert.strictEqual(
+        $(webClient.el!).find(".o_list_view tr.o_data_row .o_data_cell").text(),
+        "zoupyopplopgnapblip",
+        "order of records should not be changed, after removing current filter"
+      );
+
+      webClient.destroy();
     }
   );
 

@@ -190,6 +190,14 @@ interface useSetupActionParams {
 type ClearUncommittedChanges = () => Promise<void>;
 
 // -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+export class ViewNotFoundError extends Error {
+  name = "ViewNotFoundError";
+}
+
+// -----------------------------------------------------------------------------
 // Action hook
 // -----------------------------------------------------------------------------
 
@@ -955,7 +963,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
     const view = controller.views.find((view: any) => view.type === viewType);
     if (!view) {
-      throw new Error(`switchView: cannot find view of type ${viewType}`);
+      throw new ViewNotFoundError(
+        env._t(`No view of type '${viewType}' could be found in the current action.`)
+      );
     }
     const newController = controller.action.controllers[viewType] || {
       jsId: `controller_${++id}`,
@@ -1025,7 +1035,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       // Window Action: determine model, viewType etc....
       if (
         !action &&
-        !Number.isNaN(state.action) &&
+        currentController &&
+        currentController.action.type === "ir.actions.act_window" &&
         currentActionId === parseInt(state.action, 10)
       ) {
         // only when we already have an action in dom
@@ -1034,13 +1045,15 @@ function makeActionManager(env: OdooEnv): ActionManager {
           if (state.id) {
             viewOptions.recordId = parseInt(state.id, 10);
           }
-          let viewType = state.view_type || "";
-          if (!viewType && (currentController as any).view) {
-            viewType = (currentController as ViewController).view.type;
-          }
+          let viewType = state.view_type || (currentController as ViewController).view.type;
           await switchView(viewType, viewOptions);
           return true;
-        } catch (e) {}
+        } catch (e) {
+          if (e instanceof ViewNotFoundError) {
+            return false;
+          }
+          throw e;
+        }
       }
       if (!action) {
         // the action to load isn't the current one, so execute it

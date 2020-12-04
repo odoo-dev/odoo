@@ -10,7 +10,7 @@ import {
   Type,
 } from "../types";
 import { useService } from "../core/hooks";
-import { useSetupAction } from "../action_manager/action_manager";
+import { useSetupAction, ViewNotFoundError } from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
 import { viewRegistry } from "../views/view_registry";
 import { Context } from "../core/context";
@@ -268,16 +268,25 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
      * @private
      * @param {OdooEvent} ev
      */
-    _trigger_up(ev: any) {
+    async _trigger_up(ev: any) {
       const payload = ev.data;
       if (ev.name === "switch_view") {
         const state = ev.target.exportState();
-        this.am.switchView(payload.view_type, {
-          recordId: payload.res_id,
-          recordIds: state.resIds,
-          searchModel: state.searchModel,
-          searchPanel: state.searchPanel,
-        });
+        try {
+          await this.am.switchView(payload.view_type, {
+            recordId: payload.res_id,
+            recordIds: state.resIds,
+            searchModel: state.searchModel,
+            searchPanel: state.searchPanel,
+          });
+        } catch (e) {
+          console.log(e);
+          debugger;
+          if (e instanceof ViewNotFoundError) {
+            return;
+          }
+          throw e;
+        }
       } else if (ev.name === "execute_action") {
         this.am.doActionButton({
           args: payload.action_data.args,

@@ -284,7 +284,7 @@ QUnitCopy.onUnhandledRejection = (reason: PromiseRejectionEvent["reason"]) => {
     qunitUnhandledReject(reason);
   }
 };
-// Essntially prevents default error logging when the rejection was
+// Essentially prevents default error logging when the rejection was
 // not due to an actual error
 const windowUnhandledReject = window.onunhandledrejection;
 window.onunhandledrejection = (ev: PromiseRejectionEvent) => {
