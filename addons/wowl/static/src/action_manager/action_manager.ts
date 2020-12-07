@@ -138,7 +138,7 @@ interface ActionManagerUpdateInfo {
     title: string;
   };
   onClose?: ActionOptions["onClose"];
-  onCloseInfo?: any;
+  onCloseInfos?: any;
 }
 
 interface UpdateStackOptions {
@@ -260,9 +260,14 @@ export class ActionContainer extends Component<{}, OdooEnv> {
           break;
         }
         case "CLOSE_DIALOG": {
-          const { onClose } = this.dialog;
+          let onClose;
+          if (this.dialog.Component) {
+            onClose = this.dialog.onClose;
+          } else {
+            onClose = info.onClose;
+          }
           if (onClose) {
-            onClose(info.onCloseInfo);
+            onClose(info.onCloseInfos);
           }
           this.dialog = {};
           break;
@@ -884,7 +889,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       case "ir.actions.act_window_close": {
         env.bus.trigger("ACTION_MANAGER:UPDATE", {
           type: "CLOSE_DIALOG",
-          onCloseInfo: actionRequest.info,
+          onClose: options.onClose,
+          onCloseInfos: actionRequest.infos,
         });
         return dialogCloseProm;
       }

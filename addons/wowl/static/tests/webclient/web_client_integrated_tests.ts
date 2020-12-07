@@ -5018,7 +5018,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.verifySteps([]);
 
     // An act_window_close should trigger the on_close
-    await doAction(webClient, { type: "ir.actions.act_window_close", info: "smallCandle" });
+    await doAction(webClient, { type: "ir.actions.act_window_close", infos: "smallCandle" });
     assert.verifySteps(["Close Action"]);
 
     webClient.destroy();
@@ -5269,7 +5269,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip('execute "on_close" only if there is no dialog to close', async function (assert) {
+  QUnit.test('execute "on_close" only if there is no dialog to close', async function (assert) {
     assert.expect(3);
 
     const webClient = await createWebClient({ baseConfig });
@@ -5326,14 +5326,13 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     */
   });
 
-  QUnit.skip("close action with provided infos", async function (assert) {
-    /*
+  QUnit.test("close action with provided infos", async function (assert) {
     assert.expect(1);
 
     const webClient = await createWebClient({ baseConfig });
 
-    var options = {
-      on_close: function (infos) {
+    const options = {
+      onClose: function (infos: any) {
         assert.strictEqual(infos, "just for testing", "should have the correct close infos");
       },
     };
@@ -5347,7 +5346,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     );
 
     webClient.destroy();
-    */
   });
 
   QUnit.skip("history back calls on_close handler of dialog action", async function (assert) {
