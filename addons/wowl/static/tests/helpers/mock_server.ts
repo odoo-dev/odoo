@@ -375,7 +375,7 @@ class MockServer {
       doc = arch;
     }
 
-    //const inTreeView = (doc.tagName === 'tree');
+    const inTreeView = doc.tagName === "tree";
 
     // mock _postprocess_access_rights
     const isBaseModel = !context.base_model_name || modelName === context.base_model_name;
@@ -451,26 +451,32 @@ class MockServer {
         modifiers.invisible.push(["state", "not in", states.split(",")]);
       }
 
-      // implem from JSON in Py
-      /*            const inListHeader = inTreeView && node.closest('header');
-            _.each(modifiersNames, function (a) {
-                const mod = node.getAttribute(a);
-                if (mod) {
-                    const pyevalContext = window.py.dict.fromJSON(context || {});
-                    var v = pyUtils.py_eval(mod, {context: pyevalContext}) ? true: false;
-                    if (inTreeView && !inListHeader && a === 'invisible') {
-                        modifiers.column_invisible = v;
-                    } else if (v || !(a in modifiers) || !_.isArray(modifiers[a])) {
-                        modifiers[a] = v;
-                    }
-                }
-            });*/
+      const inListHeader = inTreeView && node.closest("header");
+      modifiersNames.forEach((attr) => {
+        const mod = node.getAttribute(attr);
+        if (mod) {
+          // TODO
+          // const pyevalContext = window.py.dict.fromJSON(context || {});
+          // var v = pyUtils.py_eval(mod, {context: pyevalContext}) ? true : false;
+          console.warn("MockServer: naive parse of modifier value");
+          const v = JSON.parse(mod);
+          if (inTreeView && !inListHeader && attr === "invisible") {
+            modifiers.column_invisible = v;
+          } else if (v || !(attr in modifiers) || !Array.isArray(modifiers[attr])) {
+            modifiers[attr] = v;
+          }
+        }
+      });
 
-      /*            _.each(modifiersNames, function (a) {
-                if (a in modifiers && (!!modifiers[a] === false || (_.isArray(modifiers[a]) && !modifiers[a].length))) {
-                    delete modifiers[a];
-                }
-            });*/
+      modifiersNames.forEach((attr) => {
+        if (
+          attr in modifiers &&
+          (!!modifiers[attr] === false ||
+            (Array.isArray(modifiers[attr]) && !modifiers[attr].length))
+        ) {
+          delete modifiers[attr];
+        }
+      });
 
       if (Object.keys(modifiers).length) {
         node.setAttribute("modifiers", JSON.stringify(modifiers));
