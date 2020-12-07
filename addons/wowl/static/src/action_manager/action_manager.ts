@@ -38,6 +38,7 @@ export interface ActionOptions {
   clearBreadcrumbs?: boolean;
   viewType?: ViewType;
   resId?: number;
+  onClose?: CallableFunction;
 }
 
 interface Context {
@@ -136,12 +137,15 @@ interface ActionManagerUpdateInfo {
   dialogProps?: {
     title: string;
   };
+  onClose?: ActionOptions["onClose"];
+  onCloseInfo?: any;
 }
 
 interface UpdateStackOptions {
   clearBreadcrumbs?: boolean;
   index?: number;
   lazyController?: Controller;
+  onClose?: ActionOptions["onClose"];
 }
 
 interface ViewOptions {
@@ -244,17 +248,25 @@ export class ActionContainer extends Component<{}, OdooEnv> {
           this.main = { id: info.id, Component: info.Component, props: info.props };
           this.dialog = {};
           break;
-        case "OPEN_DIALOG":
+        case "OPEN_DIALOG": {
+          const { onClose } = this.dialog;
           this.dialog = {
             id: info.id,
             Component: info.Component,
             props: info.props,
             dialogProps: info.dialogProps,
+            onClose: onClose || info.onClose,
           };
           break;
-        case "CLOSE_DIALOG":
+        }
+        case "CLOSE_DIALOG": {
+          const { onClose } = this.dialog;
+          if (onClose) {
+            onClose(info.onCloseInfo);
+          }
           this.dialog = {};
           break;
+        }
       }
       this.render();
     });
@@ -542,6 +554,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
           //TODO add size and dialogClass
           title: action.name,
         },
+        onClose: options.onClose,
       });
       return currentActionProm;
     }
@@ -659,7 +672,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
       props: _getViewProps(view, action, views, viewOptions),
     };
     action.controllers[view.type] = controller;
-    return _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs, lazyController });
+    return _updateUI(controller, {
+      clearBreadcrumbs: options.clearBreadcrumbs,
+      lazyController,
+      onClose: options.onClose,
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -685,7 +702,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
           params: action.params,
         },
       };
-      return _updateUI(controller, { clearBreadcrumbs: options.clearBreadcrumbs });
+      return _updateUI(controller, {
+        clearBreadcrumbs: options.clearBreadcrumbs,
+        onClose: options.onClose,
+      });
     } else {
       return (clientAction as FunctionAction)(env, action);
     }
@@ -862,7 +882,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
         }
         return _executeActWindowAction(action, options);
       case "ir.actions.act_window_close": {
-        env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "CLOSE_DIALOG" });
+        env.bus.trigger("ACTION_MANAGER:UPDATE", {
+          type: "CLOSE_DIALOG",
+          onCloseInfo: actionRequest.info,
+        });
         return dialogCloseProm;
       }
       case "ir.actions.client":

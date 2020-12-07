@@ -4971,7 +4971,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
   QUnit.module('Actions in target="new"');
 
-  QUnit.skip('can execute act_window actions in target="new"', async function (assert) {
+  QUnit.test('can execute act_window actions in target="new"', async function (assert) {
     assert.expect(7);
 
     const mockRPC: RPC = async (route, args) => {
@@ -4985,43 +4985,43 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       ".o_technical_modal .o_form_view",
       "should have rendered a form view in a modal"
     );
-    assert.hasClass(
-      $(".o_technical_modal .modal-body")[0],
-      "o_act_window",
-      "dialog main element should have classname 'o_act_window'"
-    );
+    // LPE FIXME:
+    // assert.hasClass(
+    //   $(".o_technical_modal .modal-body")[0],
+    //   "o_act_window",
+    //   "dialog main element should have classname 'o_act_window'"
+    // );
     assert.hasClass(
       $(".o_technical_modal .o_form_view")[0],
       "o_form_editable",
       "form view should be in edit mode"
     );
 
-    assert.verifySteps(["/web/action/load", "load_views", "onchange"]);
+    assert.verifySteps(["/wowl/load_menus", "/web/action/load", "load_views", "onchange"]);
 
     webClient.destroy();
   });
 
-  QUnit.skip("chained action on_close", async function (assert) {
-    /*
-    assert.expect(3);
+  QUnit.test("chained action on_close", async function (assert) {
+    assert.expect(4);
 
-    function on_close() {
+    function onClose(closeInfo: any) {
+      assert.strictEqual(closeInfo, "smallCandle");
       assert.step("Close Action");
     }
 
     const webClient = await createWebClient({ baseConfig });
-    await doAction(webClient, 5, { on_close: on_close });
+    await doAction(webClient, 5, { onClose });
 
     // a target=new action shouldn't activate the on_close
     await doAction(webClient, 5);
     assert.verifySteps([]);
 
     // An act_window_close should trigger the on_close
-    await doAction(webClient, 10);
+    await doAction(webClient, { type: "ir.actions.act_window_close", info: "smallCandle" });
     assert.verifySteps(["Close Action"]);
 
     webClient.destroy();
-    */
   });
 
   QUnit.skip("footer buttons are moved to the dialog footer", async function (assert) {
