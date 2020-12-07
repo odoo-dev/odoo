@@ -5058,56 +5058,53 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.skip("Button with `close` attribute closes dialog", async function (assert) {
-    /*
+    // unskip when button in dialogAction are implemented (boi I think)
     assert.expect(2);
-    const actions = [
-      {
-        id: 4,
-        name: "Partners Action 4",
-        res_model: "partner",
-        type: "ir.actions.act_window",
-        views: [[false, "form"]],
-      },
-      {
-        id: 5,
-        name: "Create a Partner",
-        res_model: "partner",
-        target: "new",
-        type: "ir.actions.act_window",
-        views: [["view_ref", "form"]],
-      },
-    ];
 
-    const actionManager = await createActionManager({
-      actions,
-      archs: {
-        "partner,false,form": `
-                    <form>
-                        <header>
-                            <button string="Open dialog" name="5" type="action"/>
-                        </header>
-                    </form>
-                `,
-        "partner,view_ref,form": `
-                    <form>
-                        <footer>
-                            <button string="I close the dialog" name="some_method" type="object" close="1"/>
-                        </footer>
-                    </form>
-                `,
-        "partner,false,search": "<search></search>",
-      },
-      data: this.data,
-      mockRPC: async function (route, args) {
-        if (route === "/web/dataset/call_button" && args.method === "some_method") {
-          return {
-            tag: "display_notification",
-            type: "ir.actions.client",
-          };
-        }
-        return this._super(...arguments);
-      },
-    });
+    baseConfig.serverData!.views! = {
+      "partner,false,form": `
+        <form>
+          <header>
+            <button string="Open dialog" name="5" type="action"/>
+          </header>
+        </form>
+      `,
+      "partner,view_ref,form": `
+          <form>
+            <footer>
+              <button string="I close the dialog" name="some_method" type="object" close="1"/>
+            </footer>
+          </form>
+      `,
+      "partner,false,search": "<search></search>",
+    };
+
+    baseConfig.serverData!.actions![4] = {
+      id: 4,
+      name: "Partners Action 4",
+      res_model: "partner",
+      type: "ir.actions.act_window",
+      views: [[false, "form"]],
+    };
+    baseConfig.serverData!.actions![5] = {
+      id: 5,
+      name: "Create a Partner",
+      res_model: "partner",
+      target: "new",
+      type: "ir.actions.act_window",
+      views: [["view_ref", "form"]],
+    };
+
+    const mockRPC: RPC = async (route, args) => {
+      if (route === "/web/dataset/call_button" && args!.method === "some_method") {
+        return {
+          tag: "display_notification",
+          type: "ir.actions.client",
+        };
+      }
+    };
+
+    const webClient = await createWebClient({ baseConfig , mockRPC });
 
     await doAction(webClient, 4);
     await testUtils.dom.click(`button[name="5"]`);
@@ -5115,7 +5112,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     await testUtils.dom.click(`button[name="some_method"]`);
     assert.strictEqual($(".modal").length, 0, "It should have closed the modal");
     webClient.destroy();
-    */
   });
 
   QUnit.skip('on_attach_callback is called for actions in target="new"', async function (assert) {
@@ -5274,7 +5270,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.skip('execute "on_close" only if there is no dialog to close', async function (assert) {
-    /*
     assert.expect(3);
 
     const webClient = await createWebClient({ baseConfig });
@@ -5282,9 +5277,10 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     // execute an action in target="new"
     await doAction(webClient, 5);
 
-    var options = {
-      on_close: assert.step.bind(assert, "on_close"),
-    };
+    function onClose() {
+      assert.step('on_close');
+    }
+    const options = {onClose};
     // execute an 'ir.actions.act_window_close' action
     // should not call 'on_close' as there is a dialog to close
     await doAction(webClient, { type: "ir.actions.act_window_close" }, options);
@@ -5298,7 +5294,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.verifySteps(["on_close"]);
 
     webClient.destroy();
-    */
   });
 
   QUnit.skip("doAction resolved with an action", async function (assert) {
