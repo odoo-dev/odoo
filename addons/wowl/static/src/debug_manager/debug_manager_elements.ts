@@ -1,6 +1,6 @@
 import { MenuElement, OdooEnv } from "../types";
 import { routeToUrl } from "../services/router";
-import { DomainListRepr as Domain } from "../core/domain";
+import { DomainListRepr } from "../core/domain";
 
 // Backend Debug Manager Items
 
@@ -93,7 +93,7 @@ export function regenerateAssets(env: OdooEnv): MenuElement {
     type: "item",
     description: env._t("Regenerate Assets Bundles"),
     callback: async () => {
-      const domain: Domain = [
+      const domain: DomainListRepr = [
         "&",
         ["res_model", "=", "ir.ui.view"],
         "|",

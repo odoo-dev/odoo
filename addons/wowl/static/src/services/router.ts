@@ -119,7 +119,7 @@ export const routerService: Service<Router> = {
   },
 };
 
-export function objectToQuery(obj: {[k: string]: any}): Query {
+export function objectToQuery(obj: { [k: string]: any }): Query {
   const query: Query = {};
   Object.entries(obj).forEach(([k, v]) => {
     query[k] = v ? `${v}` : v;

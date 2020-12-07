@@ -1079,7 +1079,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test("document's title is updated when an action is executed", async function (assert) {
     assert.expect(8);
 
-    const defaultTitle: any = {zopenerp: 'Odoo'};
+    const defaultTitle: any = { zopenerp: "Odoo" };
 
     const webClient = await createWebClient({ baseConfig });
     let currentTitle = webClient.env.services.title.getParts();
@@ -1091,29 +1091,29 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     currentTitle = webClient.env.services.title.getParts();
     assert.deepEqual(currentTitle, {
       ...defaultTitle,
-      action: 'Partners Action 4',
+      action: "Partners Action 4",
     });
     currentHash = webClient.env.services.router.current.hash;
-    assert.deepEqual(currentHash,  { action: '4', model: "partner", view_type: "kanban" });
+    assert.deepEqual(currentHash, { action: "4", model: "partner", view_type: "kanban" });
 
     await doAction(webClient, 8);
     currentTitle = webClient.env.services.title.getParts();
     assert.deepEqual(currentTitle, {
       ...defaultTitle,
-      action: 'Favorite Ponies',
+      action: "Favorite Ponies",
     });
     currentHash = webClient.env.services.router.current.hash;
-    assert.deepEqual(currentHash, { action: '8', model: "pony", view_type: "list" });
+    assert.deepEqual(currentHash, { action: "8", model: "pony", view_type: "list" });
 
     await testUtils.dom.click($(webClient.el!).find("tr.o_data_row:first"));
     await legacyExtraNextTick();
     currentTitle = webClient.env.services.title.getParts();
     assert.deepEqual(currentTitle, {
       ...defaultTitle,
-      action: 'Twilight Sparkle',
+      action: "Twilight Sparkle",
     });
     currentHash = webClient.env.services.router.current.hash;
-    assert.deepEqual(currentHash, { action: '8', id: '4', model: "pony", view_type: "form" });
+    assert.deepEqual(currentHash, { action: "8", id: "4", model: "pony", view_type: "form" });
 
     webClient.destroy();
   });

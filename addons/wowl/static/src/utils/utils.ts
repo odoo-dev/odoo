@@ -101,6 +101,7 @@ export function json_node_to_xml(env: OdooEnv, node: any, human_readable: any, i
   } else {
     return r + "/>";
   }
+}
 /*
  * Helper function returning an extraction handler to use on array elements to
  * return a certain attribute or mutated form of the element.

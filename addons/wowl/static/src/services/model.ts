@@ -49,7 +49,7 @@ export interface Model {
     options?: GroupByOptions,
     ctx?: Context
   ): Promise<ReadGroupResult>;
-  search(domain: Domain, options?: SearchReadOptions, ctx?: Context): Promise<number[]>;
+  search(domain: DomainListRepr, options?: SearchReadOptions, ctx?: Context): Promise<number[]>;
   searchRead(
     domain: DomainListRepr,
     fields: string[],

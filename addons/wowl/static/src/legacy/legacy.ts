@@ -21,7 +21,7 @@ import { Dialog } from "../components/dialog/dialog";
 import { json_node_to_xml } from "../utils/utils";
 import { formatDateTime, formatMany2one, parseDateTime } from "../utils/fields_utils";
 const { useState } = hooks;
-import { Query, objectToQuery } from '../services/router';
+import { Query, objectToQuery } from "../services/router";
 
 declare const odoo: any;
 
@@ -124,7 +124,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     // a legacy widget widget can push_state anytime including during its async rendering
     // In Wowl, we want to have all states pushed during the same setTimeout.
     // This is protected in legacy (backward compatibility) but should not e supported in Wowl
-    tempQuery: Query|null = {};
+    tempQuery: Query | null = {};
 
     constructor(...args: any[]) {
       super(...args);
