@@ -5,6 +5,7 @@ import { Dropdown } from "../../src/components/dropdown/dropdown";
 import { DropdownItem } from "../../src/components/dropdown/dropdown_item";
 import { OdooEnv } from "../helpers";
 import { click, makeTestEnv, mount, nextTick } from "../helpers/utility";
+import { makeDeferred } from '../helpers/index';
 
 let env: OdooEnv;
 let parent: owl.Component;
@@ -51,23 +52,41 @@ QUnit.test("can be styled", async (assert) => {
 });
 
 QUnit.test("menu can be toggled", async (assert) => {
+  assert.expect(5);
+
+  const beforeOpenProm = makeDeferred();
   class Parent extends owl.Component {
     static components = { Dropdown };
-    static template = owl.tags.xml`<Dropdown/>`;
+    static template = owl.tags.xml`<Dropdown beforeOpen="beforeOpen"/>`;
+    beforeOpen = () => {
+      assert.step('beforeOpen');
+      return beforeOpenProm;
+    }
   }
   parent = await mount(Parent, { env });
   await click(parent.el!, "button.o_dropdown_toggler");
+  assert.verifySteps(['beforeOpen']);
+  assert.containsNone(parent.el!, "ul.o_dropdown_menu");
+
+  beforeOpenProm.resolve();
+  await nextTick();
   assert.containsOnce(parent.el!, "ul.o_dropdown_menu");
   await click(parent.el!, "button.o_dropdown_toggler");
   assert.containsNone(parent.el!, "ul.o_dropdown_menu");
 });
 
 QUnit.test("initial open state can be true", async (assert) => {
+  assert.expect(3);
+
   class Parent extends owl.Component {
     static components = { Dropdown };
-    static template = owl.tags.xml`<Dropdown startOpen="true"/>`;
+    static template = owl.tags.xml`<Dropdown startOpen="true" beforeOpen="beforeOpen"/>`;
+    beforeOpen = () => {
+      assert.step('beforeOpen');
+    }
   }
   parent = await mount(Parent, { env });
+  assert.verifySteps(['beforeOpen']);
   assert.containsOnce(parent.el!, "ul.o_dropdown_menu");
 });
 
@@ -370,28 +389,42 @@ QUnit.test("multi-level dropdown: recursive template can be rendered", async (as
 QUnit.test(
   "siblings dropdowns: when one is open, others can be toggled on mouse-enter",
   async (assert) => {
+    assert.expect(13);
+
+    const beforeOpenProm = makeDeferred();
     class Parent extends owl.Component {
       static components = { Dropdown };
       static template = owl.tags.xml`
       <div>
         <Dropdown class="one" />
-        <Dropdown class="two" />
+        <Dropdown class="two" beforeOpen="beforeOpen"/>
         <Dropdown class="three" />
         <div class="outside">OUTSIDE</div>
       </div>
     `;
+      beforeOpen = () => {
+        assert.step('beforeOpen');
+        return beforeOpenProm;
+      }
     }
     parent = await mount(Parent, { env });
 
     // Click on ONE
     const one = parent.el!.querySelector<HTMLElement>(".one");
     await click(one!, "button");
+    assert.verifySteps([]);
     assert.containsOnce(parent.el!, "ul.o_dropdown_menu");
     assert.containsOnce(one!, "ul.o_dropdown_menu");
 
     // Hover on TWO
     const two = parent.el!.querySelector<HTMLElement>(".two");
     two!.querySelector("button")!.dispatchEvent(new MouseEvent("mouseenter"));
+    assert.verifySteps(['beforeOpen']);
+    await nextTick();
+    assert.containsOnce(parent.el!, "ul.o_dropdown_menu");
+    assert.containsNone(two!, "ul.o_dropdown_menu");
+
+    beforeOpenProm.resolve();
     await nextTick();
     assert.containsOnce(parent.el!, "ul.o_dropdown_menu");
     assert.containsOnce(two!, "ul.o_dropdown_menu");

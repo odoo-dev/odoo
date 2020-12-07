@@ -32,12 +32,20 @@ export class Dropdown extends Component {
     hooks.useExternalListener(window, "click", this.onWindowClicked);
     // Listen to siblings state
     Dropdown.bus.on("state-changed", this, this.onSiblingDropdownStateChanged);
+    hooks.onWillStart(() => {
+      if ((this.state.open || this.state.groupIsOpen) && this.props.beforeOpen) {
+        return this.props.beforeOpen();
+      }
+    });
   }
 
   // --------------------------------------------------------------------------
   // PRIVATE
   // --------------------------------------------------------------------------
-  private _changeStateAndNotify(stateSlice: any) {
+  private async _changeStateAndNotify(stateSlice: any) {
+    if ((stateSlice.open || stateSlice.groupIsOpen) && this.props.beforeOpen) {
+      await this.props.beforeOpen();
+    }
     // Update the state
     Object.assign(this.state, stateSlice);
     // Notify over the bus
@@ -48,19 +56,16 @@ export class Dropdown extends Component {
   }
 
   private _close() {
-    this._changeStateAndNotify({ open: false, groupIsOpen: false });
+    return this._changeStateAndNotify({ open: false, groupIsOpen: false });
   }
 
   private _open() {
-    this._changeStateAndNotify({ open: true, groupIsOpen: true });
+    return this._changeStateAndNotify({ open: true, groupIsOpen: true });
   }
 
-  private async _toggle() {
+  private _toggle() {
     const toggled = !this.state.open;
-    if (toggled && this.props.beforeOpen) {
-      await this.props.beforeOpen();
-    }
-    this._changeStateAndNotify({
+    return this._changeStateAndNotify({
       open: toggled,
       groupIsOpen: toggled,
     });
