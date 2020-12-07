@@ -1224,6 +1224,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.skip(
     'executing an action with target != "new" closes all dialogs',
     async function (assert) {
+      // LPE. unskip when all dialogs are WOWL dialogs,
+      // LPE: x2m dialogs are not yet wowl dialogs
       assert.expect(4);
 
       baseConfig.serverData!.views!["partner,false,form"] = `
@@ -1257,6 +1259,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.skip(
     'executing an action with target "new" does not close dialogs',
     async function (assert) {
+      // LPE: FIXME: same as above
       assert.expect(4);
 
       baseConfig.serverData!.views!["partner,false,form"] = `
@@ -5297,14 +5300,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.skip("doAction resolved with an action", async function (assert) {
-    /*
     assert.expect(4);
 
-    this.actions.push({
+    // LPE/ FIXME: outdated ?
+/*    baseConfig.serverData!.actions![21] = {
       id: 21,
       name: "A Close Action",
       type: "ir.actions.act_window_close",
-    });
+    };
 
     const webClient = await createWebClient({ baseConfig });
 
@@ -5322,8 +5325,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         "should be resolved with correct action type"
       );
       webClient.destroy();
-    });
-    */
+    });*/
   });
 
   QUnit.test("close action with provided infos", async function (assert) {
@@ -5441,23 +5443,17 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip("web client is not deadlocked when a view crashes", async function (assert) {
-    /*
+  QUnit.test("web client is not deadlocked when a view crashes", async function (assert) {
     assert.expect(3);
 
-    var readOnFirstRecordDef = testUtils.makeTestPromise();
+    const readOnFirstRecordDef = testUtils.makeTestPromise();
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      mockRPC: function (route, args) {
-        if (args.method === "read" && args.args[0][0] === 1) {
-          return readOnFirstRecordDef;
-        }
-        return this._super.apply(this, arguments);
-      },
-    });
+    const mockRPC: RPC = (route, args) => {
+      if (args!.method === "read" && args!.args[0][0] === 1) {
+        return readOnFirstRecordDef;
+      }
+    };
+    const webClient = await createWebClient({ baseConfig , mockRPC });
 
     await doAction(webClient, 3);
 
@@ -5467,7 +5463,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     await legacyExtraNextTick();
 
     readOnFirstRecordDef.reject("not working as intended");
-
+    await nextTick();
     assert.containsOnce(webClient, ".o_list_view", "there should still be a list view in dom");
 
     // open another record, the read will not crash
@@ -5479,7 +5475,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.containsOnce(webClient, ".o_form_view", "there should be a form view in dom");
 
     webClient.destroy();
-    */
   });
 
   QUnit.skip("data-mobile attribute on action button, in desktop", async function (assert) {
