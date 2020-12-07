@@ -1,5 +1,6 @@
 import { BUILTINS, PyDate, parseArgs, PyDateTime, PyTime, PyRelativeDelta } from "./builtins";
 import { AST, ASTBinaryOperator, ASTUnaryOperator, AST_TYPE } from "./parser";
+import { PY_DICT } from "./utils";
 
 export type EvalContext = { [key: string]: any };
 
@@ -207,7 +208,7 @@ export function evaluate(ast: AST, context: EvalContext = {}): any {
       }
       case AST_TYPE.ObjLookup: {
         const left = _evaluate(ast.obj);
-        if (dicts.has(left)) {
+        if (dicts.has(left) || Object.isPrototypeOf.call(PY_DICT, left)) {
           // this is a dictionary => need to apply dict methods
           return DICT[ast.key](left);
         }

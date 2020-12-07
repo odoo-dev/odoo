@@ -82,3 +82,10 @@ export function formatAST(ast: AST, lbp: number = 0): string {
   }
   throw new Error("invalid expression: " + ast);
 }
+
+export const PY_DICT = Object.create(null);
+
+export function toPyDict(obj: Object): Object {
+  const result = Object.create(PY_DICT);
+  return Object.assign(result, obj);
+}

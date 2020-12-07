@@ -6,6 +6,7 @@ import {
   tokenize,
   TOKEN_TYPE,
 } from "../../src/py/index";
+import { toPyDict } from "../../src/py/utils";
 
 QUnit.module("py", {}, () => {
   QUnit.module("tokenizer");
@@ -567,6 +568,12 @@ QUnit.module("py", {}, () => {
       assert.strictEqual(evaluateExpr("a", { a: "bar" }), "bar");
 
       assert.deepEqual(evaluateExpr("foo", { foo: [1, 2, 3] }), [1, 2, 3]);
+    });
+
+    QUnit.test("python values in context", (assert) => {
+      const context = toPyDict({ b: 3 });
+      assert.strictEqual(evaluateExpr("context.get('b', 54)", { context }), 3);
+      assert.strictEqual(evaluateExpr("context.get('c', 54)", { context }), 54);
     });
 
     QUnit.test("throw error if name is not defined", (assert) => {
