@@ -83,6 +83,9 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
   class MyItem3 extends Component {
     static template = xml`<li class="my-item-3">my item 3</li>`;
   }
+  class MyItem4 extends Component {
+    static template = xml`<li class="my-item-4">my item 4</li>`;
+  }
 
   const item1 = {
     name: "addon.myitem1",
@@ -98,18 +101,23 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
     Component: MyItem3,
     sequence: 100,
   };
+  const item4 = {
+    name: "addon.myitem4",
+    Component: MyItem4,
+  };
   const systrayRegistry: Registries["systrayRegistry"] = new Registry();
   systrayRegistry.add(item2.name, item2);
   systrayRegistry.add(item1.name, item1);
   systrayRegistry.add(item3.name, item3);
+  systrayRegistry.add(item4.name, item4);
 
   const env = await makeTestEnv({ ...baseConfig, systrayRegistry });
   const navbar = await mount(NavBar, { env });
 
   const menuSystray = navbar.el!.getElementsByClassName("o_menu_systray")[0] as HTMLElement;
 
-  assert.containsN(menuSystray, "li", 3, "tree systray items should be displayed");
-  assert.strictEqual(menuSystray.innerText, "my item 3\nmy item 2\nmy item 1");
+  assert.containsN(menuSystray, "li", 4, "four systray items should be displayed");
+  assert.strictEqual(menuSystray.innerText, "my item 3\nmy item 2\nmy item 4\nmy item 1");
 });
 
 QUnit.test("can adapt with 'more' menu sections behavior", async (assert) => {
