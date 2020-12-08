@@ -1753,8 +1753,7 @@ class MailThread(models.AbstractModel):
                      email_from=None, author_id=None, parent_id=False,
                      subtype_xmlid=None, subtype_id=False, partner_ids=None, channel_ids=None,
                      attachments=None, attachment_ids=None,
-                     add_sign=True, record_name=False,
-                     **kwargs):
+                     add_sign=True, **kwargs):
         """ Post a new message in an existing thread, returning the new
             mail.message ID.
             :param str body: body of the message, usually raw HTML that will
@@ -1795,7 +1794,6 @@ class MailThread(models.AbstractModel):
         # Explicit access rights check, because display_name is computed as sudo.
         self.check_access_rights('read')
         self.check_access_rule('read')
-        record_name = record_name or self.display_name
 
         partner_ids = set(partner_ids or [])
         channel_ids = set(channel_ids or [])
@@ -1847,7 +1845,6 @@ class MailThread(models.AbstractModel):
             'partner_ids': partner_ids,
             'channel_ids': channel_ids,
             'add_sign': add_sign,
-            'record_name': record_name,
         })
         attachments = attachments or []
         attachment_ids = attachment_ids or []
@@ -1975,7 +1972,6 @@ class MailThread(models.AbstractModel):
             'partner_ids': partner_ids,
             'subtype_id': self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note'),
             'is_internal': True,
-            'record_name': False,
             'reply_to': MailThread._notify_get_reply_to(default=email_from, records=None)[False],
             'message_id': tools.generate_tracking_message_id('message-notify'),
         }
@@ -2004,7 +2000,6 @@ class MailThread(models.AbstractModel):
             'res_id': self.ids[0] if self.ids else False,
             'subtype_id': self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note'),
             'is_internal': True,
-            'record_name': False,
             'reply_to': self.env['mail.thread']._notify_get_reply_to(default=email_from, records=None)[False],
             'message_id': tools.generate_tracking_message_id('message-notify'),  # why? this is all but a notify
         }
@@ -2027,7 +2022,6 @@ class MailThread(models.AbstractModel):
             'model': self._name,
             'subtype_id': self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note'),
             'is_internal': True,
-            'record_name': False,
             'reply_to': self.env['mail.thread']._notify_get_reply_to(default=email_from, records=None)[False],
             'message_id': tools.generate_tracking_message_id('message-notify'),  # why? this is all but a notify
         }
@@ -2369,7 +2363,6 @@ class MailThread(models.AbstractModel):
             'company': company,
             'model_description': model_description,
             'record': self,
-            'record_name': record_name,
             'tracking_values': tracking,
             'is_discussion': is_discussion,
             'subtype': message.subtype_id,
@@ -2753,7 +2746,6 @@ class MailThread(models.AbstractModel):
                 subject=_('You have been assigned to %s', record.display_name),
                 body=assignation_msg,
                 partner_ids=partner_ids,
-                record_name=record.display_name,
                 email_layout_xmlid='mail.mail_notification_light',
                 model_description=model_description,
             )

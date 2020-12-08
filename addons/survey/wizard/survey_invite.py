@@ -232,7 +232,7 @@ class SurveyInvite(models.TransientModel):
                 _logger.warning('QWeb template %s not found when sending survey mails. Sending without layouting.' % (notif_layout))
             else:
                 template_ctx = {
-                    'message': self.env['mail.message'].sudo().new(dict(body=mail_values['body_html'], record_name=self.survey_id.title)),
+                    'message': self.env['mail.message'].sudo().new(dict(body=mail_values['body_html'])),
                     'model_description': self.env['ir.model']._get('survey.survey').display_name,
                     'company': self.env.company,
                 }

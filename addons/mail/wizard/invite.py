@@ -66,7 +66,6 @@ class Invite(models.TransientModel):
                 message = self.env['mail.message'].create({
                     'subject': _('Invitation to follow %(document_model)s: %(document_name)s', document_model=model_name, document_name=document.display_name),
                     'body': wizard.message,
-                    'record_name': document.display_name,
                     'email_from': email_from,
                     'reply_to': email_from,
                     'model': wizard.res_model,

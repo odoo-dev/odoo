@@ -262,7 +262,7 @@ class MailTemplate(models.Model):
             else:
                 record = self.env[self.model].browse(res_id)
                 template_ctx = {
-                    'message': self.env['mail.message'].sudo().new(dict(body=values['body_html'], record_name=record.display_name)),
+                    'message': self.env['mail.message'].sudo().new(dict(body=values['body_html'])),
                     'model_description': self.env['ir.model']._get(record._name).display_name,
                     'company': 'company_id' in record and record['company_id'] or self.env.company,
                     'record': record,

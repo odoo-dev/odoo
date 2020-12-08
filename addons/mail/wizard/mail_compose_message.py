@@ -299,7 +299,6 @@ class MailComposer(models.TransientModel):
                 'attachment_ids': [attach.id for attach in self.attachment_ids],
                 'author_id': self.author_id.id,
                 'email_from': self.email_from,
-                'record_name': self.record_name,
                 'no_auto_thread': self.no_auto_thread,
                 'mail_server_id': self.mail_server_id.id,
                 'mail_activity_type_id': self.mail_activity_type_id.id,
@@ -310,7 +309,7 @@ class MailComposer(models.TransientModel):
                 record = self.env[self.model].browse(res_id)
                 mail_values['headers'] = record._notify_email_headers()
                 # keep a copy unless specifically requested, reset record name (avoid browsing records)
-                mail_values.update(notification=not self.auto_delete_message, model=self.model, res_id=res_id, record_name=False)
+                mail_values.update(notification=not self.auto_delete_message, model=self.model, res_id=res_id)
                 # auto deletion of mail_mail
                 if self.auto_delete or self.template_id.auto_delete:
                     mail_values['auto_delete'] = True
