@@ -61,7 +61,10 @@ class IoTboxHomepage(web.Home):
 
     def get_opcua_server(self):
         opcua_server = helpers.read_file_first_line('odoo-opcua-server.conf')
-        return json.loads(opcua_server) or {}
+        if opcua_server:
+            return json.loads(opcua_server)
+        else:
+            return {}
 
     def get_homepage_data(self):
         hostname = str(socket.gethostname())
@@ -85,6 +88,14 @@ class IoTboxHomepage(web.Home):
                 'identifier': iot_devices[device].device_identifier,
             })
 
+        opcua_servers = []
+        opcua_server_list = self.get_opcua_server()
+        for opcua_server in opcua_server_list.keys():
+            opcua_servers.append({
+                'name': opcua_server,
+                'root': iot_devices[opcua_server].loop_node('test'),
+            })
+
         return {
             'hostname': hostname,
             'ip': helpers.get_ip(),
@@ -92,7 +103,7 @@ class IoTboxHomepage(web.Home):
             'iot_device_status': iot_device,
             'server_status': helpers.get_odoo_server_url() or 'Not Configured',
             'six_terminal': self.get_six_terminal(),
-            'opcua_server': self.get_opcua_server().get('endpoint', 'Not Configured'),
+            'opcua_server_list': self.opcua_servers,
             'network_status': network,
             'version': helpers.get_version(),
             }
@@ -373,12 +384,15 @@ class IoTboxHomepage(web.Home):
         })
 
     @http.route('/opcua_server_add', type='http', auth='none', cors='*', csrf=False)
-    def add_opcua_server(self, opcua_server_endpoint, opcua_server_endpoint_user, opcua_server_endpoint_pwd):
-        opcua_server = {
-            'endpoint': opcua_server_endpoint,
-            'user': opcua_server_endpoint_user,
-            'pwd': opcua_server_endpoint_pwd,
-            }
+    def add_opcua_server(self, opcua_server_name, opcua_server_endpoint, opcua_server_endpoint_user, opcua_server_endpoint_pwd):
+        opcua_server = self.get_opcua_server()
+        opcua_server.update({
+            opcua_server_name : {
+                'endpoint': opcua_server_endpoint,
+                'user': opcua_server_endpoint_user,
+                'pwd': opcua_server_endpoint_pwd,
+                }
+            })
         helpers.write_file('odoo-opcua-server.conf', json.dumps(opcua_server))
         subprocess.check_call(["sudo", "service", "odoo", "restart"])
         return 'http://' + helpers.get_ip() + ':8069'

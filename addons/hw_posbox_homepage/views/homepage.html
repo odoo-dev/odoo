@@ -81,6 +81,30 @@
             content.css('max-height', maxHeight);
         });
     });
+    $('#flash').click(async function() {
+        $('.loading-block').removeClass('o_hide');
+        $('.message-title').text('IoTBox perform a self flashing it take a lot of time (~30min).');
+        $('.message-status').text('Prepare space for IoTBox.');
+            await $.ajax({url: '/hw_proxy/perform_flashing_create_partition/'}).promise();
+            $('.message-status').text('Prepare new boot partition.');
+            await $.ajax({url: '/hw_proxy/perform_flashing_download_raspios/'}).promise();
+            $('.message-status').text('Download file for new boot partition.');
+            await $.ajax({url: '/hw_proxy/perform_flashing_copy_raspios/'}).promise();
+            $('.message-status').text('Prepare to restart and installation of the new version of the IoT Box.');
+            setTimeout(function() {
+            $('.message-status').text('The auto flash is almost finished - the page will be automatically reloaded');
+            setInterval(function() {
+                $.ajax({
+                    url: '/hw_proxy/get_version',
+                    timeout: 4000,
+                }).done(function(version) {
+                    if (version == {{ flashToVersion }}) {
+                        window.location = '/';
+                    }
+                });
+            } , 2000);
+        }, 240000);
+    });
 </script>
 {% endblock %}
 {% block content %}
@@ -117,7 +141,18 @@
         </tr>
         <tr>
             <td class="heading">Opc-Ua Server</td>
-            <td>{{ opcua_server }} <a class="btn btn-sm float-right" href='/opcua_server'>configure</a></td>
+            <td>
+                <div class="collapse">
+                    {% for opcua_server in opcua_server_list %}
+                        <div class="collapsible">
+                            <div class="title arrow-down">{{ opcua_server }}</div>
+                            <div class="content">
+                                <span>Root</span>
+                            </div>
+                        </div>
+                    {%- endfor %}
+                </div>
+            <a class="btn btn-sm float-right" href='/opcua_server'>configure</a></td>
         </tr>
         {% endif %}
         <tr>
