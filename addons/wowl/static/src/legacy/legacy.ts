@@ -10,7 +10,11 @@ import {
   Type,
 } from "../types";
 import { useService } from "../core/hooks";
-import { ActionManagerUpdateInfo, useSetupAction, ViewNotFoundError } from "../action_manager/action_manager";
+import {
+  ActionManagerUpdateInfo,
+  useSetupAction,
+  ViewNotFoundError,
+} from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
 import { viewRegistry } from "../views/view_registry";
 import { Context } from "../core/context";
@@ -140,7 +144,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         this.__widget = this.widget;
         envWowl.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionManagerUpdateInfo) => {
           if (info.type === "MAIN") {
-            (this.env as any).bus.trigger('close_dialogs');
+            (this.env as any).bus.trigger("close_dialogs");
           }
         });
       });

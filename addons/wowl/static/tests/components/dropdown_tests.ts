@@ -5,7 +5,7 @@ import { Dropdown } from "../../src/components/dropdown/dropdown";
 import { DropdownItem } from "../../src/components/dropdown/dropdown_item";
 import { OdooEnv } from "../helpers";
 import { click, makeTestEnv, mount, nextTick } from "../helpers/utility";
-import { makeDeferred } from '../helpers/index';
+import { makeDeferred } from "../helpers/index";
 
 let env: OdooEnv;
 let parent: owl.Component;
@@ -59,13 +59,13 @@ QUnit.test("menu can be toggled", async (assert) => {
     static components = { Dropdown };
     static template = owl.tags.xml`<Dropdown beforeOpen="beforeOpen"/>`;
     beforeOpen = () => {
-      assert.step('beforeOpen');
+      assert.step("beforeOpen");
       return beforeOpenProm;
-    }
+    };
   }
   parent = await mount(Parent, { env });
   await click(parent.el!, "button.o_dropdown_toggler");
-  assert.verifySteps(['beforeOpen']);
+  assert.verifySteps(["beforeOpen"]);
   assert.containsNone(parent.el!, "ul.o_dropdown_menu");
 
   beforeOpenProm.resolve();
@@ -82,11 +82,11 @@ QUnit.test("initial open state can be true", async (assert) => {
     static components = { Dropdown };
     static template = owl.tags.xml`<Dropdown startOpen="true" beforeOpen="beforeOpen"/>`;
     beforeOpen = () => {
-      assert.step('beforeOpen');
-    }
+      assert.step("beforeOpen");
+    };
   }
   parent = await mount(Parent, { env });
-  assert.verifySteps(['beforeOpen']);
+  assert.verifySteps(["beforeOpen"]);
   assert.containsOnce(parent.el!, "ul.o_dropdown_menu");
 });
 
@@ -403,9 +403,9 @@ QUnit.test(
       </div>
     `;
       beforeOpen = () => {
-        assert.step('beforeOpen');
+        assert.step("beforeOpen");
         return beforeOpenProm;
-      }
+      };
     }
     parent = await mount(Parent, { env });
 
@@ -419,7 +419,7 @@ QUnit.test(
     // Hover on TWO
     const two = parent.el!.querySelector<HTMLElement>(".two");
     two!.querySelector("button")!.dispatchEvent(new MouseEvent("mouseenter"));
-    assert.verifySteps(['beforeOpen']);
+    assert.verifySteps(["beforeOpen"]);
     await nextTick();
     assert.containsOnce(parent.el!, "ul.o_dropdown_menu");
     assert.containsNone(two!, "ul.o_dropdown_menu");

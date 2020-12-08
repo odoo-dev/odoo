@@ -5114,7 +5114,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const ClientAction = AbstractAction.extend({
       on_attach_callback: function () {
         assert.step("on_attach_callback");
-        assert.containsOnce(document.body, '.modal .o_test',
+        assert.containsOnce(
+          document.body,
+          ".modal .o_test",
           "should have rendered the client action in a dialog"
         );
       },
@@ -5139,25 +5141,26 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
   QUnit.module('Actions in target="inline"');
 
-  QUnit.skip(
+  QUnit.test(
     'form views for actions in target="inline" open in edit mode',
     async function (assert) {
-      /*
-    assert.expect(5);
+      assert.expect(6);
 
-    const webClient = await createWebClient({ baseConfig });
-    await doAction(webClient, 6);
+      const mockRPC: RPC = async (route, args) => {
+        assert.step(args!.method || route);
+      };
+      const webClient = await createWebClient({ baseConfig, mockRPC });
+      await doAction(webClient, 6);
 
-    assert.containsOnce(
-      actionManager,
-      ".o_form_view.o_form_editable",
-      "should have rendered a form view in edit mode"
-    );
+      assert.containsOnce(
+        webClient,
+        ".o_form_view.o_form_editable",
+        "should have rendered a form view in edit mode"
+      );
 
-    assert.verifySteps(["/web/action/load", "load_views", "read"]);
+      assert.verifySteps(["/wowl/load_menus", "/web/action/load", "load_views", "read"]);
 
-    webClient.destroy();
-    */
+      webClient.destroy();
     }
   );
 
@@ -5343,14 +5346,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       assert.step("on_close");
     }
     // open a new dialog form
-    await doAction(webClient, 5, {onClose});
-    assert.containsOnce(webClient.el!, '.modal');
+    await doAction(webClient, 5, { onClose });
+    assert.containsOnce(webClient.el!, ".modal");
 
     const ev = new Event("history-back", { bubbles: true, cancelable: true });
     webClient.el!.querySelector(".o_view_controller")!.dispatchEvent(ev);
     assert.verifySteps(["on_close"], "should have called the on_close handler");
     await nextTick();
-    assert.containsNone(webClient.el!, '.modal');
+    assert.containsNone(webClient.el!, ".modal");
     webClient.destroy();
   });
 

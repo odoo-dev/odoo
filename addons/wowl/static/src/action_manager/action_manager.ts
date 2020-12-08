@@ -387,7 +387,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       return {
         jsId: controller.jsId,
         name: controller.title || controller.action.name || env._t("Undefined"),
-      }
+      };
     });
   }
 
@@ -481,7 +481,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       componentRef = hooks.useRef("component");
       exportState: ((state: any) => void) | null = null;
       beforeLeave: ((callback: ClearUncommittedChanges) => void) | null = null;
-      getTitle: ((title: (() => string)) => void) | null = null;
+      getTitle: ((title: () => string) => void) | null = null;
 
       constructor() {
         super(...arguments);
@@ -494,12 +494,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
             beforeLeaveFns.push(callback);
           };
           this.getTitle = (getTitle) => {
-            if (!('title' in controller) {
-              Object.defineProperty(controller, 'title', {
+            if (!("title" in controller)) {
+              Object.defineProperty(controller, "title", {
                 get: getTitle,
               });
             }
-          }
+          };
           this.env.bus.on("CLEAR-UNCOMMITTED-CHANGES", this, (callbacks) => {
             beforeLeaveFns.forEach((fn) => callbacks.push(fn));
           });
@@ -565,7 +565,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         if (previousController) {
           restore(previousController.jsId);
         } else {
-          _executeCloseAction({onClose: options.onClose});
+          _executeCloseAction({ onClose: options.onClose });
         }
       }
     }
@@ -881,10 +881,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
     return doAction(nextAction, options);
   }
 
-  function _executeCloseAction(params: {onClose?: ActionOptions['onClose'], onCloseInfo?: any} = {}) {
+  function _executeCloseAction(
+    params: { onClose?: ActionOptions["onClose"]; onCloseInfo?: any } = {}
+  ) {
     env.bus.trigger("ACTION_MANAGER:UPDATE", {
       type: "CLOSE_DIALOG",
-      ...params
+      ...params,
     });
     return dialogCloseProm;
   }
@@ -915,7 +917,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         }
         return _executeActWindowAction(action, options);
       case "ir.actions.act_window_close":
-        return _executeCloseAction({onClose: options.onClose, onCloseInfo: action.infos});
+        return _executeCloseAction({ onClose: options.onClose, onCloseInfo: action.infos });
       case "ir.actions.client":
         if (action.target !== "new") {
           await clearUncommittedChanges(env);
