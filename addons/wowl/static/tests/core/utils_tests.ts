@@ -1,4 +1,4 @@
-import { sprintf } from "../../src/utils/utils";
+import { sprintf } from "../../src/utils/strings";
 
 QUnit.module("utils", {}, () => {
   QUnit.module("sprintf");

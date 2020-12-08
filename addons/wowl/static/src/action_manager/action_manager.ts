@@ -18,7 +18,7 @@ import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
 import { DialogAction } from "./dialog_action";
-import { KeepLast } from "../utils/utils";
+import { KeepLast } from "../utils/concurrency";
 
 // -----------------------------------------------------------------------------
 // Types

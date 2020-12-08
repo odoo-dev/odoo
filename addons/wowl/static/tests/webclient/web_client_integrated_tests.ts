@@ -5107,7 +5107,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       }
     };
 
-    const webClient = await createWebClient({ baseConfig , mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     await doAction(webClient, 4);
     await testUtils.dom.click(`button[name="5"]`);
@@ -5281,9 +5281,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     await doAction(webClient, 5);
 
     function onClose() {
-      assert.step('on_close');
+      assert.step("on_close");
     }
-    const options = {onClose};
+    const options = { onClose };
     // execute an 'ir.actions.act_window_close' action
     // should not call 'on_close' as there is a dialog to close
     await doAction(webClient, { type: "ir.actions.act_window_close" }, options);
@@ -5303,7 +5303,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     assert.expect(4);
 
     // LPE/ FIXME: outdated ?
-/*    baseConfig.serverData!.actions![21] = {
+    /*    baseConfig.serverData!.actions![21] = {
       id: 21,
       name: "A Close Action",
       type: "ir.actions.act_window_close",
@@ -5339,7 +5339,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       },
     };
 
-    await doAction(webClient, 
+    await doAction(
+      webClient,
       {
         type: "ir.actions.act_window_close",
         infos: "just for testing",
@@ -5453,7 +5454,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return readOnFirstRecordDef;
       }
     };
-    const webClient = await createWebClient({ baseConfig , mockRPC });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
     await doAction(webClient, 3);
 

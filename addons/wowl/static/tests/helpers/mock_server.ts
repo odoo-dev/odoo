@@ -1,5 +1,5 @@
 import { ActionDescription } from "../../src/action_manager/action_manager";
-import * as utils from "../../src/utils/utils";
+import * as utils from "../../src/utils/arrays";
 import { Service, ViewId, ViewType } from "../../src/types";
 import { MockRPC, makeFakeRPCService, makeMockFetch } from "./mocks";
 import { MenuData } from "../../src/services/menus";

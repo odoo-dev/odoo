@@ -18,7 +18,7 @@ import { useDebugManager } from "../debug_manager/debug_manager";
 import { DebuggingAccessRights, editModelDebug } from "../debug_manager/debug_manager_service";
 import { ActWindowAction, ClientAction } from "../action_manager/action_manager";
 import { Dialog } from "../components/dialog/dialog";
-import { json_node_to_xml } from "../utils/utils";
+import { json_node_to_xml } from "../utils/misc";
 import { formatDateTime, formatMany2one, parseDateTime } from "../utils/fields_utils";
 const { useState } = hooks;
 import { Query, objectToQuery } from "../services/router";

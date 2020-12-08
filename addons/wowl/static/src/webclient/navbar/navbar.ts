@@ -5,7 +5,7 @@ import { MenuTree } from "../../services/menus";
 import { OdooEnv } from "../../types";
 import { Dropdown } from "../../components/dropdown/dropdown";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
-import { debounce } from "../../utils/utils";
+import { debounce } from "../../utils/misc";
 const { useExternalListener } = hooks;
 
 export interface NavBarState {

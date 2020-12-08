@@ -1,21 +1,5 @@
 import { OdooEnv } from "../types";
 
-/**
- * Returns a string formatted using given values.
- * If the value is an object, its keys will replace `%(key)s` expressions.
- * If the values are a set of strings, they will replace `%s` expressions.
- * If no value is given, the string will not be formatted.
- */
-export function sprintf(s: string, ...values: string[] | [{ [key: string]: string }]): string {
-  if (values.length === 1 && typeof values[0] === "object") {
-    const valuesDict = values[0] as { [key: string]: string };
-    s = s.replace(/\%\(?([^\)]+)\)s/g, (match, value) => valuesDict[value]);
-  } else if (values.length > 0) {
-    s = s.replace(/\%s/g, () => values.shift() as string);
-  }
-  return s;
-}
-
 export function isBrowserChromium(): boolean {
   // true for the browser base on Chromium (Google Chrome, Opera, Edge)
   return navigator.userAgent.includes("Chrome");
@@ -100,68 +84,5 @@ export function json_node_to_xml(env: OdooEnv, node: any, human_readable: any, i
     return r;
   } else {
     return r + "/>";
-  }
-}
-/*
- * Helper function returning an extraction handler to use on array elements to
- * return a certain attribute or mutated form of the element.
- */
-function _getExtractorFrom(criterion: string | Function): any {
-  switch (typeof criterion) {
-    case "string":
-      return (element: any) => element[criterion];
-    case "function":
-      return criterion;
-    default:
-      throw new Error(
-        `Expected criterion of type 'string' or 'function' and got '${typeof criterion}'`
-      );
-  }
-}
-/**
- * Returns an object holding different groups defined by a given criterion
- * or a default one. Each group is a subset of the original given list.
- * The given criterion can either be:
- * - a string: a property name on the list elements which value will be the
- * group name,
- * - a function: a handler that will return the group name from a given
- * element.
- *
- * @param {any[]} list
- * @param {string | function} [criterion]
- * @returns {Object}
- */
-export function groupBy(list: any[], criterion: string | Function): Object {
-  const extract = _getExtractorFrom(criterion);
-  const groups: { [key: string]: any } = {};
-  for (const element of list) {
-    const group = String(extract(element));
-    if (!(group in groups)) {
-      groups[group] = [];
-    }
-    groups[group].push(element);
-  }
-  return groups;
-}
-
-export class KeepLast {
-  id: number = 0;
-  add(promise: Promise<any>) {
-    this.id++;
-    const currentId = this.id;
-    return new Promise((resolve, reject) => {
-      promise
-        .then((value) => {
-          if (this.id === currentId) {
-            resolve(value);
-          }
-        })
-        .catch((reason) => {
-          // not sure about this part
-          if (this.id === currentId) {
-            reject(reason);
-          }
-        });
-    });
   }
 }
