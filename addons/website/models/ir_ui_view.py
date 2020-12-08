@@ -70,14 +70,20 @@ class View(models.Model):
         return super().create(vals_list)
 
     def name_get(self):
+        display_website = True
         if (not self._context.get('display_website') and not self.env.user.has_group('website.group_multi_website')) or \
                 not self._context.get('display_website'):
+            display_website = False
+
+        if not self._context.get('display_key') and not display_website:
             return super(View, self).name_get()
 
         res = []
         for view in self:
             view_name = view.name
-            if view.website_id:
+            if self._context.get('display_key'):
+                view_name += ' <%s>' % view.key
+            if display_website and view.website_id:
                 view_name += ' [%s]' % view.website_id.name
             res.append((view.id, view_name))
         return res
@@ -222,6 +228,12 @@ class View(models.Model):
                 'is_published': page.is_published,
             })
             page.menu_ids.filtered(lambda m: m.website_id.id == website.id).page_id = new_page.id
+
+    def _get_top_level_view(self):
+        self.ensure_one()
+        while self.inherit_id:
+            self = self.inherit_id
+        return self
 
     @api.model
     def get_related_views(self, key, bundles=False):
