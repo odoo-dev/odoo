@@ -289,8 +289,6 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
             searchPanel: state.searchPanel,
           });
         } catch (e) {
-          console.log(e);
-          debugger;
           if (e instanceof ViewNotFoundError) {
             return;
           }
