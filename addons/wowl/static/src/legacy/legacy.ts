@@ -109,6 +109,7 @@ interface ComponentAdapter extends Component {
 interface ActionAdapter extends ComponentAdapter {
   exportState(): any;
   canBeRemoved(): Promise<void>;
+  getTitle(): string;
   documentState(): any;
 }
 
@@ -125,6 +126,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     // In Wowl, we want to have all states pushed during the same setTimeout.
     // This is protected in legacy (backward compatibility) but should not e supported in Wowl
     tempQuery: Query | null = {};
+    __widget: any;
 
     constructor(...args: any[]) {
       super(...args);
@@ -135,6 +137,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         Object.assign(query, this.tempQuery);
         this.tempQuery = null;
         this.router.pushState(query);
+        this.__widget = this.widget;
         envWowl.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionManagerUpdateInfo) => {
           if (info.type === "MAIN") {
             (this.env as any).bus.trigger('close_dialogs');
@@ -175,12 +178,14 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
      * in props so that we can re-use it.
      */
     exportState() {
-      const widget = this.widget;
       this.widget = null;
-      return { __legacy_widget__: widget };
+      return { __legacy_widget__: this.__widget };
     }
     canBeRemoved() {
-      return this.widget.canBeRemoved();
+      return this.__widget.canBeRemoved();
+    }
+    getTitle() {
+      return this.__widget.getTitle();
     }
   }
 
@@ -339,6 +344,7 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
           super(...arguments);
           useSetupAction({
             export: () => this.controllerRef.comp!.exportState(),
+            getTitle: () => this.controllerRef.comp!.widget!.getTitle(),
           });
         }
       }
@@ -404,10 +410,9 @@ odoo.define("wowl.legacyViews", async function (require: any) {
       constructor() {
         super(...arguments);
         useSetupAction({
+          beforeLeave: () => this.controllerRef.comp!.widget!.canBeRemoved(),
           export: () => this.controllerRef.comp!.exportState(),
-          beforeLeave: () => {
-            return this.controllerRef.comp!.widget!.canBeRemoved();
-          },
+          getTitle: () => this.controllerRef.comp!.getTitle(),
         });
       }
 
