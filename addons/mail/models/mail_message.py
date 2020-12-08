@@ -59,7 +59,7 @@ class Message(models.Model):
     # related document
     model = fields.Char('Related Document Model', index=True)
     res_id = fields.Many2oneReference('Related Document ID', index=True, model_field='model')
-    record_name = fields.Char('Message Record Name', help="Name get of the related document.")
+    record_name = fields.Char(compute='_compute_record_name', help="Name get of the related document.")
     # characteristics
     message_type = fields.Selection([
         ('email', 'Email'),
@@ -148,6 +148,13 @@ class Message(models.Model):
             else:
                 plaintext_ct = '' if not message.body else tools.html2plaintext(message.body)
                 message.description = plaintext_ct[:30] + '%s' % (' [...]' if len(plaintext_ct) >= 30 else '')
+
+    def _compute_record_name(self):
+        for message in self:
+            message.record_name = self._get_record_name({
+                'model': message.model,
+                'res_id': message.res_id
+            })
 
     def _get_needaction(self):
         """ Need action on a mail.message = notified on my channel """
