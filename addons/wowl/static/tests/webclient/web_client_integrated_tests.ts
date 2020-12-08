@@ -115,7 +115,7 @@ function addLegacyMockEnvironment(
     },
     legacyParams.dataManager
   );
-  const legacyEnv = legacy.makeTestEnvironment({ dataManager });
+  const legacyEnv = legacy.makeTestEnvironment({ dataManager, bus: legacy.core.bus });
   Component.env = legacyEnv;
   mapLegacyEnvToWowlEnv(legacyEnv, comp.env);
 
@@ -1221,11 +1221,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     */
   });
 
-  QUnit.skip(
+  QUnit.test(
     'executing an action with target != "new" closes all dialogs',
     async function (assert) {
-      // LPE. unskip when all dialogs are WOWL dialogs,
-      // LPE: x2m dialogs are not yet wowl dialogs
       assert.expect(4);
 
       baseConfig.serverData!.views!["partner,false,form"] = `
@@ -5352,7 +5350,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.test("history back calls on_close handler of dialog action", async function (assert) {
-    assert.expect(3);
+    assert.expect(4);
 
     const webClient = await createWebClient({ baseConfig });
 
@@ -5366,7 +5364,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const ev = new Event("history-back", { bubbles: true, cancelable: true });
     webClient.el!.querySelector(".o_view_controller")!.dispatchEvent(ev);
     assert.verifySteps(["on_close"], "should have called the on_close handler");
-
+    await nextTick();
+    assert.containsNone(webClient.el!, '.modal');
     webClient.destroy();
   });
 

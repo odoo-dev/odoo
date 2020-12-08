@@ -129,7 +129,7 @@ export interface Breadcrumb {
 }
 export type Breadcrumbs = Breadcrumb[];
 
-interface ActionManagerUpdateInfo {
+export interface ActionManagerUpdateInfo {
   type: "MAIN" | "OPEN_DIALOG" | "CLOSE_DIALOG";
   id?: number;
   Component?: Type<Component<{}, OdooEnv>>;
