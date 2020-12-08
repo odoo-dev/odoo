@@ -5285,35 +5285,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("doAction resolved with an action", async function (assert) {
-    assert.expect(4);
-
-    // LPE/ FIXME: outdated ?
-    /*    baseConfig.serverData!.actions![21] = {
-      id: 21,
-      name: "A Close Action",
-      type: "ir.actions.act_window_close",
-    };
-
-    const webClient = await createWebClient({ baseConfig });
-
-    await doAction(webClient, 21).then(function (action) {
-      assert.ok(action, "doAction should be resolved with an action");
-      assert.strictEqual(action.id, 21, "should be resolved with correct action id");
-      assert.strictEqual(
-        action.name,
-        "A Close Action",
-        "should be resolved with correct action name"
-      );
-      assert.strictEqual(
-        action.type,
-        "ir.actions.act_window_close",
-        "should be resolved with correct action type"
-      );
-      webClient.destroy();
-    });*/
-  });
-
   QUnit.test("close action with provided infos", async function (assert) {
     assert.expect(1);
 
