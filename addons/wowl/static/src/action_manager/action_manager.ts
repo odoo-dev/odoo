@@ -138,7 +138,7 @@ interface ActionManagerUpdateInfo {
     title: string;
   };
   onClose?: ActionOptions["onClose"];
-  onCloseInfos?: any;
+  onCloseInfo?: any;
 }
 
 interface UpdateStackOptions {
@@ -267,7 +267,7 @@ export class ActionContainer extends Component<{}, OdooEnv> {
             onClose = info.onClose;
           }
           if (onClose) {
-            onClose(info.onCloseInfos);
+            onClose(info.onCloseInfo);
           }
           this.dialog = {};
           break;
@@ -545,8 +545,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
         this.env.bus.off("CLEAR-UNCOMMITTED-CHANGES", this);
       }
       onHistoryBack() {
-        // FIXME: close dialog instead if one is open
-        restore(controllerStack[controllerStack.length - 2].jsId);
+        const previousController = controllerStack[controllerStack.length - 2];
+        if (previousController) {
+          restore(previousController.jsId);
+        } else {
+          _executeCloseAction({ onClose: options.onClose });
+        }
       }
     }
     if (action.target === "new") {
@@ -871,6 +875,16 @@ function makeActionManager(env: OdooEnv): ActionManager {
     return doAction(nextAction, options);
   }
 
+  function _executeCloseAction(
+    params: { onClose?: ActionOptions["onClose"]; onCloseInfo?: any } = {}
+  ) {
+    env.bus.trigger("ACTION_MANAGER:UPDATE", {
+      type: "CLOSE_DIALOG",
+      ...params,
+    });
+    return dialogCloseProm;
+  }
+
   // ---------------------------------------------------------------------------
   // public API
   // ---------------------------------------------------------------------------
@@ -896,14 +910,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
           await clearUncommittedChanges(env);
         }
         return _executeActWindowAction(action, options);
-      case "ir.actions.act_window_close": {
-        env.bus.trigger("ACTION_MANAGER:UPDATE", {
-          type: "CLOSE_DIALOG",
-          onClose: options.onClose,
-          onCloseInfos: actionRequest.infos,
-        });
-        return dialogCloseProm;
-      }
+      case "ir.actions.act_window_close":
+        return _executeCloseAction({ onClose: options.onClose, onCloseInfo: action.infos });
       case "ir.actions.client":
         if (action.target !== "new") {
           await clearUncommittedChanges(env);

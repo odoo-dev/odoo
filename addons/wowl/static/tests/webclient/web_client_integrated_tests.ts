@@ -5337,24 +5337,23 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("history back calls on_close handler of dialog action", async function (assert) {
-    /*
-    assert.expect(2);
+  QUnit.test("history back calls on_close handler of dialog action", async function (assert) {
+    assert.expect(3);
 
     const webClient = await createWebClient({ baseConfig });
 
+    function onClose() {
+      assert.step("on_close");
+    }
     // open a new dialog form
-    await doAction(webClient, this.actions[4], {
-      on_close: function () {
-        assert.step("on_close");
-      },
-    });
+    await doAction(webClient, 5, { onClose });
+    assert.containsOnce(webClient.el!, ".modal");
 
-    actionManager.trigger_up("history_back");
+    const ev = new Event("history-back", { bubbles: true, cancelable: true });
+    webClient.el!.querySelector(".o_view_controller")!.dispatchEvent(ev);
     assert.verifySteps(["on_close"], "should have called the on_close handler");
 
     webClient.destroy();
-    */
   });
 
   QUnit.skip("abstract action does not crash on navigation_moves", async function (assert) {
