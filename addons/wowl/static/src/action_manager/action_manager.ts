@@ -597,7 +597,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       controllerArray.unshift(options.lazyController);
     }
     const nextStack = controllerStack.slice(0, index).concat(controllerArray);
-    controller.props.breadcrumbs = _getBreadcrumbs(nextStack);
+    controller.props.breadcrumbs = _getBreadcrumbs(nextStack.slice(0, nextStack.length-1));
 
     env.bus.trigger("ACTION_MANAGER:UPDATE", {
       type: "MAIN",
