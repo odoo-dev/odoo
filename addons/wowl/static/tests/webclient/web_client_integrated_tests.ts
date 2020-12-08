@@ -2784,16 +2784,68 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig.actionRegistry!.remove('HelloWorldTest');
   });
 
+  QUnit.test('client actions can have breadcrumbs (legacy)', async function (assert) {
+    assert.expect(4);
+
+    const ClientAction = AbstractAction.extend({
+      hasControlPanel: true,
+      init(parent: any, action: any) {
+        action.display_name = 'Goldeneye';
+        this._super.apply(this, arguments);
+      },
+      start() {
+        this.$el.addClass('o_client_action_test');
+        return this._super.apply(this, arguments);
+      },
+    });
+    core.action_registry.add('ClientAction', ClientAction);
+
+    const ClientAction2 = AbstractAction.extend({
+      hasControlPanel: true,
+      init(parent: any, action: any) {
+        action.display_name = 'No time for sweetness';
+        this._super.apply(this, arguments);
+      },
+      start() {
+        this.$el.addClass('o_client_action_test_2');
+        return this._super.apply(this, arguments);
+      },
+    });
+    core.action_registry.add('ClientAction2', ClientAction2);
+
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 'ClientAction');
+    assert.containsOnce(webClient.el!, '.breadcrumb-item');
+    assert.strictEqual(
+      webClient.el!.querySelector('.breadcrumb-item.active')!.textContent,
+      'Goldeneye'
+    );
+
+    await doAction(webClient, 'ClientAction2', {clearBreadcrumbs: false});
+    assert.containsN(webClient.el!, '.breadcrumb-item', 2);
+    assert.strictEqual(
+      webClient.el!.querySelector('.breadcrumb-item.active')!.textContent,
+      'No time for sweetness'
+      );
+
+    webClient.destroy();
+    delete core.action_registry.map.ClientAction;
+    delete core.action_registry.map.ClientAction2;
+    baseConfig.actionRegistry!.remove('ClientAction');
+    baseConfig.actionRegistry!.remove('ClientAction2');
+  });
+
   QUnit.test('ClientAction receives breadcrumbs and exports title (wowl)', async (assert) => {
     assert.expect(4);
     class ClientAction extends Component<{}, OdooEnv> {
-      static template = tags.xml`<div class="my_owl_action">owl client action</div>`;
+      static template = tags.xml`<div class="my_owl_action" t-on-click="onClick">owl client action</div>`;
       breadcrumbTitle = 'myOwlAction';
+
       constructor(parent:any, props: any) {
         super(parent, props);
         const breadCrumbs = props.breadcrumbs;
         assert.strictEqual(breadCrumbs.length, 1);
-        assert.strictEqual(breadCrumbs[0].name, 'Undefined');
+        assert.strictEqual(breadCrumbs[0].name, 'Favorite Ponies');
 
         useSetupAction({
           getTitle: () => {
@@ -2801,14 +2853,20 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
           }
         });
       }
+      onClick() {
+        this.breadcrumbTitle = 'newOwlTitle';
+      }
     }
     baseConfig.actionRegistry!.add('OwlClientAction', ClientAction);
     const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 8);
+
     await doAction(webClient, 'OwlClientAction');
     assert.containsOnce(webClient.el!, '.my_owl_action');
+    await click(webClient.el!, '.my_owl_action');
 
     await doAction(webClient, 3);
-    assert.strictEqual(webClient.el!.querySelector('.breadcrumb')!.textContent, 'myOwlActionPartners');
+    assert.strictEqual(webClient.el!.querySelector('.breadcrumb')!.textContent, 'Favorite PoniesnewOwlTitlePartners');
     webClient.destroy();
     baseConfig.actionRegistry!.remove('OwlClientAction');
   });

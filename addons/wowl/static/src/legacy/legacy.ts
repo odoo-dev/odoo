@@ -11,8 +11,7 @@ import {
 } from "../types";
 import { useService } from "../core/hooks";
 import {
-  ActionManagerUpdateInfo,
-  useSetupAction,
+  ActionManagerUpdateInfo, Breadcrumbs, useSetupAction,
   ViewNotFoundError,
 } from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
@@ -422,6 +421,17 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
   return { ClientActionAdapter, ViewAdapter };
 });
 
+type LegacyBreadCrumbs = {title: string, controllerID: string}[];
+
+function breadcrumbsToLegacy(breadcrumbs?: Breadcrumbs): LegacyBreadCrumbs|undefined {
+  if (!breadcrumbs) {
+    return;
+  }
+  return breadcrumbs.slice().map((bc) => {
+    return { title: bc.name, controllerID: bc.jsId };
+  });
+}
+
 odoo.define("wowl.legacyClientActions", function (require: any) {
   const { action_registry } = require("web.core");
   const { ClientActionAdapter } = require("wowl.ActionAdapters");
@@ -439,7 +449,7 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
         controllerRef = hooks.useRef<ActionAdapter>("controller");
 
         Widget = action;
-        widgetArgs = [this.props.action, {}];
+        widgetArgs = [this.props.action, {breadcrumbs: breadcrumbsToLegacy(this.props.breadcrumbs)}];
         widget = this.props.state && this.props.state.__legacy_widget__;
 
         constructor() {
@@ -494,11 +504,7 @@ odoo.define("wowl.legacyViews", async function (require: any) {
       viewParams = {
         action: this.props.action,
         // legacy views automatically add the last part of the breadcrumbs
-        breadcrumbs:
-          this.props.breadcrumbs &&
-          this.props.breadcrumbs.slice(0, this.props.breadcrumbs.length - 1).map((bc) => {
-            return { title: bc.name, controllerID: bc.jsId };
-          }),
+        breadcrumbs: breadcrumbsToLegacy(this.props.breadcrumbs),
         modelName: this.props.model,
         currentId: this.props.recordId,
         controllerState: {
