@@ -218,7 +218,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p11235'),
-                'plus_report_line_ids': [ref('tax_report_line_cess')],
+                'plus_report_line_ids': [ref('tax_report_line_cess'), ref('outward_taxable_supplies0_cess')],
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -252,12 +252,11 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('tax_report_line_exempt'), ref('other_outward_taxable_supplies_total_taxable_value')],
-
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -266,10 +265,10 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('tax_report_line_exempt'), ref('other_outward_taxable_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-
             }),
         ]"/>
     </record>
@@ -289,12 +288,11 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('tax_report_line_nil_rated'), ref('other_outward_taxable_supplies_total_taxable_value')],
-
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -303,10 +301,10 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('tax_report_line_nil_rated'), ref('other_outward_taxable_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-
             }),
         ]"/>
     </record>
@@ -631,6 +629,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -644,6 +643,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -716,6 +716,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -729,6 +730,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -801,6 +803,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -814,6 +817,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -886,6 +890,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -899,6 +904,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -933,6 +939,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -946,6 +953,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -969,6 +977,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -982,6 +991,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1231,8 +1241,8 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('tax_report_line_exempt')],
-
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1244,6 +1254,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('tax_report_line_exempt')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1268,10 +1279,10 @@ if tax > result:result=tax</field>
                 'minus_report_line_ids': [ref('tax_report_line_nil_rated')],
 
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -1280,10 +1291,10 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('tax_report_line_nil_rated')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-
             }),
         ]"/>
     </record>
@@ -1555,6 +1566,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1567,6 +1579,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1589,6 +1602,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1601,6 +1615,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1670,6 +1685,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1682,6 +1698,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1689,7 +1706,6 @@ if tax > result:result=tax</field>
                 'plus_report_line_ids': [ref('tax_report_line_cgst')],
             })
         ]"/>
-
     </record>
 
     <record id="sgst_purchase_2" model="account.tax.template">
@@ -1716,6 +1732,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1728,6 +1745,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1750,6 +1768,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1762,6 +1781,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1831,6 +1851,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1843,6 +1864,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1912,6 +1934,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1924,6 +1947,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -1993,6 +2017,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -2005,6 +2030,7 @@ if tax > result:result=tax</field>
                 'factor_percent': 100,
                 'repartition_type': 'base',
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
@@ -2051,6 +2077,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2070,6 +2097,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2094,11 +2122,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2118,6 +2148,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2157,11 +2188,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2181,6 +2214,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2214,6 +2248,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2233,6 +2268,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2257,11 +2293,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2281,6 +2319,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2311,6 +2350,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2330,6 +2370,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2360,6 +2401,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2379,6 +2421,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2409,6 +2452,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2428,6 +2472,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2458,6 +2503,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2477,6 +2523,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2503,11 +2550,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2521,11 +2570,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2550,11 +2601,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2568,11 +2621,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2615,6 +2670,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2634,6 +2690,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2658,11 +2715,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2676,11 +2735,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2688,7 +2749,6 @@ if tax > result:result=tax</field>
                 'plus_report_line_ids': [ref('tax_report_line_cgst_rc'), ref('inward_supplies_central_tax')],
             })
         ]"/>
-
     </record>
 
     <record id="sgst_purchase_2_rc" model="account.tax.template">
@@ -2718,18 +2778,19 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
                 'account_id': ref('p11232'),
-                'minus_report_line_ids': [ref('tax_report_line_sgst_rc'), ref('inward_supplies_state_ut_tax'), ref('inward_supplies_state_ut_tax')],
+                'minus_report_line_ids': [ref('tax_report_line_sgst_rc'), ref('inward_supplies_state_ut_tax')],
             }),
-
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -2737,16 +2798,18 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10051'),
-                'plus_report_line_ids': [ref('tax_report_line_sgst_rc'), ref('inward_supplies_state_ut_tax'), ref('inward_supplies_state_ut_tax')],
+                'plus_report_line_ids': [ref('tax_report_line_sgst_rc'), ref('inward_supplies_state_ut_tax')],
             }),
         ]"/>
     </record>
@@ -2766,11 +2829,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2784,11 +2849,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2831,6 +2898,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2850,6 +2918,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2874,11 +2943,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2892,11 +2963,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2939,6 +3012,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2958,6 +3032,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -2982,11 +3057,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -3000,11 +3077,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -3047,6 +3126,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -3066,6 +3146,7 @@ if tax > result:result=tax</field>
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -3090,11 +3171,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -3108,11 +3191,13 @@ if tax > result:result=tax</field>
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('inward_supplies_total_taxable_value')],
             }),
+
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('p10057'),
             }),
+
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
@@ -3134,79 +3219,5 @@ if tax > result:result=tax</field>
         <field name="sequence">0</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_2_5_rc'),ref('cgst_purchase_2_5_rc'),])]"/>
     </record>
-
-    <!-- <record id="import_of_goods_at_gst_0" model="account.tax.template">
-        <field name="name">Import of goods at GST 0%</field>
-        <field name="description">Import of goods at GST 0%</field>
-        <field name="type_tax_use">none</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">0</field>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
-            }),
-
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('p11233'),
-                'plus_report_line_ids': [ref('')],
-            })
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
-            }),
-
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('p10052'),
-                'minus_report_line_ids': [ref('')],
-            })
-        ]"/>
-    </record>
-
-    <record id="import_of_services_at_gst_0" model="account.tax.template">
-        <field name="name">Import of services at GST 0%</field>
-        <field name="description">Import of services at GST 0%</field>
-        <field name="type_tax_use">none</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">0</field>
-        <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
-            }),
-
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('p11233'),
-                'plus_report_line_ids': [ref('')],
-            })
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('outward_taxable_supplies0_total_taxable_value')],
-            }),
-
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'account_id': ref('p10052'),
-                'minus_report_line_ids': [ref('')],
-            })
-        ]"/>
-    </record> -->
 
 </odoo>
