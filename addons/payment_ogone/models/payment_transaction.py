@@ -31,6 +31,39 @@ class PaymentTransaction(models.Model):
     ogone_html_3ds = fields.Char(string="3D Secure HTML")
     ogone_user_error = fields.Char(string="User Friendly State message")
 
+    def _get_specific_processing_values(self, processing_values):
+        if self.acquirer_id.provider != 'ogone':
+            return super()._get_specific_rendering_values(processing_values)
+
+        return processing_values
+
+    def _get_specific_rendering_values(self, processing_values):
+        if self.acquirer_id.provider != 'ogone':
+            return super()._get_specific_processing_values(processing_values)
+        partner_id = self.env['res.partner'].browse(processing_values.get('partner_id'))
+        base_url = self.acquirer_id._get_base_url()
+        return_url = urls.url_join(base_url, OgoneController._fleckcheckout_url)
+        form_values = {'tx_url': self.acquirer_id._ogone_get_urls()['ogone_flexcheckout_url'],}
+        ogone_sign_values = {
+            'ACCOUNT.PSPID': self.acquirer_id.ogone_pspid,
+            'ALIAS.ORDERID': processing_values.get('reference'),
+            'aliasid': 'ODOO-NEW-ALIAS-%s' % time.time(),  # something unique,
+            'LAYOUT.LANGUAGE': partner_id.lang,
+            'CARD.PAYMENTMETHOD': 'CreditCard',
+            'PARAMETERS.ACCEPTURL': return_url,
+            'PARAMETERS.EXCEPTIONURL': return_url,
+            'PARAMPLUS': {
+                'acquirerId': processing_values.get('acquirer_id'),
+                'partnerId': processing_values.get('partner_id'),
+                'currencyId': processing_values.get('currency_id'),
+                'amount': processing_values.get('amount', 0),
+            },
+        }
+        shasign = self.acquirer_id._ogone_generate_shasign('in', ogone_sign_values,)
+        ogone_sign_values['SHASIGNATURE.SHASIGN'] = shasign
+        form_values.update(ogone_sign_values)
+        return form_values
+
     # --------------------------------------------------
     # BUSINESS METHODS
     # --------------------------------------------------

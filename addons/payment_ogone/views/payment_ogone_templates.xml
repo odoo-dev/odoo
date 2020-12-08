@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    
+
+    <template id="redirect_template">
+         <form t-att-action="tx_url" method="post">
+            <input type="hidden" name="ACCOUNT.PSPID" t-att-value="ACCOUNT.PSPID"/>
+             <input type="hidden" name="ALIAS.ORDERID" t-att-value="ALIAS.ORDERID"/>
+             <input type="hidden" name="ALIAS.ALIASID" t-att-value="ALIAS.ALIASID"/>
+            <!-- arj fixme: use it with the save my payment details checkbox. need to update the value according to
+            what the user check... so redirect + JS ? -->
+<!--             <input type="hidden" name="ALIAS.STOREPERMANENTLY" t-att-value="store"/>-->
+             <input type="hidden" name="LAYOUT.LANGUAGE" t-att-value="LAYOUT.LANGUAGE"/>
+             <input type="hidden" name="CARD.PAYMENTMETHOD" t-att-value="CARD.PAYMENTMETHOD"/>
+             <input type="hidden" name="PARAMETERS.ACCEPTURL" t-att-value="PARAMETERS.ACCEPTURL"/>
+             <input type="hidden" name="PARAMETERS.EXCEPTIONURL" t-att-value="PARAMETERS.EXCEPTIONURL"/>
+             <input type="hidden" name="PARAMPLUS" t-att-value="PARAMPLUS"/>
+        </form>
+    </template>
+
+
     <template id="inline_form">
         <div t-attf-id="ogone_iframe_container_{{acquirer_id}}">
             <iframe t-attf-id="oe_ogone_iframe_{{id}}"

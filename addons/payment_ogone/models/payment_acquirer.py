@@ -40,23 +40,117 @@ class PaymentAcquirer(models.Model):
             return super()._get_validation_amount()
         return 1.0
 
-    def _ogone_generate_shasign(self, values, incoming=True):
+    def _ogone_generate_shasign(self, inout, values):
         """ Generate the shasign for incoming or outgoing communications.
 
-        :param dict values: The values used to generate the signature
-        :param bool incoming: Whether the signature must be generate for an incoming (ogone to odoo)
-                              or outgoing (odoo to ogone) communication.
-        :return: The shasign
-        :rtype: str
+        :param string inout: 'in' (odoo contacting ogone) or 'out' (ogone
+                             contacting odoo). In this last case only some
+                             fields should be contained (see e-Commerce basic)
+        :param dict values: transaction values
+
+        :return string: shasign
         """
-        key = self.ogone_shakey_in if incoming else self.ogone_shakey_out
-        sorted_sign_items = sorted((k.upper(), v) for k, v in values.items())
-        # For outgoing communications, only some fields must be included (see e-Commerce basic)
-        filtered_sign_items = [(k, v) for k, v in sorted_sign_items
-                               if v and (incoming or k in const.VALID_KEYS)]
-        sign_string = ''.join(f'{k}={v}{key}' for k, v in filtered_sign_items)
-        sign = sign_string.encode('utf-8')
-        return sha256(sign).hexdigest()
+        assert inout in ('in', 'out')
+        assert self.provider == 'ogone'
+        key = getattr(self, 'ogone_shakey_' + inout)
+
+        def filter_key(key):
+            if inout == 'in':
+                return True
+            else:
+                # SHA-OUT keys
+                # source https://payment-services.ingenico.com/int/en/ogone/support/guides/integration guides/e-commerce/transaction-feedback
+                keys = [
+                    'AAVADDRESS',
+                    'AAVCHECK',
+                    'AAVMAIL',
+                    'AAVNAME',
+                    'AAVPHONE',
+                    'AAVZIP',
+                    'ACCEPTANCE',
+                    'ALIAS',
+                    'AMOUNT',
+                    'BIC',
+                    'BIN',
+                    'BRAND',
+                    'CARDNO',
+                    'CCCTY',
+                    'CN',
+                    'COLLECTOR_BIC',
+                    'COLLECTOR_IBAN',
+                    'COMPLUS',
+                    'CREATION_STATUS',
+                    'CREDITDEBIT',
+                    'CURRENCY',
+                    'CVCCHECK',
+                    'DCC_COMMPERCENTAGE',
+                    'DCC_CONVAMOUNT',
+                    'DCC_CONVCCY',
+                    'DCC_EXCHRATE',
+                    'DCC_EXCHRATESOURCE',
+                    'DCC_EXCHRATETS',
+                    'DCC_INDICATOR',
+                    'DCC_MARGINPERCENTAGE',
+                    'DCC_VALIDHOURS',
+                    'DEVICEID',
+                    'DIGESTCARDNO',
+                    'ECI',
+                    'ED',
+                    'EMAIL',
+                    'ENCCARDNO',
+                    'FXAMOUNT',
+                    'FXCURRENCY',
+                    'IP',
+                    'IPCTY',
+                    'MANDATEID',
+                    'MOBILEMODE',
+                    'NBREMAILUSAGE',
+                    'NBRIPUSAGE',
+                    'NBRIPUSAGE_ALLTX',
+                    'NBRUSAGE',
+                    'NCERROR',
+                    'ORDERID',
+                    'PAYID',
+                    'PAYIDSUB',
+                    'PAYMENT_REFERENCE',
+                    'PM',
+                    'SCO_CATEGORY',
+                    'SCORING',
+                    'SEQUENCETYPE',
+                    'SIGNDATE',
+                    'STATUS',
+                    'SUBBRAND',
+                    'SUBSCRIPTION_ID',
+                    'TICKET',
+                    'TRXDATE',
+                    'VC',
+                ]
+                # Source https://epayments-support.ingenico.com/en/integration/all-sales-channels/flexcheckout/guide#flexcheckout_integration_guides_sha_out
+                flexcheckout_out = ['ALIAS.ALIASID',
+                                    'ALIAS.NCERROR',
+                                    'ALIAS.NCERRORCARDNO',
+                                    'ALIAS.NCERRORCN',
+                                    'ALIAS.NCERRORCVC',
+                                    'ALIAS.NCERRORED',
+                                    'ALIAS.ORDERID',
+                                    'ALIAS.STATUS',
+                                    'ALIAS.STOREPERMANENTLY',
+                                    'CARD.BIC',
+                                    'CARD.BIN',
+                                    'CARD.BRAND',
+                                    'CARD.CARDHOLDERNAME',
+                                    'CARD.CARDNUMBER',
+                                    'CARD.CVC',
+                                    'CARD.EXPIRYDATE'
+                                    ]
+                keys += flexcheckout_out
+                return key.upper() in keys
+
+        items = sorted((k.upper(), v) for k, v in values.items())
+        sign = ''.join('%s=%s%s' % (k, v, key) for k, v in items if v and filter_key(k.upper()))
+        sign = sign.encode("utf-8")
+        shasign = sha256(sign).hexdigest()
+        return shasign
 
     def _ogone_setup_iframe(self, data):  # TODO ANV review this + rename
         """ Setup the ogone Iframe.
@@ -121,7 +215,7 @@ class PaymentAcquirer(models.Model):
             'ALIAS.ALIASID': 'ODOO-NEW-ALIAS-%s' % time.time(),  # something unique,
             'PARAMPLUS': urls.url_encode(param_plus),
         }
-        shasign = self._ogone_generate_shasign(ogone_tx_values, incoming=True)
+        shasign = self._ogone_generate_shasign(ogone_tx_values, 'in')
         ogone_tx_values['SHASIGNATURE.SHASIGN'] = shasign
         # ogone_tx_values.update(ogone_tx_values) # FIXME VFE strange code...
         return ogone_tx_values
