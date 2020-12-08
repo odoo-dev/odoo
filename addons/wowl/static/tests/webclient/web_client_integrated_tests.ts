@@ -1254,10 +1254,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip(
+  QUnit.test(
     'executing an action with target "new" does not close dialogs',
     async function (assert) {
-      // LPE: FIXME: same as above
       assert.expect(4);
 
       baseConfig.serverData!.views!["partner,false,form"] = `
@@ -2870,9 +2869,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("handle server actions returning false", async function (assert) {
-    // unskip: on_close option?
-    assert.expect(9);
+  QUnit.test("handle server actions returning false", async function (assert) {
+    assert.expect(10);
 
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
@@ -2883,7 +2881,10 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // execute an action in target="new"
-    await doAction(webClient, 5);
+    function onClose() {
+      assert.step('close handler');
+    }
+    await doAction(webClient, 5, {onClose});
     // on_close: assert.step.bind(assert, "close handler"),
     assert.containsOnce(
       document.body,
