@@ -344,7 +344,7 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
           super(...arguments);
           useSetupAction({
             export: () => this.controllerRef.comp!.exportState(),
-            getTitle: () => this.controllerRef.comp!.widget!.getTitle(),
+            getTitle: () => this.controllerRef.comp!.getTitle(),
           });
         }
       }
