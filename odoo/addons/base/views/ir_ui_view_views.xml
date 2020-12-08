@@ -81,6 +81,8 @@
                     <filter string="Search" name="search" domain="[('type', '=', 'search')]"/>
                     <filter string="QWeb" name="qweb" domain="[('type', '=', 'qweb')]"/>
                     <separator/>
+                    <filter string="Modified Architecture" name="arch_updated" domain="[('arch_updated', '=',True)]"/>
+                    <separator/>
                     <filter string="Active" name="active" domain="[('active', '=',True)]"/>
                     <filter string="Inactive" name="inactive" domain="[('active', '=',False)]"/>
                     <group expand="0" string="Group By">
