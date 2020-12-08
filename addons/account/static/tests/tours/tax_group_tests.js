@@ -3,7 +3,6 @@ odoo.define('account.tax.group.tour.tests', function (require) {
 
     var core = require('web.core');
     var tour = require('web_tour.tour');
-    var _t = core._t;
 
     tour.register('account_tax_group', {
         test: true,
@@ -73,7 +72,7 @@ odoo.define('account.tax.group.tour.tests', function (require) {
         // Edit tax group amount
         {
             content: "Edit tax group amount",
-            trigger: '.oe_tax_group_amount_value',
+            trigger: '.tax_group_edit',
         },
         {
             content: "Modify the input value",
@@ -81,9 +80,7 @@ odoo.define('account.tax.group.tour.tests', function (require) {
             run: function (actions) {
                 $('.tax_group_edit_input input').val(200);
                 $('.tax_group_edit_input input').select();
-                var keydownEvent = jQuery.Event('keydown');
-                keydownEvent.which = 13;
-                this.$anchor.trigger(keydownEvent);
+                $('.tax_group_edit_input input').blur();
             },
         },
         // Check new value for total (with modified tax_group_amount).
@@ -94,16 +91,16 @@ odoo.define('account.tax.group.tour.tests', function (require) {
         // Modify the quantity of the object
         {
             content: "Select item quantity",
-            trigger: 'div[name="invoice_line_ids"] .o_list_view tbody tr.o_data_row .o_list_number[title="1.000"]',
+            trigger: 'div[name="invoice_line_ids"] .o_list_view tbody tr.o_data_row .o_list_number[title="1.00"]',
         },
         {
             content: "Change item quantity",
-            trigger: 'div[name="invoice_line_ids"] .o_list_view tbody tr.o_data_row .o_list_number[title="1.000"] input',
+            trigger: 'div[name="invoice_line_ids"] .o_list_view tbody tr.o_data_row .o_list_number[title="1.00"] input',
             run: 'text 2',
         },
         {
             content: "Valid the new value",
-            trigger: 'div[name="invoice_line_ids"] .o_list_view tbody tr.o_data_row .o_list_number[title="1.000"] input',
+            trigger: 'div[name="invoice_line_ids"] .o_list_view tbody tr.o_data_row .o_list_number[title="1.00"] input',
             run: function (actions) {
                 var keydownEvent = jQuery.Event('keydown');
                 keydownEvent.which = 13;

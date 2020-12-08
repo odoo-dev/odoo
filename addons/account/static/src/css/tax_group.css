@@ -1,5 +1,6 @@
 .oe_tax_group_editable {
     width: 100%;
+    padding: 1% 0% !important;
 }
 
 .tax_group_edit {
@@ -22,4 +23,8 @@
     width: 65%; 
     float: right; 
     text-align: right;
+}
+
+.oe_tax_group_editable .oe_tax_group_amount_value::before {
+    content: ' ';
 }
