@@ -5108,16 +5108,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip('on_attach_callback is called for actions in target="new"', async function (assert) {
-    /*
-    assert.expect(4);
+  QUnit.test('on_attach_callback is called for actions in target="new"', async function (assert) {
+    assert.expect(3);
 
-    var ClientAction = AbstractAction.extend({
+    const ClientAction = AbstractAction.extend({
       on_attach_callback: function () {
         assert.step("on_attach_callback");
-        assert.ok(
-          actionManager.currentDialogController,
-          "the currentDialogController should have been set already"
+        assert.containsOnce(document.body, '.modal .o_test',
+          "should have rendered the client action in a dialog"
         );
       },
       start: function () {
@@ -5133,16 +5131,10 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       type: "ir.actions.client",
     });
 
-    assert.strictEqual(
-      $(".modal .o_test").length,
-      1,
-      "should have rendered the client action in a dialog"
-    );
     assert.verifySteps(["on_attach_callback"]);
 
     webClient.destroy();
     delete core.action_registry.map.test;
-    */
   });
 
   QUnit.module('Actions in target="inline"');
