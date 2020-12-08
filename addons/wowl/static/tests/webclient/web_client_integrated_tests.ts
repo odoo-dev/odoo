@@ -4842,8 +4842,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("execute action from dirty, new record, and come back", async function (assert) {
-    // unskip: field isn't readonly (???) + contaisnOnce doens't accept jquery selectors
+  QUnit.test("execute action from dirty, new record, and come back", async function (assert) {
     assert.expect(18);
 
     baseConfig.serverData!.models!.partner.fields.bar.default = 1;
@@ -4865,12 +4864,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       }
     };
     const webClient = await createWebClient({ baseConfig, mockRPC });
-    // unskip: i think this won't be necessary anymore
-    // intercepts: {
-    // do_action: function (ev) {
-    // doAction(webClient, ev.data.action, {});
-    // },
-    // },
 
     // execute an action and create a new record
     await doAction(webClient, 3);

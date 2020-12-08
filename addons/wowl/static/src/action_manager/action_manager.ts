@@ -114,6 +114,7 @@ interface Controller {
   action: ClientAction | ActWindowAction;
   props: ControllerProps;
   exportedState?: any;
+  title?: string;
 }
 interface ViewController extends Controller {
   action: ActWindowAction;
@@ -196,6 +197,7 @@ export function clearUncommittedChanges(env: OdooEnv): Promise<void[]> {
 interface useSetupActionParams {
   export?: () => any;
   beforeLeave?: ClearUncommittedChanges;
+  getTitle?: () => string;
 }
 
 type ClearUncommittedChanges = () => Promise<void>;
@@ -227,6 +229,11 @@ export function useSetupAction(params: useSetupActionParams) {
   if (params.beforeLeave && component.props.__beforeLeave__) {
     hooks.onMounted(() => {
       component.props.__beforeLeave__(params.beforeLeave);
+    });
+  }
+  if (params.getTitle && component.props.__getTitle__) {
+    hooks.onMounted(() => {
+      component.props.__getTitle__(params.getTitle);
     });
   }
 }
@@ -381,8 +388,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
     return stack.map((controller) => {
       return {
         jsId: controller.jsId,
-        name: controller.action.name || env._t("Undefined"),
-      };
+        name: controller.title || controller.action.name || env._t("Undefined"),
+      }
     });
   }
 
@@ -468,14 +475,17 @@ function makeActionManager(env: OdooEnv): ActionManager {
       static template = tags.xml`<t t-component="Component" t-props="props"
         __exportState__="exportState"
         __beforeLeave__="beforeLeave"
+        __getTitle__="getTitle"
           t-ref="component"
           t-on-history-back="onHistoryBack"/>`;
+
       static Component = controller.Component;
       Component = controller.Component;
       componentProps = this.props;
       componentRef = hooks.useRef("component");
       exportState: ((state: any) => void) | null = null;
-      beforeLeave: ((state: any) => void) | null = null;
+      beforeLeave: ((callback: ClearUncommittedChanges) => void) | null = null;
+      getTitle: ((title: (() => string)) => void) | null = null;
 
       constructor() {
         super(...arguments);
@@ -484,9 +494,16 @@ function makeActionManager(env: OdooEnv): ActionManager {
             controller.exportedState = state;
           };
           const beforeLeaveFns: ClearUncommittedChanges[] = [];
-          this.beforeLeave = (callback: ClearUncommittedChanges) => {
+          this.beforeLeave = (callback) => {
             beforeLeaveFns.push(callback);
           };
+          this.getTitle = (getTitle) => {
+            if (!('title' in controller) {
+              Object.defineProperty(controller, 'title', {
+                get: getTitle,
+              });
+            }
+          }
           this.env.bus.on("CLEAR-UNCOMMITTED-CHANGES", this, (callbacks) => {
             beforeLeaveFns.forEach((fn) => callbacks.push(fn));
           });
