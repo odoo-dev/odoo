@@ -9,8 +9,7 @@ import { menusService } from "../../src/services/menus";
 import {
   ActionManager,
   actionManagerService,
-  clearUncommittedChanges,
-} from "../../src/action_manager/action_manager";
+  clearUncommittedChanges, useSetupAction } from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
 import {
   makeFakeRouterService,
@@ -838,29 +837,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
   QUnit.module("Misc");
 
-  QUnit.test("breadcrumbs and actions with target inline", async function (assert) {
-    assert.expect(4);
-
-    baseConfig.serverData!.actions![4].views = [[false, "form"]];
-    baseConfig.serverData!.actions![4].target = "inline";
-
-    const webClient = await createWebClient({ baseConfig });
-
-    await doAction(webClient, 4);
-    assert.containsNone(webClient, ".o_control_panel");
-
-    await doAction(webClient, 1, { clearBreadcrumbs: true });
-    assert.containsOnce(webClient, ".o_control_panel");
-    assert.isVisible(webClient.el!.querySelector(".o_control_panel") as HTMLElement);
-    assert.strictEqual(
-      webClient.el!.querySelector(".o_control_panel .breadcrumb")!.textContent,
-      "Partners Action 1",
-      "should have only one current action visible in breadcrumbs"
-    );
-
-    webClient.destroy();
-  });
-
   QUnit.test("no widget memory leaks when doing some action stuff", async function (assert) {
     assert.expect(1);
 
@@ -1265,10 +1241,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip(
+  QUnit.test(
     'executing an action with target "new" does not close dialogs',
     async function (assert) {
-      // LPE: FIXME: same as above
       assert.expect(4);
 
       baseConfig.serverData!.views!["partner,false,form"] = `
@@ -2739,43 +2714,43 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     actionRegistry.remove("HelloWorldTest");
   });
 
-  QUnit.skip("action can use a custom control panel", async function (assert) {
-    /*
+  QUnit.test("action can use a custom control panel (legacy)", async function (assert) {
     assert.expect(1);
 
-    class CustomControlPanel extends owl.Component {}
-    CustomControlPanel.template = xml`
-            <div class="custom-control-panel">My custom control panel</div>
-        `;
+    class CustomControlPanel extends Component {
+      static template = tags.xml`
+        <div class="custom-control-panel">My custom control panel</div>
+      `;
+    }
     const ClientAction = AbstractAction.extend({
       hasControlPanel: true,
       config: {
         ControlPanel: CustomControlPanel,
       },
     });
-    const actionManager = await createActionManager();
+    const webClient = await createWebClient({ baseConfig });
     core.action_registry.add("HelloWorldTest", ClientAction);
+
     await doAction(webClient, "HelloWorldTest");
     assert.containsOnce(
-      actionManager,
+      webClient.el!,
       ".custom-control-panel",
       "should have a custom control panel"
     );
 
     webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
-    */
+    baseConfig.actionRegistry!.remove('HelloWorldTest');
   });
 
-  QUnit.skip("breadcrumb is updated on title change", async function (assert) {
-    /*
+  QUnit.test("breadcrumb is updated on title change (legacy)", async function (assert) {
     assert.expect(2);
 
-    var ClientAction = AbstractAction.extend({
+    const ClientAction = AbstractAction.extend({
       hasControlPanel: true,
       events: {
         click: function () {
-          this.updateControlPanel({ title: "new title" });
+          (this as any).updateControlPanel({ title: "new title" });
         },
       },
       start: async function () {
@@ -2785,8 +2760,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await this._super.apply(this, arguments);
       },
     });
-    var actionManager = await createActionManager();
     core.action_registry.add("HelloWorldTest", ClientAction);
+
+    const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, "HelloWorldTest");
 
     assert.strictEqual(
@@ -2805,7 +2781,36 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
-    */
+    baseConfig.actionRegistry!.remove('HelloWorldTest');
+  });
+
+  QUnit.test('ClientAction receives breadcrumbs and exports title (wowl)', async (assert) => {
+    assert.expect(4);
+    class ClientAction extends Component<{}, OdooEnv> {
+      static template = tags.xml`<div class="my_owl_action">owl client action</div>`;
+      breadcrumbTitle = 'myOwlAction';
+      constructor(parent:any, props: any) {
+        super(parent, props);
+        const breadCrumbs = props.breadcrumbs;
+        assert.strictEqual(breadCrumbs.length, 1);
+        assert.strictEqual(breadCrumbs[0].name, 'Undefined');
+
+        useSetupAction({
+          getTitle: () => {
+            return  this.breadcrumbTitle;
+          }
+        });
+      }
+    }
+    baseConfig.actionRegistry!.add('OwlClientAction', ClientAction);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 'OwlClientAction');
+    assert.containsOnce(webClient.el!, '.my_owl_action');
+
+    await doAction(webClient, 3);
+    assert.strictEqual(webClient.el!.querySelector('.breadcrumb')!.textContent, 'myOwlActionPartners');
+    webClient.destroy();
+    baseConfig.actionRegistry!.remove('OwlClientAction');
   });
 
   QUnit.test("test display_notification client action", async function (assert) {
@@ -2881,9 +2886,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("handle server actions returning false", async function (assert) {
-    // unskip: on_close option?
-    assert.expect(9);
+  QUnit.test("handle server actions returning false", async function (assert) {
+    assert.expect(10);
 
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
@@ -2894,7 +2898,10 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const webClient = await createWebClient({ baseConfig, mockRPC });
 
     // execute an action in target="new"
-    await doAction(webClient, 5);
+    function onClose() {
+      assert.step('close handler');
+    }
+    await doAction(webClient, 5, {onClose});
     // on_close: assert.step.bind(assert, "close handler"),
     assert.containsOnce(
       document.body,
@@ -5114,16 +5121,16 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip('on_attach_callback is called for actions in target="new"', async function (assert) {
-    /*
-    assert.expect(4);
+  QUnit.test('on_attach_callback is called for actions in target="new"', async function (assert) {
+    assert.expect(3);
 
-    var ClientAction = AbstractAction.extend({
+    const ClientAction = AbstractAction.extend({
       on_attach_callback: function () {
         assert.step("on_attach_callback");
-        assert.ok(
-          actionManager.currentDialogController,
-          "the currentDialogController should have been set already"
+        assert.containsOnce(
+          document.body,
+          ".modal .o_test",
+          "should have rendered the client action in a dialog"
         );
       },
       start: function () {
@@ -5139,41 +5146,59 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       type: "ir.actions.client",
     });
 
-    assert.strictEqual(
-      $(".modal .o_test").length,
-      1,
-      "should have rendered the client action in a dialog"
-    );
     assert.verifySteps(["on_attach_callback"]);
 
     webClient.destroy();
     delete core.action_registry.map.test;
-    */
   });
 
   QUnit.module('Actions in target="inline"');
 
-  QUnit.skip(
+  QUnit.test(
     'form views for actions in target="inline" open in edit mode',
     async function (assert) {
-      /*
-    assert.expect(5);
+      assert.expect(6);
 
-    const webClient = await createWebClient({ baseConfig });
-    await doAction(webClient, 6);
+      const mockRPC: RPC = async (route, args) => {
+        assert.step(args!.method || route);
+      };
+      const webClient = await createWebClient({ baseConfig, mockRPC });
+      await doAction(webClient, 6);
 
-    assert.containsOnce(
-      actionManager,
-      ".o_form_view.o_form_editable",
-      "should have rendered a form view in edit mode"
-    );
+      assert.containsOnce(
+        webClient,
+        ".o_form_view.o_form_editable",
+        "should have rendered a form view in edit mode"
+      );
 
-    assert.verifySteps(["/web/action/load", "load_views", "read"]);
+      assert.verifySteps(["/wowl/load_menus", "/web/action/load", "load_views", "read"]);
 
-    webClient.destroy();
-    */
+      webClient.destroy();
     }
   );
+
+  QUnit.test("breadcrumbs and actions with target inline", async function (assert) {
+    assert.expect(4);
+
+    baseConfig.serverData!.actions![4].views = [[false, "form"]];
+    baseConfig.serverData!.actions![4].target = "inline";
+
+    const webClient = await createWebClient({ baseConfig });
+
+    await doAction(webClient, 4);
+    assert.containsNone(webClient, ".o_control_panel");
+
+    await doAction(webClient, 1, { clearBreadcrumbs: true });
+    assert.containsOnce(webClient, ".o_control_panel");
+    assert.isVisible(webClient.el!.querySelector(".o_control_panel") as HTMLElement);
+    assert.strictEqual(
+      webClient.el!.querySelector(".o_control_panel .breadcrumb")!.textContent,
+      "Partners Action 1",
+      "should have only one current action visible in breadcrumbs"
+    );
+
+    webClient.destroy();
+  });
 
   QUnit.module('Actions in target="fullscreen"');
 
@@ -5296,35 +5321,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("doAction resolved with an action", async function (assert) {
-    assert.expect(4);
-
-    // LPE/ FIXME: outdated ?
-    /*    baseConfig.serverData!.actions![21] = {
-      id: 21,
-      name: "A Close Action",
-      type: "ir.actions.act_window_close",
-    };
-
-    const webClient = await createWebClient({ baseConfig });
-
-    await doAction(webClient, 21).then(function (action) {
-      assert.ok(action, "doAction should be resolved with an action");
-      assert.strictEqual(action.id, 21, "should be resolved with correct action id");
-      assert.strictEqual(
-        action.name,
-        "A Close Action",
-        "should be resolved with correct action name"
-      );
-      assert.strictEqual(
-        action.type,
-        "ir.actions.act_window_close",
-        "should be resolved with correct action type"
-      );
-      webClient.destroy();
-    });*/
-  });
-
   QUnit.test("close action with provided infos", async function (assert) {
     assert.expect(1);
 
@@ -5364,7 +5360,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.el!.querySelector(".o_view_controller")!.dispatchEvent(ev);
     assert.verifySteps(["on_close"], "should have called the on_close handler");
     await nextTick();
-    assert.containsNone(webClient.el!, '.modal');
+    assert.containsNone(webClient.el!, ".modal");
     webClient.destroy();
   });
 
@@ -5395,79 +5391,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       assert.containsNone(webClient.el!, ".modal");
 
       webClient.destroy();
-    }
-  );
-
-  QUnit.skip("abstract action does not crash on navigation_moves", async function (assert) {
-    /*
-    assert.expect(1);
-    var ClientAction = AbstractAction.extend({});
-    core.action_registry.add("ClientAction", ClientAction);
-    const webClient = await createWebClient({ baseConfig });
-    await doAction(webClient, "ClientAction");
-    actionManager.trigger_up("navigation_move", { direction: "down" });
-
-    assert.ok(true); // no error so it's good
-    webClient.destroy();
-    delete core.action_registry.ClientAction;
-    */
-  });
-
-  QUnit.skip(
-    "fields in abstract action does not crash on navigation_moves",
-    async function (assert) {
-      /*
-    assert.expect(1);
-    // create a client action with 2 input field
-    var inputWidget;
-    var secondInputWidget;
-    var ClientAction = AbstractAction.extend(StandaloneFieldManagerMixin, {
-      init: function () {
-        this._super.apply(this, arguments);
-        StandaloneFieldManagerMixin.init.call(this);
-      },
-      start: function () {
-        var _self = this;
-
-        return this.model
-          .makeRecord("partner", [
-            {
-              name: "display_name",
-              type: "char",
-            },
-          ])
-          .then(function (recordID) {
-            var record = _self.model.get(recordID);
-            inputWidget = new BasicFields.InputField(_self, "display_name", record, {
-              mode: "edit",
-            });
-            _self._registerWidget(recordID, "display_name", inputWidget);
-
-            secondInputWidget = new BasicFields.InputField(_self, "display_name", record, {
-              mode: "edit",
-            });
-            secondInputWidget.attrs = { className: "secondField" };
-            _self._registerWidget(recordID, "display_name", secondInputWidget);
-
-            inputWidget.appendTo(_self.$el);
-            secondInputWidget.appendTo(_self.$el);
-          });
-      },
-    });
-    core.action_registry.add("ClientAction", ClientAction);
-    const webClient = await createWebClient({ baseConfig });
-    await doAction(webClient, "ClientAction");
-    inputWidget.$el[0].focus();
-    var event = $.Event("keydown", {
-      which: $.ui.keyCode.TAB,
-      keyCode: $.ui.keyCode.TAB,
-    });
-    $(inputWidget.$el[0]).trigger(event);
-
-    assert.notOk(event.isDefaultPrevented(), "the keyboard event default should not be prevented"); // no crash is good
-    webClient.destroy();
-    delete core.action_registry.ClientAction;
-    */
     }
   );
 

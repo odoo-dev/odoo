@@ -158,7 +158,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         this.__widget = this.widget;
         envWowl.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionManagerUpdateInfo) => {
           if (info.type === "MAIN") {
-            (this.env as any).bus.trigger('close_dialogs');
+            (this.env as any).bus.trigger("close_dialogs");
           }
         });
       });

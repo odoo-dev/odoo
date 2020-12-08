@@ -389,7 +389,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       return {
         jsId: controller.jsId,
         name: controller.title || controller.action.name || env._t("Undefined"),
-      }
+      };
     });
   }
 
@@ -485,7 +485,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       componentRef = hooks.useRef("component");
       exportState: ((state: any) => void) | null = null;
       beforeLeave: ((callback: ClearUncommittedChanges) => void) | null = null;
-      getTitle: ((title: (() => string)) => void) | null = null;
+      getTitle: ((title: () => string) => void) | null = null;
 
       constructor() {
         super(...arguments);
@@ -498,12 +498,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
             beforeLeaveFns.push(callback);
           };
           this.getTitle = (getTitle) => {
-            if (!('title' in controller) {
-              Object.defineProperty(controller, 'title', {
+            if (!("title" in controller)) {
+              Object.defineProperty(controller, "title", {
                 get: getTitle,
               });
             }
-          }
+          };
           this.env.bus.on("CLEAR-UNCOMMITTED-CHANGES", this, (callbacks) => {
             beforeLeaveFns.forEach((fn) => callbacks.push(fn));
           });
