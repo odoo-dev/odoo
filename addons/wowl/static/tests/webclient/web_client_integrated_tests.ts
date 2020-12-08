@@ -5945,4 +5945,934 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       webClient.destroy();
     }
   );
+
+  QUnit.module("LPE's new tests");
+
+  QUnit.skip("switching when doing an action -- load_views slow", async function (assert) {
+    /*
+        assert.expect(11);
+
+        let def;
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            mockRPC: function (route, args) {
+                var result = this._super.apply(this, arguments);
+                assert.step(args.method || route);
+                if (args.method === 'load_views') {
+                    return Promise.resolve(def).then(() => result);
+                }
+                return result;
+            },
+        });
+        await doAction(3);
+
+        assert.containsOnce(webClient, '.o_list_view',
+            "should display the list view of action 3");
+
+        def = testUtils.makeTestPromise();
+        doAction(4, {clear_breadcrumbs: true});
+        await testUtils.nextTick();
+        await testUtils.controlPanel.switchView(webClient, 'kanban');
+        def.resolve();
+        await testUtils.owlCompatibilityExtraNextTick();
+
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.strictEqual(
+            webClient.el.querySelector('.o_control_panel .breadcrumb-item').textContent,
+            'Partners',
+        );
+        assert.containsNone(webClient, '.o_list_view');
+
+        assert.verifySteps([
+            '/web/action/load', // action 3
+            'load_views', // action 3
+            '/web/dataset/search_read', // action 3 list fetch
+            '/web/action/load', // action 4
+            'load_views', // action 4 Hanging
+            '/web/dataset/search_read', // action 3 kanban fetch
+        ]);
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("switching when doing an action -- search_read slow", async function (assert) {
+    /*
+        assert.expect(12);
+
+        const def = testUtils.makeTestPromise();
+        const defs = [null, def, null];
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            mockRPC: function (route, args) {
+                var result = this._super.apply(this, arguments);
+                assert.step(args.method || route);
+                if (route === "/web/dataset/search_read") {
+                    return Promise.resolve(defs.shift()).then(() => result);
+                }
+                return result;
+            },
+        });
+        await doAction(3);
+
+        assert.containsOnce(webClient, '.o_list_view',
+            "should display the list view of action 3");
+
+        doAction(4, {clear_breadcrumbs: true});
+        await testUtils.nextTick();
+        await testUtils.controlPanel.switchView(webClient, 'kanban');
+        //def.resolve();
+        await testUtils.owlCompatibilityExtraNextTick();
+
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.strictEqual(
+            webClient.el.querySelector('.o_control_panel .breadcrumb-item').textContent,
+            'Partners',
+        );
+        assert.containsNone(webClient, '.o_list_view');
+
+        assert.verifySteps([
+            '/web/action/load', // action 3
+            'load_views', // action 3
+            '/web/dataset/search_read', // action 3 list fetch
+            '/web/action/load', // action 4
+            'load_views', // action 4
+            '/web/dataset/search_read', // action 4 kanban fetch Hanging
+            '/web/dataset/search_read', // action 3 kanban fetch
+        ]);
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("load state supports being given menu_id alone", async function (assert) {
+    /*
+        assert.expect(6);
+
+        const menus = {
+            all_menu_ids: [666],
+            children: [{
+                id: 666,
+                action: 'ir.actions.act_window,1',
+                children: [],
+            }]
+        };
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: menus,
+            mockRPC(route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            },
+            webClient: {
+                _getWindowHash() {
+                    return '#menu_id=666';
+                }
+            }
+        });
+        assert.containsOnce(webClient, '.o_kanban_view',
+            "should display a kanban view");
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 1',
+            "breadcrumbs should display the display_name of the action");
+
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/search_read',
+        ]);
+
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("load state supports #home", async function (assert) {
+    /*
+        assert.expect(12);
+
+        const menus = {
+            all_menu_ids: [666],
+            children: [{
+                id: 666,
+                action: 'ir.actions.act_window,1',
+                children: [],
+            }]
+        };
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: menus,
+            mockRPC(route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            },
+            webClient: {
+                _getWindowHash() {
+                    return '#action=3';
+                }
+            }
+        });
+        assert.containsOnce(webClient, '.o_list_view',
+            "should display a list view");
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners',
+            "breadcrumbs should display the display_name of the action");
+
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/search_read',
+        ]);
+
+        await testUtils.actionManager.loadState(webClient, {
+            home: true,
+        });
+        assert.containsOnce(webClient, '.o_kanban_view',
+            "should display a kanban view");
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 1',
+            "breadcrumbs should display the display_name of the action");
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/search_read',
+        ]);
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("load state supports #home as initial state", async function (assert) {
+    /*
+        assert.expect(6);
+
+        const menus = {
+            all_menu_ids: [666],
+            children: [{
+                id: 666,
+                action: 'ir.actions.act_window,1',
+                children: [],
+            }]
+        };
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: menus,
+            mockRPC(route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            },
+            webClient: {
+                _getWindowHash() {
+                    return '#home';
+                }
+            }
+        });
+        assert.containsOnce(webClient, '.o_kanban_view',
+            "should display a kanban view");
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 1',
+            "breadcrumbs should display the display_name of the action");
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/search_read',
+        ]);
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("load state different id null", async function (assert) {
+    /*
+        assert.expect(12);
+
+        this.actions.push({
+            id: 999,
+            name: 'Partner',
+            res_id: 2,
+            res_model: 'partner',
+            type: 'ir.actions.act_window',
+            views: [[false, 'list'],[666, 'form']],
+        });
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            mockRPC(route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            },
+        });
+        await doAction(999, {viewType: 'form'})
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.containsN(webClient, '.breadcrumb-item', 2);
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item.active').text(), 'Second record');
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/call_kw/partner/read',
+        ]);
+        await loadState(webClient, {action:999, view_type: 'form'});
+        assert.verifySteps([
+             '/web/dataset/call_kw/partner/onchange',
+        ]);
+        assert.containsOnce(webClient, '.o_form_view.o_form_editable');
+        assert.containsN(webClient, '.breadcrumb-item', 2);
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item.active').text(), 'New');
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("rainbowman integrated to webClient", async function (assert) {
+    /*
+        assert.expect(10);
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            session: {
+                show_effect: true,
+            },
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(webClient, '.o_reward');
+        webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
+        await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
+
+        assert.containsOnce(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_kanban_view');
+        await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.containsNone(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
+        await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.containsOnce(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        // Do not force rainbow man to destroy on doAction
+        // we let it die either after its animation or on user click
+        await doAction(3);
+        assert.containsOnce(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_list_view');
+
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("show effect notification", async function (assert) {
+    /*
+        assert.expect(6);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            session: {
+                show_effect: false,
+            },
+            services: {
+                notification: NotificationService
+            }
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(webClient, '.o_reward');
+        assert.containsNone(document.querySelector('body'), '.o_notification');
+        webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
+        await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(webClient, '.o_reward');
+        assert.containsOnce(document.querySelector('body'), '.o_notification');
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("deconnection and reconnection notifications", async function (assert) {
+    /*
+        assert.expect(8);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            services: {
+                notification: NotificationService
+            }
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(document.querySelector('body'), '.o_notification');
+        webClient.env.bus.trigger('connection_lost');
+        await testUtils.nextTick();
+        assert.containsOnce(document.querySelector('body'), '.o_notification');
+        assert.strictEqual(
+            document.querySelector('body .o_notification .o_notification_title').innerHTML,
+            'Connection lost'
+        );
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        webClient.env.bus.trigger('connection_restored');
+        await testUtils.nextTick();
+        assert.containsN(document.querySelector('body'), '.o_notification', 2);
+        assert.strictEqual(
+            document.querySelectorAll('body .o_notification .o_notification_title')[1].innerHTML,
+            'Connection restored'
+        );
+        assert.containsOnce(webClient, '.o_kanban_view');
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("display warning as notification", async function (assert) {
+    /*
+        assert.expect(6);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            services: {
+                notification: NotificationService
+            }
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(document.querySelector('body'), '.o_notification');
+        webClient.trigger('warning', {title: 'gloria', message: 'Like to tell ya about my baby'});
+        await testUtils.nextTick();
+        assert.containsOnce(document.querySelector('body'), '.o_notification');
+        assert.strictEqual(
+            document.querySelector('body .o_notification .o_notification_title').innerHTML,
+            'gloria'
+        );
+        assert.strictEqual(
+            document.querySelector('body .o_notification .o_notification_content').innerHTML,
+            'Like to tell ya about my baby'
+        );
+        assert.containsOnce(webClient, '.o_kanban_view');
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("display warning as modal", async function (assert) {
+    /*
+        assert.expect(8);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            services: {
+                notification: NotificationService
+            }
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(document.querySelector('body'), '.modal');
+        webClient.trigger('warning', {title: 'gloria', type: 'dialog', message: 'Like to tell ya about my baby'});
+        await testUtils.nextTick();
+        // In this case the bootstrap modal may take one more tick to be here
+        await testUtils.nextTick();
+        assert.containsOnce(document.querySelector('body'), '.modal');
+        assert.strictEqual(
+            document.querySelector('body .modal .modal-title').textContent,
+            'gloria'
+        );
+        assert.strictEqual(
+            document.querySelector('body .modal .modal-body').textContent.trim(),
+            'Like to tell ya about my baby'
+        );
+        assert.containsOnce(webClient, '.o_kanban_view');
+        await testUtils.dom.click(document.querySelector('body .modal .modal-footer button'));
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(document.querySelector('body'), '.modal');
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip(
+    "requests for execute_action of type object raises error in modal: re-enables buttons",
+    async function (assert) {
+      /*
+        assert.expect(5);
+
+        this.archs['partner,false,form'] = `
+            <form>
+                <field name="display_name"/>
+                <footer>
+                    <button name="object" string="Call method" type="object"/>
+                </footer>
+            </form>
+        `;
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/call_button') {
+                    // the crash manager is not triggered
+                    // in tests (low level AJAX)
+                    return Promise.reject();
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        await doAction(5);
+        assert.containsOnce(webClient, '.modal .o_form_view');
+
+        testUtils.dom.click(webClient.el.querySelector('.modal footer button[name="object"]'));
+        assert.containsOnce(webClient, '.modal .o_form_view');
+        assert.ok(webClient.el.querySelector('.modal footer button').disabled);
+        await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.containsOnce(webClient, '.modal .o_form_view');
+        assert.notOk(webClient.el.querySelector('.modal footer button').disabled);
+        webClient.destroy();
+        */
+    }
+  );
+
+  QUnit.skip(
+    'fullscreen on action change: back to another "current" action',
+    async function (assert) {
+      /*
+        assert.expect(8);
+
+        const menus = {
+            all_menu_ids: [999, 1],
+            children: [{
+                id: 999,
+                action: 'ir.actions.act_window,6',
+                name: 'MAIN APP',
+                children: [{
+                    id: 1,
+                    name: 'P1',
+                    children: [],
+                }]
+            }],
+        };
+
+        this.actions[0].target = 'fullscreen';
+        this.archs['partner,false,form'] = `
+            <form>
+                <button name="24" type="action" class="oe_stat_button"/>
+            </form>`;
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: menus,
+        });
+
+        assert.containsOnce(webClient, 'nav .o_menu_brand');
+        assert.strictEqual(webClient.el.querySelector('nav .o_menu_brand').textContent, 'MAIN APP');
+        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+
+        await testUtils.dom.click(webClient.el.querySelector('button[name="24"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+
+        await testUtils.dom.click(webClient.el.querySelector('button[name="1"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.hasClass(webClient.el, 'o_fullscreen');
+
+        await testUtils.dom.click(webClient.el.querySelectorAll('.breadcrumb li a')[1]);
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+
+        assert.containsOnce(webClient, 'nav .o_menu_brand');
+        assert.strictEqual(webClient.el.querySelector('nav .o_menu_brand').textContent, 'MAIN APP');
+
+        webClient.destroy();
+        */
+    }
+  );
+
+  QUnit.skip(
+    'footer buttons are updated when having another action in target "new"',
+    async function (assert) {
+      /*
+        assert.expect(9);
+
+        this.archs['partner,false,form'] = '<form>' +
+                '<field name="display_name"/>' +
+                '<footer>' +
+                    '<button string="Create" type="object" class="infooter"/>' +
+                '</footer>' +
+            '</form>';
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+        });
+        await doAction(5);
+        assert.containsNone(webClient, '.o_technical_modal .modal-body button[special="save"]');
+        assert.containsNone(webClient, '.o_technical_modal .modal-body button.infooter');
+        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button.infooter');
+        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button');
+
+        await doAction(25);
+        assert.containsNone(webClient, '.o_technical_modal .modal-body button.infooter');
+        assert.containsNone(webClient, '.o_technical_modal .modal-footer button.infooter');
+        assert.containsNone(webClient, '.o_technical_modal .modal-body button[special="save"]');
+        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button[special="save"]');
+        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button');
+
+        webClient.destroy();
+        */
+    }
+  );
+
+  QUnit.skip(
+    'buttons of client action in target="new" and transition to MVC action',
+    async function (assert) {
+      /*
+        assert.expect(4);
+
+        var ClientAction = AbstractAction.extend({
+            renderButtons($target) {
+                const button = document.createElement('button');
+                button.setAttribute('class', 'o_stagger_lee');
+                $target[0].appendChild(button);
+            },
+        });
+        core.action_registry.add('test', ClientAction);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+        });
+        await doAction({
+            tag: 'test',
+            target: 'new',
+            type: 'ir.actions.client',
+        });
+        assert.containsOnce(webClient, '.modal footer button.o_stagger_lee');
+        assert.containsNone(webClient, '.modal footer button[special="save"]');
+        await doAction(25);
+        assert.containsNone(webClient, '.modal footer button.o_stagger_lee');
+        assert.containsOnce(webClient, '.modal footer button[special="save"]');
+
+        webClient.destroy();
+        delete core.action_registry.map.test;
+        */
+    }
+  );
+
+  QUnit.skip("execute action without modal", async function (assert) {
+    /*
+        // TODO: I don't like those 2 tooltips
+        // Just because there are two bodies
+        assert.expect(11);
+
+        Object.assign(this.archs, {
+            'partner,666,form': `<form>
+                <header><button name="object" string="Call method" type="object" help="need somebody"/></header>
+                    <field name="display_name"/>
+                </form>`,
+        });
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            webClient: {
+                _getWindowHash() {
+                    return '#action=24';
+                }
+            },
+            mockRPC(route) {
+                assert.step(route);
+                if (route === '/web/dataset/call_button') {
+                    // Some business stuff server side, then return an implicit close action
+                    return Promise.resolve(false);
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/call_kw/partner/read',
+        ]);
+        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
+        const actionButton = webClient.el.querySelector('button[name=object]');
+        const tooltipProm = new Promise((resolve) => {
+            $(document.body).one("shown.bs.tooltip", () => {
+                $(actionButton).mouseleave();
+                resolve();
+            });
+        });
+        $(actionButton).mouseenter();
+        await tooltipProm;
+        assert.containsN(document.body, '.tooltip', 2);
+        await testUtils.dom.click(actionButton);
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.verifySteps([
+            '/web/dataset/call_button',
+            '/web/dataset/call_kw/partner/read',
+        ]);
+        assert.containsNone(document.body, '.tooltip'); // body different from webClient in tests !
+        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("on close with effect from server", async function (assert) {
+    /*
+        assert.expect(1);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            session: {
+                show_effect: true,
+            },
+            mockRPC(route, args) {
+                if (route === '/web/dataset/call_button') {
+                    return Promise.resolve({
+                        type: 'ir.actions.act_window_close',
+                        effect: {
+                            type: 'rainbow_man',
+                            message: 'button called',
+                        }
+                    });
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        await doAction(6);
+        await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.containsOnce(webClient, '.o_reward');
+
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("on close with effect in xml", async function (assert) {
+    /*
+        assert.expect(2);
+
+        this.archs['partner,false,form'] = `
+            <form>
+                <header>
+                    <button string="Call method"
+                        name="object"
+                        type="object"
+                        effect="{'type': 'rainbow_man', 'message': 'rainBowInXML'}"/>
+                </header>
+                    <field name="display_name"/>
+            </form>`;
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            session: {
+                show_effect: true,
+            },
+            mockRPC(route, args) {
+                if (route === '/web/dataset/call_button') {
+                    return Promise.resolve();
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        await doAction(6);
+        await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.containsOnce(webClient, '.o_reward');
+        assert.strictEqual(
+            webClient.el.querySelector('.o_reward .o_reward_msg_content').textContent,
+            'rainBowInXML'
+        );
+
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("hashchange does not trigger canberemoved right away", async function (assert) {
+    /*
+        assert.expect(9);
+
+        var ClientAction = AbstractAction.extend({
+            start() {
+                this.$el.text('Hello World');
+                this.$el.addClass('o_client_action_test');
+            },
+            canBeRemoved(){
+                assert.step('canBeRemoved');
+                return this._super.apply(this, arguments);
+            }
+        });
+        core.action_registry.add('ClientAction', ClientAction);
+
+        var ClientAction2 = AbstractAction.extend({
+            start() {
+                this.$el.text('Hello World');
+                this.$el.addClass('o_client_action_test_2');
+            },
+            canBeRemoved(){
+                assert.step('canBeRemoved_2');
+                return this._super.apply(this, arguments);
+            }
+        });
+        core.action_registry.add('ClientAction2', ClientAction2);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            webClient: {
+                _setWindowHash(newHash) {
+                    assert.step('hashSet');
+                }
+            }
+        });
+        assert.verifySteps([]);
+        await doAction(9);
+        assert.verifySteps([
+            'hashSet',
+        ]);
+        assert.containsOnce(webClient, '.o_client_action_test');
+        assert.verifySteps([]);
+        await doAction('ClientAction2');
+        assert.containsOnce(webClient, '.o_client_action_test_2');
+        assert.verifySteps([
+            'canBeRemoved',
+            'hashSet',
+        ]);
+        webClient.destroy();
+        delete core.action_registry.map.ClientAction;
+        delete core.action_registry.map.ClientAction2;
+        */
+  });
+
+  QUnit.skip("on_close should be called only once", async function (assert) {
+    /**
+     * TODO: Improve this test
+     *
+     * When clicking on dialog button it should trigger act_window_close and
+     * then execute_action (that will be redirected to an act_window_close)
+     *
+     * The execute_action comes from BasicController._callButtonAction
+     *
+     * A real case: event_configurator_widget.js
+     */
+    /*
+        assert.expect(2);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+        });
+
+        await doAction(3);
+        await testUtils.dom.click(webClient.el.querySelector('.o_list_view .o_data_row'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        await testUtils.dom.click(webClient.el.querySelector('.o_form_buttons_view .o_form_button_edit'));
+
+        await doAction(25, {
+            on_close() {
+                assert.step('on_close');
+            },
+        });
+
+        // Close dialog by clicking on save button
+        await testUtils.dom.click(webClient.el.querySelector('.o_dialog .modal-footer button[special=save]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        // Directly do act_window_close
+        await doAction(10);
+
+        assert.verifySteps(['on_close']);
+
+        webClient.destroy();
+        */
+  });
+
+  QUnit.skip("properly push state active_id", async function (assert) {
+    /*
+        assert.expect(13);
+
+        Object.assign(this.archs, {
+            // kanban views
+            'partner,1,kanban': '<kanban><templates><t t-name="kanban-box">' +
+                    '<div class="oe_kanban_global_click"><a name="1" type="action"></a><field name="foo"/></div>' +
+                '</t></templates></kanban>',
+        });
+
+        let _hash = '#action=1';
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                return this._super.apply(this, arguments);
+            },
+            webClient: {
+                _getWindowHash() {
+                    return _hash;
+                },
+                _setWindowHash(newHash) {
+                    assert.step(newHash);
+                    _hash = newHash;
+                }
+            }
+        });
+        assert.verifySteps([
+            '/web/action/load',
+            'load_views',
+            '/web/dataset/search_read',
+            '#model=partner&view_type=kanban&action=1',
+        ]);
+        await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record a'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.verifySteps([
+            '/web/action/load',
+            'load_views',
+            '/web/dataset/search_read',
+            '#model=partner&view_type=kanban&action=1&active_id=1',
+        ]);
+        await testUtils.dom.click(webClient.el.querySelector('.breadcrumb-item'));
+        await testUtils.owlCompatibilityExtraNextTick();
+        assert.verifySteps([
+            '/web/dataset/search_read',
+            '#model=partner&view_type=kanban&action=1',
+        ]);
+        webClient.destroy();
+        */
+  });
 });
