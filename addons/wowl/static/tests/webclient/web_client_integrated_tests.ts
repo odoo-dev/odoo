@@ -9,8 +9,7 @@ import { menusService } from "../../src/services/menus";
 import {
   ActionManager,
   actionManagerService,
-  clearUncommittedChanges,
-} from "../../src/action_manager/action_manager";
+  clearUncommittedChanges, useSetupAction } from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
 import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";
@@ -2795,6 +2794,35 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
     baseConfig.actionRegistry!.remove('HelloWorldTest');
+  });
+
+  QUnit.test('ClientAction receives breadcrumbs and exports title (wowl)', async (assert) => {
+    assert.expect(4);
+    class ClientAction extends Component<{}, OdooEnv> {
+      static template = tags.xml`<div class="my_owl_action">owl client action</div>`;
+      breadcrumbTitle = 'myOwlAction';
+      constructor(parent:any, props: any) {
+        super(parent, props);
+        const breadCrumbs = props.breadcrumbs;
+        assert.strictEqual(breadCrumbs.length, 1);
+        assert.strictEqual(breadCrumbs[0].name, 'Undefined');
+
+        useSetupAction({
+          getTitle: () => {
+            return  this.breadcrumbTitle;
+          }
+        });
+      }
+    }
+    baseConfig.actionRegistry!.add('OwlClientAction', ClientAction);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 'OwlClientAction');
+    assert.containsOnce(webClient.el!, '.my_owl_action');
+
+    await doAction(webClient, 3);
+    assert.strictEqual(webClient.el!.querySelector('.breadcrumb')!.textContent, 'myOwlActionPartners');
+    webClient.destroy();
+    baseConfig.actionRegistry!.remove('OwlClientAction');
   });
 
   QUnit.test("test display_notification client action", async function (assert) {
