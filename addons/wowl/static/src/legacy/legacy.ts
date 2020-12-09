@@ -11,7 +11,9 @@ import {
 } from "../types";
 import { useService } from "../core/hooks";
 import {
-  ActionManagerUpdateInfo, Breadcrumbs, useSetupAction,
+  ActionManagerUpdateInfo,
+  Breadcrumbs,
+  useSetupAction,
   ViewNotFoundError,
 } from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
@@ -144,6 +146,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     // This is protected in legacy (backward compatibility) but should not e supported in Wowl
     tempQuery: Query | null = {};
     __widget: any;
+    onReverseBreadcrumb: any;
 
     constructor(...args: any[]) {
       super(...args);
@@ -178,7 +181,8 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         ) {
           payload.action.context = actionContext.eval();
         }
-        this.am.doAction(payload.action);
+        this.onReverseBreadcrumb = ev.data.options && ev.data.options.on_reverse_breadcrumb;
+        this.am.doAction(payload.action, ev.data.options || {});
       } else if (ev.name === "breadcrumb_clicked") {
         this.am.restore(payload.controllerID);
       } else if (ev.name === "push_state") {
@@ -205,7 +209,10 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
      */
     exportState() {
       this.widget = null;
-      return { __legacy_widget__: this.__widget };
+      return {
+        __legacy_widget__: this.__widget,
+        __on_reverse_breadcrumb__: this.onReverseBreadcrumb,
+      };
     }
     canBeRemoved() {
       return this.__widget.canBeRemoved();
@@ -227,6 +234,9 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     async willStart() {
       if (this.props.widget) {
         this.widget = this.props.widget;
+        if (this.props.onReverseBreadcrumb) {
+          await this.props.onReverseBreadcrumb();
+        }
         return this.updateWidget();
       }
       return super.willStart();
@@ -334,6 +344,9 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     async willStart() {
       if (this.props.widget) {
         this.widget = this.props.widget;
+        if (this.props.onReverseBreadcrumb) {
+          await this.props.onReverseBreadcrumb();
+        }
         return this.updateWidget(this.props.viewParams);
       } else {
         const view = new this.props.View(this.props.viewInfo, this.props.viewParams);
@@ -421,9 +434,9 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
   return { ClientActionAdapter, ViewAdapter };
 });
 
-type LegacyBreadCrumbs = {title: string, controllerID: string}[];
+type LegacyBreadCrumbs = { title: string; controllerID: string }[];
 
-function breadcrumbsToLegacy(breadcrumbs?: Breadcrumbs): LegacyBreadCrumbs|undefined {
+function breadcrumbsToLegacy(breadcrumbs?: Breadcrumbs): LegacyBreadCrumbs | undefined {
   if (!breadcrumbs) {
     return;
   }
@@ -443,14 +456,21 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
     if ((action as any).prototype instanceof Widget) {
       // the action is a widget, wrap it into a Component and register that component
       class Action extends Component<ClientActionProps, OdooEnv> {
-        static template = tags.xml`<ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget" t-ref="controller"/>`;
+        static template = tags.xml`
+          <ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget"
+                               onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"/>
+        `;
         static components = { ClientActionAdapter };
 
         controllerRef = hooks.useRef<ActionAdapter>("controller");
 
         Widget = action;
-        widgetArgs = [this.props.action, {breadcrumbs: breadcrumbsToLegacy(this.props.breadcrumbs)}];
+        widgetArgs = [
+          this.props.action,
+          { breadcrumbs: breadcrumbsToLegacy(this.props.breadcrumbs) },
+        ];
         widget = this.props.state && this.props.state.__legacy_widget__;
+        onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
 
         constructor() {
           super(...arguments);
@@ -486,7 +506,8 @@ odoo.define("wowl.legacyViews", async function (require: any) {
   function registerView(name: string, LegacyView: any) {
     class Controller extends Component<ViewProps, OdooEnv> {
       static template = tags.xml`
-        <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams" widget="widget" t-ref="controller"/>
+        <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"
+                     widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"/>
       `;
       static components = { ViewAdapter };
       static display_name = LegacyView.prototype.display_name;
@@ -515,6 +536,7 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         },
       };
       widget = this.props.state && this.props.state.__legacy_widget__;
+      onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
 
       constructor() {
         super(...arguments);

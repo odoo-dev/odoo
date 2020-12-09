@@ -9,7 +9,9 @@ import { menusService } from "../../src/services/menus";
 import {
   ActionManager,
   actionManagerService,
-  clearUncommittedChanges, useSetupAction } from "../../src/action_manager/action_manager";
+  clearUncommittedChanges,
+  useSetupAction,
+} from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
 import {
   makeFakeRouterService,
@@ -1105,34 +1107,48 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("on_reverse_breadcrumb handler is correctly called", async function (assert) {
-    /*
-    assert.expect(3);
+  QUnit.test("on_reverse_breadcrumb handler is correctly called (legacy)", async function (assert) {
+    // This test can be removed as soon as we no longer support legacy actions as the new
+    // ActionManager doesn't support this option. Indeed, it is used to reload the previous
+    // action when coming back, but we won't need such an artefact to that with Wowl, as the
+    // controller will be re-instantiated with an (exported) state given in props.
+    assert.expect(5);
+
+    const ClientAction = AbstractAction.extend({
+      events: {
+        "click button": "_onClick",
+      },
+      start() {
+        this.$el.html('<button class="my_button">Execute another action</button>');
+      },
+      _onClick() {
+        this.do_action(4, {
+          on_reverse_breadcrumb: () => assert.step("on_reverse_breadcrumb"),
+        });
+      },
+    });
+    core.action_registry.add("ClientAction", ClientAction);
 
     const webClient = await createWebClient({ baseConfig });
 
-    // execute action 3 and open a record in form view
-    await doAction(webClient, 3);
-    testUtils.dom.click($(webClient.el!).find(".o_list_view .o_data_row:first"));
+    await doAction(webClient, "ClientAction");
 
-    // execute action 4 without 'on_reverse_breadcrumb' handler, then go back
-    await doAction(webClient, 4);
+    assert.containsOnce(webClient, ".my_button");
+
+    await testUtils.dom.click(webClient.el!.querySelector(".my_button"));
+    await legacyExtraNextTick();
+
+    assert.containsOnce(webClient, ".o_kanban_view");
+
     await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:first"));
     await legacyExtraNextTick();
-    assert.verifySteps([]);
 
-    // execute action 4 with an 'on_reverse_breadcrumb' handler, then go back
-    await doAction(webClient, 4, {
-      on_reverse_breadcrumb: function () {
-        assert.step("on_reverse_breadcrumb");
-      },
-    });
-    await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a:first"));
-    await legacyExtraNextTick();
+    assert.containsOnce(webClient, ".my_button");
     assert.verifySteps(["on_reverse_breadcrumb"]);
 
     webClient.destroy();
-    */
+    delete core.action_registry.map.ClientAction;
+    baseConfig.actionRegistry!.remove("ClientAction");
   });
 
   QUnit.test('handles "history_back" event', async function (assert) {
@@ -2740,7 +2756,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
-    baseConfig.actionRegistry!.remove('HelloWorldTest');
+    baseConfig.actionRegistry!.remove("HelloWorldTest");
   });
 
   QUnit.test("breadcrumb is updated on title change (legacy)", async function (assert) {
@@ -2781,94 +2797,97 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     webClient.destroy();
     delete core.action_registry.map.HelloWorldTest;
-    baseConfig.actionRegistry!.remove('HelloWorldTest');
+    baseConfig.actionRegistry!.remove("HelloWorldTest");
   });
 
-  QUnit.test('client actions can have breadcrumbs (legacy)', async function (assert) {
+  QUnit.test("client actions can have breadcrumbs (legacy)", async function (assert) {
     assert.expect(4);
 
     const ClientAction = AbstractAction.extend({
       hasControlPanel: true,
       init(parent: any, action: any) {
-        action.display_name = 'Goldeneye';
+        action.display_name = "Goldeneye";
         this._super.apply(this, arguments);
       },
       start() {
-        this.$el.addClass('o_client_action_test');
+        this.$el.addClass("o_client_action_test");
         return this._super.apply(this, arguments);
       },
     });
-    core.action_registry.add('ClientAction', ClientAction);
+    core.action_registry.add("ClientAction", ClientAction);
 
     const ClientAction2 = AbstractAction.extend({
       hasControlPanel: true,
       init(parent: any, action: any) {
-        action.display_name = 'No time for sweetness';
+        action.display_name = "No time for sweetness";
         this._super.apply(this, arguments);
       },
       start() {
-        this.$el.addClass('o_client_action_test_2');
+        this.$el.addClass("o_client_action_test_2");
         return this._super.apply(this, arguments);
       },
     });
-    core.action_registry.add('ClientAction2', ClientAction2);
+    core.action_registry.add("ClientAction2", ClientAction2);
 
     const webClient = await createWebClient({ baseConfig });
-    await doAction(webClient, 'ClientAction');
-    assert.containsOnce(webClient.el!, '.breadcrumb-item');
+    await doAction(webClient, "ClientAction");
+    assert.containsOnce(webClient.el!, ".breadcrumb-item");
     assert.strictEqual(
-      webClient.el!.querySelector('.breadcrumb-item.active')!.textContent,
-      'Goldeneye'
+      webClient.el!.querySelector(".breadcrumb-item.active")!.textContent,
+      "Goldeneye"
     );
 
-    await doAction(webClient, 'ClientAction2', {clearBreadcrumbs: false});
-    assert.containsN(webClient.el!, '.breadcrumb-item', 2);
+    await doAction(webClient, "ClientAction2", { clearBreadcrumbs: false });
+    assert.containsN(webClient.el!, ".breadcrumb-item", 2);
     assert.strictEqual(
-      webClient.el!.querySelector('.breadcrumb-item.active')!.textContent,
-      'No time for sweetness'
-      );
+      webClient.el!.querySelector(".breadcrumb-item.active")!.textContent,
+      "No time for sweetness"
+    );
 
     webClient.destroy();
     delete core.action_registry.map.ClientAction;
     delete core.action_registry.map.ClientAction2;
-    baseConfig.actionRegistry!.remove('ClientAction');
-    baseConfig.actionRegistry!.remove('ClientAction2');
+    baseConfig.actionRegistry!.remove("ClientAction");
+    baseConfig.actionRegistry!.remove("ClientAction2");
   });
 
-  QUnit.test('ClientAction receives breadcrumbs and exports title (wowl)', async (assert) => {
+  QUnit.test("ClientAction receives breadcrumbs and exports title (wowl)", async (assert) => {
     assert.expect(4);
     class ClientAction extends Component<{}, OdooEnv> {
       static template = tags.xml`<div class="my_owl_action" t-on-click="onClick">owl client action</div>`;
-      breadcrumbTitle = 'myOwlAction';
+      breadcrumbTitle = "myOwlAction";
 
-      constructor(parent:any, props: any) {
+      constructor(parent: any, props: any) {
         super(parent, props);
         const breadCrumbs = props.breadcrumbs;
         assert.strictEqual(breadCrumbs.length, 1);
-        assert.strictEqual(breadCrumbs[0].name, 'Favorite Ponies');
+        assert.strictEqual(breadCrumbs[0].name, "Favorite Ponies");
 
         useSetupAction({
           getTitle: () => {
-            return  this.breadcrumbTitle;
-          }
+            return this.breadcrumbTitle;
+          },
         });
       }
       onClick() {
-        this.breadcrumbTitle = 'newOwlTitle';
+        this.breadcrumbTitle = "newOwlTitle";
       }
     }
-    baseConfig.actionRegistry!.add('OwlClientAction', ClientAction);
+    baseConfig.actionRegistry!.add("OwlClientAction", ClientAction);
     const webClient = await createWebClient({ baseConfig });
     await doAction(webClient, 8);
 
-    await doAction(webClient, 'OwlClientAction');
-    assert.containsOnce(webClient.el!, '.my_owl_action');
-    await click(webClient.el!, '.my_owl_action');
+    await doAction(webClient, "OwlClientAction");
+    assert.containsOnce(webClient.el!, ".my_owl_action");
+    await click(webClient.el!, ".my_owl_action");
 
     await doAction(webClient, 3);
-    assert.strictEqual(webClient.el!.querySelector('.breadcrumb')!.textContent, 'Favorite PoniesnewOwlTitlePartners');
+    assert.strictEqual(
+      webClient.el!.querySelector(".breadcrumb")!.textContent,
+      "Favorite PoniesnewOwlTitlePartners"
+    );
     webClient.destroy();
-    baseConfig.actionRegistry!.remove('OwlClientAction');
+    baseConfig.actionRegistry!.remove("OwlClientAction");
   });
 
   QUnit.test("test display_notification client action", async function (assert) {
@@ -2957,9 +2976,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     // execute an action in target="new"
     function onClose() {
-      assert.step('close handler');
+      assert.step("close handler");
     }
-    await doAction(webClient, 5, {onClose});
+    await doAction(webClient, 5, { onClose });
     // on_close: assert.step.bind(assert, "close handler"),
     assert.containsOnce(
       document.body,
