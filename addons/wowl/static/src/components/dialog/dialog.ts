@@ -3,7 +3,7 @@ import { OdooEnv } from "../../types";
 const { useRef, useExternalListener, useSubEnv } = hooks;
 const { Portal } = misc;
 
-interface DialogProps {
+export interface DialogProps {
   contentClass?: string;
   fullscreen: boolean;
   renderFooter: boolean;
@@ -13,7 +13,7 @@ interface DialogProps {
   title: String;
 }
 
-export class Dialog extends Component<DialogProps, OdooEnv> {
+export class Dialog<T extends DialogProps = DialogProps> extends Component<T, OdooEnv> {
   static components = { Portal };
   static props = {
     contentClass: { type: String, optional: 1 },
@@ -39,8 +39,8 @@ export class Dialog extends Component<DialogProps, OdooEnv> {
 
   modalRef = useRef("modal");
 
-  constructor(...args: any[]) {
-    super(...args);
+  constructor(parent?: Component | null, props?: T) {
+    super(...arguments);
     useExternalListener(window, "keydown", this._onKeydown);
     useSubEnv({ inDialog: true });
   }

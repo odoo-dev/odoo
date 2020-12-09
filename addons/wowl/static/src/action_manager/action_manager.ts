@@ -17,14 +17,14 @@ import { DomainListRepr as Domain } from "../core/domain";
 import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
-import { DialogAction } from "./dialog_action";
+import { ActionDialog, ActionDialogProps } from "./action_dialog";
 import { KeepLast } from "../utils/concurrency";
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
-type ActionType = Action["type"];
+export type ActionType = Action["type"];
 type ActionTarget = "current" | "main" | "new" | "fullscreen" | "inline";
 type URLActionTarget = "self";
 type ActionId = number;
@@ -129,17 +129,22 @@ export interface Breadcrumb {
 }
 export type Breadcrumbs = Breadcrumb[];
 
-interface ActionManagerUpdateInfo {
-  type: "MAIN" | "OPEN_DIALOG" | "CLOSE_DIALOG";
+interface MainActionManagerUpdateInfo {
   id?: number;
+  type: "MAIN";
   Component?: Type<Component<{}, OdooEnv>>;
-  props?: ControllerProps;
-  dialogProps?: {
-    title: string;
-  };
+  componentProps?: ControllerProps;
+}
+
+interface DialogActionManagerUpdateInfo {
+  id?: number;
+  type: "OPEN_DIALOG" | "CLOSE_DIALOG";
+  props?: ActionDialogProps;
   onClose?: ActionOptions["onClose"];
   onCloseInfo?: any;
 }
+
+type ActionManagerUpdateInfo = MainActionManagerUpdateInfo | DialogActionManagerUpdateInfo;
 
 interface UpdateStackOptions {
   clearBreadcrumbs?: boolean;
@@ -162,6 +167,7 @@ interface ActionCache {
 interface DoActionButtonParams {
   args?: string;
   buttonContext?: string;
+  close?: boolean;
   context: Context;
   effect?: string;
   model: string;
@@ -229,39 +235,35 @@ export function useSetupAction(params: useSetupActionParams) {
 // -----------------------------------------------------------------------------
 
 export class ActionContainer extends Component<{}, OdooEnv> {
-  static components = { DialogAction };
+  static components = { ActionDialog };
   static template = tags.xml`
     <div t-name="wowl.ActionContainer" class="o_action_manager">
-      <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="main.id"/>
-      <DialogAction t-if="dialog.Component" t-props="dialog.dialogProps" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed">
-        <t t-component="dialog.Component" t-props="dialog.props"/>
-      </DialogAction>
+      <t t-if="main.Component" t-component="main.Component" t-props="main.componentProps" t-key="main.id"/>
+      <ActionDialog t-if="dialog.id" t-props="dialog.props" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed"/>
     </div>`;
-  main: Partial<ActionManagerUpdateInfo> = {};
-  dialog: Partial<ActionManagerUpdateInfo> = {};
+  main: Partial<MainActionManagerUpdateInfo> = {};
+  dialog: Partial<DialogActionManagerUpdateInfo> = {};
 
   constructor(...args: any[]) {
     super(...args);
     this.env.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionManagerUpdateInfo) => {
       switch (info.type) {
         case "MAIN":
-          this.main = { id: info.id, Component: info.Component, props: info.props };
+          this.main = info;
           this.dialog = {};
           break;
         case "OPEN_DIALOG": {
           const { onClose } = this.dialog;
           this.dialog = {
             id: info.id,
-            Component: info.Component,
             props: info.props,
-            dialogProps: info.dialogProps,
             onClose: onClose || info.onClose,
           };
           break;
         }
         case "CLOSE_DIALOG": {
           let onClose;
-          if (this.dialog.Component) {
+          if (this.dialog.id) {
             onClose = this.dialog.onClose;
           } else {
             onClose = info.onClose;
@@ -468,6 +470,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         __beforeLeave__="beforeLeave"
           t-ref="component"
           t-on-history-back="onHistoryBack"/>`;
+      static Component = controller.Component;
       Component = controller.Component;
       componentProps = this.props;
       componentRef = hooks.useRef("component");
@@ -554,15 +557,18 @@ function makeActionManager(env: OdooEnv): ActionManager {
       }
     }
     if (action.target === "new") {
+      const actionDialogProps: Partial<ActionDialogProps> = {
+        // TODO add size
+        ActionComponent: ControllerComponent,
+        actionProps: controller.props,
+      };
+      if (action.name) {
+        actionDialogProps.title = action.name;
+      }
       env.bus.trigger("ACTION_MANAGER:UPDATE", {
         type: "OPEN_DIALOG",
         id: ++id,
-        Component: ControllerComponent,
-        props: controller.props,
-        dialogProps: {
-          //TODO add size and dialogClass
-          title: action.name,
-        },
+        props: actionDialogProps,
         onClose: options.onClose,
       });
       return currentActionProm;
@@ -587,7 +593,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       type: "MAIN",
       id: ++id,
       Component: ControllerComponent,
-      props: controller.props,
+      componentProps: controller.props,
     });
     return currentActionProm;
   }
@@ -994,7 +1000,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
     // attribute on the button, the priority is given to the button attribute
     action.effect = params.effect ? evaluateExpr(params.effect) : action.effect;
 
-    return doAction(action);
+    await doAction(action);
+
+    if (params.close) {
+      _executeCloseAction();
+    }
   }
 
   /**

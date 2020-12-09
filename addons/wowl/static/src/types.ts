@@ -187,6 +187,7 @@ export interface ViewProps extends ActionProps {
   actionId?: number;
   context: Context;
   domain?: Domain;
+  isLegacy?: true;
   model: string;
   type: ViewType;
   views: [ViewId, ViewType][];

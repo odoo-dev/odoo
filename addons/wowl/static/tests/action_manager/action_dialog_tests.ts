@@ -1,6 +1,6 @@
 import { Component, hooks, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
-import { DialogAction } from "../../src/action_manager/dialog_action";
+import { ActionDialog } from "../../src/action_manager/action_dialog";
 import { Registry } from "../../src/core/registry";
 import { useDebugManager } from "../../src/debug_manager/debug_manager";
 import { debugManagerService } from "../../src/debug_manager/debug_manager_service";
@@ -21,7 +21,7 @@ let target: HTMLElement;
 let env: OdooEnv;
 let serviceRegistry: Registries["serviceRegistry"];
 
-QUnit.module("DialogAction", {
+QUnit.module("ActionDialog", {
   async beforeEach() {
     target = getFixture();
     const dialogContainer = document.createElement("div");
@@ -48,15 +48,15 @@ QUnit.module("DialogAction", {
 
 QUnit.test("Don't display the DebugManager if debug mode is disabled", async (assert) => {
   env = await makeTestEnv(baseConfig);
-  const dialogAction = await mount(DialogAction, { env, target });
+  const actionDialog = await mount(ActionDialog, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.containsNone(target, ".o_dialog .o_debug_manager .fa-bug");
 
-  dialogAction.unmount();
+  actionDialog.unmount();
 });
 
 QUnit.test(
-  "Display the DebugManager correctly in a DialogAction if debug mode is enabled",
+  "Display the DebugManager correctly in a ActionDialog if debug mode is enabled",
   async (assert) => {
     env = await makeTestEnv(Object.assign(baseConfig, { debug: "1" }));
     odoo.debugManagerRegistry.add("global", () => {
@@ -87,8 +87,8 @@ QUnit.test(
       sequence: 20,
     };
     class Parent extends Component {
-      static components = { DialogAction };
-      static template = tags.xml`<DialogAction/>`;
+      static components = { ActionDialog };
+      static template = tags.xml`<ActionDialog/>`;
 
       constructor(...args: any[]) {
         super(...args);
@@ -97,7 +97,7 @@ QUnit.test(
       }
     }
 
-    const dialogAction = await mount(Parent, { env, target });
+    const actionDialog = await mount(Parent, { env, target });
     assert.containsOnce(target, "div.o_dialog_container .o_dialog");
     assert.containsOnce(target, ".o_dialog .o_debug_manager .fa-bug");
 
@@ -120,6 +120,6 @@ QUnit.test(
     }
     assert.verifySteps(["callback item_1", "callback item_2"]);
 
-    dialogAction.unmount();
+    actionDialog.unmount();
   }
 );

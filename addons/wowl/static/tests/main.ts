@@ -5,7 +5,7 @@ import "./qunit";
 
 // import here every test suite files
 import "./action_manager/action_manager_tests";
-import "./action_manager/dialog_action_tests";
+import "./action_manager/action_dialog_tests";
 import "./components/dropdown_tests";
 import "./components/dialog_tests";
 import "./core/context_tests";

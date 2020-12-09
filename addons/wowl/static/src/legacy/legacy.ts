@@ -33,7 +33,21 @@ export function makeLegacyActionManagerService(legacyEnv: any): Service<void> {
     dependencies: ["action_manager"],
     deploy(env: OdooEnv): void {
       legacyEnv.bus.on("do-action", null, (payload: any) => {
-        env.services.action_manager.doAction(payload.action, payload.options || {});
+        const legacyOptions = payload.options || {};
+
+        // use camelCase instead of snake_case for some keys
+        Object.assign(legacyOptions, {
+          additionalContext: legacyOptions.additional_context,
+          clearBreadcrumbs: legacyOptions.clear_breadcrumbs,
+          viewType: legacyOptions.view_type,
+          resId: legacyOptions.res_id,
+        });
+        delete legacyOptions.additional_context;
+        delete legacyOptions.clear_breadcrumbs;
+        delete legacyOptions.view_type;
+        delete legacyOptions.res_id;
+
+        env.services.action_manager.doAction(payload.action, legacyOptions);
       });
     },
   };
@@ -289,8 +303,6 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
             searchPanel: state.searchPanel,
           });
         } catch (e) {
-          console.log(e);
-          debugger;
           if (e instanceof ViewNotFoundError) {
             return;
           }
@@ -300,6 +312,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         this.am.doActionButton({
           args: payload.action_data.args,
           buttonContext: payload.action_data.context,
+          close: payload.action_data.close,
           context: payload.env.context,
           model: payload.env.model,
           name: payload.action_data.name,
@@ -377,6 +390,7 @@ odoo.define("wowl.legacyViews", async function (require: any) {
       static icon = LegacyView.prototype.icon;
       static multiRecord = LegacyView.prototype.multi_record;
       static type = LegacyView.prototype.viewType;
+      static isLegacy = true;
 
       vm = useService("view_manager");
       controllerRef = hooks.useRef<ActionAdapter>("controller");
