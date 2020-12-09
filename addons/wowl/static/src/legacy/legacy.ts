@@ -234,6 +234,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     async willStart() {
       if (this.props.widget) {
         this.widget = this.props.widget;
+        this.widget.setParent(this);
         if (this.props.onReverseBreadcrumb) {
           await this.props.onReverseBreadcrumb();
         }
@@ -344,6 +345,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     async willStart() {
       if (this.props.widget) {
         this.widget = this.props.widget;
+        this.widget.setParent(this);
         if (this.props.onReverseBreadcrumb) {
           await this.props.onReverseBreadcrumb();
         }
@@ -460,7 +462,8 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
       class Action extends Component<ClientActionProps, OdooEnv> {
         static template = tags.xml`
           <ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget"
-                               onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"/>
+                               onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
+                               t-on-scrollTo.stop="onScrollTo"/>
         `;
         static components = { ClientActionAdapter };
 
@@ -474,12 +477,17 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
         widget = this.props.state && this.props.state.__legacy_widget__;
         onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
 
+        onScrollTo: (offset: any) => void;
+
         constructor() {
           super(...arguments);
-          useSetupAction({
+          const { scrollTo } = useSetupAction({
             export: () => this.controllerRef.comp!.exportState(),
             getTitle: () => this.controllerRef.comp!.getTitle(),
           });
+          this.onScrollTo = (ev: any) => {
+            scrollTo({ left: ev.detail.left, top: ev.detail.top });
+          };
         }
       }
       actionRegistry.add(name, Action);
@@ -509,7 +517,8 @@ odoo.define("wowl.legacyViews", async function (require: any) {
     class Controller extends Component<ViewProps, OdooEnv> {
       static template = tags.xml`
         <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"
-                     widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"/>
+                     widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
+                     t-on-scrollTo.stop="onScrollTo"/>
       `;
       static components = { ViewAdapter };
       static display_name = LegacyView.prototype.display_name;
@@ -540,13 +549,18 @@ odoo.define("wowl.legacyViews", async function (require: any) {
       widget = this.props.state && this.props.state.__legacy_widget__;
       onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
 
+      onScrollTo: (offset: any) => void;
+
       constructor() {
         super(...arguments);
-        useSetupAction({
+        const { scrollTo } = useSetupAction({
           beforeLeave: () => this.controllerRef.comp!.widget!.canBeRemoved(),
           export: () => this.controllerRef.comp!.exportState(),
           getTitle: () => this.controllerRef.comp!.getTitle(),
         });
+        this.onScrollTo = (ev: any) => {
+          scrollTo({ left: ev.detail.left, top: ev.detail.top });
+        };
       }
 
       async willStart() {

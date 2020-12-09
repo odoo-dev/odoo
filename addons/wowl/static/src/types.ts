@@ -121,6 +121,7 @@ export interface OdooEnv extends Env {
   bus: EventBus;
   debug: string;
   _t: (str: string) => string;
+  isMobile?: boolean;
 }
 
 export type ComponentAction = Type<Component<{}, OdooEnv>>;
