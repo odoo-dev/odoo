@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_donation" name="Donation">
+    <section class="s_donation pt32 pb32 o_cc o_cc1" style="position: relative;" data-oe-shape-data='{"shape":"web_editor/Origins/02","flip":[]}'>
+        <div class="o_we_shape o_web_editor_Origins_02"/>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="s_donation_column col-lg-7 pt16 pb16">
+                    <h2>Make a Donation</h2>
+                    <p>Help us to work with <b>local communities</b> to protect our <b>planet</b>.</p>
+
+                    <div class="s_donation_prefilled_buttons">
+                        <button class="s_donation_btn btn btn-outline-primary btn-lg o_not_editable mb-2 mr-1" data-donation-value="5" contenteditable="false">$5</button>
+                        <button class="s_donation_btn btn btn-outline-primary btn-lg o_not_editable mb-2 mr-1" data-donation-value="10" contenteditable="false">$10</button>
+                        <button class="s_donation_btn btn btn-outline-primary btn-lg o_not_editable mb-2 mr-1" data-donation-value="25" contenteditable="false">$25</button>
+                    </div>
+
+                    <!-- <div class="s_donation_prefilled_buttons mt-4">
+                        <div class="d-sm-flex align-items-center my-3">
+                            <button class="s_donation_btn btn btn-outline-primary o_not_editable btn-lg mr-3" data-donation-value="5.00">$5.00</button>
+                            <p class="mt-2 my-sm-auto text-muted"><i>Add a description here of what the donation will be used for.</i></p>
+                        </div>
+                        <div class="d-sm-flex align-items-center my-3">
+                            <button class="s_donation_btn btn btn-outline-primary o_not_editable btn-lg mr-3" data-donation-value="10.00">$10.00</button>
+                            <p class="mt-2 my-sm-auto text-muted"><i>Add a description here of what the donation will be used for.</i></p>
+                        </div>
+                        <div class="d-sm-flex align-items-center my-3">
+                            <button class="s_donation_btn btn btn-outline-primary o_not_editable btn-lg mr-3" data-donation-value="25.00">$25.00</button>
+                            <p class="mt-2 my-sm-auto text-muted"><i>Add a description here of what the donation will be used for.</i></p>
+                        </div>
+                    </div> -->
+
+                    <div class="s_donation_input_container my-3" data-donation-layout="freeAmount">
+                        <div class="row s_col_no_resize s_col_no_bgcolor">
+                            <label for="s_donation_amount_input" class="col-sm-4 col-form-label">Enter your own amount</label>
+                            <div class="col-sm-4">
+                                <input id="s_donation_amount_input" type="number" min="5" class="form-control" aria-label="Amount"/>
+                                <small class="form-text text-muted">
+                                    <i>Minimum Donation: $<span class="s_donation_minimum_value font-weight-bold" contenteditable="false">5</span></i>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p><a href="#" class="btn btn-primary btn-lg mb-2">Donate Now</a></p>
+                </div>
+                <div class="col-lg-5 pt16 pb16 d-none d-md-block">
+                    <img src="/web_editor/shape/website_payment/s_donation_gift.svg?c1=%2340FFFB" class="img img-fluid mx-auto" style="width: 75%;" alt=""/>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<template id="s_donation_options"  inherit_id="website.snippet_options">
+    <xpath expr="." position="inside">
+        <div data-js="Donation" data-selector=".s_donation">
+            <we-row class="o_we_full_row">
+                <we-checkbox string="Pre-filled Options"
+                        data-name="pre_filled_opt"
+                        data-toggle-prefilled-options="true"
+                        data-no-preview="true">
+                </we-checkbox>
+                <we-button class="o_we_text_success ml-auto"
+                        data-add-prefilled-option="true"
+                        title="Add a new pre-filled option"
+                        data-dependencies="pre_filled_opt"
+                        data-no-preview="true">
+                    <i class="fa fa-fw fa-plus"/>
+                </we-button>
+            </we-row>
+            <we-list class="o_we_prefilled_options_list">
+                <div class="oe_we_table_wraper">
+                    <table></table>
+                </div>
+            </we-list>
+            <we-checkbox string="⌙ Descriptions"
+                    data-toggle-option-description="true"
+                    data-dependencies="pre_filled_opt"
+                    data-no-preview="true">
+            </we-checkbox>
+            <we-select string="Amount Input">
+                <we-button data-name="free_amount_opt" data-select-amount-input="freeAmount">Free Amount</we-button>
+                <we-button data-name="slider_opt" data-select-amount-input="slider">Slider</we-button>
+                <we-button data-name="no_input_opt" data-select-amount-input="">None</we-button>
+            </we-select>
+            <we-input string="⌙ Minimum" data-step="1" data-minimum-donation="" data-dependencies="!no_input_opt"/>
+            <we-input string="⌙ Maximum" data-step="1" data-maximum-donation="" data-dependencies="slider_opt"/>
+            <we-input string="⌙ Step" data-step="1" data-slider-step="" data-dependencies="slider_opt"/>
+        </div>
+        <div data-js="DonationColumn" data-selector=".s_donation_column"/>
+        <!-- TODO: find a way to allow drag and drop of the first column only inside the snippet but leave the option to resize the column -->
+    </xpath>
+</template>
+
+<!-- Assets -->
+<template id="assets_snippet_s_donation_js_000" inherit_id="website.assets_frontend">
+    <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/website_payment/static/src/snippets/s_donation/000.js"/>
+    </xpath>
+</template>
+
+<template id="assets_snippet_s_donation_css_000" inherit_id="website.assets_frontend">
+    <xpath expr="//link[last()]" position="after">
+        <link rel="stylesheet" type="text/scss" href="/website_payment/static/src/snippets/s_donation/000.scss"/>
+    </xpath>
+</template>
+
+</odoo>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="website_payment.donation.prefilledButtons">
+        <button class="s_donation_btn btn btn-outline-primary btn-lg o_not_editable mb-2 mr-1" data-donation-value="5" contenteditable="false">$5</button>
+        <button class="s_donation_btn btn btn-outline-primary btn-lg o_not_editable mb-2 mr-1" data-donation-value="10" contenteditable="false">$10</button>
+        <button class="s_donation_btn btn btn-outline-primary btn-lg o_not_editable mb-2 mr-1" data-donation-value="25" contenteditable="false">$25</button>
+    </t>
+    <t t-name="website_payment.donation.freeAmount">
+        <div class="row s_col_no_resize s_col_no_bgcolor">
+            <label for="s_donation_amount_input" class="col-sm-4 col-form-label">Enter your own amount</label>
+            <div class="col-sm-4">
+                <input id="s_donation_amount_input" type="number" min="5" class="form-control" aria-label="Amount"/>
+                <small class="form-text text-muted">
+                    <i>Minimum Donation: $<span class="s_donation_minimum_value font-weight-bold" contenteditable="false">5</span></i>
+                </small>
+            </div>
+        </div>
+    </t>
+    <t t-name="website_payment.donation.slider">
+        <div class="s_donation_range_slider_wrap position-relative">
+            <label for="s_donation_range_slider">Choose Your Amount</label>
+            <input type="range" class="custom-range" data-default-value="25" min="1" max="100" step="1" id="s_donation_range_slider" contenteditable="false"/>
+            <output class="s_range_bubble" contenteditable="false">5</output>
+        </div>
+    </t>
+</templates>

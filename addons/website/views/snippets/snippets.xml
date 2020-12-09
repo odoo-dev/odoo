@@ -127,6 +127,7 @@
                     </t>
                     <t id="mail_channel_discussion_group_hook"/>
                     <t id="twitter_favorite_tweets_hook"/>
+                    <t id="snippet_donation_hook"/>
                 </div>
             </div>
 

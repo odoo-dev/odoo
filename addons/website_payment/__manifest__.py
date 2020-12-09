@@ -15,6 +15,9 @@ This is a bridge module which integrates payment acquirers with Website app.
     ],
     'data': [
         'views/payment_acquirer.xml',
+        'views/assets.xml',
+        'views/snippets/snippets.xml',
+        'views/snippets/s_donation.xml',
     ],
     'auto_install': False,
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="assets_wysiwyg" inherit_id="website.assets_wysiwyg" name="Website Payment Donation Assets">
+    <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/website_payment/static/src/snippets/s_donation/options.js"/>
+    </xpath>
+</template>
+
+</odoo>
