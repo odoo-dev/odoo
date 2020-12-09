@@ -6154,7 +6154,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
 
 
- // QUnit.test('requests for execute_action of type object: disable buttons (2)', async function (assert) {
+ //LPE DONE QUnit.test('requests for execute_action of type object: disable buttons (2)', async function (assert) {
  //        assert.expect(6);
 
  //        this.archs['pony,44,form'] = `
@@ -6214,7 +6214,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
  //        webClient.destroy();
  //    });
 
- //    QUnit.test('requests for execute_action of type object raises error: re-enables buttons', async function (assert) {
+ //    LPE: DONE QUnit.test('requests for execute_action of type object raises error: re-enables buttons', async function (assert) {
  //        assert.expect(3);
 
  //        const webClient = await createWebClient({
@@ -6403,8 +6403,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 //         delete core.action_registry.map.test;
 //     });
 
-
-    // QUnit.test('go back to action with form view as main view, and res_id', async function (assert) {
+    // LPE DONE QUnit.test('go back to action with form view as main view, and res_id', async function (assert) {
     //     assert.expect(7);
 
     //     this.actions.push({
@@ -6459,7 +6458,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
 
 
-    // QUnit.test('open form view, use the pager, execute action, and come back', async function (assert) {
+    // LPE: DONE QUnit.test('open form view, use the pager, execute action, and come back', async function (assert) {
     //     assert.expect(8);
 
     //     const webClient = await createWebClient({
@@ -6496,7 +6495,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     //     webClient.destroy();
     // });
 
-    // QUnit.test('create a new record in a form view, execute action, and come back', async function (assert) {
+    // LPE DONE QUnit.test('create a new record in a form view, execute action, and come back', async function (assert) {
     //     assert.expect(8);
 
     //     const webClient = await createWebClient({
@@ -6532,7 +6531,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     //     webClient.destroy();
     // });
 
-    // QUnit.test('open a record, come back, and create a new record', async function (assert) {
+    // LPE DONE QUnit.test('open a record, come back, and create a new record', async function (assert) {
     //     assert.expect(7);
 
     //     const webClient = await createWebClient({
@@ -6567,7 +6566,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
 
 
- // QUnit.test('execute smart button and back', async function (assert) {
+ // LPE DONE QUnit.test('execute smart button and back', async function (assert) {
  //        assert.expect(8);
 
  //        const webClient = await createWebClient({
@@ -6604,7 +6603,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
  //        webClient.destroy();
  //    });
 
- //    QUnit.test('execute smart button and fails', async function (assert) {
+ //    LPE DONE QUnit.test('execute smart button and fails', async function (assert) {
  //        assert.expect(11);
 
  //        const webClient = await createWebClient({
