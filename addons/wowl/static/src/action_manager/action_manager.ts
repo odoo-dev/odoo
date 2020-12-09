@@ -430,8 +430,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
       withActionMenus: target !== "new" && target !== "inline",
       withFilters: action.views.some((v) => v[1] === "search"),
     };
-    if (options.recordId || action.res_id) {
-      props.recordId = options.recordId || action.res_id;
+    if (action.res_id) {
+      props.recordId = action.res_id;
+    }
+    if ('recordId' in options) {
+      props.recordId = options.recordId;
     }
     if (options.recordIds) {
       props.recordIds = options.recordIds;

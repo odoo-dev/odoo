@@ -5033,6 +5033,82 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
+  QUnit.test('go back to action with form view as main view, and res_id', async function (assert) {
+    assert.expect(7);
+
+    baseConfig.serverData!.actions![999] = {
+      id: 999,
+      name: 'Partner',
+      res_model: 'partner',
+      type: 'ir.actions.act_window',
+      res_id: 2,
+      views: [[44, 'form']],
+    };
+    baseConfig.serverData!.views!['partner,44,form'] = '<form><field name="m2o"/></form>';
+
+    const mockRPC: RPC = async (route, args) => {
+      if (args!.method === "get_formview_action") {
+        return Promise.resolve({
+          res_id: 3,
+          res_model: 'partner',
+          type: 'ir.actions.act_window',
+          views: [[false, 'form']],
+        });
+      }
+    };
+    const webClient = await createWebClient({baseConfig, mockRPC});
+
+    await doAction(webClient, 999);
+
+    assert.containsOnce(webClient.el!, '.o_form_view');
+    assert.hasClass(webClient.el!.querySelector('.o_form_view')! as HTMLElement, 'o_form_readonly');
+    assert.strictEqual(webClient.el!.querySelector('.o_control_panel .breadcrumb')!.textContent, 'Second record');
+
+    // push another action in the breadcrumb
+    await testUtils.dom.click($(webClient.el!).find('.o_form_uri:contains(Third record)'));
+    await legacyExtraNextTick();
+    assert.strictEqual(webClient.el!.querySelector('.o_control_panel .breadcrumb')!.textContent, 'Second recordThird record');
+
+    // go back to the form view
+    await testUtils.dom.click($(webClient.el!).find('.o_control_panel .breadcrumb a:first'));
+    await legacyExtraNextTick();
+
+    assert.containsOnce(webClient.el!, '.o_form_view');
+    assert.hasClass(webClient.el!.querySelector('.o_form_view')! as HTMLElement, 'o_form_readonly');
+    assert.strictEqual(webClient.el!.querySelector('.o_control_panel .breadcrumb-item')!.textContent, 'Second record');
+
+    webClient.destroy();
+  });
+
+  QUnit.test('open a record, come back, and create a new record', async function (assert) {
+    assert.expect(7);
+
+    const webClient = await createWebClient({baseConfig});
+
+    // execute an action and open a record
+    await doAction(webClient, 3);
+    assert.containsOnce(webClient.el!, '.o_list_view');
+    assert.containsN(webClient.el!, '.o_list_view .o_data_row', 5);
+
+    await testUtils.dom.click($(webClient.el!).find('.o_list_view .o_data_row:first'));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, '.o_form_view');
+    assert.hasClass(webClient.el!.querySelector('.o_form_view') as HTMLElement, 'o_form_readonly');
+
+    // go back using the breadcrumbs
+    await testUtils.dom.click($(webClient.el!).find('.o_control_panel .breadcrumb-item a'));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, '.o_list_view');
+
+    // create a new record
+    await testUtils.dom.click($(webClient.el!).find('.o_list_button_add'));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, '.o_form_view');
+    assert.hasClass(webClient.el!.querySelector('.o_form_view') as HTMLElement, 'o_form_editable');
+
+    webClient.destroy();
+  });
+
   QUnit.module('Actions in target="new"');
 
   QUnit.test('can execute act_window actions in target="new"', async function (assert) {

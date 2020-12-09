@@ -529,7 +529,7 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         modelName: this.props.model,
         currentId: this.props.recordId,
         controllerState: {
-          currentId: this.props.recordId || (this.props.state && this.props.state.currentId),
+          currentId: 'recordId' in this.props ? this.props.recordId : (this.props.state && this.props.state.currentId),
           resIds: this.props.recordIds || (this.props.state && this.props.state.resIds),
           searchModel: this.props.searchModel || (this.props.state && this.props.state.searchModel),
           searchPanel: this.props.searchPanel || (this.props.state && this.props.state.searchPanel),
