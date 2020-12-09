@@ -5,7 +5,7 @@ import { Type } from "../types";
 export default class OdooError extends Error {
   public traceback?: string;
   public name: string;
-  public component?: Type<Component<any, Env>>;
+  public Component?: Type<Component<any, Env>>;
 
   constructor(name: string) {
     super();

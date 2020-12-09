@@ -64,13 +64,6 @@ function makeErrorFromResponse(reponse: any): RPCError {
   const exception_class_name = exception_class || data_name;
 
   const error = new RPCError();
-  // When an error comes from the server, it can have an exeption name. (or any string truly).
-  // It is used as key in the error dialog from server registry to know which dialog component to use.
-  // It's how a backend dev can easily map its error to another component.
-  // Note that for a client side exception, we don't use this registry as we can directly assign a value to `component`.
-  if (exception_class_name && odoo.errorDialogRegistry.contains(exception_class_name)) {
-    error.component = odoo.errorDialogRegistry.get(exception_class_name);
-  }
   error.exceptionName = exception_class_name;
   error.subType = subType;
   error.data = errorData;
