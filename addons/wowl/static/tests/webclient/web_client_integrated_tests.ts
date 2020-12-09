@@ -19,6 +19,7 @@ import {
   makeFakeDownloadService,
   makeFakeNotificationService,
   makeFakeUIService,
+  makeFakeDeviceService,
 } from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";
 
@@ -209,7 +210,8 @@ function beforeEachActionManager(): TestConfig {
     .add("view_manager", viewManagerService)
     .add("model", modelService)
     .add(fakeTitleService.name, fakeTitleService)
-    .add(uiService.name, uiService);
+    .add(uiService.name, uiService)
+    .add("device", makeFakeDeviceService());
 
   const browser = {
     setTimeout: window.setTimeout.bind(window),
@@ -1175,53 +1177,33 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("stores and restores scroll position", async function (assert) {
-    /*
-    assert.expect(7);
+  QUnit.test("stores and restores scroll position", async function (assert) {
+    assert.expect(3);
 
-    var left;
-    var top;
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      intercepts: {
-        getScrollPosition: function (ev) {
-          assert.step("getScrollPosition");
-          ev.data.callback({ left: left, top: top });
-        },
-        scrollTo: function (ev) {
-          assert.step("scrollTo left " + ev.data.left + ", top " + ev.data.top);
-        },
-      },
-    });
+    for (let i = 0; i < 60; i++) {
+      baseConfig.serverData!.models!.partner.records.push({ id: 100 + i, foo: `Record ${i}` });
+    }
 
-    // execute a first action and simulate a scroll
-    assert.step("execute action 3");
+    const webClient = await createWebClient({ baseConfig });
+    webClient.el!.style.height = "250px";
+
+    // execute a first action
     await doAction(webClient, 3);
-    left = 50;
-    top = 100;
+    assert.strictEqual(webClient.el!.querySelector(".o_content")!.scrollTop, 0);
+
+    // simulate a scroll
+    webClient.el!.querySelector(".o_content")!.scrollTop = 100;
 
     // execute a second action (in which we don't scroll)
-    assert.step("execute action 4");
     await doAction(webClient, 4);
+    assert.strictEqual(webClient.el!.querySelector(".o_content")!.scrollTop, 0);
 
     // go back using the breadcrumbs
-    assert.step("go back to action 3");
     await testUtils.dom.click($(webClient.el!).find(".o_control_panel .breadcrumb a"));
     await legacyExtraNextTick();
-
-    assert.verifySteps([
-      "execute action 3",
-      "execute action 4",
-      "getScrollPosition", // of action 3, before leaving it
-      "go back to action 3",
-      "getScrollPosition", // of action 4, before leaving it
-      "scrollTo left 50, top 100", // restore scroll position of action 3
-    ]);
+    assert.strictEqual(webClient.el!.querySelector(".o_content")!.scrollTop, 100);
 
     webClient.destroy();
-    */
   });
 
   QUnit.test(
