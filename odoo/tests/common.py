@@ -54,7 +54,7 @@ except ImportError:
 
 import odoo
 import pprint
-from odoo import api
+from odoo import api, exceptions
 from odoo.service import security
 
 
@@ -310,6 +310,19 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
 
     longMessage = True      # more verbose error message by default: https://www.odoo.com/r/Vmh
     warm = True             # False during warm-up phase (see :func:`warmup`)
+
+    def iap_jsonrpc(*args, **kwargs):
+        raise exceptions.AccessError("Unavailable during tests.")
+
+    iap_patch = patch('odoo.addons.iap.tools.iap_tools.iap_jsonrpc', iap_jsonrpc)
+
+    def setUp(self):
+        super().setUp()
+        try:
+            self.iap_patch.start()
+            self.addCleanup(self.iap_patch.stop)
+        except ModuleNotFoundError:
+            pass
 
     def cursor(self):
         return self.registry.cursor()
