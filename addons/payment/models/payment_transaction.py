@@ -135,7 +135,7 @@ class PaymentTransaction(models.Model):
         for tx in self:
             tx.invoice_ids_nbr = tx_data.get(tx.id, 0)
 
-    #=== CONSTRAINS & ONCHANGE METHODS ===#
+    #=== CONSTRAINT METHODS ===#
 
     @api.constrains('state')
     def _check_state_authorized_supported(self):
@@ -159,11 +159,6 @@ class PaymentTransaction(models.Model):
             if not values.get('reference'):
                 values['reference'] = self._compute_reference(acquirer.provider, **values)
 
-            # Compute fees
-            currency = self.env['res.currency'].browse(values.get('currency_id')).exists()
-            country = self.env['res.country'].browse(values.get('partner_country_id')).exists()
-            values['fees'] = acquirer._compute_fees(values.get('amount', 0), currency, country)
-
             # Duplicate partner values
             partner = self.env['res.partner'].browse(values['partner_id'])
             values.update({
@@ -179,6 +174,12 @@ class PaymentTransaction(models.Model):
                 'partner_country_id': partner.country_id.id,
                 'partner_phone': partner.phone,
             })
+
+            # Compute fees
+            currency = self.env['res.currency'].browse(values.get('currency_id')).exists()
+            values['fees'] = acquirer._compute_fees(
+                values.get('amount', 0), currency, partner.country_id
+            )
 
             # Include acquirer-specific create values
             values.update(self._get_specific_create_values(acquirer.provider, values))

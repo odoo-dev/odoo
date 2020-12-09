@@ -131,6 +131,24 @@ class PaymentAcquirer(models.Model):
 
     #=== COMPUTE METHODS ===#
 
+    @api.depends('state', 'module_state')
+    def _compute_color(self):
+        """ Update the color of the kanban card based on the state of the acquirer.
+
+        :return: None
+        """
+        for acquirer in self:
+            if acquirer.module_id and not acquirer.module_state == 'installed':
+                acquirer.color = 4  # blue
+            elif acquirer.state == 'disabled':
+                acquirer.color = 3  # yellow
+            elif acquirer.state == 'test':
+                acquirer.color = 2  # orange
+            elif acquirer.state == 'enabled':
+                acquirer.color = 7  # green
+
+    #=== ONCHANGE METHODS ===#
+
     @api.onchange('state')
     def _onchange_state(self):
         """ Only enable dashboard display for journals of enabled acquirers.
@@ -154,21 +172,20 @@ class PaymentAcquirer(models.Model):
             elif electronic in acquirer.inbound_payment_method_ids:
                 acquirer.inbound_payment_method_ids = [(2, electronic.id)]
 
-    @api.depends('state', 'module_state')
-    def _compute_color(self):
-        """ Update the color of the kanban card based on the state of the acquirer.
+    #=== CONSTRAINT METHODS ===#
 
-        :return: None
+    @api.constrains('fees_dom_var', 'fees_int_var')
+    def _check_fee_var_within_boundaries(self):
+        """ Check that variable fees are within realistic boundaries.
+
+        Variable fees values should always be positive and below 100% to respectively avoid negative
+        and infinite (division by zero) fees amount.
+
+        :return None
         """
         for acquirer in self:
-            if acquirer.module_id and not acquirer.module_state == 'installed':
-                acquirer.color = 4  # blue
-            elif acquirer.state == 'disabled':
-                acquirer.color = 3  # yellow
-            elif acquirer.state == 'test':
-                acquirer.color = 2  # orange
-            elif acquirer.state == 'enabled':
-                acquirer.color = 7  # green
+            if any(not 0 <= fee < 100 for fee in (acquirer.fees_dom_var, acquirer.fees_int_var)):
+                raise ValidationError(_("Variable fees must always be positive and below 100%."))
 
     #=== CRUD METHODS ===#
 

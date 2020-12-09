@@ -61,14 +61,12 @@
                             </span>
                             <!-- === "Test Mode" badge === -->
                             <span t-if="acquirer.state == 'test'"
-                                  class="badge-pill badge-warning"
-                                  style="margin-left:5px">
+                                  class="badge-pill badge-warning ml-1">
                                 Test Mode
                             </span>
                             <!-- === Extra fees badge === -->
                             <t t-if="fees_by_acquirer.get(acquirer)">
-                                <br/>
-                                <span class="badge-pill badge-secondary">
+                                <span class="badge-pill badge-secondary ml-1">
                                     + <t t-esc="fees_by_acquirer.get(acquirer)"
                                          t-options="{'widget': 'monetary', 'display_currency': currency}"/>
                                     Fees
