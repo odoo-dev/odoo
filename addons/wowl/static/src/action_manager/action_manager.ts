@@ -1025,7 +1025,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     await doAction(action, options);
 
     if (params.close) {
-      _executeCloseAction();
+      await _executeCloseAction();
     }
   }
 

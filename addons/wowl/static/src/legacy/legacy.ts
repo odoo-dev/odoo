@@ -412,6 +412,8 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           throw e;
         }
       } else if (ev.name === "execute_action") {
+        const onSuccess = payload.on_success || (() => {});
+        const onFail = payload.on_fail || (() => {});
         this.am.doActionButton({
           args: payload.action_data.args,
           buttonContext: payload.action_data.context,
@@ -424,7 +426,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           special: payload.action_data.special,
           type: payload.action_data.type,
           onClose: payload.on_closed,
-        });
+        }).then(onSuccess).catch(onFail);
       } else {
         super._trigger_up(ev);
       }

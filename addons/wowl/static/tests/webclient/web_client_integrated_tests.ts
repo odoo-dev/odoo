@@ -4073,6 +4073,81 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
+  QUnit.test('requests for execute_action of type object: disable buttons (2)', async function (assert) {
+    assert.expect(6);
+
+    baseConfig.serverData!.views!['pony,44,form'] = `
+    <form>
+    <field name="name"/>
+    <button string="Cancel" class="cancel-btn" special="cancel"/>
+    </form>`;
+    baseConfig.serverData!.actions![4] = {
+      id: 4,
+      name: 'Create a Partner',
+      res_model: 'pony',
+      target: 'new',
+      type: 'ir.actions.act_window',
+      views: [[44, 'form']],
+    };
+    const def = testUtils.makeTestPromise();
+    const mockRPC: RPC = async (route, args) => {
+      if (args!.method === 'onchange') {
+        // delay the opening of the dialog
+        await def;
+      }
+    };
+    const webClient = await createWebClient({baseConfig, mockRPC});
+    await doAction(webClient, 3);
+    assert.containsOnce(webClient.el!, '.o_list_view');
+
+    // open first record in form view
+    await testUtils.dom.click(webClient.el!.querySelector('.o_list_view .o_data_row'));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, '.o_form_view');
+
+    // click on 'Execute action', to execute action 4 in a dialog
+    await testUtils.dom.click(webClient.el!.querySelector('.o_form_view button[name="4"]'));
+    await legacyExtraNextTick();
+    assert.ok((webClient.el!.querySelector('.o_cp_buttons .o_form_button_edit')! as any).disabled,
+      'control panel buttons should be disabled');
+
+    def.resolve();
+    await nextTick();
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, '.modal .o_form_view');
+    assert.notOk((webClient.el!.querySelector('.o_cp_buttons .o_form_button_edit')! as any).disabled,
+      'control panel buttons should have been re-enabled');
+
+    await testUtils.dom.click(webClient.el!.querySelector('.modal .cancel-btn'));
+    await legacyExtraNextTick();
+    assert.notOk((webClient.el!.querySelector('.o_cp_buttons .o_form_button_edit')!as any).disabled,
+      'control panel buttons should still be enabled');
+
+    webClient.destroy();
+  });
+
+  QUnit.test('requests for execute_action of type object raises error: re-enables buttons', async function (assert) {
+    assert.expect(3);
+
+   const mockRPC: RPC = async (route, args) => {
+      if (route === '/web/dataset/call_button') {
+        return Promise.reject();
+      }
+    };
+    const webClient = await createWebClient({baseConfig, mockRPC});
+
+    await doAction(webClient, 3, {viewType: 'form'});
+    assert.containsOnce(webClient.el!, '.o_form_view');
+
+    // click on 'Execute action', to execute action 4 in a dialog
+    testUtils.dom.click(webClient.el!.querySelector('.o_form_view button[name="object"]'));
+    assert.ok((webClient.el!.querySelector('.o_cp_buttons button')! as any).disabled);
+    await nextTick();
+    await legacyExtraNextTick();
+    assert.notOk((webClient.el!.querySelector('.o_cp_buttons button')! as any).disabled);
+    webClient.destroy();
+  });
+
   QUnit.test("requests for execute_action of type action are handled", async function (assert) {
     assert.expect(12);
 
