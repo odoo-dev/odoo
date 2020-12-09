@@ -3,6 +3,7 @@ import { Registry } from "../core/registry";
 import { crashManagerService } from "../crash_manager/crash_manager_service";
 import { notificationService } from "../notifications/notification_service";
 import { cookieService } from "./cookie";
+import { deviceService } from "./device";
 import { dialogManagerService } from "./dialog_manager";
 import { menusService } from "./menus";
 import { modelService } from "./model";
@@ -22,6 +23,7 @@ const services = [
   actionManagerService,
   crashManagerService,
   cookieService,
+  deviceService,
   dialogManagerService,
   titleService,
   menusService,

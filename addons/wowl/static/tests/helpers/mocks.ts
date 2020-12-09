@@ -8,6 +8,7 @@ import { titleService } from "../../src/services/title";
 import { DowloadFileOptions, Download } from "../../src/services/download";
 import { NotificationService } from "../../src/notifications/notification_service";
 import { UIService } from "../../src/services/ui/ui";
+import { Device, SIZES } from "../../src/services/device";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -265,6 +266,21 @@ export function makeFakeRouterService(params?: FakeRouterParams): Service<Router
         pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
         replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
         redirect: (params && params.redirect) || (() => {}),
+      };
+    },
+  };
+}
+
+export function makeFakeDeviceService(): Service<Device> {
+  return {
+    name: 'device',
+    deploy() {
+      return {
+        isMobile: false,
+        isMobileDevice: false,
+        isTouchDevice: false,
+        size: SIZES.LG,
+        SIZES,
       };
     },
   };
