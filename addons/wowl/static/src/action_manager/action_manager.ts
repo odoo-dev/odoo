@@ -485,7 +485,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     if (action.res_id) {
       props.recordId = action.res_id;
     }
-    if ('recordId' in options) {
+    if ("recordId" in options) {
       props.recordId = options.recordId;
     }
     if (options.recordIds) {

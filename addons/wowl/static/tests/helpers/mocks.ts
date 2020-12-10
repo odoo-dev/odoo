@@ -273,7 +273,7 @@ export function makeFakeRouterService(params?: FakeRouterParams): Service<Router
 
 export function makeFakeDeviceService(): Service<Device> {
   return {
-    name: 'device',
+    name: "device",
     deploy() {
       return {
         isMobile: false,
