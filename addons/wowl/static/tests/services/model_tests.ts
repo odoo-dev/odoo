@@ -166,7 +166,7 @@ QUnit.test("webSearchRead method", async (assert) => {
   const [query, rpc] = makeFakeRPC();
   serviceRegistry.add("rpc", rpc);
   const env = await makeTestEnv({ serviceRegistry });
-  await env.services.model("sale.order").searchRead([["user_id", "=", 2]], ["amount_total"]);
+  await env.services.model("sale.order").webSearchRead([["user_id", "=", 2]], ["amount_total"]);
   assert.strictEqual(query.route, "/web/dataset/call_kw/sale.order/web_search_read");
   assert.deepEqual(query.params, {
     args: [],
@@ -175,7 +175,7 @@ QUnit.test("webSearchRead method", async (assert) => {
       domain: [["user_id", "=", 2]],
       fields: ["amount_total"],
     },
-    method: "search_read",
+    method: "web_search_read",
     model: "sale.order",
   });
 });
