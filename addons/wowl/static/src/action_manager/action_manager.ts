@@ -145,6 +145,7 @@ interface DialogActionManagerUpdateInfo {
   props?: ActionDialogProps;
   onClose?: ActionOptions["onClose"];
   onCloseInfo?: any;
+  closingProms?: CallableFunction[];
 }
 
 export type ActionManagerUpdateInfo = MainActionManagerUpdateInfo | DialogActionManagerUpdateInfo;
@@ -343,6 +344,12 @@ export class ActionContainer extends Component<{}, OdooEnv> {
   _onDialogClosed() {
     this.dialog = {};
     this.render();
+  }
+
+  shouldUpdate(nextProps: any) {
+    // We should not be updated by a render triggered from our parent
+    // LPE FIXME: except in the case of the HomeMenu
+    return false;
   }
 }
 
@@ -980,14 +987,16 @@ function makeActionManager(env: OdooEnv): ActionManager {
     return doAction(nextAction, options);
   }
 
-  function _executeCloseAction(
+  async function _executeCloseAction(
     params: { onClose?: ActionOptions["onClose"]; onCloseInfo?: any } = {}
   ) {
+    const closingProms: CallableFunction[] = [];
     env.bus.trigger("ACTION_MANAGER:UPDATE", {
       type: "CLOSE_DIALOG",
+      closingProms,
       ...params,
     });
-    return dialogCloseProm;
+    await Promise.all([dialogCloseProm].concat(closingProms.map((fn)=>fn())));
   }
 
   // ---------------------------------------------------------------------------
