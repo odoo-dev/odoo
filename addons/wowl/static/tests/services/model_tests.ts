@@ -47,7 +47,13 @@ QUnit.test("add user context to a simple read request", async (assert) => {
   assert.strictEqual(query.route, "/web/dataset/call_kw/my.model/read");
   assert.deepEqual(query.params, {
     args: [[3], ["id", "descr"]],
-    kwargs: { context: { uid: 2 } },
+    kwargs: {
+      context: {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+      },
+    },
     method: "read",
     model: "my.model",
   });
@@ -62,7 +68,14 @@ QUnit.test("context is combined with user context in read request", async (asser
   assert.strictEqual(query.route, "/web/dataset/call_kw/my.model/read");
   assert.deepEqual(query.params, {
     args: [[3], ["id", "descr"]],
-    kwargs: { context: { uid: 2, earth: "isfucked" } },
+    kwargs: {
+      context: {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+        earth: "isfucked",
+      },
+    },
     method: "read",
     model: "my.model",
   });
@@ -76,7 +89,14 @@ QUnit.test("basic method call of model", async (assert) => {
   assert.strictEqual(query.route, "/web/dataset/call_kw/partner/test");
   assert.deepEqual(query.params, {
     args: [],
-    kwargs: { context: { uid: 2, a: 1 } },
+    kwargs: {
+      context: {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+        a: 1,
+      },
+    },
     method: "test",
     model: "partner",
   });
@@ -94,7 +114,13 @@ QUnit.test("create method", async (assert) => {
         color: "red",
       },
     ],
-    kwargs: { context: { uid: 2 } },
+    kwargs: {
+      context: {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+      },
+    },
     method: "create",
     model: "partner",
   });
@@ -108,7 +134,13 @@ QUnit.test("unlink method", async (assert) => {
   assert.strictEqual(query.route, "/web/dataset/call_kw/partner/unlink");
   assert.deepEqual(query.params, {
     args: [[43]],
-    kwargs: { context: { uid: 2 } },
+    kwargs: {
+      context: {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+      },
+    },
     method: "unlink",
     model: "partner",
   });
@@ -122,7 +154,13 @@ QUnit.test("write method", async (assert) => {
   assert.strictEqual(query.route, "/web/dataset/call_kw/partner/write");
   assert.deepEqual(query.params, {
     args: [[43, 14], { active: false }],
-    kwargs: { context: { uid: 2 } },
+    kwargs: {
+      context: {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+      },
+    },
     method: "write",
     model: "partner",
   });
@@ -142,7 +180,11 @@ QUnit.test("readGroup method", async (assert) => {
       domain: [["user_id", "=", 2]],
       fields: ["amount_total:sum"],
       groupby: ["date_order"],
-      context: { uid: 2 },
+      context: {
+        lang: "en",
+        uid: 7,
+        tz: "taht",
+      },
       offset: 1,
     },
     method: "web_read_group",
@@ -159,7 +201,11 @@ QUnit.test("searchRead method", async (assert) => {
   assert.deepEqual(query.params, {
     args: [],
     kwargs: {
-      context: { uid: 2 },
+      context: {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+      },
       domain: [["user_id", "=", 2]],
       fields: ["amount_total"],
     },
@@ -177,7 +223,11 @@ QUnit.test("webSearchRead method", async (assert) => {
   assert.deepEqual(query.params, {
     args: [],
     kwargs: {
-      context: { uid: 2 },
+      context: {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+      },
       domain: [["user_id", "=", 2]],
       fields: ["amount_total"],
     },

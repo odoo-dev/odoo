@@ -3155,7 +3155,8 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         "/web/action/load",
         "/report/check_wkhtmltopdf",
         "notify",
-        "/report/html/some_report?context=%7B%22uid%22%3A2%7D", // context={"uid":2}
+        // context={"lang":'en',"uid":7,"tz":'taht'}
+        "/report/html/some_report?context=%7B%22lang%22%3A%22en%22%2C%22uid%22%3A7%2C%22tz%22%3A%22taht%22%7D",
       ]);
 
       webClient.destroy();
@@ -4954,7 +4955,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     const expectedAction = {
       ...baseConfig.serverData!.actions![3],
       context: {
-        uid: 2,
+        lang: "en",
+        uid: 7,
+        tz: "taht",
       },
     };
     const sessionStorage = baseConfig.browser!.sessionStorage;
@@ -4983,7 +4986,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       const expectedAction = {
         ...baseConfig.serverData!.actions![4],
         context: {
-          uid: 2,
+          lang: "en",
+          uid: 7,
+          tz: "taht",
           active_model: "partner",
           active_id: 1,
           active_ids: [1],

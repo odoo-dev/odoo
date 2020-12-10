@@ -15,22 +15,15 @@ import { Device, SIZES } from "../../src/services/device";
 // // -----------------------------------------------------------------------------
 
 /**
- * Simulate a fake user service.  For convenience, by default, this fake user
- * service will return { uid: 2 } as context, even though it is not a valid
- * context.  If this is significant for a test, then the `fullContext` option
- * should be set to true.
+ * Simulate a fake user service.
  */
-export function makeFakeUserService(
-  values?: Partial<UserService>,
-  fullContext: boolean = false
-): Service<UserService> {
+export function makeFakeUserService(values?: Partial<UserService>): Service<UserService> {
   const { uid, name, username, is_admin, user_companies, partner_id, db } = odoo.session_info;
   const { user_context } = odoo.session_info;
   return {
     name: "user",
     deploy(env: OdooEnv, config: OdooConfig): UserService {
       const { localization } = config;
-      const context = fullContext ? user_context : ({ uid: 2 } as any);
       const result = {
         dateFormat: localization.dateFormat,
         decimalPoint: localization.decimalPoint,
@@ -39,7 +32,7 @@ export function makeFakeUserService(
         multiLang: localization.multiLang,
         thousandsSep: localization.thousandsSep,
         timeFormat: localization.timeFormat,
-        context,
+        context: user_context as any,
         userId: uid,
         name: name,
         userName: username,
