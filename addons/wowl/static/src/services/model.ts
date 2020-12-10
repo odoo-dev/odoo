@@ -34,10 +34,12 @@ interface SearchReadOptions {
   order?: string;
 }
 
-interface SearchReadResult {
+interface WebSearchReadResult {
   length: number;
   records: DBRecord[];
 }
+
+type SearchReadResult = DBRecord[];
 
 export interface Model {
   create(state: Partial<DBRecord>, ctx?: Context): Promise<number>;
@@ -56,6 +58,12 @@ export interface Model {
     options?: SearchReadOptions,
     ctx?: Context
   ): Promise<SearchReadResult>;
+  webSearchRead(
+    domain: DomainListRepr,
+    fields: string[],
+    options?: SearchReadOptions,
+    ctx?: Context
+  ): Promise<WebSearchReadResult>;
 
   // raise an error if id already deleted
   unlink(ids: number[], ctx?: Context): Promise<true>;
@@ -123,23 +131,25 @@ function search(rpc: RPC, env: OdooEnv, model: string): Model["search"] {
   };
 }
 
-function searchRead(rpc: RPC, env: OdooEnv, model: string): Model["searchRead"] {
-  return (domain, fields, options = {}, ctx = {}) => {
-    const kwargs: any = {
-      context: ctx,
-      domain,
-      fields,
+function makeSearchRead(method: string) {
+  return function (rpc: RPC, env: OdooEnv, model: string): any {
+    return (domain: any, fields: any, options: any = {}, ctx: any = {}) => {
+      const kwargs: any = {
+        context: ctx,
+        domain,
+        fields,
+      };
+      if (options.offset) {
+        kwargs.offset = options.offset;
+      }
+      if (options.limit) {
+        kwargs.limit = options.limit;
+      }
+      if (options.order) {
+        kwargs.order = options.order;
+      }
+      return callModel(rpc, env, model)(method, [], kwargs);
     };
-    if (options.offset) {
-      kwargs.offset = options.offset;
-    }
-    if (options.limit) {
-      kwargs.limit = options.limit;
-    }
-    if (options.order) {
-      kwargs.order = options.order;
-    }
-    return callModel(rpc, env, model)("search_read", [], kwargs);
   };
 }
 
@@ -153,14 +163,8 @@ function callModel(rpc: RPC, env: OdooEnv, model: string): Model["call"] {
       model,
       method,
     };
-    // yes or no???
-    if (method === "search_read") {
-      url = `/web/dataset/search_read`;
-      params = Object.assign(params, { context: fullContext }, fullKwargs);
-    } else {
-      params.args = args;
-      params.kwargs = fullKwargs;
-    }
+    params.args = args;
+    params.kwargs = fullKwargs;
     return rpc(url, params);
   };
 }
@@ -184,6 +188,8 @@ export const modelService: Service<ModelBuilder> = {
   deploy(env: OdooEnv) {
     return function (this: Component | null, model: string): Model {
       const rpc = this instanceof Component ? env.services.rpc.bind(this) : env.services.rpc;
+      const searchRead = makeSearchRead("search_read");
+      const webSearchRead = makeSearchRead("web_search_read");
       return {
         get read() {
           return read(rpc, env, model);
@@ -196,6 +202,9 @@ export const modelService: Service<ModelBuilder> = {
         },
         get searchRead() {
           return searchRead(rpc, env, model);
+        },
+        get webSearchRead() {
+          return webSearchRead(rpc, env, model);
         },
         get create() {
           return create(rpc, env, model);
