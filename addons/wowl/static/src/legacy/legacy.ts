@@ -416,19 +416,22 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
       } else if (ev.name === "execute_action") {
         const onSuccess = payload.on_success || (() => {});
         const onFail = payload.on_fail || (() => {});
-        this.am.doActionButton({
-          args: payload.action_data.args,
-          buttonContext: payload.action_data.context,
-          close: payload.action_data.close,
-          context: payload.env.context,
-          model: payload.env.model,
-          name: payload.action_data.name,
-          recordId: payload.env.currentID || null,
-          recordIds: payload.env.resIDs,
-          special: payload.action_data.special,
-          type: payload.action_data.type,
-          onClose: payload.on_closed,
-        }).then(onSuccess).catch(onFail);
+        this.am
+          .doActionButton({
+            args: payload.action_data.args,
+            buttonContext: payload.action_data.context,
+            context: payload.env.context,
+            close: payload.action_data.close,
+            model: payload.env.model,
+            name: payload.action_data.name,
+            recordId: payload.env.currentID || null,
+            recordIds: payload.env.resIDs,
+            special: payload.action_data.special,
+            type: payload.action_data.type,
+            onClose: payload.on_closed,
+          })
+          .then(onSuccess)
+          .catch(onFail);
       } else {
         super._trigger_up(ev);
       }
@@ -540,7 +543,10 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         modelName: this.props.model,
         currentId: this.props.recordId,
         controllerState: {
-          currentId: 'recordId' in this.props ? this.props.recordId : (this.props.state && this.props.state.currentId),
+          currentId:
+            "recordId" in this.props
+              ? this.props.recordId
+              : this.props.state && this.props.state.currentId,
           resIds: this.props.recordIds || (this.props.state && this.props.state.resIds),
           searchModel: this.props.searchModel || (this.props.state && this.props.state.searchModel),
           searchPanel: this.props.searchPanel || (this.props.state && this.props.state.searchPanel),
