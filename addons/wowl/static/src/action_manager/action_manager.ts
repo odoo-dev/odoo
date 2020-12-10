@@ -144,7 +144,7 @@ interface DialogActionManagerUpdateInfo {
   onCloseInfo?: any;
 }
 
-type ActionManagerUpdateInfo = MainActionManagerUpdateInfo | DialogActionManagerUpdateInfo;
+export type ActionManagerUpdateInfo = MainActionManagerUpdateInfo | DialogActionManagerUpdateInfo;
 
 interface UpdateStackOptions {
   clearBreadcrumbs?: boolean;
@@ -176,6 +176,7 @@ interface DoActionButtonParams {
   recordIds: number[];
   special?: boolean;
   type: "object" | "action";
+  onClose?: ActionOptions["onClose"];
 }
 
 export interface ActionManager {
@@ -1000,7 +1001,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
     // attribute on the button, the priority is given to the button attribute
     action.effect = params.effect ? evaluateExpr(params.effect) : action.effect;
 
-    await doAction(action);
+    const options = { onClose: params.onClose };
+    await doAction(action, options);
 
     if (params.close) {
       _executeCloseAction();

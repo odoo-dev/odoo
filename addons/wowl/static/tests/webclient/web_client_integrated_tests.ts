@@ -5046,7 +5046,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   });
 
   QUnit.test("Button with `close` attribute closes dialog", async function (assert) {
-    assert.expect(2);
+    assert.expect(19);
 
     baseConfig.serverData!.views! = {
       "partner,false,form": `
@@ -5083,6 +5083,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     };
 
     const mockRPC: RPC = async (route, args) => {
+      assert.step(route);
       if (route === "/web/dataset/call_button" && args!.method === "some_method") {
         return {
           tag: "display_notification",
@@ -5092,14 +5093,31 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     };
 
     const webClient = await createWebClient({ baseConfig, mockRPC });
+    assert.verifySteps(["/wowl/load_menus"]);
     await doAction(webClient, 4);
+    assert.verifySteps([
+      "/web/action/load",
+      "/web/dataset/call_kw/partner/load_views",
+      "/web/dataset/call_kw/partner/onchange",
+    ]);
+
     await testUtils.dom.click(`button[name="5"]`);
-    // boi lpe fixme: open the action dialog triggers an onchange twice
-    // first onchange from target "new" action
-    // second onchange from main action
+    assert.verifySteps([
+      "/web/dataset/call_kw/partner/create",
+      "/web/dataset/call_kw/partner/read",
+      "/web/action/load",
+      "/web/dataset/call_kw/partner/load_views",
+      "/web/dataset/call_kw/partner/onchange",
+    ]);
     await legacyExtraNextTick();
     assert.strictEqual($(".modal").length, 1, "It should display a modal");
     await testUtils.dom.click(`button[name="some_method"]`);
+    assert.verifySteps([
+      "/web/dataset/call_kw/partner/create",
+      "/web/dataset/call_kw/partner/read",
+      "/web/dataset/call_button",
+      "/web/dataset/call_kw/partner/read",
+    ]);
     await legacyExtraNextTick();
     assert.strictEqual($(".modal").length, 0, "It should have closed the modal");
     webClient.destroy();

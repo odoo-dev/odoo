@@ -10,7 +10,11 @@ import {
   Type,
 } from "../types";
 import { useService } from "../core/hooks";
-import { useSetupAction, ViewNotFoundError } from "../action_manager/action_manager";
+import {
+  ActionManagerUpdateInfo,
+  useSetupAction,
+  ViewNotFoundError,
+} from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
 import { viewRegistry } from "../views/view_registry";
 import { Context } from "../core/context";
@@ -225,11 +229,61 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     do_push_state() {}
   }
 
+  const magicReloadSymbol = Symbol("magicReload");
+  function useMagicLegacyReload<
+    T extends ComponentAdapter = ComponentAdapter
+  >(): { reloadProm: Promise<any> | null } {
+    const comp: T = <T>Component.current;
+    if (comp.props.widget && comp.props.widget[magicReloadSymbol]) {
+      return comp.props.widget[magicReloadSymbol];
+    }
+    let legacyReloadProm: Promise<any> | null = null;
+    const getters = {
+      get reloadProm() {
+        return legacyReloadProm;
+      },
+    };
+
+    let manualReload: boolean;
+    hooks.onMounted(() => {
+      const widget = comp.widget;
+
+      const controllerReload = widget.reload;
+      widget.reload = function (...args: any[]) {
+        manualReload = true;
+        legacyReloadProm = <Promise<any>>controllerReload.call(widget, ...args);
+        return legacyReloadProm.then(() => {
+          if (manualReload) {
+            legacyReloadProm = null;
+            manualReload = false;
+          }
+        });
+      };
+      const controllerUpdate = widget.update;
+      widget.update = function (...args: any[]) {
+        const updateProm = controllerUpdate.call(widget, ...args);
+        const manualUpdate = !manualReload;
+        if (manualUpdate) {
+          legacyReloadProm = updateProm;
+        }
+        return updateProm.then(() => {
+          if (manualUpdate) {
+            legacyReloadProm = null;
+          }
+        });
+      };
+      widget[magicReloadSymbol] = getters;
+    });
+    return getters;
+  }
+
   class ViewAdapter extends ActionAdapter {
     model = useService("model");
     am = useService("action_manager");
     vm = useService("view_manager");
     widget: any;
+    shouldUpdateWidget: boolean = true;
+    magicReload = useMagicLegacyReload();
     constructor(...args: any[]) {
       super(...args);
       const envWowl = <OdooEnv>this.env;
@@ -243,6 +297,24 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
         useDebugManager((accessRights: DebuggingAccessRights) =>
           setupDebugViewForm(envWowl, this, this.props.viewParams.action)
         );
+      }
+      if (!(envWowl as any).inDialog) {
+        hooks.onMounted(() => {
+          envWowl.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionManagerUpdateInfo) => {
+            switch (info.type) {
+              case "OPEN_DIALOG": {
+                // we are a main action, and a dialog is going to open:
+                // we should not reload
+                this.shouldUpdateWidget = false;
+                break;
+              }
+              case "CLOSE_DIALOG": {
+                this.shouldUpdateWidget = false;
+                break;
+              }
+            }
+          });
+        });
       }
       this.env = <OdooEnv>Component.env;
     }
@@ -267,6 +339,11 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
      * @override
      */
     async updateWidget(nextProps: ViewProps) {
+      const shouldUpdateWidget = this.shouldUpdateWidget;
+      this.shouldUpdateWidget = true;
+      if (!shouldUpdateWidget) {
+        return;
+      }
       await this.widget.willRestore();
       const options = Object.assign({}, this.props.viewParams, {
         shouldUpdateSearchComponents: true,
@@ -320,6 +397,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           recordIds: payload.env.resIDs,
           special: payload.action_data.special,
           type: payload.action_data.type,
+          onClose: payload.on_closed,
         });
       } else {
         super._trigger_up(ev);
