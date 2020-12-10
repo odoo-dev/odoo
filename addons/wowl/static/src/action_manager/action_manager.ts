@@ -899,8 +899,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
     } finally {
       env.services.ui.unblock();
     }
+    const onClose = options.onClose;
     if (action.close_on_report_download) {
-      return doAction({ type: "ir.actions.act_window_close" });
+      return doAction({ type: "ir.actions.act_window_close" }, { onClose });
+    } else if (onClose) {
+      onClose();
     }
   }
 

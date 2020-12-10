@@ -344,6 +344,13 @@ function makeServerData(): ServerData {
       close_on_report_download: true,
     },
     {
+      id: 12,
+      name: "Some HTML Report",
+      report_name: "some_report",
+      report_type: "qweb-html",
+      type: "ir.actions.report",
+    },
+    {
       id: 24,
       name: "Partner",
       res_id: 2,
@@ -2961,7 +2968,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       assert.step("close handler");
     }
     await doAction(webClient, 5, { onClose });
-    // on_close: assert.step.bind(assert, "close handler"),
     assert.containsOnce(
       document.body,
       ".o_technical_modal .o_form_view",
@@ -2988,7 +2994,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.module("Report actions");
 
   QUnit.test("can execute report actions from db ID", async function (assert) {
-    assert.expect(5); // TODO on close param
+    assert.expect(6);
 
     baseConfig.serviceRegistry!.add(
       "download",
@@ -3004,22 +3010,24 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return Promise.resolve("ok");
       }
     };
-
     const webClient = await createWebClient({ baseConfig, mockRPC });
-    await doAction(webClient, 7); // TODO on close param
-    await testUtils.nextTick();
+
+    await doAction(webClient, 7, { onClose: () => assert.step('on_close') });
+
     assert.verifySteps([
       "/wowl/load_menus",
       "/web/action/load",
       "/report/check_wkhtmltopdf",
       "/report/download",
-      // TODO on close
+      "on_close",
     ]);
+
     webClient.destroy();
   });
 
   QUnit.test("report actions can close modals and reload views", async function (assert) {
-    assert.expect(6); // TODO on close param
+    assert.expect(8);
+
     baseConfig.serviceRegistry!.add(
       "download",
       makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
@@ -3027,36 +3035,34 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return Promise.resolve();
       })
     );
-    const mockRPC: RPC = async (route, args) => {
+    const mockRPC: RPC = async (route) => {
       if (route === "/report/check_wkhtmltopdf") {
         return Promise.resolve("ok");
       }
     };
     const webClient = await createWebClient({ baseConfig, mockRPC });
-    await doAction(webClient, 5); // TODO on close
-    assert.strictEqual(
-      $(".o_technical_modal .o_form_view").length,
-      1,
+
+    await doAction(webClient, 5, { onClose: () => assert.step('on_close') });
+    assert.containsOnce(document.body, ".o_technical_modal .o_form_view",
       "should have rendered a form view in a modal"
     );
-    await doAction(webClient, 7); // TODO on close
-    assert.strictEqual(
-      $(".o_technical_modal .o_form_view").length,
-      1,
+
+    await doAction(webClient, 7, { onClose: () => assert.step('on_printed') });
+    assert.containsOnce(document.body, ".o_technical_modal .o_form_view",
       "The modal should still exist"
     );
-    await doAction(webClient, 11); // TODO on close
-    assert.strictEqual(
-      $(".o_technical_modal .o_form_view").length,
-      0,
+
+    await doAction(webClient, 11);
+    assert.containsNone(document.body, ".o_technical_modal .o_form_view",
       "the modal should have been closed after the action report"
     );
     assert.verifySteps([
       "/report/download",
+      "on_printed",
       "/report/download",
-      // TODO on close
+      "on_close",
     ]);
-    // old test with on close expected : assert.verifySteps(["/report/download", "on_printed", "/report/download", "on_close"]);
+
     webClient.destroy();
   });
 
@@ -3078,6 +3084,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         return Promise.resolve();
       })
     );
+
     const mockRPC: RPC = async (route, args) => {
       assert.step(args?.method || route);
       if (route === "/report/check_wkhtmltopdf") {
@@ -3085,6 +3092,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       }
     };
     const webClient = await createWebClient({ baseConfig, mockRPC });
+
     await doAction(webClient, 7);
     assert.verifySteps([
       "/wowl/load_menus",
@@ -3093,6 +3101,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "notify",
       "/report/download",
     ]);
+
     webClient.destroy();
   });
 
@@ -3116,6 +3125,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         ),
         true
       );
+
       const mockRPC: RPC = async (route, args) => {
         assert.step(args!.method || route);
         if (route === "/report/check_wkhtmltopdf") {
@@ -3164,9 +3174,38 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip("send context in case of html report", async function (assert) {
-    /*
-    assert.expect(4);
+  QUnit.test("send context in case of html report", async function (assert) {
+    assert.expect(5);
+
+    baseConfig.serviceRegistry!.add(
+      "download",
+      makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
+        assert.step("download"); // should not be called
+        return Promise.resolve();
+      })
+    );
+    baseConfig.serviceRegistry!.add(
+      notificationService.name,
+      makeFakeNotificationService(
+        (message: string, options: any) => {
+          assert.step(options.type || "notification");
+        },
+        () => {}
+      ),
+      true
+    );
+    baseConfig.serviceRegistry!.add(
+      "user",
+      makeFakeUserService({ context: { some_key: 2 } } as any),
+      true
+    );
+
+    const mockRPC: RPC = async (route, args) => {
+      assert.step(args!.method || route);
+      if (route.includes("/report/html/some_report")) {
+        return Promise.resolve(true);
+      }
+    };
 
     // patch the report client action to override its iframe's url so that
     // it doesn't trigger an RPC when it is appended to the DOM (for this
@@ -3174,56 +3213,27 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     // triggered as soon as the iframe is in the DOM, even if its src
     // attribute is removed right after)
     testUtils.mock.patch(ReportClientAction, {
-      start: function () {
-        var self = this;
-        return this._super.apply(this, arguments).then(function () {
-          self._rpc({ route: self.iframe.getAttribute("src") });
-          self.iframe.setAttribute("src", "about:blank");
-        });
+      async start() {
+        await this._super(...arguments);
+        this._rpc({ route: this.iframe.getAttribute("src") });
+        this.iframe.setAttribute("src", "about:blank");
       },
     });
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        report: ReportService,
-        notification: NotificationService.extend({
-          notify: function (params) {
-            assert.step(params.type || "notification");
-          },
-        }),
-      },
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        if (route.includes("/report/html/some_report")) {
-          return Promise.resolve();
-        }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        user_context: {
-          some_key: 2,
-        },
-      },
-    });
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 12);
 
-    assert.containsOnce(
-      actionManager,
-      ".o_report_iframe",
-      "should have opened the report client action"
-    );
+    assert.containsOnce(webClient, ".o_report_iframe", "should have opened the client action");
 
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load",
+      // context={"some_key":2}
       "/report/html/some_report?context=%7B%22some_key%22%3A2%7D", // report client action's iframe
     ]);
 
     webClient.destroy();
     testUtils.mock.unpatch(ReportClientAction);
-    */
   });
 
   QUnit.test(
@@ -3269,14 +3279,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       const webClient = await createWebClient({ baseConfig, mockRPC });
 
       await doAction(webClient, 7);
-      await testUtils.nextTick();
 
       try {
         await doAction(webClient, 7);
       } catch (e) {
         assert.step("error caught");
       }
-      await testUtils.nextTick();
 
       assert.verifySteps([
         "block",
