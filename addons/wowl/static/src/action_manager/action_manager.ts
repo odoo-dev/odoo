@@ -1,6 +1,9 @@
 import { Component, hooks, tags } from "@odoo/owl";
 import type {
   ActionContext,
+  ActionProps,
+  ClientActionProps,
+  ControllerProps,
   OdooEnv,
   Service,
   ComponentAction,
@@ -10,7 +13,6 @@ import type {
   ViewId,
   ViewProps,
   ViewType,
-  ControllerProps,
 } from "../types";
 import { DomainListRepr as Domain } from "../core/domain";
 
@@ -446,6 +448,26 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
+   * @param {ClientAction | ActWindowAction} action
+   * @returns {ActionProps}
+   */
+  function _getActionProps(action: ClientAction | ActWindowAction): ActionProps {
+    return {
+      action, // FIXME remove it? the id is enough if we can provide a way to get the action from its id
+      actionId: action.id,
+    };
+  }
+
+  /**
+   * @param {ClientAction} action
+   * @param {ActionOptions} options
+   * @returns {ActionProps}
+   */
+  function _getClientActionProps(action: ClientAction, options: ActionOptions): ClientActionProps {
+    return Object.assign({}, _getActionProps(action), { options });
+  }
+
+  /**
    * @param {BaseView} view
    * @param {ActWindowAction} action
    * @param {BaseView[]} views
@@ -470,9 +492,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         };
       });
 
-    const props: ViewProps = {
-      actionId: action.id,
-      action: action, // FIXME: needed for legacy views, find another way to give it to them
+    const props: ViewProps = Object.assign({}, _getActionProps(action), {
       context: action.context,
       domain: action.domain || [],
       model: action.res_model,
@@ -481,7 +501,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       viewSwitcherEntries,
       withActionMenus: target !== "new" && target !== "inline",
       withFilters: action.views.some((v) => v[1] === "search"),
-    };
+    });
     if (action.res_id) {
       props.recordId = action.res_id;
     }
@@ -785,10 +805,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         jsId: `controller_${++id}`,
         Component: clientAction as ComponentAction,
         action,
-        props: {
-          action, // FIXME
-          params: action.params,
-        },
+        props: _getClientActionProps(action, options),
       };
       return _updateUI(controller, {
         clearBreadcrumbs: options.clearBreadcrumbs,
@@ -844,8 +861,14 @@ function makeActionManager(env: OdooEnv): ActionManager {
       const options = encodeURIComponent(JSON.stringify(action.data));
       const context = encodeURIComponent(JSON.stringify(actionContext));
       url += `?options=${options}&context=${context}`;
-    } else if (actionContext.active_ids) {
-      url += `/${actionContext.active_ids.join(",")}`;
+    } else {
+      if (actionContext.active_ids) {
+        url += `/${actionContext.active_ids.join(",")}`;
+      }
+      if (type === "html") {
+        const context = encodeURIComponent(JSON.stringify(env.services.user.context));
+        url += `?context=${context}`;
+      }
     }
     return url;
   }

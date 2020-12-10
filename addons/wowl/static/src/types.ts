@@ -173,6 +173,7 @@ export type ViewType =
 
 export interface ActionProps {
   action?: any;
+  actionId?: number;
   breadcrumbs?: Breadcrumb[];
   state?: any;
 }
@@ -185,7 +186,6 @@ interface ViewSwitcherEntry {
 export type ViewSwitcherEntries = ViewSwitcherEntry[];
 
 export interface ViewProps extends ActionProps {
-  actionId?: number;
   context: Context;
   domain?: Domain;
   isLegacy?: true;
@@ -204,7 +204,7 @@ export interface ViewProps extends ActionProps {
 }
 
 export interface ClientActionProps extends ActionProps {
-  params?: any;
+  options?: { [key: string]: any };
 }
 
 export type ControllerProps = ActionProps | ViewProps | ClientActionProps;
