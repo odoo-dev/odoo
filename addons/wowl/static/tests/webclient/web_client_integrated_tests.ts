@@ -481,7 +481,7 @@ QUnit.module("web client integrated tests", (hooks) => {
     class ClientAction extends Component<{}, OdooEnv> {
       static template = tags.xml`
         <div class="test_client_action">
-          ClientAction_<t t-esc="props.params?.description" />
+          ClientAction_<t t-esc="props.action.params?.description" />
         </div>`;
     }
     actionsRegistry.add("clientAction", ClientAction);
@@ -3096,7 +3096,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip(
+  QUnit.test(
     "should open the report client action if wkhtmltopdf is broken",
     async function (assert) {
       baseConfig.serviceRegistry!.add(
@@ -3122,7 +3122,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
           return Promise.resolve("broken");
         }
         if (route.includes("/report/html/some_report")) {
-          return Promise.resolve();
+          return Promise.resolve(true);
         }
       };
 
@@ -3132,12 +3132,10 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       // triggered as soon as the iframe is in the DOM, even if its src
       // attribute is removed right after)
       testUtils.mock.patch(ReportClientAction, {
-        start: function () {
-          var self = this;
-          return this._super.apply(this, arguments).then(function () {
-            self._rpc({ route: self.iframe.getAttribute("src") });
-            self.iframe.setAttribute("src", "about:blank");
-          });
+        async start() {
+          await this._super(...arguments);
+          this._rpc({ route: this.iframe.getAttribute("src") });
+          this.iframe.setAttribute("src", "about:blank");
         },
       });
 
@@ -3150,7 +3148,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         ".o_report_iframe",
         "should have opened the report client action"
       );
-
       assert.containsOnce(webClient, ".o_cp_buttons .o_report_buttons .o_report_print");
 
       assert.verifySteps([
@@ -3158,7 +3155,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         "/web/action/load",
         "/report/check_wkhtmltopdf",
         "notify",
-        "/report/html/some_report?context=%7B%7D",
+        "/report/html/some_report?context=%7B%22uid%22%3A2%7D", // context={"uid":2}
       ]);
 
       webClient.destroy();

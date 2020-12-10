@@ -475,7 +475,9 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
         Widget = action;
         widgetArgs = [
           this.props.action,
-          { breadcrumbs: breadcrumbsToLegacy(this.props.breadcrumbs) },
+          Object.assign({}, this.props.options, {
+            breadcrumbs: breadcrumbsToLegacy(this.props.breadcrumbs),
+          }),
         ];
         widget = this.props.state && this.props.state.__legacy_widget__;
         onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
