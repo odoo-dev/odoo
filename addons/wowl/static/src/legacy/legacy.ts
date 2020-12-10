@@ -253,20 +253,14 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     do_push_state() {}
   }
 
-  const magicReloadSymbol = Symbol("magicReload");
-  function useMagicLegacyReload<
-    T extends ComponentAdapter = ComponentAdapter
-  >(): { reloadProm: Promise<any> | null } {
+  const magicReloadSymbol = Symbol('magicReload');
+  function useMagicLegacyReload<T extends ComponentAdapter = ComponentAdapter>(): () => (Promise<any> | null) {
     const comp: T = <T>Component.current;
     if (comp.props.widget && comp.props.widget[magicReloadSymbol]) {
       return comp.props.widget[magicReloadSymbol];
     }
     let legacyReloadProm: Promise<any> | null = null;
-    const getters = {
-      get reloadProm() {
-        return legacyReloadProm;
-      },
-    };
+    const getReloadProm = () => legacyReloadProm;
 
     let manualReload: boolean;
     hooks.onMounted(() => {
@@ -296,9 +290,9 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           }
         });
       };
-      widget[magicReloadSymbol] = getters;
+      widget[magicReloadSymbol] = getReloadProm;
     });
-    return getters;
+    return getReloadProm;
   }
 
   class ViewAdapter extends ActionAdapter {
@@ -334,6 +328,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
               }
               case "CLOSE_DIALOG": {
                 this.shouldUpdateWidget = false;
+                info.closingProms!.push(() => this.magicReload());
                 break;
               }
             }
@@ -370,13 +365,16 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
       const shouldUpdateWidget = this.shouldUpdateWidget;
       this.shouldUpdateWidget = true;
       if (!shouldUpdateWidget) {
-        return;
+        return this.magicReload();
       }
       await this.widget.willRestore();
       const options = Object.assign({}, this.props.viewParams, {
         shouldUpdateSearchComponents: true,
       });
-      return this.widget.reload(options);
+      if (!this.magicReload()) {
+        this.widget.reload(options);
+      }
+      return this.magicReload();
     }
 
     /**
