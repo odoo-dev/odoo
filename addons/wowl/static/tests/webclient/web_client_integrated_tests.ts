@@ -3012,7 +3012,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     };
     const webClient = await createWebClient({ baseConfig, mockRPC });
 
-    await doAction(webClient, 7, { onClose: () => assert.step('on_close') });
+    await doAction(webClient, 7, { onClose: () => assert.step("on_close") });
 
     assert.verifySteps([
       "/wowl/load_menus",
@@ -3042,26 +3042,27 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     };
     const webClient = await createWebClient({ baseConfig, mockRPC });
 
-    await doAction(webClient, 5, { onClose: () => assert.step('on_close') });
-    assert.containsOnce(document.body, ".o_technical_modal .o_form_view",
+    await doAction(webClient, 5, { onClose: () => assert.step("on_close") });
+    assert.containsOnce(
+      document.body,
+      ".o_technical_modal .o_form_view",
       "should have rendered a form view in a modal"
     );
 
-    await doAction(webClient, 7, { onClose: () => assert.step('on_printed') });
-    assert.containsOnce(document.body, ".o_technical_modal .o_form_view",
+    await doAction(webClient, 7, { onClose: () => assert.step("on_printed") });
+    assert.containsOnce(
+      document.body,
+      ".o_technical_modal .o_form_view",
       "The modal should still exist"
     );
 
     await doAction(webClient, 11);
-    assert.containsNone(document.body, ".o_technical_modal .o_form_view",
+    assert.containsNone(
+      document.body,
+      ".o_technical_modal .o_form_view",
       "the modal should have been closed after the action report"
     );
-    assert.verifySteps([
-      "/report/download",
-      "on_printed",
-      "/report/download",
-      "on_close",
-    ]);
+    assert.verifySteps(["/report/download", "on_printed", "/report/download", "on_close"]);
 
     webClient.destroy();
   });
@@ -5948,284 +5949,256 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
   QUnit.module("LPE's new tests");
 
-  QUnit.skip("switching when doing an action -- load_views slow", async function (assert) {
-    /*
-        assert.expect(11);
+  QUnit.test("switching when doing an action -- load_views slow", async function (assert) {
+    assert.expect(13);
 
-        let def;
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            mockRPC: function (route, args) {
-                var result = this._super.apply(this, arguments);
-                assert.step(args.method || route);
-                if (args.method === 'load_views') {
-                    return Promise.resolve(def).then(() => result);
-                }
-                return result;
-            },
-        });
-        await doAction(3);
+    let def: any;
+    const mockRPC: RPC = async (route, args) => {
+      assert.step((args && args.method) || route);
+      if (args && args.method === "load_views") {
+        return Promise.resolve(def);
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
-        assert.containsOnce(webClient, '.o_list_view',
-            "should display the list view of action 3");
+    await doAction(webClient, 3);
+    assert.containsOnce(webClient, ".o_list_view");
 
-        def = testUtils.makeTestPromise();
-        doAction(4, {clear_breadcrumbs: true});
-        await testUtils.nextTick();
-        await testUtils.controlPanel.switchView(webClient, 'kanban');
-        def.resolve();
-        await testUtils.owlCompatibilityExtraNextTick();
+    def = testUtils.makeTestPromise();
+    doAction(webClient, 4, { clearBreadcrumbs: true });
+    await nextTick();
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient, ".o_list_view", "should still contain the list view");
 
-        assert.containsOnce(webClient, '.o_kanban_view');
-        assert.strictEqual(
-            webClient.el.querySelector('.o_control_panel .breadcrumb-item').textContent,
-            'Partners',
-        );
-        assert.containsNone(webClient, '.o_list_view');
+    await cpHelpers.switchView(webClient, "kanban");
+    def.resolve();
+    await testUtils.nextTick();
+    await legacyExtraNextTick();
 
-        assert.verifySteps([
-            '/web/action/load', // action 3
-            'load_views', // action 3
-            '/web/dataset/search_read', // action 3 list fetch
-            '/web/action/load', // action 4
-            'load_views', // action 4 Hanging
-            '/web/dataset/search_read', // action 3 kanban fetch
-        ]);
-        webClient.destroy();
-        */
+    assert.containsOnce(webClient, ".o_kanban_view");
+    assert.strictEqual(
+      webClient.el!.querySelector(".o_control_panel .breadcrumb-item")!.textContent,
+      "Partners"
+    );
+    assert.containsNone(webClient, ".o_list_view");
+
+    assert.verifySteps([
+      "/wowl/load_menus",
+      "/web/action/load", // action 3
+      "load_views", // action 3
+      "/web/dataset/search_read", // action 3 list fetch
+      "/web/action/load", // action 4
+      "load_views", // action 4 Hanging
+      "/web/dataset/search_read", // action 3 kanban fetch
+    ]);
+
+    webClient.destroy();
   });
 
-  QUnit.skip("switching when doing an action -- search_read slow", async function (assert) {
-    /*
-        assert.expect(12);
+  QUnit.test("switching when doing an action -- search_read slow", async function (assert) {
+    assert.expect(13);
 
-        const def = testUtils.makeTestPromise();
-        const defs = [null, def, null];
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            mockRPC: function (route, args) {
-                var result = this._super.apply(this, arguments);
-                assert.step(args.method || route);
-                if (route === "/web/dataset/search_read") {
-                    return Promise.resolve(defs.shift()).then(() => result);
-                }
-                return result;
-            },
-        });
-        await doAction(3);
+    const def = testUtils.makeTestPromise();
+    const defs = [null, def, null];
+    const mockRPC: RPC = async (route, args) => {
+      assert.step((args && args.method) || route);
+      if (route === "/web/dataset/search_read") {
+        await Promise.resolve(defs.shift());
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
-        assert.containsOnce(webClient, '.o_list_view',
-            "should display the list view of action 3");
+    await doAction(webClient, 3);
+    assert.containsOnce(webClient, ".o_list_view");
 
-        doAction(4, {clear_breadcrumbs: true});
-        await testUtils.nextTick();
-        await testUtils.controlPanel.switchView(webClient, 'kanban');
-        //def.resolve();
-        await testUtils.owlCompatibilityExtraNextTick();
+    doAction(webClient, 4, { clearBreadcrumbs: true });
+    await testUtils.nextTick();
+    await legacyExtraNextTick();
 
-        assert.containsOnce(webClient, '.o_kanban_view');
-        assert.strictEqual(
-            webClient.el.querySelector('.o_control_panel .breadcrumb-item').textContent,
-            'Partners',
-        );
-        assert.containsNone(webClient, '.o_list_view');
+    await cpHelpers.switchView(webClient, "kanban");
+    def.resolve();
+    await testUtils.nextTick();
+    await legacyExtraNextTick();
 
-        assert.verifySteps([
-            '/web/action/load', // action 3
-            'load_views', // action 3
-            '/web/dataset/search_read', // action 3 list fetch
-            '/web/action/load', // action 4
-            'load_views', // action 4
-            '/web/dataset/search_read', // action 4 kanban fetch Hanging
-            '/web/dataset/search_read', // action 3 kanban fetch
-        ]);
-        webClient.destroy();
-        */
+    assert.containsOnce(webClient, ".o_kanban_view");
+    assert.strictEqual(
+      webClient.el!.querySelector(".o_control_panel .breadcrumb-item")!.textContent,
+      "Partners"
+    );
+    assert.containsNone(webClient, ".o_list_view");
+
+    assert.verifySteps([
+      "/wowl/load_menus",
+      "/web/action/load", // action 3
+      "load_views", // action 3
+      "/web/dataset/search_read", // action 3 list fetch
+      "/web/action/load", // action 4
+      "load_views", // action 4
+      "/web/dataset/search_read", // action 4 kanban fetch Hanging
+      "/web/dataset/search_read", // action 3 kanban fetch
+    ]);
+
+    webClient.destroy();
   });
 
-  QUnit.skip("load state supports being given menu_id alone", async function (assert) {
-    /*
-        assert.expect(6);
+  QUnit.test("load state supports being given menu_id alone", async function (assert) {
+    assert.expect(7);
 
-        const menus = {
-            all_menu_ids: [666],
-            children: [{
-                id: 666,
-                action: 'ir.actions.act_window,1',
-                children: [],
-            }]
-        };
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: menus,
-            mockRPC(route, args) {
-                assert.step(route);
-                return this._super.apply(this, arguments);
-            },
-            webClient: {
-                _getWindowHash() {
-                    return '#menu_id=666';
-                }
-            }
-        });
-        assert.containsOnce(webClient, '.o_kanban_view',
-            "should display a kanban view");
-        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 1',
-            "breadcrumbs should display the display_name of the action");
+    baseConfig.serverData!.menus![666] = {
+      id: 666,
+      children: [],
+      name: "App1",
+      appID: 1,
+      actionID: 1,
+    };
 
-        assert.verifySteps([
-            '/web/action/load',
-            '/web/dataset/call_kw/partner',
-            '/web/dataset/search_read',
-        ]);
+    const mockRPC: RPC = async function (route, args) {
+      assert.step(route);
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
 
-        webClient.destroy();
-        */
+    await loadState(webClient, {
+      menu_id: "666",
+    });
+
+    assert.containsOnce(webClient, ".o_kanban_view", "should display a kanban view");
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
+      "Partners Action 1",
+      "breadcrumbs should display the display_name of the action"
+    );
+
+    assert.verifySteps([
+      "/wowl/load_menus",
+      "/web/action/load",
+      "/web/dataset/call_kw/partner/load_views",
+      "/web/dataset/search_read",
+    ]);
+
+    webClient.destroy();
   });
 
-  QUnit.skip("load state supports #home", async function (assert) {
-    /*
-        assert.expect(12);
+  QUnit.test("load state supports #home", async function (assert) {
+    assert.expect(6);
 
-        const menus = {
-            all_menu_ids: [666],
-            children: [{
-                id: 666,
-                action: 'ir.actions.act_window,1',
-                children: [],
-            }]
-        };
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: menus,
-            mockRPC(route, args) {
-                assert.step(route);
-                return this._super.apply(this, arguments);
-            },
-            webClient: {
-                _getWindowHash() {
-                    return '#action=3';
-                }
-            }
-        });
-        assert.containsOnce(webClient, '.o_list_view',
-            "should display a list view");
-        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners',
-            "breadcrumbs should display the display_name of the action");
+    baseConfig.serverData!.menus! = {
+      root: { id: "root", children: [1], name: "root", appID: "root" },
+      1: { id: 1, children: [], name: "App1", appID: 1, actionID: 1 },
+    };
 
-        assert.verifySteps([
-            '/web/action/load',
-            '/web/dataset/call_kw/partner',
-            '/web/dataset/search_read',
-        ]);
+    const webClient = await createWebClient({ baseConfig });
+    await testUtils.nextTick(); // wait for the load state (default app)
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient, ".o_kanban_view"); // action 1 (default app)
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
+      "Partners Action 1"
+    );
 
-        await testUtils.actionManager.loadState(webClient, {
-            home: true,
-        });
-        assert.containsOnce(webClient, '.o_kanban_view',
-            "should display a kanban view");
-        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 1',
-            "breadcrumbs should display the display_name of the action");
-        assert.verifySteps([
-            '/web/action/load',
-            '/web/dataset/call_kw/partner',
-            '/web/dataset/search_read',
-        ]);
-        webClient.destroy();
-        */
+    await loadState(webClient, {
+      action: "3",
+    });
+    assert.containsOnce(webClient, ".o_list_view"); // action 3
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
+      "Partners"
+    );
+
+    await loadState(webClient, {
+      home: "1",
+    });
+    assert.containsOnce(webClient, ".o_kanban_view"); // action 1 (default app)
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
+      "Partners Action 1"
+    );
+
+    webClient.destroy();
   });
 
-  QUnit.skip("load state supports #home as initial state", async function (assert) {
-    /*
-        assert.expect(6);
+  QUnit.test("load state supports #home as initial state", async function (assert) {
+    assert.expect(7);
 
-        const menus = {
-            all_menu_ids: [666],
-            children: [{
-                id: 666,
-                action: 'ir.actions.act_window,1',
-                children: [],
-            }]
-        };
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: menus,
-            mockRPC(route, args) {
-                assert.step(route);
-                return this._super.apply(this, arguments);
-            },
-            webClient: {
-                _getWindowHash() {
-                    return '#home';
-                }
-            }
-        });
-        assert.containsOnce(webClient, '.o_kanban_view',
-            "should display a kanban view");
-        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 1',
-            "breadcrumbs should display the display_name of the action");
-        assert.verifySteps([
-            '/web/action/load',
-            '/web/dataset/call_kw/partner',
-            '/web/dataset/search_read',
-        ]);
-        webClient.destroy();
-        */
+    baseConfig.serverData!.menus! = {
+      root: { id: "root", children: [1], name: "root", appID: "root" },
+      1: { id: 1, children: [], name: "App1", appID: 1, actionID: 1 },
+    };
+
+    baseConfig.serviceRegistry!.add(
+      "router",
+      makeFakeRouterService({
+        initialRoute: {
+          hash: { home: "1" },
+        },
+      }),
+      true
+    );
+
+    const mockRPC: RPC = async function (route, args) {
+      assert.step(route);
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    await testUtils.nextTick(); // wait for the load state (default app)
+    await legacyExtraNextTick();
+
+    assert.containsOnce(webClient, ".o_kanban_view", "should display a kanban view");
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item").text(),
+      "Partners Action 1"
+    );
+    assert.verifySteps([
+      "/wowl/load_menus",
+      "/web/action/load",
+      "/web/dataset/call_kw/partner/load_views",
+      "/web/dataset/search_read",
+    ]);
+
+    webClient.destroy();
   });
 
-  QUnit.skip("load state different id null", async function (assert) {
-    /*
-        assert.expect(12);
+  QUnit.test("load state: in a form view, remove the id from the state", async function (assert) {
+    assert.expect(13);
 
-        this.actions.push({
-            id: 999,
-            name: 'Partner',
-            res_id: 2,
-            res_model: 'partner',
-            type: 'ir.actions.act_window',
-            views: [[false, 'list'],[666, 'form']],
-        });
+    baseConfig.serverData!.actions![999] = {
+      id: 999,
+      name: "Partner",
+      res_model: "partner",
+      type: "ir.actions.act_window",
+      views: [
+        [false, "list"],
+        [666, "form"],
+      ],
+    };
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            mockRPC(route, args) {
-                assert.step(route);
-                return this._super.apply(this, arguments);
-            },
-        });
-        await doAction(999, {viewType: 'form'})
-        assert.containsOnce(webClient, '.o_form_view');
-        assert.containsN(webClient, '.breadcrumb-item', 2);
-        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item.active').text(), 'Second record');
-        assert.verifySteps([
-            '/web/action/load',
-            '/web/dataset/call_kw/partner',
-            '/web/dataset/call_kw/partner/read',
-        ]);
-        await loadState(webClient, {action:999, view_type: 'form'});
-        assert.verifySteps([
-             '/web/dataset/call_kw/partner/onchange',
-        ]);
-        assert.containsOnce(webClient, '.o_form_view.o_form_editable');
-        assert.containsN(webClient, '.breadcrumb-item', 2);
-        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item.active').text(), 'New');
-        webClient.destroy();
-        */
+    const mockRPC: RPC = async (route, args) => {
+      assert.step(route);
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+
+    await doAction(webClient, 999, { viewType: "form", resId: 2 });
+    assert.containsOnce(webClient, ".o_form_view");
+    assert.containsN(webClient, ".breadcrumb-item", 2);
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item.active").text(),
+      "Second record"
+    );
+    assert.verifySteps([
+      "/wowl/load_menus",
+      "/web/action/load",
+      "/web/dataset/call_kw/partner/load_views",
+      "/web/dataset/call_kw/partner/read",
+    ]);
+
+    await loadState(webClient, { action: "999", view_type: "form", id: undefined });
+    assert.verifySteps(["/web/dataset/call_kw/partner/onchange"]);
+    assert.containsOnce(webClient, ".o_form_view.o_form_editable");
+    assert.containsN(webClient, ".breadcrumb-item", 2);
+    assert.strictEqual(
+      $(webClient.el!).find(".o_control_panel .breadcrumb-item.active").text(),
+      "New"
+    );
+
+    webClient.destroy();
   });
 
   QUnit.skip("rainbowman integrated to webClient", async function (assert) {
@@ -6240,29 +6213,29 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
                 show_effect: true,
             },
         });
-        await doAction(1);
+        await doAction(webClient, 1);
         assert.containsOnce(webClient, '.o_kanban_view');
         assert.containsNone(webClient, '.o_reward');
         webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
         await testUtils.nextTick();
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
 
         assert.containsOnce(webClient, '.o_reward');
         assert.containsOnce(webClient, '.o_kanban_view');
         await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record'));
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         assert.containsNone(webClient, '.o_reward');
         assert.containsOnce(webClient, '.o_kanban_view');
 
         webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
         await testUtils.nextTick();
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         assert.containsOnce(webClient, '.o_reward');
         assert.containsOnce(webClient, '.o_kanban_view');
 
         // Do not force rainbow man to destroy on doAction
         // we let it die either after its animation or on user click
-        await doAction(3);
+        await doAction(webClient, 3);
         assert.containsOnce(webClient, '.o_reward');
         assert.containsOnce(webClient, '.o_list_view');
 
@@ -6286,13 +6259,13 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
                 notification: NotificationService
             }
         });
-        await doAction(1);
+        await doAction(webClient, 1);
         assert.containsOnce(webClient, '.o_kanban_view');
         assert.containsNone(webClient, '.o_reward');
         assert.containsNone(document.querySelector('body'), '.o_notification');
         webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
         await testUtils.nextTick();
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         assert.containsOnce(webClient, '.o_kanban_view');
         assert.containsNone(webClient, '.o_reward');
         assert.containsOnce(document.querySelector('body'), '.o_notification');
@@ -6313,7 +6286,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
                 notification: NotificationService
             }
         });
-        await doAction(1);
+        await doAction(webClient, 1);
         assert.containsOnce(webClient, '.o_kanban_view');
         assert.containsNone(document.querySelector('body'), '.o_notification');
         webClient.env.bus.trigger('connection_lost');
@@ -6350,7 +6323,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
                 notification: NotificationService
             }
         });
-        await doAction(1);
+        await doAction(webClient, 1);
         assert.containsOnce(webClient, '.o_kanban_view');
         assert.containsNone(document.querySelector('body'), '.o_notification');
         webClient.trigger('warning', {title: 'gloria', message: 'Like to tell ya about my baby'});
@@ -6382,7 +6355,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
                 notification: NotificationService
             }
         });
-        await doAction(1);
+        await doAction(webClient, 1);
         assert.containsOnce(webClient, '.o_kanban_view');
         assert.containsNone(document.querySelector('body'), '.modal');
         webClient.trigger('warning', {title: 'gloria', type: 'dialog', message: 'Like to tell ya about my baby'});
@@ -6406,104 +6379,76 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         */
   });
 
-  QUnit.skip(
+  QUnit.test(
     "requests for execute_action of type object raises error in modal: re-enables buttons",
     async function (assert) {
-      /*
-        assert.expect(5);
+      assert.expect(5);
 
-        this.archs['partner,false,form'] = `
-            <form>
-                <field name="display_name"/>
-                <footer>
-                    <button name="object" string="Call method" type="object"/>
-                </footer>
-            </form>
-        `;
+      baseConfig.serverData!.views!['partner,false,form'] = `
+        <form>
+          <field name="display_name"/>
+          <footer>
+            <button name="object" string="Call method" type="object"/>
+          </footer>
+        </form>
+      `;
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            mockRPC: function (route, args) {
-                if (route === '/web/dataset/call_button') {
-                    // the crash manager is not triggered
-                    // in tests (low level AJAX)
-                    return Promise.reject();
-                }
-                return this._super.apply(this, arguments);
-            },
-        });
-        await doAction(5);
-        assert.containsOnce(webClient, '.modal .o_form_view');
+      const mockRPC: RPC = async (route, args) => {
+        if (route === '/web/dataset/call_button') {
+          return Promise.reject();
+        }
+      };
+      const webClient = await createWebClient({baseConfig, mockRPC});
+      await doAction(webClient, 5);
+      assert.containsOnce(webClient.el!, '.modal .o_form_view');
 
-        testUtils.dom.click(webClient.el.querySelector('.modal footer button[name="object"]'));
-        assert.containsOnce(webClient, '.modal .o_form_view');
-        assert.ok(webClient.el.querySelector('.modal footer button').disabled);
-        await testUtils.nextTick();
-        await testUtils.owlCompatibilityExtraNextTick();
-        assert.containsOnce(webClient, '.modal .o_form_view');
-        assert.notOk(webClient.el.querySelector('.modal footer button').disabled);
-        webClient.destroy();
-        */
+      testUtils.dom.click(webClient.el!.querySelector('.modal footer button[name="object"]')!);
+      assert.containsOnce(webClient.el!, '.modal .o_form_view');
+      assert.ok((webClient.el!.querySelector('.modal footer button') as HTMLButtonElement).disabled);
+      await testUtils.nextTick();
+      await legacyExtraNextTick();
+      assert.containsOnce(webClient.el!, '.modal .o_form_view');
+      assert.notOk((webClient.el!.querySelector('.modal footer button') as HTMLButtonElement).disabled);
+      webClient.destroy();
     }
   );
 
-  QUnit.skip(
+  QUnit.test(
     'fullscreen on action change: back to another "current" action',
     async function (assert) {
-      /*
-        assert.expect(8);
+      assert.expect(8);
+      baseConfig.serverData!.menus = {
+        root: { id: "root", children: [1], name: "root", appID: "root" },
+        1: { id: 1, children: [], name: "MAIN APP", appID: 1, actionID: 6 },
+      };
 
-        const menus = {
-            all_menu_ids: [999, 1],
-            children: [{
-                id: 999,
-                action: 'ir.actions.act_window,6',
-                name: 'MAIN APP',
-                children: [{
-                    id: 1,
-                    name: 'P1',
-                    children: [],
-                }]
-            }],
-        };
+      baseConfig.serverData!.actions![1].target = "fullscreen";
+      baseConfig.serverData!.views!["partner,false,form"] =
+        '<form><button name="24" type="action" class="oe_stat_button"/></form>';
 
-        this.actions[0].target = 'fullscreen';
-        this.archs['partner,false,form'] = `
-            <form>
-                <button name="24" type="action" class="oe_stat_button"/>
-            </form>`;
+      const webClient = await createWebClient({ baseConfig });
+      await testUtils.nextTick(); // wait for the load state (default app)
+      await legacyExtraNextTick();
+      assert.containsOnce(webClient, "nav .o_menu_brand");
+      assert.strictEqual($(webClient.el!).find("nav .o_menu_brand").text(), "MAIN APP");
+      assert.doesNotHaveClass(webClient.el!, "o_fullscreen");
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: menus,
-        });
+      await testUtils.dom.click($(webClient.el!).find('button[name="24"]'));
+      await legacyExtraNextTick();
+      assert.doesNotHaveClass(webClient.el!, "o_fullscreen");
 
-        assert.containsOnce(webClient, 'nav .o_menu_brand');
-        assert.strictEqual(webClient.el.querySelector('nav .o_menu_brand').textContent, 'MAIN APP');
-        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+      await testUtils.dom.click($(webClient.el!).find('button[name="1"]'));
+      await legacyExtraNextTick();
+      assert.hasClass(webClient.el!, "o_fullscreen");
 
-        await testUtils.dom.click(webClient.el.querySelector('button[name="24"]'));
-        await testUtils.owlCompatibilityExtraNextTick();
-        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+      await testUtils.dom.click($(webClient.el!).find(".breadcrumb li a")[1]);
+      await legacyExtraNextTick();
+      assert.doesNotHaveClass(webClient.el!, "o_fullscreen");
 
-        await testUtils.dom.click(webClient.el.querySelector('button[name="1"]'));
-        await testUtils.owlCompatibilityExtraNextTick();
-        assert.hasClass(webClient.el, 'o_fullscreen');
+      assert.containsOnce(webClient, "nav .o_menu_brand");
+      assert.strictEqual($(webClient.el!).find("nav .o_menu_brand").text(), "MAIN APP");
 
-        await testUtils.dom.click(webClient.el.querySelectorAll('.breadcrumb li a')[1]);
-        await testUtils.owlCompatibilityExtraNextTick();
-        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
-
-        assert.containsOnce(webClient, 'nav .o_menu_brand');
-        assert.strictEqual(webClient.el.querySelector('nav .o_menu_brand').textContent, 'MAIN APP');
-
-        webClient.destroy();
-        */
+      webClient.destroy();
     }
   );
 
@@ -6526,13 +6471,13 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
             data: this.data,
             menus: this.menus,
         });
-        await doAction(5);
+        await doAction(webClient, 5);
         assert.containsNone(webClient, '.o_technical_modal .modal-body button[special="save"]');
         assert.containsNone(webClient, '.o_technical_modal .modal-body button.infooter');
         assert.containsOnce(webClient, '.o_technical_modal .modal-footer button.infooter');
         assert.containsOnce(webClient, '.o_technical_modal .modal-footer button');
 
-        await doAction(25);
+        await doAction(webClient, 25);
         assert.containsNone(webClient, '.o_technical_modal .modal-body button.infooter');
         assert.containsNone(webClient, '.o_technical_modal .modal-footer button.infooter');
         assert.containsNone(webClient, '.o_technical_modal .modal-body button[special="save"]');
@@ -6565,14 +6510,14 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
             data: this.data,
             menus: this.menus,
         });
-        await doAction({
+        await doAction(webClient, {
             tag: 'test',
             target: 'new',
             type: 'ir.actions.client',
         });
         assert.containsOnce(webClient, '.modal footer button.o_stagger_lee');
         assert.containsNone(webClient, '.modal footer button[special="save"]');
-        await doAction(25);
+        await doAction(webClient, 25);
         assert.containsNone(webClient, '.modal footer button.o_stagger_lee');
         assert.containsOnce(webClient, '.modal footer button[special="save"]');
 
@@ -6631,7 +6576,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         await tooltipProm;
         assert.containsN(document.body, '.tooltip', 2);
         await testUtils.dom.click(actionButton);
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         assert.verifySteps([
             '/web/dataset/call_button',
             '/web/dataset/call_kw/partner/read',
@@ -6667,9 +6612,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
                 return this._super.apply(this, arguments);
             },
         });
-        await doAction(6);
+        await doAction(webClient, 6);
         await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         assert.containsOnce(webClient, '.o_reward');
 
         webClient.destroy();
@@ -6706,9 +6651,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
                 return this._super.apply(this, arguments);
             },
         });
-        await doAction(6);
+        await doAction(webClient, 6);
         await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         assert.containsOnce(webClient, '.o_reward');
         assert.strictEqual(
             webClient.el.querySelector('.o_reward .o_reward_msg_content').textContent,
@@ -6759,13 +6704,13 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
             }
         });
         assert.verifySteps([]);
-        await doAction(9);
+        await doAction(webClient, 9);
         assert.verifySteps([
             'hashSet',
         ]);
         assert.containsOnce(webClient, '.o_client_action_test');
         assert.verifySteps([]);
-        await doAction('ClientAction2');
+        await doAction(webClient, 'ClientAction2');
         assert.containsOnce(webClient, '.o_client_action_test_2');
         assert.verifySteps([
             'canBeRemoved',
@@ -6798,12 +6743,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
             menus: this.menus,
         });
 
-        await doAction(3);
+        await doAction(webClient, 3);
         await testUtils.dom.click(webClient.el.querySelector('.o_list_view .o_data_row'));
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         await testUtils.dom.click(webClient.el.querySelector('.o_form_buttons_view .o_form_button_edit'));
 
-        await doAction(25, {
+        await doAction(webClient, 25, {
             on_close() {
                 assert.step('on_close');
             },
@@ -6811,9 +6756,9 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
         // Close dialog by clicking on save button
         await testUtils.dom.click(webClient.el.querySelector('.o_dialog .modal-footer button[special=save]'));
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         // Directly do act_window_close
-        await doAction(10);
+        await doAction(webClient, 10);
 
         assert.verifySteps(['on_close']);
 
@@ -6859,7 +6804,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
             '#model=partner&view_type=kanban&action=1',
         ]);
         await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record a'));
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         assert.verifySteps([
             '/web/action/load',
             'load_views',
@@ -6867,7 +6812,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
             '#model=partner&view_type=kanban&action=1&active_id=1',
         ]);
         await testUtils.dom.click(webClient.el.querySelector('.breadcrumb-item'));
-        await testUtils.owlCompatibilityExtraNextTick();
+        await legacyExtraNextTick();
         assert.verifySteps([
             '/web/dataset/search_read',
             '#model=partner&view_type=kanban&action=1',
