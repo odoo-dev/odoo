@@ -13,6 +13,12 @@ QUnit.module("domain", {}, () => {
     assert.deepEqual(new Domain([]).toList(), []);
   });
 
+  QUnit.test("undefined domain", function (assert) {
+    assert.ok(new Domain(undefined).contains({}));
+    assert.strictEqual(new Domain(undefined).toString(), "[]");
+    assert.deepEqual(new Domain(undefined).toList(), []);
+  });
+
   QUnit.test("simple condition", function (assert) {
     assert.ok(new Domain([["a", "=", 3]]).contains({ a: 3 }));
     assert.notOk(new Domain([["a", "=", 3]]).contains({ a: 5 }));

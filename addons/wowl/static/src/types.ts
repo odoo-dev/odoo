@@ -186,7 +186,7 @@ export type ViewSwitcherEntries = ViewSwitcherEntry[];
 export interface ViewProps extends ActionProps {
   actionId?: number;
   context: Context;
-  domain: Domain;
+  domain?: Domain;
   model: string;
   type: ViewType;
   views: [ViewId, ViewType][];

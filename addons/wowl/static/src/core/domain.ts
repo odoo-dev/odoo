@@ -15,7 +15,7 @@ export type DomainRepr = DomainListRepr | DomainStringRepr | DomainClassRepr;
 export class Domain {
   ast: AST;
 
-  constructor(descr: DomainRepr) {
+  constructor(descr: DomainRepr = []) {
     if (descr instanceof Domain) {
       this.ast = descr.ast;
     } else {
