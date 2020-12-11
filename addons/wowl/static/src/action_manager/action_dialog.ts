@@ -75,7 +75,7 @@ export class ActionDialog extends TrueActionDialog {
 
         // Render legacy footer buttons
         const footer = this.modalRef.el!.querySelector("footer")!;
-        widget.renderButtons(footer);
+        widget.renderButtons($(footer));
       }
     });
   }

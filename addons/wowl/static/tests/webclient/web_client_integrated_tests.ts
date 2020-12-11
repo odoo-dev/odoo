@@ -5540,6 +5540,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     webClient.destroy();
     delete core.action_registry.map.test;
+    baseConfig.actionRegistry!.remove('test');
   });
 
   QUnit.module('Actions in target="inline"');
@@ -6452,80 +6453,67 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip(
+  QUnit.test(
     'footer buttons are updated when having another action in target "new"',
     async function (assert) {
-      /*
         assert.expect(9);
 
-        this.archs['partner,false,form'] = '<form>' +
+        baseConfig.serverData!.views!['partner,false,form'] = '<form>' +
                 '<field name="display_name"/>' +
                 '<footer>' +
                     '<button string="Create" type="object" class="infooter"/>' +
                 '</footer>' +
             '</form>';
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-        });
+        const webClient = await createWebClient({ baseConfig });
         await doAction(webClient, 5);
-        assert.containsNone(webClient, '.o_technical_modal .modal-body button[special="save"]');
-        assert.containsNone(webClient, '.o_technical_modal .modal-body button.infooter');
-        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button.infooter');
-        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button');
+        assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button[special="save"]');
+        assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button.infooter');
+        assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button.infooter');
+        assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button');
 
         await doAction(webClient, 25);
-        assert.containsNone(webClient, '.o_technical_modal .modal-body button.infooter');
-        assert.containsNone(webClient, '.o_technical_modal .modal-footer button.infooter');
-        assert.containsNone(webClient, '.o_technical_modal .modal-body button[special="save"]');
-        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button[special="save"]');
-        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button');
+        assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button.infooter');
+        assert.containsNone(webClient.el!, '.o_technical_modal .modal-footer button.infooter');
+        assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button[special="save"]');
+        assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button[special="save"]');
+        assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button');
 
         webClient.destroy();
-        */
     }
   );
 
-  QUnit.skip(
+  QUnit.test(
     'buttons of client action in target="new" and transition to MVC action',
     async function (assert) {
-      /*
-        assert.expect(4);
+      assert.expect(4);
 
-        var ClientAction = AbstractAction.extend({
-            renderButtons($target) {
-                const button = document.createElement('button');
-                button.setAttribute('class', 'o_stagger_lee');
-                $target[0].appendChild(button);
-            },
-        });
-        core.action_registry.add('test', ClientAction);
+      const ClientAction = AbstractAction.extend({
+        renderButtons($target: JQuery) {
+          const button = document.createElement('button');
+          button.setAttribute('class', 'o_stagger_lee');
+          $target[0].appendChild(button);
+        },
+      });
+      core.action_registry.add('test', ClientAction);
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-        });
-        await doAction(webClient, {
-            tag: 'test',
-            target: 'new',
-            type: 'ir.actions.client',
-        });
-        assert.containsOnce(webClient, '.modal footer button.o_stagger_lee');
-        assert.containsNone(webClient, '.modal footer button[special="save"]');
-        await doAction(webClient, 25);
-        assert.containsNone(webClient, '.modal footer button.o_stagger_lee');
-        assert.containsOnce(webClient, '.modal footer button[special="save"]');
+      const webClient = await createWebClient({baseConfig});
+      await doAction(webClient, {
+        tag: 'test',
+        target: 'new',
+        type: 'ir.actions.client',
+      });
+      assert.containsOnce(webClient.el!, '.modal footer button.o_stagger_lee');
+      assert.containsNone(webClient.el!, '.modal footer button[special="save"]');
+      await doAction(webClient, 25);
+      assert.containsNone(webClient.el!, '.modal footer button.o_stagger_lee');
+      assert.containsOnce(webClient.el!, '.modal footer button[special="save"]');
 
-        webClient.destroy();
-        delete core.action_registry.map.test;
-        */
+      webClient.destroy();
+      delete core.action_registry.map.test;
+      baseConfig.actionRegistry!.remove('test');
     }
-  );
+    );
 
   QUnit.skip("execute action without modal", async function (assert) {
     /*
