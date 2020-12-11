@@ -1276,15 +1276,24 @@ function makeActionManager(env: OdooEnv): ActionManager {
     const action = controller.action;
     if (action.id) {
       newState.action = `${action.id}`;
-    } else if ((action as any).tag) {
-      newState.action = (action as any).tag;
+    } else if (action.type === "ir.actions.client") {
+      newState.action = (action as ClientAction).tag;
     }
-    const actionProps = controller.props;
-    if ("model" in actionProps) {
-      // type === ViewProps
-      newState.model = actionProps.model;
-      newState.view_type = actionProps.type;
-      newState.id = actionProps.recordId ? `${actionProps.recordId}` : undefined;
+    if (action.context) {
+      const activeId = action.context.active_id;
+      newState.active_id = activeId ? `${activeId}` : undefined;
+      const activeIds = action.context.active_ids;
+      // we don't push active_ids if it's a single element array containing
+      // the active_id to make the url shorter in most cases
+      if (activeIds && !(activeIds.length === 1 && activeIds[0] === activeId)) {
+        newState.active_ids = activeIds.join(",");
+      }
+    }
+    if (action.type === "ir.actions.act_window") {
+      const props = (controller as ViewController).props;
+      newState.model = props.model;
+      newState.view_type = props.type;
+      newState.id = props.recordId ? `${props.recordId}` : undefined;
     }
     env.services.router.pushState(newState, true);
   }

@@ -6754,58 +6754,54 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         */
   });
 
-  QUnit.skip("properly push state active_id", async function (assert) {
-    /*
-        assert.expect(13);
+  QUnit.test("properly push state active_id", async function (assert) {
+    assert.expect(3);
 
-        Object.assign(this.archs, {
-            // kanban views
-            'partner,1,kanban': '<kanban><templates><t t-name="kanban-box">' +
-                    '<div class="oe_kanban_global_click"><a name="1" type="action"></a><field name="foo"/></div>' +
-                '</t></templates></kanban>',
-        });
+    baseConfig.serviceRegistry!.add(
+      "router",
+      makeFakeRouterService({
+        initialRoute: {
+          hash: { action: "1" },
+        },
+      }),
+      true
+    );
+    baseConfig.serverData!.views!["partner,1,kanban"] = `
+         <kanban><templates><t t-name="kanban-box">
+            <div class="oe_kanban_global_click">
+              <a name="3" type="action">Execute Action 3</a>
+              <field name="foo"/>
+            </div>
+        </t></templates></kanban>`;
 
-        let _hash = '#action=1';
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            mockRPC: function (route, args) {
-                assert.step(args.method || route);
-                return this._super.apply(this, arguments);
-            },
-            webClient: {
-                _getWindowHash() {
-                    return _hash;
-                },
-                _setWindowHash(newHash) {
-                    assert.step(newHash);
-                    _hash = newHash;
-                }
-            }
-        });
-        assert.verifySteps([
-            '/web/action/load',
-            'load_views',
-            '/web/dataset/search_read',
-            '#model=partner&view_type=kanban&action=1',
-        ]);
-        await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record a'));
-        await legacyExtraNextTick();
-        assert.verifySteps([
-            '/web/action/load',
-            'load_views',
-            '/web/dataset/search_read',
-            '#model=partner&view_type=kanban&action=1&active_id=1',
-        ]);
-        await testUtils.dom.click(webClient.el.querySelector('.breadcrumb-item'));
-        await legacyExtraNextTick();
-        assert.verifySteps([
-            '/web/dataset/search_read',
-            '#model=partner&view_type=kanban&action=1',
-        ]);
-        webClient.destroy();
-        */
+    const webClient = await createWebClient({ baseConfig });
+    const router = webClient.env.services["router"];
+
+    await testUtils.nextTick(); // wait for the load state (default app)
+    await legacyExtraNextTick();
+    assert.deepEqual(router.current.hash, {
+      model: "partner",
+      view_type: "kanban",
+      action: "1",
+    });
+
+    await testUtils.dom.click($(webClient.el!).find(".o_kanban_record a:first"));
+    await legacyExtraNextTick();
+    assert.deepEqual(router.current.hash, {
+      model: "partner",
+      view_type: "list",
+      action: "3",
+      active_id: "1",
+    });
+
+    await testUtils.dom.click($(webClient.el!).find(".breadcrumb-item:first"));
+    await legacyExtraNextTick();
+    assert.deepEqual(router.current.hash, {
+      model: "partner",
+      view_type: "kanban",
+      action: "1",
+    });
+
+    webClient.destroy();
   });
 });
