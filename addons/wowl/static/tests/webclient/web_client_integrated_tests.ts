@@ -6650,62 +6650,54 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         */
   });
 
-  QUnit.skip("hashchange does not trigger canberemoved right away", async function (assert) {
-    /*
-        assert.expect(9);
+  QUnit.test("hashchange does not trigger canberemoved right away", async function (assert) {
+    assert.expect(9);
 
-        var ClientAction = AbstractAction.extend({
-            start() {
-                this.$el.text('Hello World');
-                this.$el.addClass('o_client_action_test');
-            },
-            canBeRemoved(){
-                assert.step('canBeRemoved');
-                return this._super.apply(this, arguments);
-            }
-        });
-        core.action_registry.add('ClientAction', ClientAction);
+    const ClientAction = AbstractAction.extend({
+      start() {
+        this.$el.text('Hello World');
+        this.$el.addClass('o_client_action_test');
+      },
+      canBeRemoved(){
+        assert.step('canBeRemoved');
+        return this._super.apply(this, arguments);
+      }
+    });
+    core.action_registry.add('ClientAction', ClientAction);
 
-        var ClientAction2 = AbstractAction.extend({
-            start() {
-                this.$el.text('Hello World');
-                this.$el.addClass('o_client_action_test_2');
-            },
-            canBeRemoved(){
-                assert.step('canBeRemoved_2');
-                return this._super.apply(this, arguments);
-            }
-        });
-        core.action_registry.add('ClientAction2', ClientAction2);
+    const ClientAction2 = AbstractAction.extend({
+      start() {
+        this.$el.text('Hello World');
+        this.$el.addClass('o_client_action_test_2');
+      },
+      canBeRemoved(){
+        assert.step('canBeRemoved_2');
+        return this._super.apply(this, arguments);
+      }
+    });
+    core.action_registry.add('ClientAction2', ClientAction2);
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            webClient: {
-                _setWindowHash(newHash) {
-                    assert.step('hashSet');
-                }
-            }
-        });
-        assert.verifySteps([]);
-        await doAction(webClient, 9);
-        assert.verifySteps([
-            'hashSet',
-        ]);
-        assert.containsOnce(webClient, '.o_client_action_test');
-        assert.verifySteps([]);
-        await doAction(webClient, 'ClientAction2');
-        assert.containsOnce(webClient, '.o_client_action_test_2');
-        assert.verifySteps([
-            'canBeRemoved',
-            'hashSet',
-        ]);
-        webClient.destroy();
-        delete core.action_registry.map.ClientAction;
-        delete core.action_registry.map.ClientAction2;
-        */
+
+    baseConfig.serviceRegistry!.add('router', makeFakeRouterService({onPushState: () => assert.step('hashSet')}), true);
+    const webClient = await createWebClient({baseConfig});
+    assert.verifySteps([]);
+    await doAction(webClient, 9);
+    assert.verifySteps([
+      'hashSet',
+      ]);
+    assert.containsOnce(webClient.el!, '.o_client_action_test');
+    assert.verifySteps([]);
+    await doAction(webClient, 'ClientAction2');
+    assert.containsOnce(webClient.el!, '.o_client_action_test_2');
+    assert.verifySteps([
+      'canBeRemoved',
+      'hashSet',
+      ]);
+    webClient.destroy();
+    delete core.action_registry.map.ClientAction;
+    delete core.action_registry.map.ClientAction2;
+    baseConfig.actionRegistry!.remove('ClientAction');
+    baseConfig.actionRegistry!.remove('ClientAction2');
   });
 
   QUnit.skip("on_close should be called only once", async function (assert) {
