@@ -5,6 +5,7 @@ import { Registry } from "../../src/core/registry";
 import { makeFakeUserService, nextTick, OdooEnv } from "../helpers/index";
 import { click, legacyExtraNextTick, makeTestEnv, mount, TestConfig } from "../helpers/utility";
 import { notificationService } from "../../src/notifications/notification_service";
+import { dialogManagerService } from "../../src/services/dialog_manager";
 import { menusService } from "../../src/services/menus";
 import {
   ActionManager,
@@ -204,6 +205,7 @@ function beforeEachActionManager(): TestConfig {
   serviceRegistry
     .add("user", makeFakeUserService())
     .add(notificationService.name, notificationService)
+    .add(dialogManagerService.name, dialogManagerService)
     .add("menus", menusService)
     .add("action_manager", actionManagerService)
     .add("router", makeFakeRouterService())
@@ -6311,73 +6313,69 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         */
   });
 
-  QUnit.skip("display warning as notification", async function (assert) {
-    /*
-        assert.expect(6);
+  QUnit.test("display warning as notification", async function (assert) {
+    // this test can be removed as soon as the legacy layer is dropped
+    assert.expect(5);
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            services: {
-                notification: NotificationService
-            }
-        });
-        await doAction(webClient, 1);
-        assert.containsOnce(webClient, '.o_kanban_view');
-        assert.containsNone(document.querySelector('body'), '.o_notification');
-        webClient.trigger('warning', {title: 'gloria', message: 'Like to tell ya about my baby'});
-        await testUtils.nextTick();
-        assert.containsOnce(document.querySelector('body'), '.o_notification');
-        assert.strictEqual(
-            document.querySelector('body .o_notification .o_notification_title').innerHTML,
-            'gloria'
-        );
-        assert.strictEqual(
-            document.querySelector('body .o_notification .o_notification_content').innerHTML,
-            'Like to tell ya about my baby'
-        );
-        assert.containsOnce(webClient, '.o_kanban_view');
-        webClient.destroy();
-        */
+    let list: any;
+    testUtils.patch(ListController, {
+      init() {
+        this._super(...arguments);
+        list = this;
+      },
+    });
+
+    const webClient = await createWebClient({ baseConfig });
+
+    await doAction(webClient, 3);
+    assert.containsOnce(webClient, ".o_list_view");
+
+    list.trigger_up("warning", {
+      title: "Warning!!!",
+      message: "This is a warning...",
+    });
+    await testUtils.nextTick();
+    await legacyExtraNextTick();
+
+    assert.containsOnce(webClient, ".o_list_view");
+    assert.containsOnce(document.body, ".o_notification.bg-warning");
+    assert.strictEqual($(".o_notification_title").text(), "Warning!!!");
+    assert.strictEqual($(".o_notification_content").text(), "This is a warning...");
+
+    webClient.destroy();
   });
 
-  QUnit.skip("display warning as modal", async function (assert) {
-    /*
-        assert.expect(8);
+  QUnit.test("display warning as modal", async function (assert) {
+    // this test can be removed as soon as the legacy layer is dropped
+    assert.expect(5);
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            services: {
-                notification: NotificationService
-            }
-        });
-        await doAction(webClient, 1);
-        assert.containsOnce(webClient, '.o_kanban_view');
-        assert.containsNone(document.querySelector('body'), '.modal');
-        webClient.trigger('warning', {title: 'gloria', type: 'dialog', message: 'Like to tell ya about my baby'});
-        await testUtils.nextTick();
-        // In this case the bootstrap modal may take one more tick to be here
-        await testUtils.nextTick();
-        assert.containsOnce(document.querySelector('body'), '.modal');
-        assert.strictEqual(
-            document.querySelector('body .modal .modal-title').textContent,
-            'gloria'
-        );
-        assert.strictEqual(
-            document.querySelector('body .modal .modal-body').textContent.trim(),
-            'Like to tell ya about my baby'
-        );
-        assert.containsOnce(webClient, '.o_kanban_view');
-        await testUtils.dom.click(document.querySelector('body .modal .modal-footer button'));
-        assert.containsOnce(webClient, '.o_kanban_view');
-        assert.containsNone(document.querySelector('body'), '.modal');
-        webClient.destroy();
-        */
+    let list: any;
+    testUtils.patch(ListController, {
+      init() {
+        this._super(...arguments);
+        list = this;
+      },
+    });
+
+    const webClient = await createWebClient({ baseConfig });
+
+    await doAction(webClient, 3);
+    assert.containsOnce(webClient, ".o_list_view");
+
+    list.trigger_up("warning", {
+      title: "Warning!!!",
+      message: "This is a warning...",
+      type: "dialog",
+    });
+    await testUtils.nextTick();
+    await legacyExtraNextTick();
+
+    assert.containsOnce(webClient, ".o_list_view");
+    assert.containsOnce(document.body, ".modal");
+    assert.strictEqual($(".modal-title").text(), "Warning!!!");
+    assert.strictEqual($(".modal-body").text(), "This is a warning...");
+
+    webClient.destroy();
   });
 
   QUnit.test(

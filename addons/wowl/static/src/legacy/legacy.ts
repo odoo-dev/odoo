@@ -140,6 +140,8 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     am = useService("action_manager");
     router = useService("router");
     title = useService("title");
+    notifications = useService("notifications");
+    dialogs = useService("dialog_manager");
 
     // a legacy widget widget can push_state anytime including during its async rendering
     // In Wowl, we want to have all states pushed during the same setTimeout.
@@ -192,6 +194,26 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           return;
         }
         this.router.pushState(query);
+      } else if (ev.name === "warning") {
+        if (payload.type === "dialog") {
+          class WarningDialog extends Component<{}, OdooEnv> {
+            static template = tags.xml`
+                <Dialog title="props.title">
+                  <t t-esc="props.message"/>
+                </Dialog>
+                `;
+            static components = { Dialog };
+          }
+          this.dialogs.open(WarningDialog, { title: payload.title, message: payload.message });
+        } else {
+          this.notifications.create(payload.message, {
+            className: payload.className,
+            icon: payload.icon,
+            sticky: payload.sticky,
+            title: payload.title,
+            type: "warning",
+          });
+        }
       } else {
         super._trigger_up(ev);
       }
