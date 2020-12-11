@@ -132,7 +132,7 @@ export const crashManagerService: Service<void> = {
         error.traceback = ev.reason.stack;
         handleError(error, env);
       }
-      
+
       // The thrown value was originally a non-Error instance or a raw js object
       else {
         const error = new OdooError("UNCAUGHT_OBJECT_REJECTION_ERROR");

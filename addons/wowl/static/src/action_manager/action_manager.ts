@@ -251,7 +251,6 @@ export class ActionContainer extends Component<{}, OdooEnv> {
       switch (info.type) {
         case "MAIN":
           this.main = info;
-          this.dialog = {};
           break;
         case "OPEN_DIALOG": {
           const { onClose } = this.dialog;
@@ -550,10 +549,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
       }
       onHistoryBack() {
         const previousController = controllerStack[controllerStack.length - 2];
-        if (previousController) {
+        if (previousController && !dialogCloseProm) {
           restore(previousController.jsId);
         } else {
-          _executeCloseAction({ onClose: options.onClose });
+          _executeCloseAction();
         }
       }
     }
@@ -590,13 +589,14 @@ function makeActionManager(env: OdooEnv): ActionManager {
     const nextStack = controllerStack.slice(0, index).concat(controllerArray);
     controller.props.breadcrumbs = _getBreadcrumbs(nextStack);
 
+    const closingProm = _executeCloseAction();
     env.bus.trigger("ACTION_MANAGER:UPDATE", {
       type: "MAIN",
       id: ++id,
       Component: ControllerComponent,
       componentProps: controller.props,
     });
-    return currentActionProm;
+    return Promise.all([currentActionProm, closingProm]).then((r) => r[0]);
   }
 
   // ---------------------------------------------------------------------------

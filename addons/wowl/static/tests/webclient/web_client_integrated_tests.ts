@@ -5376,6 +5376,36 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
+  QUnit.test(
+    "history back calls on_close handler of dialog action with 2 breadcrumbs",
+    async function (assert) {
+      assert.expect(7);
+
+      const webClient = await createWebClient({ baseConfig });
+      await doAction(webClient, 1); // kanban
+      await doAction(webClient, 3); // list
+      assert.containsOnce(webClient.el!, ".o_list_view");
+
+      function onClose() {
+        assert.step("on_close");
+      }
+      // open a new dialog form
+      await doAction(webClient, 5, { onClose });
+      assert.containsOnce(webClient.el!, ".modal");
+      assert.containsOnce(webClient.el!, ".o_list_view");
+
+      const ev = new Event("history-back", { bubbles: true, cancelable: true });
+      webClient.el!.querySelector(".o_view_controller")!.dispatchEvent(ev);
+      assert.verifySteps(["on_close"], "should have called the on_close handler");
+      await nextTick();
+      await legacyExtraNextTick();
+      assert.containsOnce(webClient.el!, ".o_list_view");
+      assert.containsNone(webClient.el!, ".modal");
+
+      webClient.destroy();
+    }
+  );
+
   QUnit.skip("abstract action does not crash on navigation_moves", async function (assert) {
     /*
     assert.expect(1);
