@@ -3118,7 +3118,8 @@ QUnit.module('basic_fields', {
                 call_service: function (ev) {
                     if (ev.data.service === 'notification') {
                         assert.strictEqual(ev.data.method, 'notify');
-                        assert.strictEqual(ev.data.args[0].title, 'Invalid fields!');
+                        assert.strictEqual(ev.data.args[0].title, 'The following fields are invalid:');
+                        assert.strictEqual(ev.data.args[0].message, '<ul><li>A date</li></ul>');
                     }
                 }
             },
@@ -3129,12 +3130,14 @@ QUnit.module('basic_fields', {
         await testUtils.dom.click(form.$el);
         assert.hasClass(form.$('input[name=date]'), 'o_field_invalid',
             "date field should be displayed as invalid");
-        assert.strictEqual(form.$('input').val(), '',
-            "date field should be have empty value if value entered is invalid");
         // update input date with right value
         await testUtils.fields.editInput(form.$('.o_field_date_range:first'), '02/08/2017');
         assert.doesNotHaveClass(form.$('input[name=date]'), 'o_field_invalid',
             "date field should not be displayed as invalid now");
+
+        // again enter wrong value and try to save should raise invalid fields value
+        await testUtils.fields.editInput(form.$('.o_field_date_range:first'), 'blabla');
+        await testUtils.form.clickSave(form);
 
         form.destroy();
     });

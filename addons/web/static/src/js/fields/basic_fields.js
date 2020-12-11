@@ -632,12 +632,12 @@ var FieldDateRange = InputField.extend({
         try {
             // user may enter manual value in input and it may not be parsed as date/datetime value
             this.removeInvalidClass();
-            return field_utils.parse[this.formatType](this.$input.val(), this.field, { timezone: true });
+            var value = field_utils.parse[this.formatType](this.$input.val(), this.field, { timezone: true });
+            return value;
         } catch (error) {
-            this.do_warn(_t("Invalid fields!"), _t("Please enter a valid date / date & time."));
-            this.$input.val('');
             this.setInvalidClass();
-            return false;
+            // return wrongly entered value so parseValue fails and save will throw invalid notification
+            return this.$input.val();
         }
     },
 
