@@ -12,6 +12,7 @@ import {
 import { useService } from "../core/hooks";
 import {
   ActionManagerUpdateInfo,
+  ActionOptions,
   Breadcrumbs,
   useSetupAction,
   ViewNotFoundError,
@@ -30,6 +31,24 @@ import { Query, objectToQuery } from "../services/router";
 
 declare const odoo: any;
 
+function mapDoActionOptionAPI(legacyOptions?: any): ActionOptions {
+  legacyOptions = Object.assign(legacyOptions || {});
+  // use camelCase instead of snake_case for some keys
+  Object.assign(legacyOptions, {
+    additionalContext: legacyOptions.additional_context,
+    clearBreadcrumbs: legacyOptions.clear_breadcrumbs,
+    viewType: legacyOptions.view_type,
+    resId: legacyOptions.res_id,
+    onClose: legacyOptions.on_close,
+  });
+  delete legacyOptions.additional_context;
+  delete legacyOptions.clear_breadcrumbs;
+  delete legacyOptions.view_type;
+  delete legacyOptions.res_id;
+  delete legacyOptions.on_close;
+  return legacyOptions;
+}
+
 export function makeLegacyActionManagerService(legacyEnv: any): Service<void> {
   // add a service to redirect 'do-action' events triggered on the bus in the
   // legacy env to the action-manager service in the wowl env
@@ -38,20 +57,7 @@ export function makeLegacyActionManagerService(legacyEnv: any): Service<void> {
     dependencies: ["action_manager"],
     deploy(env: OdooEnv): void {
       legacyEnv.bus.on("do-action", null, (payload: any) => {
-        const legacyOptions = payload.options || {};
-
-        // use camelCase instead of snake_case for some keys
-        Object.assign(legacyOptions, {
-          additionalContext: legacyOptions.additional_context,
-          clearBreadcrumbs: legacyOptions.clear_breadcrumbs,
-          viewType: legacyOptions.view_type,
-          resId: legacyOptions.res_id,
-        });
-        delete legacyOptions.additional_context;
-        delete legacyOptions.clear_breadcrumbs;
-        delete legacyOptions.view_type;
-        delete legacyOptions.res_id;
-
+        const legacyOptions = mapDoActionOptionAPI(payload.options);
         env.services.action_manager.doAction(payload.action, legacyOptions);
       });
     },
@@ -79,8 +85,8 @@ export function makeLegacySessionService(legacyEnv: any, session: any): Service<
   return {
     name: "legacy_session",
     deploy(env: OdooEnv): void {
-      // userContext
-      const userContext = Object.create(env.services.user.context);
+      // userContext, Object.create is incompatible with legacy new Context
+      const userContext = Object.assign({}, env.services.user.context);
       legacyEnv.session.userContext = userContext;
       // usually core.session
       session.user_context = userContext;
@@ -184,7 +190,8 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           payload.action.context = actionContext.eval();
         }
         this.onReverseBreadcrumb = ev.data.options && ev.data.options.on_reverse_breadcrumb;
-        this.am.doAction(payload.action, ev.data.options || {});
+        const legacyOptions = mapDoActionOptionAPI(ev.data.options);
+        this.am.doAction(payload.action, legacyOptions);
       } else if (ev.name === "breadcrumb_clicked") {
         this.am.restore(payload.controllerID);
       } else if (ev.name === "push_state") {
@@ -540,6 +547,12 @@ odoo.define("wowl.legacyViews", async function (require: any) {
   const { ViewAdapter } = require("wowl.ActionAdapters");
   const Widget = require("web.Widget");
 
+  function getJsClassWidget(fieldsInfo: any): any {
+    const parsedXML = new DOMParser().parseFromString(fieldsInfo.arch, "text/xml");
+    const key = parsedXML.documentElement.getAttribute("js_class");
+    return legacyViewRegistry.get(key);
+  }
+
   // registers a view from the legacy view registry to the wowl one, but wrapped
   // into an Owl Component
   function registerView(name: string, LegacyView: any) {
@@ -609,6 +622,8 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         };
         const result: any = await this.vm.loadViews(params, options);
         const fieldsInfo = result.fields_views[this.props.type];
+        const jsClass = getJsClassWidget(fieldsInfo);
+        this.View = jsClass || this.View;
         this.viewInfo = Object.assign({}, fieldsInfo, {
           fields: result.fields,
           viewFields: fieldsInfo.fields,
