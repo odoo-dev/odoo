@@ -71,7 +71,7 @@ export interface ActWindowAction extends ActionCommonInfo {
   res_model: string;
   views: [ViewId, ViewType][];
   context: Context;
-  domain: Domain;
+  domain: Domain | false;
   search_view_id?: [ViewId, string]; // second member is the views's display_name, not the type
   target: ActionTarget;
   res_id?: number;
@@ -413,7 +413,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       actionId: action.id,
       action: action, // FIXME: needed for legacy views, find another way to give it to them
       context: action.context,
-      domain: action.domain,
+      domain: action.domain || [],
       model: action.res_model,
       type: view.type,
       views: action.views,
