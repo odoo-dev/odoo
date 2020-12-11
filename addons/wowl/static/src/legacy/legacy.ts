@@ -510,6 +510,7 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
         constructor() {
           super(...arguments);
           const { scrollTo } = useSetupAction({
+            beforeLeave: () => this.controllerRef.comp!.widget!.canBeRemoved(),
             export: () => this.controllerRef.comp!.exportState(),
             getTitle: () => this.controllerRef.comp!.getTitle(),
           });
