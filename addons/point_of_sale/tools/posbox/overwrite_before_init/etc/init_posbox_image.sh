@@ -103,6 +103,7 @@ rm -rfv /usr/share/doc
 PIP_TO_INSTALL="
     evdev==1.2.0 \
     gatt \
+    opcua \
     polib \
     pycups \
     pyusb \

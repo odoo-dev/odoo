@@ -81,19 +81,12 @@ class IoTboxHomepage(web.Home):
             network = 'Not Connected'
 
         iot_device = []
+        opcua_servers = []
         for device in iot_devices:
             iot_device.append({
                 'name': iot_devices[device].device_name + ' : ' + str(iot_devices[device].data['value']),
                 'type': iot_devices[device].device_type.replace('_', ' '),
                 'identifier': iot_devices[device].device_identifier,
-            })
-
-        opcua_servers = []
-        opcua_server_list = self.get_opcua_server()
-        for opcua_server in opcua_server_list.keys():
-            opcua_servers.append({
-                'name': opcua_server,
-                'root': iot_devices[opcua_server].loop_node('test'),
             })
 
         return {
@@ -103,7 +96,7 @@ class IoTboxHomepage(web.Home):
             'iot_device_status': iot_device,
             'server_status': helpers.get_odoo_server_url() or 'Not Configured',
             'six_terminal': self.get_six_terminal(),
-            'opcua_server_list': self.opcua_servers,
+            'opcua_server_list': opcua_servers,
             'network_status': network,
             'version': helpers.get_version(),
             }
@@ -387,8 +380,9 @@ class IoTboxHomepage(web.Home):
     def add_opcua_server(self, opcua_server_name, opcua_server_endpoint, opcua_server_endpoint_user, opcua_server_endpoint_pwd):
         opcua_server = self.get_opcua_server()
         opcua_server.update({
-            opcua_server_name : {
+            opcua_server_endpoint : {
                 'endpoint': opcua_server_endpoint,
+                'name': opcua_server_name,
                 'user': opcua_server_endpoint_user,
                 'pwd': opcua_server_endpoint_pwd,
                 }

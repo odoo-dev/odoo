@@ -80,30 +80,13 @@
             var maxHeight = ( content.css('max-height') === '0px' ? content.prop('scrollHeight') : 0) + 'px';
             content.css('max-height', maxHeight);
         });
-    });
-    $('#flash').click(async function() {
-        $('.loading-block').removeClass('o_hide');
-        $('.message-title').text('IoTBox perform a self flashing it take a lot of time (~30min).');
-        $('.message-status').text('Prepare space for IoTBox.');
-            await $.ajax({url: '/hw_proxy/perform_flashing_create_partition/'}).promise();
-            $('.message-status').text('Prepare new boot partition.');
-            await $.ajax({url: '/hw_proxy/perform_flashing_download_raspios/'}).promise();
-            $('.message-status').text('Download file for new boot partition.');
-            await $.ajax({url: '/hw_proxy/perform_flashing_copy_raspios/'}).promise();
-            $('.message-status').text('Prepare to restart and installation of the new version of the IoT Box.');
-            setTimeout(function() {
-            $('.message-status').text('The auto flash is almost finished - the page will be automatically reloaded');
-            setInterval(function() {
-                $.ajax({
-                    url: '/hw_proxy/get_version',
-                    timeout: 4000,
-                }).done(function(version) {
-                    if (version == {{ flashToVersion }}) {
-                        window.location = '/';
-                    }
-                });
-            } , 2000);
-        }, 240000);
+        $('.root-opcua').on('click', function (ev) {
+            $.ajax({
+                url: '/opcua_server_clear',
+                type: 'post',
+                data: $('#opcua-server-id').serialize(),
+            })
+        });
     });
 </script>
 {% endblock %}
@@ -143,16 +126,19 @@
             <td class="heading">Opc-Ua Server</td>
             <td>
                 <div class="collapse">
-                    {% for opcua_server in opcua_server_list %}
+                    {% for device in iot_device_status if device.type == 'opcua'  %}
                         <div class="collapsible">
-                            <div class="title arrow-down">{{ opcua_server }}</div>
+                            <div class="title arrow-down">{{ device.name }}</div>
                             <div class="content">
-                                <span>Root</span>
+                                <div class="root-opcua">
+                                    Root
+                                </div>
                             </div>
                         </div>
-                    {%- endfor %}
+                    {% endfor %}
                 </div>
-            <a class="btn btn-sm float-right" href='/opcua_server'>configure</a></td>
+                <br><center><a class="btn btn-sm" href='/opcua_server'>configure</a></center>
+            </td>
         </tr>
         {% endif %}
         <tr>
