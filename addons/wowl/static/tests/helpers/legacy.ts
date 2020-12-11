@@ -16,6 +16,8 @@ export const legacyProm: Promise<any> = new Promise((resolve) => {
       ListController: require("web.ListController"),
       core: require("web.core"),
       ReportClientAction: require("report.client_action"),
+      AbstractView: require("web.AbstractView"),
+      legacyViewRegistry: require("web.view_registry"),
     });
     resolve(legacyExports);
   });

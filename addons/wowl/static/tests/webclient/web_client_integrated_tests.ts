@@ -5542,7 +5542,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     webClient.destroy();
     delete core.action_registry.map.test;
-    baseConfig.actionRegistry!.remove('test');
+    baseConfig.actionRegistry!.remove("test");
   });
 
   QUnit.module('Actions in target="inline"');
@@ -6383,7 +6383,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     async function (assert) {
       assert.expect(5);
 
-      baseConfig.serverData!.views!['partner,false,form'] = `
+      baseConfig.serverData!.views!["partner,false,form"] = `
         <form>
           <field name="display_name"/>
           <footer>
@@ -6393,21 +6393,25 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       `;
 
       const mockRPC: RPC = async (route, args) => {
-        if (route === '/web/dataset/call_button') {
+        if (route === "/web/dataset/call_button") {
           return Promise.reject();
         }
       };
-      const webClient = await createWebClient({baseConfig, mockRPC});
+      const webClient = await createWebClient({ baseConfig, mockRPC });
       await doAction(webClient, 5);
-      assert.containsOnce(webClient.el!, '.modal .o_form_view');
+      assert.containsOnce(webClient.el!, ".modal .o_form_view");
 
       testUtils.dom.click(webClient.el!.querySelector('.modal footer button[name="object"]')!);
-      assert.containsOnce(webClient.el!, '.modal .o_form_view');
-      assert.ok((webClient.el!.querySelector('.modal footer button') as HTMLButtonElement).disabled);
+      assert.containsOnce(webClient.el!, ".modal .o_form_view");
+      assert.ok(
+        (webClient.el!.querySelector(".modal footer button") as HTMLButtonElement).disabled
+      );
       await testUtils.nextTick();
       await legacyExtraNextTick();
-      assert.containsOnce(webClient.el!, '.modal .o_form_view');
-      assert.notOk((webClient.el!.querySelector('.modal footer button') as HTMLButtonElement).disabled);
+      assert.containsOnce(webClient.el!, ".modal .o_form_view");
+      assert.notOk(
+        (webClient.el!.querySelector(".modal footer button") as HTMLButtonElement).disabled
+      );
       webClient.destroy();
     }
   );
@@ -6454,30 +6458,31 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.test(
     'footer buttons are updated when having another action in target "new"',
     async function (assert) {
-        assert.expect(9);
+      assert.expect(9);
 
-        baseConfig.serverData!.views!['partner,false,form'] = '<form>' +
-                '<field name="display_name"/>' +
-                '<footer>' +
-                    '<button string="Create" type="object" class="infooter"/>' +
-                '</footer>' +
-            '</form>';
+      baseConfig.serverData!.views!["partner,false,form"] =
+        "<form>" +
+        '<field name="display_name"/>' +
+        "<footer>" +
+        '<button string="Create" type="object" class="infooter"/>' +
+        "</footer>" +
+        "</form>";
 
-        const webClient = await createWebClient({ baseConfig });
-        await doAction(webClient, 5);
-        assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button[special="save"]');
-        assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button.infooter');
-        assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button.infooter');
-        assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button');
+      const webClient = await createWebClient({ baseConfig });
+      await doAction(webClient, 5);
+      assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button[special="save"]');
+      assert.containsNone(webClient.el!, ".o_technical_modal .modal-body button.infooter");
+      assert.containsOnce(webClient.el!, ".o_technical_modal .modal-footer button.infooter");
+      assert.containsOnce(webClient.el!, ".o_technical_modal .modal-footer button");
 
-        await doAction(webClient, 25);
-        assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button.infooter');
-        assert.containsNone(webClient.el!, '.o_technical_modal .modal-footer button.infooter');
-        assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button[special="save"]');
-        assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button[special="save"]');
-        assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button');
+      await doAction(webClient, 25);
+      assert.containsNone(webClient.el!, ".o_technical_modal .modal-body button.infooter");
+      assert.containsNone(webClient.el!, ".o_technical_modal .modal-footer button.infooter");
+      assert.containsNone(webClient.el!, '.o_technical_modal .modal-body button[special="save"]');
+      assert.containsOnce(webClient.el!, '.o_technical_modal .modal-footer button[special="save"]');
+      assert.containsOnce(webClient.el!, ".o_technical_modal .modal-footer button");
 
-        webClient.destroy();
+      webClient.destroy();
     }
   );
 
@@ -6488,30 +6493,30 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
       const ClientAction = AbstractAction.extend({
         renderButtons($target: JQuery) {
-          const button = document.createElement('button');
-          button.setAttribute('class', 'o_stagger_lee');
+          const button = document.createElement("button");
+          button.setAttribute("class", "o_stagger_lee");
           $target[0].appendChild(button);
         },
       });
-      core.action_registry.add('test', ClientAction);
+      core.action_registry.add("test", ClientAction);
 
-      const webClient = await createWebClient({baseConfig});
+      const webClient = await createWebClient({ baseConfig });
       await doAction(webClient, {
-        tag: 'test',
-        target: 'new',
-        type: 'ir.actions.client',
+        tag: "test",
+        target: "new",
+        type: "ir.actions.client",
       });
-      assert.containsOnce(webClient.el!, '.modal footer button.o_stagger_lee');
+      assert.containsOnce(webClient.el!, ".modal footer button.o_stagger_lee");
       assert.containsNone(webClient.el!, '.modal footer button[special="save"]');
       await doAction(webClient, 25);
-      assert.containsNone(webClient.el!, '.modal footer button.o_stagger_lee');
+      assert.containsNone(webClient.el!, ".modal footer button.o_stagger_lee");
       assert.containsOnce(webClient.el!, '.modal footer button[special="save"]');
 
       webClient.destroy();
       delete core.action_registry.map.test;
-      baseConfig.actionRegistry!.remove('test');
+      baseConfig.actionRegistry!.remove("test");
     }
-    );
+  );
 
   QUnit.skip("execute action without modal", async function (assert) {
     /*
@@ -6655,49 +6660,47 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
     const ClientAction = AbstractAction.extend({
       start() {
-        this.$el.text('Hello World');
-        this.$el.addClass('o_client_action_test');
+        this.$el.text("Hello World");
+        this.$el.addClass("o_client_action_test");
       },
-      canBeRemoved(){
-        assert.step('canBeRemoved');
+      canBeRemoved() {
+        assert.step("canBeRemoved");
         return this._super.apply(this, arguments);
-      }
+      },
     });
-    core.action_registry.add('ClientAction', ClientAction);
+    core.action_registry.add("ClientAction", ClientAction);
 
     const ClientAction2 = AbstractAction.extend({
       start() {
-        this.$el.text('Hello World');
-        this.$el.addClass('o_client_action_test_2');
+        this.$el.text("Hello World");
+        this.$el.addClass("o_client_action_test_2");
       },
-      canBeRemoved(){
-        assert.step('canBeRemoved_2');
+      canBeRemoved() {
+        assert.step("canBeRemoved_2");
         return this._super.apply(this, arguments);
-      }
+      },
     });
-    core.action_registry.add('ClientAction2', ClientAction2);
+    core.action_registry.add("ClientAction2", ClientAction2);
 
-
-    baseConfig.serviceRegistry!.add('router', makeFakeRouterService({onPushState: () => assert.step('hashSet')}), true);
-    const webClient = await createWebClient({baseConfig});
+    baseConfig.serviceRegistry!.add(
+      "router",
+      makeFakeRouterService({ onPushState: () => assert.step("hashSet") }),
+      true
+    );
+    const webClient = await createWebClient({ baseConfig });
     assert.verifySteps([]);
     await doAction(webClient, 9);
-    assert.verifySteps([
-      'hashSet',
-      ]);
-    assert.containsOnce(webClient.el!, '.o_client_action_test');
+    assert.verifySteps(["hashSet"]);
+    assert.containsOnce(webClient.el!, ".o_client_action_test");
     assert.verifySteps([]);
-    await doAction(webClient, 'ClientAction2');
-    assert.containsOnce(webClient.el!, '.o_client_action_test_2');
-    assert.verifySteps([
-      'canBeRemoved',
-      'hashSet',
-      ]);
+    await doAction(webClient, "ClientAction2");
+    assert.containsOnce(webClient.el!, ".o_client_action_test_2");
+    assert.verifySteps(["canBeRemoved", "hashSet"]);
     webClient.destroy();
     delete core.action_registry.map.ClientAction;
     delete core.action_registry.map.ClientAction2;
-    baseConfig.actionRegistry!.remove('ClientAction');
-    baseConfig.actionRegistry!.remove('ClientAction2');
+    baseConfig.actionRegistry!.remove("ClientAction");
+    baseConfig.actionRegistry!.remove("ClientAction2");
   });
 
   QUnit.skip("on_close should be called only once", async function (assert) {
@@ -6743,6 +6746,46 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         webClient.destroy();
         */
   });
+
+  QUnit.test("jsClass legacy", async function (assert) {
+    assert.expect(2);
+    const { AbstractView, legacyViewRegistry } = getLegacy() as any;
+
+    const TestView = AbstractView.extend({
+      viewType: "test_view",
+    });
+    legacyViewRegistry.add("test_view", TestView);
+
+    const TestJsClassView = TestView.extend({
+      init() {
+        this._super.call(this, ...arguments);
+        assert.step("init js class");
+      },
+    });
+    legacyViewRegistry.add("test_jsClass", TestJsClassView);
+
+    baseConfig.serverData!.views!["partner,false,test_view"] = `
+      <div js_class="test_jsClass"></div>
+    `;
+    baseConfig.serverData!.actions![9999] = {
+      id: 1,
+      name: "Partners Action 1",
+      res_model: "partner",
+      type: "ir.actions.act_window",
+      views: [[false, "test_view"]],
+    };
+
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 9999);
+    assert.verifySteps(["init js class"]);
+    delete legacyViewRegistry.map.test_view;
+    delete legacyViewRegistry.map.test_jsClass;
+    baseConfig.viewRegistry!.remove("test_view");
+    baseConfig.viewRegistry!.remove("test_jsClass");
+    webClient.destroy();
+  });
+
+  QUnit.skip("jsClass wowl", async function (assert) {});
 
   QUnit.test("properly push state active_id", async function (assert) {
     assert.expect(3);
