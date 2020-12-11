@@ -996,7 +996,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       closingProms,
       ...params,
     });
-    await Promise.all([dialogCloseProm].concat(closingProms.map((fn)=>fn())));
+    await Promise.all([dialogCloseProm].concat(closingProms.map((fn) => fn())));
   }
 
   // ---------------------------------------------------------------------------

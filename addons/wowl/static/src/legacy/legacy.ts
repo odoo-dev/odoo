@@ -253,8 +253,10 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     do_push_state() {}
   }
 
-  const magicReloadSymbol = Symbol('magicReload');
-  function useMagicLegacyReload<T extends ComponentAdapter = ComponentAdapter>(): () => (Promise<any> | null) {
+  const magicReloadSymbol = Symbol("magicReload");
+  function useMagicLegacyReload<
+    T extends ComponentAdapter = ComponentAdapter
+  >(): () => Promise<any> | null {
     const comp: T = <T>Component.current;
     if (comp.props.widget && comp.props.widget[magicReloadSymbol]) {
       return comp.props.widget[magicReloadSymbol];
