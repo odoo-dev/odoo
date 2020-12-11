@@ -469,6 +469,7 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
                                t-on-scrollTo.stop="onScrollTo"/>
         `;
         static components = { ClientActionAdapter };
+        static isLegacy = true;
 
         controllerRef = hooks.useRef<ActionAdapter>("controller");
 
