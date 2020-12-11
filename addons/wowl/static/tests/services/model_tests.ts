@@ -137,8 +137,14 @@ QUnit.test("readGroup method", async (assert) => {
     .readGroup([["user_id", "=", 2]], ["amount_total:sum"], ["date_order"], { offset: 1 });
   assert.strictEqual(query.route, "/web/dataset/call_kw/sale.order/web_read_group");
   assert.deepEqual(query.params, {
-    args: [[["user_id", "=", 2]], ["amount_total:sum"], ["date_order"]],
-    kwargs: { context: { uid: 2 }, offset: 1 },
+    args: [],
+    kwargs: {
+      domain: [["user_id", "=", 2]],
+      fields: ["amount_total:sum"],
+      groupby: ["date_order"],
+      context: { uid: 2 },
+      offset: 1,
+    },
     method: "web_read_group",
     model: "sale.order",
   });

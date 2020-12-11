@@ -99,6 +99,9 @@ function write(rpc: RPC, env: OdooEnv, model: string): Model["write"] {
 function readGroup(rpc: RPC, env: OdooEnv, model: string): Model["readGroup"] {
   return (domain, fields, groupby, options = {}, ctx = {}) => {
     const kwargs: any = {
+      domain,
+      groupby,
+      fields,
       context: ctx,
     };
     if (options.lazy) {
@@ -113,7 +116,7 @@ function readGroup(rpc: RPC, env: OdooEnv, model: string): Model["readGroup"] {
     if (options.limit) {
       kwargs.limit = options.limit;
     }
-    return callModel(rpc, env, model)("web_read_group", [domain, fields, groupby], kwargs);
+    return callModel(rpc, env, model)("web_read_group", [], kwargs);
   };
 }
 
