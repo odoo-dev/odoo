@@ -57,9 +57,15 @@ export class NavBar extends Component<{}, OdooEnv> {
   }
 
   protected async adapt() {
+    if (!this.el) {
+      // currently, the promise returned by 'render' is resolved at the end of
+      // the rendering even if the component has been destroyed meanwhile, so we
+      // may get here and have this.el unset
+      return;
+    }
     // ------- Initialize -------
     // Check actual "more" dropdown state
-    const moreDropdown = this.el!.querySelector<HTMLElement>(".o_menu_sections_more");
+    const moreDropdown = this.el.querySelector<HTMLElement>(".o_menu_sections_more");
     const initialAppSectionsExtra = this.currentAppSectionsExtra;
 
     // Restore (needed to get offset widths)
@@ -71,7 +77,7 @@ export class NavBar extends Component<{}, OdooEnv> {
     moreDropdown!.classList.add("d-none");
 
     // ------- Check overflowing sections -------
-    const sectionsMenu = this.el!.querySelector<HTMLElement>(".o_menu_sections")!;
+    const sectionsMenu = this.el.querySelector<HTMLElement>(".o_menu_sections")!;
     const sectionsAvailableWidth = sectionsMenu.offsetWidth;
     const sectionsTotalWidth = sections.reduce((sum, s) => sum + s.offsetWidth, 0);
 
