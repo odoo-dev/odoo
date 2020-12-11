@@ -66,9 +66,11 @@ export const notificationService: Service<NotificationService> = {
         id: ++notifId,
         message,
       });
+      const sticky = notif.sticky;
+      delete notif.sticky;
       notifications.push(notif);
       bus.trigger("UPDATE");
-      if (!notif.sticky) {
+      if (!sticky) {
         odoo.browser.setTimeout(() => close(notif.id), AUTOCLOSE_DELAY);
       }
       return notif.id;
