@@ -47,6 +47,17 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12 col-lg-6 o_setting_box" id="wave_transfers">
+                                <div class="o_setting_left_pane">
+                                    <field name="module_stock_picking_wave"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="module_stock_picking_wave"/>
+                                    <div class="text-muted">
+                                        Process operations in wave per worker
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-12 col-lg-6 o_setting_box" id="quality_control">
                                 <div class="o_setting_left_pane">
                                     <field name="module_quality_control" widget="upgrade_boolean"/>

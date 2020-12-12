@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherited" model="ir.ui.view">
+        <field name="name">stock_picking_wave.picking.form</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="mode">primary</field>
+        <field name="priority" eval="1000"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="replace">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,assigned,done"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_move_wave_tree_inherited" model="ir.ui.view">
+        <field name="name">stock_picking_wave.picking.move.tree</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_picking_move_tree"/>
+        <field name="mode">primary</field>
+        <field name="priority" eval="1000"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="picking_id" required="1"
+                    attrs="{'readonly': [('id', '!=', False)]}"
+                    domain="[('id', 'in', parent.picking_ids)]"
+                    options="{'no_create_edit': True}"/>
+            </xpath>
+            <xpath expr="//field[@name='quantity_done']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_tree_wave_inherit" model="ir.ui.view">
+        <field name="name">stock_picking_wave.picking.tree</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="mode">primary</field>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name='optional'>hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="attributes">
+                <attribute name='optional'>hide</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="stock_picking_wave_form" model="ir.ui.view">
+        <field name="name">stock.picking.wave.form</field>
+        <field name="model">stock.picking.wave</field>
+        <field name="arch" type="xml">
+            <form string="Stock Wave Transfer">
+                <header>
+                    <button name="action_done" string="Validate" type="object" class="oe_highlight"
+                        attrs="{'invisible': [('state', '!=', 'in_progress')]}"/>
+                    <button name="action_print" states="in_progress,done" string="Print" type="object"/>
+                    <button name="action_cancel" string="Cancel" type="object" states="in_progress"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" class="oe_inline"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="picking_type_id" force_save="1"/>
+                            <field name="location_id" attrs="{'invisible': [('location_id', '=', False), ('state', '!=', 'draft')]}"/>
+                            <field name="location_dest_id" attrs="{'invisible': [('location_dest_id', '=', False), ('state', '!=', 'draft')]}"/>
+                        </group>
+                        <group>
+                            <field name="scheduled_date"/>
+                            <field name="company_id" groups="base.group_multi_company" attrs="{'readonly': [('picking_ids', '!=', [])]}" force_save="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Detailed Operations">
+                            <field name="move_line_ids" context="{'tree_view_ref': 'stock_picking_wave.view_move_line_tree'}" widget="many2many" domain="[('picking_type_id', '=', picking_type_id), ('state', '!=', 'done')]"/>
+                            <button class="oe_highlight" name="action_put_in_pack" type="object" string="Put in Pack" attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}" groups="stock.group_tracking_lot"/>
+                        </page>
+                        <page string="Operations" attrs="{'invisible': [('state', '=', 'draft')]}">
+                            <field name="move_ids" context="{'tree_view_ref': 'stock_picking_wave.view_picking_move_wave_tree_inherited'}"/>
+                        </page>
+                        <page string="Transfers">
+                            <field name="allowed_picking_ids" invisible="1"/>
+                            <field name="picking_ids"
+                                widget="many2many"
+                                domain="[('state', 'in', ['confirmed', 'waiting', 'assigned']), ('picking_type_id', '=', picking_type_id)]"
+                                attrs="{'readonly': ['&amp;', '&amp;', ('scheduled_date', '=', False), ('location_id', '=', False), ('location_dest_id', '=', False)]}"
+                                context="{'tree_view_ref': 'stock_picking_wave.view_picking_tree_wave_inherit'}">
+                                <tree editable="top">
+                                    <field name="name"/>
+                                    <field name="company_id" invisible="1"/>
+                                    <field name="scheduled_date"/>
+                                    <field name="location_id"/>
+                                    <field name="origin"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="stock_picking_wave_tree" model="ir.ui.view">
+        <field name="name">stock.picking.wave.tree</field>
+        <field name="model">stock.picking.wave</field>
+        <field name="arch" type="xml">
+            <tree string="Stock Wave Transfer" multi_edit="1" sample="1">
+                <field name="name" decoration-bf="1"/>
+                <field name="scheduled_date"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('draft', 'in_progress')"/>
+                <field name="activity_exception_decoration" widget="activity_exception"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="stock_picking_wave_kanban" model="ir.ui.view">
+        <field name="name">stock.picking.wave.kanban</field>
+        <field name="model">stock.picking.wave</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                </div>
+                                <field name="state" widget="label_selection"/>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="picking_type_id"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <!-- <field name="scheduled_date" widget="date"/> -->
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="stock_picking_wave_filter" model="ir.ui.view">
+        <field name="name">stock.picking.wave.filter</field>
+        <field name="model">stock.picking.wave</field>
+        <field name="arch" type="xml">
+            <search string="Search Wave Transfer">
+                <field name="name" string="Wave Transfer"/>
+                <field name="user_id"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="in_progress" string="In Progress" domain="[('state', '=', 'in_progress')]" help="Wave Transfers not finished"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter invisible="1" string="Late Activities" name="activities_overdue"
+                    domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                    help="Show all records which has next action date is before today"/>
+                <filter invisible="1" string="Today Activities" name="activities_today"
+                    domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
+                    domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Responsible" name="user" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="State" name="state" domain="[]" context="{'group_by': 'state'}"/>
+                </group>
+           </search>
+        </field>
+    </record>
+
+    <record id="stock_picking_wave_action" model="ir.actions.act_window">
+        <field name="name">Wave Transfers</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.picking.wave</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="context">{
+            "search_default_draft" : True,
+            "search_default_in_progress" : True,
+            'default_company_id': allowed_company_ids[0]
+        }</field>
+        <field name="search_view_id" ref="stock_picking_wave_filter"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new wave transfer
+          </p><p>
+            The goal of the wave transfer is to group operations that may
+            (needs to) be done together in order to increase their efficiency.
+            It may also be useful to assign jobs (one person = one wave) or
+            help the timing management of operations (tasks to be done at 1pm).
+          </p>
+        </field>
+    </record>
+
+    <record id="action_validate_wave" model="ir.actions.server">
+        <field name="name">Validate</field>
+        <field name="model_id" ref="stock_picking_wave.model_stock_picking_wave"/>
+        <field name="binding_model_id" ref="stock_picking_wave.model_stock_picking_wave"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+        if records:
+            res = records.action_done()
+            if isinstance(res, dict):
+                action = res
+        </field>
+    </record>
+
+
+    <menuitem action="stock_picking_wave_action" id="stock_picking_wave_menu" parent="stock.menu_stock_warehouse_mgmt" sequence="10"/>
+
+</odoo>

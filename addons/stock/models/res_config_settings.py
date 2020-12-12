@@ -24,6 +24,7 @@ class ResConfigSettings(models.TransientModel):
     group_warning_stock = fields.Boolean("Warnings for Stock", implied_group='stock.group_warning_stock')
     group_stock_sign_delivery = fields.Boolean("Signature", implied_group='stock.group_stock_sign_delivery')
     module_stock_picking_batch = fields.Boolean("Batch Pickings")
+    module_stock_picking_wave = fields.Boolean("Wave Pickings")
     module_stock_barcode = fields.Boolean("Barcode Scanner")
     stock_move_email_validation = fields.Boolean(related='company_id.stock_move_email_validation', readonly=False)
     stock_mail_confirmation_template_id = fields.Many2one(related='company_id.stock_mail_confirmation_template_id', readonly=False)
