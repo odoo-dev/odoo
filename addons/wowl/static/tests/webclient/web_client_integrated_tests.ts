@@ -5821,56 +5821,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("data-mobile attribute on action button, in desktop", async function (assert) {
-    /*
-    assert.expect(2);
-
-    testUtils.mock.patch(ActionManager, {
-      doAction(action, options) {
-        assert.strictEqual(options.plop, undefined);
-        return this._super(...arguments);
-      },
-    });
-
-    this.archs["partner,75,kanban"] = `
-            <kanban>
-                <templates>
-                    <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click">
-                            <field name="display_name"/>
-                            <button
-                                name="1"
-                                string="Execute action"
-                                type="action"
-                                data-mobile='{"plop": 28}'/>
-                        </div>
-                    </t>
-                </templates>
-            </kanban>`;
-
-    this.actions.push({
-      id: 100,
-      name: "action 100",
-      res_model: "partner",
-      type: "ir.actions.act_window",
-      views: [[75, "kanban"]],
-    });
-
-    const actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-    });
-
-    await doAction(webClient, 100, {});
-    await testUtils.dom.click($(webClient.el!).find("button[data-mobile]:first"));
-    await legacyExtraNextTick();
-
-    webClient.destroy();
-    testUtils.mock.unpatch(ActionManager);
-    */
-  });
-
   QUnit.module("Search View Action");
 
   QUnit.test("search view should keep focus during do_search", async function (assert) {
