@@ -21,6 +21,7 @@ export interface UserService extends Localization {
   tz: string;
   home_action_id?: number | false;
   db: string;
+  showEffect: boolean;
 }
 
 function computeAllowedCompanyIds(env: OdooEnv): number[] {
@@ -58,6 +59,7 @@ export const userService: Service<UserService> = {
       user_companies,
       home_action_id,
       db,
+      show_effect: showEffect,
     } = info;
 
     const allowedCompanies = computeAllowedCompanyIds(env);
@@ -98,6 +100,7 @@ export const userService: Service<UserService> = {
       },
       home_action_id,
       db,
+      showEffect,
     };
   },
 };

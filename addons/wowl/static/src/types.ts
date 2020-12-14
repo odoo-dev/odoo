@@ -74,6 +74,7 @@ export interface SessionInfo {
   server_version: string;
   server_version_info: (number | string)[];
   home_action_id?: number | false;
+  show_effect: boolean;
 }
 
 export interface Odoo extends Registries {

@@ -37,6 +37,7 @@ import { Route } from "../../src/services/router";
 import type { Context } from "../../src/core/context";
 import { DowloadFileOptionsFromParams } from "../../src/services/download";
 import { uiService } from "../../src/services/ui/ui";
+import { effectService } from "../../src/effects/effects_service";
 
 // JQuery :visible selector
 // https://stackoverflow.com/questions/13388616/firefox-query-selector-and-the-visible-pseudo-selector
@@ -213,7 +214,8 @@ function beforeEachActionManager(): TestConfig {
     .add("model", modelService)
     .add(fakeTitleService.name, fakeTitleService)
     .add(uiService.name, uiService)
-    .add("device", makeFakeDeviceService());
+    .add("device", makeFakeDeviceService())
+    .add(effectService.name, effectService);
 
   const browser = {
     setTimeout: window.setTimeout.bind(window),
@@ -6154,76 +6156,55 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("rainbowman integrated to webClient", async function (assert) {
-    /*
-        assert.expect(10);
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            session: {
-                show_effect: true,
-            },
-        });
-        await doAction(webClient, 1);
-        assert.containsOnce(webClient, '.o_kanban_view');
-        assert.containsNone(webClient, '.o_reward');
-        webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
-        await testUtils.nextTick();
-        await legacyExtraNextTick();
+  QUnit.test("rainbowman integrated to webClient", async function (assert) {
+    assert.expect(10);
 
-        assert.containsOnce(webClient, '.o_reward');
-        assert.containsOnce(webClient, '.o_kanban_view');
-        await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record'));
-        await legacyExtraNextTick();
-        assert.containsNone(webClient, '.o_reward');
-        assert.containsOnce(webClient, '.o_kanban_view');
+    baseConfig.serviceRegistry!.add("user", makeFakeUserService({ showEffect: true }), true);
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 1);
+    assert.containsOnce(webClient.el!, ".o_kanban_view");
+    assert.containsNone(webClient.el!, ".o_reward");
+    webClient.env.services.effects.create("", { fadeout: "no" });
+    await nextTick();
+    await legacyExtraNextTick();
 
-        webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
-        await testUtils.nextTick();
-        await legacyExtraNextTick();
-        assert.containsOnce(webClient, '.o_reward');
-        assert.containsOnce(webClient, '.o_kanban_view');
+    assert.containsOnce(webClient.el!, ".o_reward");
+    assert.containsOnce(webClient.el!, ".o_kanban_view");
+    await testUtils.dom.click(webClient.el!.querySelector(".o_kanban_record"));
+    await legacyExtraNextTick();
+    assert.containsNone(webClient.el!, ".o_reward");
+    assert.containsOnce(webClient.el!, ".o_kanban_view");
 
-        // Do not force rainbow man to destroy on doAction
-        // we let it die either after its animation or on user click
-        await doAction(webClient, 3);
-        assert.containsOnce(webClient, '.o_reward');
-        assert.containsOnce(webClient, '.o_list_view');
+    webClient.env.services.effects.create("", { fadeout: "no" });
+    await nextTick();
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_reward");
+    assert.containsOnce(webClient.el!, ".o_kanban_view");
 
-        webClient.destroy();
-        */
+    // Do not force rainbow man to destroy on doAction
+    // we let it die either after its animation or on user click
+    await doAction(webClient, 3);
+    assert.containsOnce(webClient.el!, ".o_reward");
+    assert.containsOnce(webClient.el!, ".o_list_view");
+
+    webClient.destroy();
   });
 
-  QUnit.skip("show effect notification", async function (assert) {
-    /*
-        assert.expect(6);
+  QUnit.test("show effect notification instead of rainbow man", async function (assert) {
+    assert.expect(6);
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            session: {
-                show_effect: false,
-            },
-            services: {
-                notification: NotificationService
-            }
-        });
-        await doAction(webClient, 1);
-        assert.containsOnce(webClient, '.o_kanban_view');
-        assert.containsNone(webClient, '.o_reward');
-        assert.containsNone(document.querySelector('body'), '.o_notification');
-        webClient.env.bus.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
-        await testUtils.nextTick();
-        await legacyExtraNextTick();
-        assert.containsOnce(webClient, '.o_kanban_view');
-        assert.containsNone(webClient, '.o_reward');
-        assert.containsOnce(document.querySelector('body'), '.o_notification');
-        webClient.destroy();
-        */
+    const webClient = await createWebClient({ baseConfig });
+    await doAction(webClient, 1);
+    assert.containsOnce(webClient.el!, ".o_kanban_view");
+    assert.containsNone(webClient.el!, ".o_reward");
+    assert.containsNone(webClient.el!, ".o_notification");
+    webClient.env.services.effects.create("", { fadeout: "no" });
+    await nextTick();
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_kanban_view");
+    assert.containsNone(webClient.el!, ".o_reward");
+    assert.containsOnce(webClient.el!, ".o_notification");
+    webClient.destroy();
   });
 
   QUnit.test("display warning as notification", async function (assert) {
@@ -6491,81 +6472,62 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         */
   });
 
-  QUnit.skip("on close with effect from server", async function (assert) {
-    /*
-        assert.expect(1);
+  QUnit.test("on close with effect from server", async function (assert) {
+    assert.expect(1);
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            session: {
-                show_effect: true,
-            },
-            mockRPC(route, args) {
-                if (route === '/web/dataset/call_button') {
-                    return Promise.resolve({
-                        type: 'ir.actions.act_window_close',
-                        effect: {
-                            type: 'rainbow_man',
-                            message: 'button called',
-                        }
-                    });
-                }
-                return this._super.apply(this, arguments);
-            },
+    baseConfig.serviceRegistry!.add("user", makeFakeUserService({ showEffect: true }), true);
+
+    const mockRPC: RPC = async (route, args) => {
+      if (route === "/web/dataset/call_button") {
+        return Promise.resolve({
+          type: "ir.actions.act_window_close",
+          effect: {
+            type: "rainbow_man",
+            message: "button called",
+          },
         });
-        await doAction(webClient, 6);
-        await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
-        await legacyExtraNextTick();
-        assert.containsOnce(webClient, '.o_reward');
+      }
+    };
 
-        webClient.destroy();
-        */
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    await doAction(webClient, 6);
+    await click(<HTMLElement>webClient.el!.querySelector('button[name="object"]'));
+    assert.containsOnce(webClient, ".o_reward");
+
+    webClient.destroy();
   });
 
-  QUnit.skip("on close with effect in xml", async function (assert) {
-    /*
-        assert.expect(2);
+  QUnit.test("on close with effect in xml", async function (assert) {
+    assert.expect(2);
 
-        this.archs['partner,false,form'] = `
-            <form>
-                <header>
-                    <button string="Call method"
-                        name="object"
-                        type="object"
-                        effect="{'type': 'rainbow_man', 'message': 'rainBowInXML'}"/>
-                </header>
-                    <field name="display_name"/>
-            </form>`;
+    baseConfig.serverData!.views!["partner,false,form"] = `
+    <form>
+      <header>
+        <button string="Call method" name="object" type="object"
+         effect="{'type': 'rainbow_man', 'message': 'rainBowInXML'}"
+        />
+      </header>
+      <field name="display_name"/>
+    </form>`;
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            session: {
-                show_effect: true,
-            },
-            mockRPC(route, args) {
-                if (route === '/web/dataset/call_button') {
-                    return Promise.resolve();
-                }
-                return this._super.apply(this, arguments);
-            },
-        });
-        await doAction(webClient, 6);
-        await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
-        await legacyExtraNextTick();
-        assert.containsOnce(webClient, '.o_reward');
-        assert.strictEqual(
-            webClient.el.querySelector('.o_reward .o_reward_msg_content').textContent,
-            'rainBowInXML'
-        );
+    baseConfig.serviceRegistry!.add("user", makeFakeUserService({ showEffect: true }), true);
+    const mockRPC: RPC = async (route, args) => {
+      if (route === "/web/dataset/call_button") {
+        return Promise.resolve(false);
+      }
+    };
 
-        webClient.destroy();
-        */
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    await doAction(webClient, 6);
+    await click(<HTMLElement>webClient.el!.querySelector('button[name="object"]'));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient.el!, ".o_reward");
+    assert.strictEqual(
+      webClient.el!.querySelector(".o_reward .o_reward_msg_content")!.textContent,
+      "rainBowInXML"
+    );
+
+    webClient.destroy();
   });
 
   QUnit.test("hashchange does not trigger canberemoved right away", async function (assert) {
@@ -6616,26 +6578,28 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig.actionRegistry!.remove("ClientAction2");
   });
 
-  QUnit.test("on_close should be called only once with right parameters in js_class form view", async function (assert) {
-    assert.expect(4);
-    // This test is quite specific but matches a real case in legacy: event_configurator_widget.js
-    // Clicking on form view's action button triggers its own mechanism: it saves the record and closes the dialog.
-    // Now it is possible that the dialog action wants to do something of its own at closing time, to, for instance
-    // update the main action behind it, with specific parameters.
-    // This test ensures that this flow is supported in legacy,
-    const {FormView , legacyViewRegistry } = await getLegacy() as any;
+  QUnit.test(
+    "on_close should be called only once with right parameters in js_class form view",
+    async function (assert) {
+      assert.expect(4);
+      // This test is quite specific but matches a real case in legacy: event_configurator_widget.js
+      // Clicking on form view's action button triggers its own mechanism: it saves the record and closes the dialog.
+      // Now it is possible that the dialog action wants to do something of its own at closing time, to, for instance
+      // update the main action behind it, with specific parameters.
+      // This test ensures that this flow is supported in legacy,
+      const { FormView, legacyViewRegistry } = (await getLegacy()) as any;
 
-    const TestCustoFormController = FormView.prototype.config.Controller.extend({
-      async saveRecord() {
-        await this._super.apply(this, arguments);
-        this.do_action({type: 'ir.actions.act_window_close', infos: { cantaloupe: 'island' }});
-      }
-    });
-    const TestCustoFormView = FormView.extend({});
-    TestCustoFormView.prototype.config.Controller = TestCustoFormController;
-    legacyViewRegistry.add('test_view', TestCustoFormView);
+      const TestCustoFormController = FormView.prototype.config.Controller.extend({
+        async saveRecord() {
+          await this._super.apply(this, arguments);
+          this.do_action({ type: "ir.actions.act_window_close", infos: { cantaloupe: "island" } });
+        },
+      });
+      const TestCustoFormView = FormView.extend({});
+      TestCustoFormView.prototype.config.Controller = TestCustoFormController;
+      legacyViewRegistry.add("test_view", TestCustoFormView);
 
-    baseConfig.serverData!.views!['partner,1,form'] = `
+      baseConfig.serverData!.views!["partner,1,form"] = `
       <form js_class="test_view">
         <field name="foo" />
         <footer>
@@ -6643,25 +6607,29 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         </footer>
       </form>`;
 
-     const webClient = await createWebClient({ baseConfig });
-     await doAction(webClient, 24); // main form view
-     await doAction(webClient, 25, { // Custom jsClass form view in target new
-       onClose(infos: any) {
-         assert.step('onClose');
-         assert.deepEqual(infos, {cantaloupe: 'island'});
-       },
-     });
+      const webClient = await createWebClient({ baseConfig });
+      await doAction(webClient, 24); // main form view
+      await doAction(webClient, 25, {
+        // Custom jsClass form view in target new
+        onClose(infos: any) {
+          assert.step("onClose");
+          assert.deepEqual(infos, { cantaloupe: "island" });
+        },
+      });
 
-     // Close dialog by clicking on save button
-     await testUtils.dom.click(webClient.el!.querySelector('.o_dialog .modal-footer button[special=save]'));
-     assert.verifySteps(['onClose']);
+      // Close dialog by clicking on save button
+      await testUtils.dom.click(
+        webClient.el!.querySelector(".o_dialog .modal-footer button[special=save]")
+      );
+      assert.verifySteps(["onClose"]);
 
-     await legacyExtraNextTick();
-     assert.containsNone(webClient.el!, '.modal');
-     webClient.destroy();
-     delete legacyViewRegistry.map.test_view;
-     baseConfig.viewRegistry!.remove('test_view');
-   });
+      await legacyExtraNextTick();
+      assert.containsNone(webClient.el!, ".modal");
+      webClient.destroy();
+      delete legacyViewRegistry.map.test_view;
+      baseConfig.viewRegistry!.remove("test_view");
+    }
+  );
 
   QUnit.test("jsClass legacy", async function (assert) {
     assert.expect(2);
@@ -6700,8 +6668,6 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig.viewRegistry!.remove("test_jsClass");
     webClient.destroy();
   });
-
-  QUnit.skip("jsClass wowl", async function (assert) {});
 
   QUnit.test("properly push state active_id", async function (assert) {
     assert.expect(3);

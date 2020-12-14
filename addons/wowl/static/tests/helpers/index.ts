@@ -31,7 +31,7 @@ export async function setupTests(): Promise<void> {
   for (let child of doc.querySelectorAll("templates > [owl]")) {
     child.removeAttribute("owl");
   }
-  templates =  new XMLSerializer().serializeToString(doc);
+  templates = new XMLSerializer().serializeToString(doc);
 
   setTemplates(templates);
   await Promise.all([whenReady(), legacyProm]);

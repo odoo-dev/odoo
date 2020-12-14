@@ -458,6 +458,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
             special: payload.action_data.special,
             type: payload.action_data.type,
             onClose: payload.on_closed,
+            effect: payload.action_data.effect,
           })
           .then(onSuccess)
           .catch(onFail);

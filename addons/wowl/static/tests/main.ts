@@ -39,6 +39,7 @@ import "./services/crash_manager_tests";
 import "./crash_manager/error_dialogs_tests";
 import "./services/dialog_manager_tests";
 import "./services/title_tests";
+import "./effects/rainbow_man_tests";
 
 (async () => {
   await setupTests();

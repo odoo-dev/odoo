@@ -18,7 +18,7 @@ export const legacyProm: Promise<any> = new Promise((resolve) => {
       ReportClientAction: require("report.client_action"),
       AbstractView: require("web.AbstractView"),
       legacyViewRegistry: require("web.view_registry"),
-      FormView: require('web.FormView'),
+      FormView: require("web.FormView"),
     });
     resolve(legacyExports);
   });
