@@ -11,74 +11,110 @@ import { Env } from "@odoo/owl/dist/types/component/component";
 import { RPCError } from "../services/rpc";
 import OdooError from "./odoo_error";
 
-function handleError(error: OdooError, env: OdooEnv) {
-  switch (error.name) {
-    case "UNKNOWN_CORS_ERROR":
-      env.services.dialog_manager.open(NetworkErrorDialog, {
-        traceback: error.traceback || error.stack,
-        message: error.message,
-        name: error.name,
-      });
-      break;
-    case "UNCAUGHT_CLIENT_ERROR":
-      env.services.dialog_manager.open(ClientErrorDialog, {
-        traceback: error.traceback || error.stack,
-        message: error.message,
-        name: error.name,
-      });
-      break;
-    case "UNCAUGHT_EMPTY_REJECTION_ERROR":
-      env.services.dialog_manager.open(ClientErrorDialog, {
-        message: error.message,
-        name: error.name,
-      });
-      break;
-    case "RPC_ERROR":
-      // When an error comes from the server, it can have an exeption name.
-      // (or any string truly). It is used as key in the error dialog from
-      // server registry to know which dialog component to use.
-      // It's how a backend dev can easily map its error to another component.
-      // Note that for a client side exception, we don't use this registry
-      // as we can directly assign a value to `component`.
-
-      // error is here a RPCError
-      const exceptionName = (error as RPCError).exceptionName;
-      let ErrorComponent = error.Component;
-      if (!ErrorComponent && exceptionName && odoo.errorDialogRegistry.contains(exceptionName)) {
-        ErrorComponent = odoo.errorDialogRegistry.get(exceptionName);
-      }
-
-      env.services.dialog_manager.open(ErrorComponent || RPCErrorDialog, {
-        traceback: error.traceback || error.stack,
-        message: error.message,
-        name: error.name,
-        exceptionName: (error as RPCError).exceptionName,
-        data: (error as RPCError).data,
-        subType: (error as RPCError).subType,
-        code: (error as RPCError).code,
-        type: (error as RPCError).type,
-      });
-      break;
-    default:
-      let DialogComponent: Type<Component<any, Env>> = ErrorDialog;
-      // If an error has been defined to have a custom dialog
-      if (error.Component) {
-        DialogComponent = error.Component!;
-      }
-      env.services.dialog_manager.open(DialogComponent, {
-        traceback: error.traceback || error.stack,
-        message: error.message,
-        name: error.name,
-      });
-      break;
-  }
-  env.bus.trigger("ERROR_DISPATCHED", error);
-}
-
 export const crashManagerService: Service<void> = {
   name: "crash_manager",
-  dependencies: ["dialog_manager"],
+  dependencies: ["dialog_manager", "notifications", "rpc"],
   deploy(env: OdooEnv): void {
+    let connectionLostNotifId: number | null;
+
+    function handleError(error: OdooError, env: OdooEnv) {
+      switch (error.name) {
+        case "UNKNOWN_CORS_ERROR":
+          env.services.dialog_manager.open(NetworkErrorDialog, {
+            traceback: error.traceback || error.stack,
+            message: error.message,
+            name: error.name,
+          });
+          break;
+        case "UNCAUGHT_CLIENT_ERROR":
+          env.services.dialog_manager.open(ClientErrorDialog, {
+            traceback: error.traceback || error.stack,
+            message: error.message,
+            name: error.name,
+          });
+          break;
+        case "UNCAUGHT_EMPTY_REJECTION_ERROR":
+          env.services.dialog_manager.open(ClientErrorDialog, {
+            message: error.message,
+            name: error.name,
+          });
+          break;
+        case "RPC_ERROR":
+          // When an error comes from the server, it can have an exeption name.
+          // (or any string truly). It is used as key in the error dialog from
+          // server registry to know which dialog component to use.
+          // It's how a backend dev can easily map its error to another component.
+          // Note that for a client side exception, we don't use this registry
+          // as we can directly assign a value to `component`.
+
+          // error is here a RPCError
+          const exceptionName = (error as RPCError).exceptionName;
+          let ErrorComponent = error.Component;
+          if (
+            !ErrorComponent &&
+            exceptionName &&
+            odoo.errorDialogRegistry.contains(exceptionName)
+          ) {
+            ErrorComponent = odoo.errorDialogRegistry.get(exceptionName);
+          }
+
+          env.services.dialog_manager.open(ErrorComponent || RPCErrorDialog, {
+            traceback: error.traceback || error.stack,
+            message: error.message,
+            name: error.name,
+            exceptionName: (error as RPCError).exceptionName,
+            data: (error as RPCError).data,
+            subType: (error as RPCError).subType,
+            code: (error as RPCError).code,
+            type: (error as RPCError).type,
+          });
+          break;
+        case "CONNECTION_LOST_ERROR": {
+          if (connectionLostNotifId) {
+            // notification already displayed (can occur if there were several
+            // concurrent rpcs when the connection was lost)
+            break;
+          }
+          connectionLostNotifId = env.services.notifications.create(
+            env._t("Connection lost. Trying to reconnect..."),
+            { sticky: true }
+          );
+          let delay = 2000;
+          odoo.browser.setTimeout(function checkConnection() {
+            env.services
+              .rpc("/web/webclient/version_info", {})
+              .then(function () {
+                env.services.notifications.close(connectionLostNotifId!);
+                connectionLostNotifId = null;
+                env.services.notifications.create(
+                  env._t("Connection restored. You are back online."),
+                  { type: "info" }
+                );
+              })
+              .catch((e) => {
+                // exponential backoff, with some jitter
+                delay = delay * 1.5 + 500 * Math.random();
+                odoo.browser.setTimeout(checkConnection, delay);
+              });
+          }, delay);
+          break;
+        }
+        default:
+          let DialogComponent: Type<Component<any, Env>> = ErrorDialog;
+          // If an error has been defined to have a custom dialog
+          if (error.Component) {
+            DialogComponent = error.Component!;
+          }
+          env.services.dialog_manager.open(DialogComponent, {
+            traceback: error.traceback || error.stack,
+            message: error.message,
+            name: error.name,
+          });
+          break;
+      }
+      env.bus.trigger("ERROR_DISPATCHED", error);
+    }
+
     window.addEventListener("error", (ev: ErrorEvent) => {
       const { colno, error: eventError, filename, lineno, message } = ev;
       let err;
