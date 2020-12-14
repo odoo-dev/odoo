@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="event_search_tag">
+        <span
+            t-att-data-group="group"
+            t-att-data-value="value"
+            class="o_wesponsor_search_tag align-items-baseline border d-inline-flex pl-2 mt-3 rounded ml16 mb-2 bg-white">
+            <i class="fa fa-tag mr-2 text-muted"/>
+            <t t-esc="value"/>
+            <a href="#" class="btn border-0 py-1">&#215;</a>
+        </span>
+    </t>
+</templates>
