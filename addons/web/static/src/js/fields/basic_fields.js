@@ -622,6 +622,31 @@ var FieldDateRange = InputField.extend({
         }
         this._super.apply(this, arguments);
     },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * Field widget is valid if value entered can convered to date/dateime value
+     * while parsing input value to date/datetime throws error then widget considered
+     * invalid
+     *
+     * @override
+     */
+    isValid: function () {
+        const value = this.mode === "readonly" ? this.value : this.$input.val();
+        try {
+            return field_utils.parse[this.formatType](value, this.field, { timezone: true }) || true;
+        } catch (error) {
+            return false;
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
      * Return the date written in the input, in UTC.
      *
@@ -632,12 +657,10 @@ var FieldDateRange = InputField.extend({
         try {
             // user may enter manual value in input and it may not be parsed as date/datetime value
             this.removeInvalidClass();
-            var value = field_utils.parse[this.formatType](this.$input.val(), this.field, { timezone: true });
-            return value;
+            return field_utils.parse[this.formatType](this.$input.val(), this.field, { timezone: true });
         } catch (error) {
             this.setInvalidClass();
-            // return wrongly entered value so parseValue fails and save will throw invalid notification
-            return this.$input.val();
+            return false;
         }
     },
 
