@@ -452,15 +452,31 @@ class WebsiteSale(http.Controller):
         return request.redirect("/shop/cart")
 
     @http.route(['/shop/cart/update_json'], type='json', auth="public", methods=['POST'], website=True, csrf=False)
-    def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, display=True):
-        """This route is called when changing quantity from the cart or adding
-        a product from the wishlist."""
+    def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, display=True, **kw):
+        """
+        This route is called :
+            - When changing quantity from the cart.
+            - When adding a product from the wishlist.
+            - When adding a product to cart on the same page (without redirection).
+        """
         order = request.website.sale_get_order(force_create=1)
         if order.state != 'draft':
             request.website.sale_reset()
-            return {}
+            if kw.get('force_order'):
+                order = request.website.sale_get_order(force_create=1)
+            else:
+                return {}
 
-        value = order._cart_update(product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty)
+        pcav = kw.get('product_custom_attribute_values')
+        nvav = kw.get('no_variant_attribute_values')
+        value = order._cart_update(
+            product_id=product_id,
+            line_id=line_id,
+            add_qty=add_qty,
+            set_qty=set_qty,
+            product_custom_attribute_values=json.loads(pcav) if pcav else None,
+            no_variant_attribute_values=json.loads(nvav) if nvav else None
+        )
 
         if not order.cart_quantity:
             request.website.sale_reset()
