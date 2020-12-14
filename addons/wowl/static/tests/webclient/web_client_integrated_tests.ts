@@ -6431,7 +6431,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip("execute action without modal", async function (assert) {
+  QUnit.skip("execute action without modal closes tooltips anyway", async function (assert) {
     /*
         // TODO: I don't like those 2 tooltips
         // Just because there are two bodies
@@ -6616,49 +6616,52 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig.actionRegistry!.remove("ClientAction2");
   });
 
-  QUnit.skip("on_close should be called only once", async function (assert) {
-    /**
-     * TODO: Improve this test
-     *
-     * When clicking on dialog button it should trigger act_window_close and
-     * then execute_action (that will be redirected to an act_window_close)
-     *
-     * The execute_action comes from BasicController._callButtonAction
-     *
-     * A real case: event_configurator_widget.js
-     */
-    /*
-        assert.expect(2);
+  QUnit.test("on_close should be called only once with right parameters in js_class form view", async function (assert) {
+    assert.expect(4);
+    // This test is quite specific but matches a real case in legacy: event_configurator_widget.js
+    // Clicking on form view's action button triggers its own mechanism: it saves the record and closes the dialog.
+    // Now it is possible that the dialog action wants to do something of its own at closing time, to, for instance
+    // update the main action behind it, with specific parameters.
+    // This test ensures that this flow is supported in legacy,
+    const {FormView , legacyViewRegistry } = await getLegacy() as any;
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-        });
+    const TestCustoFormController = FormView.prototype.config.Controller.extend({
+      async saveRecord() {
+        await this._super.apply(this, arguments);
+        this.do_action({type: 'ir.actions.act_window_close', infos: { cantaloupe: 'island' }});
+      }
+    });
+    const TestCustoFormView = FormView.extend({});
+    TestCustoFormView.prototype.config.Controller = TestCustoFormController;
+    legacyViewRegistry.add('test_view', TestCustoFormView);
 
-        await doAction(webClient, 3);
-        await testUtils.dom.click(webClient.el.querySelector('.o_list_view .o_data_row'));
-        await legacyExtraNextTick();
-        await testUtils.dom.click(webClient.el.querySelector('.o_form_buttons_view .o_form_button_edit'));
+    baseConfig.serverData!.views!['partner,1,form'] = `
+      <form js_class="test_view">
+        <field name="foo" />
+        <footer>
+          <button string="Echoes" special="save" />
+        </footer>
+      </form>`;
 
-        await doAction(webClient, 25, {
-            on_close() {
-                assert.step('on_close');
-            },
-        });
+     const webClient = await createWebClient({ baseConfig });
+     await doAction(webClient, 24); // main form view
+     await doAction(webClient, 25, { // Custom jsClass form view in target new
+       onClose(infos: any) {
+         assert.step('onClose');
+         assert.deepEqual(infos, {cantaloupe: 'island'});
+       },
+     });
 
-        // Close dialog by clicking on save button
-        await testUtils.dom.click(webClient.el.querySelector('.o_dialog .modal-footer button[special=save]'));
-        await legacyExtraNextTick();
-        // Directly do act_window_close
-        await doAction(webClient, 10);
+     // Close dialog by clicking on save button
+     await testUtils.dom.click(webClient.el!.querySelector('.o_dialog .modal-footer button[special=save]'));
+     assert.verifySteps(['onClose']);
 
-        assert.verifySteps(['on_close']);
-
-        webClient.destroy();
-        */
-  });
+     await legacyExtraNextTick();
+     assert.containsNone(webClient.el!, '.modal');
+     webClient.destroy();
+     delete legacyViewRegistry.map.test_view;
+     baseConfig.viewRegistry!.remove('test_view');
+   });
 
   QUnit.test("jsClass legacy", async function (assert) {
     assert.expect(2);
