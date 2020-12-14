@@ -10,6 +10,15 @@ declare const odoo: Odoo;
 type Params = { [key: string]: any };
 
 export type RPC = (route: string, params?: Params, settings?: RPCSettings) => Promise<any>;
+
+interface RPCSettings {
+  shadow?: boolean;
+}
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
 export class RPCError extends OdooError {
   public exceptionName?: string;
   public type: string;
@@ -24,36 +33,15 @@ export class RPCError extends OdooError {
   }
 }
 
-// -----------------------------------------------------------------------------
-// Handling of lost connection
-// -----------------------------------------------------------------------------
-
-let isConnected = true;
-let rpcId: number = 0;
-
-function handleLostConnection(env: OdooEnv) {
-  if (!isConnected) {
-    return;
+export class ConnectionLostError extends OdooError {
+  constructor() {
+    super("CONNECTION_LOST_ERROR");
   }
-  isConnected = false;
-  const notificationId = env.services.notifications.create(
-    "Connection lost. Trying to reconnect...",
-    { sticky: true }
-  );
-  let delay = 2000;
-  setTimeout(function checkConnection() {
-    jsonrpc(env, "/web/webclient/version_info", {}, rpcId++)
-      .then(function () {
-        isConnected = true;
-        env.services.notifications.close(notificationId);
-      })
-      .catch(() => {
-        // exponential backoff, with some jitter
-        delay = delay * 1.5 + 500 * Math.random();
-        setTimeout(checkConnection, delay);
-      });
-  }, delay);
 }
+
+// -----------------------------------------------------------------------------
+// Main RPC method
+// -----------------------------------------------------------------------------
 
 function makeErrorFromResponse(reponse: any): RPCError {
   // Odoo returns error like this, in a error field instead of properly
@@ -73,13 +61,7 @@ function makeErrorFromResponse(reponse: any): RPCError {
   return error;
 }
 
-// -----------------------------------------------------------------------------
-// Main RPC method
-// -----------------------------------------------------------------------------
-
-interface RPCSettings {
-  shadow?: boolean;
-}
+let rpcId: number = 0;
 
 function jsonrpc(
   env: OdooEnv,
@@ -117,11 +99,8 @@ function jsonrpc(
 
     // handle failure
     request.addEventListener("error", () => {
-      handleLostConnection(env);
       bus.trigger("RPC:RESPONSE", data.id);
-      // We do not throw an error as it is handled in the handleLostConnection
-      // If we wanted to throw an error anyway but not display it with the crash manager,
-      // a "mute" argument had been proposed on the OdooError object. It is not implemented currently.
+      reject(new ConnectionLostError());
     });
 
     // configure and send request

@@ -354,10 +354,10 @@ export function makeFakeNotificationService(
     name: "notifications",
     deploy(): NotificationService {
       function create() {
-        return createMock();
+        return createMock(...arguments);
       }
       function close() {
-        return closeMock();
+        return closeMock(...arguments);
       }
       return {
         create,
