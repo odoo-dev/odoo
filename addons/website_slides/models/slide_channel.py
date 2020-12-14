@@ -26,6 +26,18 @@ class ChannelUsersRelation(models.Model):
     completed_slides_count = fields.Integer('# Completed Slides')
     partner_id = fields.Many2one('res.partner', index=True, required=True, ondelete='cascade')
     partner_email = fields.Char(related='partner_id.email', readonly=True)
+    user_id = fields.Many2one('res.users', string='Responsible', related='channel_id.user_id')
+    channel_type = fields.Selection(related='channel_id.channel_type')
+    visibility = fields.Selection(related='channel_id.visibility')
+    enroll = fields.Selection(related='channel_id.enroll')
+    website_id = fields.Many2one('website', string='Website', related='channel_id.website_id')
+
+    def name_get(self):
+        result = []
+        for rec in self:
+            name = rec.channel_id.display_name + ' (%s)' % rec.partner_id.display_name
+            result.append((rec.id, name))
+        return result
 
     def _recompute_completion(self):
         read_group_res = self.env['slide.slide.partner'].sudo().read_group(
@@ -519,12 +531,13 @@ class Channel(models.Model):
 
     def action_redirect_to_members(self, state=None):
         action = self.env["ir.actions.actions"]._for_xml_id("website_slides.slide_channel_partner_action")
-        action['domain'] = [('channel_id', 'in', self.ids)]
+        action_ctx = {'search_default_channel_id': self.ids}
         if len(self) == 1:
             action['display_name'] = _('Attendees of %s', self.name)
-            action['context'] = {'active_test': False, 'default_channel_id': self.id}
-        if state:
-            action['domain'] += [('completed', '=', state == 'completed')]
+            action_ctx.update({'active_test': False})
+        if state and state == 'completed':
+            action_ctx.update({'search_default_completed': 1})
+        action['context'] = action_ctx
         return action
 
     def action_redirect_to_running_members(self):
