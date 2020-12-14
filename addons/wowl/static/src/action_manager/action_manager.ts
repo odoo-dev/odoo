@@ -1106,13 +1106,16 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
     // in case an effect is returned from python and there is already an effect
     // attribute on the button, the priority is given to the button attribute
-    action.effect = params.effect ? evaluateExpr(params.effect) : action.effect;
+    const effect = params.effect ? evaluateExpr(params.effect) : action.effect;
 
     const options = { onClose: params.onClose };
     await doAction(action, options);
 
     if (params.close) {
       await _executeCloseAction();
+    }
+    if (effect) {
+      env.services.effects.create(effect.message, effect);
     }
   }
 
@@ -1309,7 +1312,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["notifications", "rpc", "user", "router"],
+  dependencies: ["notifications", "rpc", "user", "router", "effects"],
   deploy(env: OdooEnv): ActionManager {
     return makeActionManager(env);
   },

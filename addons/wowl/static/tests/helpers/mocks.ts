@@ -43,6 +43,7 @@ export function makeFakeUserService(values?: Partial<UserService>): Service<User
         lang: user_context.lang,
         tz: "Europe/Brussels",
         db: db,
+        showEffect: false,
       };
       Object.assign(result, values);
       return result;

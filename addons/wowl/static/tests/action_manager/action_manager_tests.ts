@@ -6,6 +6,7 @@ import { ComponentAction, FunctionAction, OdooEnv, Service, Registries } from ".
 import { fakeTitleService, makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 import { notificationService } from "../../src/notifications/notification_service";
 import { TestConfig } from "../helpers/utility";
+import { effectService } from "../../src/effects/effects_service";
 
 let baseConfig: TestConfig;
 let env: OdooEnv;
@@ -45,6 +46,7 @@ QUnit.module("Action Manager Service", {
     serviceRegistry.add("router", makeFakeRouterService({}));
     serviceRegistry.add("user", makeFakeUserService());
     serviceRegistry.add("title", fakeTitleService);
+    serviceRegistry.add(effectService.name, effectService);
 
     baseConfig = {
       actionRegistry,

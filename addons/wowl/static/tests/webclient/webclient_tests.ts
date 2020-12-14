@@ -9,6 +9,7 @@ import { Registries } from "../../src/types";
 import { mount, makeTestEnv, TestConfig } from "../helpers/utility";
 import { menusService } from "../../src/services/menus";
 import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
+import { effectService } from "../../src/effects/effects_service";
 
 const { xml } = tags;
 
@@ -23,7 +24,8 @@ QUnit.module("Web Client", {
       .add(notificationService.name, notificationService)
       .add(fakeTitleService.name, fakeTitleService)
       .add("menus", menusService)
-      .add("router", makeFakeRouterService());
+      .add("router", makeFakeRouterService())
+      .add(effectService.name, effectService);
     baseConfig = { serviceRegistry, activateMockServer: true };
   },
 });
