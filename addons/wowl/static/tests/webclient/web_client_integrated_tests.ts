@@ -11,7 +11,6 @@ import {
   ActionManager,
   actionManagerService,
   clearUncommittedChanges,
-  useSetupAction,
 } from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
 import {
@@ -2846,7 +2845,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
   QUnit.test("ClientAction receives breadcrumbs and exports title (wowl)", async (assert) => {
     assert.expect(4);
-    class ClientAction extends Component<{}, OdooEnv> {
+    class ClientAction extends Component<any, OdooEnv> {
       static template = tags.xml`<div class="my_owl_action" t-on-click="onClick">owl client action</div>`;
       breadcrumbTitle = "myOwlAction";
 
@@ -2855,15 +2854,13 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         const breadCrumbs = props.breadcrumbs;
         assert.strictEqual(breadCrumbs.length, 1);
         assert.strictEqual(breadCrumbs[0].name, "Favorite Ponies");
-
-        useSetupAction({
-          getTitle: () => {
-            return this.breadcrumbTitle;
-          },
-        });
+      }
+      mounted() {
+        this.trigger("controller-title-updated", this.breadcrumbTitle);
       }
       onClick() {
         this.breadcrumbTitle = "newOwlTitle";
+        this.trigger("controller-title-updated", this.breadcrumbTitle);
       }
     }
     baseConfig.actionRegistry!.add("OwlClientAction", ClientAction);

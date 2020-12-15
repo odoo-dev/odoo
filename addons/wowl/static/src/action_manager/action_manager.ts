@@ -1,4 +1,5 @@
 import { Component, hooks, tags } from "@odoo/owl";
+import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
 import type {
   ActionContext,
   ActionProps,
@@ -204,7 +205,6 @@ interface ScrollOffset {
 interface UseSetupActionParams {
   export?: () => any;
   beforeLeave?: ClearUncommittedChanges;
-  getTitle?: () => string;
 }
 interface UseSetupActionReturnType {
   scrollTo: (offset: ScrollOffset) => void;
@@ -271,9 +271,6 @@ export function useSetupAction(params: UseSetupActionParams): UseSetupActionRetu
     }
     if (params.beforeLeave && component.props.__beforeLeave__) {
       component.props.__beforeLeave__(params.beforeLeave);
-    }
-    if (params.getTitle && component.props.__getTitle__) {
-      component.props.__getTitle__(params.getTitle);
     }
   });
   hooks.onWillUnmount(() => {
@@ -559,7 +556,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
         __beforeLeave__="beforeLeave"
         __getTitle__="getTitle"
           t-ref="component"
-          t-on-history-back="onHistoryBack"/>`;
+          t-on-history-back="onHistoryBack"
+          t-on-controller-title-updated.stop="onTitleUpdated"/>`;
 
       static Component = controller.Component;
       Component = controller.Component;
@@ -567,7 +565,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
       componentRef = hooks.useRef("component");
       exportState: ((state: any) => void) | null = null;
       beforeLeave: ((callback: ClearUncommittedChanges) => void) | null = null;
-      getTitle: ((title: () => string) => void) | null = null;
 
       constructor() {
         super(...arguments);
@@ -578,13 +575,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
           const beforeLeaveFns: ClearUncommittedChanges[] = [];
           this.beforeLeave = (callback) => {
             beforeLeaveFns.push(callback);
-          };
-          this.getTitle = (getTitle) => {
-            if (!("title" in controller)) {
-              Object.defineProperty(controller, "title", {
-                get: getTitle,
-              });
-            }
           };
           this.env.bus.on("CLEAR-UNCOMMITTED-CHANGES", this, (callbacks) => {
             beforeLeaveFns.forEach((fn) => callbacks.push(fn));
@@ -653,6 +643,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
         } else {
           _executeCloseAction();
         }
+      }
+      onTitleUpdated(ev: OwlEvent<string>) {
+        controller.title = ev.detail;
       }
     }
     if (action.target === "new") {
