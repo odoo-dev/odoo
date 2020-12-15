@@ -241,17 +241,20 @@ QUnit.test("useModel take proper reference to rpc service", async (assert) => {
     static template = xml`<div/>`;
     model = useService("model");
   }
-  const [, rpc] = makeFakeRPC();
-  serviceRegistry.add("rpc", rpc);
+  let component: any;
+
+  serviceRegistry.add("rpc", {
+    name: "rpc",
+    deploy() {
+      return async function (this: any) {
+        assert.strictEqual(this, component);
+      };
+    },
+  });
 
   const env = await makeTestEnv({ serviceRegistry });
 
-  const component = await mount(MyComponent, { env, target: getFixture() });
-
-  const rpcFn: RPC = function (this: any) {
-    assert.strictEqual(this, component);
-  } as any;
-  env.services.rpc = rpcFn;
+  component = await mount(MyComponent, { env, target: getFixture() });
 
   await component.model("test").read([1], ["asfd"]);
 });

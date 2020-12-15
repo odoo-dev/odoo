@@ -136,3 +136,29 @@ QUnit.test("can deploy a service with a dependency", async (assert) => {
   await makeTestEnv({ serviceRegistry });
   assert.verifySteps(["appa", "aang"]);
 });
+
+QUnit.test("a service has only access to dependent services", async (assert) => {
+  assert.expect(2);
+  serviceRegistry.add("king", {
+    name: "king",
+    deploy() {
+      return {};
+    },
+  });
+
+  serviceRegistry.add("bishop", {
+    name: "bishop",
+    deploy(env) {
+      assert.deepEqual(Object.keys(env.services), []);
+    },
+  });
+  serviceRegistry.add("queen", {
+    name: "queen",
+    dependencies: ["king"],
+    deploy(env) {
+      assert.deepEqual(Object.keys(env.services), ["king"]);
+    },
+  });
+
+  await makeTestEnv({ serviceRegistry });
+});

@@ -84,6 +84,7 @@ export function makeLegacyRpcService(legacyEnv: any): Service<void> {
 export function makeLegacySessionService(legacyEnv: any, session: any): Service<void> {
   return {
     name: "legacy_session",
+    dependencies: ["user"],
     deploy(env: OdooEnv): void {
       // userContext, Object.create is incompatible with legacy new Context
       const userContext = Object.assign({}, env.services.user.context);

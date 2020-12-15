@@ -1304,7 +1304,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["notifications", "rpc", "user", "router", "effects"],
+  dependencies: ["notifications", "rpc", "user", "router", "ui", "effects", "download"],
   deploy(env: OdooEnv): ActionManager {
     return makeActionManager(env);
   },

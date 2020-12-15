@@ -1,4 +1,5 @@
 import { UserService } from "../../src/services/user";
+import { effectService } from "../../src/effects/effects_service";
 import { Odoo, OdooEnv, OdooConfig, Service } from "../../src/types";
 import { RPC } from "../../src/services/rpc";
 import { Deferred, TestConfig } from "./utility";
@@ -318,29 +319,35 @@ export const fakeTitleService: typeof titleService = {
   },
 };
 
-export function makeFakeDownloadService(callback: CallableFunction): Service<Download> {
+export function makeFakeDownloadService(callback?: CallableFunction): Service<Download> {
   return {
     name: "download",
     deploy(): Download {
       return async function (options: DowloadFileOptions) {
-        return await callback(options);
+        if (callback) {
+          return await callback(options);
+        }
       };
     },
   };
 }
 
 export function makeFakeUIService(
-  blockCallback: CallableFunction,
-  unblockCallback: CallableFunction
+  blockCallback?: CallableFunction,
+  unblockCallback?: CallableFunction
 ): Service<UIService> {
   return {
     name: "ui",
     deploy(): UIService {
       function block(): void {
-        blockCallback();
+        if (blockCallback) {
+          blockCallback();
+        }
       }
       function unblock(): void {
-        unblockCallback();
+        if (unblockCallback) {
+          unblockCallback();
+        }
       }
       return { block, unblock };
     },
@@ -348,17 +355,21 @@ export function makeFakeUIService(
 }
 
 export function makeFakeNotificationService(
-  createMock: CallableFunction,
-  closeMock: CallableFunction
+  createMock?: CallableFunction,
+  closeMock?: CallableFunction
 ): Service<NotificationService> {
   return {
     name: "notifications",
     deploy(): NotificationService {
       function create() {
-        return createMock(...arguments);
+        if (createMock) {
+          return createMock(...arguments);
+        }
       }
       function close() {
-        return closeMock(...arguments);
+        if (closeMock) {
+          return closeMock(...arguments);
+        }
       }
       return {
         create,
@@ -367,3 +378,15 @@ export function makeFakeNotificationService(
     },
   };
 }
+
+export const mocks = {
+  notifications: makeFakeNotificationService,
+  download: makeFakeDownloadService,
+  ui: makeFakeUIService,
+  user: makeFakeUserService,
+  rpc: makeFakeRPCService,
+  router: makeFakeRouterService,
+  title: () => fakeTitleService,
+  cookie: () => fakeCookieService,
+  effects: () => effectService
+};
