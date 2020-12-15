@@ -1,6 +1,6 @@
 import * as owl from "@odoo/owl";
 import { actionRegistry } from "./action_manager/action_registry";
-import { fetchLocalization } from "./core/localization";
+import { fetchLocalization } from "./services/localization";
 import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
 import { debugManagerRegistry } from "./debug_manager/debug_manager_registry";
 import { makeEnv, makeRAMLocalStorage } from "./env";

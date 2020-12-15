@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { getDefaultLocalization } from "../../src/core/localization";
+import { getDefaultLocalization } from "../../src/services/localization";
 import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
 import { Odoo, OdooConfig, OdooEnv, Registries, Type } from "../../src/types";

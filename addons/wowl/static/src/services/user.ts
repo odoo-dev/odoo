@@ -1,4 +1,4 @@
-import { Localization } from "../core/localization";
+import { Localization } from "./localization";
 import type { UserCompany, Service, OdooEnv } from "../types";
 interface Context {
   lang: string;
