@@ -16,7 +16,7 @@ import { viewManagerService } from "./view_manager";
 import { Service } from "../types";
 import { debugManagerService } from "../debug_manager/debug_manager_service";
 import { downloadService } from "./download";
-import { effectService } from '../effects/effects_service';
+import { effectService } from "../effects/effects_service";
 
 export const serviceRegistry: Registry<Service<any>> = new Registry();
 

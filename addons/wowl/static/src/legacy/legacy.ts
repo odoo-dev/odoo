@@ -141,6 +141,20 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
   const {
     ComponentAdapter,
   }: { ComponentAdapter: Type<ComponentAdapter> } = require("web.OwlCompatibility");
+
+  const reBSTooltip = /^bs-.*$/;
+  function cleanDomFromBootstrap() {
+    const body = document.body;
+    // multiple bodies in tests
+    // Bootstrap tooltips
+    const tooltips = body.querySelectorAll("body .tooltip");
+    for (const tt of tooltips) {
+      if (Array.from(tt.classList).find((cls) => reBSTooltip.test(cls))) {
+        tt.parentNode!.removeChild(tt);
+      }
+    }
+  }
+
   class ActionAdapter extends ComponentAdapter {
     am = useService("action_manager");
     router = useService("router");
@@ -172,6 +186,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           if (info.type === "MAIN") {
             (this.env as any).bus.trigger("close_dialogs");
           }
+          cleanDomFromBootstrap();
         });
 
         originalUpdateControlPanel = this.__widget.updateControlPanel.bind(this.__widget);
