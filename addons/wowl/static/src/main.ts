@@ -1,6 +1,5 @@
 import * as owl from "@odoo/owl";
 import { actionRegistry } from "./action_manager/action_registry";
-import { fetchLocalization } from "./services/localization";
 import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
 import { debugManagerRegistry } from "./debug_manager/debug_manager_registry";
 import { makeEnv, makeRAMLocalStorage } from "./env";
@@ -51,16 +50,9 @@ const { whenReady, loadFile } = utils;
   odoo.serviceRegistry = serviceRegistry;
   odoo.debugManagerRegistry = debugManagerRegistry;
 
-  // load templates and localization
-  let [templates, { localization, _t }] = await Promise.all([loadTemplates(), fetchLocalization()]);
-
   // setup environment
-  const env = await makeEnv({
-    localization,
-    debug: odoo.debug!,
-    templates,
-    _t,
-  });
+  const [env, templates] = await Promise.all([makeEnv(odoo.debug!), loadTemplates()]);
+  env.qweb.addTemplates(templates);
 
   // start web client
   await whenReady();
