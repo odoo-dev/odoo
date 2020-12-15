@@ -62,7 +62,7 @@ odoo.define('payment_adyen.payment_form', require => {
         },
 
         /**
-         * Handle the submit event of the Adyen drop-in.
+         * Handle the submit event of the Adyen drop-in and initiate the payment.
          *
          * @private
          * @param {object} state - The state of the drop-in
@@ -70,12 +70,13 @@ odoo.define('payment_adyen.payment_form', require => {
          * @return {undefined}
          */
         _dropinOnSubmit: function (state, dropin) {
-            // Call the init route to create the transaction and retrieve processing values
+            // Create the transaction and retrieve the processing values
             this._rpc({
                 route: this.txContext.transactionRoute,
                 params: this._prepareInitTxParams('adyen', dropin.acquirerId, 'direct'),
             }).then(processingValues => {
                 this.adyenDropin.reference = processingValues.reference; // Store final reference
+                // Initiate the payment
                 return this._rpc({
                     route: '/payment/adyen/payments',
                     params: {

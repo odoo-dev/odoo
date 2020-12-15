@@ -21,13 +21,13 @@ class AdyenController(http.Controller):
 
     @http.route('/payment/adyen/acquirer_state', type='json', auth='public')
     def adyen_acquirer_state(self, acquirer_id):
-        """ Query the state of the acquirer.
+        """ Return the state of the acquirer.
 
         :param int acquirer_id: The acquirer handling the transaction, as a `payment.acquirer` id
         :return: The state of the acquirer: 'enabled' or 'test'
         :rtype: str
         """
-        acquirer_sudo = request.env['payment.acquirer'].sudo().browse(acquirer_id)
+        acquirer_sudo = request.env['payment.acquirer'].sudo().browse(acquirer_id).exists()
         return acquirer_sudo.state
 
     @http.route('/payment/adyen/payment_methods', type='json', auth='public')
@@ -119,7 +119,7 @@ class AdyenController(http.Controller):
             raise ValidationError("Adyen: " + _("Received tampered payment request data."))
 
         # Make the payment request to Adyen
-        acquirer_sudo = request.env['payment.acquirer'].sudo().browse(acquirer_id)
+        acquirer_sudo = request.env['payment.acquirer'].sudo().browse(acquirer_id).exists()
         tx_sudo = request.env['payment.transaction'].sudo().search([('reference', '=', reference)])
         data = {
             'merchantAccount': acquirer_sudo.adyen_merchant_account,

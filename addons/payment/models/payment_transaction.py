@@ -626,22 +626,22 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         for tx in self.filtered(lambda t: not t.callback_is_done):
-            model_id_sudo = tx.sudo().callback_model_id  # Only use sudo to check, not to execute
+            # Only use sudo to check, not to execute
+            model_sudo = tx.sudo().callback_model_id
             res_id = tx.sudo().callback_res_id
             method = tx.sudo().callback_method
-            if not (model_id_sudo and res_id and method):
-                _logger.warning(f"invalid callback definition for transaction with id {tx.id}")
-                continue  # Ignore undefined or not properly defined callbacks
+            if not (model_sudo and res_id and method):
+                continue  # Skip transactions with unset (or not properly defined) callbacks
 
-            valid_callback_hash = self._generate_callback_hash(model_id_sudo.id, res_id, method)
+            valid_callback_hash = self._generate_callback_hash(model_sudo.id, res_id, method)
             if not consteq(ustr(valid_callback_hash), tx.callback_hash):
                 _logger.warning(f"invalid callback signature for transaction with id {tx.id}")
                 continue  # Ignore tampered callbacks
 
-            record = self.env[model_id_sudo.model].browse(res_id).exists()
+            record = self.env[model_sudo.model].browse(res_id).exists()
             if not record:
                 _logger.warning(
-                    f"invalid callback record {model_id_sudo.model}.{res_id} for transaction with "
+                    f"invalid callback record {model_sudo.model}.{res_id} for transaction with "
                     f"id {tx.id}"
                 )
                 continue  # Ignore invalidated callbacks
