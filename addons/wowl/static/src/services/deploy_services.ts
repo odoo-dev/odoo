@@ -1,8 +1,8 @@
 import { Payload } from "../core/registry";
-import { OdooConfig, OdooEnv, Service } from "../types";
+import { OdooEnv, Service } from "../types";
 import { serviceRegistry } from "./service_registry";
 
-export async function deployServices(env: OdooEnv, config: OdooConfig): Promise<void> {
+export async function deployServices(env: OdooEnv): Promise<void> {
   const toDeploy: Set<Service> = new Set();
   let timeoutId: number | undefined;
 
@@ -17,16 +17,15 @@ export async function deployServices(env: OdooEnv, config: OdooConfig): Promise<
     if (toDeploy.size) {
       toDeploy.add(value);
     } else {
-      timeoutId = await _deployServices(env, config, toDeploy, timeoutId);
+      timeoutId = await _deployServices(env, toDeploy, timeoutId);
     }
   });
 
-  timeoutId = await _deployServices(env, config, toDeploy, timeoutId);
+  timeoutId = await _deployServices(env, toDeploy, timeoutId);
 }
 
 async function _deployServices(
   env: OdooEnv,
-  config: OdooConfig,
   toDeploy: Set<Service>,
   timeoutId: number | undefined
 ): Promise<number | undefined> {
@@ -53,7 +52,7 @@ async function _deployServices(
           serviceEnv.services[dep] = env.services[dep];
         }
       }
-      const value = service.deploy(serviceEnv, config);
+      const value = service.deploy(serviceEnv);
       if (value instanceof Promise) {
         proms.push(
           value.then((val) => {

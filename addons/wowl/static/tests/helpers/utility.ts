@@ -1,8 +1,7 @@
 import { Component } from "@odoo/owl";
-import { getDefaultLocalization } from "../../src/services/localization";
 import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
-import { Odoo, OdooConfig, OdooEnv, Registries, Type } from "../../src/types";
+import { Odoo, OdooEnv, Registries, Type } from "../../src/types";
 import { makeTestOdoo, MockRPC, mocks } from "./mocks";
 import { makeMockServer, ServerData } from "./mock_server";
 
@@ -25,28 +24,16 @@ export async function mount<T extends Type<Component>>(
   return component as any;
 }
 
-type _TestConfig = Partial<
-  {
-    [K in keyof OdooConfig]: OdooConfig[K] extends Registry<any>
-      ? OdooConfig[K]
-      : Partial<OdooConfig[K]>;
-  }
->;
-
-export interface TestConfig extends _TestConfig, Partial<Registries> {
+export interface TestConfig extends Partial<Registries> {
   browser?: Partial<Odoo["browser"]>;
+  debug?: string;
   serverData?: ServerData;
   mockRPC?: MockRPC;
   activateMockServer?: boolean;
 }
 
-function makeTestConfig(config: TestConfig = {}): OdooConfig {
-  const localization = config.localization || (getDefaultLocalization() as any);
-  const _t = config._t || (((str: string) => str) as any);
+function makeTestConfig(config: TestConfig = {}): TestConfig {
   return Object.assign(config, {
-    localization,
-    _t,
-    templates,
     debug: config.debug || "",
     serviceRegistry: config.serviceRegistry || new Registry(),
     mainComponentRegistry: config.mainComponentRegistry || new Registry(),
@@ -77,7 +64,9 @@ export async function makeTestEnv(config: TestConfig = {}): Promise<OdooEnv> {
   }
 
   odoo = makeTestOdoo(testConfig);
-  return await makeEnv(testConfig as OdooConfig);
+  const env = await makeEnv(odoo.debug!);
+  env.qweb.addTemplates(templates);
+  return env;
 }
 
 export function getFixture(): HTMLElement {

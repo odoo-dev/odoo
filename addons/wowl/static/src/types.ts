@@ -8,7 +8,7 @@ import { actionRegistry } from "./action_manager/action_registry";
 import { debugManagerRegistry } from "./debug_manager/debug_manager_registry";
 import { Context } from "./core/context";
 import { DomainListRepr as Domain } from "./core/domain";
-import { Localization } from "./services/localization";
+import { localizationService } from "./services/localization";
 import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
 import type { notificationService } from "./notifications/notification_service";
 import type { cookieService } from "./services/cookie";
@@ -104,7 +104,7 @@ export interface Type<T> extends Function {
 export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-  deploy: (env: OdooEnv, config: OdooConfig) => Promise<T> | T;
+  deploy: (env: OdooEnv) => Promise<T> | T;
 }
 
 type Browser = Env["browser"];
@@ -129,13 +129,6 @@ export interface OdooEnv extends Env {
 export type ComponentAction = Type<Component<{}, OdooEnv>>;
 export type FunctionAction = (env: OdooEnv, action: any) => any;
 
-export interface OdooConfig {
-  localization: Localization;
-  debug: string;
-  templates: string;
-  _t: (str: string) => string;
-}
-
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -147,6 +140,7 @@ export interface Services {
   action_manager: ServiceType<typeof actionManagerService["deploy"]>;
   cookie: ServiceType<typeof cookieService["deploy"]>;
   dialog_manager: ServiceType<typeof dialogManagerService["deploy"]>;
+  localization: ServiceType<typeof localizationService["deploy"]>;
   menus: ServiceType<typeof menusService["deploy"]>;
   model: ServiceType<typeof modelService["deploy"]>;
   notifications: ServiceType<typeof notificationService["deploy"]>;

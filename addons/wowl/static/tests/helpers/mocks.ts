@@ -1,6 +1,6 @@
 import { UserService } from "../../src/services/user";
 import { effectService } from "../../src/effects/effects_service";
-import { Odoo, OdooEnv, OdooConfig, Service } from "../../src/types";
+import { Odoo, OdooEnv, Service } from "../../src/types";
 import { RPC } from "../../src/services/rpc";
 import { Deferred, TestConfig } from "./utility";
 import { Query, Route, Router, makePushState, routeToUrl } from "../../src/services/router";
@@ -10,10 +10,21 @@ import { DowloadFileOptions, Download } from "../../src/services/download";
 import { NotificationService } from "../../src/notifications/notification_service";
 import { UIService } from "../../src/services/ui/ui";
 import { Device, SIZES } from "../../src/services/device";
+import { getDefaultLocalization, Localization } from "../../src/services/localization";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
 // // -----------------------------------------------------------------------------
+
+interface FakeLocalizationConfig extends Partial<Localization> {}
+export function makeFakeLocalizationService(
+  config?: FakeLocalizationConfig
+): Service<Localization> {
+  return {
+    name: "localization",
+    deploy: () => Object.assign(getDefaultLocalization(), config),
+  };
+}
 
 /**
  * Simulate a fake user service.
@@ -23,16 +34,8 @@ export function makeFakeUserService(values?: Partial<UserService>): Service<User
   const { user_context } = odoo.session_info;
   return {
     name: "user",
-    deploy(env: OdooEnv, config: OdooConfig): UserService {
-      const { localization } = config;
+    deploy(): UserService {
       const result = {
-        dateFormat: localization.dateFormat,
-        decimalPoint: localization.decimalPoint,
-        direction: localization.direction,
-        grouping: localization.grouping,
-        multiLang: localization.multiLang,
-        thousandsSep: localization.thousandsSep,
-        timeFormat: localization.timeFormat,
         context: user_context as any,
         userId: uid,
         name: name,
@@ -104,6 +107,7 @@ export function makeFakeRPCService(mockRPC?: MockRPC): Service<RPC> {
 export function makeTestOdoo(config: TestConfig = {}): Odoo {
   return Object.assign({}, odoo, {
     browser: (config.browser || {}) as Odoo["browser"],
+    debug: config.debug,
     session_info: {
       cache_hashes: {
         load_menus: "161803",
@@ -382,6 +386,7 @@ export function makeFakeNotificationService(
 export const mocks = {
   notifications: makeFakeNotificationService,
   download: makeFakeDownloadService,
+  localization: makeFakeLocalizationService,
   ui: makeFakeUIService,
   user: makeFakeUserService,
   rpc: makeFakeRPCService,

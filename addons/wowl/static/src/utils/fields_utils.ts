@@ -1,5 +1,3 @@
-import { OdooEnv } from "../types";
-import { DateTime } from "luxon";
 /**
  * Returns a string representing an many2one.  If the value is false, then we
  * return an empty string.  Note that it accepts two types of input parameters:
@@ -33,56 +31,6 @@ export function formatMany2one(value: any, field?: any, options?: { escape: bool
   return value;
 }
 
-/**
- * Returns a string representing a datetime.  If the value is false, then we
- * return an empty string.  Note that this is dependant on the localization
- * settings
- *
- * @params {Moment|false}
- * @param {Object} [field]
- *        a description of the field (note: this parameter is ignored)
- * @param {Object} [options] additional options
- * @param {boolean} [options.timezone=true] use the user timezone when formating the
- *        date
- * @returns {string}
- */
-export function formatDateTime(
-  value: any,
-  env: OdooEnv,
-  field?: any,
-  options?: { timezone: boolean }
-) {
-  if (value === false) {
-    return "";
-  }
-  if (!options || !("timezone" in options) || options.timezone) {
-    value = value.plus({ minutes: -new Date(value).getTimezoneOffset() });
-  }
-  return value.toFormat(getLangDatetimeFormat(env));
-}
-
-/**
- * Create an Date object
- * The method toJSON return the formated value to send value server side
- *
- * @param {string} value
- * @param {Object} [field]
- *        a description of the field (note: this parameter is ignored)
- * @param {Object} [options] additional options
- * @returns {Moment|false} Moment date object
- */
-export function parseDateTime(value: any, env: OdooEnv, field?: any, options?: {}) {
-  if (!value) {
-    return false;
-  }
-  const datetime = DateTime.fromSQL(value);
-
-  if (datetime.isValid) {
-    return datetime;
-  }
-  throw new Error(`${env._t("'%s' is not a correct datetime")} ${value}`);
-}
-
 // TIME
 
 const normalize_format_table: {
@@ -114,15 +62,16 @@ const normalize_format_table: {
 };
 
 const _normalize_format_cache: {
-  [id: string]: any;
+  [id: string]: string;
 } = {};
 
 /**
- * Convert Python strftime to escaped moment.js format.
+ * Convert Python strftime to escaped luxon.js format.
  *
  * @param {String} value original format
+ * @returns {String} valid Luxon format
  */
-function strftime_to_moment_format(value: any) {
+export function strftimeToLuxonFormat(value: string): string {
   if (_normalize_format_cache[value] === undefined) {
     const isletter = /[a-zA-Z]/,
       output = [];
@@ -147,27 +96,4 @@ function strftime_to_moment_format(value: any) {
     _normalize_format_cache[value] = output.join("");
   }
   return _normalize_format_cache[value];
-}
-
-/**
- * Get date format of the user's language
- */
-export function getLangDateFormat(env: OdooEnv) {
-  return strftime_to_moment_format(env.services.user.dateFormat);
-}
-
-/**
- * Get time format of the user's language
- */
-export function getLangTimeFormat(env: OdooEnv) {
-  return strftime_to_moment_format(env.services.user.timeFormat);
-}
-
-/**
- * Get date time format of the user's language
- */
-export function getLangDatetimeFormat(env: OdooEnv) {
-  return strftime_to_moment_format(
-    env.services.user.dateFormat + " " + env.services.user.timeFormat
-  );
 }

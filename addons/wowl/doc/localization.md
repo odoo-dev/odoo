@@ -29,12 +29,12 @@ translations are loaded, as class attributes or at the top-level of
 an Odoo Web module, for example:
 
 ```ts
-import { _lt } from ./core/localization.ts
+import { _lt } from ./services/localization.ts
 const greeting = _lt("Hello");
 ```
 
 The value returned by `_lt` is an object with a single property `toString`.
-If the current user language is `fr_FR` and `Today` has translation `Bonjour`,
+If the current user language is `fr_FR` and `Hello` has translation `Bonjour`,
 `greeting` takes the value
 
 ```ts

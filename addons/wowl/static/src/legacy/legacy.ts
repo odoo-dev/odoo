@@ -25,7 +25,7 @@ import { DebuggingAccessRights, editModelDebug } from "../debug_manager/debug_ma
 import { ActWindowAction, ClientAction } from "../action_manager/action_manager";
 import { Dialog } from "../components/dialog/dialog";
 import { json_node_to_xml } from "../utils/misc";
-import { formatDateTime, formatMany2one, parseDateTime } from "../utils/fields_utils";
+import { formatMany2one } from "../utils/fields_utils";
 const { useState } = hooks;
 import { Query, objectToQuery } from "../services/router";
 
@@ -905,12 +905,15 @@ class GetMetadataDialog extends Component<GetMetadataProps, OdooEnv> {
     this.state.xmlid = metadata.xmlid;
     this.state.creator = formatMany2one(metadata.create_uid);
     this.state.lastModifiedBy = formatMany2one(metadata.write_uid);
-    this.state.create_date = formatDateTime(
-      parseDateTime(metadata.create_date, this.env),
-      this.env
-    );
-    this.state.write_date = formatDateTime(parseDateTime(metadata.write_date, this.env), this.env);
     this.state.noupdate = metadata.noupdate;
+
+    const localization = this.env.services.localization;
+    this.state.create_date = localization.formatDateTime(
+      localization.parseDateTime(metadata.create_date)
+    );
+    this.state.write_date = localization.formatDateTime(
+      localization.parseDateTime(metadata.write_date)
+    );
   }
 }
 

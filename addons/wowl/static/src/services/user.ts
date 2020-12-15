@@ -1,4 +1,3 @@
-import { Localization } from "./localization";
 import type { UserCompany, Service, OdooEnv } from "../types";
 interface Context {
   lang: string;
@@ -8,7 +7,7 @@ interface Context {
   [key: string]: any;
 }
 
-export interface UserService extends Localization {
+export interface UserService {
   context: Context;
   userId: number;
   name: string;
@@ -47,8 +46,7 @@ function computeAllowedCompanyIds(env: OdooEnv): number[] {
 export const userService: Service<UserService> = {
   name: "user",
   dependencies: ["router", "cookie"],
-  deploy(env: OdooEnv, config): UserService {
-    const { localization } = config;
+  deploy(env: OdooEnv): UserService {
     const info = odoo.session_info;
     const {
       user_context,
@@ -75,13 +73,6 @@ export const userService: Service<UserService> = {
     env.services.cookie.setCookie("cids", cids);
 
     return {
-      dateFormat: localization.dateFormat,
-      decimalPoint: localization.decimalPoint,
-      direction: localization.direction,
-      grouping: localization.grouping,
-      multiLang: localization.multiLang,
-      thousandsSep: localization.thousandsSep,
-      timeFormat: localization.timeFormat,
       context,
       get userId() {
         return context.uid;
