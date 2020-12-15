@@ -3,7 +3,7 @@ import { Odoo, OdooEnv } from "../types";
 import { Dialog } from "../components/dialog/dialog";
 import { ActionRequest } from "../action_manager/action_manager";
 import { useService } from "../core/hooks";
-import { Stringifiable, _lt } from "../core/localization";
+import { Stringifiable, _lt } from "../services/localization";
 declare const odoo: Odoo;
 const { useState } = hooks;
 

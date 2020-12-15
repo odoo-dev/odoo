@@ -8,7 +8,7 @@ import { actionRegistry } from "./action_manager/action_registry";
 import { debugManagerRegistry } from "./debug_manager/debug_manager_registry";
 import { Context } from "./core/context";
 import { DomainListRepr as Domain } from "./core/domain";
-import { Localization } from "./core/localization";
+import { Localization } from "./services/localization";
 import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
 import type { notificationService } from "./notifications/notification_service";
 import type { cookieService } from "./services/cookie";
