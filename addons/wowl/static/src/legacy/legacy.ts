@@ -134,7 +134,6 @@ interface ComponentAdapter extends Component {
 interface ActionAdapter extends ComponentAdapter {
   exportState(): any;
   canBeRemoved(): Promise<void>;
-  getTitle(): string;
   documentState(): any;
 }
 
@@ -149,6 +148,8 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     notifications = useService("notifications");
     dialogs = useService("dialog_manager");
 
+    wowlEnv: OdooEnv = this.env as OdooEnv;
+
     // a legacy widget widget can push_state anytime including during its async rendering
     // In Wowl, we want to have all states pushed during the same setTimeout.
     // This is protected in legacy (backward compatibility) but should not e supported in Wowl
@@ -158,22 +159,32 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
 
     constructor(...args: any[]) {
       super(...args);
-      const envWowl = <OdooEnv>this.env;
-      hooks.onMounted(() => {
+
+      let originalUpdateControlPanel: any;
+      hooks.onMounted(async () => {
         this.title.setParts({ action: this.widget.getTitle() });
         const query = objectToQuery(this.widget.getState());
         Object.assign(query, this.tempQuery);
         this.tempQuery = null;
-        this.router.pushState(query);
         this.__widget = this.widget;
-        envWowl.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionManagerUpdateInfo) => {
+        this.router.pushState(query);
+        this.wowlEnv.bus.on("ACTION_MANAGER:UPDATE", this, (info: ActionManagerUpdateInfo) => {
           if (info.type === "MAIN") {
             (this.env as any).bus.trigger("close_dialogs");
           }
         });
+
+        originalUpdateControlPanel = this.__widget.updateControlPanel.bind(this.__widget);
+        this.__widget.updateControlPanel = (newProps: any) => {
+          this.trigger("controller-title-updated", this.__widget.getTitle());
+          return originalUpdateControlPanel(newProps);
+        };
+        await Promise.resolve(); // see https://github.com/odoo/owl/issues/809
+        this.trigger("controller-title-updated", this.__widget.getTitle());
       });
       hooks.onWillUnmount(() => {
-        envWowl.bus.off("ACTION_MANAGER:UPDATE", this);
+        this.__widget.updateControlPanel = originalUpdateControlPanel;
+        this.wowlEnv.bus.off("ACTION_MANAGER:UPDATE", this);
       });
     }
 
@@ -246,17 +257,13 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     canBeRemoved() {
       return this.__widget.canBeRemoved();
     }
-    getTitle() {
-      return this.__widget.getTitle();
-    }
   }
 
   class ClientActionAdapter extends ActionAdapter {
     constructor(parent: Component, props: any) {
       super(parent, props);
-      const envWowl = <OdooEnv>this.env;
       useDebugManager((accessRights: DebuggingAccessRights) =>
-        setupDebugAction(accessRights, envWowl, this.props.widgetArgs[0])
+        setupDebugAction(accessRights, this.wowlEnv, this.props.widgetArgs[0])
       );
       this.env = Component.env;
     }
@@ -520,7 +527,6 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
           const { scrollTo } = useSetupAction({
             beforeLeave: () => this.controllerRef.comp!.widget!.canBeRemoved(),
             export: () => this.controllerRef.comp!.exportState(),
-            getTitle: () => this.controllerRef.comp!.getTitle(),
           });
           this.onScrollTo = (ev: any) => {
             scrollTo({ left: ev.detail.left, top: ev.detail.top });
@@ -602,7 +608,6 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         const { scrollTo } = useSetupAction({
           beforeLeave: () => this.controllerRef.comp!.widget!.canBeRemoved(),
           export: () => this.controllerRef.comp!.exportState(),
-          getTitle: () => this.controllerRef.comp!.getTitle(),
         });
         this.onScrollTo = (ev: any) => {
           scrollTo({ left: ev.detail.left, top: ev.detail.top });
