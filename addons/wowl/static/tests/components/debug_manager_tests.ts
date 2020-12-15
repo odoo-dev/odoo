@@ -7,7 +7,6 @@ import { Registries } from "../../src/types";
 import {
   click,
   getFixture,
-  makeFakeUserService,
   makeTestEnv,
   mount,
   OdooEnv,
@@ -22,7 +21,6 @@ QUnit.module("DebugManager", {
   async beforeEach() {
     target = getFixture();
     serviceRegistry = new Registry();
-    serviceRegistry.add("user", makeFakeUserService());
     serviceRegistry.add(modelService.name, modelService);
     serviceRegistry.add(debugManagerService.name, debugManagerService);
 

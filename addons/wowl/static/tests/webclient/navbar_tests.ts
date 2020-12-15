@@ -7,9 +7,7 @@ import { Registry } from "./../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
 import { menusService } from "./../../src/services/menus";
 import { notificationService } from "../../src/notifications/notification_service";
-import { fakeTitleService, makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 import { OdooBrowser, Registries } from "../../src/types";
-import { effectService } from "../../src/effects/effects_service";
 
 const { xml } = tags;
 
@@ -25,10 +23,6 @@ QUnit.module("Navbar", {
     serviceRegistry.add("menus", menusService);
     serviceRegistry.add(actionManagerService.name, actionManagerService);
     serviceRegistry.add(notificationService.name, notificationService);
-    serviceRegistry.add("router", makeFakeRouterService());
-    serviceRegistry.add("user", makeFakeUserService());
-    serviceRegistry.add("title", fakeTitleService);
-    serviceRegistry.add(effectService.name, effectService);
     const menus = {
       root: { id: "root", children: [1], name: "root", appID: "root" },
       1: { id: 1, children: [], name: "App0", appID: 1 },

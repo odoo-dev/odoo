@@ -9,7 +9,6 @@ import { MenuElement, Registries } from "../../src/types";
 import {
   click,
   getFixture,
-  makeFakeUserService,
   makeTestEnv,
   mount,
   OdooEnv,
@@ -29,7 +28,6 @@ QUnit.module("ActionDialog", {
     target.append(dialogContainer);
 
     serviceRegistry = new Registry();
-    serviceRegistry.add("user", makeFakeUserService());
     serviceRegistry.add(modelService.name, modelService);
     serviceRegistry.add(debugManagerService.name, debugManagerService);
     baseConfig = {

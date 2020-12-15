@@ -3,7 +3,7 @@ import { getDefaultLocalization } from "../../src/core/localization";
 import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
 import { Odoo, OdooConfig, OdooEnv, Registries, Type } from "../../src/types";
-import { makeTestOdoo, MockRPC } from "./mocks";
+import { makeTestOdoo, MockRPC, mocks } from "./mocks";
 import { makeMockServer, ServerData } from "./mock_server";
 
 // -----------------------------------------------------------------------------
@@ -65,6 +65,17 @@ export async function makeTestEnv(config: TestConfig = {}): Promise<OdooEnv> {
     testConfig.serviceRegistry!.remove("rpc");
     makeMockServer(testConfig, config.serverData, config.mockRPC);
   }
+  // add all missing dependencies if necessary
+  for (let service of testConfig.serviceRegistry!.getAll()) {
+    if (service.dependencies) {
+      for (let dep of service.dependencies) {
+        if (dep in mocks && !testConfig.serviceRegistry!.contains(dep)) {
+          testConfig.serviceRegistry!.add(dep, (mocks as any)[dep]());
+        }
+      }
+    }
+  }
+
   odoo = makeTestOdoo(testConfig);
   return await makeEnv(testConfig as OdooConfig);
 }
