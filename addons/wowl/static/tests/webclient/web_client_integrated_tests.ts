@@ -6409,65 +6409,52 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     }
   );
 
-  QUnit.skip("execute action without modal closes tooltips anyway", async function (assert) {
-    /*
-        // TODO: I don't like those 2 tooltips
-        // Just because there are two bodies
-        assert.expect(11);
+  QUnit.test(
+    "execute action without modal closes bootstrap tooltips anyway",
+    async function (assert) {
+      assert.expect(12);
 
-        Object.assign(this.archs, {
-            'partner,666,form': `<form>
-                <header><button name="object" string="Call method" type="object" help="need somebody"/></header>
-                    <field name="display_name"/>
-                </form>`,
-        });
+      Object.assign(baseConfig.serverData!.views!, {
+        "partner,666,form": `<form>
+      <header><button name="object" string="Call method" type="object" help="need somebody"/></header>
+      <field name="display_name"/>
+      </form>`,
+      });
 
-        const webClient = await createWebClient({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-            menus: this.menus,
-            webClient: {
-                _getWindowHash() {
-                    return '#action=24';
-                }
-            },
-            mockRPC(route) {
-                assert.step(route);
-                if (route === '/web/dataset/call_button') {
-                    // Some business stuff server side, then return an implicit close action
-                    return Promise.resolve(false);
-                }
-                return this._super.apply(this, arguments);
-            }
+      const mockRPC: RPC = async (route, args) => {
+        assert.step(route);
+        if (route === "/web/dataset/call_button") {
+          // Some business stuff server side, then return an implicit close action
+          return Promise.resolve(false);
+        }
+      };
+      const webClient = await createWebClient({ baseConfig, mockRPC });
+      await doAction(webClient, 24);
+      assert.verifySteps([
+        "/wowl/load_menus",
+        "/web/action/load",
+        "/web/dataset/call_kw/partner/load_views",
+        "/web/dataset/call_kw/partner/read",
+      ]);
+      assert.containsN(webClient.el!, ".o_form_buttons_view button:not([disabled])", 2);
+      const actionButton = webClient.el!.querySelector("button[name=object]");
+      const tooltipProm = new Promise((resolve) => {
+        $(document.body).one("shown.bs.tooltip", () => {
+          $(actionButton!).mouseleave();
+          resolve();
         });
-        assert.verifySteps([
-            '/web/action/load',
-            '/web/dataset/call_kw/partner',
-            '/web/dataset/call_kw/partner/read',
-        ]);
-        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
-        const actionButton = webClient.el.querySelector('button[name=object]');
-        const tooltipProm = new Promise((resolve) => {
-            $(document.body).one("shown.bs.tooltip", () => {
-                $(actionButton).mouseleave();
-                resolve();
-            });
-        });
-        $(actionButton).mouseenter();
-        await tooltipProm;
-        assert.containsN(document.body, '.tooltip', 2);
-        await testUtils.dom.click(actionButton);
-        await legacyExtraNextTick();
-        assert.verifySteps([
-            '/web/dataset/call_button',
-            '/web/dataset/call_kw/partner/read',
-        ]);
-        assert.containsNone(document.body, '.tooltip'); // body different from webClient in tests !
-        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
-        webClient.destroy();
-        */
-  });
+      });
+      $(actionButton!).mouseenter();
+      await tooltipProm;
+      assert.containsN(document.body, ".tooltip", 2);
+      await click(<HTMLElement>actionButton!);
+      await legacyExtraNextTick();
+      assert.verifySteps(["/web/dataset/call_button", "/web/dataset/call_kw/partner/read"]);
+      assert.containsNone(document.body, ".tooltip"); // body different from webClient in tests !
+      assert.containsN(webClient.el!, ".o_form_buttons_view button:not([disabled])", 2);
+      webClient.destroy();
+    }
+  );
 
   QUnit.test("on close with effect from server", async function (assert) {
     assert.expect(1);
