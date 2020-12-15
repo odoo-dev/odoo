@@ -1,4 +1,4 @@
-import { OdooEnv, Service } from "../types";
+import { Service } from "../types";
 import { debounce } from "../utils/misc";
 
 type Size = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -14,7 +14,7 @@ export const SIZES: { [key: string]: Size } = { XS: 0, VSM: 1, SM: 2, MD: 3, LG:
 
 export const deviceService: Service<Device> = {
   name: "device",
-  deploy(env: OdooEnv): Device {
+  deploy(env): Device {
     const MEDIAS = [
       window.matchMedia("(max-width: 474px)"),
       window.matchMedia("(min-width: 475px) and (max-width: 575px)"),

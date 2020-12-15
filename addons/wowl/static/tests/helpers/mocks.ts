@@ -270,9 +270,9 @@ export function makeFakeDeviceService(): Service<Device> {
     name: "device",
     deploy() {
       return {
-        isMobile: false,
-        isMobileDevice: false,
-        isTouchDevice: false,
+        isSmall: false,
+        isMobileOS: false,
+        hasTouch: false,
         size: SIZES.LG,
         SIZES,
       };
