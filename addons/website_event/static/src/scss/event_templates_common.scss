@@ -72,6 +72,8 @@
         .dropdown-menu {
             margin-top: $navbar-padding-y;
             min-width: 12rem;
+            max-height: 250px;
+            overflow-y: auto;
         }
         .dropdown-item  {
             &.active .badge { // Invert badge display when the item is active
@@ -137,13 +139,6 @@
         }
 
         .o_wevent_online_page_container {
-            // Widescreen mode
-            @include media-breakpoint-up(md) {
-                &:not(.container) {
-                    padding-left: 0.5rem;
-                    padding-right: 0.5rem;
-                }
-            }
 
             // Main panel
             .o_wevent_online_page_main {
@@ -167,21 +162,7 @@
 
                 // Left panel: content display
                 .o_wevent_online_page_aside_content {
-                    border: 1px solid $border-color;
-
-                    @include media-breakpoint-up(md) {
-                        border-top-width: 0;
-                    }
-
-                    li:not(.nav-item) {
-                        border-bottom: 1px solid $border-color;
-                        &:first-child {
-                            border-top: 1px solid $border-color;
-                        }
-                        &:last-child {
-                            border-bottom: 0px;
-                        }
-                    }
+                    border-bottom: 1px solid $border-color;
 
                     .o_wevent_online_page_aside_collapse:not(.collapsed) {
                         transform: rotate(180deg);

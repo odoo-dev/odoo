@@ -202,10 +202,10 @@
             <div class="col-12 h-100">
                 <main class="card-body">
                     <!-- Title -->
-                    <h5 class="card-title mt-0 mb-0 text-truncate d-flex align-items-top">
-                        <span t-field="sponsor.name" itemprop="name"/>
+                    <h5 class="card-title mt-0 mb-0 d-flex align-items-top text-break">
+                        <span t-field="sponsor.name" itemprop="name" class="mr-3"/>
                         <span t-if="sponsor.is_in_opening_hours and sponsor.chat_room_id"
-                            class="ml-auto badge badge-danger">Live
+                            class="ml-auto badge badge-danger align-self-start">Live
                         </span>
                     </h5>
                     <!-- Catchy sentence -->

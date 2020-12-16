@@ -95,32 +95,41 @@
 <!-- ============================================================ -->
 
 <template id="meeting_room_aside" name="Meeting Room: Aside">
-    <div t-att-class="'col-12 pl-0 pr-0 pr-md-3 o_wevent_online_page_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
+    <div t-att-class="'col-12 pl-0 pr-0 o_wevent_online_page_aside %s' % ('col-md-3 col-lg-2' if option_widescreen else 'col-md-4 col-lg-3')">
         <div class="bg-white o_wevent_online_page_aside_content">
-            <div class="d-flex align-items-center justify-content-between mx-2 py-1">
+            <div class="d-flex align-items-center justify-content-between mx-2">
                 <span class="h5 mb-0 pt-0 pt-md-3 pb-0 pb-md-2">Other Rooms</span>
                 <a href="#collapse_meet_room_aside" data-toggle="collapse" class="d-lg-none p-2 text-decoration-none o_wevent_online_page_aside_collapse collapsed">
                     <i class="fa fa-chevron-down d-lg-none"/>
                 </a>
             </div>
-            <ul id="collapse_meet_room_aside" class="list-unstyled collapse d-lg-block mb-0">
-                <li t-foreach="meeting_rooms_other" t-as="meeting_room_other">
-                    <a class="d-block w-100 h-100 px-2 pt-2 pb-1 text-decoration-none"
-                        t-att-href="'/event/%s/meeting_room/%s' % (slug(event), slug(meeting_room_other))">
-                        <div class="flex-grow-1 mw-100">
-                            <div class="text-truncate" t-esc="meeting_room_other.name"/>
-                            <span class="text-muted" t-esc="meeting_room_other.summary"></span>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="text-muted">
-                                    <b>&amp;#9900;&amp;nbsp;</b>
-                                    <small><t t-esc="meeting_room_other.room_participant_count"/> <t t-esc="meeting_room_other.target_audience"/></small>
+            <div id="collapse_meet_room_aside" class="collapse d-lg-block">
+                <ul class="list-unstyled mb-0">
+                    <li t-foreach="meeting_rooms_other" t-as="meeting_room_other">
+                        <a class="d-block px-2 pt-2 pb-1 text-decoration-none"
+                            t-att-href="'/event/%s/meeting_room/%s' % (slug(event), slug(meeting_room_other))">
+                            <div class="flex-grow-1 mw-100">
+                                <div class="text-truncate" t-esc="meeting_room_other.name"/>
+                                <div class="text-muted" t-esc="meeting_room_other.summary"/>
+                                <div class="text-muted" t-if="meeting_room_other.room_lang_id">
+                                    <i class="fa fa-globe"/>
+                                    <small>
+                                        <t t-esc="meeting_room_other.room_lang_id.name"/>
+                                    </small>
                                 </div>
-                                <small t-if="meeting_room_other.room_lang_id" class="text-muted"><i class="fa fa-globe"/> <t t-esc="meeting_room_other.room_lang_id.name"/></small>
+                                <div class="text-muted">
+                                    <i class="fa fa-user"/>
+                                    <small>
+                                        <t t-esc="meeting_room_other.room_participant_count"/>
+                                        <span t-if="meeting_room_other.target_audience" class="text-uppercase" t-field="meeting_room_other.target_audience"/>
+                                        <span t-else="" class="text-uppercase">participant(s)</span>
+                                    </small>
+                                </div>
                             </div>
-                        </div>
-                    </a>
-                </li>
-            </ul>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </template>
