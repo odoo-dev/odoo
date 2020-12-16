@@ -6438,7 +6438,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       ]);
       assert.containsN(webClient.el!, ".o_form_buttons_view button:not([disabled])", 2);
       const actionButton = webClient.el!.querySelector("button[name=object]");
-      const tooltipProm = new Promise((resolve) => {
+      const tooltipProm = new Promise<void>((resolve) => {
         $(document.body).one("shown.bs.tooltip", () => {
           $(actionButton!).mouseleave();
           resolve();
