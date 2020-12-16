@@ -554,7 +554,6 @@ function makeActionManager(env: OdooEnv): ActionManager {
       static template = tags.xml`<t t-component="Component" t-props="props"
         __exportState__="exportState"
         __beforeLeave__="beforeLeave"
-        __getTitle__="getTitle"
           t-ref="component"
           t-on-history-back="onHistoryBack"
           t-on-controller-title-updated.stop="onTitleUpdated"/>`;
