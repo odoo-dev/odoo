@@ -6,7 +6,7 @@
             <field name="name">mrp.routing.workcenter.tree</field>
             <field name="model">mrp.routing.workcenter</field>
             <field name="arch" type="xml">
-                <tree string="Routing Work Centers">
+                <tree string="Routing Work Centers" create="0">
                     <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="workcenter_id"/>
@@ -15,11 +15,23 @@
             </field>
         </record>
 
+        <record id="mrp_routing_workcenter_tree_view_with_create" model="ir.ui.view">
+            <field name="name">mrp.routing.workcenter.tree.with.create</field>
+            <field name="model">mrp.routing.workcenter</field>
+            <field name="inherit_id" ref="mrp_routing_workcenter_tree_view"/>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="create">1</attribute>
+                </xpath>
+            </field>
+        </record>
+
         <record id="mrp_routing_workcenter_form_view" model="ir.ui.view">
             <field name="name">mrp.routing.workcenter.form</field>
             <field name="model">mrp.routing.workcenter</field>
             <field name="arch" type="xml">
-                <form string="Routing Work Centers">
+                <form string="Routing Work Centers" create="0">
                     <sheet>
                         <group>
                             <group name="description">
@@ -67,10 +79,11 @@
             <field name="view_id" ref="mrp_routing_workcenter_tree_view"/>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
-                Create a new operation
+                No operations yet
               </p><p>
-                Operation define that need to be done to realize a Work Order.
+                Operations define what need to be done to realize a Work Order.
                 Each operation is done at a specific Work Center and has a specific duration.
+                You can create new operations while configuring a <span class="font-weight-bold">Bill of Materials</span>.
               </p>
             </field>
             <field name="domain">['|', ('bom_id', '=', False), ('bom_id.active', '=', True)]</field>

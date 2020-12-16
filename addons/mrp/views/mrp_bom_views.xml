@@ -104,7 +104,7 @@
                                     widget="many2many"
                                     attrs="{'invisible': [('type','not in',('normal','phantom'))]}"
                                     groups="mrp.group_mrp_routings"
-                                    context="{'default_company_id': company_id, 'default_product_tmpl_ids': [product_tmpl_id]}"/>
+                                    context="{'default_company_id': company_id, 'default_product_tmpl_ids': [product_tmpl_id], 'tree_view_ref': 'mrp.mrp_routing_workcenter_tree_view_with_create'}"/>
                         </page>
                         <page string="By-products"
                             name="by_products"
