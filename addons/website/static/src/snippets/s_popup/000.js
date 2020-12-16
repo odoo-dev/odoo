@@ -82,6 +82,9 @@ const PopupWidget = publicWidget.Widget.extend({
      * @private
      */
     _onCloseClick: function () {
+        this.el.querySelectorAll('.media_iframe_video iframe').forEach(function(iframe) {
+            iframe.src = '';
+        });
         this._hidePopup();
     },
     /**

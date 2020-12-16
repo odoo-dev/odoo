@@ -70,3 +70,16 @@
         }
     }
 }
+
+#oe_main_menu_navbar:not(.o_hidden) + #wrapwrap main {
+    .s_popup[data-vcss='001'] {
+        .modal:not(.s_popup_top) {
+            .s_popup_size_full {
+                margin-top: $o-navbar-height;
+            }
+        }
+        .s_popup_top {
+            margin-top: $o-navbar-height;
+        }
+    }
+}
