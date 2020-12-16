@@ -15,8 +15,7 @@ interface DisplayOptions {
 }
 
 export interface EffectService {
-  close: (id: number) => void;
-  create: (message: string, options?: DisplayOptions) => number;
+  create: (message: string, options?: DisplayOptions) => void;
 }
 
 class EffectsManager extends Component<{}, OdooEnv> {
@@ -47,10 +46,7 @@ export const effectService: Service<EffectService> = {
     if (!env.services.user.showEffect) {
       return {
         create: (message, options?) => {
-          return env.services.notifications.create(message, { sticky: false });
-        },
-        close(id) {
-          return env.services.notifications.close(id);
+          env.services.notifications.create(message, { sticky: false });
         },
       };
     }
@@ -67,17 +63,17 @@ export const effectService: Service<EffectService> = {
         });
       }
       closeRainbowMan() {
-        close(0);
+        close();
       }
     }
     odoo.mainComponentRegistry.add("EffectsManager", ReactiveEffectsManager);
 
-    function close(id: number): void {
+    function close(): void {
       effect = {};
       bus.trigger("UPDATE");
     }
 
-    function create(message: string, options?: DisplayOptions): number {
+    function create(message: string, options?: DisplayOptions): void {
       message = message || env._t("Well Done!");
       let type = "rainbow_man";
       if (options) {
@@ -89,11 +85,9 @@ export const effectService: Service<EffectService> = {
           message,
         });
         bus.trigger("UPDATE");
-        return (<Effect>effect).id;
       }
-      return 0;
     }
 
-    return { close, create };
+    return { create };
   },
 };
