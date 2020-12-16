@@ -5,7 +5,6 @@ import psycopg2
 
 from odoo import _, api, fields, models, SUPERUSER_ID
 from odoo.exceptions import ValidationError
-from odoo.http import request
 from odoo.osv import expression
 
 _logger = logging.getLogger(__name__)
@@ -45,7 +44,8 @@ class PaymentAcquirer(models.Model):
         string="Allow Saving Payment Methods",
         help="This controls whether customers can save their payment methods as payment tokens.\n"
              "A payment token is an anonymous link to the payment method details saved in the\n"
-             "acquirer's database, allowing the customer to reuse it for a next purchase.")
+             "acquirer's database, allowing the customer to reuse it for a next purchase.",
+        default=True)
     check_validity = fields.Boolean(
         string="Verify Token Validity",
         help="Whether a validation transaction should be triggered and immediately refunded\n"
@@ -400,7 +400,7 @@ class PaymentAcquirer(models.Model):
 
         For an acquirer to handle both direct payments and payment with redirection, it should
         override this method and return whether the inline form should be instantiated (i.e. if the
-        payment should be direct) based on the operation (validation or online payment).
+        payment should be direct) based on the operation (online payment or validation).
 
         :param bool is_validation: Whether the operation is a validation
         :return: Whether the inline form should be instantiated

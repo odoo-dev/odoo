@@ -25,27 +25,19 @@ class OdooController(http.Controller):
 
         :return: None
         """
-        # Payload data represent a single notification's data. Because wo notifications of a same
+        # Payload data represent a single notification's data. Because two notifications of a same
         # batch can be related to different sub-merchants, the proxy splits the batches and send
         # individual notifications one by one to this endpoint.
         notification_data = json.loads(request.httprequest.data)
 
         # Check the source and integrity of the notification
-        signature = notification_data.get('additionalData', {}).get('metadata.merchant_signature')
-        if not signature:
-            _logger.warning(f"ignored notification with missing signature")
-            return
+        received_signature = notification_data.get('additionalData', {}).get(
+            'metadata.merchant_signature'
+        )
         tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
             'odoo', notification_data
         )
-        db_secret = request.env['ir.config_parameter'].sudo().get_param('database.secret')
-        converted_amount = payment_utils.to_minor_currency_units(
-            tx_sudo.amount, tx_sudo.currency_id, CURRENCY_DECIMALS.get(tx_sudo.currency_id.name)
-        )
-        if not payment_utils.check_access_token(
-            signature, db_secret, converted_amount, tx_sudo.currency_id.name, tx_sudo.reference
-        ):
-            _logger.warning(f"ignored notification with invalid signature")
+        if not self._verify_notification_signature(received_signature, tx_sudo):
             return
 
         _logger.info(f"notification received:\n{pprint.pformat(notification_data)}")
@@ -63,3 +55,28 @@ class OdooController(http.Controller):
 
         # Handle the notification data as a regular feedback
         request.env['payment.transaction'].sudo()._handle_feedback_data('odoo', notification_data)
+
+    def _verify_notification_signature(self, received_signature, tx):
+        """ Check that the signature computed from the transaction values matches the received one.
+
+        :param str received_signature: The signature sent with the notification
+        :param recordset tx: The transaction of the notification, as a `payment.transaction` record
+        :return: Whether the signatures match
+        :rtype: str
+        """
+
+        if not received_signature:
+            _logger.warning(f"ignored notification with missing signature")
+            return False
+
+        db_secret = request.env['ir.config_parameter'].sudo().get_param('database.secret')
+        converted_amount = payment_utils.to_minor_currency_units(
+            tx.amount, tx.currency_id, CURRENCY_DECIMALS.get(tx.currency_id.name)
+        )
+        if not payment_utils.check_access_token(
+            received_signature, db_secret, converted_amount, tx.currency_id.name, tx.reference
+        ):
+            _logger.warning(f"ignored notification with invalid signature")
+            return False
+
+        return True

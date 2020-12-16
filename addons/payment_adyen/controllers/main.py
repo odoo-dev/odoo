@@ -1,4 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+import base64
+import binascii
+import hashlib
+import hmac
 import json
 import logging
 import pprint
@@ -243,17 +248,16 @@ class AdyenController(http.Controller):
             notification_data = notification_item['NotificationRequestItem']
 
             # Check the source and integrity of the notification
-            hmac_signature = notification_data.get('additionalData', {}).get('hmacSignature')
-            if not hmac_signature:
-                _logger.warning(f"ignored notification with missing signature")
-                continue
+            received_signature = notification_data.get('additionalData', {}).get('hmacSignature')
             acquirer_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
                 'adyen', notification_data
             ).acquirer_id  # Find the acquirer based on the transaction
-            if hmac_signature != to_text(acquirer_sudo._adyen_compute_signature(notification_data)):
-                _logger.warning(f"ignored notification with invalid signature")
+            if not self._verify_notification_signature(
+                received_signature, notification_data, acquirer_sudo.adyen_hmac_key
+            ):
                 continue
 
+            # Check whether the event of the notification succeeded
             _logger.info(f"notification received:\n{pprint.pformat(notification_data)}")
             if notification_data['success'] != 'true':
                 continue  # Don't handle failed events
@@ -268,8 +272,85 @@ class AdyenController(http.Controller):
                 continue  # Don't handle unsupported event codes
 
             # Handle the notification data as a regular feedback
-            request.env['payment.transaction'].sudo()._handle_feedback_data(
-                'adyen', notification_data
-            )
+            try:
+                request.env['payment.transaction'].sudo()._handle_feedback_data(
+                    'adyen', notification_data
+                )
+            except ValidationError:  # Acknowledge the notification to avoid getting spammed
+                _logger.exception("unable to handle the notification data; skipping to acknowledge")
 
         return '[accepted]'  # Acknowledge the notification
+
+    def _verify_notification_signature(self, received_signature, payload, hmac_key):
+        """ Check that the signature computed from the payload matches the received one.
+
+        See https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures
+
+        :param str received_signature: The signature sent with the notification
+        :param dict payload: The notification payload
+        :param str hmac_key: The HMAC key of the acquirer handling the transaction
+        :return: Whether the signatures match
+        :rtype: str
+        """
+
+        def _flatten_dict(_value, _path_base='', _separator='.'):
+            """ Recursively generate a flat representation of a dict.
+
+            :param Object _value: The value to flatten. A dict or an already flat value
+            :param str _path_base: They base path for keys of _value, including preceding separators
+            :param str _separator: The string to use as a separator in the key path
+            """
+            if type(_value) == dict:  # The inner value is a dict, flatten it
+                _path_base = _path_base if not _path_base else _path_base + _separator
+                for _key in _value:
+                    yield from _flatten_dict(_value[_key], _path_base + str(_key))
+            else:  # The inner value cannot be flattened, yield it
+                yield _path_base, _value
+
+        def _to_escaped_string(_value):
+            """ Escape payload values that are using illegal symbols and cast them to string.
+
+            String values containing `\\` or `:` are prefixed with `\\`.
+            Empty values (`None`) are replaced by an empty string.
+
+            :param Object _value: The value to escape
+            :return: The escaped value
+            :rtype: string
+            """
+            if isinstance(_value, str):
+                return _value.replace('\\', '\\\\').replace(':', '\\:')
+            elif _value is None:
+                return ''
+            else:
+                return str(_value)
+
+        if not received_signature:
+            _logger.warning(f"ignored notification with missing signature")
+            return False
+
+        # Compute the signature from the payload
+        signature_keys = [
+            'pspReference', 'originalReference', 'merchantAccountCode', 'merchantReference',
+            'amount.value', 'amount.currency', 'eventCode', 'success'
+        ]
+        # Flatten the payload to allow accessing inner dicts naively
+        flattened_payload = {k: v for k, v in _flatten_dict(payload)}
+        # Build the list of signature values as per the list of required signature keys
+        signature_values = [flattened_payload.get(key) for key in signature_keys]
+        # Escape values using forbidden symbols
+        escaped_values = [_to_escaped_string(value) for value in signature_values]
+        # Concatenate values together with ':' as delimiter
+        signing_string = ':'.join(escaped_values)
+        # Convert the HMAC key to the binary representation
+        binary_hmac_key = binascii.a2b_hex(hmac_key.encode('ascii'))
+        # Calculate the HMAC with the binary representation of the signing string with SHA-256
+        binary_hmac = hmac.new(binary_hmac_key, signing_string.encode('utf-8'), hashlib.sha256)
+        # Calculate the signature by encoding the result with Base64
+        expected_signature = base64.b64encode(binary_hmac.digest())
+
+        # Compare signatures
+        if received_signature != to_text(expected_signature):
+            _logger.warning(f"ignored event with invalid signature")
+            return False
+
+        return True
