@@ -6,13 +6,7 @@ import { useDebugManager } from "../../src/debug_manager/debug_manager";
 import { debugManagerService } from "../../src/debug_manager/debug_manager_service";
 import { modelService } from "../../src/services/model";
 import { MenuElement, Registries } from "../../src/types";
-import {
-  click,
-  getFixture,
-  makeTestEnv,
-  mount,
-  OdooEnv,
-} from "../helpers/index";
+import { click, getFixture, makeTestEnv, mount, OdooEnv } from "../helpers/index";
 import { TestConfig } from "../helpers/utility";
 
 let baseConfig: TestConfig;
