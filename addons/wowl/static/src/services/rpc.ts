@@ -116,7 +116,6 @@ function jsonrpc(
 
 export const rpcService: Service<RPC> = {
   name: "rpc",
-  dependencies: ["notifications"],
   deploy(env: OdooEnv): RPC {
     return async function (
       this: Component | null,
