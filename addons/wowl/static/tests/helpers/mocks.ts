@@ -388,5 +388,5 @@ export const mocks = {
   router: makeFakeRouterService,
   title: () => fakeTitleService,
   cookie: () => fakeCookieService,
-  effects: () => effectService
+  effects: () => effectService,
 };

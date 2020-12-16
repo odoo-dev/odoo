@@ -16,7 +16,8 @@ import { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
 import { WebClient } from "./webclient/webclient";
 
-const { whenReady, loadFile } = owl.utils;
+const { mount, utils } = owl;
+const { whenReady, loadFile } = utils;
 
 (async () => {
   // prepare browser object
@@ -60,17 +61,13 @@ const { whenReady, loadFile } = owl.utils;
     templates,
     _t,
   });
-  WebClient.env = env;
 
   // start web client
-  const root = new WebClient();
   await whenReady();
   const legacyEnv = await legacySetupProm;
   mapLegacyEnvToWowlEnv(legacyEnv, env);
 
-  await root.mount(document.body, { position: "self" });
-  // the chat window and dialog services listen to 'web_client_ready' event in order to initialize themselves:
-  env.bus.trigger("WEB_CLIENT_READY");
+  const root = await mount(WebClient, { env, target: document.body, position: "self" });
 
   // prepare runtime Odoo object
   const sessionInfo = odoo.session_info;

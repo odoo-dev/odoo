@@ -30,6 +30,12 @@ export class WebClient extends Component<{}, OdooEnv> {
     });
   }
 
+  mounted() {
+    // the chat window and dialog services listen to 'web_client_ready' event in
+    // order to initialize themselves:
+    this.env.bus.trigger("WEB_CLIENT_READY");
+  }
+
   async loadRouterState(): Promise<void> {
     const options: ActionOptions = {
       clearBreadcrumbs: true,
