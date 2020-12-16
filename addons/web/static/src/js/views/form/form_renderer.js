@@ -872,6 +872,8 @@ var FormRenderer = BasicRenderer.extend({
                         $firstVisibleTab.addClass('active');
                         $pages.find($firstVisibleTab.attr('href')).addClass('active');
                     }
+                    // if all pages are invisible then hide notebooks header's ul as well
+                    $headers.toggleClass('o_invisible_modifier', !$headers.find('li:not(.o_invisible_modifier)').length);
                 },
             });
         });
