@@ -25,7 +25,7 @@ import { DebuggingAccessRights, editModelDebug } from "../debug_manager/debug_ma
 import { ActWindowAction, ClientAction } from "../action_manager/action_manager";
 import { Dialog } from "../components/dialog/dialog";
 import { json_node_to_xml } from "../utils/misc";
-import { formatMany2one } from "../utils/fields_utils";
+import { formatMany2one } from "../utils/fields";
 const { useState } = hooks;
 import { Query, objectToQuery } from "../services/router";
 
