@@ -25,9 +25,7 @@ const services = [
   actionManagerService,
   crashManagerService,
   cookieService,
-  deviceService,
   dialogManagerService,
-  localizationService,
   titleService,
   menusService,
   modelService,
@@ -40,6 +38,8 @@ const services = [
   debugManagerService,
   downloadService,
   effectService,
+  deviceService,
+  localizationService,
 ];
 
 for (let service of services) {
