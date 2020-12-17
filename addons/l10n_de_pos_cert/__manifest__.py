@@ -22,6 +22,7 @@
 
     'data': [
         'data/ir_config_param.xml',
+        'views/l10n_de_pos_cert_templates.xml',
         'views/res_company_views.xml',
         'views/pos_config_views.xml'
     ]
