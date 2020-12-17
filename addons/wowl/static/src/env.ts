@@ -17,6 +17,16 @@ export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
     debug,
   };
 
+  // define shortcut properties coming from some services
+  Object.defineProperty(env, "isSmall", {
+    get() {
+      if (!env.services.device) {
+        throw new Error("Device service not initialized!");
+      }
+      return env.services.device.isSmall;
+    },
+  });
+
   await deployServices(env, config);
 
   return env;
