@@ -27,6 +27,7 @@ import { mainComponentRegistry } from "./webclient/main_component_registry";
 import type { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
 import { debugManagerService } from "./debug_manager/debug_manager_service";
+import { deviceService } from "./services/device";
 
 export interface Registries {
   mainComponentRegistry: typeof mainComponentRegistry;
@@ -156,6 +157,7 @@ export interface Services {
   user: ServiceType<typeof userService["deploy"]>;
   view_manager: ServiceType<typeof viewManagerService["deploy"]>;
   debug_manager: ServiceType<typeof debugManagerService["deploy"]>;
+  device: ServiceType<typeof deviceService["deploy"]>;
 
   [key: string]: any;
 }

@@ -14,7 +14,7 @@ export const SIZES: { [key: string]: Size } = { XS: 0, VSM: 1, SM: 2, MD: 3, LG:
 
 export const deviceService: Service<Device> = {
   name: "device",
-  deploy(env): Device {
+  deploy(): Device {
     const MEDIAS = [
       window.matchMedia("(max-width: 474px)"),
       window.matchMedia("(min-width: 475px) and (max-width: 575px)"),
@@ -48,13 +48,6 @@ export const deviceService: Service<Device> = {
     Object.defineProperty(device, "isSmall", {
       get() {
         return device.size <= SIZES.SM;
-      },
-    });
-
-    // define a shortcut in the env
-    Object.defineProperty(env, "isSmall", {
-      get() {
-        return env.services.device.isSmall;
       },
     });
 
