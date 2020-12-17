@@ -2,7 +2,13 @@ import { Component } from "@odoo/owl";
 import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
 import { Odoo, OdooEnv, Registries, Type } from "../../src/types";
-import { makeTestOdoo, MockRPC, mocks } from "./mocks";
+import {
+  makeFakeDeviceService,
+  makeFakeLocalizationService,
+  makeTestOdoo,
+  MockRPC,
+  mocks,
+} from "./mocks";
 import { makeMockServer, ServerData } from "./mock_server";
 
 // -----------------------------------------------------------------------------
@@ -33,9 +39,16 @@ export interface TestConfig extends Partial<Registries> {
 }
 
 function makeTestConfig(config: TestConfig = {}): TestConfig {
+  const serviceRegistry = config.serviceRegistry || new Registry();
+  if (!serviceRegistry.contains("device")) {
+    serviceRegistry.add("device", makeFakeDeviceService());
+  }
+  if (!serviceRegistry.contains("localization")) {
+    serviceRegistry.add("localization", makeFakeLocalizationService());
+  }
   return Object.assign(config, {
     debug: config.debug || "",
-    serviceRegistry: config.serviceRegistry || new Registry(),
+    serviceRegistry,
     mainComponentRegistry: config.mainComponentRegistry || new Registry(),
     actionRegistry: config.actionRegistry || new Registry(),
     systrayRegistry: config.systrayRegistry || new Registry(),
