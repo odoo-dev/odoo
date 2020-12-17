@@ -53,9 +53,9 @@ QUnit.test('simplest layout of a followed subtype', async function (assert) {
         model: 'res.partner',
     });
     const follower = this.env.models['mail.follower'].create({
-        channel: [['insert', {
+        partner: [['insert', {
+            email: "bla@bla.bla",
             id: 1,
-            model: 'mail.channel',
             name: "François Perusse",
         }]],
         followedThread: [['link', thread]],
@@ -114,9 +114,9 @@ QUnit.test('simplest layout of a not followed subtype', async function (assert) 
         model: 'res.partner',
     });
     const follower = this.env.models['mail.follower'].create({
-        channel: [['insert', {
+        partner: [['insert', {
+            email: "bla@bla.bla",
             id: 1,
-            model: 'mail.channel',
             name: "François Perusse",
         }]],
         followedThread: [['link', thread]],
@@ -172,9 +172,9 @@ QUnit.test('toggle follower subtype checkbox', async function (assert) {
         model: 'res.partner',
     });
     const follower = this.env.models['mail.follower'].create({
-        channel: [['insert', {
+        partner: [['insert', {
+            email: "bla@bla.bla",
             id: 1,
-            model: 'mail.channel',
             name: "François Perusse",
         }]],
         followedThread: [['link', thread]],
