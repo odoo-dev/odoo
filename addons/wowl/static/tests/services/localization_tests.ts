@@ -3,7 +3,7 @@ import * as QUnit from "qunit";
 import { OdooEnv, Registries } from "../../src/types";
 import { useService } from "../../src/core/hooks";
 import { getFixture, makeTestEnv, mount } from "../helpers/index";
-import { Registry } from "./../../src/core/registry";
+import { Registry } from "../../src/core/registry";
 import { makeFakeLocalizationService } from "../helpers/mocks";
 
 let target: HTMLElement;
