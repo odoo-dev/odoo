@@ -231,7 +231,7 @@ const scrollSymbol = Symbol("scroll");
  */
 function getScrollPosition(component: Component<any, OdooEnv>) {
   let scrollingEl;
-  if (component.env.isMobile) {
+  if (component.env.isSmall) {
     scrollingEl = document.body;
   } else {
     scrollingEl = component.el!.querySelector(".o_action_manager .o_content");
@@ -247,7 +247,7 @@ function getScrollPosition(component: Component<any, OdooEnv>) {
  */
 function setScrollPosition(component: Component<any, OdooEnv>, offset: ScrollOffset) {
   let scrollingEl;
-  if (component.env.isMobile) {
+  if (component.env.isSmall) {
     scrollingEl = document.body;
   } else {
     scrollingEl = component.el!.querySelector(".o_action_manager .o_content");
