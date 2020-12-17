@@ -4,8 +4,6 @@ import { setupTests } from "./helpers/index";
 import "./qunit";
 
 // import here every test suite files
-import "./action_manager/action_dialog_tests";
-import "./action_manager/action_manager_tests";
 import "./components/debug_manager_tests";
 import "./components/dialog_tests";
 import "./components/dropdown_tests";
@@ -25,10 +23,10 @@ import "./services/rpc_tests";
 import "./services/services_tests";
 import "./services/title_tests";
 import "./services/ui_tests";
+import "./webclient/action_manager_tests";
 import "./webclient/loading_indicator_tests";
 import "./webclient/navbar_tests";
 import "./webclient/user_menu_tests";
-import "./webclient/web_client_integrated_tests";
 import "./webclient/webclient_tests";
 
 (async () => {
