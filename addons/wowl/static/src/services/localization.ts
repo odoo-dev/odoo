@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { Service } from "../types";
-import { strftimeToLuxonFormat } from "../utils/fields_utils";
+import { strftimeToLuxonFormat } from "../utils/fields";
 
 export interface Localization {
   dateFormat: string;
