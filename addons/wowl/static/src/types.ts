@@ -28,6 +28,7 @@ import type { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
 import { debugManagerService } from "./debug_manager/debug_manager_service";
 import { deviceService } from "./services/device";
+import { Currencies, currencyService } from "./services/currency";
 
 export interface Registries {
   mainComponentRegistry: typeof mainComponentRegistry;
@@ -63,6 +64,7 @@ interface UserCompanies {
 
 export interface SessionInfo {
   cache_hashes: CacheHashes;
+  currencies: Currencies;
   user_context: UserContext;
   qweb: string;
   uid: number;
@@ -139,6 +141,7 @@ type ServiceType<T extends (...args: any[]) => any> = Nullify<Unwrap<ReturnType<
 export interface Services {
   action_manager: ServiceType<typeof actionManagerService["deploy"]>;
   cookie: ServiceType<typeof cookieService["deploy"]>;
+  currency: ServiceType<typeof currencyService["deploy"]>;
   dialog_manager: ServiceType<typeof dialogManagerService["deploy"]>;
   localization: ServiceType<typeof localizationService["deploy"]>;
   menus: ServiceType<typeof menusService["deploy"]>;

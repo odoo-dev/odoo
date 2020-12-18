@@ -10,19 +10,26 @@ import { DowloadFileOptions, Download } from "../../src/services/download";
 import { NotificationService } from "../../src/notifications/notification_service";
 import { UIService } from "../../src/services/ui/ui";
 import { Device, SIZES } from "../../src/services/device";
-import { getDefaultLocalization, Localization } from "../../src/services/localization";
+import {
+  makeLocalization,
+  Localization,
+  LocalizationConfig,
+} from "../../src/services/localization";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
 // // -----------------------------------------------------------------------------
-
-interface FakeLocalizationConfig extends Partial<Localization> {}
 export function makeFakeLocalizationService(
-  config?: FakeLocalizationConfig
+  config?: Partial<LocalizationConfig>
 ): Service<Localization> {
   return {
     name: "localization",
-    deploy: () => Object.assign(getDefaultLocalization(), config),
+    deploy: () => {
+      return makeLocalization({
+        langParams: (config && config.langParams) || {},
+        terms: (config && config.terms) || {},
+      });
+    },
   };
 }
 
@@ -112,6 +119,10 @@ export function makeTestOdoo(config: TestConfig = {}): Odoo {
       cache_hashes: {
         load_menus: "161803",
         translations: "314159",
+      },
+      currencies: {
+        1: { name: "USD", digits: [69, 2], position: "before", symbol: "$" },
+        2: { name: "EUR", digits: [69, 2], position: "after", symbol: "€" },
       },
       user_context: {
         lang: "en",
@@ -384,14 +395,14 @@ export function makeFakeNotificationService(
 }
 
 export const mocks = {
-  notifications: makeFakeNotificationService,
+  cookie: () => fakeCookieService,
   download: makeFakeDownloadService,
+  effects: () => effectService,
   localization: makeFakeLocalizationService,
+  notifications: makeFakeNotificationService,
+  router: makeFakeRouterService,
+  rpc: makeFakeRPCService,
+  title: () => fakeTitleService,
   ui: makeFakeUIService,
   user: makeFakeUserService,
-  rpc: makeFakeRPCService,
-  router: makeFakeRouterService,
-  title: () => fakeTitleService,
-  cookie: () => fakeCookieService,
-  effects: () => effectService,
 };
