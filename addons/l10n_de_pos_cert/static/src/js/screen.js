@@ -24,7 +24,9 @@ odoo.define('l10n_de_pos_cert.screens', function (require) {
                     });
                 }
                 if (order.isTransactionStarted()) {
-                    await order.finishShortTransaction().catch(error => {
+                    await order.finishShortTransaction().then(() => {
+                        _super();
+                    }).catch(error => {
                         const message = {
                             'noInternet': _t(
                                 'The transaction has already been sent to Fiskaly. You still need to finish or cancel the transaction. ' +
@@ -36,11 +38,8 @@ odoo.define('l10n_de_pos_cert.screens', function (require) {
                         this.chrome.showFiskalyErrorPopup(error, message)
                     });
                 }
-                if (order.isTransactionFinished()) {
-                    return _super()
-                }
             } else {
-                return _super();
+                _super();
             }
         }
     })

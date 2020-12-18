@@ -337,7 +337,6 @@ odoo.define('l10n_de_pos_cert.pos', function(require) {
                 contentType: 'application/json'
             }).then((data) => {
                 this._updateTssInfo(data);
-                this.save_to_db();
             }).catch(async (error) => {
                 if (error.status === 401) {  // Need to update the token
                     await this._authenticate();
