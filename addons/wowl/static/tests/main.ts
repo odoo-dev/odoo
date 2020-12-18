@@ -4,6 +4,19 @@ import { setupTests } from "./helpers/index";
 import "./qunit";
 
 // import here every test suite files
+import "./action_manager/client_action_tests";
+import "./action_manager/close_action_tests";
+import "./action_manager/concurrency_tests";
+import "./action_manager/effects_tests";
+import "./action_manager/legacy_tests";
+import "./action_manager/load_state_tests";
+import "./action_manager/misc_tests";
+import "./action_manager/push_state_tests";
+import "./action_manager/report_action_tests";
+import "./action_manager/server_action_tests";
+import "./action_manager/target_tests";
+import "./action_manager/url_action_tests";
+import "./action_manager/window_action_tests";
 import "./components/debug_manager_tests";
 import "./components/dialog_tests";
 import "./components/dropdown_tests";
@@ -23,7 +36,6 @@ import "./services/rpc_tests";
 import "./services/services_tests";
 import "./services/title_tests";
 import "./services/ui_tests";
-import "./webclient/action_manager_tests";
 import "./webclient/loading_indicator_tests";
 import "./webclient/navbar_tests";
 import "./webclient/user_menu_tests";
