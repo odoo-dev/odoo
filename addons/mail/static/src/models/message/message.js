@@ -399,6 +399,14 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
+        _computeHasUnfollowIcon() {
+            return this.originThread && this.originThread.isCurrentPartnerFollowing;
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
         _computeIsCurrentPartnerAuthor() {
             return !!(
                 this.author &&
@@ -608,6 +616,13 @@ function factory(dependencies) {
             default: false,
             dependencies: ['isModeratedByCurrentPartner'],
         }),
+        hasUnfollowIcon: attr({
+            compute: '_computeHasUnfollowIcon',
+            dependencies: [
+                'originThread',
+                'originThreadIsCurrentPartnerFollowing',
+            ],
+        }),
         id: attr({
             required: true,
         }),
@@ -755,6 +770,12 @@ function factory(dependencies) {
          */
         originThread: many2one('mail.thread', {
             inverse: 'messagesAsOriginThread',
+        }),
+        /**
+         * Serves as compute dependency for hasUnfollowIcon
+         */
+        originThreadIsCurrentPartnerFollowing: attr({
+            related: 'originThread.isCurrentPartnerFollowing',
         }),
         originThreadIsModeratedByCurrentPartner: attr({
             default: false,

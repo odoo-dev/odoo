@@ -60,6 +60,7 @@
                 hasSquashCloseMessages="discuss.thread.model !== 'mail.box'"
                 haveMessagesMarkAsReadIcon="discuss.thread === env.messaging.inbox"
                 haveMessagesReplyIcon="discuss.thread === env.messaging.inbox"
+                haveMessagesUnfollowIcon="discuss.thread.model === 'mail.box'"
                 isDoFocus="discuss.isDoFocus"
                 threadViewLocalId="discuss.threadView.localId"
                 t-on-o-focusin-composer="_onFocusinComposer"

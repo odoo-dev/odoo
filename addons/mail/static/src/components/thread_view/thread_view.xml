@@ -17,6 +17,7 @@
                         hasSquashCloseMessages="props.hasSquashCloseMessages"
                         haveMessagesMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
                         haveMessagesReplyIcon="props.haveMessagesReplyIcon"
+                        haveMessagesUnfollowIcon="props.haveMessagesUnfollowIcon"
                         order="props.order"
                         threadViewLocalId="threadView.localId"
                         t-ref="messageList"

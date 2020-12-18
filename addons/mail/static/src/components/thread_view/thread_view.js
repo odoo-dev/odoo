@@ -167,6 +167,7 @@ Object.assign(ThreadView, {
         hasSquashCloseMessages: false,
         haveMessagesMarkAsReadIcon: false,
         haveMessagesReplyIcon: false,
+        haveMessagesUnfollowIcon: false,
         isDoFocus: false,
         order: 'asc',
         showComposerAttachmentsExtensions: true,
@@ -203,6 +204,7 @@ Object.assign(ThreadView, {
         hasSquashCloseMessages: Boolean,
         haveMessagesMarkAsReadIcon: Boolean,
         haveMessagesReplyIcon: Boolean,
+        haveMessagesUnfollowIcon: Boolean,
         /**
          * Determines whether this should become focused.
          */

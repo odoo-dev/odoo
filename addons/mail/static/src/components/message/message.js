@@ -63,6 +63,7 @@ class Message extends Component {
                 authorNameOrDisplayName: author && author.nameOrDisplayName,
                 correspondent: thread && thread.correspondent,
                 hasMessageCheckbox: message ? message.hasCheckbox : false,
+                hasMessageUnfollowIcon: message ? message.hasUnfollowIcon : false,
                 isDeviceMobile: this.env.messaging.device.isMobile,
                 isMessageChecked: message && threadView
                     ? message.isChecked(thread, threadView.stringifiedDomain)
@@ -470,6 +471,14 @@ class Message extends Component {
             });
         }
         this._wasSelected = this.isSelected;
+        if (
+            this.message.originThread &&
+            this.threadView &&
+            this.threadView.thread &&
+            this.threadView.thread.model === 'mail.box'
+        ) {
+            this.message.originThread.refreshFollowers();
+        }
         this.message.refreshDateFromNow();
         clearInterval(this._intervalId);
         this._intervalId = setInterval(() => {
@@ -646,6 +655,17 @@ class Message extends Component {
 
     /**
      * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickUnfollow(ev) {
+        if (!this.message.isHistory) {
+            this.message.markAsRead();
+        }
+        this.message.originThread.unfollow();
+    }
+
+    /**
+     * @private
      */
     _onDialogClosedModerationBan() {
         this.state.hasModerationBanDialog = false;
@@ -673,6 +693,7 @@ Object.assign(Message, {
         hasCheckbox: false,
         hasMarkAsReadIcon: false,
         hasReplyIcon: false,
+        hasUnfollowIcon: false,
         isSquashed: false,
     },
     props: {
@@ -684,6 +705,7 @@ Object.assign(Message, {
         hasCheckbox: Boolean,
         hasMarkAsReadIcon: Boolean,
         hasReplyIcon: Boolean,
+        hasUnfollowIcon: Boolean,
         isSquashed: Boolean,
         messageLocalId: String,
         threadViewLocalId: {

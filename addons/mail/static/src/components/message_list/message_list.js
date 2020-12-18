@@ -569,6 +569,7 @@ Object.assign(MessageList, {
         hasSquashCloseMessages: false,
         haveMessagesMarkAsReadIcon: false,
         haveMessagesReplyIcon: false,
+        haveMessagesUnfollowIcon: false,
         order: 'asc',
     },
     props: {
@@ -576,6 +577,7 @@ Object.assign(MessageList, {
         hasSquashCloseMessages: Boolean,
         haveMessagesMarkAsReadIcon: Boolean,
         haveMessagesReplyIcon: Boolean,
+        haveMessagesUnfollowIcon: Boolean,
         hasScrollAdjust: Boolean,
         order: {
             type: String,

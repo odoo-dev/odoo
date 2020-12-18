@@ -76,6 +76,7 @@
                             hasMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
                             hasCheckbox="props.hasMessageCheckbox"
                             hasReplyIcon="props.haveMessagesReplyIcon"
+                            hasUnfollowIcon="props.haveMessagesUnfollowIcon"
                             isSquashed="isMessageSquashed"
                             messageLocalId="message.localId"
                             threadViewLocalId="threadView.localId"
