@@ -18,6 +18,7 @@ import { debugManagerService } from "../debug_manager/debug_manager_service";
 import { downloadService } from "./download";
 import { effectService } from "../effects/effects_service";
 import { localizationService } from "./localization";
+import { currencyService } from "./currency";
 
 export const serviceRegistry: Registry<Service<any>> = new Registry();
 
@@ -25,6 +26,7 @@ const services = [
   actionManagerService,
   crashManagerService,
   cookieService,
+  currencyService,
   dialogManagerService,
   titleService,
   menusService,

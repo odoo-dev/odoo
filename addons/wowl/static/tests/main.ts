@@ -28,6 +28,7 @@ import "./effects/rainbow_man_tests";
 import "./notifications/notifications_tests";
 import "./py/py_tests";
 import "./services/crash_manager_tests";
+import "./services/currency_tests";
 import "./services/dialog_manager_tests";
 import "./services/localization_tests";
 import "./services/model_tests";
