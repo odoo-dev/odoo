@@ -3138,6 +3138,7 @@ class TestAutoAssign(TestStockCommon):
         4. Check that only the correct outgoing pickings are auto_assigned
         5. Additionally check that auto-assignment at confirmation correctly works when products are in stock
         Note, default reservation method is expected to be covered by other tests.
+        Also check reservation_dates are as expected
         """
 
         stock_location = self.env['stock.location'].browse(self.stock_location)
@@ -3208,6 +3209,13 @@ class TestAutoAssign(TestStockCommon):
         self.assertEqual(customer_picking1.move_lines.reserved_availability, 0, "There should be no products available to reserve yet.")
         self.assertEqual(customer_picking2.move_lines.reserved_availability, 0, "There should be no products available to reserve yet.")
         self.assertEqual(customer_picking3.move_lines.reserved_availability, 0, "There should be no products available to reserve yet.")
+
+        self.assertFalse(customer_picking1.move_lines.reservation_date, "Reservation Method: 'manual' shouldn't have a reservation_date")
+        self.assertEqual(customer_picking2.move_lines.reservation_date, (customer_picking2.scheduled_date - timedelta(days=1)).date(),
+                         "Reservation Method: 'by_date' should have a reservation_date = scheduled_date - reservation_days_before")
+        self.assertEqual(customer_picking5.move_lines.reservation_date, customer_picking4.create_date.date(),
+                         "Reservation Method: 'at_confirm' should have a reservation_date = create_date")
+
 
         # create supplier picking and move
         supplier_picking = self.env['stock.picking'].create({
