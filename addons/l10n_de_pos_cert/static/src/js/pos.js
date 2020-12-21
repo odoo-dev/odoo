@@ -5,6 +5,8 @@ odoo.define('l10n_de_pos_cert.pos', function(require) {
     const rpc = require('web.rpc');
     const {uuidv4, convertFromEpoch} = require('l10n_de_pos_cert.utils');
     const { TaxError } = require('l10n_de_pos_cert.errors');
+    const core = require('web.core');
+    const _t = core._t;
 
     const RATE_ID_MAPPING = {
         1: 'NORMAL',
@@ -94,6 +96,30 @@ odoo.define('l10n_de_pos_cert.pos', function(require) {
                     })
                 })
             })
+        },
+        //@Override
+        async delete_current_order(){
+            const order = this.get_order();
+            if (this.isCountryGermany() && order && order.isTransactionStarted()) {
+                await order.cancelTransaction()
+                    .then(() => _super_posmodel.delete_current_order.apply(this, arguments))
+                    .catch(error => this._triggerFiskalyCancelError(error))
+            } else {
+                _super_posmodel.delete_current_order.apply(this, arguments);
+            }
+        },
+         _triggerFiskalyCancelError(error) {
+            const message = {
+                'noInternet': _t(
+                    'Check the internet connection then try to validate or cancel the order. ' +
+                    'Do not delete your browsing, cookies and cache data in the meantime !'
+                ),
+                'unknown': _t(
+                    'An unknown error has occurred ! Try to validate this order or cancel it again. ' +
+                    'Please contact Odoo for more information.'
+                )
+            };
+            this.chrome.showFiskalyErrorPopup(error, message);
         }
     });
 
