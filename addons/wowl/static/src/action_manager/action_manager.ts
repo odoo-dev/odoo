@@ -22,6 +22,7 @@ import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
 import { ActionDialog, ActionDialogProps } from "./action_dialog";
 import { KeepLast } from "../utils/concurrency";
+import { sprintf } from "../utils/strings";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -1125,7 +1126,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     const view = controller.views.find((view: any) => view.type === viewType);
     if (!view) {
       throw new ViewNotFoundError(
-        env._t(`No view of type '${viewType}' could be found in the current action.`)
+        sprintf(env._t("No view of type '%s' could be found in the current action."), viewType)
       );
     }
     const newController = controller.action.controllers[viewType] || {
