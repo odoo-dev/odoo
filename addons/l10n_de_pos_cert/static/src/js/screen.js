@@ -9,11 +9,7 @@ odoo.define('l10n_de_pos_cert.screens', function (require) {
             const _super = this._super.bind(this);
             if (this.pos.isCountryGermany()) {
                 const order = this.pos.get_order();
-                for (let line of order.get_paymentlines()) {
-                    if (!line.get_payment_status() || line.get_payment_status() === 'done') {
-                        order.remove_paymentline(line);
-                    };
-                }
+                order.clean_empty_paymentlines()
                 if (order.isTransactionInactive()) {
                     await order.createTransaction().catch(error => {
                         const message = {
