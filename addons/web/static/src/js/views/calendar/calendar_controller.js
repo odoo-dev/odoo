@@ -196,7 +196,7 @@ var CalendarController = AbstractController.extend({
      */
     _onChangeFilter: function (event) {
         if (this.model.changeFilter(event.data) && !event.data.no_reload) {
-            this.reload();
+            this.update({}, { reload: 'reload' in event.data ? event.data.reload : true });
         }
     },
     /**
