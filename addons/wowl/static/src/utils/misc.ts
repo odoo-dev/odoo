@@ -53,7 +53,7 @@ export function json_node_to_xml(node: any, human_readable: any, indent: number)
     <any>!node.children instanceof Array ||
     <any>!node.attrs instanceof Object
   ) {
-    throw new Error(`"Node [%s] is not a JSONified XML node" ${JSON.stringify(node)}`);
+    throw new Error(`Node [${JSON.stringify(node)}] is not a JSONified XML node`);
   }
   for (const attr in node.attrs) {
     let vattr = node.attrs[attr];
