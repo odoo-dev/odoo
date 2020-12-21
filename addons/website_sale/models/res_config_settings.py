@@ -31,6 +31,7 @@ class ResConfigSettings(models.TransientModel):
     module_website_sale_wishlist = fields.Boolean("Wishlists")
     module_website_sale_comparison = fields.Boolean("Product Comparison Tool")
     module_website_sale_stock = fields.Boolean("Inventory", help='Installs the "Website Delivery Information" application')
+    module_website_sale_loyalty = fields.Boolean("Loyalty Program Module", help="Enables a loyalty program for this website")
 
     module_account = fields.Boolean("Invoicing")
 
