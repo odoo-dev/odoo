@@ -605,9 +605,9 @@ var FieldMany2One = AbstractField.extend({
         if (this.limit < values.length) {
             values = this._manageSearchMore(values, value, domain, context);
         }
-        if (!this.can_create) {
-            return values;
-        }
+        // if (!this.can_create) {
+        //     return values;
+        // }
 
         // Additional options...
         const canQuickCreate = !this.nodeOptions.no_quick_create;
@@ -615,7 +615,7 @@ var FieldMany2One = AbstractField.extend({
         if (value.length) {
             // "Quick create" option
             const nameExists = results.some((result) => result[1] === value);
-            if (canQuickCreate && !nameExists) {
+            if (this.can_create && canQuickCreate && !nameExists) {
                 values.push({
                     label: sprintf(
                         _t(`Create "<strong>%s</strong>"`),
@@ -626,7 +626,7 @@ var FieldMany2One = AbstractField.extend({
                 });
             }
             // "Create and Edit" option
-            if (canCreateEdit) {
+            if (this.can_create && canCreateEdit) {
                 const valueContext = this._createContext(value);
                 values.push({
                     label: _t("Create and Edit..."),
@@ -644,7 +644,7 @@ var FieldMany2One = AbstractField.extend({
                     label: _t("No results to show..."),
                 });
             }
-        } else if (!this.value && (canQuickCreate || canCreateEdit)) {
+        } else if (!this.value && this.can_create && (canQuickCreate || canCreateEdit)) {
             // "Start typing" option
             values.push({
                 label: _t("Start typing..."),
