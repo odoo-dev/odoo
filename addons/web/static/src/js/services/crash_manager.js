@@ -99,6 +99,8 @@ var CrashManager = AbstractService.extend({
             'odoo.exceptions.Warning': _lt("Warning"),
         };
 
+        this.displayedWarnings = {}; // do not display simultaneously several times the same warning
+
         this.browserDetection = new BrowserDetection();
         this._super.apply(this, arguments);
 
@@ -311,11 +313,17 @@ var CrashManager = AbstractService.extend({
      * @param {Object} options
      */
     _displayWarning: function (message, title, options) {
-        return new WarningDialog(this, Object.assign({}, options, {
-            title,
-        }), {
-            message,
-        }).open();
+        const key = `${message} --- ${title}`;
+        if (key in this.displayedWarnings) {
+            return this.displayedWarnings[key]; // the same warning is already displayed
+        }
+        const dialogOptions = Object.assign({}, options, { title });
+        const dialog = new WarningDialog(this, dialogOptions, { message });
+        dialog.on('closed', this, () => {
+            delete this.displayedWarnings[key];
+        });
+        this.displayedWarnings[key] = dialog.open();
+        return this.displayedWarnings[key];
     },
 });
 
