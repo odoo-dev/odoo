@@ -605,9 +605,6 @@ var FieldMany2One = AbstractField.extend({
         if (this.limit < values.length) {
             values = this._manageSearchMore(values, value, domain, context);
         }
-        // if (!this.can_create) {
-        //     return values;
-        // }
 
         // Additional options...
         const canQuickCreate = !this.nodeOptions.no_quick_create;
