@@ -38,6 +38,15 @@ odoo.define('l10n_de_pos_cert.chrome', function (require) {
             const body = _.str.sprintf(_t('Your %s is incorrect. Update it in your PoS settings'), data);
             this.gui.show_popup('error', { title, body });
         },
+        showTaxError() {
+            const rates = Object.keys(this.pos.vatRateMapping);
+            const ratesText = [rates.slice(0,-1).join(', '), rates.slice(-1)[0]].join(' and ');
+
+            const title = _t('Tax error');
+            const body = _.str.sprintf(_t('Product has an invalid tax amount. Only the following rates are allowed: %s.'),
+                ratesText);
+            this.gui.show_popup('error', { title, body });
+        }
     });
 
 });

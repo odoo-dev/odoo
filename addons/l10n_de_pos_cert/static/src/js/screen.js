@@ -3,6 +3,7 @@ odoo.define('l10n_de_pos_cert.screens', function (require) {
     const screens = require('point_of_sale.screens');
     const core = require('web.core');
     const _t = core._t;
+    const { TaxError } = require('l10n_de_pos_cert.errors');
 
     screens.PaymentScreenWidget.include({
         async finalize_validation() {
@@ -39,6 +40,59 @@ odoo.define('l10n_de_pos_cert.screens', function (require) {
                 _super();
             }
         }
-    })
+    });
 
+    screens.ProductScreenWidget.include({
+        click_product(product) {
+            if (this.pos.isCountryGermany()) {
+                try {
+                    this._super(product);
+                } catch (error) {
+                    if (error instanceof TaxError) {
+                        this.chrome.showTaxError();
+                    } else {
+                        throw error;
+                    }
+                }
+            } else {
+                this._super(product);
+            }
+        }
+    });
+
+    screens.ProductCategoriesWidget.include({
+        perform_search(category, query, buy_result) {
+            if (this.pos.isCountryGermany()) {
+                try {
+                    this._super(category, query, buy_result);
+                } catch (error) {
+                    if (error instanceof TaxError) {
+                        this.chrome.showTaxError();
+                    } else {
+                        throw error;
+                    }
+                }
+            } else {
+                this._super(category, query, buy_result);
+            }
+        }
+    });
+
+    screens.ScaleScreenWidget.include({
+        order_product(){
+            if (this.pos.isCountryGermany()) {
+                try {
+                    this._super();
+                } catch (error) {
+                    if (error instanceof TaxError) {
+                        this.chrome.showTaxError();
+                    } else {
+                        throw error;
+                    }
+                }
+            } else {
+                this._super();
+            }
+        }
+    });
 });
