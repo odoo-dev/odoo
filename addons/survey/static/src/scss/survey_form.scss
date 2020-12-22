@@ -419,6 +419,20 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
             display: none;
         }
     }
+
+    // default border looks ugly for the scored questions because container div also have border in
+    // print page to indicate correct / incorrect answers, so we remove it and add needed rules
+    fieldset[disabled] .o_survey_scored_question {
+        .o_survey_question_date, .o_survey_question_datetime, .o_survey_question_numerical_box {
+            border: 0;
+            color: $white !important;
+            font-weight: $font-weight-bold;
+        }
+        .o_survey_question_skipped {
+            opacity: 0.6;
+        }
+    }
+
     .o_survey_question_matrix {
         th {
             /* important needed to force override bg-primary set on th in the template */

@@ -134,11 +134,15 @@
                                         ('question_type', 'not in', ['numerical_box', 'date', 'datetime'])]
                                     }">
                                     <group>
-                                        <field name="answer_numerical_box" string="Correct Answer" attrs="{'invisible': [('question_type', '!=', 'numerical_box')]}"/>
-                                        <field name="answer_date" string="Correct Answer" attrs="{'invisible': [('question_type', '!=', 'date')]}"/>
-                                        <field name="answer_datetime" string="Correct Answer" attrs="{'invisible': [('question_type', '!=', 'datetime')]}"/>
-                                        <field name="is_scored_question"/>
-                                        <field name="answer_score"/>
+                                        <field name="answer_numerical_box" string="Correct Answer" attrs="{'invisible': [('question_type', '!=', 'numerical_box')], 'required': [('is_scored_question', '=', True), ('question_type', '=', 'numerical_box')]}"/>
+                                        <field name="answer_date" string="Correct Answer" attrs="{'invisible': [('question_type', '!=', 'date')], 'required': [('is_scored_question', '=', True), ('question_type', '=', 'date')]}"/>
+                                        <field name="answer_datetime" string="Correct Answer" attrs="{'invisible': [('question_type', '!=', 'datetime')], 'required': [('is_scored_question', '=', True), ('question_type', '=', 'datetime')]}"/>
+                                        <label for="is_scored_question"/>
+                                        <div>
+                                            <field name="is_scored_question" nolabel="1"/>
+                                            <field name="answer_score" class="w-50 mr-2" attrs="{'invisible': [('is_scored_question', '!=', True)]}" nolabel="1"/>
+                                            <span attrs="{'invisible': [('is_scored_question', '!=', True)]}">points</span>
+                                        </div>
                                     </group>
                                 </div>
                             </div>
