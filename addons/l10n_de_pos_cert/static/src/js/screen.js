@@ -7,8 +7,9 @@ odoo.define('l10n_de_pos_cert.screens', function (require) {
     screens.PaymentScreenWidget.include({
         async finalize_validation() {
             const _super = this._super.bind(this);
-            if (this.pos.isCountryGermany()) {
-                const order = this.pos.get_order();
+            const order = this.pos.get_order();
+            // In order to not modify the base code, the second condition is needed for invoicing
+            if (this.pos.isCountryGermany() && (!order.is_to_invoice() || order.get_client())) {
                 order.clean_empty_paymentlines()
                 if (order.isTransactionInactive()) {
                     await order.createTransaction().catch(error => {
