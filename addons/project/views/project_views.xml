@@ -60,6 +60,7 @@
             <field name="context">{
                 'pivot_row_groupby': ['user_id'],
                 'default_project_id': active_id,
+                'show_project_update': True,
             }</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="help" type="html">
@@ -283,6 +284,9 @@
                             </div>
                         </div>
                     </div>
+                    <group>
+                        <field name="last_update_id"/>
+                    </group>
                     <notebook>
                         <page name="description_page" string="Description">
                             <field name="description" nolabel="1" placeholder="Describe your project..." type="html"/>
