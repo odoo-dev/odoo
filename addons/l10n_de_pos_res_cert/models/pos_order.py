@@ -127,7 +127,6 @@ class PosOrder(models.Model):
     def _get_fields_for_draft_order(self):
         field_list = super(PosOrder, self)._get_fields_for_draft_order()
         if self.env.company.country_id == self.env.ref('base.de'):
-            field_list.append('fiskaly_transaction_uuid')
             field_list.append('fiskaly_time_start')
         return field_list
 
@@ -136,11 +135,8 @@ class PosOrder(models.Model):
         table_orders = super(PosOrder, self).get_table_draft_orders(table_id)
         if self.env.company.country_id == self.env.ref('base.de'):
             for order in table_orders:
-                order['fiskaly_uuid'] = order['fiskaly_transaction_uuid']
                 order['tss_info'] = {}
                 order['tss_info']['time_start'] = order['fiskaly_time_start']
-
-                del order['fiskaly_transaction_uuid']
                 del order['fiskaly_time_start']
 
         return table_orders

@@ -23,11 +23,9 @@ odoo.define('l10n_de_pos_res_cert.floor', function(require) {
                 // at this point of the flow, it's impossible to retrieve the local order, only the ids were stored
                 // therefore we create an "empty" order object in order to call the needed methods
                 data.forEach(async elem => {
-                    if (elem.differences.length > 0) {
-                        const order = new models.Order({},{pos:this});
-                        await order.cancelOrderTransaction(elem.differences);
-                        order.destroy();
-                    }
+                    const order = new models.Order({},{pos:this});
+                    await order.cancelOrderTransaction(elem.differences);
+                    order.destroy();
                 })
             }
             return _super_posmodel._post_remove_from_server.apply(this, arguments);
@@ -108,7 +106,9 @@ odoo.define('l10n_de_pos_res_cert.floor', function(require) {
             });
         },
          async cancelOrderTransaction(lineDifference) {
-            await this.createAndFinishOrderTransaction(lineDifference);
+            if (lineDifference.length > 0) {
+                await this.createAndFinishOrderTransaction(lineDifference);
+            }
             await this.createTransaction();
             await this.cancelTransaction();
         }

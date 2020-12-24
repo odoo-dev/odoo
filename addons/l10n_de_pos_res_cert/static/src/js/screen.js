@@ -8,16 +8,14 @@ odoo.define('l10n_de_pos_res_cert.screens', function (require) {
         async finalize_validation() {
             const _super = this._super.bind(this);
             const order = this.pos.get_order();
-            // In order to not modify the base code, the second condition is needed for invoicing
             if (this.pos.isRestaurantCountryGermany() && (!order.is_to_invoice() || order.get_client())) {
+                // In order to not modify the base code, the second condition is needed for invoicing
                 await order.retrieveAndSendLineDifference().then(async () => {
                     await _super();
                 }).catch(error => {
-                    const message = {
-                        'noInternet': _t('Check the internet connection then try to validate the order again'),
-                        'unknown': _t('An unknown error has occurred ! Please, contact Odoo.')
-                    }
-                    this.chrome.showFiskalyErrorPopup(error, message)
+                    const title = _('No internet')
+                    const body = _t('Check the internet connection then try to validate the order again')
+                    this.gui.show_popup('error', { title, body });
                 });
             } else {
                 _super();
