@@ -155,3 +155,20 @@ class PosOrder(models.Model):
         return {
             'differences': differences
         }
+
+    @api.model
+    def remove_from_ui(self, server_ids):
+        """
+        Almost the same as the original method except that we compute the line difference and add it to the response
+        """
+        if self.env.company.country_id == self.env.ref('base.de'):
+            orders = self.search([('id', 'in', server_ids), ('state', '=', 'draft')])
+            res = []
+            for order in orders:
+                differences = self.line_differences(order, None)
+                res.append({'id': order.id, 'differences': differences})
+            super(PosOrder, self).remove_from_ui(server_ids)
+
+            return res
+        else:
+            return super(PosOrder, self).remove_from_ui(server_ids)
