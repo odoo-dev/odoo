@@ -81,11 +81,13 @@
             content.css('max-height', maxHeight);
         });
         $('.root-opcua').on('click', function (ev) {
-            $.ajax({
-                url: '/opcua_server_clear',
-                type: 'post',
-                data: $('#opcua-server-id').serialize(),
-            })
+            console.log(this);
+            console.log($(this).data("value"));
+            // $.ajax({
+            //     url: '/',
+            //     type: 'post',
+            //     data: $('#opcua-server-id').serialize(),
+            // });
         });
     });
 </script>
@@ -131,7 +133,7 @@
                             <div class="title arrow-down">{{ device.name }}</div>
                             <div class="content">
                                 <div class="root-opcua">
-                                    Root
+                                    <a class="btn btn-sm btn-in-border" href="#" data-value="root">Root</a>
                                 </div>
                             </div>
                         </div>
