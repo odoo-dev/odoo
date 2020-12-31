@@ -115,22 +115,22 @@ odoo.define('website_form_editor.tour', function (require) {
         ...addCustomField('one2many', 'checkbox', 'Products', true),
         {
             content: "Change Option 1 label",
-            trigger: 'we-list table input:eq(0)',
+            trigger: 'we-list.s_website_form_list table input:eq(0)',
             run: 'text Iphone',
         }, {
             content: "Change Option 2 label",
-            trigger: 'we-list table input:eq(1)',
+            trigger: 'we-list.s_website_form_list table input:eq(1)',
             run: 'text Galaxy S',
         }, {
             content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
+            trigger: 'we-list.s_website_form_list table input:eq(2)',
             run: 'text Xperia',
         }, {
             content: "Click on Add new Checkbox",
-            trigger: 'we-list we-button.o_we_list_add_optional',
+            trigger: 'we-list.s_website_form_list we-button.o_we_list_add_optional',
         }, {
             content: "Change added Option label",
-            trigger: 'we-list table input:eq(3)',
+            trigger: 'we-list.s_website_form_list table input:eq(3)',
             run: 'text Wiko Stairway',
         }, {
             content: "Check the resulting field",
@@ -157,22 +157,22 @@ odoo.define('website_form_editor.tour', function (require) {
         ...addCustomField('selection', 'radio', 'Service', true),
         {
             content: "Change Option 1 label",
-            trigger: 'we-list table input:eq(0)',
+            trigger: 'we-list.s_website_form_list table input:eq(0)',
             run: 'text After-sales Service',
         }, {
             content: "Change Option 2 label",
-            trigger: 'we-list table input:eq(1)',
+            trigger: 'we-list.s_website_form_list table input:eq(1)',
             run: 'text Invoicing Service',
         }, {
             content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
+            trigger: 'we-list.s_website_form_list table input:eq(2)',
             run: 'text Development Service',
         }, {
             content: "Click on Add new Checkbox",
-            trigger: 'we-list we-button.o_we_list_add_optional',
+            trigger: 'we-list.s_website_form_list we-button.o_we_list_add_optional',
         }, {
             content: "Change last Option label",
-            trigger: 'we-list table input:eq(3)',
+            trigger: 'we-list.s_website_form_list table input:eq(3)',
             run: 'text Management Service',
         }, {
             content: "Mark the field as not required",
@@ -192,22 +192,22 @@ odoo.define('website_form_editor.tour', function (require) {
         // Customize custom selection field
         {
             content: "Change Option 1 Label",
-            trigger: 'we-list table input:eq(0)',
+            trigger: 'we-list.s_website_form_list table input:eq(0)',
             run: 'text Germany',
         }, {
             content: "Change Option 2 Label",
-            trigger: 'we-list table input:eq(1)',
+            trigger: 'we-list.s_website_form_list table input:eq(1)',
             run: 'text Belgium',
         }, {
             content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
+            trigger: 'we-list.s_website_form_list table input:eq(2)',
             run: 'text France',
         }, {
             content: "Click on Add new Checkbox",
-            trigger: 'we-list we-button.o_we_list_add_optional',
+            trigger: 'we-list.s_website_form_list we-button.o_we_list_add_optional',
         }, {
             content: "Change last Option label",
-            trigger: 'we-list table input:eq(3)',
+            trigger: 'we-list.s_website_form_list table input:eq(3)',
             run: 'text Canada',
         }, {
             content: "Remove Germany Option",

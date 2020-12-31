@@ -1030,6 +1030,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             this._loadListDropdown(selectMenuEl);
         }
         const selectInputEl = document.createElement('we-list');
+        selectInputEl.classList.add('s_website_form_list');
         const title = document.createElement('we-title');
         title.textContent = listTitle;
         selectInputEl.appendChild(title);
