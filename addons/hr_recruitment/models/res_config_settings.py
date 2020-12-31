@@ -9,3 +9,4 @@ class ResConfigSettings(models.TransientModel):
 
     module_website_hr_recruitment = fields.Boolean(string='Online Posting')
     module_hr_recruitment_survey = fields.Boolean(string='Interview Forms')
+    interview_template = fields.Html(related='company_id.interview_template', readonly=False)

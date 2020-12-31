@@ -8,6 +8,12 @@ class Applicant(models.Model):
 
     survey_id = fields.Many2one('survey.survey', related='job_id.survey_id', string="Survey", readonly=True)
     response_id = fields.Many2one('survey.user_input', "Response", ondelete="set null")
+    interview_note = fields.Html(compute='_compute_interview_note', readonly=False, store=True)
+
+    @api.depends('job_id')
+    def _compute_interview_note(self):
+        for applicant in self.filtered(lambda x: not x.interview_note):
+            applicant.interview_note = applicant.job_id.interview_template
 
     def action_start_survey(self):
         self.ensure_one()
@@ -24,3 +30,7 @@ class Applicant(models.Model):
         """ If response is available then print this response otherwise print survey form (print template of the survey) """
         self.ensure_one()
         return self.survey_id.action_print_survey(answer=self.response_id)
+
+    def action_send_survey(self):
+        self.ensure_one()
+        return self.survey_id.action_send_survey()

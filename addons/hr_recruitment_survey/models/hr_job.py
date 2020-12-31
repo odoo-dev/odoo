@@ -6,6 +6,7 @@ from odoo import fields, models, _
 class Job(models.Model):
     _inherit = "hr.job"
 
+    interview_template = fields.Html(related='company_id.interview_template', readonly=False)
     survey_id = fields.Many2one(
         'survey.survey', "Interview Form",
         help="Choose an interview form for this job position and you will be able to print/answer this interview from all applicants who apply for this job")

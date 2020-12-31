@@ -13,6 +13,10 @@
                     <button string="Display Interview Form" name="action_print_survey" type="object" attrs="{'invisible':[('survey_id','=',False)]}" class="oe_link"/>
                 </div>
             </xpath>
+            <xpath expr="//group[@name='Recruitment_info']" position="after">
+                <separator string="Interview Template" class="mt-4"/>
+                <field name="interview_template" class="o_form_label" nolabel="1"/>
+            </xpath>
         </field>
     </record>
     <record id="view_hr_job_kanban_inherit" model="ir.ui.view">
@@ -23,9 +27,11 @@
             <xpath expr="//field[@name='manager_id']" position="after">
                 <field name="survey_id"/>
             </xpath>
-            <xpath expr='//a[@name="edit_job"]' position="after">
-                <a t-if="record.survey_id.raw_value" name="action_print_survey" type="object" title="Display Interview Form">Preview Interview</a>
-                <a t-if="!record.survey_id.raw_value" name="action_new_survey" type="object" title="Create Interview Form">Create Interview Form</a>
+            <xpath expr='//div[@name="applications_action"]' position="after">
+                <div role="menuitem">
+                    <a t-if="record.survey_id.raw_value" name="action_print_survey" type="object" title="Display Interview Form">Preview Interview</a>
+                    <a t-if="!record.survey_id.raw_value" name="action_new_survey" type="object" title="Create Interview Form">Create Interview Form</a>
+                </div>
             </xpath>
         </field>
     </record>

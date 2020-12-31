@@ -152,7 +152,7 @@ class Applicant(models.Model):
     legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked')
     legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid')
     legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing')
-    application_count = fields.Integer(compute='_compute_application_count', help='Applications with the same email')
+    application_count = fields.Integer(compute='_compute_application_count', help='Applications with the same email, or phone or the name')
     meeting_count = fields.Integer(compute='_compute_meeting_count', help='Meeting Count')
     refuse_reason_id = fields.Many2one('hr.applicant.refuse.reason', string='Refuse Reason', tracking=True)
 
@@ -174,15 +174,15 @@ class Applicant(models.Model):
                 applicant.day_close = False
                 applicant.delay_close = False
 
-    @api.depends('email_from')
+    @api.depends('email_from', 'partner_phone', 'partner_name')
     def _compute_application_count(self):
-        application_data = self.env['hr.applicant'].with_context(active_test=False).read_group([
-            ('email_from', 'in', list(set(self.mapped('email_from'))))], ['email_from'], ['email_from'])
-        application_data_mapped = dict((data['email_from'], data['email_from_count']) for data in application_data)
-        applicants = self.filtered(lambda applicant: applicant.email_from)
-        for applicant in applicants:
-            applicant.application_count = application_data_mapped.get(applicant.email_from, 1) - 1
-        (self - applicants).application_count = False
+        for applicant in self:
+            applicant.application_count = self.env['hr.applicant'].with_context(active_test=False).search_count([
+                '|', '|',
+                ('partner_phone', 'in', [p for p in self.mapped('partner_phone') if p]),
+                ('email_from', 'in', [p for p in self.mapped('email_from') if p]),
+                ('partner_name', 'in', [p for p in self.mapped('partner_name') if p])
+            ])
 
     def _compute_meeting_count(self):
         if self.ids:
@@ -361,8 +361,9 @@ class Applicant(models.Model):
             'name': _('Job Applications'),
             'res_model': self._name,
             'view_mode': 'kanban,tree,form,pivot,graph,calendar,activity',
-            'domain': [('email_from', 'in', self.mapped('email_from'))],
+            'domain': ['|', '|', ('partner_name', 'in', [p for p in self.mapped('partner_name') if p]), ('partner_phone', 'in', [p for p in self.mapped('partner_phone') if p]), ('email_from', 'in', [p for p in self.mapped('email_from') if p])],
             'context': {
+                'search_default_partner_name': [p for p in self.mapped('partner_name') if p],
                 'active_test': False
             },
         }
