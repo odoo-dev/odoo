@@ -1511,7 +1511,7 @@ def db_monodb(httprequest=None):
     """
     httprequest = httprequest or request.httprequest
 
-    dbs = db_list(True, httprequest)
+    dbs = []
 
     # try the db already in the session
     db_session = httprequest.session.db
