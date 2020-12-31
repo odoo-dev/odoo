@@ -1665,11 +1665,18 @@ QUnit.test('load more messages from channel', async function (assert) {
         "should have load more link"
     );
 
-    await afterNextRender(() =>
-        document.querySelector(`
-            .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_loadMore
-        `).click()
-    );
+    await this.afterEvent({
+        eventName: 'o-thread-view-hint-processed',
+        func: () => document.querySelector('.o_ThreadView_messageList').scrollTop = 0,
+        message: "should wait until thread loaded more messages after scrolling to top",
+        predicate: ({ hint, threadViewer }) => {
+            return (
+                hint.type === 'more-messages-loaded' &&
+                threadViewer.thread.model === 'mail.channel' &&
+                threadViewer.thread.id === 20
+            );
+        },
+    });
     assert.strictEqual(
         document.querySelectorAll(`
             .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_message

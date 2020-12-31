@@ -15,6 +15,9 @@ class ChatterContainerWrapperComponent extends ComponentWrapper {}
  * subset of) the mail widgets (mail_thread, mail_followers and mail_activity).
  */
 FormRenderer.include({
+    events: Object.assign({}, FormRenderer.prototype.events, {
+        'touchmove': '_onScrollForm', // Mobile
+    }),
     /**
      * @override
      */
@@ -30,6 +33,13 @@ FormRenderer.include({
         this._chatterContainerTarget = undefined;
         // Do not load chatter in form view dialogs
         this._isFromFormViewDialog = params.isFromFormViewDialog;
+    },
+    /**
+     * @override
+     */
+    start() {
+        document.addEventListener('scroll', this._onScrollForm, true);
+        return this._super(...arguments);
     },
     /**
      * @override
@@ -183,6 +193,21 @@ FormRenderer.include({
      * @param {mail.thread} ev.data.thread
      */
     _onChatterRendered(ev) {},
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onScrollForm(ev) {
+        const target = ev.target;
+        const chatterContainer = target.querySelector('.o_FormRenderer_chatterContainer');
+        if (
+            chatterContainer &&
+            !chatterContainer.classList.contains('o-aside') &&
+            target.scrollTop >= target.scrollHeight - target.clientHeight - 30
+        ) {
+            owl.Component.env.bus.trigger('formview_scroll');
+        }
+    }
 });
 
 });

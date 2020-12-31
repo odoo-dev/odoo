@@ -100,7 +100,7 @@
             </div>
         </t>
         <t t-elif="!threadView.threadCache.isAllHistoryLoaded and !threadView.thread.isTemporary">
-            <a class="o_MessageList_item o_MessageList_loadMore" href="#" t-on-click="_onClickLoadMore" t-ref="loadMore">
+            <a class="o_MessageList_item o_MessageList_loadMore" href="#" t-ref="loadMore">
                 Load more
             </a>
         </t>

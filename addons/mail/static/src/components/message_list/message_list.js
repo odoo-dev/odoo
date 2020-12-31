@@ -91,6 +91,7 @@ class MessageList extends Component {
         // useUpdate must be defined after useRenderedValues to guarantee proper
         // call order
         useUpdate({ func: () => this._update() });
+        this.env.bus.on('formview_scroll', this, this.onScroll.bind(this));
     }
 
     willPatch() {
@@ -480,15 +481,6 @@ class MessageList extends Component {
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickLoadMore(ev) {
-        ev.preventDefault();
-        this._loadMore();
-    }
 
     /**
      * @private
