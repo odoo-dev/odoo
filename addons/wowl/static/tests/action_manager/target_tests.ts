@@ -27,7 +27,7 @@ QUnit.module("ActionManager", (hooks) => {
   // add those actions/views in the test registries, and remove them from the
   // real ones (directly, as we don't need them in the test).
   const owner = Symbol("owner");
-  hooks.before(() => {
+  hooks.beforeEach(() => {
     actionRegistry.on("UPDATE", owner, (payload) => {
       if (payload.operation === "add" && testConfig.actionRegistry) {
         testConfig.actionRegistry.add(payload.key, payload.value);
@@ -41,7 +41,7 @@ QUnit.module("ActionManager", (hooks) => {
       }
     });
   });
-  hooks.after(() => {
+  hooks.afterEach(() => {
     actionRegistry.off("UPDATE", owner);
     viewRegistry.off("UPDATE", owner);
   });
