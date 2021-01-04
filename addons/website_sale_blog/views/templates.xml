@@ -1,0 +1,111 @@
+<odoo>
+    <data>
+        <template id="assets_frontend" inherit_id="website.assets_frontend" name="Sale-Blog Assets">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" type="text/scss" href="/website_sale_blog/static/src/scss/website_sale_blog.scss"/>
+            </xpath>
+        </template>
+
+        <!-- ===== (Option) Post Sidebar: Products Carousel ===== -->
+        <template id="opt_blog_post_product_display" name="Related Products" inherit_id="website_blog.blog_post_sidebar" active="False" customize_show="True" priority="6">
+            <xpath expr="//div[@id='o_wblog_post_sidebar']" position="inside">
+                <div class="o_wblog_sidebar_block pb-5">
+                    <h6 class="text-uppercase pb-3 mb-4 border-bottom font-weight-bold">Related Products</h6>
+                    <t t-if="blog_post.product_ids">
+                        <div id="o-blog-carousel-product" class="carousel slide o_not_editable" data-ride="carousel" data-interval="0">
+                            <div class="carousel-inner">
+                                <t t-foreach="blog_post.product_ids" t-as="product">
+                                    <t t-set="image_holder" t-value="product._get_image_holder()"/>
+                                    <t t-set="combination_info" t-value="product._get_combination_info(only_template=True, add_qty=1, pricelist=pricelist)"/>
+                                    <div t-attf-class="card oe_product_cart carousel-item #{product_first and 'active' or None}">
+                                        <div class="card-body p-1 oe_product_image" style="height: 256px;">
+                                            <span t-field="image_holder.image_1920" t-options="{'widget': 'image', 'preview_image': 'image_256'}"/>
+                                        </div>
+                                        <div class="card-body p-2 text-center o_wsale_product_information">
+                                            <h6 class="o_wsale_products_item_title">
+                                                <p t-field="product.name"/>
+                                                <a role="button" t-if="not product.website_published" 
+                                                t-att-href="product.website_url" class="btn btn-sm btn-danger" 
+                                                title="This product is unpublished.">Unpublished</a>
+                                            </h6>
+                                            <div class="product_price">
+                                                <del t-attf-class="text-danger mr-2 {{'' if combination_info['has_discounted_price'] else 'd-none'}}" 
+                                                style="white-space: nowrap;" t-esc="combination_info['list_price']"
+                                                t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                                                <span t-if="combination_info['price']" t-esc="combination_info['price']" 
+                                                t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                                            </div>
+                                            <a t-att-href="product.website_url" class="btn btn-primary mt-2">View Product</a>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                            <t t-if="len(blog_post.product_ids) > 1">
+                                <a class="carousel-control-prev" href="#o-blog-carousel-product" role="button" data-slide="prev">
+                                    <span class="fa fa-chevron-left bg-white text-primary p-2" role="img" aria-label="Previous" title="Previous"/>
+                                </a>
+                                <a class="carousel-control-next" href="#o-blog-carousel-product" role="button" data-slide="next">
+                                    <span class="fa fa-chevron-right bg-white text-primary p-2" role="img" aria-label="Next" title="Next"/>
+                                </a>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="mb-4 bg-100 py-2 px-3 border o_not_editable" groups="website.group_website_designer">
+                            <h6 class="text-muted"><em>No related products for this blog post!</em></h6>
+                            <a class="btn btn-primary" t-attf-href="/web#view_type=form&amp;model=#{main_object._name}&amp;id=#{main_object.id}">Add Some</a>
+                        </div>
+                    </t>
+                </div>
+                <div class="oe_structure" id="oe_structure_blog_post_sidebar_7"/>
+            </xpath>
+        </template>
+
+        <!-- ===== (Option) Product page: Related Blog Posts ===== -->
+        <template id="opt_product_blog_post_display" name="Related Blog Posts" inherit_id="website_sale.product" active="False" customize_show="True" priority="14">
+            <xpath expr="//div[@t-field='product.website_description']" position="after">
+                <section class="container mt32 mb32">
+                    <h3 class="text-center mb32">Related Blog Posts</h3>
+                    <t t-if="product.blog_post_ids">
+                        <div id="o-product-carousel-blogpost" class="carousel slide o_not_editable" data-ride="carousel" data-interval="0">
+                            <div class="carousel-inner">
+                                <t t-foreach="product.blog_post_ids" t-as="blog_post">
+                                    <article t-attf-class="carousel-item #{blog_post_first and 'active' or None}" name="blog_post">
+                                        <div class="mb-3">
+                                            <t t-call="website_blog.post_heading"/>
+                                            <t t-call="website_blog.post_info"/>
+                                        </div>
+                                        <t t-call="website_blog.post_cover_image"/>
+                                        <div t-field="blog_post.teaser" class="mt-2"/>
+                                        <a t-attf-href="/blog/#{slug(blog_post.blog_id)}/#{slug(blog_post)}" class="btn btn-primary mt-3">
+                                            Read more <i class="fa fa-chevron-right ml-2"/>
+                                        </a>
+                                        <span t-if="not blog_post.website_published" class="float-right bg-danger small py-1 px-2 o_not_editable">
+                                            unpublished
+                                        </span>
+                                    </article>
+                                </t>
+                            </div>
+                            <t t-if="len(product.blog_post_ids) > 1">
+                                <a class="o_carousel_blog_control carousel-control-prev" href="#o-product-carousel-blogpost" role="button" data-slide="prev">
+                                    <span class="fa fa-chevron-left bg-white text-primary p-2" role="img" aria-label="Previous" title="Previous"/>
+                                </a>
+                                <a class="o_carousel_blog_control carousel-control-next" href="#o-product-carousel-blogpost" role="button" data-slide="next">
+                                    <span class="fa fa-chevron-right bg-white text-primary p-2" role="img" aria-label="Next" title="Next"/>
+                                </a>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="text-center mb-5 o_not_editable" groups="website.group_website_designer">
+                            <h6 class="text-muted"><em>There is no blog posts for this product!</em></h6>
+                            <a class="btn btn-primary mt-3" t-attf-href="/web#view_type=form&amp;model=#{main_object._name}&amp;id=#{main_object.id}">
+                                Add blog posts
+                            </a>
+                        </div>
+                    </t>
+                </section>
+            </xpath>
+        </template>
+    </data>
+</odoo>
