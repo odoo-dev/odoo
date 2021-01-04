@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
-from datetime import datetime
+from odoo import fields, models
 
 
 class ProjectTaskCreateTimesheet(models.TransientModel):
@@ -20,16 +19,14 @@ class ProjectTaskCreateTimesheet(models.TransientModel):
     )
 
     def save_timesheet(self):
-        values = {
-            'task_id': self.task_id.id,
-            'project_id': self.task_id.project_id.id,
-            'date': fields.Date.context_today(self),
-            'name': self.description,
-            'user_id': self.env.uid,
-            'unit_amount': self.time_spent,
-        }
+        analytic_line = self.task_id.timesheet_ids.filtered(lambda l: l.user_timer_id)
         self.task_id.user_timer_id.unlink()
-        return self.env['account.analytic.line'].create(values)
+        return analytic_line.write({
+            'display_timer_pause': False,
+            'name': self.description,
+            'unit_amount': self.time_spent,
+            })
 
     def action_delete_timesheet(self):
-        self.task_id.user_timer_id.unlink()
+        analytic_line = self.task_id.timesheet_ids.filtered(lambda l: l.user_timer_id)
+        analytic_line.unlink()
