@@ -1,6 +1,96 @@
 import { DateTime } from "luxon";
 
 /**
+ * Change the method toJSON to return the formated value to send server side.
+ */
+DateTime.prototype.toJSON = function () {
+  return this.setLocale("en").toFormat("yyyy-MM-dd HH:mm:ss");
+};
+
+export function formatDateTime(
+  value: DateTime | false,
+  options: { format?: string; timezone?: boolean } = {}
+): string {
+  if (value === false) {
+    return "";
+  }
+  if (options.timezone === undefined || options.timezone) {
+    value = value.minus({ minutes: value.toJSDate().getTimezoneOffset() });
+  }
+  return options.format ? value.toFormat(options.format) : value.toJSON();
+}
+
+const stripAlphaDupesRegex = /([a-zA-Z])(?<=\1[^\1])/g;
+function stripAlphaDupes(str: string) {
+  // Removes any duplicated alphabetic characters in a given string.
+  // Example: "aa-bb-CCcc-ddD xxxx-Yy-ZZ" -> "a-b-Cc-dD x-Yy-Z"
+  return str.replace(stripAlphaDupesRegex, "");
+}
+function check(d: DateTime): DateTime | false {
+  // FYI, luxon authorizes years until 275760 included...
+  return d.isValid && d.year < 10000 && d;
+}
+const nonAlphaRegex = /\W/g;
+const nonDigitsRegex = /\D/g;
+
+/**
+ * Utilitary method to create a Luxon DateTime object.
+ * The value can also take the form of a smart date: e.g. "+3w" for three weeks from now.
+ * If value can not be parsed with the localized format, the fallback is ISO8601 format.
+ *
+ * @param {string} value
+ * @param {string} [options.format=ISO8601]
+ * @param {boolean} [options.timezone=false] parse the date then apply the timezone offset
+ * @returns {DateTime|false} Luxon DateTime object
+ */
+export function parseDateTime(
+  value: string,
+  options: { format?: string; timezone?: boolean } = {}
+): DateTime | false {
+  if (!value) {
+    return false;
+  }
+  let result: DateTime;
+  const smartDate = parseSmartDateInput(value);
+  if (smartDate) {
+    result = smartDate;
+  } else if (!options.format) {
+    result = DateTime.fromISO(value);
+  } else {
+    const fmt = options.format;
+    const fmtWoZero = stripAlphaDupes(fmt);
+
+    // Luxon is not permissive regarding non alphabetical characters for
+    // formatting strings. So if the value to parse has less characters than
+    // the format, we would try to parse without the separating characters.
+    const woSeps = value.length < fmt.length && {
+      val: value.replace(nonDigitsRegex, ""),
+      fmt: fmt.replace(nonAlphaRegex, ""),
+    };
+
+    result =
+      check(DateTime.fromFormat(value, fmt)) ||
+      check(DateTime.fromFormat(value, fmtWoZero)) ||
+      (woSeps &&
+        (check(DateTime.fromFormat(woSeps.val, woSeps.fmt)) ||
+          check(DateTime.fromFormat(woSeps.val, woSeps.fmt.slice(0, woSeps.val.length))))) ||
+      DateTime.fromISO(value) || // last try: ISO8601
+      DateTime.invalid("mandatory but unused string");
+  }
+  return options.timezone
+    ? result.minus({ minutes: result.toJSDate().getTimezoneOffset() })
+    : result;
+}
+
+const dateUnits: { [unit: string]: string } = {
+  d: "days",
+  m: "months",
+  w: "weeks",
+  y: "years",
+};
+const smartDateRegex = new RegExp(`^([+-])(\\d+)([${Object.keys(dateUnits).join("")}]?)$`);
+
+/**
  * Smart date inputs are shortcuts to write dates quicker.
  * These shortcuts should respect the format ^[+-]\d+[dmwy]?$
  *
@@ -14,18 +104,11 @@ import { DateTime } from "luxon";
  * @returns {DateTime|false} Luxon datetime object
  */
 export function parseSmartDateInput(value: string): DateTime | false {
-  const units: { [unit: string]: string } = {
-    d: "days",
-    m: "months",
-    w: "weeks",
-    y: "years",
-  };
-  const re = new RegExp(`^([+-])(\\d+)([${Object.keys(units).join("")}]?)$`);
-  const match = re.exec(value);
+  const match = smartDateRegex.exec(value);
   if (match) {
     let date = DateTime.local();
     const offset = parseInt(match[2], 10);
-    const unit = units[match[3] || "d"];
+    const unit = dateUnits[match[3] || "d"];
     if (match[1] === "+") {
       date = date.plus({ [unit]: offset });
     } else {
@@ -35,8 +118,6 @@ export function parseSmartDateInput(value: string): DateTime | false {
   }
   return false;
 }
-
-// TIME
 
 const normalize_format_table: {
   [id: string]: any;

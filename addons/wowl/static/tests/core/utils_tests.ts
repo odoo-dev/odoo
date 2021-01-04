@@ -1,4 +1,4 @@
-import { escapeRegExp, intersperse, sprintf, stripAlphaDupes } from "../../src/utils/strings";
+import { escapeRegExp, intersperse, sprintf } from "../../src/utils/strings";
 
 QUnit.module("utils", {}, () => {
   QUnit.module("strings");
@@ -60,21 +60,5 @@ QUnit.module("utils", {}, () => {
     assert.deepEqual(sprintf("Hello!"), "Hello!");
     assert.deepEqual(sprintf("Hello %s!"), "Hello %s!");
     assert.deepEqual(sprintf("Hello %(value)s!"), "Hello %(value)s!");
-  });
-
-  QUnit.test("stripAlphaDupes", (assert) => {
-    const sAD = stripAlphaDupes;
-    assert.deepEqual(sAD(""), "");
-    assert.deepEqual(sAD("11223344"), "11223344");
-    assert.deepEqual(sAD("..::!!//@@--==  ,,++$$\\\\"), "..::!!//@@--==  ,,++$$\\\\");
-    assert.deepEqual(sAD("QqWwEeRrTtYy"), "QqWwEeRrTtYy");
-    assert.deepEqual(sAD("QQwwEErrTTyy"), "QwErTy");
-    assert.deepEqual(sAD("QqWwEeRrTtYy", { ignoreCase: true }), "QWERTY");
-    assert.deepEqual(sAD("qQwWeErRtTyY", { ignoreCase: true }), "qwerty");
-
-    assert.deepEqual(sAD("HH:mm:ss"), "H:m:s");
-    assert.deepEqual(sAD("yyyy/LL/dd HH:mm:ss"), "y/L/d H:m:s");
-    assert.deepEqual(sAD("aa-bb-CCcc-ddD xxxx-Yy-ZZ"), "a-b-Cc-dD x-Yy-Z");
-    assert.deepEqual(sAD("aa-bb-CCcc-ddD xxxx-Yy-ZZ", { ignoreCase: true }), "a-b-C-d x-Y-Z");
   });
 });
