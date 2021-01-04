@@ -4,7 +4,9 @@
  * @param {String} str
  * @returns {String} escaped string to use as a RegExp
  */
-export const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+export function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 /**
  * Intersperses ``separator`` in ``str`` at the positions indicated by
@@ -71,24 +73,3 @@ export function sprintf(s: string, ...values: string[] | [{ [key: string]: strin
   }
   return s;
 }
-
-/**
- * Removes any duplicated alphabetic characters in a given string.
- *
- * Example:
- *  - "aa-bb-CCcc-ddD xxxx-Yy-ZZ" -> "a-b-Cc-dD x-Yy-Z"
- *  - "aa-bb-CCcc-ddD xxxx-Yy-ZZ" (ignoreCase: true) -> "a-b-C-d x-Y-Z"
- *
- * @param {String} str
- * @param {Object} options
- * @param {boolean} options.ignoreCase default: false
- * @returns String
- */
-export const stripAlphaDupes = (
-  str: string,
-  options: { ignoreCase: boolean } = { ignoreCase: false }
-): string => {
-  const flags = options.ignoreCase ? "gi" : "g";
-  const regex = new RegExp(/([a-zA-Z])(?<=\1[^\1])/.source, flags);
-  return str.replace(regex, "");
-};

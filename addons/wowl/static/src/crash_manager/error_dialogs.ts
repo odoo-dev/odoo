@@ -3,7 +3,7 @@ import { Odoo, OdooEnv } from "../types";
 import { Dialog } from "../components/dialog/dialog";
 import { ActionRequest } from "../action_manager/action_manager";
 import { useService } from "../core/hooks";
-import { Stringifiable, _lt } from "../services/localization";
+import { Stringable, _lt } from "../services/localization";
 declare const odoo: Odoo;
 const { useState } = hooks;
 
@@ -11,7 +11,7 @@ function capitalize(s: string | undefined): string {
   return s ? s[0].toUpperCase() + s.slice(1) : "";
 }
 
-export const odooExceptionTitleMap: Map<string, Stringifiable> = new Map();
+export const odooExceptionTitleMap: Map<string, Stringable> = new Map();
 odooExceptionTitleMap.set("odoo.exceptions.AccessDenied", _lt("Access Denied"));
 odooExceptionTitleMap.set("odoo.exceptions.AccessError", _lt("Access Error"));
 odooExceptionTitleMap.set("odoo.exceptions.MissingError", _lt("Missing Record"));

@@ -28,7 +28,7 @@ import type { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
 import { debugManagerService } from "./debug_manager/debug_manager_service";
 import { deviceService } from "./services/device";
-import { Currencies, currencyService } from "./services/currency";
+import { Currency, currencyService } from "./services/currency";
 
 export interface Registries {
   mainComponentRegistry: typeof mainComponentRegistry;
@@ -64,7 +64,7 @@ interface UserCompanies {
 
 export interface SessionInfo {
   cache_hashes: CacheHashes;
-  currencies: Currencies;
+  currencies: { [id: number]: Currency };
   user_context: UserContext;
   qweb: string;
   uid: number;
