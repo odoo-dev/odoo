@@ -196,12 +196,9 @@ class EventEvent(models.Model):
         tracking=True, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     country_id = fields.Many2one(
         'res.country', 'Country', related='address_id.country_id', readonly=False, store=True)
-    # badge fields
-    badge_front = fields.Html(string='Badge Front')
-    badge_back = fields.Html(string='Badge Back')
-    badge_innerleft = fields.Html(string='Badge Inner Left')
-    badge_innerright = fields.Html(string='Badge Inner Right')
-    event_logo = fields.Html(string='Event Logo')
+    # ticket reports
+    ticket_extra_instructions = fields.Html('Extra Instruction', translate=True,
+        help="These information will be added on your printed tickets.")
 
     @api.depends('stage_id', 'kanban_state')
     def _compute_kanban_state_label(self):

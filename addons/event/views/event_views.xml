@@ -256,6 +256,7 @@
                                     'tree_view_ref': 'event.event_event_ticket_view_tree_from_event',
                                     'form_view_ref': 'event.event_event_ticket_view_form_from_event',
                                     'kanban_view_ref': 'event.event_event_ticket_view_kanban_from_event'}" mode="tree,kanban"/>
+                                <field name="ticket_extra_instructions"/>
                             </page>
                             <page string="Communication" name="event_communication">
                                 <field name="event_mail_ids">

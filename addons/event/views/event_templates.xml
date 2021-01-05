@@ -12,6 +12,11 @@
                 <script type="text/javascript" src="/event/static/src/js/tours/event_tour.js"></script>
             </xpath>
         </template>
+        <template id="event_report_assets_pdf" name="Event Assets Reports" inherit_id="web.report_assets_common">
+            <xpath expr="link[last()]" position="after">
+                <link rel="stylesheet" type="text/scss" href="/event/static/src/scss/event_foldable_badge_report.scss"/>
+            </xpath>
+        </template>
     </data>
     <template id="event_default_descripton" name="Event default description">
         <section class="s_text_block">
