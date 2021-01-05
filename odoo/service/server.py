@@ -544,7 +544,6 @@ class ThreadedServer(CommonServer):
         a second one if any will force an immediate exit.
         """
         self.start(stop=stop)
-
         rc = preload_registries(preload)
 
         if stop:
@@ -1245,6 +1244,7 @@ def preload_registries(dbnames):
             registry = Registry.new(dbname, update_module=update_module)
 
             # run test_file if provided
+
             if config['test_file']:
                 test_file = config['test_file']
                 if not os.path.isfile(test_file):
@@ -1279,6 +1279,7 @@ def preload_registries(dbnames):
             _logger.critical('Failed to initialize database `%s`.', dbname, exc_info=True)
             return -1
     return rc
+
 
 def start(preload=None, stop=False):
     """ Start the odoo http server and cron processor.

@@ -21,6 +21,7 @@ import sys
 import threading
 import time
 import traceback
+import uuid
 import warnings
 from os.path import join as opj
 from zlib import adler32
@@ -52,6 +53,8 @@ from .service.server import memory_info
 from .service import security, model as service_model
 from .sql_db import flush_env
 from .tools.func import lazy_property
+from .tools.misc import str2bool
+from .tools import profiler
 from .tools import ustr, consteq, frozendict, pycompat, unique, date_utils
 from .tools.mimetypes import guess_mimetype
 from .tools._vendor import sessions
@@ -307,7 +310,7 @@ class WebRequest(object):
         # WARNING: do not inline or it breaks: raise...from evaluates strictly
         # LTR so would first remove traceback then copy lack of traceback
         new_cause = Exception().with_traceback(exception.__traceback__)
-        new_cause.__cause__ = exception.__cause__
+        new_cause.__cause__ = exception.__cause__ or exception.__context__
         # tries to provide good chained tracebacks, just re-raising exception
         # generates a weird message as stacks just get concatenated, exceptions
         # not guaranteed to copy.copy cleanly & we want `exception` as leaf (for
@@ -1121,7 +1124,6 @@ class OpenERPSession(sessions.Session):
         return saved_actions.get("actions", {}).get(key)
 
     def save_request_data(self):
-        import uuid
         req = request.httprequest
         files = werkzeug.datastructures.MultiDict()
         # NOTE we do not store files in the session itself to avoid loading them in memory.
@@ -1414,6 +1416,21 @@ class Root(object):
 
         return response
 
+    def _handle_debug(self, request):
+        # Store URL debug mode (might be empty) into session
+        if 'debug' in request.httprequest.args:
+            debug_mode = []
+            for debug in request.httprequest.args['debug'].split(','):
+                if debug not in ALLOWED_DEBUG_MODES:
+                    debug = '1' if str2bool(debug, debug) else ''
+                debug_mode.append(debug)
+            debug_mode = ','.join(debug_mode)
+
+            # Write on session only when needed
+            if debug_mode != request.session.debug:
+                request.session.debug = debug_mode
+
+
     def dispatch(self, environ, start_response):
         """
         Performs the actual WSGI dispatching for the application.
@@ -1435,6 +1452,8 @@ class Root(object):
 
             request = self.get_request(httprequest)
 
+            self._handle_debug(request)
+
             def _dispatch_nodb():
                 try:
                     func, arguments = self.nodb_routing_map.bind_to_environ(request.httprequest.environ).match()
@@ -1447,8 +1466,19 @@ class Root(object):
                     return request._handle_exception(e)
                 return result
 
-            with request:
-                db = request.session.db
+            db = request.session.db
+
+            request_managers = [request]
+
+            if request.session.profile_session_id and db:
+                description = request.httprequest.base_url
+                profile_session_id = request.session.profile_session_id
+                request_profiler = profiler.Profiler(db=db, profile_session_id=profile_session_id, description=description)
+                request_managers.append(request_profiler)
+
+            with contextlib.ExitStack() as stack:
+                for request_manager in request_managers:
+                    stack.enter_context(request_manager)
                 if db:
                     try:
                         odoo.registry(db).check_signaling()
@@ -1474,6 +1504,7 @@ class Root(object):
                     result = _dispatch_nodb()
 
                 response = self.get_response(httprequest, result, explicit_session)
+
             return response(environ, start_response)
 
         except werkzeug.exceptions.HTTPException as e:
