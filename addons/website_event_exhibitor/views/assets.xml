@@ -10,5 +10,10 @@
             <script type="text/javascript" src="/website_event_exhibitor/static/src/js/event_exhibitor_connect.js"></script>
         </xpath>
     </template>
+    <template id="event_exhibitor_report_assets_pdf" name="Online Exhibitor Assets Reports" inherit_id="web.report_assets_common">
+        <xpath expr="link[last()]" position="after">
+            <link rel="stylesheet" type="text/scss" href="/website_event_exhibitor/static/src/scss/event_a4_ticket_report.scss"/>
+        </xpath>
+    </template>
 
 </odoo>
