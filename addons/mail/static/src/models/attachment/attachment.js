@@ -176,7 +176,7 @@ function factory(dependencies) {
                 return `https://www.youtube.com/embed/${token}`;
             }
             if (this.fileType === 'video') {
-                return `/web/image/${this.id}?model=ir.attachment`;
+                return `/web/content/${this.id}?model=ir.attachment`;
             }
             return clear();
         }
@@ -215,16 +215,36 @@ function factory(dependencies) {
             } else if (!this.mimetype) {
                 return clear();
             }
-            const match = this.type === 'url'
-                ? this.url.match('(youtu|.png|.jpg|.gif)')
-                : this.mimetype.match('(image|video|application/pdf|text)');
-            if (!match) {
+            switch (this.mimetype) {
+                case 'application/pdf':
+                    return 'application/pdf';
+                case 'image/bmp':
+                case 'image/gif':
+                case 'image/jpeg':
+                case 'image/png':
+                case 'image/svg+xml':
+                case 'image/x-icon':
+                case 'image/webp':
+                    return 'image';
+                case 'text/css':
+                case 'text/html':
+                case 'text/plain':
+                    return 'text';
+                case 'video/mp4':
+                case 'video/ogg':
+                case 'video/webm':
+                    return 'video';
+            }
+            if (!this.url) {
                 return clear();
             }
-            if (match[1].match('(.png|.jpg|.gif)')) {
+            if (this.url.match('(.png|.jpg|.gif)')) {
                 return 'image';
             }
-            return match[1];
+            if (this.url.includes('youtu')) {
+                return 'youtu';
+            }
+            return clear();
         }
 
         /**
@@ -243,7 +263,7 @@ function factory(dependencies) {
             if (!this.fileType) {
                 return false;
             }
-            return this.fileType.includes('text');
+            return this.fileType === 'text';
         }
 
         /**
@@ -251,15 +271,29 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeIsViewable() {
-            return (
-                this.mediaType === 'image' ||
-                this.mediaType === 'video' ||
-                this.mimetype === 'application/pdf' ||
-                this.isTextFile
-            );
+            switch (this.mimetype) {
+                case 'application/pdf':
+                case 'image/bmp':
+                case 'image/gif':
+                case 'image/jpeg':
+                case 'image/png':
+                case 'image/svg+xml':
+                case 'image/x-icon':
+                case 'image/webp':
+                case 'text/css':
+                case 'text/html':
+                case 'text/plain':
+                case 'video/mp4':
+                case 'video/ogg':
+                case 'video/webm':
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         /**
+         * @deprecated
          * @private
          * @returns {string}
          */
@@ -350,11 +384,12 @@ function factory(dependencies) {
         isViewable: attr({
             compute: '_computeIsViewable',
             dependencies: [
-                'mediaType',
-                'isTextFile',
                 'mimetype',
             ],
         }),
+        /**
+         * @deprecated
+         */
         mediaType: attr({
             compute: '_computeMediaType',
             dependencies: ['mimetype'],
