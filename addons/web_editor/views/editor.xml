@@ -38,7 +38,6 @@
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/fonts.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/base.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/editor/editor.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/editor/rte.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/editor/rte.summernote.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/editor/image_processing.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/editor/custom_colors.js"/>

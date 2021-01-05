@@ -26,6 +26,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         snippet_dropped: '_onSnippetDropped',
         edition_will_stopped: '_onEditionWillStop',
         edition_was_stopped: '_onEditionWasStopped',
+        request_save: '_onSaveRequest',
     }),
 
     /**
@@ -258,6 +259,18 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             $target: ev.data.$target,
         });
         this._addEditorMessages();
+    },
+
+
+    /**
+     * Called when a save request is received -> saves the page content.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onSaveRequest: function (ev) {
+        ev.stopPropagation();
+        // TODO: implement me
     },
 });
 

@@ -6,7 +6,7 @@ var Widget = require('web.Widget');
 var core = require('web.core');
 var rte = require('web_editor.rte');
 var snippetsEditor = require('web_editor.snippet.editor');
-var summernoteCustomColors = require('web_editor.rte.summernote_custom_colors');
+var summernoteCustomColors = require('web_editor.custom_colors');
 
 var _t = core._t;
 
@@ -20,7 +20,6 @@ var EditorMenuBar = Widget.extend({
     custom_events: {
         request_editable: '_onRequestEditable',
         request_history_undo_record: '_onHistoryUndoRecordRequest',
-        request_save: '_onSaveRequest',
     },
 
     /**
@@ -263,16 +262,6 @@ var EditorMenuBar = Widget.extend({
      */
     _onDiscardRequest: function (ev) {
         this.cancel(ev.data.reload).then(ev.data.onSuccess, ev.data.onFailure);
-    },
-    /**
-     * Called when a save request is received -> saves the page content.
-     *
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onSaveRequest: function (ev) {
-        ev.stopPropagation();
-        this.save(ev.data.reload).then(ev.data.onSuccess, ev.data.onFailure);
     },
     /**
      * @private

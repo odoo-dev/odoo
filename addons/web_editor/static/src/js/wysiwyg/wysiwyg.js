@@ -2,7 +2,7 @@ odoo.define('web_editor.wysiwyg', function (require) {
 'use strict';
 var Widget = require('web.Widget');
 var SummernoteManager = require('web_editor.rte.summernote');
-var summernoteCustomColors = require('web_editor.rte.summernote_custom_colors');
+var summernoteCustomColors = require('web_editor.custom_colors');
 var id = 0;
 
 // core.bus
@@ -198,6 +198,171 @@ var Wysiwyg = Widget.extend({
         };
         return options;
     },
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // Previously on rte.js
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
+    /**
+     * Returns the editable areas on the page.
+     *
+     * @returns {jQuery}
+     */
+    editable: function () {
+        return $('#wrapwrap [data-oe-model]')
+            .not('.o_not_editable')
+            .filter(function () {
+                return !$(this).closest('.o_not_editable').length;
+            })
+            .not('link, script')
+            .not('[data-oe-readonly]')
+            .not('img[data-oe-field="arch"], br[data-oe-field="arch"], input[data-oe-field="arch"]')
+            .not('.oe_snippet_editor')
+            .add('.o_editable');
+    },
+
+    /**
+     * Searches all the dirty element on the page and saves them one by one. If
+     * one cannot be saved, this notifies it to the user and restarts rte
+     * edition.
+     *
+     * @param {Object} [context] - the context to use for saving rpc, default to
+     *                           the editor context found on the page
+     * @return {Promise} rejected if the save cannot be done
+     */
+    rteSave(){
+        var self = this;
+
+        $('.o_editable')
+            .destroy()
+            .removeClass('o_editable o_is_inline_editable o_editable_date_field_linked o_editable_date_field_format_changed');
+
+        var $dirty = $('.o_dirty');
+        $dirty
+            .removeAttr('contentEditable')
+            .removeClass('o_dirty oe_carlos_danger o_is_inline_editable');
+        var defs = _.map($dirty, function (el) {
+            var $el = $(el);
+
+            $el.find('[class]').filter(function () {
+                if (!this.getAttribute('class').match(/\S/)) {
+                    this.removeAttribute('class');
+                }
+            });
+
+            // TODO: Add a queue with concurrency limit in webclient
+            // https://github.com/medikoo/deferred/blob/master/lib/ext/function/gate.js
+            return self.saving_mutex.exec(function () {
+                return self._saveElement($el, context || weContext.get())
+                .then(function () {
+                    $el.removeClass('o_dirty');
+                }).guardedCatch(function (response) {
+                    // because ckeditor regenerates all the dom, we can't just
+                    // setup the popover here as everything will be destroyed by
+                    // the DOM regeneration. Add markings instead, and returns a
+                    // new rejection with all relevant info
+                    var id = _.uniqueId('carlos_danger_');
+                    $el.addClass('o_dirty oe_carlos_danger ' + id);
+                    $('.o_editable.' + id)
+                        .removeClass(id)
+                        .popover({
+                            trigger: 'hover',
+                            content: response.message.data.message || '',
+                            placement: 'auto top',
+                        })
+                        .popover('show');
+                });
+            });
+        });
+        return Promise.all(defs).then(function () {
+            window.onbeforeunload = null;
+        }).guardedCatch(function (failed) {
+            // If there were errors, re-enable edition
+            self.cancel();
+            self.start();
+        });
+    },
+
+    rteStart(){
+        $(document.body)
+            .tooltip({
+                selector: '[data-oe-readonly]',
+                container: 'body',
+                trigger: 'hover',
+                delay: { 'show': 1000, 'hide': 100 },
+                placement: 'bottom',
+                title: _t("Readonly field")
+            })
+            .on('click', function () {
+                $(this).tooltip('hide');
+            });
+    },
+
+
+    /**
+     * Gets jQuery cloned element with internal text nodes escaped for XML
+     * storage.
+     *
+     * @private
+     * @param {jQuery} $el
+     * @return {jQuery}
+     */
+    _getEscapedElement: function ($el) {
+        var escaped_el = $el.clone();
+        var to_escape = escaped_el.find('*').addBack();
+        to_escape = to_escape.not(to_escape.filter('object,iframe,script,style,[data-oe-model][data-oe-model!="ir.ui.view"]').find('*').addBack());
+        to_escape.contents().each(function () {
+            if (this.nodeType === 3) {
+                this.nodeValue = $('<div />').text(this.nodeValue).html();
+            }
+        });
+        return escaped_el;
+    },
+
+    /**
+     * Saves one (dirty) element of the page.
+     *
+     * @private
+     * @param {jQuery} $el - the element to save
+     * @param {Object} context - the context to use for the saving rpc
+     * @param {boolean} [withLang=false]
+     *        false if the lang must be omitted in the context (saving "master"
+     *        page element)
+     */
+    _saveElement: function ($el, context, withLang) {
+        var viewID = $el.data('oe-id');
+        if (!viewID) {
+            return Promise.resolve();
+        }
+
+        return this._rpc({
+            model: 'ir.ui.view',
+            method: 'save',
+            args: [
+                viewID,
+                this._getEscapedElement($el).prop('outerHTML'),
+                !$el.data('oe-expression') && $el.data('oe-xpath') || null, // Note: hacky way to get the oe-xpath only if not a t-field
+            ],
+            context: context,
+        }, withLang ? undefined : {
+            noContextKeys: 'lang',
+        });
+    },
+
+
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // Previously on editor.js
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
 });
 //--------------------------------------------------------------------------
 // Public helper
