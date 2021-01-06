@@ -60,6 +60,24 @@ odoo.define('l10n_de_pos_cert.screens', function (require) {
         }
     });
 
+    screens.ScreenWidget.include({
+        barcode_product_action(code) {
+            if (this.pos.isCountryGermany()) {
+                try {
+                    this._super(code);
+                } catch (error) {
+                    if (error instanceof TaxError) {
+                        this.chrome.showTaxError();
+                    } else {
+                        throw error;
+                    }
+                }
+            } else {
+                this._super(code);
+            }
+        }
+    });
+
     screens.ProductCategoriesWidget.include({
         perform_search(category, query, buy_result) {
             if (this.pos.isCountryGermany()) {
