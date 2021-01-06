@@ -5,6 +5,7 @@ const { EventBus } = core;
 
 export interface UIService {
   block: () => void;
+  isBlocked: boolean | undefined;
   unblock: () => void;
 }
 
@@ -83,14 +84,21 @@ class BlockUI extends Component<{}, OdooEnv> {
 
 export const uiService: Service<UIService> = {
   name: "ui",
-  deploy(env: OdooEnv): UIService {
+  deploy(): UIService {
     const bus = new EventBus();
+    let isBlocked: UIService["isBlocked"];
 
     class ReactiveBlockUI extends BlockUI {
       constructor() {
         super(...arguments);
-        bus.on("BLOCK", this, this.block);
-        bus.on("UNBLOCK", this, this.unblock);
+        bus.on("BLOCK", this, () => {
+          this.block();
+          isBlocked = true;
+        });
+        bus.on("UNBLOCK", this, () => {
+          this.unblock();
+          isBlocked = false;
+        });
       }
     }
     odoo.mainComponentRegistry.add("BlockUI", ReactiveBlockUI);
@@ -103,6 +111,6 @@ export const uiService: Service<UIService> = {
       bus.trigger("UNBLOCK");
     }
 
-    return { block, unblock };
+    return { block, isBlocked, unblock };
   },
 };

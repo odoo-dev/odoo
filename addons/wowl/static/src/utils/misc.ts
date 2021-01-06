@@ -1,6 +1,10 @@
 export function isBrowserChromium(): boolean {
   // true for the browser base on Chromium (Google Chrome, Opera, Edge)
-  return navigator.userAgent.includes("Chrome");
+  return odoo.browser.navigator.userAgent.includes("Chrome");
+}
+
+export function isOsMac(): boolean {
+  return odoo.browser.navigator.platform.toLowerCase().includes("mac");
 }
 
 /**

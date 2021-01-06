@@ -29,6 +29,7 @@ import { userMenuRegistry } from "./webclient/user_menu_registry";
 import { debugManagerService } from "./debug_manager/debug_manager_service";
 import { deviceService } from "./services/device";
 import { Currency, currencyService } from "./services/currency";
+import { keyNavService } from "./services/keynav";
 
 export interface Registries {
   mainComponentRegistry: typeof mainComponentRegistry;
@@ -143,6 +144,7 @@ export interface Services {
   cookie: ServiceType<typeof cookieService["deploy"]>;
   currency: ServiceType<typeof currencyService["deploy"]>;
   dialog_manager: ServiceType<typeof dialogManagerService["deploy"]>;
+  keynav: ServiceType<typeof keyNavService["deploy"]>;
   localization: ServiceType<typeof localizationService["deploy"]>;
   menus: ServiceType<typeof menusService["deploy"]>;
   model: ServiceType<typeof modelService["deploy"]>;
