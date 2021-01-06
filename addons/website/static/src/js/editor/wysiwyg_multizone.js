@@ -237,7 +237,7 @@ var WysiwygMultizone = Wysiwyg.extend({
     },
 });
 
-snippetsEditor.Class.include({
+snippetsEditor.SnippetsMenu.include({
     /**
      * @private
      * @param {boolean} show

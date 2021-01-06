@@ -4,9 +4,10 @@ odoo.define('web_editor.wysiwyg.multizone.translate', function (require) {
 var core = require('web.core');
 var webDialog = require('web.Dialog');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
-var rte = require('web_editor.rte');
 var Dialog = require('wysiwyg.widgets.Dialog');
 var websiteNavbarData = require('website.navbar');
+
+return;
 
 var _t = core._t;
 

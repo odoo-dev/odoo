@@ -2,7 +2,7 @@ odoo.define('website.editMenu', function (require) {
 'use strict';
 
 var core = require('web.core');
-var EditorMenu = require('website.editor.menu');
+var wysiwygLoader = require('web_editor.loader');
 var websiteNavbarData = require('website.navbar');
 
 var _t = core._t;
@@ -27,6 +27,10 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         edition_will_stopped: '_onEditionWillStop',
         edition_was_stopped: '_onEditionWasStopped',
         request_save: '_onSaveRequest',
+        // todo: check if those events are still usefull
+        // previously on editor_menu.js
+        request_save: '_onSnippetRequestSave',
+        get_clean_html: '_onGetCleanHTML',
     }),
 
     /**
@@ -97,7 +101,10 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             this.$welcomeMessage.detach(); // detach from the readonly rendering before the clone by summernote
         }
         this.editModeEnable = true;
-        await new EditorMenu(this).prependTo(document.body);
+
+        await this._createWysiwyg();
+        // await new EditorMenu(this).prependTo(document.body);
+
         this._addEditorMessages();
         var res = await new Promise(function (resolve, reject) {
             self.trigger_up('widgets_start_request', {
@@ -116,6 +123,40 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         }
 
         return res;
+    },
+
+    async _createWysiwyg() {
+        var context;
+        this.trigger_up('context_get', {
+            callback: function (ctx) {
+                context = ctx;
+            },
+        });
+        const params = {
+            snippets: 'website.snippets',
+            recordInfo: {
+                context: context,
+                data_res_model: 'website',
+                data_res_id: context.website_id,
+            },
+            enableWebsite: true,
+            discardButton: true,
+            saveButton: true,
+            devicePreview: true,
+            // toolbarLayout: enableTranslation ? translationToolbar : websiteToolbar,
+        };
+
+        var $wrapwrap = $('#wrapwrap');
+        $wrapwrap.removeClass('o_editable'); // clean the dom before edition
+        this.editableFromEditorMenu($wrapwrap).addClass('o_editable');
+
+
+        this.wysiwyg = await wysiwygLoader.createWysiwyg(this, params, ['website.compiled_assets_wysiwyg']);
+
+        await this.wysiwyg.attachTo($('#wrapwrap')).then(() => {
+            this.trigger_up('edit_mode');
+            this.$el.css({width: ''});
+        });
     },
     /**
      * On save, the editor will ask to parent widgets if something needs to be
@@ -271,6 +312,172 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     _onSaveRequest: function (ev) {
         ev.stopPropagation();
         // TODO: implement me
+    },
+
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // from editor_menu.js
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
+
+    /**
+     * Asks the user if they really wants to discard their changes (if any),
+     * then simply reloads the page if they want to.
+     *
+     * @param {boolean} [reload=true]
+     *        true if the page has to be reloaded when the user answers yes
+     *        (do nothing otherwise but add this to allow class extension)
+     * @returns {Deferred}
+     */
+    cancel: function (reload) {
+        var self = this;
+        var def = new Promise(function (resolve, reject) {
+            if (!self.wysiwyg.isDirty()) {
+                resolve();
+            } else {
+                var confirm = Dialog.confirm(self, _t("If you discard the current edits, all unsaved changes will be lost. You can cancel to return to edit mode."), {
+                    confirm_callback: resolve,
+                });
+                confirm.on('closed', self, reject);
+            }
+        });
+
+        return def.then(function () {
+            self.trigger_up('edition_will_stopped');
+            var $wrapwrap = $('#wrapwrap');
+            self.editable($wrapwrap).removeClass('o_editable');
+            if (reload !== false) {
+                window.onbeforeunload = null;
+                self.wysiwyg.destroy();
+                return self._reload();
+            } else {
+                self.wysiwyg.destroy();
+                self.trigger_up('readonly_mode');
+                self.trigger_up('edition_was_stopped');
+                self.destroy();
+            }
+        });
+    },
+
+    /**
+     * Asks the snippets to clean themself, then saves the page, then reloads it
+     * if asked to.
+     *
+     * @param {boolean} [reload=true]
+     *        true if the page has to be reloaded after the save
+     * @returns {Promise}
+     */
+    save: async function (reload) {
+        if (this._saving) {
+            return false;
+        }
+        var self = this;
+        this._saving = true;
+        this.trigger_up('edition_will_stopped');
+        return this.wysiwyg.save(false).then((result) => {
+            var $wrapwrap = $('#wrapwrap');
+            self.editableFromEditorMenu($wrapwrap).removeClass('o_editable');
+            if (result.isDirty && reload !== false) {
+                // remove top padding because the connected bar is not visible
+                $('body').removeClass('o_connected_user');
+                return self._reload();
+            } else {
+                self.wysiwyg.destroy();
+                self.trigger_up('edition_was_stopped');
+                self.destroy();
+            }
+            return true;
+        }).guardedCatch(() => {
+            this._saving = false;
+        });
+    },
+
+    // todo: check if this function is still usefull
+    /**
+     * Returns the editable areas on the page.
+     *
+     * @param {DOM} $wrapwrap
+     * @returns {jQuery}
+     */
+    editableFromEditorMenu: function ($wrapwrap) {
+        return $wrapwrap.find('[data-oe-model]')
+            .not('.o_not_editable')
+            .filter(function () {
+                var $parent = $(this).closest('.o_editable, .o_not_editable');
+                return !$parent.length || $parent.hasClass('o_editable');
+            })
+            .not('link, script')
+            .not('[data-oe-readonly]')
+            .not('img[data-oe-field="arch"], br[data-oe-field="arch"], input[data-oe-field="arch"]')
+            .not('.oe_snippet_editor')
+            .not('hr, br, input, textarea')
+            .add('.o_editable');
+    },
+
+    /**
+     * Reloads the page in non-editable mode, with the right scrolling.
+     *
+     * @private
+     * @returns {Deferred} (never resolved, the page is reloading anyway)
+     */
+    _reload: function () {
+        $('body').addClass('o_wait_reload');
+        this.wysiwyg.destroy();
+        this.$el.hide();
+        window.location.hash = 'scrollTop=' + window.document.body.scrollTop;
+        window.location.reload(true);
+        return new Promise(function () {});
+    },
+
+
+    /**
+     * @private
+     */
+    _wysiwygInstance: function () {
+        var context;
+        this.trigger_up('context_get', {
+            callback: function (ctx) {
+                context = ctx;
+            },
+        });
+        return new WysiwygMultizone(this, {
+            snippets: 'website.snippets',
+            recordInfo: {
+                context: context,
+                data_res_model: 'website',
+                data_res_id: context.website_id,
+            }
+        });
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Get the cleaned value of the editable element.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onGetCleanHTML: function (ev) {
+        ev.data.callback(this.wysiwyg.getValue({$layout: ev.data.$layout}));
+    },
+    /**
+     * Snippet (menu_data) can request to save the document to leave the page
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {object} ev.data
+     * @param {function} ev.data.onSuccess
+     * @param {function} ev.data.onFailure
+     */
+    _onSnippetRequestSave: function (ev) {
+        this.save(false).then(ev.data.onSuccess, ev.data.onFailure);
     },
 });
 

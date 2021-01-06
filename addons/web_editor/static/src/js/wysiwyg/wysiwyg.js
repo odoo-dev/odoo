@@ -1,13 +1,12 @@
 odoo.define('web_editor.wysiwyg', function (require) {
 'use strict';
-var Widget = require('web.Widget');
-var SummernoteManager = require('web_editor.rte.summernote');
-var summernoteCustomColors = require('web_editor.custom_colors');
+const Widget = require('web.Widget');
+const summernoteCustomColors = require('web_editor.custom_colors');
+const OdooEditor = require('web_editor.odoo-editor').OdooEditor;
+const snippetsEditor = require('web_editor.snippet.editor');
 var id = 0;
 
-// core.bus
-// media_dialog_demand
-var Wysiwyg = Widget.extend({
+const Wysiwyg = Widget.extend({
     xmlDependencies: [
     ],
     defaultOptions: {
@@ -57,7 +56,6 @@ var Wysiwyg = Widget.extend({
      * @override
      **/
     willStart: function () {
-        this._summernoteManager = new SummernoteManager(this);
         this.$target = this.$el;
         return this._super();
     },
@@ -65,18 +63,38 @@ var Wysiwyg = Widget.extend({
      *
      * @override
      */
-    start: function () {
-        this.$target.wrap('<odoo-wysiwyg-container>');
-        this.$el = this.$target.parent();
+    start: async function () {
+        const _super = this._super;
+
         var options = this._editorOptions();
-        this.$target.summernote(options);
-        this.$editor = this.$('.note-editable:first');
+        if (this.$target[0] instanceof HTMLTextAreaElement) {
+            this.$target.wrap('<odoo-wysiwyg-container>');
+            this.$el = this.$target.parent();
+            this.$editor = $("<div class='note-editable'></div>");
+            this.$editor.html(this.$target.val());
+            this.$el.append(this.$editor);
+        } else {
+            this.$editor = this.$target;
+        }
+        // this.$editor = this.$('.note-editable:first');
         this.$editor.data('wysiwyg', this);
         this.$editor.data('oe-model', options.recordInfo.res_model);
         this.$editor.data('oe-id', options.recordInfo.res_id);
         $(document).on('mousedown', this._blur);
+        this.odooEditor = new OdooEditor(this.$editor[0]);
         this._value = this.$target.html() || this.$target.val();
-        return this._super.apply(this, arguments);
+
+        if (options.snippets) {
+            $('body').addClass('editor_enable');
+            this.snippetsMenu = new snippetsEditor.SnippetsMenu(this, Object.assign({
+                wysiwyg: this,
+                selectorEditableArea: '.o_editable',
+            }, options));
+            await this.snippetsMenu.insertAfter(this.$el);
+            console.log('inserted', this.snippetsMenu.$el);
+        }
+
+        return _super.apply(this, arguments);
     },
     /**
      * @override
@@ -157,7 +175,7 @@ var Wysiwyg = Widget.extend({
      * @returns {Promise}
      */
     saveModifiedImages: function ($editable) {
-        return this._summernoteManager.saveModifiedImages($editable);
+        return Promise.resolve();
     },
     /**
      * @param {String} value
@@ -178,7 +196,7 @@ var Wysiwyg = Widget.extend({
     //--------------------------------------------------------------------------
     _editorOptions: function () {
         var self = this;
-        var options = Object.assign({}, $.summernote.options, this.defaultOptions, this.options);
+        var options = Object.assign({},  this.defaultOptions, this.options);
         if (this.options.generateOptions) {
             options = this.options.generateOptions(options);
         }
@@ -234,7 +252,7 @@ var Wysiwyg = Widget.extend({
      *                           the editor context found on the page
      * @return {Promise} rejected if the save cannot be done
      */
-    rteSave(){
+    rteSave() {
         var self = this;
 
         $('.o_editable')
@@ -363,6 +381,104 @@ var Wysiwyg = Widget.extend({
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
+
+    /**
+     * Asks the snippets to clean themself, then saves the page, then reloads it
+     * if asked to.
+     *
+     * @param {boolean} [reload=true]
+     *        true if the page has to be reloaded after the save
+     * @returns {Promise}
+     */
+    saveToServer: async function (reload) {
+        var defs = [];
+        this.trigger_up('ready_to_save', {defs: defs});
+        await Promise.all(defs);
+
+        if (this.snippetsMenu) {
+            await this.snippetsMenu.cleanForSave();
+        }
+        await this.getParent().saveModifiedImages(this.rte.editable());
+        this.rteSave();
+
+        if (reload !== false) {
+            return this._reload();
+        }
+    },
+
+
+    /**
+     * Asks the user if he really wants to discard its changes (if there are
+     * some of them), then simply reload the page if he wants to.
+     *
+     * @param {boolean} [reload=true]
+     *        true if the page has to be reloaded when the user answers yes
+     *        (do nothing otherwise but add this to allow class extension)
+     * @returns {Promise}
+     */
+    cancel: function (reload) {
+        var self = this;
+        return new Promise(function(resolve, reject) {
+            if (!rte.history.getEditableHasUndo().length) {
+                resolve();
+            } else {
+                var confirm = Dialog.confirm(this, _t("If you discard the current edits, all unsaved changes will be lost. You can cancel to return to edit mode."), {
+                    confirm_callback: resolve,
+                });
+                confirm.on('closed', self, reject);
+            }
+        }).then(function () {
+            if (reload !== false) {
+                window.onbeforeunload = null;
+                return self._reload();
+            }
+        });
+    },
+
+
+    /**
+     * Reloads the page in non-editable mode, with the right scrolling.
+     *
+     * @private
+     * @returns {Promise} (never resolved, the page is reloading anyway)
+     */
+    _reload: function () {
+        window.location.hash = 'scrollTop=' + window.document.body.scrollTop;
+        if (window.location.search.indexOf('enable_editor') >= 0) {
+            window.location.href = window.location.href.replace(/&?enable_editor(=[^&]*)?/g, '');
+        } else {
+            window.location.reload(true);
+        }
+        return new Promise(function(){});
+    },
+
+
+    /**
+     * @private
+     */
+    _getDefaultConfig: function ($editable) {
+        return {
+            'airMode' : true,
+            'focus': false,
+            'airPopover': [
+                ['style', ['style']],
+                ['font', ['bold', 'italic', 'underline', 'clear']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture']],
+                ['history', ['undo', 'redo']],
+            ],
+            'styleWithSpan': false,
+            'inlinemedia' : ['p'],
+            'lang': 'odoo',
+            'onChange': function (html, $editable) {
+                $editable.trigger('content_changed');
+            },
+            'colors': summernoteCustomColors,
+        };
+    },
 });
 //--------------------------------------------------------------------------
 // Public helper

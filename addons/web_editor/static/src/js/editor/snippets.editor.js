@@ -7,7 +7,7 @@ var Dialog = require('web.Dialog');
 var dom = require('web.dom');
 var Widget = require('web.Widget');
 var options = require('web_editor.snippets.options');
-var Wysiwyg = require('web_editor.wysiwyg');
+// var Wysiwyg = require('web_editor.wysiwyg');
 const {ColorPaletteWidget} = require('web_editor.ColorPalette');
 const SmoothScrollOnDrag = require('web/static/src/js/core/smooth_scroll_on_drag.js');
 const {getCSSVariableValue} = require('web_editor.utils');
@@ -963,8 +963,6 @@ var SnippetsMenu = Widget.extend({
 
         this._mutex = new concurrency.Mutex();
 
-        this.setSelectorEditableArea(options.$el, options.selectorEditableArea);
-
         this._notActivableElementsSelector = [
             '#web_editor-top-edit',
             '.o_we_website_top_actions',
@@ -1103,14 +1101,14 @@ var SnippetsMenu = Widget.extend({
 
         // Auto-selects text elements with a specific class and remove this
         // on text changes
-        this.$document.on('click.snippets_menu', '.o_default_snippet_text', function (ev) {
-            $(ev.target).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
-            $(ev.target).selectContent();
-            $(ev.target).removeClass('o_default_snippet_text');
-        });
+        // this.$document.on('click.snippets_menu', '.o_default_snippet_text', function (ev) {
+        //     $(ev.target).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
+        //     $(ev.target).selectContent();
+        //     $(ev.target).removeClass('o_default_snippet_text');
+        // });
         this.$document.on('keyup.snippets_menu', function () {
-            var range = Wysiwyg.getRange(this);
-            $(range && range.sc).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
+            // var range = Wysiwyg.getRange(this);
+            // $(range && range.sc).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
         });
 
         const $autoFocusEls = $('.o_we_snippet_autofocus');
@@ -1207,24 +1205,13 @@ var SnippetsMenu = Widget.extend({
         return this._defLoadSnippets;
     },
     /**
-     * Sets the instance variables $editor, $body and selectorEditableArea.
-     *
-     * @param {JQuery} $editor
-     * @param {String} selectorEditableArea
-     */
-    setSelectorEditableArea: function ($editor, selectorEditableArea) {
-        this.selectorEditableArea = selectorEditableArea;
-        this.$editor = $editor;
-        this.$body = $editor.closest('body');
-    },
-    /**
      * Get the editable area.
      *
      * @returns {JQuery}
      */
     getEditableArea: function () {
-        return this.$editor.find(this.selectorEditableArea)
-            .add(this.$editor.filter(this.selectorEditableArea));
+        return this.options.wysiwyg.$editor.find(this.options.selectorEditableArea)
+            .add(this.options.wysiwyg.$editor.filter(this.options.selectorEditableArea));
     },
     /**
      * Updates the cover dimensions of the current snippet editor.
@@ -1966,9 +1953,9 @@ var SnippetsMenu = Widget.extend({
                         colorCustomizedURL.searchParams.forEach((value, key) => {
                             const match = key.match(/^c([1-5])$/);
                             if (match) {
-                                colorCustomizedURL.searchParams.set(key, getCSSVariableValue(`o-color-${match[1]}`))
+                                colorCustomizedURL.searchParams.set(key, getCSSVariableValue(`o-color-${match[1]}`));
                             }
-                        })
+                        });
                         dynamicSvg.src = colorCustomizedURL.pathname + colorCustomizedURL.search;
                     });
 
@@ -2623,8 +2610,8 @@ var SnippetsMenu = Widget.extend({
 });
 
 return {
-    Class: SnippetsMenu,
-    Editor: SnippetEditor,
+    SnippetsMenu: SnippetsMenu,
+    SnippetEditor: SnippetEditor,
     globalSelector: globalSelector,
 };
 });

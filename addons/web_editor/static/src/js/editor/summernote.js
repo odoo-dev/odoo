@@ -3,7 +3,6 @@ odoo.define('web_editor.summernote', function (require) {
 
 var core = require('web.core');
 require('summernote/summernote'); // wait that summernote is loaded
-var weDefaultOptions = require('web_editor.wysiwyg.default_options');
 
 var _t = core._t;
 

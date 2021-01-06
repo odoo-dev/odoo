@@ -13,7 +13,6 @@ const {ColorpickerWidget} = require('web.Colorpicker');
 var ColorPaletteWidget = require('web_editor.ColorPalette').ColorPaletteWidget;
 var mixins = require('web.mixins');
 var fonts = require('wysiwyg.fonts');
-var rte = require('web_editor.rte');
 var ServicesMixin = require('web.ServicesMixin');
 var weWidgets = require('wysiwyg.widgets');
 

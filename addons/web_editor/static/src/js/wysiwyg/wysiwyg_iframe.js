@@ -1,6 +1,8 @@
 odoo.define('web_editor.wysiwyg.iframe', function (require) {
 'use strict';
 
+return;
+
 var Wysiwyg = require('web_editor.wysiwyg');
 var ajax = require('web.ajax');
 var core = require('web.core');

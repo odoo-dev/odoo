@@ -1,8 +1,9 @@
 odoo.define('website.rte.summernote', function (require) {
 'use strict';
 
+return;
+
 var core = require('web.core');
-require('web_editor.rte.summernote');
 
 var eventHandler = $.summernote.eventHandler;
 var renderer = $.summernote.renderer;

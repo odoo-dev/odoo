@@ -3,7 +3,6 @@ odoo.define('website_forum.website_forum', function (require) {
 
 const dom = require('web.dom');
 var core = require('web.core');
-var weDefaultOptions = require('web_editor.wysiwyg.default_options');
 var wysiwygLoader = require('web_editor.loader');
 var publicWidget = require('web.public.widget');
 var session = require('web.session');

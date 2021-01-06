@@ -1,6 +1,8 @@
 odoo.define('website_mass_mailing.editor', function (require) {
 'use strict';
 
+return;
+
 var core = require('web.core');
 var rpc = require('web.rpc');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');

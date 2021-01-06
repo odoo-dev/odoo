@@ -5,7 +5,7 @@ var ajax = require('web.ajax');
 var basic_fields = require('web.basic_fields');
 var config = require('web.config');
 var core = require('web.core');
-var Wysiwyg = require('web_editor.wysiwyg.root');
+var wysiwygLoader = require('web_editor.loader');
 var field_registry = require('web.field_registry');
 // must wait for web/ to add the default html widget, otherwise it would override the web_editor one
 require('web._field_registry');
@@ -45,26 +45,17 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
     /**
      * @override
      */
-    willStart: function () {
-        var self = this;
+    willStart: async function () {
         this.isRendered = false;
         this._onUpdateIframeId = 'onLoad_' + _.uniqueId('FieldHtml');
-        var defAsset;
+        await this._super();
         if (this.nodeOptions.cssReadonly) {
-            defAsset = ajax.loadAsset(this.nodeOptions.cssReadonly);
+            this.cssReadonly = await ajax.loadAsset(this.nodeOptions.cssReadonly);
         }
-
-        if (!assetsLoaded) { // avoid flickering when begin to edit
-            assetsLoaded = new Promise(function (resolve) {
-                var wysiwyg = new Wysiwyg(self, {});
-                wysiwyg.attachTo($('<textarea>')).then(function () {
-                    wysiwyg.destroy();
-                    resolve();
-                });
-            });
+        if (this.nodeOptions.cssEdit || this.nodeOptions['style-inline']) {
+            this.needShadow = true;
+            this.cssEdit = await ajax.loadAsset(this.nodeOptions.cssEdit || 'web_editor.assets_edit_html_field');
         }
-
-        return Promise.all([this._super(), assetsLoaded, defAsset]);
     },
     /**
      * @override
@@ -170,18 +161,25 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @private
      * @returns {$.Promise}
      */
-    _createWysiwygIntance: function () {
-        var self = this;
-        this.wysiwyg = new Wysiwyg(this, this._getWysiwygOptions());
-        this.wysiwyg.__extraAssetsForIframe = this.__extraAssetsForIframe || [];
+    _createWysiwygIntance: async function () {
+        // // var self = this;
+        // this.wysiwyg = new Wysiwyg(this, this._getWysiwygOptions());
 
-        // by default this is synchronous because the assets are already loaded in willStart
-        // but it can be async in the case of options such as iframe, snippets...
-        return this.wysiwyg.attachTo(this.$target).then(function () {
-            self.$content = self.wysiwyg.$editor.closest('body, odoo-wysiwyg-container');
-            self._onLoadWysiwyg();
-            self.isRendered = true;
+        // // by default this is synchronous because the assets are already loaded in willStart
+        // // but it can be async in the case of options such as iframe, snippets...
+        // return this.wysiwyg.attachTo(this.$target).then(function () {
+        // });
+        console.log('_createWysiwygIntance');
+
+        this.wysiwyg = await wysiwygLoader.createWysiwyg(this, this._getWysiwygOptions());
+        // todo: to remove
+        this.wysiwyg.__extraAssetsForIframe = this.__extraAssetsForIframe || [];
+        return this.wysiwyg.attachTo(this.$target).then(() => {
+            this.$content = this.wysiwyg.$editor.closest('body, odoo-wysiwyg-container');
+            this._onLoadWysiwyg();
+            this.isRendered = true;
         });
+
     },
     /**
      * Get wysiwyg options to create wysiwyg instance.
