@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { OdooEnv, Service } from "../types";
 import * as dates from "../utils/dates";
 import * as numbers from "../utils/numbers";
-import { escapeRegExp, intersperse, sprintf } from "../utils/strings";
+import { escapeRegExp, sprintf } from "../utils/strings";
 
 interface LangParams {
   dateFormat: string;
