@@ -1284,11 +1284,13 @@ class StockMove(models.Model):
 
     def _should_bypass_reservation(self):
         self.ensure_one()
-        return self.location_id.should_bypass_reservation() or self.product_id.type != 'product'
+        return (self.location_id.should_bypass_reservation() and not self.origin_returned_move_id) or self.product_id.type != 'product'
 
     # necessary hook to be able to override move reservation to a restrict lot, owner, pack, location...
     def _get_available_quantity(self, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, allow_negative=False):
         self.ensure_one()
+        if location_id.should_bypass_reservation():
+            return self.product_qty
         return self.env['stock.quant']._get_available_quantity(self.product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, allow_negative=allow_negative)
 
     def _action_assign(self):
