@@ -41,8 +41,8 @@ odoo.define('web.PivotView', function (require) {
             this._super.apply(this, arguments);
 
             const activeMeasures = []; // Store the defined active measures
-            const colGroupBys = []; // Store the defined group_by used on cols
-            const rowGroupBys = []; // Store the defined group_by used on rows
+            let colGroupBys = []; // Store the defined group_by used on cols
+            let rowGroupBys = []; // Store the defined group_by used on rows
             const measures = {}; // All the available measures
             const groupableFields = {}; // The fields which can be used to group data
             const widgets = {}; // Wigdets defined in the arch
@@ -107,6 +107,23 @@ odoo.define('web.PivotView', function (require) {
                     rowGroupBys.push(name);
                 }
             });
+
+            const arch = this.arch.attrs;
+            if (arch.hasOwnProperty('colGroupBys')) {
+                if (arch.colGroupBys !== 'false') {
+                    colGroupBys = arch.colGroupBys.split(",");
+                } else {
+                    colGroupBys = [];
+                }
+            }
+            if (arch.hasOwnProperty('rowGroupBys')) {
+                if (arch.rowGroupBys !== 'false') {
+                    rowGroupBys = arch.rowGroupBys.split(",");
+                } else {
+                    rowGroupBys = [];
+                }
+            }
+
             if ((!activeMeasures.length) || this.arch.attrs.display_quantity) {
                 activeMeasures.splice(0, 0, '__count');
             }

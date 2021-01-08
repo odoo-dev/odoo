@@ -1859,6 +1859,27 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
+    QUnit.test('pivot view with colGroupBys and rowGroupBys attribute', async function (assert) {
+        assert.expect(4);
+
+        const pivot = await createView({
+            View: PivotView,
+            model: "partner",
+            data: this.data,
+            arch: '<pivot colGroupBys="company_type" rowGroupBys="date"/>',
+        });
+        assert.containsN(pivot, 'tbody tr', 4, "should have 4 rows (total + 1 for December and 1 for October and 1 for April)");
+        assert.containsN(pivot, 'thead tr', 3, "should have 3 rows (total + 1 for compony + 1 for measure");
+        assert.strictEqual(pivot.$('th').slice(0, 5).text(), "TotalCompanyindividual",
+            "The col headers should be as expected"
+        );
+        assert.strictEqual(pivot.$('th').slice(8).text(), "TotalDecember 2016October 2016April 2016",
+            "The row headers should be as expected"
+        );
+
+        pivot.destroy();
+    });
+
     QUnit.test('parallel data loading should discard all but the last one', async function (assert) {
         assert.expect(2);
 

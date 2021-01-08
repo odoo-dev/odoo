@@ -750,6 +750,27 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
+    QUnit.test('graph view with groupBys attribute', async function (assert) {
+        assert.expect(4);
+
+        const graph = await createView({
+            View: GraphView,
+            model: "foo",
+            data: this.data,
+            arch: `
+                <graph groupBys="product_id,date">
+                    <field name="bar"/>
+                </graph>`,
+        });
+
+        assert.strictEqual(graph.renderer.props.groupBy[0], "product_id", "the groupBy field should contain correct value");
+        assert.strictEqual(graph.renderer.props.groupBy[1], "date", "the groupBy field should contain correct value");
+        checkLabels(assert, graph, [['xphone'], ['xpad']]);
+        checkLegend(assert, graph, ['January 2016', 'March 2016', 'May 2016', 'Undefined', 'April 2016']);
+
+        graph.destroy();
+    });
+
     QUnit.test('not use a many2one as a measure by default', async function (assert) {
         assert.expect(1);
 

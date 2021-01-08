@@ -75,6 +75,18 @@ var GraphView = AbstractView.extend({
             }
         });
 
+        const arch = this.arch.attrs;
+        if (arch.hasOwnProperty('groupBys')) {
+            if (arch.groupBys !== 'false') {
+                groupBys = arch.groupBys.split(",");
+            } else {
+                groupBys = [];
+            }
+        }
+        if (arch.hasOwnProperty('measure')) {
+            measure = arch.measure;
+        }
+
         for (const name in this.fields) {
             const field = this.fields[name];
             if (name !== 'id' && field.store === true) {
