@@ -19,7 +19,7 @@ import { downloadService } from "./download";
 import { effectService } from "../effects/effects_service";
 import { localizationService } from "./localization";
 import { currencyService } from "./currency";
-import { keyboardManagerService } from "./keyboard_manager";
+import { hotkeysService } from "./hotkeys";
 
 export const serviceRegistry: Registry<Service<any>> = new Registry();
 
@@ -29,7 +29,7 @@ const services = [
   cookieService,
   currencyService,
   dialogManagerService,
-  keyboardManagerService,
+  hotkeysService,
   titleService,
   menusService,
   modelService,
