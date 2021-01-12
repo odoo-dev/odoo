@@ -71,6 +71,10 @@ const PopupWidget = publicWidget.Widget.extend({
         if (this._popupAlreadyShown) {
             return;
         }
+        const $bgVideoContainer = this.$target.find('.o_bg_video_container');
+        if ($bgVideoContainer.length) {
+            $bgVideoContainer.hide();
+        }
         this.$target.find('.modal').modal('show');
     },
 

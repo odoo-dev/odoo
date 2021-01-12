@@ -680,6 +680,13 @@ registry.backgroundVideo = publicWidget.Widget.extend({
 
         $(window).on('resize.' + this.iframeID, throttledUpdate);
 
+        const $popupSnippet = this.$target.closest('.s_popup');
+        if ($popupSnippet.length) {
+            $popupSnippet.on('shown.bs.modal', () => {
+                this._adjustIframe();
+                this.$target.find('.o_bg_video_container').show();
+            });
+        }
         return Promise.all(proms).then(() => this._appendBgVideo());
     },
     /**
