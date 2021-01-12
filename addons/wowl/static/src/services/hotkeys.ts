@@ -1,15 +1,21 @@
 import { Component, core, hooks } from "@odoo/owl";
-import { OdooEnv, Service } from "../types";
+import { Callback, OdooEnv, Service } from "../types";
 
 const bus = new core.EventBus();
 
 const isVisibleHTMLElement = (el: HTMLElement) => el.offsetHeight > 0 && el.offsetWidth > 0;
 
+type HotkeyCallback = Callback | { scope: string; callback: Callback };
+type HotkeyAction = "setScope" | "previousScope" | HotkeyCallback | HotkeyCallback[];
+interface HotkeyActionConfig {
+  [hotkey: string]: HotkeyAction;
+}
 interface UseHotkeysParams {
   autoRegisterAccessKeys: boolean;
   combinator: string;
   separator: string;
   scope: string;
+  hotkeys: HotkeyActionConfig;
 }
 
 /**
@@ -58,6 +64,7 @@ export function useHotkeys(params: Partial<UseHotkeysParams>) {
   hooks.onWillUnmount(unregister);
 
   return {
+    register: function (config: HotkeyActionConfig) {},
     on: function (hotkeyPattern: string, cb: () => boolean) {
       bus.on("dispatch", component, (keys) => {
         if (keys === hotkeyPattern) {
@@ -75,38 +82,48 @@ export const hotkeysService: Service<HotkeysService> = {
   name: "hotkeys",
   deploy(): HotkeysService {
     let flushTimer: number | undefined;
-    const keysBuffer: any = {};
+    const keysBuffer: {
+      [id: number]: {
+        key: string;
+        code: string;
+        modifiers: { alt: boolean; ctrl: boolean; shift: boolean };
+      };
+    } = {};
 
     function registerKeydown(ev: KeyboardEvent) {
-      keysBuffer[ev.key] = {
+      keysBuffer[Object.keys(keysBuffer).length] = {
         key: ev.key,
+        code: ev.code,
         modifiers: {
           alt: ev.altKey,
           ctrl: ev.ctrlKey,
           shift: ev.shiftKey,
         },
       };
-      const eventName = Object.keys(keysBuffer).join(" ");
-      bus.trigger(eventName, keysBuffer);
-      resetAutoFlush();
+      const eventName = Object.values(keysBuffer)
+        .map((e) => e.key)
+        .join("");
+      console.log("register", eventName);
     }
 
-    function resetAutoFlush() {
+    function autoFlush(delay: number) {
+      const flush = function () {
+        console.log("flushing", keysBuffer);
+        Object.keys(keysBuffer).forEach((k) => {
+          console.log("delete", keysBuffer[+k]);
+          delete keysBuffer[+k];
+        });
+        console.log("flushed", keysBuffer);
+        odoo.browser.clearTimeout(flushTimer);
+      };
       odoo.browser.clearTimeout(flushTimer);
-      flushTimer = odoo.browser.setTimeout(flush, FLUSH_DELAY);
-    }
-
-    function flush() {
-      console.log("flushing", keysBuffer);
-      Object.keys(keysBuffer).forEach((k) => {
-        console.log("delete", keysBuffer[k]);
-        delete keysBuffer[k];
-      });
-      console.log("flushed", keysBuffer);
-      odoo.browser.clearTimeout(flushTimer);
+      flushTimer = odoo.browser.setTimeout(flush, delay);
     }
 
     window.addEventListener("keydown", registerKeydown);
+    window.addEventListener("blur", () => autoFlush(0));
+    window.addEventListener("focus", () => autoFlush(0));
+    window.addEventListener("keyup", () => autoFlush(FLUSH_DELAY));
 
     return {};
   },
