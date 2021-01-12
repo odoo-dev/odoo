@@ -300,10 +300,8 @@ class PosSession(models.Model):
             self._create_account_move()
         if self.move_id.line_ids:
             self.move_id.post() if not sudo else self.move_id.sudo().post()
-            # Set the uninvoiced orders' state to 'done'
             orders = self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')])
-            orders.write({'state': 'done'})
-            self._finalize_validation(orders)
+            self._finalize_orders(orders)
         else:
             # The cash register needs to be confirmed for cash diffs
             # made thru cash in/out when sesion is in cash_control.
@@ -1030,8 +1028,10 @@ class PosSession(models.Model):
             )
         return True
 
-    def _finalize_validation(self, orders):
-        pass
+    def _finalize_orders(self, orders):
+        # Set the uninvoiced orders' state to 'done'
+        orders.write({'state': 'done'})
+
 
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
