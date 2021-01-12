@@ -324,6 +324,9 @@
                         </div>
                         <field name="name" attrs="{'readonly': [('state', 'not in', ('draft', 'confirm'))]}" widget="text"/>
                         <field name="user_id" invisible="1"/>
+                        <field name="leave_type_support_document" invisible="1"/>
+                        <label for="support_documents_ids" string="Attach Supporting Documents" attrs="{'invisible': ['|', ('leave_type_support_document', '=', False), ('state', 'not in', ('draft', 'confirm', 'validate1'))]}"/>
+                        <field name="support_documents_ids" widget="many2many_binary" attrs="{'invisible': ['|', ('leave_type_support_document', '=', False), ('state', 'not in', ('draft', 'confirm', 'validate1'))]}" nolabel="1"/>
                     </group>
                     <group name="col_right">
                         <field name="department_id" groups="hr_holidays.group_hr_holidays_user" invisible="1"/>
@@ -333,7 +336,7 @@
             <div class="oe_chatter">
                 <field name="message_follower_ids"/>
                 <field name="activity_ids"/>
-                <field name="message_ids"/>
+                <field name="message_ids" options="{'post_refresh': 'always'}"/>
             </div>
             </form>
         </field>
@@ -356,7 +359,7 @@
         <field name="name">hr.leave.view.dashboard</field>
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
-            <calendar js_class="time_off_calendar" string="Time Off Request" form_view_id="%(hr_holidays.hr_leave_view_form_dashboard)d" event_open_popup="true" date_start="date_from" date_stop="date_to" mode="year" quick_add="False" show_unusual_days="True" color="holiday_status_id" hide_time="True">
+            <calendar js_class="time_off_calendar" string="Time Off Request" form_view_id="%(hr_holidays.hr_leave_view_form_dashboard)d" event_open_popup="true" date_start="date_from" date_stop="date_to" mode="month" quick_add="False" show_unusual_days="True" color="holiday_status_id" hide_time="True">
                 <field name="display_name"/>
                 <field name="holiday_status_id" filters="1" invisible="1"/>
                 <field name="state" invisible="1"/>

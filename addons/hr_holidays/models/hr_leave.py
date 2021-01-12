@@ -191,9 +191,11 @@ class HolidaysRequest(models.Model):
         help='This area is automatically filled by the user who validate the time off with second level (If time off type need second validation)')
     can_reset = fields.Boolean('Can reset', compute='_compute_can_reset')
     can_approve = fields.Boolean('Can Approve', compute='_compute_can_approve')
+    support_documents_ids = fields.Many2many('ir.attachment', string="Attach File", inverse='_inverse_support_documents_ids')
 
     # UX fields
     leave_type_request_unit = fields.Selection(related='holiday_status_id.request_unit', readonly=True)
+    leave_type_support_document = fields.Boolean(related="holiday_status_id.support_document", readonly=True)
     # Interface fields used when not using hour-based computation
     request_date_from = fields.Date('Request Start Date')
     request_date_to = fields.Date('Request End Date')
@@ -556,6 +558,13 @@ class HolidaysRequest(models.Model):
         for holiday in self:
             holiday.is_hatched = holiday.state not in ['refuse', 'validate']
 
+    def _inverse_support_documents_ids(self):
+        for rec in self.filtered(lambda x: x.support_documents_ids):
+            rec.support_documents_ids.write({
+                'res_id': rec.id,
+                'res_model': 'hr.leave'
+            })
+
     @api.constrains('date_from', 'date_to', 'employee_id')
     def _check_date(self):
         for holiday in self.filtered('employee_id'):
@@ -794,6 +803,13 @@ class HolidaysRequest(models.Model):
         if not is_officer:
             if any(hol.date_from.date() < fields.Date.today() for hol in self):
                 raise UserError(_('You must have manager rights to modify/validate a time off that already begun'))
+
+        attachment_ids = values.get('support_documents_ids', False)
+        if attachment_ids:
+            # delete the attachment on unlink from m2m
+            linked_attachment_ids = [(4, attach_id) for attach_id in attachment_ids[0][2]]
+            unlinked_attachment_ids = [(2, item) for item in self.support_documents_ids.ids if item not in attachment_ids[0][2]]
+            values['support_documents_ids'] = linked_attachment_ids + unlinked_attachment_ids
 
         employee_id = values.get('employee_id', False)
         if not self.env.context.get('leave_fast_create'):
