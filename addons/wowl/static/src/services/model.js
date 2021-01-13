@@ -20,7 +20,8 @@ function readGroup(rpc, env, model) {
       fields,
       context: ctx,
     };
-    if (options.lazy) {
+    if ("lazy" in options) {
+      // adapt other tests below?
       kwargs.lazy = options.lazy;
     }
     if (options.offset) {

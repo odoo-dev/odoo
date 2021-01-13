@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.ListView" owl="1">
+      <Layout viewProps="props" title="props.action.name">
+        <t t-set-slot="control-panel-top-right">
+          <div class="o_cp_searchview"
+            role="search"
+            t-ref="searchView"
+            >
+            <div class="o_searchview" role="search" aria-autocomplete="list" >
+                <i class="o_searchview_icon fa fa-search"
+                    title="Search..."
+                    role="img"
+                    aria-label="Search..."
+                />
+                <SearchBar searchModel="searchModel"/>
+            </div>
+          </div>
+        </t>
+        <t t-set-slot="control-panel-bottom-left">
+          <div class="o_list_buttons" role="toolbar" aria-label="Main actions">
+              <button type="button" class="btn btn-primary o_list_button_save" accesskey="s">
+                  Save
+              </button>
+              <button type="button" class="btn btn-secondary o_list_button_discard" accesskey="j">
+                  Discard
+              </button>
+              <button type="button" class="btn btn-primary o_list_button_add" accesskey="c">
+                  Create
+              </button>
+          </div>
+        </t>
+        <t t-set-slot="control-panel-bottom-right">
+          <div class="btn-group o_search_options position-static" role="search">
+            <FilterMenu searchModel="searchModel"/>
+            <GroupByMenu searchModel="searchModel"/>
+            <FavoriteMenu searchModel="searchModel"/>
+          </div>
+        </t>
+        <div class="o_list_view">
+          <div class="table-responsive">
+            <table class="o_list_table table table-sm table-hover table-striped">
+              <thead>
+                <tr>
+                  <th class="o_list_record_selector"><input type="checkbox"/></th>
+                  <th t-foreach="model.columns" t-as="fieldName" t-key="fieldName">
+                    <t t-esc="props.fields[fieldName].string"/>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr  t-foreach="model.records" t-as="record" t-key="record.id" class="o_data_row" t-on-click="_onRowClicked(record.id)">
+                  <td class="o_list_record_selector"><input type="checkbox"/></td>
+                  <td t-foreach="model.columns" t-as="fieldName" t-key="fieldName" class="o_data_cell">
+                    <t t-if="props.fields[fieldName].type === 'many2one'">
+                      <t t-esc="record[fieldName] ? record[fieldName][1] : ''"/>
+                    </t>
+                    <t t-else="">
+                      <t t-esc="record[fieldName] !== false ? record[fieldName] : ''"/>
+                    </t>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <td/>
+                <td t-foreach="model.columns" t-as="fieldName" t-key="fieldName"/>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </Layout>
+    </t>
+</templates>

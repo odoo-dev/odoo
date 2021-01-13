@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div t-name="wowl.NoContentHelper" class="o_view_nocontent" role="alert" owl="1">
+        <div class="o_nocontent_help">
+            <p class="o_view_nocontent_empty_folder">
+                <t t-if="title" t-esc="title"/>
+                <t t-else="1">No data to display</t>
+            </p>
+            <p>
+                <t t-if="description" t-esc="description"/>
+                <t t-else="1">Try to add some records, or make sure that there is no
+                    active filter in the search bar.</t>
+            </p>
+        </div>
+    </div>
+
+    <div t-name="wowl.ActionHelper" class="o_view_nocontent" owl="1">
+        <div class="o_nocontent_help">
+            <t t-raw="noContentHelp"/>
+        </div>
+    </div>
+
+    <t t-name="wowl.GraphView.MeasureMenu" owl="1">
+        <Dropdown t-on-dropdown-item-selected.stop="onMeasureSelected">
+            Measures
+            <t t-set-slot="menu">
+                <t t-foreach="Object.values(measures)" t-as="measure" t-key="measure.fieldName">
+                    <DropdownItem payload="{ measure: measure.fieldName }" t-att-class="{ o_dropdown_active: measure.fieldName === state.activeMeasure }">
+                        <t t-esc="measure.description"/>
+                    </DropdownItem>
+                    <div t-if="measure_last" role="separator" class="dropdown-divider"/>
+                </t>
+                <DropdownItem payload="{ measure: '__count__' }" t-att-class="{ o_dropdown_active: '__count__' ===  state.activeMeasure }">
+                    Count
+                </DropdownItem>   
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="wowl.GraphView.GroupByMenu" owl="1">
+        <!-- reuse the "true" GroupBy menu in some way or the "control panel model" via a specific arch??? we could pass an generarted search arch (in which form???)-->
+        <!-- idea could we have arch in slot views??? (view Form, dashboards,...) -->   
+        <Dropdown>
+            Group By
+        </Dropdown>
+    </t>
+
+    <t t-name="wowl.GraphView" owl="1">
+        <Layout viewProps="props" class="o_graph_view">
+            <t t-set-slot="control-panel-bottom-left">
+                <div class="btn-group" role="toolbar" aria-label="Main actions">
+                    <t t-call="wowl.GraphView.MeasureMenu"/>
+                    <t t-if="props.isEmbedded" t-call="wowl.GraphView.GroupByMenu"/>
+                </div>
+                <!-- would be good to avoid repetition: look for best solution -->
+                <div class="btn-group" role="toolbar" aria-label="Change graph">
+                    <button class="btn btn-secondary fa fa-bar-chart-o o_graph_button" title="Bar Chart" aria-label="Bar Chart" data-mode="bar"
+                        t-on-click="onModeSelected('bar')"
+                        t-att-class="{ active: state.mode === 'bar' }"
+                    />
+                    <button class="btn btn-secondary fa fa-area-chart o_graph_button" title="Line Chart" aria-label="Line Chart" data-mode="line"
+                        t-on-click="onModeSelected('line')"
+                        t-att-class="{ active: state.mode === 'line' }"
+                    />
+                    <button class="btn btn-secondary fa fa-pie-chart o_graph_button" title="Pie Chart" aria-label="Pie Chart" data-mode="pie"
+                        t-on-click="onModeSelected('pie')"
+                        t-att-class="{ active: state.mode === 'pie' }"
+                    />
+                </div>
+                <div t-if="state.mode === 'bar'" class="btn-group" role="toolbar" aria-label="Change graph">
+                    <button class="btn btn-secondary fa fa-database o_graph_button" title="Stacked" aria-label="Stacked"
+                        t-on-click="state.stacked = !state.stacked"
+                        t-att-class="{ active: state.stacked }"
+                    />
+                </div>
+                <div t-if="state.mode !== 'pie' and searchModel.domains.length === 1" class="btn-group" role="toolbar" aria-label="Sort graph">
+                    <button class="btn btn-secondary fa fa-sort-amount-desc o_graph_button" title="Descending" aria-label="Descending"
+                        t-on-click="toggleOrder('DESC')"
+                        t-att-class="{ active: state.order === 'DESC' }"
+                    />
+                    <button class="btn btn-secondary fa fa-sort-amount-asc o_graph_button" title="Ascending" aria-label="Ascending"
+                        t-on-click="toggleOrder('ASC')"
+                        t-att-class="{ active: state.order === 'ASC' }"
+                    />
+                </div>
+            </t>
+            <t t-set-slot="control-panel-top-right">
+                <div class="o_cp_searchview"
+                    role="search"
+                    t-ref="searchView"
+                    >
+                    <div class="o_searchview" role="search" aria-autocomplete="list" >
+                        <i class="o_searchview_icon fa fa-search"
+                            title="Search..."
+                            role="img"
+                            aria-label="Search..."
+                        />
+                        <SearchBar searchModel="searchModel"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set-slot="control-panel-bottom-right">
+                <div class="btn-group o_search_options position-static" role="search">
+                    <FilterMenu searchModel="searchModel"/>
+                    <GroupByMenu searchModel="searchModel"/>
+                    <ComparisonMenu t-if="searchModel.getSearchItems(i => i.type === 'comparison').length" searchModel="searchModel"/>
+                    <FavoriteMenu searchModel="searchModel"/>
+                </div>
+            </t>
+            <t t-slot="default"> <!-- t-set-slot does not work here ??? -->
+                <label t-if="props.title" t-esc="props.title"/>
+                <t t-if="model.noContentHelperData" t-call="wowl.NoContentHelper">
+                    <t t-set="title" t-value="model.noContentHelperData.title"/>
+                    <t t-set="description" t-value="model.noContentHelperData.description"/>
+                </t>
+                <t t-else="">
+                    <t t-if="props.isSample and !props.isEmbedded and props.noContentHelp" t-call="wowl.ActionHelper">
+                        <t t-set="noContentHelp" t-value="props.noContentHelp"/>
+                    </t>
+                    <div class="o_graph_canvas_container" t-ref="container">
+                        <canvas t-ref="canvas"/>
+                    </div>
+                </t>
+            </t>
+        </Layout>
+    </t>
+
+</templates>

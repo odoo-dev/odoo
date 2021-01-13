@@ -7,6 +7,7 @@ import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { legacySetupProm } from "./legacy/legacy_setup";
 import { serviceRegistry } from "./services/service_registry";
 import { viewRegistry } from "./views/view_registry";
+import { favoriteMenuRegistry } from "./views/view_utils/favorite_menu/favorite_menu_registry";
 import { mainComponentRegistry } from "./webclient/main_component_registry";
 import { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
@@ -43,6 +44,7 @@ const { whenReady, loadFile } = utils;
   odoo.errorDialogRegistry = errorDialogRegistry;
   odoo.serviceRegistry = serviceRegistry;
   odoo.debugManagerRegistry = debugManagerRegistry;
+  odoo.favoriteMenuRegistry = favoriteMenuRegistry;
   // setup environment
   const [env, templates] = await Promise.all([makeEnv(odoo.debug), loadTemplates()]);
   env.qweb.addTemplates(templates);

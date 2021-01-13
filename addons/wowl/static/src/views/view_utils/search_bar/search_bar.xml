@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.SearchBar" owl="1">
+        <div class="o_searchview_input_container">
+            <div t-foreach="props.searchModel.facets" t-as="facet" t-key="facet_index"
+                tabindex="0"
+                class="o_searchview_facet"
+                role="img"
+                aria-label="search"
+                t-on-keydown="_onFacetKeydown(facet, facet_index)"
+                >
+                <span t-if="facet.icon" t-attf-class="o_searchview_facet_label {{ facet.icon }}"/>
+                <span t-else="" class="o_searchview_facet_label" t-esc="facet.title"/>
+                <div class="o_facet_values">
+                    <t t-foreach="facet.values" t-as="facetValue" t-key="facetValue_index">
+                        <span t-if="!facetValue_first" class="o_facet_values_sep" t-esc="facet.separator"/>
+                        <span class="o_facet_value" t-esc="facetValue"/>
+                    </t>
+                </div>
+                <i class="fa fa-sm fa-remove o_facet_remove"
+                    role="img"
+                    aria-label="Remove"
+                    title="Remove"
+                    t-on-click="_onFacetRemove(facet)"
+                />
+            </div>
+            <input type="text"
+                class="o_searchview_input"
+                autofocus=""
+                accesskey="Q"
+                placeholder="Search..."
+                role="searchbox"
+                t-ref="search-input"
+                t-on-keydown="_onSearchKeydown"
+                t-on-input="_onSearchInput"
+            />
+            <ul t-if="state.sources.length" class="o_dropdown_menu o_searchview_autocomplete dropdown-menu show" role="menu">
+                <li t-foreach="state.sources" t-as="src" t-key="src.id"
+                    t-att-id="src.id"
+                    class="o_menu_item"
+                    t-att-class="{ o_indent: src.parent, o_selection_focus: src_index === state.focusedItem }"
+                    t-on-click="_selectSource(src)"
+                    t-on-mousemove="_onSourceMousemove(src_index)"
+                    >
+                    <a t-if="src.expand"
+                        href="#"
+                        class="o_expand"
+                        t-on-click.stop.prevent="_expandSource(src, !src.expanded)"
+                        >
+                        <i t-attf-class="fa fa-caret-{{ src.expanded ? 'down' : 'right' }}"/>
+                    </a>
+                    <a href="#" t-on-click.prevent="">
+                        <t t-if="src.label" t-esc="src.label"/>
+                        <t t-elif="['date', 'datetime'].includes(src.type)">
+                            <t>Search <em t-esc="src.description"/> at: <strong t-esc="state.inputValue"/></t>
+                        </t>
+                        <t t-else="">Search <em t-esc="src.description"/> for: <strong t-esc="state.inputValue"/></t>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </t>
+
+</templates>

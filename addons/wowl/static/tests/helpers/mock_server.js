@@ -378,6 +378,10 @@ class MockServer {
         return Promise.resolve(this.mockOnchange(args.model, args.args, args.kwargs));
       case "read":
         return Promise.resolve(this.mockRead(args.model, args.args));
+      case "search_read":
+        return Promise.resolve(this.mockSearchRead(args.model, args.args, args.kwargs));
+      case "web_search_read":
+        return Promise.resolve(this.mockWebSearchRead(args.model, args.args, args.kwargs));
       case "read_group":
         return Promise.resolve(this.mockReadGroup(args.model, args.kwargs));
       case "web_read_group":
@@ -766,6 +770,18 @@ class MockServer {
       context: kwargs.context,
     });
     return result.records;
+  }
+  mockWebSearchRead(modelName, args, kwargs) {
+    const result = this.mockSearchReadController({
+      model: modelName,
+      domain: kwargs.domain || args[0],
+      fields: kwargs.fields || args[1],
+      offset: kwargs.offset || args[2],
+      limit: kwargs.limit || args[3],
+      sort: kwargs.order || args[4],
+      context: kwargs.context,
+    });
+    return result;
   }
   mockSearchReadController(params) {
     const model = this.models[params.model];

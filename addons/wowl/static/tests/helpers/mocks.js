@@ -3,6 +3,7 @@ import { effectService } from "../../src/effects/effects_service";
 import { makePushState, routeToUrl } from "../../src/services/router";
 import { SIZES } from "../../src/services/device";
 import { makeLocalization } from "../../src/services/localization";
+const { Component } = owl;
 // // -----------------------------------------------------------------------------
 // // Mock Services
 // // -----------------------------------------------------------------------------
@@ -76,7 +77,10 @@ export function makeFakeUserService(values) {
   };
 }*/
 function buildMockRPC(mockRPC) {
-  return async (...args) => {
+  return async function (...args) {
+    if (this instanceof Component && this.__owl__.isDestroyed) {
+      return new Promise(() => {});
+    }
     if (mockRPC) {
       return mockRPC(...args);
     }
@@ -130,6 +134,7 @@ export function makeTestOdoo(config = {}) {
     userMenuRegistry: config.userMenuRegistry,
     debugManagerRegistry: config.debugManagerRegistry,
     viewRegistry: config.viewRegistry,
+    favoriteMenuRegistry: config.favoriteMenuRegistry,
   });
 }
 export function makeMockXHR(response, sendCb, def) {

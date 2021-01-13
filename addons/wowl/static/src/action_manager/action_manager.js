@@ -5,6 +5,7 @@ import { makeContext } from "../core/context";
 import { ActionDialog } from "./action_dialog";
 import { KeepLast } from "../utils/concurrency";
 import { sprintf } from "../utils/strings";
+import { ViewLoader } from "../views/view_utils/view_loader";
 export function clearUncommittedChanges(env) {
   const callbacks = [];
   env.bus.trigger("CLEAR-UNCOMMITTED-CHANGES", callbacks);
@@ -249,9 +250,9 @@ function makeActionManager(env) {
     return Object.assign({}, _getActionProps(action), { options });
   }
   /**
-   * @param {BaseView} view
+   * @param {View} view
    * @param {ActWindowAction} action
-   * @param {BaseView[]} views
+   * @param {View[]} views
    * @returns {ViewProps}
    */
   function _getViewProps(view, action, views, options = {}) {
@@ -267,11 +268,13 @@ function makeActionManager(env) {
           multiRecord: v.multiRecord,
         };
       });
+    // FIXME: props should be cleaned
     const props = Object.assign({}, _getActionProps(action), {
       context: action.context,
       domain: action.domain || [],
       model: action.res_model,
       type: view.type,
+      View: view,
       views: action.views,
       viewSwitcherEntries,
       withActionMenus: target !== "new" && target !== "inline",
@@ -316,6 +319,15 @@ function makeActionManager(env) {
       reject = _rej;
     });
     const action = controller.action;
+    // LEGACY CODE COMPATIBILITY: remove when all views will be written in owl
+    if (action.type === "ir.actions.act_window") {
+      const View = controller.view;
+      if (View.isLegacy) {
+        controller.Component = View;
+        delete controller.props.View;
+      }
+    }
+    // END LEGACY CODE COMPATIBILITY
     class ControllerComponent extends Component {
       constructor() {
         super(...arguments);
@@ -353,7 +365,10 @@ function makeActionManager(env) {
             if (!nextStackActionIds.includes(c.action.jsId)) {
               if (c.action.type === "ir.actions.act_window") {
                 for (const viewType in c.action.controllers) {
-                  toDestroy.add(c.action.controllers[viewType]);
+                  const controller = c.action.controllers[viewType];
+                  if (controller.Component.isLegacy) {
+                    toDestroy.add(controller);
+                  }
                 }
               } else {
                 toDestroy.add(c);
@@ -511,7 +526,7 @@ function makeActionManager(env) {
       if (lazyView) {
         lazyController = {
           jsId: `controller_${++id}`,
-          Component: lazyView,
+          Component: ViewLoader,
           action,
           view: lazyView,
           views,
@@ -527,7 +542,7 @@ function makeActionManager(env) {
     }
     const controller = {
       jsId: `controller_${++id}`,
-      Component: view,
+      Component: ViewLoader,
       action,
       view,
       views,
@@ -854,7 +869,7 @@ function makeActionManager(env) {
     }
     const newController = controller.action.controllers[viewType] || {
       jsId: `controller_${++id}`,
-      Component: view,
+      Component: ViewLoader,
       action: controller.action,
       views: controller.views,
       view,

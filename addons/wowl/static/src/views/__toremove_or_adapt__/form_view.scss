@@ -1,0 +1,85 @@
+.o_form_sheet_bg {
+  border-bottom: 1px solid #ddd;
+  background: url(/web/static/src/img/form_sheetbg.png);
+  .o_form_sheet {
+    margin: 12px auto;
+    min-width: 650px;
+    max-width: 1140px;
+    min-height: 330px;
+    padding: 24px;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid #c8c8d3;
+    // Groups
+    .o_group {
+      display: inline-block;
+      width: 100%;
+      margin: 10px 0;
+
+      // o_group contains nested groups
+      @for $i from 1 through $o-form-group-cols {
+        .o_group_col_#{$i} {
+          display: inline-block;
+          width: floor(100% / 12 * $i);
+          vertical-align: top;
+        }
+      }
+
+      &.o_inner_group {
+        display: inline-table;
+
+        > tbody > tr > td {
+          &.o_td_label {
+            width: 0%;
+            padding: 0 15px 0 0;
+            min-width: 150px;
+          }
+          vertical-align: top;
+
+          span,
+          .o_field_boolean,
+          .oe_avatar,
+          .o_form_uri {
+            &.o_field_widget {
+              width: auto;
+            }
+          }
+        }
+      }
+
+      .o_form_label {
+        font-weight: normal;
+      }
+
+      .o_field_widget {
+        width: 100%;
+
+        > .btn {
+          flex: 0 0 auto;
+          padding: 0 10px;
+        }
+      }
+
+      :not(.o_row):not(.o_data_cell) > .o_field_widget,
+      .o_row > .o_field_widget:last-child {
+        // Note: this does not take care
+        // of an invisible last-child but
+        // it does not really matter
+        // Makes extra buttons (e.g. m2o external button) overflow on the
+        // right padding of the parent element
+        > .o_input_dropdown {
+          flex: 1 0 auto;
+        }
+      }
+
+      &.o_label_nowrap .o_form_label {
+        white-space: nowrap;
+      }
+
+      .o_td_label .o_form_label {
+        font-weight: bold;
+        margin-right: 0px;
+      }
+    }
+  }
+}

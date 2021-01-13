@@ -6,12 +6,10 @@ import { viewRegistry } from "../../src/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 let testConfig;
 // legacy stuff
-let ListController;
 let testUtils;
 QUnit.module("ActionManager", (hooks) => {
   hooks.before(() => {
     const legacy = getLegacy();
-    ListController = legacy.ListController;
     testUtils = legacy.testUtils;
   });
   // Remove this as soon as we drop the legacy support.
@@ -45,52 +43,82 @@ QUnit.module("ActionManager", (hooks) => {
   QUnit.test("display warning as notification", async function (assert) {
     // this test can be removed as soon as the legacy layer is dropped
     assert.expect(5);
-    let list;
-    testUtils.patch(ListController, {
+    const { AbstractView, legacyViewRegistry } = getLegacy();
+    let self;
+    const TestCustoController = AbstractView.prototype.config.Controller.extend({
       init() {
         this._super(...arguments);
-        list = this;
+        self = this;
       },
     });
+    const TestCustoView = AbstractView.extend({
+      viewType: "test_view",
+    });
+    TestCustoView.prototype.config.Controller = TestCustoController;
+    legacyViewRegistry.add("test_view", TestCustoView);
+    testConfig.serverData.views["partner,false,test_view"] = `<div class="o_test_view"/>`;
+    testConfig.serverData.actions[777] = {
+      id: 1,
+      name: "Partners Action 1",
+      res_model: "partner",
+      type: "ir.actions.act_window",
+      views: [[false, "test_view"]],
+    };
     const webClient = await createWebClient({ testConfig });
-    await doAction(webClient, 3);
-    assert.containsOnce(webClient, ".o_list_view");
-    list.trigger_up("warning", {
+    await doAction(webClient, 777);
+    assert.containsOnce(webClient, ".o_test_view");
+    self.trigger_up("warning", {
       title: "Warning!!!",
       message: "This is a warning...",
     });
     await testUtils.nextTick();
     await legacyExtraNextTick();
-    assert.containsOnce(webClient, ".o_list_view");
+    assert.containsOnce(webClient, ".o_test_view");
     assert.containsOnce(document.body, ".o_notification.bg-warning");
     assert.strictEqual($(".o_notification_title").text(), "Warning!!!");
     assert.strictEqual($(".o_notification_content").text(), "This is a warning...");
     webClient.destroy();
+    delete legacyViewRegistry.map.test_view;
   });
   QUnit.test("display warning as modal", async function (assert) {
     // this test can be removed as soon as the legacy layer is dropped
     assert.expect(5);
-    let list;
-    testUtils.patch(ListController, {
+    const { AbstractView, legacyViewRegistry } = getLegacy();
+    let self;
+    const TestCustoController = AbstractView.prototype.config.Controller.extend({
       init() {
         this._super(...arguments);
-        list = this;
+        self = this;
       },
     });
+    const TestCustoView = AbstractView.extend({
+      viewType: "test_view",
+    });
+    TestCustoView.prototype.config.Controller = TestCustoController;
+    legacyViewRegistry.add("test_view", TestCustoView);
+    testConfig.serverData.views["partner,false,test_view"] = `<div class="o_test_view"/>`;
+    testConfig.serverData.actions[777] = {
+      id: 1,
+      name: "Partners Action 1",
+      res_model: "partner",
+      type: "ir.actions.act_window",
+      views: [[false, "test_view"]],
+    };
     const webClient = await createWebClient({ testConfig });
-    await doAction(webClient, 3);
-    assert.containsOnce(webClient, ".o_list_view");
-    list.trigger_up("warning", {
+    await doAction(webClient, 777);
+    assert.containsOnce(webClient, ".o_test_view");
+    self.trigger_up("warning", {
       title: "Warning!!!",
       message: "This is a warning...",
       type: "dialog",
     });
     await testUtils.nextTick();
     await legacyExtraNextTick();
-    assert.containsOnce(webClient, ".o_list_view");
+    assert.containsOnce(webClient, ".o_test_view");
     assert.containsOnce(document.body, ".modal");
     assert.strictEqual($(".modal-title").text(), "Warning!!!");
     assert.strictEqual($(".modal-body").text(), "This is a warning...");
     webClient.destroy();
+    delete legacyViewRegistry.map.test_view;
   });
 });

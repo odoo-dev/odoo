@@ -67,7 +67,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/action/load",
       "/web/action/load",
       "/web/dataset/call_kw/pony/load_views",
-      "/web/dataset/search_read",
+      "/web/dataset/call_kw/pony/web_search_read",
     ]);
     webClient.destroy();
   });
@@ -77,7 +77,7 @@ QUnit.module("ActionManager", (hooks) => {
     const defs = [Promise.resolve(), def, Promise.resolve()];
     const mockRPC = async function (route, args) {
       assert.step(route);
-      if (route === "/web/dataset/search_read") {
+      if (route.endsWith("search_read")) {
         await defs.shift();
       }
     };
@@ -96,7 +96,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/action/load",
       "/web/dataset/call_kw/partner/load_views",
       "/web/dataset/search_read",
-      "/web/dataset/search_read",
+      "/web/dataset/call_kw/partner/web_search_read",
       "/web/dataset/search_read",
     ]);
     // we resolve def => list view is now ready (but we want to ignore it)
@@ -206,7 +206,7 @@ QUnit.module("ActionManager", (hooks) => {
         "/web/dataset/search_read",
         "/web/action/load",
         "load_views",
-        "/web/dataset/search_read",
+        "web_search_read",
       ]);
       // unblock the switch to Kanban in action 4
       def.resolve();
@@ -253,12 +253,12 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read",
+      "web_search_read",
       "read",
       "object",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read",
+      "web_search_read",
     ]);
     // unblock the call_button request
     def.resolve();
@@ -315,7 +315,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read",
+      "web_search_read",
       "read",
       "/web/action/load",
       "load_views",
@@ -392,7 +392,7 @@ QUnit.module("ActionManager", (hooks) => {
     const def = testUtils.makeTestPromise();
     const mockRPC = async function (route, args) {
       assert.step((args && args.method) || route);
-      if (route === "/web/dataset/search_read") {
+      if (route.endsWith("search_read")) {
         await def;
       }
     };
@@ -430,7 +430,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read",
+      "web_search_read",
       "/web/action/load",
       "load_views",
       "/web/dataset/search_read",
@@ -530,7 +530,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read",
+      "web_search_read",
       "/web/action/load",
       "load_views",
       "/web/dataset/search_read",
@@ -543,7 +543,7 @@ QUnit.module("ActionManager", (hooks) => {
     const defs = [null, def, null];
     const mockRPC = async (route, args) => {
       assert.step((args && args.method) || route);
-      if (route === "/web/dataset/search_read") {
+      if (route.endsWith("search_read")) {
         await Promise.resolve(defs.shift());
       }
     };
@@ -567,7 +567,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read",
+      "web_search_read",
       "/web/action/load",
       "load_views",
       "/web/dataset/search_read",
