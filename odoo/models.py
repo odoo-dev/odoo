@@ -5436,9 +5436,8 @@ Fields:
 
     def update(self, values):
         """ Update the records in ``self`` with ``values``. """
-        # method BaseModel.write() handles new records and avoids accidental
-        # recomputation of fields being updated
-        BaseModel.write(self, values)
+        for name, value in values.items():
+            self[name] = value
 
     @api.model
     def flush(self, fnames=None, records=None):
