@@ -7,8 +7,10 @@ from odoo.addons.mail.tests.common import MailCase, MailCommon, mail_new_test_us
 
 class MassMailCase(MailCase, MockLinkTracker):
 
-    def assertMailTraces(self, recipients_info, mailing, records, check_mail=True):
-        """ Check content of traces.
+    def assertMailTraces(self, recipients_info, mailing, records, author=None, check_mail=True):
+        """ Check content of traces. Traces are fetched based on a given mailing
+        and records. Their content is compared to recipients_info structure that
+        holds expected information. Mail.mail records may optionally be checked.
 
         :param recipients_info: list[{
             'partner': res.partner record (may be empty),
@@ -18,6 +20,10 @@ class MassMailCase(MailCase, MockLinkTracker):
             'content': UDPATE ME
             'failure_type': optional: UPDATE ME
             }, { ... }]
+        :param mailing: used to find traces;
+        :param records: used to find traces;
+        :param check_mail: if True, also check mail.mail records that should be
+          linked to traces;
         """
         traces = self.env['mailing.trace'].search([
             ('mass_mailing_id', 'in', mailing.ids),
@@ -50,19 +56,21 @@ class MassMailCase(MailCase, MockLinkTracker):
                 fields_values = {'mailing_id': mailing}
                 if 'failure_type' in recipient_info:
                     fields_values['failure_type'] = recipient_info['failure_type']
+                if content:
+                    fields_values['body_html_content'] = content
 
                 if state == 'sent':
-                    self.assertMailMailWEmails([email], 'sent', content, fields_values=fields_values)
+                    self.assertMailMailWEmails([email], 'sent', content, author=author, fields_values=fields_values, check_email=True)
                 elif state in ['opened', 'replied']:  # replied imply something has been sent
-                    self.assertMailMailWEmails([email], 'sent', content, fields_values=fields_values)
+                    self.assertMailMailWEmails([email], 'sent', content, author=author, fields_values=fields_values, check_email=True)
                 elif state == 'ignored':
-                    self.assertMailMailWEmails([email], 'cancel', content, fields_values=fields_values)
+                    self.assertMailMailWEmails([email], 'cancel', content, author=author, fields_values=fields_values)
                 elif state == 'exception':
-                    self.assertMailMailWEmails([email], 'exception', content, fields_values=fields_values)
+                    self.assertMailMailWEmails([email], 'exception', content, author=author, fields_values=fields_values, check_email=True)
                 elif state == 'canceled':
-                    self.assertMailMailWEmails([email], 'canceled', content, fields_values=fields_values)
+                    self.assertMailMailWEmails([email], 'canceled', content, author=author, fields_values=fields_values)
                 elif state == 'bounced':
-                    self.assertMailMailWEmails([email], 'canceled', content, fields_values=fields_values)
+                    self.assertMailMailWEmails([email], 'canceled', content, author=author, fields_values=fields_values, check_email=True)
                 else:
                     raise NotImplementedError()
 

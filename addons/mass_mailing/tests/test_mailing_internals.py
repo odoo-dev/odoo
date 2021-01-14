@@ -202,7 +202,8 @@ class TestMassMailFeatures(MassMailCommon):
         self.assertMailTraces(
             [{'email': 'test1@example.com'},
              {'email': 'test2@example.com', 'state': 'ignored'}],
-            mailing, partner_a + partner_b, check_mail=True
+            mailing, partner_a + partner_b,
+            author=self.env.user.partner_id, check_mail=True
         )
 
     @users('user_marketing')
@@ -237,7 +238,8 @@ Email: <a id="url5" href="mailto:test@odoo.com">test@odoo.com</a></div>""",
             [{'email': 'fleurus@example.com'},
              {'email': 'gorramts@example.com'},
              {'email': 'ybrant@example.com'}],
-            mailing, self.mailing_list_1.contact_ids, check_mail=True
+            mailing, self.mailing_list_1.contact_ids,
+            author=self.env.user.partner_id, check_mail=True
         )
 
         for contact in self.mailing_list_1.contact_ids:

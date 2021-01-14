@@ -169,7 +169,10 @@ class MockEmail(common.BaseCase):
     # GATEWAY ASSERTS
     # ------------------------------------------------------------
 
-    def _find_sent_mail_wemail(self, email_to):
+    # FINDERS
+    # ------------------------------------------------------------
+
+    def _find_sent_email_wemail(self, email_to):
         for email in self._mails:
             if set(email['email_to']) == set([email_to]):
                 break
@@ -214,21 +217,20 @@ class MockEmail(common.BaseCase):
             raise AssertionError('mail.mail not found for record %s in %s' % (record, repr([m.email_to for m in self._new_mails])))
         return mail
 
-    def assertMailFailed(self, author, recipients, mail_message):
-        mail = self._find_mail(author, recipients, mail_message)
-        self.assertEqual(mail.state, 'exception')
+    # MAIL.MAIL
+    # ------------------------------------------------------------
 
     def assertMailMail(self, recipients, status, check_mail_mail=True, mail_message=None, author=None, email_values=None, fields_values=None):
         if check_mail_mail:
             mail = self._find_mail_mail_wpartners(recipients, status, mail_message=mail_message, author=author)
             self.assertTrue(bool(mail))
-            for fname, fvalue in (fields_values or {}).items():
-                self.assertEqual(mail[fname], fvalue)
+            if fields_values:
+                self.assertMailMailContent(mail, fields_values)
         if status == 'sent':
             for recipient in recipients:
                 self.assertSentEmail(author, [recipient], **email_values)
 
-    def assertMailMailWEmails(self, emails, status, content, fields_values=None):
+    def assertMailMailWEmails(self, emails, status, check_mail_mail=True, mail_message=None, author=None, fields_values=None, check_email=False, email_values=None):
         """ Will check in self._new_mails to find a sent mail.mail. To use with
         mail gateway mock.
 
@@ -238,11 +240,20 @@ class MockEmail(common.BaseCase):
         :param fields_values: specific value to check on the mail.mail record;
         """
         for email_to in emails:
-            sent_mail = self._find_mail_mail_wemail(email_to, status)
-            if content:
-                self.assertIn(content, sent_mail.body_html)
-            for fname, fvalue in (fields_values or {}).items():
-                self.assertEqual(sent_mail[fname], fvalue)
+            if check_mail_mail:
+                mail = self._find_mail_mail_wemail(email_to, status, mail_message=mail_message, author=author)
+                self.assertTrue(bool(mail))
+                if fields_values:
+                    self.assertMailMailContent(mail, fields_values)
+            if check_email:
+                self.assertSentEmail(author, [email_to], **(email_values or {}))
+
+    def assertMailMailContent(self, mail, fields_values):
+        for fname, fvalue in (fields_values or {}).items():
+            if fname == 'body_html_content':
+                self.assertIn(fvalue, mail['body_html'])
+            else:
+                self.assertEqual(mail[fname], fvalue)
 
     def assertNoMail(self, author, recipients, mail_message=None):
         try:
@@ -253,6 +264,9 @@ class MockEmail(common.BaseCase):
             raise AssertionError('mail.mail exists for message %s / recipients %s but should not exist' % (mail_message, recipients.ids))
         finally:
             self.assertNotSentEmail()
+
+    # EMAIL (GATEWAY)
+    # ------------------------------------------------------------
 
     def assertNotSentEmail(self):
         self.assertEqual(len(self._mails), 0)
@@ -271,6 +285,8 @@ class MockEmail(common.BaseCase):
                       'body_content', 'body_alternative_content', 'references_content']:
             if fname in values:
                 base_expected[fname] = values[fname]
+
+        print([p['email_from'] for p in self._mails])
 
         expected = dict(base_expected)
         if isinstance(author, self.env['res.partner'].__class__):

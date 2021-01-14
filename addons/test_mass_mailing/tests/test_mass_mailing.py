@@ -33,7 +33,7 @@ class TestMassMailing(TestMassMailCommon):
              {'email': 'test.record.02@test.example.com'},
              {'email': 'test.record.03@test.example.com', 'state': 'ignored'},
              {'email': 'test.record.04@test.example.com', 'state': 'ignored'}],
-            mailing, recipients, check_mail=True
+            mailing, recipients, author=self.env.user.partner_id, check_mail=True
         )
         self.assertEqual(mailing.ignored, 2)
 
@@ -62,7 +62,7 @@ class TestMassMailing(TestMassMailCommon):
              {'email': 'test.record.02@test.example.com'},
              {'email': 'test.record.03@test.example.com'},
              {'email': 'test.record.04@test.example.com', 'state': 'ignored'}],
-            mailing, recipients, check_mail=True
+            mailing, recipients, author=self.env.user.partner_id, check_mail=True
         )
         self.assertEqual(mailing.ignored, 3)
 
@@ -121,6 +121,6 @@ class TestMassMailing(TestMassMailCommon):
              {'email': 'test5@test.example.com', 'state': 'ignored'}],
             mailing,
             mailing_contact_1 | mailing_contact_2 | mailing_contact_3 | mailing_contact_4 | mailing_contact_5,
-            check_mail=True
+            author=self.env.user.partner_id, check_mail=True
         )
         self.assertEqual(mailing.ignored, 2)

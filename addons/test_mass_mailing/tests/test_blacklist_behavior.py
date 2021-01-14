@@ -35,7 +35,7 @@ class TestAutoBlacklist(common.TestMassMailCommon):
 
         self.assertMailTraces(
             [{'email': 'test.record.00@test.example.com'}],
-            mailing, target, check_mail=True
+            mailing, target, author=self.env.user.partner_id, check_mail=True
         )
 
         # call bounced
@@ -59,5 +59,5 @@ class TestAutoBlacklist(common.TestMassMailCommon):
             new_mailing._process_mass_mailing_queue()
         self.assertMailTraces(
             [{'email': 'test.record.00@test.example.com', 'state': 'ignored'}],
-            new_mailing, target, check_mail=True
+            new_mailing, target, author=self.env.user.partner_id, check_mail=True
         )
