@@ -8,10 +8,12 @@
         <field name="arch" type="xml">
             <xpath expr="//div[@name='website_menu']" position='after'>
                 <div class="row mt16" attrs="{'invisible': [('website_menu', '=', False)]}">
-                    <label class="col-lg-4" for="website_track"/> <field name="website_track"/>
+                    <label class="col-4" for="website_track" string="Tracks Menu Item"/>
+                    <field name="website_track"/>
                 </div>
-                <div class="row mt16" attrs="{'invisible': [('website_menu', '=', False)]}">
-                    <label class="col-lg-4" for="website_track_proposal"/> <field name="website_track_proposal"/>
+                <div class="row mt16" name="website_track_proposal" attrs="{'invisible': [('website_menu', '=', False)]}">
+                    <label class="col-4" for="website_track_proposal" string="Track Proposals Menu Item"/>
+                    <field name="website_track_proposal"/>
                 </div>
             </xpath>
         </field>

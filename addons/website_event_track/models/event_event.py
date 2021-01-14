@@ -36,10 +36,35 @@ class Event(models.Model):
         for event in self:
             if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.website_track = event.event_type_id.website_track
-            elif event.website_menu and (event.website_menu != event._origin.website_menu or not event.website_track):
+            elif event.website_menu and (event.website_menu != event._origin.website_menu):
                 event.website_track = True
             elif not event.website_menu:
                 event.website_track = False
+
+    @api.onchange('website_menu')
+    def _onchange_website_menu(self):
+        """use onchange to make sure that website_track has the correct value
+        when the user makes changes inside the form, what we want is that when
+        the user activates the website menu the website_track field to be set to
+        the value of the template, if the event is not linked
+        to a template, the value of website_track will be set to True.
+        When the menu is deactivated it should always be false"""
+        for event in self:
+            if not event.website_menu:
+                event.website_track = False
+            else:
+                if event.event_type_id:
+                    event.website_track = event.event_type_id.website_track
+                else:
+                    event.website_track = True
+
+    @api.onchange('event_type_id')
+    def _onchange_event_type(self):
+        """use onchange to make sure that website_track has the same value
+        as in the event type when the user makes changes inside the form"""
+        for event in self:
+            if event.event_type_id:
+                event.website_track = event.event_type_id.website_track
 
     @api.depends('event_type_id', 'website_track')
     def _compute_website_track_proposal(self):
@@ -59,6 +84,13 @@ class Event(models.Model):
     # ------------------------------------------------------------
     # WEBSITE MENU MANAGEMENT
     # ------------------------------------------------------------
+
+    def toggle_website_menu(self, val):
+        super(Event, self).toggle_website_menu(val)
+        if val:
+            if self.event_type_id:
+                self.website_track = self.event_type_id.website_track
+                self.website_track_proposal = self.event_type_id.website_track_proposal
 
     def toggle_website_track(self, val):
         self.website_track = val

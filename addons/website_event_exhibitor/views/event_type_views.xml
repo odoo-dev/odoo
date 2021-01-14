@@ -5,9 +5,9 @@
         <field name="model">event.type</field>
         <field name="inherit_id" ref="website_event.event_type_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@name='website_menu']" position='after'>
+            <xpath expr="//div[@name='website_track_proposal' or @name='website_menu'][last()]" position='after'>
                 <div class="row mt16" attrs="{'invisible': [('website_menu', '=', False)]}">
-                    <label class="col-lg-4" for="exhibitor_menu"/> <field name="exhibitor_menu"/>
+                    <label class="col-4" for="exhibitor_menu" string="Exhibitors Menu Item"/> <field name="exhibitor_menu"/>
                 </div>
             </xpath>
         </field>

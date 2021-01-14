@@ -25,19 +25,49 @@ class EventEvent(models.Model):
         for event in self:
             event.sponsor_count = result.get(event.id, 0)
 
-    @api.depends('event_type_id', 'website_menu', 'exhibitor_menu')
+    @api.depends('event_type_id', 'website_menu')
     def _compute_exhibitor_menu(self):
         for event in self:
             if event.event_type_id and event.event_type_id != event._origin.event_type_id:
                 event.exhibitor_menu = event.event_type_id.exhibitor_menu
-            elif event.website_menu and (event.website_menu != event._origin.website_menu or not event.exhibitor_menu):
+            elif event.website_menu and (event.website_menu != event._origin.website_menu):
                 event.exhibitor_menu = True
             elif not event.website_menu:
                 event.exhibitor_menu = False
 
+    @api.onchange('website_menu')
+    def _on_change_website_menu(self):
+        """use onchange to make sure that website_exhibitor has the correct value
+           when the user makes changes inside the form, what we want is that when the
+           user activates the menu the website_exhibitor field to be set to
+           the value of the template, if the event is not linked to a template the value will
+           be set to true. When the menu is deactivated it should always be false"""
+        for event in self:
+            if not event.website_menu:
+                event.exhibitor_menu = False
+            else:
+                if event.event_type_id:
+                    event.exhibitor_menu = event.event_type_id.exhibitor_menu
+                else:
+                    event.exhibitor_menu = True
+
+    @api.onchange('event_type_id')
+    def _on_change_event_type(self):
+        """use onchange to make sure that website_exhibitor has the correct value
+        when the user makes changes inside the form"""
+        for event in self:
+            if event.event_type_id:
+                event.exhibitor_menu = event.event_type_id.exhibitor_menu
+
     # ------------------------------------------------------------
     # WEBSITE MENU MANAGEMENT
     # ------------------------------------------------------------
+
+    def toggle_website_menu(self, val):
+        super(EventEvent, self).toggle_website_menu(val)
+        if val:
+            if self.event_type_id:
+                self.exhibitor_menu = self.event_type_id.exhibitor_menu
 
     def toggle_exhibitor_menu(self, val):
         self.exhibitor_menu = val

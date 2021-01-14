@@ -10,29 +10,26 @@
                 <form string="Event Category">
                    <sheet>
                         <div class="oe_title">
-                            <label for="name"/>
-                            <h1><field name="name" placeholder="e.g. Exhibition"/></h1>
+                            <h1><field name="name" placeholder="e.g. Online Conference" style="margin-bottom: 0.5em"/></h1>
                         </div>
-                        <h2>Location</h2>
+
                         <div class="row mt16 o_settings_container" name="event_type_location">
                             <div class="col-12 col-lg-6 o_setting_box">
                                 <div class="o_setting_left_pane">
                                     <field name="use_timezone"/>
                                 </div>
-                                <div class="o_setting_right_pane">
-                                    <label for="use_timezone"/>
-                                    <div class="row">
-                                        <div class="col-lg-8 mt16" attrs="{'invisible': [('use_timezone', '=', False)]}">
-                                            <label for="default_timezone"/>
-                                            <field name="default_timezone"
-                                                attrs="{'required': [('use_timezone', '=', True)]}"/>
-                                        </div>
-                                    </div>
+                                <div class="o_setting_right_pane" style="border-left: None">
+                                    <label for="use_timezone" string="Timezone"/>
+                                    <span attrs="{'invisible': [('use_timezone', '=', False)]}">
+                                        <field name="default_timezone"
+                                               attrs="{'required': [('use_timezone', '=', True)]}"/>
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                        <h2>Communication</h2>
-                        <div class="row mt16 o_settings_container" name="event_type_communication">
+
+                        <h2 style="margin-top: 1em">Communication</h2>
+                        <div class="row my16 o_settings_container" name="event_type_communication">
                             <div class="col-12 col-lg-12 o_setting_box">
                                 <div class="o_setting_left_pane">
                                     <field name="use_mail_schedule"/>
@@ -56,7 +53,19 @@
                             </div>
                         </div>
                         <h2>Visibility</h2>
-                        <div class="row mt16 o_settings_container" name="event_type_visibility">
+                        <div class="row my16 o_settings_container" name="event_type_visibility">
+                            <div class="col-12 col-lg-6 o_setting_box" name="event_type_visibility_tags">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane" style="border-left: None">
+                                    <label for="tag_ids" string="Tags"/>
+                                    <div class="col-12 mt16">
+                                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_quick_create': True}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h2>Attendees</h2>
+                        <div class="row my16 o_settings_container" name="event_type_attendees">
                             <div class="col-12 col-lg-6 o_setting_box" name="event_type_visibility_seats">
                                 <div class="o_setting_left_pane">
                                     <field name="has_seats_limitation"/>
@@ -72,20 +81,20 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-6 o_setting_box" name="event_type_visibility_tags">
-                                <div class="o_setting_left_pane"/>
+
+                            <div class="col-12 col-lg-6 o_setting_box" name="event_type_attendees_auto_confirm">
+                                <div class="o_setting_left_pane">
+                                    <field name="auto_confirm" string="Registration Auto-confirmation"/>
+                                </div>
                                 <div class="o_setting_right_pane">
-                                    <label for="tag_ids" string="Tags"/>
+                                    <label for="auto_confirm" string="Registration Auto-confirmation"/>
                                     <div class="row">
-                                        <div class="col-12 mt16">
-                                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_quick_create': True}"/>
+                                        <div class="col-lg-8 mt16 text-muted">
+                                            Attendee registrations will be confirmed upon creation
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <h2>Attendees</h2>
-                        <div class="row mt16 o_settings_container" name="event_type_attendees">
                             <div class="col-12 o_setting_box" name="event_type_attendees_tickets">
                                 <div class="o_setting_left_pane">
                                     <field name="use_ticket"/>
@@ -100,20 +109,6 @@
                                                     'tree_view_ref': 'event.event_type_ticket_view_tree_from_type',
                                                     'form_view_ref': 'event.event_type_ticket_view_form_from_type'
                                                 }"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-6 o_setting_box" name="event_type_attendees_auto_confirm">
-                                <div class="o_setting_left_pane">
-                                    <field name="auto_confirm"/>
-                                </div>
-                                <div class="o_setting_right_pane">
-                                    <label for="auto_confirm"/>
-                                    <div class="row">
-                                        <div class="col-lg-8 mt16 text-muted">
-                                            Events and registrations will automatically be confirmed
-                                            upon creation, easing the flow for simple events.
                                         </div>
                                     </div>
                                 </div>
