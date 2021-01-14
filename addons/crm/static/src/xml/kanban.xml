@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+
+<t t-name="KanbanView.ColumnQuickAdd">
+    <div class="o_column_quick_create">
+        <div class="o_quick_create_folded">
+            <span class="o_kanban_add_column"><i class="fa fa-plus" role="img" aria-label="Add next month" title="Add next month"/></span>
+            <span class="o_kanban_title">Add next month</span>
+        </div>
+    </div>
+</t>
+
+</template>

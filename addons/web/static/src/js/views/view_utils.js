@@ -13,8 +13,11 @@ var viewUtils = {
      * @param {string} groupByField the name of the groupBy field
      * @returns {string | integer | false}
      */
-    getGroupValue: function (group, groupByField) {
+    getGroupValue: function (group, groupByField) {        
         var groupedByField = group.fields[groupByField];
+        if (group.customTypes && typeof group.customTypes[groupedByField.type] === 'function') {
+            return group.customTypes[groupedByField.type]();
+        }
         switch (groupedByField.type) {
             case 'many2one':
                 return group.res_id || false;
@@ -43,6 +46,9 @@ var viewUtils = {
             return false;
         }
         var availableTypes = ['char', 'boolean', 'many2one', 'selection'];
+        if (list.customTypes) {
+            availableTypes = availableTypes.concat(Object.keys(list.customTypes));
+        }
         if (!_.contains(availableTypes, list.fields[groupByField].type)) {
             return false;
         }

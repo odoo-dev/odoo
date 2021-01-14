@@ -4,6 +4,8 @@
         <xpath expr="." position="inside">
             <script type="text/javascript" src="/crm/static/src/js/crm_form.js"/>
             <script type="text/javascript" src="/crm/static/src/js/crm_kanban.js"/>
+            <script type="text/javascript" src="/crm/static/src/js/crm_forecast_kanban.js"/>
+            <script type="text/javascript" src="/crm/static/src/js/kanban_column_quick_add.js"/>
             <script type="text/javascript" src="/crm/static/src/js/systray_activity_menu.js"/>
             <script type="text/javascript" src="/crm/static/src/js/tours/crm.js"></script>
         </xpath>
