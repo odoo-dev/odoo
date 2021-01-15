@@ -26,7 +26,7 @@ from decorator import decorate
 from werkzeug.local import Local, release_local
 
 from .exceptions import CacheMiss
-from .tools import frozendict, classproperty, lazy_property, StackMap
+from .tools import classproperty, frozendict, lazy_property, Query, StackMap
 from .tools.translate import _
 
 _logger = logging.getLogger(__name__)
@@ -963,42 +963,50 @@ class Cache(object):
 
     def check(self, env):
         """ Check the consistency of the cache for the given environment. """
-        # flush fields to be recomputed before evaluating the cache
-        env['res.partner'].recompute()
-
-        # make a copy of the cache, and invalidate it
-        dump = dict(self._data)
-        self.invalidate()
-
-        # re-fetch the records, and compare with their former cache
         invalids = []
 
-        def check(model, field, field_dump):
-            records = env[field.model_name].browse(field_dump)
-            for record in records:
-                if not record.id:
-                    continue
-                try:
-                    cached = field_dump[record.id]
-                    value = field.convert_to_record(cached, record)
-                    fetched = record[field.name]
-                    if fetched != value:
-                        info = {'cached': value, 'fetched': fetched}
-                        invalids.append((record, field, info))
-                except (AccessError, MissingError):
-                    pass
+        def check(model, field, values):
+            # check column fields only
+            if not field.store or not field.column_type or callable(field.translate):
+                return
 
-        for field, field_dump in dump.items():
+            # ignore new records and records to flush
+            towrite = env.all.towrite.get(model._name) or {}
+            ids = [id_ for id_ in values if id_ and field.name not in towrite.get(id_, ())]
+            if not ids:
+                return
+
+            # select the column for the given ids
+            query = Query(env.cr, model._table, model._table_query)
+            qname = model._inherits_join_calc(model._table, field.name, query)
+            if field.type == 'binary' and (
+                model.env.context.get('bin_size') or model.env.context.get('bin_size_' + field.name)
+            ):
+                qname = f'pg_size_pretty(length({qname})::bigint)'
+            query.add_where(f'"{model._table}".id IN %s', [tuple(ids)])
+            query_str, params = query.select(f'"{model._table}".id', qname)
+            env.cr.execute(query_str, params)
+
+            # compare returned values with corresponding values in cache
+            for id_, value in env.cr.fetchall():
+                cached = values[id_]
+                if value == cached or (not value and not cached):
+                    continue
+                invalids.append((model.browse(id_), field, {'cached': cached, 'fetched': value}))
+
+        for field, field_cache in self._data.items():
             model = env[field.model_name]
             if field.depends_context:
-                for context_keys, field_cache in field_dump.items():
-                    context = dict(zip(field.depends_context, context_keys))
+                for context_key, field_cache in field_cache.items():
+                    context = dict(zip(field.depends_context, context_key))
+                    if 'company' in context:
+                        context['allowed_company_ids'] = [context.pop('company')]
                     check(model.with_context(context), field, field_cache)
             else:
-                check(model, field, field_dump)
+                check(model, field, field_cache)
 
         if invalids:
-            raise UserError('Invalid cache for fields\n' + pformat(invalids))
+            _logger.warning("Invalid cache: %s", pformat(invalids))
 
 
 # keep those imports here in order to handle cyclic dependencies correctly
