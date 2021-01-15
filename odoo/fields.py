@@ -937,7 +937,7 @@ class Field(MetaField('DummyField', (object,), {})):
         records = cache.get_records_different_from(records, self, cache_value)
         if not records:
             return records
-        cache.update(records, self, [cache_value] * len(records))
+        cache.update(records, self, itertools.repeat(cache_value))
 
         # update towrite
         if self.store:
@@ -1518,7 +1518,7 @@ class _String(Field):
         records = cache.get_records_different_from(records, self, cache_value)
         if not records:
             return records
-        cache.update(records, self, [cache_value] * len(records))
+        cache.update(records, self, itertools.repeat(cache_value))
 
         if not self.store:
             return records
@@ -1557,7 +1557,7 @@ class _String(Field):
             if self.translate:
                 # invalidate the field in the other languages
                 cache.invalidate([(self, records.ids)])
-                cache.update(records, self, [cache_value] * len(records))
+                cache.update(records, self, itertools.repeat(cache_value))
 
         if update_trans:
             if callable(self.translate):
@@ -2121,7 +2121,7 @@ class Binary(Field):
             # determine records that are known to be not null
             not_null = cache.get_records_different_from(records, self, None)
 
-        cache.update(records, self, [cache_value] * len(records))
+        cache.update(records, self, itertools.repeat(cache_value))
 
         # retrieve the attachments that store the values, and adapt them
         if self.store and any(records._ids):
@@ -2185,7 +2185,7 @@ class Image(Binary):
             new_value = self._image_process(value)
             new_record_values.append((record, new_value))
             cache_value = self.convert_to_cache(value if self.related else new_value, record)
-            record.env.cache.update(record, self, [cache_value] * len(record))
+            record.env.cache.update(record, self, itertools.repeat(cache_value))
         super(Image, self).create(new_record_values)
 
     def write(self, records, value):
@@ -2203,7 +2203,7 @@ class Image(Binary):
 
         super(Image, self).write(records, new_value)
         cache_value = self.convert_to_cache(value if self.related else new_value, records)
-        records.env.cache.update(records, self, [cache_value] * len(records))
+        records.env.cache.update(records, self, itertools.repeat(cache_value))
 
     def _image_process(self, value):
         return image_process(value,
@@ -2737,7 +2737,7 @@ class Many2one(_Relational):
         self._remove_inverses(records, cache_value)
 
         # update the cache of self
-        cache.update(records, self, [cache_value] * len(records))
+        cache.update(records, self, itertools.repeat(cache_value))
 
         # update towrite
         if self.store:
@@ -3390,7 +3390,7 @@ class One2many(_RelationalMulti):
                         link(recs[-1], comodel.browse(command[1]))
                     elif command[0] in (Command.CLEAR, Command.SET):
                         # assign the given lines to the last record only
-                        cache.update(recs, self, [()] * len(recs))
+                        cache.update(recs, self, itertools.repeat(()))
                         lines = comodel.browse(command[2] if command[0] == Command.SET else [])
                         cache.set(recs[-1], self, lines._ids)
 
@@ -3468,7 +3468,7 @@ class One2many(_RelationalMulti):
                         link(recs[-1], browse([command[1]]))
                     elif command[0] in (Command.CLEAR, Command.SET):
                         # assign the given lines to the last record only
-                        cache.update(recs, self, [()] * len(recs))
+                        cache.update(recs, self, itertools.repeat(()))
                         lines = comodel.browse(command[2] if command[0] == Command.SET else [])
                         cache.set(recs[-1], self, lines._ids)
 
