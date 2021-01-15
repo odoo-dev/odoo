@@ -676,6 +676,8 @@ var FieldDateRange = InputField.extend({
                 locale: {
                     format: this.isDateField ? time.getLangDateFormat() : time.getLangDatetimeFormat(),
                 },
+                startDate: this.nodeOptions.related_start_date,
+                endDate: this.nodeOptions.related_end_date,
             }
         );
         this.relatedEndDate = this.nodeOptions.related_end_date;
@@ -750,12 +752,28 @@ var FieldDateRange = InputField.extend({
         var startDate;
         var endDate;
         if (this.relatedEndDate) {
-            startDate = this._formatValue(this.value);
-            endDate = this._formatValue(this.recordData[this.relatedEndDate]);
+            if (this.dateRangePickerOptions.default_start) {
+                startDate = this._formatValue(this.recordData[this.dateRangePickerOptions.default_start]);
+            } else {
+                startDate = this._formatValue(this.value);
+            }
+            if (this.dateRangePickerOptions.default_end) {
+                endDate = this._formatValue(this.recordData[this.dateRangePickerOptions.default_end]);
+            } else {
+                endDate = this._formatValue(this.recordData[this.relatedEndDate]);
+            }
         }
         if (this.relatedStartDate) {
-            startDate = this._formatValue(this.recordData[this.relatedStartDate]);
-            endDate = this._formatValue(this.value);
+            if (this.dateRangePickerOptions.default_start) {
+                startDate = this._formatValue(this.recordData[this.dateRangePickerOptions.default_start]);
+            } else {
+                startDate = this._formatValue(this.recordData[this.relatedStartDate]);
+            }
+            if (this.dateRangePickerOptions.default_end) {
+                endDate = this._formatValue(this.recordData[this.dateRangePickerOptions.default_end]);
+            } else {
+                endDate = this._formatValue(this.value);
+            }
         }
         this.dateRangePickerOptions.startDate = startDate || moment();
         this.dateRangePickerOptions.endDate = endDate || moment();
