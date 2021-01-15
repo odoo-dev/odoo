@@ -1,0 +1,11 @@
+<template>
+    <t t-extend="KanbanView.ColumnProgressBar">
+        <t t-jquery="div.o_kanban_counter_side" t-operation="after">
+            <t t-if="widget.hasRecurringRevenueGroup">
+                <strong class="ml-3"> + </strong>
+                <div class="o_kanban_counter_side o_crm_kanban_counter_side"><strong t-esc="widget.totalRecurringRevenue || 0"/></div>
+                <strong class="ml-1"> MRR </strong>
+            </t>
+        </t>
+    </t>
+</template>

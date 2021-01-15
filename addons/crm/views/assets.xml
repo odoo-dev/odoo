@@ -19,6 +19,7 @@
     </template>
     <template id="qunit_suite" name="crm tests" inherit_id="web.qunit_suite_tests">
         <xpath expr="." position="inside">
+            <script type="text/javascript" src="/crm/static/tests/crm_kanban_progress_bar_mrr_sum_field_tests.js"></script>
             <script type="text/javascript" src="/crm/static/tests/mock_server.js"></script>
             <script type="text/javascript" src="/crm/static/tests/crm_rainbowman_tests.js"></script>
         </xpath>

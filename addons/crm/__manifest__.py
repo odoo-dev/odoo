@@ -60,6 +60,9 @@
         'report/crm_opportunity_report_views.xml',
         'views/crm_team_views.xml',
     ],
+    'qweb': [
+        "static/src/xml/kanban.xml",
+    ],
     'demo': [
         'data/crm_team_demo.xml',
         'data/mail_template_demo.xml',

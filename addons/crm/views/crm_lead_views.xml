@@ -508,7 +508,8 @@
                     <field name="company_currency"/>
                     <field name="activity_state" />
                     <field name="activity_ids" />
-                    <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}' sum_field="expected_revenue" help="This bar allows to filter the opportunities based on scheduled activities."/>
+                    <field name="recurring_revenue_monthly"/>
+                    <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}' sum_field="expected_revenue" recurring_revenue_sum_field="recurring_revenue_monthly" help="This bar allows to filter the opportunities based on scheduled activities."/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''} oe_kanban_global_click">

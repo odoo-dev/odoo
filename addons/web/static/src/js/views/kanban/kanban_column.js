@@ -67,6 +67,7 @@ var KanbanColumn = Widget.extend({
         this.loadMoreCount = data.loadMoreCount;
         this.loadMoreOffset = data.loadMoreOffset;
         this.canBeFolded = this.folded;
+        this.progressBar = KanbanColumnProgressBar;
 
         if (options.hasProgressBar) {
             this.barOptions = {
@@ -152,7 +153,7 @@ var KanbanColumn = Widget.extend({
         });
         if (this.barOptions) {
             this.$el.addClass('o_kanban_has_progressbar');
-            this.progressBar = new KanbanColumnProgressBar(this, this.barOptions, this.data);
+            this.progressBar = new this.progressBar(this, this.barOptions, this.data);
             defs.push(this.progressBar.appendTo(this.$header));
         }
 
