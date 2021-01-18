@@ -4,6 +4,7 @@
         <field name="name">Meeting Room</field>
         <field name="res_model">event.meeting.room</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'default_room_max_capacity': '8'}</field>
     </record>
     <record id="event_meeting_room_view_search" model="ir.ui.view">
         <field name="name">event.meeting.room.search</field>

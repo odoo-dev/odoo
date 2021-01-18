@@ -81,11 +81,12 @@
         </div>
         <!-- ROOM DESCRIPTION -->
         <div class="mx-3">
-            <span class="h5 d-inline-block mt-3 mb-1" t-esc="meeting_room.name"/>
-            <br/>
-            <span class="text-muted">A chat among <span class="font-weight-bold" t-esc="meeting_room.target_audience"/></span>
+            <div class="h5 my-3" t-esc="meeting_room.name"/>
+            <div t-if="meeting_room.room_participant_count > 0" class="text-muted mb-3">
+                A chat among <t t-esc="meeting_room.room_participant_count"/> <span class="font-weight-bold" t-esc="meeting_room.target_audience"/>
+            </div>
         </div>
-        <hr class="mt-2 mb-0"/>
+        <hr class="my-0"/>
         <div t-field="meeting_room.summary" class="my-2 mx-3 oe_no_empty"/>
      </div>
 </template>

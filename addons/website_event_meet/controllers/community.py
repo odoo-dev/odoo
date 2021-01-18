@@ -138,7 +138,7 @@ class WebsiteEventMeetController(EventCommunityController):
         # search for meeting room list
         meeting_rooms_other = request.env['event.meeting.room'].sudo().search([
             ('event_id', '=', event.id), ('id', '!=', meeting_room.id), ('is_published', '=', True),
-        ])
+        ], limit=6)
 
         if not request.env.user.has_group("event.group_event_manager"):
             # only the event manager can see meeting rooms which are full
