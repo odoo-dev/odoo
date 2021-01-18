@@ -24,6 +24,7 @@ var view_dialogs = require('web.view_dialogs');
 var field_utils = require('web.field_utils');
 var time = require('web.time');
 const {ColorpickerDialog} = require('web.Colorpicker');
+var ajax = require('web.ajax');
 
 let FieldBoolean = deprecatedFields.FieldBoolean;
 
@@ -3052,6 +3053,7 @@ var JournalDashboardGraph = AbstractField.extend({
     init: function () {
         this._super.apply(this, arguments);
         this.graph_type = this.attrs.graph_type;
+        this.graph_data = this.attrs.graph_data;
         this.data = JSON.parse(this.value);
     },
     /**
@@ -3084,9 +3086,9 @@ var JournalDashboardGraph = AbstractField.extend({
      * @override
      * @private
      */
-    _render: function () {
+    _render: async function () {
         if (this._isInDOM) {
-            return this._renderInDOM();
+            return await this._renderInDOM();
         }
         return Promise.resolve();
     },
@@ -3095,37 +3097,58 @@ var JournalDashboardGraph = AbstractField.extend({
      *
      * @private
      */
-    _renderInDOM: function () {
-        this.$el.empty();
+    _renderInDOM: async function () {
         var config, cssClass;
         if (this.graph_type === 'line') {
-            config = this._getLineChartConfig();
             cssClass = 'o_graph_linechart';
         } else if (this.graph_type === 'bar') {
-            config = this._getBarChartConfig();
             cssClass = 'o_graph_barchart';
         }
-        this.$canvas = $('<canvas/>');
+
+        this.$el.empty();
         this.$el.addClass(cssClass);
         this.$el.empty();
+        this.$canvas = $('<canvas/>');
         this.$el.append(this.$canvas);
+
+        if (this.data) {
+            this.graph_data = this.data[0];
+        } else {
+            this.graph_data = await this._rpc({
+                model: this.record.model,
+                method: this.graph_data,
+                args: [this.record.data.id],
+                context: self.context,
+            }, {
+                shadow: true,
+            }).then(function(result) {
+                return JSON.parse(result)[0];
+            });
+        }
+
+        if (this.graph_type === 'line') {
+            config = this._getLineChartConfig();
+        } else if (this.graph_type === 'bar') {
+            config = this._getBarChartConfig();
+        }
+
         var context = this.$canvas[0].getContext('2d');
         this.chart = new Chart(context, config);
     },
     _getLineChartConfig: function () {
-        var labels = this.data[0].values.map(function (pt) {
+        var labels = this.graph_data.values.map(function (pt) {
             return pt.x;
         });
-        var borderColor = this.data[0].is_sample_data ? '#dddddd' : '#875a7b';
-        var backgroundColor = this.data[0].is_sample_data ? '#ebebeb' : '#dcd0d9';
+        var borderColor = this.graph_data.is_sample_data ? '#dddddd' : '#875a7b';
+        var backgroundColor = this.graph_data.is_sample_data ? '#ebebeb' : '#dcd0d9';
         return {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    data: this.data[0].values,
+                    data: this.graph_data.values,
                     fill: 'start',
-                    label: this.data[0].key,
+                    label: this.graph_data.key,
                     backgroundColor: backgroundColor,
                     borderColor: borderColor,
                     borderWidth: 2,
@@ -3156,7 +3179,7 @@ var JournalDashboardGraph = AbstractField.extend({
         var labels = [];
         var backgroundColor = [];
 
-        this.data[0].values.forEach(function (pt) {
+        this.graph_data.values.forEach(function (pt) {
             data.push(pt.value);
             labels.push(pt.label);
             var color = pt.type === 'past' ? '#ccbdc8' : (pt.type === 'future' ? '#a5d8d7' : '#ebebeb');
@@ -3169,7 +3192,7 @@ var JournalDashboardGraph = AbstractField.extend({
                 datasets: [{
                     data: data,
                     fill: 'start',
-                    label: this.data[0].key,
+                    label: this.graph_data.key,
                     backgroundColor: backgroundColor,
                 }]
             },

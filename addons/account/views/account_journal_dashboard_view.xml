@@ -345,7 +345,7 @@
                         </div>
                     </t>
                     <t t-name="JournalBodyGraph">
-                        <field name="kanban_dashboard_graph" t-att-graph_type="_.contains(['cash','bank'],journal_type) ? 'line' : 'bar'" widget="dashboard_graph"/>
+                        <field name="kanban_dashboard_graph" t-att-graph_type="_.contains(['cash','bank'],journal_type) ? 'line' : 'bar'" widget="dashboard_graph" graph_data="get_kanban_dashboard_graph"/>
                     </t>
             </templates>
             </kanban>
@@ -358,7 +358,7 @@
         <field name="view_mode">kanban,form</field>
         <field name="view_id" ref="account_journal_dashboard_kanban_view"/>
         <field name="usage">menu</field>
-        <field name="context">{'search_default_dashboard':1}</field>
+        <field name="context">{'search_default_dashboard':1, 'lazy_graph': 1}</field>
         <field name="domain">[]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_neutral_face">

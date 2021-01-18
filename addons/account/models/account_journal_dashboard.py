@@ -19,14 +19,26 @@ class account_journal(models.Model):
         for journal in self:
             journal.kanban_dashboard = json.dumps(journal.get_journal_dashboard_datas())
 
+    @api.model
+    def get_kanban_dashboard_graph(self, journal_id):
+        import time
+        import random
+        print("sleeping")
+        time.sleep(random.randrange(3, 10))
+        journal = self.browse(journal_id)
+        if (journal.type in ['sale', 'purchase']):
+            return json.dumps(journal.get_bar_graph_datas())
+        elif (journal.type in ['cash', 'bank']):
+            return json.dumps(journal.get_line_graph_datas())
+        else:
+            return False
+
     def _kanban_dashboard_graph(self):
         for journal in self:
-            if (journal.type in ['sale', 'purchase']):
-                journal.kanban_dashboard_graph = json.dumps(journal.get_bar_graph_datas())
-            elif (journal.type in ['cash', 'bank']):
-                journal.kanban_dashboard_graph = json.dumps(journal.get_line_graph_datas())
-            else:
+            if self.env.context.get('lazy_graph'):
                 journal.kanban_dashboard_graph = False
+            else:
+                journal.kanban_dashboard_graph = self.get_kanban_dashboard_graph(journal.id)
 
     def _get_json_activity_data(self):
         for journal in self:
