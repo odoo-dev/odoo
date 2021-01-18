@@ -65,6 +65,7 @@ class HolidaysAllocation(models.Model):
     employee_id = fields.Many2one(
         'hr.employee', compute='_compute_from_holiday_type', store=True, string='Employee', index=True, readonly=False, ondelete="restrict", tracking=True,
         states={'cancel': [('readonly', True)], 'refuse': [('readonly', True)], 'validate1': [('readonly', True)], 'validate': [('readonly', True)]})
+    active = fields.Boolean(related='employee_id.active', readonly=True)
     manager_id = fields.Many2one('hr.employee', compute='_compute_from_employee_id', store=True, string='Manager')
     notes = fields.Text('Reasons', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     # duration

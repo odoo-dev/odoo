@@ -29,6 +29,7 @@ class HrEmployeeBase(models.AbstractModel):
             ('cancel', 'Cancelled')
         ])
     current_leave_id = fields.Many2one('hr.leave.type', compute='_compute_leave_status', string="Current Time Off Type")
+    leave_ids = fields.One2many('hr.leave', 'employee_id', string="Leaves")
     leave_date_from = fields.Date('From Date', compute='_compute_leave_status')
     leave_date_to = fields.Date('To Date', compute='_compute_leave_status')
     leaves_count = fields.Float('Number of Time Off', compute='_compute_remaining_leaves')
@@ -203,4 +204,11 @@ class HrEmployeeBase(models.AbstractModel):
             holidays.write(hr_vals)
             allocations = self.env['hr.leave.allocation'].sudo().search([('state', 'in', ['draft', 'confirm']), ('employee_id', 'in', self.ids)])
             allocations.write(hr_vals)
+        return res
+
+    def toggle_active(self):
+        res = super(HrEmployeeBase, self).toggle_active()
+        active_employees = self.filtered('active')
+        active_employees.leave_ids.active = True
+        (self - active_employees).leave_ids.active = False
         return res
