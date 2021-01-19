@@ -548,6 +548,26 @@
         </div>
     </div>
 
+    <!-- Link Edition : Popover -->
+    <div t-name="wysiwyg.widgets.link.edit.tooltip">
+        <div class="d-flex">
+            <span class="mr-2 o_we_preview_favicon"><i class="fa fa-globe"/><img class="d-none"/></span>
+            <a href="#" target="_blank" class="o_we_url_link flex-grow-1" t-esc="widget.href"/>
+            <a href="#" class="mx-2 o_we_copy_link" data-toggle="tooltip" data-placement="top" title="Copy Link">
+                <i class="fa fa-clone"/>
+            </a>
+            <a href="#" class="mx-2 o_we_edit_link" data-toggle="tooltip" data-placement="top" title="Edit Link">
+                <i class="fa fa-edit"/>
+            </a>
+            <a href="#" class="ml-2 o_we_break_link" data-toggle="tooltip" data-placement="top" title="Break Link">
+                <i class="fa fa-chain-broken"/>
+            </a>
+        </div>
+        <p class="my-1 text-muted d-none o_we_preview_description"/>
+        <img class="img img-fluid d-none o_we_preview_image" src=""/>
+        <a href="#" target="_blank" class="o_we_full_url mt-1 d-none" t-esc="widget.href"/>
+    </div>
+
     <!-- ImageCropWidget controls (allows to crop images on the page) -->
     <div t-name="wysiwyg.widgets.crop" class="o_we_crop_widget" contenteditable="false">
         <div class="o_we_cropper_wrapper">

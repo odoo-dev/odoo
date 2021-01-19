@@ -19,6 +19,7 @@
 
 <template id="assets_tests" name="Website Assets Tests" inherit_id="web.assets_tests">
     <xpath expr="." position="inside">
+        <script type="text/javascript" src="/website/static/tests/tours/edit_link_popover.js"/>
         <script type="text/javascript" src="/website/static/tests/tours/reset_password.js"></script>
         <script type="text/javascript" src="/website/static/tests/tours/rte.js"/>
         <script type="text/javascript" src="/website/static/tests/tours/html_editor.js"/>
@@ -146,6 +147,7 @@
     <script type="text/javascript" src="/website/static/src/js/editor/widget_link.js"/>
 
     <script type="text/javascript" src="/website/static/src/js/widgets/media.js"/>
+    <script type="text/javascript" src="/website/static/src/js/widgets/link_popover_widget.js"/>
 </template>
 
 <template id="website.assets_editor" name="Website Editor Assets (used in website editor)">
