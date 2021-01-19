@@ -4,7 +4,6 @@
     <!--=================-->
     <!-- Edition Iframe -->
     <!--=================-->
-
     <t t-name="wysiwyg.iframeContent"><head>
             <meta charset="utf-8"/>
             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
@@ -43,22 +42,11 @@
             </script>
         </head>
         <body id="iframe_target" class="o_in_iframe">
-            <div id="web_editor-top-edit"></div>
-            <div id="wrapwrap">
-                <main>
-                    <div data-oe-model="model" data-oe-type="html" class="o_editable oe_structure"></div>
-                </main>
-            </div>
             <script type="text/javascript">
                 odoo.define('web_editor.wysiwyg.iniframe', function (require) {
                     'use strict';
-                    var editor = require('web_editor.editor');
-
-                    window._summernoteSlave = $.summernote;
-                    window._summernoteSlave.iframe = true;
-                    window._summernoteSlave.lang = window.top.$.summernote.lang;
                     if (window.top.<t t-esc="updateIframeId"/>) {
-                        window.top.<t t-esc="updateIframeId"/>(editor.Class, <t t-esc="avoidDoubleLoad"/>);
+                        window.top.<t t-esc="updateIframeId"/>(<t t-esc="avoidDoubleLoad"/>);
                     }
                 });
             </script>

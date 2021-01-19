@@ -5,7 +5,7 @@ var ajax = require('web.ajax');
 var basic_fields = require('web.basic_fields');
 var config = require('web.config');
 var core = require('web.core');
-var Wysiwyg = require('web_editor.wysiwyg.root');
+var wysiwygLoader = require('web_editor.loader');
 var field_registry = require('web.field_registry');
 // must wait for web/ to add the default html widget, otherwise it would override the web_editor one
 require('web._field_registry');
@@ -46,26 +46,17 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
     /**
      * @override
      */
-    willStart: function () {
-        var self = this;
+    willStart: async function () {
         this.isRendered = false;
         this._onUpdateIframeId = 'onLoad_' + _.uniqueId('FieldHtml');
-        var defAsset;
+        await this._super();
         if (this.nodeOptions.cssReadonly) {
-            defAsset = ajax.loadAsset(this.nodeOptions.cssReadonly);
+            this.cssReadonly = await ajax.loadAsset(this.nodeOptions.cssReadonly);
         }
-
-        if (!assetsLoaded) { // avoid flickering when begin to edit
-            assetsLoaded = new Promise(function (resolve) {
-                var wysiwyg = new Wysiwyg(self, {});
-                wysiwyg.attachTo($('<textarea>')).then(function () {
-                    wysiwyg.destroy();
-                    resolve();
-                });
-            });
+        if (this.nodeOptions.cssEdit || this.nodeOptions['style-inline']) {
+            this.needShadow = true;
+            this.cssEdit = await ajax.loadAsset(this.nodeOptions.cssEdit || 'web_editor.assets_edit_html_field');
         }
-
-        return Promise.all([this._super(), assetsLoaded, defAsset]);
     },
     /**
      * @override
@@ -100,10 +91,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      */
     commitChanges: function () {
         var self = this;
-        if (config.isDebug() && this.mode === 'edit') {
-            var layoutInfo = $.summernote.core.dom.makeLayoutInfo(this.wysiwyg.$editor);
-            $.summernote.pluginEvents.codeview(undefined, undefined, layoutInfo, false);
-        }
         if (this.mode == "readonly" || !this.isRendered) {
             return this._super();
         }
@@ -141,7 +128,9 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
         value = this._textToHtml(value);
         if (!event || event.target !== this) {
-            if (this.mode === 'edit') {
+            if (this.cssReadonly) {
+                return Promise.resolve();
+            } else if (this.mode === 'edit') {
                 this.wysiwyg.setValue(value);
             } else {
                 this.$content.html(value);
@@ -171,17 +160,14 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @private
      * @returns {$.Promise}
      */
-    _createWysiwygIntance: function () {
-        var self = this;
-        this.wysiwyg = new Wysiwyg(this, this._getWysiwygOptions());
+    _createWysiwygIntance: async function () {
+        if (this.cssReadonly) return;
+        this.wysiwyg = await wysiwygLoader.createWysiwyg(this, this._getWysiwygOptions());
         this.wysiwyg.__extraAssetsForIframe = this.__extraAssetsForIframe || [];
-
-        // by default this is synchronous because the assets are already loaded in willStart
-        // but it can be async in the case of options such as iframe, snippets...
-        return this.wysiwyg.attachTo(this.$target).then(function () {
-            self.$content = self.wysiwyg.$editor.closest('body, odoo-wysiwyg-container');
-            self._onLoadWysiwyg();
-            self.isRendered = true;
+        return this.wysiwyg.attachTo(this.$target).then(() => {
+            this.$content = this.wysiwyg.$editor.closest('body, odoo-wysiwyg-container');
+            this._onLoadWysiwyg();
+            this.isRendered = true;
         });
     },
     /**
@@ -191,7 +177,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @returns {Object}
      */
     _getWysiwygOptions: function () {
-        var self = this;
         return Object.assign({}, this.nodeOptions, {
             recordInfo: {
                 context: this.record.getContext(this.recordParams),
@@ -202,36 +187,10 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             inIframe: !!this.nodeOptions.cssEdit,
             iframeCssAssets: this.nodeOptions.cssEdit,
             snippets: this.nodeOptions.snippets,
+            value: this.value,
 
             tabsize: 0,
             height: 180,
-            generateOptions: function (options) {
-                var toolbar = options.toolbar || options.airPopover || {};
-                var para = _.find(toolbar, function (item) {
-                    return item[0] === 'para';
-                });
-                if (para && para[1] && para[1].indexOf('checklist') === -1) {
-                    para[1].splice(2, 0, 'checklist');
-                }
-                if (config.isDebug()) {
-                    options.codeview = true;
-                    var view = _.find(toolbar, function (item) {
-                        return item[0] === 'view';
-                    });
-                    if (view) {
-                        if (!view[1].includes('codeview')) {
-                            view[1].splice(-1, 0, 'codeview');
-                        }
-                    } else {
-                        toolbar.splice(-1, 0, ['view', ['codeview']]);
-                    }
-                }
-                if (self.field.sanitize && self.field.sanitize_tags) {
-                    options.noVideos = true;
-                }
-                options.prettifyHtml = false;
-                return options;
-            },
         });
     },
     /**

@@ -6,7 +6,7 @@ const core = require('web.core');
 const session = require('web.session');
 const {ColorpickerWidget} = require('web.Colorpicker');
 const Widget = require('web.Widget');
-const summernoteCustomColors = require('web_editor.rte.summernote_custom_colors');
+const customColors = require('web_editor.custom_colors');
 const weUtils = require('web_editor.utils');
 
 const qweb = core.qweb;
@@ -38,7 +38,7 @@ const ColorPaletteWidget = Widget.extend({
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        this.summernoteCustomColorsArray = [].concat(...summernoteCustomColors);
+        this.summernoteCustomColorsArray = [].concat(...customColors);
         this.style = window.getComputedStyle(document.documentElement);
         this.options = _.extend({
             selectedColor: false,
@@ -89,7 +89,7 @@ const ColorPaletteWidget = Widget.extend({
         // Render common colors
         if (!this.options.excluded.includes('common')) {
             const $commonColorSection = this.$('[data-name="common"]');
-            summernoteCustomColors.forEach((colorRow, i) => {
+            customColors.forEach((colorRow, i) => {
                 if (i === 0) {
                     return; // Ignore the summernote gray palette and use ours
                 }
