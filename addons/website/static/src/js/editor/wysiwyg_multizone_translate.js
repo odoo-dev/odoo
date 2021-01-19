@@ -4,9 +4,10 @@ odoo.define('web_editor.wysiwyg.multizone.translate', function (require) {
 var core = require('web.core');
 var webDialog = require('web.Dialog');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
-var rte = require('web_editor.rte');
 var Dialog = require('wysiwyg.widgets.Dialog');
 var websiteNavbarData = require('website.navbar');
+
+return;
 
 var _t = core._t;
 
@@ -33,40 +34,6 @@ var RTETranslatorWidget = rte.Class.extend({
         }
         return this._super($el, context, withLang === undefined ? true : withLang);
     },
-});
-
-var AttributeTranslateDialog = Dialog.extend({
-    /**
-     * @constructor
-     */
-    init: function (parent, options, node) {
-        this._super(parent, _.extend({
-            title: _t("Translate Attribute"),
-            buttons: [
-                {text:  _t("Close"), classes: 'btn-primary', click: this.save}
-            ],
-        }, options || {}));
-        this.translation = $(node).data('translation');
-    },
-    /**
-     * @override
-     */
-    start: function () {
-        var $group = $('<div/>', {class: 'form-group'}).appendTo(this.$el);
-        _.each(this.translation, function (node, attr) {
-            var $node = $(node);
-            var $label = $('<label class="col-form-label"></label>').text(attr);
-            var $input = $('<input class="form-control"/>').val($node.html());
-            $input.on('change keyup', function () {
-                var value = $input.val();
-                $node.html(value).trigger('change', node);
-                $node.data('$node').attr($node.data('attribute'), value).trigger('translate');
-                $node.trigger('change');
-            });
-            $group.append($label).append($input);
-        });
-        return this._super.apply(this, arguments);
-    }
 });
 
 var WysiwygTranslate = WysiwygMultizone.extend({

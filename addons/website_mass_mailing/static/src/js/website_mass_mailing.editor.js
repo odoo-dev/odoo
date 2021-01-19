@@ -171,6 +171,9 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     },
 });
 
+return;
+
+
 WysiwygMultizone.include({
 
     //--------------------------------------------------------------------------

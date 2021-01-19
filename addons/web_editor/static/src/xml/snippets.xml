@@ -83,4 +83,87 @@
         </div>
     </t>
 
+    <t t-name="web_editor.many2one.button">
+        <div class="btn-group">
+            <a role="button" href="#" class="btn btn-secondary dropdown-toggle d-none" data-toggle="dropdown" data-hover="dropdown" title="Search Contact" aria-label="Search Contact">
+                <i class="fa fa-search"></i>
+            </a>
+            <ul class="dropdown-menu contact_menu d-block list-group list-group-flush mx-1" role="menu">
+                <li class="px-1"><a role="menuitem" class="dropdown-item pl-1 pr-2"><i class="fa fa-search"></i><input href="#" type="email" placeholder="Search" class="ml-2" autocomplete="off"/></a></li>
+            </ul>
+        </div>
+    </t>
+
+    <t t-name="web_editor.many2one.search">
+        <t t-foreach="contacts" t-as="item">
+            <li class="list-group-item px-2"><a role="menuitem" href="#" t-att-data-id="item.id" t-att-data-name="item.display_name"><t t-esc="item.display_name"/> <t t-if="item.city or item.country_id"><small class="text-muted">(<t t-esc="item.city"/> <t t-esc="item.country_id and item.country_id[1]"/>)</small></t></a></li>
+        </t>
+    </t>
+
+    <t t-name="web_editor.toolbar">
+                <div id="toolbar" class="toolbar">
+                    <div class="button-group dropdown">
+                        <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
+                            data-toggle="dropdown" title="" tabindex="-1"
+                            data-original-title="Style" aria-expanded="false">
+                            <i class="fa fa-magic"></i> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="paragraph">Normal</a></li>
+                            <li><a class="dropdown-item" href="#" id="pre"><pre>Code</pre></a></li>
+                            <li><a class="dropdown-item" href="#" id="heading1"><h1>Header 1</h1></a></li>
+                            <li><a class="dropdown-item" href="#" id="heading2"><h2>Header 2</h2></a></li>
+                            <li><a class="dropdown-item" href="#" id="heading3"><h3>Header 3</h3></a></li>
+                            <li><a class="dropdown-item" href="#" id="heading4"><h4>Header 4</h4></a></li>
+                            <li><a class="dropdown-item" href="#" id="heading5"><h5>Header 5</h5></a></li>
+                            <li><a class="dropdown-item" href="#" id="heading6"><h6>Header 6</h6></a></li>
+                            <li><a class="dropdown-item" href="#" id="blockquote"><blockquote>Quote</blockquote></a></li>
+                        </ul>
+                    </div>
+                    <div class="button-group">
+                        <div id="bold" title="Toggle bold" class="fa fa-bold fa-fw btn"></div>
+                        <div id="italic" title="Toggle italic" class="fa fa-italic fa-fw btn active"></div>
+                        <div id="underline" title="Toggle underline" class="fa fa-underline fa-fw btn"></div>
+                        <div id="strikeThrough" title="Toggle strikethrough" class="fa fa-strikethrough fa-fw btn"></div>
+                        <div id="removeFormat" title="Remove format" class="fa fa-eraser fa-fw btn"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <div id="foreColor" class="btn">C</div>
+                        <div id="hiliteColor" class="fa fa-highlighter fa-fw btn"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <div id="fontawesome" title="Insert font Awesome icon" class="fa fa-star fa-fw btn"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <div id="unordered" title="Toggle unordered list" class="fa fa-list-ul fa-fw btn"></div>
+                        <div id="ordered" title="Toggle ordered list" class="fa fa-list-ol fa-fw btn"></div>
+                        <div id="checklist" title="Toggle checklist" class="fa fa-tasks fa-fw btn"></div>
+                    </div>
+
+                    <div class="button-group dropdown">
+                        <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
+                            data-toggle="dropdown" title="" tabindex="-1"
+                            data-original-title="Paragraph" aria-expanded="false">
+                            <i id="paragraphDropdownButton" class="fa fa-align-left fa-fw"></i> <span class="caret"></span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="btn-group">
+                                <div class="btn" href="#" id="justifyLeft"><i class="fa fa-align-left fa-fw btn"></i></div>
+                                <div class="btn" href="#" id="justifyCenter"><i class="fa fa-align-center fa-fw btn"></i></div>
+                                <div class="btn" href="#" id="justifyRight"><i class="fa fa-align-right fa-fw btn"></i></div>
+                                <div class="btn" href="#" id="justifyFull"><i class="fa fa-align-justify fa-fw btn"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <div id="createLink" title="Link" class="fa fa-link fa-fw btn"></div>
+                        <div id="unLink" title="Link" class="fa fa-unlink fa-fw btn"></div>
+                    </div>
+                </div>
+    </t>
+
 </templates>
