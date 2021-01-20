@@ -92,7 +92,7 @@ var SnippetEditor = Widget.extend({
         this.templateOptions = templateOptions;
         this.isTargetParentEditable = false;
         this.isTargetMovable = false;
-        this.$scrollingElement = $().getScrollingElement();
+        this.$scrollingElement = $().getScrollingElement(this.ownerDocument);
 
         this.__isStarted = new Promise(resolve => {
             this.__isStartedResolveFunc = resolve;
@@ -139,7 +139,7 @@ var SnippetEditor = Widget.extend({
                     },
                 },
             });
-            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, $().getScrollingElement(), smoothScrollOptions);
+            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, $().getScrollingElement(this.ownerDocument), smoothScrollOptions);
         } else {
             this.$('.o_overlay_move_options').addClass('d-none');
             $customize.find('.oe_snippet_clone').addClass('d-none');
@@ -1122,7 +1122,7 @@ var SnippetsMenu = Widget.extend({
 
         // Hide the active overlay when scrolling.
         // Show it again and recompute all the overlays after the scroll.
-        this.$scrollingElement = $().getScrollingElement();
+        this.$scrollingElement = $().getScrollingElement(this.ownerDocument);
         this._onScrollingElementScroll = _.throttle(() => {
             for (const editor of this.snippetEditors) {
                 editor.toggleOverlayVisibility(false);
@@ -1996,7 +1996,7 @@ var SnippetsMenu = Widget.extend({
         var $toInsert, dropped, $snippet;
 
         let dragAndDropResolve;
-        const $scrollingElement = $().getScrollingElement();
+        const $scrollingElement = $().getScrollingElement(this.ownerDocument);
 
         const smoothScrollOptions = this._getScrollOptions({
             jQueryDraggableOptions: {
