@@ -169,6 +169,12 @@ const Wysiwyg = Widget.extend({
             await this.saveToServer(reload);
         }
     },
+    /**
+     * Reset the history.
+     */
+    resetHistory: function () {
+        this.odooEditor.resetHistory();
+    },
 
     /**
      * Save the content to the server for the normal mode.
