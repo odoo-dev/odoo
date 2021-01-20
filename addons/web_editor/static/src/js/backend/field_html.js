@@ -90,16 +90,13 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @override
      */
     commitChanges: function () {
-        var self = this;
         if (this.mode == "readonly" || !this.isRendered) {
             return this._super();
         }
         var _super = this._super.bind(this);
-        return this.wysiwyg.saveModifiedImages(this.$content).then(function () {
-            return self.wysiwyg.save().then(function (result) {
-                self._isDirty = result.isDirty;
-                _super();
-            });
+        return this.wysiwyg.saveModifiedImages(this.$content).then(() => {
+            this._isDirty = this.wysiwyg.isDirty();
+            _super();
         });
     },
     /**
@@ -113,7 +110,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @override
      */
     getFocusableElement: function () {
-        return this.$target || $();
+        return this.$wysiwygWrapper || $();
     },
     /**
      * Do not re-render this field if it was the origin of the onchange call.
@@ -147,7 +144,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @override
      */
     _getValue: function () {
-        var value = this.$target.val();
+        var value = this.wysiwyg.getValue();
         if (this.nodeOptions.wrapper) {
             return this._unWrap(value);
         }
@@ -164,7 +161,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         if (this.cssReadonly) return;
         this.wysiwyg = await wysiwygLoader.createWysiwyg(this, this._getWysiwygOptions());
         this.wysiwyg.__extraAssetsForIframe = this.__extraAssetsForIframe || [];
-        return this.wysiwyg.attachTo(this.$target).then(() => {
+        return this.wysiwyg.attachTo(this.$wysiwygWrapper).then(() => {
             this.$content = this.wysiwyg.$editor.closest('body, odoo-wysiwyg-container');
             this._onLoadWysiwyg();
             this.isRendered = true;
@@ -225,8 +222,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         if (this.nodeOptions.wrapper) {
             value = this._wrap(value);
         }
-        this.$target = $('<textarea>').val(value).hide();
-        this.$target.appendTo(this.$el);
+        this.$wysiwygWrapper = $('<div class="note-editable">');
+        this.$el.append(this.$wysiwygWrapper);
 
         var fieldNameAttachment = _.chain(this.recordData)
             .pairs()

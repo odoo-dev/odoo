@@ -61,7 +61,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         var $editable = this.wysiwyg.getEditable();
 
         return this.wysiwyg.saveModifiedImages(this.$content).then(function () {
-            self.$target.html(self.wysiwyg.getValue());
+            self.$wysiwygWrapper.html(self.wysiwyg.getValue());
             self._isDirty = self.wysiwyg.isDirty();
 
             convertInline.attachmentThumbnailToLinkImg($editable);
@@ -154,7 +154,9 @@ var MassMailingFieldHtml = FieldHtml.extend({
         if (!this.value) {
             this.value = this.recordData[this.nodeOptions['inline-field']];
         }
-        return this._super.apply(this, arguments);
+        const prom = this._super.apply(this, arguments);
+        this.$wysiwygWrapper.hide();
+        return prom;
     },
     /**
      * @override

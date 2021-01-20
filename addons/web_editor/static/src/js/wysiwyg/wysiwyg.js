@@ -63,9 +63,9 @@ const Wysiwyg = Widget.extend({
 
         var options = this._editorOptions();
         this.$target = this.$el;
-        let value = options.value;
+        this._value = options.value;
         this.$editor = this.$target;
-        this.$editor.html(value);
+        this.$editor.html(this._value);
         this.$editor.data('wysiwyg', this);
         this.$editor.data('oe-model', options.recordInfo.res_model);
         this.$editor.data('oe-id', options.recordInfo.res_id);
@@ -74,8 +74,6 @@ const Wysiwyg = Widget.extend({
         this.toolbar = new Toolbar();
         await this.toolbar.appendTo(document.createElement('void'));
         this.odooEditor = new OdooEditor(this.$editor[0], { toolbar: this.toolbar.$el[0] });
-
-        this._value = this.$target.html() || this.$target.val();
 
         if (options.snippets) {
             $('body').addClass('editor_enable');
