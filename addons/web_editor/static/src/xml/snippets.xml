@@ -128,9 +128,9 @@
                         <div id="removeFormat" title="Remove format" class="fa fa-eraser fa-fw btn"></div>
                     </div>
 
-                    <div class="button-group">
-                        <div id="foreColor" class="btn">C</div>
-                        <div id="hiliteColor" class="fa fa-highlighter fa-fw btn"></div>
+                    <div class="button-group" id="colorInputButtonGroup">
+                        <label id="foreColor" htmlFor="foreColorInput"><input id="foreColorInput" type="color" name="foreColor" /><span class="color-indicator"></span> <span>C</span></label>
+                        <label id="hiliteColor" htmlFor="hiliteColorInput"><input id="hiliteColorInput" type="color" name="hiliteColor" /><span class="color-indicator"></span> <span class="fa fa-highlighter fa-fw"></span></label>
                     </div>
 
                     <div class="button-group">
@@ -155,6 +155,21 @@
                                 <div class="btn" href="#" id="justifyCenter"><i class="fa fa-align-center fa-fw btn"></i></div>
                                 <div class="btn" href="#" id="justifyRight"><i class="fa fa-align-right fa-fw btn"></i></div>
                                 <div class="btn" href="#" id="justifyFull"><i class="fa fa-align-justify fa-fw btn"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-group dropdown">
+                        <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
+                            data-toggle="dropdown" title="" tabindex="-1"
+                            data-original-title="Table" aria-expanded="false"
+                            id="tableDropdownButton">
+                            <i class="fa fa-table fa-fw"></i> <span class="caret"></span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="btn-group">
+                                <div class="tablepicker"></div>
+                                <div class="tablepicker-size">1x1</div>
                             </div>
                         </div>
                     </div>
