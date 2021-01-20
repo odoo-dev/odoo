@@ -853,20 +853,21 @@ class MrpProduction(models.Model):
     def _get_moves_finished_values(self):
         moves = []
         for production in self:
-            if production.product_id in production.bom_id.byproduct_ids.mapped('product_id'):
-                raise UserError(_("You cannot have %s  as the finished product and in the Byproducts", self.product_id.name))
+            if production.bom_id:
+                if production.product_id in production.bom_id.byproduct_ids.mapped('product_id'):
+                    raise UserError(_("You cannot have %s  as the finished product and in the Byproducts", self.product_id.name))
+                for byproduct in production.bom_id.byproduct_ids:
+                    product_uom_factor = production.product_uom_id._compute_quantity(production.product_qty, production.bom_id.product_uom_id)
+                    qty = byproduct.product_qty * (product_uom_factor / production.bom_id.product_qty)
+                    moves.append(production._get_move_finished_values(
+                        byproduct.product_id.id, qty, byproduct.product_uom_id.id,
+                        byproduct.operation_id.id, byproduct.id))
             moves.append(production._get_move_finished_values(production.product_id.id, production.product_qty, production.product_uom_id.id))
-            for byproduct in production.bom_id.byproduct_ids:
-                product_uom_factor = production.product_uom_id._compute_quantity(production.product_qty, production.bom_id.product_uom_id)
-                qty = byproduct.product_qty * (product_uom_factor / production.bom_id.product_qty)
-                moves.append(production._get_move_finished_values(
-                    byproduct.product_id.id, qty, byproduct.product_uom_id.id,
-                    byproduct.operation_id.id, byproduct.id))
         return moves
 
     def _get_moves_raw_values(self):
         moves = []
-        for production in self:
+        for production in self.filtered(lambda p: p.bom_id):
             factor = production.product_uom_id._compute_quantity(production.product_qty, production.bom_id.product_uom_id) / production.bom_id.product_qty
             boms, lines = production.bom_id.explode(production.product_id, factor, picking_type=production.bom_id.picking_type_id)
             for bom_line, line_data in lines:
