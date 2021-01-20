@@ -454,7 +454,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
             selectedTheme = themeParams;
 
             // Notify form view
-            $themeSelector.find('.dropdown-menu').removeClass('show');
             $themeSelector.find('.dropdown-item.selected').removeClass('selected');
             $themeSelector.find('.dropdown-item:eq(' + themesParams.indexOf(selectedTheme) + ')').addClass('selected');
         };
