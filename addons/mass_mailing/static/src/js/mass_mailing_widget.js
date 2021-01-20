@@ -402,7 +402,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
 
 
         let firstChoice = this._editableAreaIsEmpty();
-        // this.$content.closest('body').toggleClass("o_force_mail_theme_choice", firstChoice);
         if (firstChoice) {
             $themeSelectorNew.appendTo(this.wysiwyg.$iframeBody);
         }
@@ -476,22 +475,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
 
             selectTheme(e);
         });
-
-        /**
-         * If the user opens the theme selection screen, indicates which one is active and
-         * saves the information...
-         * ... then when the user closes check if the user confirmed its choice and restore
-         * previous state if this is not the case.
-         */
-        // $dropdown.on("shown.bs.dropdown", function () {
-        //     selectedTheme = self._getSelectedTheme(themesParams);
-        //     $dropdown.find(".dropdown-item").removeClass("selected").filter(function () {
-        //         return ($(this).has(".o_thumb[style=\"" + "background-image: url(" + (selectedTheme && selectedTheme.img) + "_small.png)" + "\"]").length > 0);
-        //     }).addClass("selected");
-        // });
-        // $dropdown.on("hidden.bs.dropdown", function () {
-        //     self._switchThemes(firstChoice, selectedTheme);
-        // });
 
         /**
          * On page load, check the selected theme and force switching to it (body needs the
