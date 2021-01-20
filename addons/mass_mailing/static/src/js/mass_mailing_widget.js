@@ -251,7 +251,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
 
         this.$content.closest('body').removeClass(this._allClasses).addClass(themeParams.className);
 
-        var $old_layout = this.$content.find('.o_layout');
+        const old_layout = this.$content.find('.o_layout')[0];
+        const $old_layout = $(old_layout);
 
         var $new_wrapper;
         var $newWrapperContent;
@@ -288,16 +289,16 @@ var MassMailingFieldHtml = FieldHtml.extend({
         var $contents;
         if (firstChoice) {
             $contents = themeParams.template;
-        } else if ($old_layout.length) {
-            $contents = ($old_layout.hasClass('oe_structure') ? $old_layout : $old_layout.find('.oe_structure').first()).contents();
+        } else if (old_layout) {
+            $contents = ($old_layout.hasClass('oe_structure') ? $old_layout : $old_layout.find('.oe_structure').first()).contents().clone();
         } else {
-            $contents = this.$content.find('.o_editable').contents();
+            $contents = this.$content.find('.o_editable').contents().clone();
         }
 
         $newWrapperContent.append($contents);
         this._switchImages(themeParams, $newWrapperContent);
+        old_layout && old_layout.remove();
         this.$content.find('.o_editable').empty().append($newLayout);
-        $old_layout.remove();
 
         if (firstChoice) {
             $newWrapperContent.find('*').addBack()
@@ -474,6 +475,11 @@ var MassMailingFieldHtml = FieldHtml.extend({
             }
 
             selectTheme(e);
+            // Wait the next tick because some mutation have to be processed by
+            // the Odoo editor before resetting the history.
+            setTimeout(() => {
+                this.wysiwyg.resetHistory();
+            }, 0);
         });
 
         /**
