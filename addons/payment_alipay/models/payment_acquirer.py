@@ -61,7 +61,6 @@ class PaymentAcquirer(models.Model):
         data_string += self.alipay_md5_signature_key
         return md5(data_string.encode('utf-8')).hexdigest()
 
-    @api.model
     def _alipay_get_api_url(self):
         if self.state == 'enabled':
             return 'https://mapi.alipay.com/gateway.do'

@@ -31,7 +31,6 @@ class PaymentTransaction(models.Model):
         :return: The dict of acquirer-specific processing values
         :rtype: dict
         """
-
         if self.acquirer_id.provider != 'adyen':
             return super()._get_specific_processing_values(processing_values)
 
@@ -65,12 +64,11 @@ class PaymentTransaction(models.Model):
         if not self.token_id:
             raise UserError("Adyen: " + _("The transaction is not linked to a token."))
 
-        acquirer = self.acquirer_id
         converted_amount = payment_utils.to_minor_currency_units(
             self.amount, self.currency_id, CURRENCY_DECIMALS.get(self.currency_id.name)
         )
         data = {
-            'merchantAccount': acquirer.adyen_merchant_account,
+            'merchantAccount': self.acquirer_id.adyen_merchant_account,
             'amount': {
                 'value': converted_amount,
                 'currency': self.currency_id.name,
@@ -84,8 +82,8 @@ class PaymentTransaction(models.Model):
             'recurringProcessingModel': 'Subscription',
             'shopperInteraction': 'ContAuth',
         }
-        response_content = acquirer._adyen_make_request(
-            base_url=acquirer.adyen_checkout_api_url,
+        response_content = self.acquirer_id._adyen_make_request(
+            base_url=self.acquirer_id.adyen_checkout_api_url,
             endpoint='/payments',
             payload=data,
             method='POST'

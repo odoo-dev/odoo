@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
     
-    <record id="payment_acquirer_odoo_by_adyen" model="payment.acquirer">
-        <field name="name">Odoo Payments by Adyen</field>
+    <record id="payment_acquirer_odoo" model="payment.acquirer">
+        <field name="name">Odoo Payments</field>
         <field name="display_as">Credit Card (powered by Odoo Payments)</field>
-        <field name="image_128" type="base64" file="payment_odoo_by_adyen/static/src/img/odoo_icon.png"/>
-        <field name="module_id" ref="base.module_payment_odoo_by_adyen"/>
+        <field name="image_128" type="base64" file="payment_odoo/static/src/img/odoo_icon.png"/>
+        <field name="module_id" ref="base.module_payment_odoo"/>
         <field name="sequence">1</field>
         <field name="description" type="html">
             <p>

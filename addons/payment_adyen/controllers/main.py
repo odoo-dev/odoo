@@ -53,7 +53,7 @@ class AdyenController(http.Controller):
         # Adyen only supports a reduced set of languages but, instead of looking for the closest
         # match in https://docs.adyen.com/checkout/components-web/localization-components, we simply
         # provide the lang string as is (after adapting the format) and let Adyen find the best fit.
-        lang_code = request.context.get('lang', 'en-US').replace('_', '-')
+        lang_code = (request.context.get('lang') or 'en-US').replace('_', '-')
         shopper_reference = partner_sudo and f'ODOO_PARTNER_{partner_sudo.id}'
         data = {
             'merchantAccount': acquirer_sudo.adyen_merchant_account,
