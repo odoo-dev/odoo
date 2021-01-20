@@ -141,6 +141,7 @@ Wysiwyg.include({
                     .open("text/html", "replace")
                     .write(iframeContent);
             });
+            self.options.document = self.$iframe[0].contentWindow.document;
         });
 
         this.$iframe.insertAfter(this.$target);

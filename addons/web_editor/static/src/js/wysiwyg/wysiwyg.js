@@ -73,7 +73,7 @@ const Wysiwyg = Widget.extend({
 
         this.toolbar = new Toolbar();
         await this.toolbar.appendTo(document.createElement('void'));
-        this.odooEditor = new OdooEditor(this.$editor[0], { toolbar: this.toolbar.$el[0] });
+        this.odooEditor = new OdooEditor(this.$editor[0], { toolbar: this.toolbar.$el[0], document: this.options.document });
 
         if (options.snippets) {
             $('body').addClass('editor_enable');
