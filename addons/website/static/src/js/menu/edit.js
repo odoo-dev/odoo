@@ -274,8 +274,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             this.$el.css({width: ''});
         });
 
-        this.map = new Map();
-
         const oeStructureSelector = '.oe_structure[data-oe-xpath][data-oe-id]';
         const oeFieldSelector = '[data-oe-field]';
         const savableSelector = `${oeStructureSelector}, ${oeFieldSelector}`;
@@ -311,17 +309,8 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 const c = $savable
                     .not('.o_dirty').addClass('o_dirty');
                 this.wysiwyg.odooEditor.observerActive();
-
-
-                if (c.length) {
-                    console.log("c:", c);
-                    this.map.set(c[0], this.map.get(c[0]) || []);
-                    this.map.get(c[0]).push(record);
-                }
             }
-            console.log("this.map:", this.map);
         });
-        window.map = this.map;
 
         this.observer.observe($('#wrapwrap')[0], {
             childList: true,
