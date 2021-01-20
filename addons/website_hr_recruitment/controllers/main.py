@@ -61,6 +61,19 @@ class WebsiteHrRecruitment(http.Controller):
         else:
             office_id = False
 
+        # pager
+        # url = '/jobs'
+        # if department:
+        #     url += '/department/%s' % department.id
+        # if country:
+        #     url += '/country/%s' % country.id
+        # if office_id:
+        #     url += '/office/%s' % office_id
+        # pager = request.website.pager(
+        #     url=url, total=partner_count, page=page, step=self._references_per_page,
+        #     scope=12, url_args=post
+        # )
+
         # Render page
         return request.render("website_hr_recruitment.index", {
             'jobs': jobs,
@@ -68,8 +81,14 @@ class WebsiteHrRecruitment(http.Controller):
             'departments': departments,
             'offices': offices,
             'country_id': country,
+            'current_country_id': country.name if country else 0,
+            'current_country': country or False,
             'department_id': department,
+            'current_department_id': department.name if department else 0,
+            'current_department': department or False,
             'office_id': office_id,
+            'current_office_id': office_id if office_id else 0,
+            'current_office': office_id or False,
         })
 
     @http.route('/jobs/add', type='http', auth="user", website=True)
