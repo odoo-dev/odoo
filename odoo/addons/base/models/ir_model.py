@@ -1329,11 +1329,14 @@ class IrModelSelection(models.Model):
                 if selection.value == vals['value']:
                     continue
                 if selection.field_id.store:
+                    # in order to keep the cache consistent, flush the
+                    # corresponding field, and invalidate it from cache
+                    model = self.env[selection.field_id.model]
+                    fname = selection.field_id.name
+                    model.flush([fname])
+                    model.invalidate_cache([fname])
                     # replace the value by the new one in the field's corresponding column
-                    query = 'UPDATE "{table}" SET "{field}"=%s WHERE "{field}"=%s'.format(
-                        table=self.env[selection.field_id.model]._table,
-                        field=selection.field_id.name,
-                    )
+                    query = f'UPDATE "{model._table}" SET "{fname}"=%s WHERE "{fname}"=%s'
                     self.env.cr.execute(query, [vals['value'], selection.value])
 
         result = super().write(vals)
@@ -1777,6 +1780,7 @@ class IrModelAccess(models.Model):
 
     @api.model
     def call_cache_clearing_methods(self):
+        self.flush()
         self.invalidate_cache()
         self.check.clear_cache(self)    # clear the cache of check function
         for model, method in self.__cache_clearing_methods:
