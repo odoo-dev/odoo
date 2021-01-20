@@ -82,7 +82,6 @@ const Wysiwyg = Widget.extend({
                 selectorEditableArea: '.o_editable',
             }, options));
             this._insertSnippetMenu();
-            console.log('inserted', this.snippetsMenu.$el);
         }
 
         return _super.apply(this, arguments);
