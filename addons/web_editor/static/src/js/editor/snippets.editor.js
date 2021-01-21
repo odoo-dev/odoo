@@ -1045,6 +1045,19 @@ var SnippetsMenu = Widget.extend({
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
 
+        if (this.options.enableTranslation) {
+            // Load the sidebar with the style tab only.
+            await this._loadSnippetsTemplates();
+            this.$el.find('.o_we_website_top_actions').removeClass('d-none');
+            this.$('.o_snippet_search_filter').addClass('d-none');
+            this.$('#o_scroll').addClass('d-none');
+            this.$('button[data-action="mobilePreview"]').addClass('d-none');
+            this.$('#snippets_menu button').removeClass('active').prop('disabled', true);
+            this.$('.o_we_customize_snippet_btn').addClass('active').prop('disabled', false);
+            this.$('o_we_ui_loading').addClass('d-none');
+            $(this.customizePanel).removeClass('d-none');
+            return Promise.all(defs).then(this._addToolbar.bind(this));
+        }
         this.invisibleDOMPanelEl = document.createElement('div');
         this.invisibleDOMPanelEl.classList.add('o_we_invisible_el_panel');
         this.invisibleDOMPanelEl.appendChild(
@@ -1205,7 +1218,9 @@ var SnippetsMenu = Widget.extend({
     destroy: function () {
         this._super.apply(this, arguments);
         if (this.$window) {
-            this.$snippetEditorArea.remove();
+            if (this.$snippetEditorArea) {
+                this.$snippetEditorArea.remove();
+            }
             this.$window.off('.snippets_menu');
             this.$document.off('.snippets_menu');
             this.$scrollingElement[0].removeEventListener('scroll', this._onScrollingElementScroll, {capture: true});
@@ -2181,7 +2196,6 @@ var SnippetsMenu = Widget.extend({
                 this.customizePanel.removeChild(this.customizePanel.firstChild);
             }
             $(this.customizePanel).append(content);
-
             if (tab === this.tabs.OPTIONS) {
                 this._addToolbar();
             }
