@@ -11,31 +11,6 @@ return;
 
 var _t = core._t;
 
-
-var RTETranslatorWidget = rte.Class.extend({
-    /**
-     * If the element holds a translation, saves it. Otherwise, fallback to the
-     * standard saving but with the lang kept.
-     *
-     * @override
-     */
-    _saveElement: function ($el, context, withLang) {
-        var self = this;
-        if ($el.data('oe-translation-id')) {
-            return this._rpc({
-                model: 'ir.translation',
-                method: 'save_html',
-                args: [
-                    [+$el.data('oe-translation-id')],
-                    this._getEscapedElement($el).html()
-                ],
-                context: context,
-            });
-        }
-        return this._super($el, context, withLang === undefined ? true : withLang);
-    },
-});
-
 var WysiwygTranslate = WysiwygMultizone.extend({
     custom_events: _.extend({}, WysiwygMultizone.prototype.custom_events || {}, {
         ready_to_save: '_onSave',
@@ -61,47 +36,6 @@ var WysiwygTranslate = WysiwygMultizone.extend({
         // Hacky way to keep the top editor toolbar in translate mode for now
         this.$webEditorTopEdit = $('<div id="web_editor-top-edit"></div>').prependTo(document.body);
         this.options.toolbarHandler = this.$webEditorTopEdit;
-        this.editor = new (this.Editor)(this, Object.assign({Editor: RTETranslatorWidget}, this.options));
-        this.$editor = this.editor.rte.editable();
-        var promise = this.editor.prependTo(this.$editor[0].ownerDocument.body);
-
-        return promise.then(function () {
-            self._relocateEditorBar();
-            var attrs = ['placeholder', 'title', 'alt'];
-            _.each(attrs, function (attr) {
-                self._getEditableArea().filter('[' + attr + '*="data-oe-translation-id="]').filter(':empty, input, select, textarea, img').each(function () {
-                    var $node = $(this);
-                    var translation = $node.data('translation') || {};
-                    var trans = $node.attr(attr);
-                    var match = trans.match(/<span [^>]*data-oe-translation-id="([0-9]+)"[^>]*>(.*)<\/span>/);
-                    var $trans = $(trans).addClass('d-none o_editable o_editable_translatable_attribute').appendTo('body');
-                    $trans.data('$node', $node).data('attribute', attr);
-
-                    translation[attr] = $trans[0];
-                    $node.attr(attr, match[2]);
-
-                    var select2 = $node.data('select2');
-                    if (select2) {
-                        select2.blur();
-                        $node.on('translate', function () {
-                            select2.blur();
-                        });
-                        $node = select2.container.find('input');
-                    }
-                    $node.addClass('o_translatable_attribute').data('translation', translation);
-                });
-            });
-
-            self.translations = [];
-            self.$editables_attr = self._getEditableArea().filter('.o_translatable_attribute');
-            self.$editables_attribute = $('.o_editable_translatable_attribute');
-
-            self.$editables_attribute.on('change', function () {
-                self.trigger_up('rte_change', {target: this});
-            });
-
-            self._markTranslatableNodes();
-        });
     },
     /**
      * @override
@@ -127,16 +61,6 @@ var WysiwygTranslate = WysiwygMultizone.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Return the editable area.
-     *
-     * @override
-     * @returns {JQuery}
-     */
-    _getEditableArea: function () {
-        var $editables = this._super();
-        return $editables.add(this.$editables_attribute);
-    },
     /**
      * Return an object describing the linked record.
      *
@@ -189,78 +113,6 @@ var WysiwygTranslate = WysiwygMultizone.extend({
         });
         var trans = this._getTranlationObject($node[0]);
         $node.toggleClass('o_dirty', trans.value !== $node.html().replace(/[ \t\n\r]+/, ' '));
-    },
-    /**
-     * Returns a translation object.
-     *
-     * @private
-     * @param {Node} node
-     * @returns {Object}
-     */
-    _getTranlationObject: function (node) {
-        var $node = $(node);
-        var id = +$node.data('oe-translation-id');
-        if (!id) {
-            id = $node.data('oe-model')+','+$node.data('oe-id')+','+$node.data('oe-field');
-        }
-        var trans = _.find(this.translations, function (trans) {
-            return trans.id === id;
-        });
-        if (!trans) {
-            this.translations.push(trans = {'id': id});
-        }
-        return trans;
-    },
-    /**
-     * @private
-     */
-    _markTranslatableNodes: function () {
-        var self = this;
-        this._getEditableArea().each(function () {
-            var $node = $(this);
-            var trans = self._getTranlationObject(this);
-            trans.value = (trans.value ? trans.value : $node.html() ).replace(/[ \t\n\r]+/, ' ');
-        });
-        this._getEditableArea().prependEvent('click.translator', function (ev) {
-            if (ev.ctrlKey || !$(ev.target).is(':o_editable')) {
-                return;
-            }
-            ev.preventDefault();
-            ev.stopPropagation();
-        });
-
-        // attributes
-
-        this.$editables_attr.each(function () {
-            var $node = $(this);
-            var translation = $node.data('translation');
-            _.each(translation, function (node, attr) {
-                var trans = self._getTranlationObject(node);
-                trans.value = (trans.value ? trans.value : $node.html() ).replace(/[ \t\n\r]+/, ' ');
-                $node.attr('data-oe-translation-state', (trans.state || 'to_translate'));
-            });
-        });
-
-        this.$editables_attr.prependEvent('mousedown.translator click.translator mouseup.translator', function (ev) {
-            if (ev.ctrlKey) {
-                return;
-            }
-            ev.preventDefault();
-            ev.stopPropagation();
-            if (ev.type !== 'mousedown') {
-                return;
-            }
-
-            new AttributeTranslateDialog(self, {}, ev.target).open();
-        });
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    _onSave: function (ev) {
-        ev.stopPropagation();
     },
 });
 

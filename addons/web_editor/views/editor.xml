@@ -54,7 +54,6 @@
     <script type="text/javascript" src="/web_editor/static/src/js/editor/snippets.options.js"/>
 
     <!-- Launcher -->
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_translate_attributes.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_iframe.js"/>
 </template>
