@@ -74,7 +74,6 @@ async function loadFromTextarea(parent, textarea, options) {
 }
 
 return {
-    load: load,
     loadFromTextarea: loadFromTextarea,
     createWysiwyg: createWysiwyg,
 };
