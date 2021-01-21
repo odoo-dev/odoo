@@ -360,7 +360,7 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
         """ Context manager that clears the environment upon failure. """
         with super(BaseCase, self).assertRaises(exception, msg=msg) as cm:
             if hasattr(self, 'env'):
-                with self.env.clear_upon_failure():
+                with self.env.cr.savepoint():
                     yield cm
             else:
                 yield cm
