@@ -263,11 +263,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         $wrapwrap.removeClass('o_editable'); // clean the dom before edition
         this.editableFromEditorMenu($wrapwrap).addClass('o_editable');
 
-
         this.wysiwyg = await wysiwygLoader.createWysiwyg(this, params, ['website.compiled_assets_wysiwyg']);
-
-
-
 
         await this.wysiwyg.attachTo($('#wrapwrap')).then(() => {
             this.trigger_up('edit_mode');
