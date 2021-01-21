@@ -128,6 +128,29 @@
                         <div id="removeFormat" title="Remove format" class="fa fa-eraser fa-fw btn"></div>
                     </div>
 
+                    <div class="button-group dropdown">
+                        <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
+                            data-toggle="dropdown" title="" tabindex="-1"
+                            data-original-title="Style" aria-expanded="false">
+                            <span id="fontSizeCurrentValue"></span>
+                            <i class="fa fa-text-height"></i> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" data-font-size="medium">default</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="8px">8</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="9px">9</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="10px">10</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="11px">11</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="12px">12</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="14px">14</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="18px">18</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="24px">24</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="36px">36</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="48px">48</a></li>
+                            <li><a class="dropdown-item" href="#" data-font-size="62px">62</a></li>
+                        </ul>
+                    </div>
+
                     <div class="button-group" id="colorInputButtonGroup">
                         <label id="foreColor" htmlFor="foreColorInput"><input id="foreColorInput" type="color" name="foreColor" /><span class="color-indicator"></span> <span>C</span></label>
                         <label id="hiliteColor" htmlFor="hiliteColorInput"><input id="hiliteColorInput" type="color" name="hiliteColor" /><span class="color-indicator"></span> <span class="fa fa-highlighter fa-fw"></span></label>
