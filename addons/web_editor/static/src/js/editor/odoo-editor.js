@@ -1,1 +1,1 @@
-/home/goaman/projects/external/odoo/odoo-editor/build/odoo-editor-bundle.js
+/home/odoo/Development/odoo-work/odoo-editor/build/odoo-editor-bundle.js

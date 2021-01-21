@@ -36,8 +36,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     /**
      * @constructor
      */
-    init: function () {
+    init: function (parent, options = {}) {
         this._super.apply(this, arguments);
+        this.wysiwygOptions = options.wysiwygOptions || {};
         var context;
         this.trigger_up('context_get', {
             extra: true,
@@ -45,6 +46,13 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 context = ctx;
             },
         });
+        this.oeStructureSelector = '.oe_structure[data-oe-xpath][data-oe-id]';
+        this.oeFieldSelector = '[data-oe-field]';
+        if (options.savableSelector) {
+            this.savableSelector = options.savableSelector;
+        } else {
+            this.savableSelector = `${this.oeStructureSelector}, ${this.oeFieldSelector}`;
+        }
         this._editorAutoStart = (context.editable && window.location.search.indexOf('enable_editor') >= 0);
         var url = new URL(window.location.href);
         url.searchParams.delete('enable_editor');
@@ -239,71 +247,46 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     //--------------------------------------------------------------------------
 
     async _createWysiwyg() {
-        var context;
-        this.trigger_up('context_get', {
-            callback: function (ctx) {
-                context = ctx;
-            },
-        });
-        const params = {
-            snippets: 'website.snippets',
-            recordInfo: {
-                context: context,
-                data_res_model: 'website',
-                data_res_id: context.website_id,
-            },
-            enableWebsite: true,
-            discardButton: true,
-            saveButton: true,
-            devicePreview: true,
-            // toolbarLayout: enableTranslation ? translationToolbar : websiteToolbar,
-        };
-
         var $wrapwrap = $('#wrapwrap');
         $wrapwrap.removeClass('o_editable'); // clean the dom before edition
         this.editableFromEditorMenu($wrapwrap).addClass('o_editable');
 
-        this.wysiwyg = await wysiwygLoader.createWysiwyg(this, params, ['website.compiled_assets_wysiwyg']);
+        this.wysiwyg = await this._wysiwygInstance();
 
-        await this.wysiwyg.attachTo($('#wrapwrap')).then(() => {
-            this.trigger_up('edit_mode');
-            this.$el.css({width: ''});
-        });
-
-        const oeStructureSelector = '.oe_structure[data-oe-xpath][data-oe-id]';
-        const oeFieldSelector = '[data-oe-field]';
-        const savableSelector = `${oeStructureSelector}, ${oeFieldSelector}`;
+        await this.wysiwyg.attachTo($('#wrapwrap'));
+        this.trigger_up('edit_mode');
+        this.$el.css({width: ''});
 
         // Only make the odoo structure and fields editable.
         this.wysiwyg.odooEditor.observerUnactive();
         $('#wrapwrap').on('click.odoo-website-editor', '*', this, this._preventDefault);
         $('#wrapwrap').attr('contenteditable', 'false');
         $('#wrapwrap *').each((key, el) => {delete el.ouid});
-        $(savableSelector).attr('contenteditable', 'true');
+        $(this.savableSelector).not('[data-oe-readonly]').attr('contenteditable', 'true');
         this.wysiwyg.odooEditor.idSet($('#wrapwrap')[0]);
         this.wysiwyg.odooEditor.observerActive();
 
         // Observe changes to mark dirty structures and fields.
         this.observer = new MutationObserver(records => {
             for (const record of records) {
-                const $savable = $(record.target).closest(savableSelector);
+                const $savable = $(record.target).closest(this.savableSelector);
 
                 // Filter out:
-                // 1) Sizzle trigger many attribute mutation that does not
+                // 1) Sizzle triggers many attribute mutations that do not
                 //    really change anything.
-                // 2) Some code change attribute on odoo fields that should be
+                // 2) Some code changes attributes on odoo fields that should be
                 //    discarded because they will not be saved.
                 if (
                     record.type === 'attributes' &&
                     (record.oldValue === record.target.getAttribute(record.attributeName) ||
-                        $savable.is(oeFieldSelector))
+                        (record.oldValue && record.oldValue.startsWith('sizzle')) ||
+                        $savable.is(this.oeFieldSelector))
                 ) {
                     continue;
                 }
 
                 this.wysiwyg.odooEditor.observerUnactive();
-                const c = $savable
-                    .not('.o_dirty').addClass('o_dirty');
+                $savable.not('.o_dirty').addClass('o_dirty');
                 this.wysiwyg.odooEditor.observerActive();
             }
         });
@@ -369,14 +352,23 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 context = ctx;
             },
         });
-        return new WysiwygMultizone(this, {
+        const params = {
             snippets: 'website.snippets',
             recordInfo: {
                 context: context,
                 data_res_model: 'website',
                 data_res_id: context.website_id,
-            }
-        });
+            },
+            enableWebsite: true,
+            discardButton: true,
+            saveButton: true,
+            devicePreview: true,
+            savableSelector: this.savableSelector,
+        };
+        return wysiwygLoader.createWysiwyg(this,
+            Object.assign(params, this.wysiwygOptions),
+            ['website.compiled_assets_wysiwyg']
+        );
     },
 
 
@@ -515,4 +507,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 });
 
 websiteNavbarData.websiteNavbarRegistry.add(EditPageMenu, '#edit-page-menu');
+
+return EditPageMenu;
 });
