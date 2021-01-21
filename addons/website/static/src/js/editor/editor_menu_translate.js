@@ -5,7 +5,8 @@ require('web.dom_ready');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
 var localStorage = require('web.local_storage');
-var EditorMenu = require('website.editor.menu');
+var EditorMenu = require('website.editMenu');
+var wysiwygLoader = require('web_editor.loader');
 
 var _t = core._t;
 
@@ -45,21 +46,13 @@ var TranslatorInfoDialog = Dialog.extend({
     },
 });
 
-return;
-
-var WysiwygTranslate = Wysiwyg.extend({
-    assetLibs: Wysiwyg.prototype.assetLibs.concat(['website.compiled_assets_wysiwyg']),
-    _getWysiwygContructor: function () {
-        return odoo.__DEBUG__.services['web_editor.wysiwyg.multizone.translate'];
-    }
-});
-
 var TranslatorMenu = EditorMenu.extend({
 
     /**
      * @override
      */
     start: function () {
+        this._translateMode = true;
         if (!localStorage.getItem(localStorageNoDialogKey)) {
             new TranslatorInfoDialog(this).open();
         }
@@ -102,7 +95,19 @@ var TranslatorMenu = EditorMenu.extend({
                 context = ctx;
             },
         });
-        return new WysiwygTranslate(this, {lang: context.lang});
+        const params = {
+            snippets: 'web_editor.snippets',
+            recordInfo: {
+                context: context,
+                data_res_model: 'website',
+                data_res_id: context.website_id,
+            },
+            enableWebsite: true,
+            enableTranslation: true,
+            discardButton: true,
+            saveButton: true,
+        };
+        return wysiwygLoader.createWysiwyg(this, params, ['website.compiled_assets_wysiwyg']);
     },
 });
 

@@ -2,7 +2,6 @@ odoo.define('web_editor.wysiwyg.translate_attributes', function (require) {
 'use strict';
 
 var Dialog = require('web.Dialog');
-var JWEditorLib = require('web_editor.jabberwock');
 
 var core = require('web.core');
 var _t = core._t;
@@ -15,7 +14,7 @@ var AttributeTranslateDialog = Dialog.extend({
         this._super(parent, _.extend({
             title: _t("Translate Attribute"),
             buttons: [
-                {text: _t("Close"), classes: 'btn-primary', click: this.applyAttributeChanges}
+                {text: _t("Close"), classes: 'btn-primary', click: () => {}} // this.applyAttributeChanges}
             ],
         }, options || {}));
         this.wysiwyg = options.wysiwyg;
@@ -41,22 +40,22 @@ var AttributeTranslateDialog = Dialog.extend({
         });
         return this._super.apply(this, arguments);
     },
-    /**
-     * Apply the attributes changes in the VDocument.
-     */
-    applyAttributeChanges: function () {
-        const attributeChange = () => {
-            for (const attributeName of Object.keys(this.translation)) {
-                const domNode = this.translation[attributeName];
-                const nodes = this.wysiwyg.editorHelpers.getNodes(this.node);
-                for (const node of nodes) {
-                    node.modifiers.get(JWEditorLib.Attributes).set(attributeName, domNode.textContent);
-                }
-            }
-            this.close();
-        }
-        this.wysiwyg.execCommand(attributeChange);
-    }
+    // /**
+    //  * Apply the attributes changes in the VDocument.
+    //  */
+    // applyAttributeChanges: function () {
+    //     const attributeChange = () => {
+    //         for (const attributeName of Object.keys(this.translation)) {
+    //             const domNode = this.translation[attributeName];
+    //             const nodes = this.wysiwyg.editorHelpers.getNodes(this.node);
+    //             for (const node of nodes) {
+    //                 node.modifiers.get(JWEditorLib.Attributes).set(attributeName, domNode.textContent);
+    //             }
+    //         }
+    //         this.close();
+    //     }
+    //     this.wysiwyg.execCommand(attributeChange);
+    // }
 });
 
 return AttributeTranslateDialog;

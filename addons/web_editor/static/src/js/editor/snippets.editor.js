@@ -1512,6 +1512,11 @@ var SnippetsMenu = Widget.extend({
             await this._destroyEditors();
             const html = await this.loadSnippets(invalidateCache);
             await this._computeSnippetTemplates(html);
+            if (this.options.enableTranslation) {
+                $('.o_snippet_search_filter').hide();
+                $('#o_scroll').hide();
+                $('button[data-action="mobilePreview"]').hide();
+            }
         }, false);
     },
     /**

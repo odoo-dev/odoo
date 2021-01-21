@@ -59,8 +59,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     start: function () {
         var def = this._super.apply(this, arguments);
 
-        // If we auto start the editor, do not show a welcome message
-        if (this._editorAutoStart) {
+        // If we auto start the editor or if we start it in translate mode, do
+        // not show a welcome message
+        if (this._editorAutoStart || this._translateMode) {
             return Promise.all([def, this._startEditMode()]);
         }
 
@@ -239,31 +240,11 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     //--------------------------------------------------------------------------
 
     async _createWysiwyg() {
-        var context;
-        this.trigger_up('context_get', {
-            callback: function (ctx) {
-                context = ctx;
-            },
-        });
-        const params = {
-            snippets: 'website.snippets',
-            recordInfo: {
-                context: context,
-                data_res_model: 'website',
-                data_res_id: context.website_id,
-            },
-            enableWebsite: true,
-            discardButton: true,
-            saveButton: true,
-            devicePreview: true,
-            // toolbarLayout: enableTranslation ? translationToolbar : websiteToolbar,
-        };
-
         var $wrapwrap = $('#wrapwrap');
         $wrapwrap.removeClass('o_editable'); // clean the dom before edition
         this.editableFromEditorMenu($wrapwrap).addClass('o_editable');
 
-        this.wysiwyg = await wysiwygLoader.createWysiwyg(this, params, ['website.compiled_assets_wysiwyg']);
+        this.wysiwyg = await this._wysiwygInstance();
 
         await this.wysiwyg.attachTo($('#wrapwrap')).then(() => {
             this.trigger_up('edit_mode');
@@ -369,14 +350,19 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 context = ctx;
             },
         });
-        return new WysiwygMultizone(this, {
+        const params = {
             snippets: 'website.snippets',
             recordInfo: {
                 context: context,
                 data_res_model: 'website',
                 data_res_id: context.website_id,
-            }
-        });
+            },
+            enableWebsite: true,
+            discardButton: true,
+            saveButton: true,
+            devicePreview: true,
+        };
+        return wysiwygLoader.createWysiwyg(this, params, ['website.compiled_assets_wysiwyg']);
     },
 
 
@@ -515,4 +501,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 });
 
 websiteNavbarData.websiteNavbarRegistry.add(EditPageMenu, '#edit-page-menu');
+
+return EditPageMenu;
 });
