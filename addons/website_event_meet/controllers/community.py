@@ -17,11 +17,13 @@ _logger = logging.getLogger(__name__)
 class WebsiteEventMeetController(EventCommunityController):
 
     def _get_event_rooms_base_domain(self, event):
-        search_domain_base = [('event_id', '=', event.id), ('is_published', '=', True)]
+        search_domain_base = [('event_id', '=', event.id)]
+        if not request.env.user.has_group('event.group_event_user'):
+            search_domain_base = expression.AND([search_domain_base, [('is_published', '=', True)]])
         return search_domain_base
 
     def _sort_event_rooms(self, room):
-        return (room.is_pinned, room.room_last_activity, room.id)
+        return (room.is_published, room.is_pinned, room.room_last_activity, room.id)
 
     # ------------------------------------------------------------
     # MAIN PAGE

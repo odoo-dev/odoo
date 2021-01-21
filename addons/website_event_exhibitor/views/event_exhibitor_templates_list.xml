@@ -150,7 +150,7 @@
 <!-- ============================================================ -->
 
 <template id="exhibitor_card" name="Exhibitor Card">
-    <article t-att-class="'h-100 card border-0 shadow-sm o_wesponsor_card %s' % ('o_wesponsor_card_unpublished' if not sponsor.is_published else '')"
+    <article class="h-100 card border-0 shadow-sm o_wesponsor_card" t-att-data-publish="sponsor.website_published and 'on' or 'off'"
         itemscope="itemscope" itemtype="http://schema.org/Event">
         <div class="h-100 row no-gutters">
             <t t-set="sponsor_image_url" t-value="sponsor.website_image_url"/>

@@ -188,7 +188,7 @@
                     <hr class="mt-2 pb-1 mb-1"/>
                 </div>
                 <!-- DAY TRACKS LIST -->
-                <div t-foreach="tracks" t-as="track"
+                <div t-foreach="tracks" t-as="track" t-att-data-publish="track.website_published and 'on' or 'off'"
                     t-att-class="'o_wesession_list_item px-2 py-2 event_color_%d' % (track.color)">
                     <!-- Side information in a floating div (desktop only) -->
                     <div t-if="not event.is_done and (not track.date or today_tz &lt;= tracks_date) and option_track_wishlist"
@@ -219,7 +219,7 @@
                                     <span class="mr-2" t-field="track.name"/>
                                 </t>
                                 <span t-if="not track.is_published and user_event_manager"
-                                    class="badge badge-danger o_wevent_online_badge_unpublished">
+                                    class="badge badge-danger">
                                     Unpublished
                                 </span>
                             </span>

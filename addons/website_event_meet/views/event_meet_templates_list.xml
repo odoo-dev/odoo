@@ -117,7 +117,8 @@
         t-attf-class="card o_wevent_meeting_room_card w-100 my-2 bg-light d-block text-decoration-none"
         t-att-href="meeting_room_href"
         t-att-data-toggle="meeting_room_data_toggle"
-        t-att-data-target="meeting_room_data_target">
+        t-att-data-target="meeting_room_data_target"
+        t-att-data-publish="meeting_room.website_published and 'on' or 'off'">
         <div class="text-decoration-none w-100 h-100 p-3">
             <div class="o_wevent_meeting_room_corner_ribbon" t-if="meeting_room.room_is_full">Full</div>
             <div class="d-flex flex-column">
@@ -143,6 +144,7 @@
                         <span t-esc="meeting_room.room_participant_count"/>&amp;nbsp;
                         <span t-if="meeting_room.target_audience" class="text-uppercase" t-field="meeting_room.target_audience"/>
                         <span t-else="" class="text-uppercase">participant(s)</span>
+                        <span t-if="not meeting_room.website_published" class="ml-2 badge badge-danger">Unpublished</span>
                     </span>
                     <div class="d-inline border py-1 px-2 bg-secondary" t-esc="meeting_room.room_lang_id.name"/>
                 </div>

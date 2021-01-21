@@ -154,7 +154,7 @@
 </template>
 
 <template id="agenda_main_track" name="Track Agenda: Track">
-    <div class="d-flex flex-column h-100">
+    <div class="d-flex flex-column h-100" t-att-data-publish="track.website_published and 'on' or 'off'">
         <div class="d-flex justify-content-end flex-wrap-reverse align-items-center o_weagenda_track_badges">
             <small t-if="track.is_track_live and not track.is_track_done and track.website_published"
                 class="mx-1 badge badge-danger">Live
