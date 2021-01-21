@@ -6,6 +6,8 @@ import json
 import logging
 from collections import OrderedDict
 from time import time
+import traceback
+import threading
 
 from lxml import html
 from lxml import etree
@@ -21,7 +23,6 @@ from odoo.addons.base.models.qweb import QWeb, Contextifier
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 
 _logger = logging.getLogger(__name__)
-
 
 class IrQWeb(models.AbstractModel, QWeb):
     """ Base QWeb rendering engine
@@ -45,9 +46,13 @@ class IrQWeb(models.AbstractModel, QWeb):
         :param dict values: template values to be used for rendering
         :param options: used to compile the template (the dict available for the rendering is frozen)
             * ``load`` (function) overrides the load method
-            * ``profile`` (float) profile the rendering (use astor lib) (filter
-              profile line with time ms >= profile)
+            * ``profile`` (Boolean) activate the rendering profile displayed in log as debug
         """
+
+        # optionnal hooks for performance and tracing analysis
+        current_thread = threading.current_thread()
+        if hasattr(current_thread, 'qweb_hooks'):
+            self = self.with_context(profile=True, __render_stack__=traceback.extract_stack())
 
         context = dict(self.env.context, dev_mode='qweb' in tools.config['dev_mode'])
         context.update(options)
@@ -95,7 +100,7 @@ class IrQWeb(models.AbstractModel, QWeb):
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_get_template``. """
-        return ['lang', 'inherit_branding', 'editable', 'translatable', 'edit_translations', 'website_id']
+        return ['lang', 'inherit_branding', 'editable', 'translatable', 'edit_translations', 'website_id', 'profile']
 
     # apply ormcache_context decorator unless in dev mode...
     @tools.conditional(
@@ -132,9 +137,9 @@ class IrQWeb(models.AbstractModel, QWeb):
             for node in view:
                 if node.get('t-name'):
                     node.set('t-name', str(name))
-            return view
+            return (view, view_id)
         else:
-            return template
+            return (template, view_id)
 
     # order
 
@@ -188,7 +193,8 @@ class IrQWeb(models.AbstractModel, QWeb):
         #
         space = el.getprevious() is not None and el.getprevious().tail or el.getparent().text
         sep = u'\n' + space.rsplit('\n').pop()
-        return [
+        directive = 't-call-assets="%s"' % el.get('t-call-assets')
+        content = [
             ast.Assign(
                 targets=[ast.Name(id='nodes', ctx=ast.Store())],
                 value=ast.Call(
@@ -278,6 +284,7 @@ class IrQWeb(models.AbstractModel, QWeb):
                 orelse=[]
             )
         ]
+        return self._compile_start_profiling(el, directive, options) + content + self._compile_stop_profiling(el, directive, options)
 
     # method called by computing code
 
@@ -414,6 +421,41 @@ class IrQWeb(models.AbstractModel, QWeb):
         attributes['data-oe-expression'] = field_options['expression']
 
         return (attributes, content, None)
+
+    def _start_log_profiling(self, ref, arch, xpath, directive, values, context):
+        return (time(), self.env.cr.sql_log_count)
+
+    def _stop_log_profiling(self, ref, arch, xpath, directive, values, context, loginfo):
+        now, query = loginfo
+        delay = (time() - now) * 1000
+        dquery = self.env.cr.sql_log_count - query
+        stack = self.env.context.get('__render_stack__')
+        log = {
+            'view_id': ref,
+            'arch': arch,
+            'xpath': xpath,
+            'directive': directive,
+            'now': now,
+            'delay': delay,
+            'query': dquery,
+        }
+        if 'log_profiling' in values:
+            values['log_profiling'](log)
+
+        # optionnal hooks for performance and tracing analysis
+        current_thread = threading.current_thread()
+        if hasattr(current_thread, 'qweb_hooks'):
+            for hook in current_thread.qweb_hooks:
+                hook(self.env.cr, stack, ref, arch, xpath, directive, now, delay, dquery)
+        else:
+            _logger.debug({
+                'ref': ref,
+                'xpath': xpath,
+                'directive': directive,
+                'time': now,
+                'delay': delay,
+                'query': dquery,
+            })
 
     # compile expression add safe_eval
 
