@@ -178,8 +178,6 @@ var KanbanRecord = Widget.extend({
         if (isCurrentRecord && this.record[field] && this.record[field].raw_value && !utils.is_bin_size(this.record[field].raw_value)) {
             // Use magic-word technique for detecting image type
             url = 'data:image/' + this.file_type_magic_word[this.record[field].raw_value[0]] + ';base64,' + this.record[field].raw_value;
-        } else if (placeholder && (!model || !field || !id || (isCurrentRecord && this.record[field] && !this.record[field].raw_value))) {
-            url = placeholder;
         } else {
             var session = this.getSession();
             var params = {
@@ -190,7 +188,9 @@ var KanbanRecord = Widget.extend({
             if (isCurrentRecord) {
                 params.unique = this.record.__last_update && this.record.__last_update.value.replace(/[^0-9]/g, '');
             }
-            url = session.url('/web/image', params);
+            url = params.unique ?
+                session.url(`/web/avatar/${model}/${id}/${field}?unique=${params.unique}`) :
+                session.url(`/web/avatar/${model}/${id}/${field}`)
         }
         return url;
     },

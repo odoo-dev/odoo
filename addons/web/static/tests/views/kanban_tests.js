@@ -6613,7 +6613,7 @@ QUnit.module('Views', {
         });
 
         // since the field image is not set, kanban_image will generate an URL
-        var imageOnRecord = kanban.$('img[data-src*="/web/image"][data-src*="&id=1"]');
+        var imageOnRecord = kanban.$('img[data-src*="/web/avatar/partner/1/image"]');
         assert.strictEqual(imageOnRecord.length, 1, "partner with image display image by url");
 
         kanban.destroy();
@@ -6708,7 +6708,7 @@ QUnit.module('Views', {
         // the field image is set, but we request the image for a specific id
         // -> for the record matching the ID, the base64 should be returned
         // -> for all the other records, the image should be displayed by url
-        var imageOnRecord = kanban.$('img[data-src*="/web/image"][data-src*="&id=1"]');
+        var imageOnRecord = kanban.$('img[data-src*="/web/avatar/partner"][data-src*="/1"]');
         assert.strictEqual(imageOnRecord.length, this.data.partner.records.length - 1,
             "display image by url when requested for another record");
 
