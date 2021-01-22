@@ -13,21 +13,42 @@
 <div>
     % set colors = ctx.get('colors', {})
     % set recurrent = object.recurrence_id and not ctx['ignore_recurrence']
+    % set isOnline = object.event_id.auto_accept and 'appointment_type_id' in object.event_id and object.event_id.appointment_type_id
+    % set isForResponsible = object.partner_id.id == object.event_id.partner_id.id
     <p>
         Hello ${object.common_name},<br/><br/>
-        ${object.event_id.user_id.partner_id.name} invited you to the ${object.event_id.name} meeting of ${object.event_id.user_id.company_id.name}.
+        % if isOnline:
+            % if isForResponsible:
+                % for attendee in object.event_id.attendee_ids:
+                    % if attendee.id != object.id:
+                        ${attendee.common_name} scheduled the following meeting with you.
+                    % endif
+                % endfor
+            % else :
+                Your appointment <strong>${object.event_id.appointment_type_id.name}</strong> has been booked.
+            % endif
+        % else:
+            ${object.event_id.user_id.partner_id.name} invited you for the ${object.event_id.name} meeting of ${object.event_id.user_id.company_id.name}.
+        % endif
     </p>
     <div style="text-align: center; margin: 16px 0px 16px 0px;">
-        % set target = 'recurrence' if recurrent else 'meeting'
-        <a href="/calendar/${target}/accept?token=${object.access_token}&amp;id=${object.event_id.id}"
-            style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
-            Accept</a>
-        <a href="/calendar/${target}/decline?token=${object.access_token}&amp;id=${object.event_id.id}"
-            style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
-            Decline</a>
+         % if not object.event_id.auto_accept:
+            % set target = 'recurrence' if recurrent else 'meeting'
+            <a href="/calendar/${target}/accept?token=${object.access_token}&amp;id=${object.event_id.id}"
+                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
+                Accept</a>
+            <a href="/calendar/${target}/decline?token=${object.access_token}&amp;id=${object.event_id.id}"
+                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
+                Decline</a>
+        % endif
         <a href="/calendar/meeting/view?token=${object.access_token}&amp;id=${object.event_id.id}"
             style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
-            View</a>
+            % if isOnline and not isForResponsible:
+                Reschedule
+            % else:
+                View
+            % endif
+        </a>
     </div>
     <table border="0" cellpadding="0" cellspacing="0"><tr>
         % if not recurrent:
@@ -50,13 +71,32 @@
         <td style="padding-top: 5px;">
             <p><strong>Details of the event</strong></p>
             <ul>
+                % if isOnline:
+                    <li>Appointment Type: ${object.event_id.appointment_type_id.name}</li>
+                % endif
                 % if object.event_id.location:
                     <li>Location: ${object.event_id.location}
                         (<a target="_blank" href="http://maps.google.com/maps?oi=map&amp;q=${object.event_id.location}">View Map</a>)
                     </li>
                 % endif
                 % if object.event_id.description :
-                    <li>Description: ${object.event_id.description}</li>
+                    % if isOnline:
+                        % set bookingInfo = object.event_id.description.split('\n', 3)
+                        <li>Contact Details:
+                            % for info in bookingInfo[:3]:
+                                <ul>
+                                    <li><span style="margin-left:5px">${info}</span></li>
+                                </ul>
+                            % endfor
+                        </li>
+                        <li>Additional Information:<br/>
+                            ${bookingInfo[-1:][0].replace('\n', '<br/>') | safe}
+                        </li>
+                    % else:
+                        <li>Description:
+                            ${object.event_id.description}
+                        </li>
+                    % endif
                 % endif
                 % if recurrent:
                     <li>When: ${object.recurrence_id.name}</li>

@@ -226,6 +226,8 @@ class Meeting(models.Model):
     show_as = fields.Selection(
         [('free', 'Available'),
          ('busy', 'Busy')], 'Show Time as', default='busy', required=True)
+    auto_accept = fields.Boolean(
+        help="If true, attendees do not have to manually accept invitation (example of such events are Online Appointments booked by attendees themselves).")
 
     # linked document
     # LUL TODO use fields.Reference ?
@@ -472,9 +474,10 @@ class Meeting(models.Model):
 
         return result
 
-    def _attendees_values(self, partner_commands):
+    def _attendees_values(self, partner_commands, auto_accept=False):
         """
         :param partner_commands: ORM commands for partner_id field (0 and 1 commands not supported)
+        :param auto_accept: If True, attendees to be created should by default have 'accepted' state
         :return: associated attendee_ids ORM commands
         """
         attendee_commands = []
@@ -499,7 +502,7 @@ class Meeting(models.Model):
         attendee_commands += [[2, attendee.id] for attendee in attendees_to_unlink]  # Removes and delete
 
         attendee_commands += [
-            [0, 0, dict(partner_id=partner_id)]
+            [0, 0, dict(partner_id=partner_id, state='accepted' if auto_accept else 'needsAction')]
             for partner_id in added_partner_ids
         ]
         return attendee_commands
@@ -734,7 +737,7 @@ class Meeting(models.Model):
                             values['activity_ids'] = [(0, 0, activity_vals)]
 
         vals_list = [
-            dict(vals, attendee_ids=self._attendees_values(vals['partner_ids'])) if 'partner_ids' in vals else vals
+            dict(vals, attendee_ids=self._attendees_values(vals['partner_ids'], auto_accept=vals.get('auto_accept'))) if 'partner_ids' in vals else vals
             for vals in vals_list
         ]
         recurrence_fields = self._get_recurrent_fields()
