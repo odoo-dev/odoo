@@ -35,6 +35,7 @@ export const hotkeyService = {
   dependencies: ["ui"],
   deploy(env) {
     const subscriptions = new Map();
+    const interceptors = {};
     let nextToken = 0;
 
     window.addEventListener("keydown", onKeydown);
@@ -47,7 +48,7 @@ export const hotkeyService = {
     async function onKeydown(ev) {
       const hotkey = getActiveHotkey(ev);
       const infos = { hotkey, _originalEvent: ev };
-      if (canDispatch(infos)) {
+      if (await canDispatch(infos)) {
         dispatch(infos);
       }
     }
@@ -58,12 +59,13 @@ export const hotkeyService = {
      * - UI is blocked
      * - key is held down (to avoid repeat)
      * - focus is on an editable element (rule is bypassed on "ALT" combo)
+     * - an interceptor did intercept the event
      * - the pressed key is not whitelisted
      *
      * @param {{hotkey: string, _originalEvent: KeyboardEvent}} infos
      * @returns {boolean} true if service can dispatch the actual hotkey
      */
-    function canDispatch(infos) {
+    async function canDispatch(infos) {
       const { hotkey, _originalEvent: event } = infos;
 
       // Do not dispatch if UI is blocked
@@ -82,6 +84,12 @@ export const hotkeyService = {
         ["input", "textarea"].includes(event.target.nodeName);
       const isAltCombo = hotkey !== "alt" && event.altKey;
       if (inEditableElement && !isAltCombo) {
+        return false;
+      }
+
+      // Intercepted ?
+      const itorProms = Object.values(interceptors).map(itor => itor(infos));
+      if ((await Promise.all(itorProms)).some(res => res && res.intercepted)) {
         return false;
       }
 
@@ -218,9 +226,35 @@ export const hotkeyService = {
       subscriptions.delete(token);
     }
 
+    /**
+     * Attaches a new interceptor.
+     *
+     * @param {(hotkey:string)=>Promise<{intercepted: boolean}|void>} callback
+     *    Method that will be called whenever the service will try to dispatch an hotkey.
+     *    Should return an object {intercepted: true} in order to cancel current dispatching.
+     *    Note that the interceptor may be asynchronous and could delay the dispatching.
+     * @returns {number} interceptor token
+     */
+    function attachInterceptor(callback) {
+      const token = nextToken++;
+      interceptors[token] = callback;
+      return token;
+    }
+
+    /**
+     * Detaches the token corresponding interceptor.
+     *
+     * @param {any} owner
+     */
+    function detachInterceptor(owner) {
+      delete interceptors[token];
+    }
+
     return {
       subscribe,
       unsubscribe,
+      attachInterceptor,
+      detachInterceptor,
     };
   },
 };
