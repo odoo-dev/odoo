@@ -126,6 +126,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'number_of_days': 2,
         })
 
+        holiday_status.flush()
         holiday_status.invalidate_cache()
         self._check_holidays_status(holiday_status, 2.0, 0.0, 2.0, 0.0)
 

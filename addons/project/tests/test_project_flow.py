@@ -242,6 +242,7 @@ class TestProjectFlow(TestProjectCommon):
 
         # We need to invalidate cache since it is not done automatically by the ORM
         # Our One2Many is linked to a res_id (int) for which the orm doesn't create an inverse
+        first_task.flush()
         first_task.invalidate_cache()
 
         self.assertEqual(rating_good.rating_text, 'satisfied')
@@ -257,6 +258,7 @@ class TestProjectFlow(TestProjectCommon):
 
         # We need to invalidate cache since it is not done automatically by the ORM
         # Our One2Many is linked to a res_id (int) for which the orm doesn't create an inverse
+        first_task.flush()
         first_task.invalidate_cache()
 
         self.assertEqual(first_task.rating_count, 2, "Task should have two ratings associated with it")
@@ -269,6 +271,7 @@ class TestProjectFlow(TestProjectCommon):
 
         # We need to invalidate cache since it is not done automatically by the ORM
         # Our One2Many is linked to a res_id (int) for which the orm doesn't create an inverse
+        first_task.flush()
         first_task.invalidate_cache()
 
         self.assertEqual(rating_good.parent_res_id, self.project_goats.id)

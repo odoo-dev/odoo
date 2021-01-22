@@ -217,6 +217,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         # decrease the ordered quantity on sale line
         self.sol1_service_purchase_1.write({'product_uom_qty': self.sol1_service_purchase_1.product_uom_qty - 5})  # product_uom_qty = 8
 
+        purchase_order.flush()
         purchase_order.invalidate_cache()  # Note: creating a second activity will not refresh the cache
 
         self.assertEqual(purchase_line.product_qty, sale_line_old_quantity, "The quantity on the PO line should not have changed.")

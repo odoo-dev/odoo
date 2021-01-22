@@ -136,6 +136,7 @@ class TestMassMailFeatures(MassMailCommon):
         def _join_channel(channel, partners):
             for partner in partners:
                 channel.write({'channel_last_seen_partner_ids': [(0, 0, {'partner_id': partner.id})]})
+            channel.flush()
             channel.invalidate_cache()
 
         test_channel = self.env['mail.channel'].create({

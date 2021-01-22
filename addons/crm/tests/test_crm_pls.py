@@ -151,6 +151,7 @@ class TestCRMPLS(TransactionCase):
         Lead._cron_update_automated_probabilities()
 
         # As the cron is computing and writing in SQL queries, we need to invalidate the cache
+        leads.flush()
         leads.invalidate_cache()
 
         self.assertEqual(tools.float_compare(leads[3].automated_probability, 33.49, 2), 0)
@@ -354,6 +355,7 @@ class TestCRMPLS(TransactionCase):
 
         # Force recompute - A priori, no need to do this as, for each won / lost, we increment tag frequency.
         Lead._cron_update_automated_probabilities()
+        leads_with_tags.flush()
         leads_with_tags.invalidate_cache()
 
         lead_tag_1 = leads_with_tags[30]
@@ -392,6 +394,7 @@ class TestCRMPLS(TransactionCase):
         leads.filtered(lambda lead: lead.id % 2 == 0).email_state = 'correct'
         leads.filtered(lambda lead: lead.id % 2 == 1).email_state = 'incorrect'
         Lead._cron_update_automated_probabilities()
+        leads_with_tags.flush()
         leads_with_tags.invalidate_cache()
 
         self.assertEqual(tools.float_compare(leads[3].automated_probability, 4.21, 2), 0)
@@ -400,6 +403,7 @@ class TestCRMPLS(TransactionCase):
         # remove all pls fields
         self.env['ir.config_parameter'].sudo().set_param("crm.pls_fields", False)
         Lead._cron_update_automated_probabilities()
+        leads_with_tags.flush()
         leads_with_tags.invalidate_cache()
 
         self.assertEqual(tools.float_compare(leads[3].automated_probability, 34.38, 2), 0)
@@ -408,6 +412,7 @@ class TestCRMPLS(TransactionCase):
         # check if the probabilities are the same with the old param
         self.env['ir.config_parameter'].sudo().set_param("crm.pls_fields", "country_id,state_id,email_state,phone_state,source_id")
         Lead._cron_update_automated_probabilities()
+        leads_with_tags.flush()
         leads_with_tags.invalidate_cache()
 
         self.assertEqual(tools.float_compare(leads[3].automated_probability, 4.21, 2), 0)

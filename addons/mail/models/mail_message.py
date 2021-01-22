@@ -1203,6 +1203,7 @@ class Message(models.Model):
 
     def _invalidate_documents(self, model=None, res_id=None):
         """ Invalidate the cache of the documents followed by ``self``. """
+        self.flush(['model', 'res_id'], self)
         for record in self:
             model = model or record.model
             res_id = res_id or record.res_id

@@ -774,6 +774,7 @@ class TestCowViewSaving(TestViewSavingCommon):
             'arch': '<div position="replace"><p>COMPARE</p></div>',
             'key': '_website_sale_comparison.product_add_to_compare',
         })])
+        View.flush()
         Website.with_context(load_all_views=True).viewref('_website_sale_comparison.product_add_to_compare').invalidate_cache()
 
         # Simulate end of installation/update
@@ -835,6 +836,7 @@ class TestCowViewSaving(TestViewSavingCommon):
 
         # Simulate website_sale update on top level view
         self._create_imd(self.base_view)
+        self.base_view.flush()
         self.base_view.invalidate_cache()
         View._load_records([dict(xml_id='_website_sale.product', values={
             'website_meta_title': 'A bug got fixed by updating this field',
@@ -1059,6 +1061,7 @@ class TestCowViewSaving(TestViewSavingCommon):
         Website = self.env['website']
         self._create_imd(self.inherit_view)
         # invalidate cache to recompute xml_id, or it will still be empty
+        self.inherit_view.flush()
         self.inherit_view.invalidate_cache()
         base_view_2 = self.base_view.copy({'key': 'website.base_view2', 'arch': '<div>base2 content</div>'})
         self.base_view.with_context(website_id=1).write({'arch': '<div>website 1 content</div>'})

@@ -48,39 +48,41 @@ class TestCRUDVisibilityFollowers(TestAccessRights):
 
     @users('Internal user', 'Portal user')
     def test_project_no_read(self):
-        self.project_pigs.invalidate_cache()
         with self.assertRaises(AccessError, msg="%s should not be able to read the project" % self.env.user.name):
+            self.project_pigs.invalidate_cache()
             self.project_pigs.with_user(self.env.user).name
 
     @users('Portal user')
     def test_project_allowed_portal_no_read(self):
         self.project_pigs.allowed_user_ids = self.env.user
-        self.project_pigs.invalidate_cache()
         with self.assertRaises(AccessError, msg="%s should not be able to read the project" % self.env.user.name):
+            self.project_pigs.invalidate_cache()
             self.project_pigs.with_user(self.env.user).name
 
     @users('Internal user')
     def test_project_allowed_internal_read(self):
         self.project_pigs.allowed_user_ids = self.env.user
+        self.project_pigs.flush()
         self.project_pigs.invalidate_cache()
         self.project_pigs.with_user(self.env.user).name
 
     @users('Internal user', 'Portal user')
     def test_task_no_read(self):
-        self.task.invalidate_cache()
         with self.assertRaises(AccessError, msg="%s should not be able to read the task" % self.env.user.name):
+            self.task.invalidate_cache()
             self.task.with_user(self.env.user).name
 
     @users('Portal user')
     def test_task_allowed_portal_no_read(self):
         self.project_pigs.allowed_user_ids = self.env.user
-        self.task.invalidate_cache()
         with self.assertRaises(AccessError, msg="%s should not be able to read the task" % self.env.user.name):
+            self.task.invalidate_cache()
             self.task.with_user(self.env.user).name
 
     @users('Internal user')
     def test_task_allowed_internal_read(self):
         self.project_pigs.allowed_user_ids = self.env.user
+        self.project_pigs.flush()
         self.task.invalidate_cache()
         self.task.with_user(self.env.user).name
 
@@ -120,13 +122,14 @@ class TestCRUDVisibilityPortal(TestAccessRights):
 
     @users('Portal user')
     def test_task_portal_no_read(self):
-        self.task.invalidate_cache()
         with self.assertRaises(AccessError, msg="%s should not be able to read the task" % self.env.user.name):
+            self.task.invalidate_cache()
             self.task.with_user(self.env.user).name
 
     @users('Portal user')
     def test_task_allowed_portal_read(self):
         self.project_pigs.allowed_user_ids = self.env.user
+        self.project_pigs.flush()
         self.task.invalidate_cache()
         self.task.with_user(self.env.user).name
 
@@ -143,17 +146,18 @@ class TestCRUDVisibilityEmployees(TestAccessRights):
 
     @users('Portal user')
     def test_task_portal_no_read(self):
-        self.task.invalidate_cache()
         with self.assertRaises(AccessError, msg="%s should not be able to read the task" % self.env.user.name):
+            self.task.invalidate_cache()
             self.task.with_user(self.env.user).name
 
         self.project_pigs.allowed_user_ids = self.env.user
-        self.task.invalidate_cache()
         with self.assertRaises(AccessError, msg="%s should not be able to read the task" % self.env.user.name):
+            self.task.invalidate_cache()
             self.task.with_user(self.env.user).name
 
     @users('Internal user')
     def test_task_allowed_portal_read(self):
+        self.task.flush()
         self.task.invalidate_cache()
         self.task.with_user(self.env.user).name
 
@@ -217,7 +221,7 @@ class TestAllowedUsers(TestAccessRights):
         self.user.groups_id |= self.env.ref('project.group_project_user')
         self.assertNotIn(self.user, self.project_pigs.allowed_user_ids)
         self.task.allowed_user_ids = self.user
-        self.project_pigs.invalidate_cache()
+        self.task.flush()
         self.task.invalidate_cache()
         self.task.with_user(self.user).name = "I can edit a task!"
 

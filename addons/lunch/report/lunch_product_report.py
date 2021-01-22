@@ -80,6 +80,8 @@ class LunchProductReport(models.Model):
                 commands = [(4, product_id) for product_id in self.mapped('product_id').ids]
             else:
                 commands = [(3, product_id) for product_id in self.mapped('product_id').ids]
+            # invalidate field to ensure cache consistency
+            self.invalidate_cache(['is_favorite'], self.ids)
             self.env.user.write({
                 'favorite_lunch_product_ids': commands,
             })

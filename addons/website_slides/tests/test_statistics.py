@@ -70,6 +70,7 @@ class TestChannelStatistics(common.SlidesCase):
         self.assertEqual(channel_emp.completion, 0)
 
         slides_emp.action_set_completed()
+        channel_emp.flush()
         channel_emp.invalidate_cache()
         self.assertEqual(
             channel_emp.completion,

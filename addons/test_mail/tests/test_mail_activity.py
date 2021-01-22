@@ -107,10 +107,12 @@ class TestActivityFlow(TestActivityCommon):
             self.assertEqual(test_record.activity_state, 'planned')
 
             test_record.activity_ids.write({'date_deadline': date.today() - relativedelta(days=1)})
+            test_record.flush()
             test_record.invalidate_cache()  # TDE note: should not have to do it I think
             self.assertEqual(test_record.activity_state, 'overdue')
 
             test_record.activity_ids.write({'date_deadline': date.today()})
+            test_record.flush()
             test_record.invalidate_cache()  # TDE note: should not have to do it I think
             self.assertEqual(test_record.activity_state, 'today')
 

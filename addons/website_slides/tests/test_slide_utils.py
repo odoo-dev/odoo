@@ -104,6 +104,7 @@ class TestSequencing(slides_common.SlidesCase):
         self.assertEqual([s.id for s in self.channel.slide_ids], [self.slide.id, self.category.id, self.slide_2.id, self.slide_3.id])
         self.assertEqual(self.slide_2.category_id, self.category)
         self.slide_2.write({'sequence': 1})
+        self.channel.flush()
         self.channel.invalidate_cache()
         self.assertEqual([s.id for s in self.channel.slide_ids], [self.slide.id, self.slide_2.id, self.category.id, self.slide_3.id])
         self.assertEqual(self.slide_2.category_id, self.env['slide.slide'])
@@ -144,6 +145,7 @@ class TestSequencing(slides_common.SlidesCase):
         self.slide_2.write({'sequence': 8})
         self.slide_3.write({'sequence': 3})
 
+        self.channel.flush()
         self.channel.invalidate_cache()
         self.assertEqual([s.id for s in self.channel.slide_ids], [self.slide.id, self.slide_3.id, self.category.id, self.slide_2.id])
         self.assertEqual(self.slide.sequence, 1)
@@ -157,6 +159,7 @@ class TestSequencing(slides_common.SlidesCase):
             'sequence': 2,
         })
         new_category.flush()
+        self.channel.flush()
         self.channel.invalidate_cache()
         self.channel._resequence_slides(self.slide_3, force_category=new_category)
         self.assertEqual(self.slide.sequence, 1)

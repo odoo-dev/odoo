@@ -158,6 +158,7 @@ class TestEventNotifications(TransactionCase, MailCase):
             'partner_ids': [fields.Command.link(self.partner.id)],
             'alarm_ids': [fields.Command.link(alarm.id)],
         })
+        self.event.flush()
 
         triggers_after = self.env['ir.cron.trigger'].search([('cron_id', '=', cron_id)])
         new_triggers = triggers_after - triggers_before
