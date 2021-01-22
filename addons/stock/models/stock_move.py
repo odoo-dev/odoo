@@ -1534,12 +1534,9 @@ class StockMove(models.Model):
         # Split moves where necessary and move quants
         backorder_moves_vals = []
         for move in moves_todo:
-            # To know whether we need to create a backorder or not, round to the general product's
-            # decimal precision and not the product's UOM.
-            rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            if float_compare(move.quantity_done, move.product_uom_qty, precision_digits=rounding) < 0:
+            if move._needs_backorder() and move in moves:
                 # Need to do some kind of conversion here
-                qty_split = move.product_uom._compute_quantity(move.product_uom_qty - move.quantity_done, move.product_id.uom_id, rounding_method='HALF-UP')
+                qty_split = move._get_qty_to_split()
                 new_move_vals = move._split(qty_split)
                 backorder_moves_vals += new_move_vals
         backorder_moves = self.env['stock.move'].create(backorder_moves_vals)
@@ -1665,6 +1662,18 @@ class StockMove(models.Model):
     @api.model
     def _consuming_picking_types(self):
         return ['outgoing']
+
+    def _get_qty_to_split(self):
+        self.ensure_one()
+        return self.product_uom._compute_quantity(self.product_uom_qty - self.quantity_done, self.product_id.uom_id, rounding_method='HALF-UP')
+
+    def _needs_backorder(self):
+        """ To know whether we need to create a backorder or not, round to the general product's
+        decimal precision and not the product's UOM.
+        """
+        self.ensure_one()
+        rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        return float_compare(self.quantity_done, self.product_uom_qty, precision_digits=rounding) < 0
 
     def _get_lang(self):
         """Determine language to use for translated description"""

@@ -293,6 +293,19 @@ class StockMove(models.Model):
         res.append('mrp_operation')
         return res
 
+    def _get_qty_to_split(self):
+        qty_to_split = super()._get_qty_to_split()
+        # In case of backorder after overconsumption of components, we don't want to take the remaining quantities of every raw moves
+        # but the quantities needed to produce what's left to be produced
+        production = self.raw_material_production_id
+        if production:
+            qty_to_split = self.product_uom_qty - self.unit_factor * production.qty_producing
+            qty_to_split = self.product_uom._compute_quantity(qty_to_split, self.product_id.uom_id, rounding_method='HALF-UP')
+        return qty_to_split
+
+    def _needs_backorder(self):
+        return super()._needs_backorder or self.raw_material_production_id
+
     def _get_source_document(self):
         res = super()._get_source_document()
         return res or self.production_id or self.raw_material_production_id
