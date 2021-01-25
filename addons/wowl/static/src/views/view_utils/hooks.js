@@ -4,6 +4,15 @@ import { useSetupAction } from "../../action_manager/action_manager";
 import { Domain } from "../../core/domain";
 import { useService } from "../../core/hooks";
 import { SearchModel } from "./search_model";
+import { Layout } from "./layout/layout";
+import { FilterMenu } from "./filter_menu/filter_menu";
+import { GroupByMenu } from "./group_by_menu/group_by_menu";
+import { ComparisonMenu } from "./comparison_menu/comparison_menu";
+import { FavoriteMenu } from "./favorite_menu/favorite_menu";
+import { SearchBar } from "./search_bar/search_bar";
+import { Dropdown } from "../../components/dropdown/dropdown";
+import { DropdownItem } from "../../components/dropdown/dropdown_item";
+
 const { onMounted } = hooks;
 export function useSearch(params) {
   const component = Component.current;
@@ -39,6 +48,19 @@ export function useSetupView(setup) {
   const component = Component.current;
   const props = component.props;
   const title = useService("title");
+
+  component.constructor.components = {
+    Layout,
+    FilterMenu,
+    GroupByMenu,
+    ComparisonMenu,
+    FavoriteMenu,
+    SearchBar,
+    Dropdown,
+    DropdownItem,
+    ...component.constructor.components,
+  }
+
   useSetupAction({
     export: setup.export,
     beforeLeave: setup.beforeLeave,

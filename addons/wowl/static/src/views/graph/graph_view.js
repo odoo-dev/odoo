@@ -3,16 +3,8 @@ import { GraphModel, DEFAULT_MEASURE } from "./graph_model";
 import { GROUPABLE_TYPES, rankInterval } from "../view_utils/search_utils";
 const { Component, hooks } = owl;
 import { sortBy } from "../../utils/arrays";
-import { Layout } from "../view_utils/layout/layout";
-import { FilterMenu } from "../view_utils/filter_menu/filter_menu";
-import { GroupByMenu } from "../view_utils/group_by_menu/group_by_menu";
-import { ComparisonMenu } from "../view_utils/comparison_menu/comparison_menu";
-import { FavoriteMenu } from "../view_utils/favorite_menu/favorite_menu";
-import { SearchBar } from "../view_utils/search_bar/search_bar";
 import { useSearch, useSetupView } from "../view_utils/hooks";
 import { useService } from "../../core/hooks";
-import { Dropdown } from "../../components/dropdown/dropdown";
-import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { _lt } from "../../services/localization";
 const { useState, useRef } = hooks;
 const COLORS = [
@@ -90,16 +82,6 @@ function hexToRGBA(hex, opacity) {
 //   }
 //   return shortLabel;
 // }
-export const VIEW_COMPONENTS = {
-  Layout,
-  SearchBar,
-  FilterMenu,
-  GroupByMenu,
-  ComparisonMenu,
-  FavoriteMenu,
-  Dropdown,
-  DropdownItem,
-};
 export const VIEW_DEFAULT_PROPS = {
   action: {},
   fields: {},
@@ -856,7 +838,5 @@ GraphView.display_name = "graph";
 GraphView.icon = "fa-bar-chart";
 GraphView.multiRecord = true;
 GraphView.template = "wowl.GraphView";
-GraphView.components = {
-  ...VIEW_COMPONENTS,
-};
+GraphView.components = {};
 GraphView.defaultProps = GRAPH_DEFAULT_PROPS;
