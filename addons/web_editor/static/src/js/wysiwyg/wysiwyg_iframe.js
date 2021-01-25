@@ -55,10 +55,7 @@ Wysiwyg.include({
 
         await this.defAsset;
         await this._loadIframe();
-        // await this._loadShadow();
         await _super();
-            // .then(this._loadIframe.bind(this))
-            // .then(this._super.bind(this));
     },
 
     //--------------------------------------------------------------------------
@@ -95,13 +92,10 @@ Wysiwyg.include({
                 self.$iframeBody = $iframeTarget;
                 $iframeTarget.attr("isMobile", config.device.isMobile);
                 $iframeTarget.find('.o_editable').html(self.$target.val());
-                // const $wrapwrap = $iframeTarget.find('#wrapwrap');
                 const $utilsZone = $('<div class="iframe-utils-zone">');
                 self.$utilsZone = $utilsZone;
 
                 const $iframeWrapper = $('<div class="iframe-editor-wrapper">');
-                // const $wrapwrap = $iframeTarget.find('#wrapwrap');
-                // $iframeWrapper.append($wrapwrap);
                 const $content = $('<div data-oe-model="model" data-oe-type="html" class="o_editable oe_structure"><p></br></p></div>');
 
                 self.$el = $content;
