@@ -62,7 +62,11 @@ async function loadFromTextarea(parent, textarea, options) {
     await wysiwyg.attachTo($wysiwygWrapper);
     $form.find('.note-editable').data('wysiwyg', wysiwyg);
 
+    // o_we_selected_image has not always been removed when
+    // saving a post so we need the line below to remove it if it is present.
+    $form.find('.note-editable').find('img.o_we_selected_image').removeClass('o_we_selected_image');
     $form.on('click', 'button[type=submit]', async (e) => {
+        $form.find('.note-editable').find('img.o_we_selected_image').removeClass('o_we_selected_image');
         // float-left class messes up the post layout OPW 769721
         $form.find('.note-editable').find('img.float-left').removeClass('float-left');
         console.log("$textarea:", $textarea);
