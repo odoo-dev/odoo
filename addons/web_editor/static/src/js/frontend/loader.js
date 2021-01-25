@@ -65,7 +65,6 @@ async function loadFromTextarea(parent, textarea, options) {
     $form.on('click', 'button[type=submit]', async (e) => {
         // float-left class messes up the post layout OPW 769721
         $form.find('.note-editable').find('img.float-left').removeClass('float-left');
-        console.log("$textarea:", $textarea);
         $textarea.html(await wysiwyg.getValue());
     });
 
