@@ -2,8 +2,7 @@
 // Layout
 // ------------------------------------------------------------------
 .o_Switcher {
-    // display: none;
-    display: flex;
+    display: none;
     justify-content: center; /* align horizontal */
     align-items: center; /* align vertical */
     flex-direction: column;
@@ -14,6 +13,10 @@
     position: absolute;
     width: 100%;
     height: 100%;
+
+    &.is_open {
+        display: flex;
+    }
 
     &_overlay {
         position: absolute;
