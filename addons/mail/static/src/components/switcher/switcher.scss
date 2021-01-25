@@ -1,0 +1,46 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+.o_Switcher {
+    // display: none;
+    display: flex;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 40;
+
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    &_overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    &_box {
+        overflow: auto;
+        position: relative;
+        width: 50%;
+        // margin: 0 auto;
+    }
+}
+
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+.o_Switcher {
+    &_overlay {
+        background-color: rgba($color: #000000, $alpha: 0.8)
+    }
+
+    &_box {
+        background: $white;
+    }
+}

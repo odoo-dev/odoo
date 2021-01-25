@@ -115,6 +115,7 @@
                 <script type="text/javascript" src="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/suggestions_list/suggestions_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/suggestion/suggestion.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/switcher/switcher.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_icon/thread_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_preview/thread_preview.js"></script>
@@ -167,6 +168,7 @@
                 <script type="text/javascript" src="/mail/static/src/models/user/user.js"></script>
                 <script type="text/javascript" src="/mail/static/src/services/chat_window_service/chat_window_service.js"></script>
                 <script type="text/javascript" src="/mail/static/src/services/dialog_service/dialog_service.js"></script>
+                <script type="text/javascript" src="/mail/static/src/services/switcher_service/switcher_service.js"></script>
                 <script type="text/javascript" src="/mail/static/src/utils/deferred/deferred.js"></script>
                 <script type="text/javascript" src="/mail/static/src/utils/throttle/throttle.js"></script>
                 <script type="text/javascript" src="/mail/static/src/utils/timer/timer.js"></script>
@@ -225,6 +227,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_popover/notification_popover.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_request/notification_request.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/switcher/switcher.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_icon/thread_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_preview/thread_preview.scss"/>

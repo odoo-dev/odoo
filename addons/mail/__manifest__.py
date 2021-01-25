@@ -116,6 +116,7 @@
         'static/src/components/partner_im_status_icon/partner_im_status_icon.xml',
         'static/src/components/suggestions_list/suggestions_list.xml',
         'static/src/components/suggestion/suggestion.xml',
+        'static/src/components/switcher/switcher.xml',
         'static/src/components/thread_icon/thread_icon.xml',
         'static/src/components/thread_needaction_preview/thread_needaction_preview.xml',
         'static/src/components/thread_preview/thread_preview.xml',
