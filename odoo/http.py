@@ -56,7 +56,7 @@ from .tools.func import lazy_property
 from .tools import ustr, consteq, frozendict, pycompat, unique, date_utils, topological_sort
 from .tools.mimetypes import guess_mimetype
 from .tools._vendor import sessions
-from .modules.module import module_manifest
+from .modules.module import read_manifest
 
 _logger = logging.getLogger(__name__)
 rpc_request = logging.getLogger(__name__ + '.rpc.request')
@@ -1305,13 +1305,10 @@ class Root(object):
             for module in sorted(os.listdir(str(addons_path))):
                 if module not in addons_manifest:
                     mod_path = opj(addons_path, module)
-                    manifest_path = module_manifest(mod_path)
                     path_static = opj(addons_path, module, 'static')
-                    if manifest_path and os.path.isdir(path_static):
-                        with open(manifest_path, 'rb') as fd:
-                            manifest_data = fd.read()
-                        manifest = ast.literal_eval(pycompat.to_text(manifest_data))
-                        if not manifest.get('installable', True):
+                    if os.path.isdir(path_static):
+                        manifest = read_manifest(addons_path, module)
+                        if not manifest or not manifest.get('installable', True):
                             continue
                         manifest['addons_path'] = addons_path
                         _logger.debug("Loading %s", module)
@@ -1541,19 +1538,8 @@ def module_boot(db=None):
 
 def module_installed(environment):
     # Candidates module the current heuristic is the /static dir
-    loadable = list(addons_manifest)
-
     # Retrieve database installed modules
-    # TODO The following code should move to ir.module.module.list_installed_modules()
-    Modules = environment['ir.module.module']
-    domain = [('state','=','installed'), ('name','in', loadable)]
-    modules = collections.OrderedDict(
-        (module.name, module.dependencies_id.mapped('name'))
-        for module in Modules.search(domain)
-    )
-
-    sorted_modules = topological_sort(modules)
-    return sorted_modules
+    return environment['ir.module.module']._installed_sorted()
 
 def module_installed_bypass_session(dbname):
     try:

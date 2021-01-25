@@ -21,6 +21,8 @@ from odoo.addons.base.models.qweb import QWeb, Contextifier
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.addons.base.models.ir_asset import get_mime_type
 
+from odoo.addons.base.models.ir_asset import STYLE_EXTENSIONS, SCRIPT_EXTENSIONS
+
 _logger = logging.getLogger(__name__)
 
 
@@ -221,6 +223,7 @@ class IrQWeb(models.AbstractModel, QWeb):
                         ast.keyword('async_load', self._get_attr_bool(el.get('async_load', False))),
                         ast.keyword('defer_load', self._get_attr_bool(el.get('defer_load', False))),
                         ast.keyword('lazy_load', self._get_attr_bool(el.get('lazy_load', False))),
+                        ast.keyword('media', ast.Constant(el.get('media'))),
                         ast.keyword('values', ast.Name(id='values', ctx=ast.Load())),
                     ],
                     starargs=None, kwargs=None
@@ -295,45 +298,71 @@ class IrQWeb(models.AbstractModel, QWeb):
         'xml' not in tools.config['dev_mode'],
         tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', keys=("website_id",)),
     )
-    def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
-        files, remains = self._get_asset_content(xmlid, options, css, js)
+    def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, media=None, values=None):
+        nodeAttrs = None
+        if css and media:
+            nodeAttrs = {
+                'media': media,
+            }
+        files, remains = self._get_asset_content(xmlid, options, nodeAttrs)
         asset = self.get_asset_bundle(xmlid, files, env=self.env)
+        remains = [node for node in remains if (css and node[0] == 'link') or (js and node[0] == 'script')]
         return remains + asset.to_node(css=css, js=js, debug=debug, async_load=async_load, defer_load=defer_load, lazy_load=lazy_load)
 
     def _get_asset_link_urls(self, xmlid, options):
         asset_nodes = self._get_asset_nodes(xmlid, options, js=False)
         return [node[1]['href'] for node in asset_nodes if node[0] == 'link']
 
-    # @tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', keys=("website_id",))
-    def _get_asset_content(self, xmlid, options, css=True, js=True):
+    @tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', keys=("website_id",))
+    def _get_asset_content(self, xmlid, options, nodeAttrs=None):
         options = dict(options,
             inherit_branding=False, inherit_branding_auto=False,
             edit_translations=False, translatable=False,
             rendering_bundle=True)
 
         options['website_id'] = self.env.context.get('website_id')
-        addons = module_boot()
-        addon_files = self.env['ir.asset'].get_addon_files(addons=addons, bundle=xmlid, css=css, js=js)
+
+        addons = []
+        if not request:
+            addons = self.env['ir.module.module']._installed_sorted()
+        else:
+            addons = module_boot()
+
+        addon_files = self.env['ir.asset'].get_addon_files(addons=addons, bundle=xmlid, css=True, js=True)
 
         files = []
         remains = []
         for _, file in addon_files:
+            ext = file.split('.')[-1]
+            is_js = ext in SCRIPT_EXTENSIONS
+            is_css = ext in STYLE_EXTENSIONS
+            if not is_js and not is_css:
+                continue
+            mimetype = get_mime_type(file)
             if can_aggregate(file):
                 path = [segment for segment in file.split('/') if segment]
                 files.append({
-                    'atype': get_mime_type(file),
+                    'atype': mimetype,
                     'url': file,
                     'filename': get_resource_path(*path) if path else None,
                     'content': '',
-                    'media': None,
+                    'media': nodeAttrs and nodeAttrs.get('media'),
                 })
             else:
-                tag = 'link' if css else 'script'
-                url_attr = 'href' if css else 'src'
-                attributes = {
-                    'type': get_mime_type(file),
-                    url_attr: file,
-                }
+                if is_js:
+                    tag = 'script'
+                    attributes = OrderedDict([
+                        ["type", mimetype],
+                        ["src", file],
+                    ])
+                else:
+                    tag = 'link'
+                    attributes = OrderedDict([
+                        ["type", mimetype],
+                        ["rel", "stylesheet"],
+                        ["href", file],
+                        ['media', nodeAttrs and nodeAttrs.get('media')],
+                    ])
                 remains.append((tag, attributes, ''))
 
         return (files, remains)

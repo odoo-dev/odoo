@@ -7,7 +7,7 @@ from glob import glob
 from logging import getLogger
 
 from odoo import fields, http, models
-
+from odoo import api
 
 _logger = getLogger(__name__)
 
@@ -40,7 +40,7 @@ def get_mime_type(file):
         return 'text/%s' % ext
     return None
 
-def get_paths(path_def, extensions):
+def get_paths(path_def, extensions, manifest_cache=None):
     """
     Returns a list of file paths matching a given glob (path_def) as well as
     the addon targetted by the path definition. If no file matches that glob,
@@ -53,9 +53,11 @@ def get_paths(path_def, extensions):
         list of glob files matching the definition [1] (or the glob itself if
         none). Note that these paths are filtered on the given `extensions`.
     """
+    if manifest_cache is None:
+        manifest_cache = http.addons_manifest
     paths = []
     addon = path_def.split('/')[0]
-    addon_manifest = http.addons_manifest.get(addon)
+    addon_manifest = manifest_cache.get(addon)
 
     if addon_manifest:
         addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
@@ -97,6 +99,19 @@ class IrAsset(models.Model):
     _name = 'ir.asset'
     _description = 'Asset'
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        self.clear_caches()
+        return super().create(vals_list)
+
+    def write(self, values):
+        self.clear_caches()
+        return super().write(values)
+
+    def unlink(self):
+        self.clear_caches()
+        return super().unlink()
+
     def _get_asset_domain(self, bundle):
         """Meant to be overridden to add additional parts to the search domain"""
         return [('bundle', '=', bundle), ('active', '=', True)]
@@ -113,7 +128,7 @@ class IrAsset(models.Model):
     target = fields.Char(string='Target')
     active = fields.Boolean(string='active', default=True)
 
-    def get_addon_files(self, addons, bundle, css=False, js=False, xml=False, addon_files=None):
+    def get_addon_files(self, addons, bundle, css=False, js=False, xml=False, addon_files=None, circular_path=None):
         """
         Fetches all asset file paths from a given list of addons matching a
         certain bundle. The returned list is composed of tuples containing the
@@ -170,10 +185,15 @@ class IrAsset(models.Model):
                 target = None
 
             if directive == INCLUDE_DIRECTIVE:
+                c_path = list(circular_path) if circular_path else []
+                if bundle in c_path:
+                    c_path.append(bundle)  # to have a full circle in the exception
+                    raise Exception('Circular assets bundle declaration: %s' % ' > '.join(c_path))
+                c_path.append(bundle)
                 # Recursively calls this function for each 'include' directive.
-                return self.get_addon_files(addons, path_def, css, js, xml, addon_files)
+                return self.get_addon_files(addons, path_def, css, js, xml, addon_files, c_path)
 
-            addon, paths = get_paths(path_def, exts)
+            addon, paths = get_paths(path_def, exts, self._get_manifest_cache())
 
             if directive == REPLACE_DIRECTIVE:
                 # When replacing, we need the target path to be exactly the
@@ -190,7 +210,7 @@ class IrAsset(models.Model):
                 # it was declared like this in the first place. This is why we
                 # go through the trouble of finding the exact paths matching
                 # the given target glob (even though we only need the first one).
-                target_addon, target_paths = get_paths(target, exts)
+                target_addon, target_paths = get_paths(target, exts, self._get_manifest_cache())
 
                 if not len(target_paths):
                     # The list is empty when the target path has the wrong extension.
@@ -223,7 +243,7 @@ class IrAsset(models.Model):
 
         # 2. Goes through all addons' manifests.
         for addon in addons:
-            manifest = http.addons_manifest.get(addon)
+            manifest = self._get_manifest_cache().get(addon)
 
             if not manifest:
                 continue
@@ -248,3 +268,7 @@ class IrAsset(models.Model):
             process_path(asset.directive, asset.target, asset.glob)
 
         return addon_files
+
+    @staticmethod
+    def _get_manifest_cache():
+        return http.addons_manifest

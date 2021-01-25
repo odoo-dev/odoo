@@ -115,6 +115,8 @@ class AssetsBundle(object):
         self.user_direction = self.env['res.lang']._lang_get(
             self.env.context.get('lang') or self.env.user.lang
         ).direction
+        # asset-wide html "media" attribute
+        self.media = None
         for f in files:
             if f['atype'] == 'text/sass':
                 self.stylesheets.append(SassStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
@@ -126,6 +128,8 @@ class AssetsBundle(object):
                 self.stylesheets.append(StylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
             elif f['atype'] == 'text/javascript':
                 self.javascripts.append(JavascriptAsset(self, url=f['url'], filename=f['filename'], inline=f['content']))
+            if self.media is None and f['media']:
+                self.media = f['media']
 
     def to_node(self, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False):
         """
@@ -158,6 +162,7 @@ class AssetsBundle(object):
                         ["href", attachment.url],
                         ['data-asset-bundle', self.name],
                         ['data-asset-version', self.version],
+                        ['media', self.media],
                     ])
                     response.append(("link", attr, None))
                 if self.css_errors:
