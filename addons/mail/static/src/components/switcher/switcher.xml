@@ -3,10 +3,10 @@
 
     <t t-name="mail.Switcher" owl="1">
         <div class="o_Switcher" t-att-class="{is_open: state.isOpen }">
-            <div class="o_Switcher_overlay"></div>
+            <div class="o_Switcher_overlay" t-on-click="_close"></div>
             <div class="o_Switcher_box">
                 <form>
-                    <input type="text" name="switch" />
+                    <input type="text" name="switch" t-ref="inputSwitcher"/>
                 </form>
             </div>
         </div>

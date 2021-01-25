@@ -6,6 +6,7 @@ const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
 const { Component, useState } = owl;
+const { useRef } = owl.hooks;
 
 class Switcher extends Component {
 
@@ -27,13 +28,18 @@ class Switcher extends Component {
 
         document.addEventListener("keydown", event => {
             // See doc: https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event
-            if (event.isComposing || event.keyCode === 229) {
+            if (event.isComposing) {
                 return;
             }
 
-            if (event.ctrlKey && event.keyCode == 75) {
+            if (event.ctrlKey && event.key == 'k' && !this.state.isOpen) {
                 event.preventDefault();
                 this._open();
+            }
+
+            if (event.key == 'Escape' && this.state.isOpen) {
+                event.preventDefault();
+                this._close();
             }
         });
     }
