@@ -116,7 +116,10 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             devicePreview: false,
         };
 
-        var translator = new EditorMenu(this, { wysiwygOptions: params });
+        var translator = new EditorMenu(this, {
+            wysiwygOptions: params,
+            savableSelector: '[data-oe-model][data-oe-translation-id][data-oe-translation-state]',
+        });
 
         // We don't want the BS dropdown to close
         // when clicking in a element to translate

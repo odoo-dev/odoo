@@ -46,6 +46,14 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 context = ctx;
             },
         });
+        this.oeStructureSelector = '.oe_structure[data-oe-xpath][data-oe-id]';
+        this.oeFieldSelector = '[data-oe-field]';
+        if (options.savableSelector) {
+            console.log("yup");
+            this.savableSelector = options.savableSelector;
+        } else {
+            this.savableSelector = `${this.oeStructureSelector}, ${this.oeFieldSelector}`;
+        }
         this._editorAutoStart = (context.editable && window.location.search.indexOf('enable_editor') >= 0);
         var url = new URL(window.location.href);
         url.searchParams.delete('enable_editor');
@@ -252,23 +260,19 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             this.$el.css({width: ''});
         });
 
-        const oeStructureSelector = '.oe_structure[data-oe-xpath][data-oe-id]';
-        const oeFieldSelector = '[data-oe-field]';
-        const savableSelector = `${oeStructureSelector}, ${oeFieldSelector}`;
-
         // Only make the odoo structure and fields editable.
         this.wysiwyg.odooEditor.observerUnactive();
         $('#wrapwrap').on('click.odoo-website-editor', '*', this, this._preventDefault);
         $('#wrapwrap').attr('contenteditable', 'false');
         $('#wrapwrap *').each((key, el) => {delete el.ouid});
-        $(savableSelector).attr('contenteditable', 'true');
+        $(this.savableSelector).attr('contenteditable', 'true');
         this.wysiwyg.odooEditor.idSet($('#wrapwrap')[0]);
         this.wysiwyg.odooEditor.observerActive();
 
         // Observe changes to mark dirty structures and fields.
         this.observer = new MutationObserver(records => {
             for (const record of records) {
-                const $savable = $(record.target).closest(savableSelector);
+                const $savable = $(record.target).closest(this.savableSelector);
 
                 // Filter out:
                 // 1) Sizzle trigger many attribute mutation that does not
@@ -278,7 +282,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 if (
                     record.type === 'attributes' &&
                     (record.oldValue === record.target.getAttribute(record.attributeName) ||
-                        $savable.is(oeFieldSelector))
+                        $savable.is(this.oeFieldSelector))
                 ) {
                     continue;
                 }
