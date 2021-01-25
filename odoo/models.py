@@ -3418,6 +3418,7 @@ Fields:
             return True
 
         self.check_access_rights('unlink')
+        self.check_access_rule('unlink')
         self._check_concurrency()
 
         from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
@@ -3426,76 +3427,78 @@ Fields:
             if func._ondelete or not self._context.get(MODULE_UNINSTALL_FLAG):
                 func(self)
 
-        # mark fields that depend on 'self' to recompute them after 'self' has
-        # been deleted (like updating a sum of lines after deleting one line)
-        self.flush()
-        self.modified(self._fields, before=True)
-
-        with self.env.norecompute():
-            self.check_access_rule('unlink')
-
-            cr = self._cr
-            Data = self.env['ir.model.data'].sudo().with_context({})
-            Defaults = self.env['ir.default'].sudo()
-            Property = self.env['ir.property'].sudo()
-            Attachment = self.env['ir.attachment'].sudo()
-            ir_model_data_unlink = Data
-            ir_attachment_unlink = Attachment
-
-            # TOFIX: this avoids an infinite loop when trying to recompute a
-            # field, which triggers the recomputation of another field using the
-            # same compute function, which then triggers again the computation
-            # of those two fields
-            for field in self._fields.values():
+        # TOFIX: this avoids an infinite loop when trying to recompute a
+        # field, which triggers the recomputation of another field using the
+        # same compute function, which then triggers again the computation
+        # of those two fields
+        for field in self._fields.values():
+            if field.compute and field.store:
                 self.env.remove_to_compute(field, self)
 
-            for sub_ids in cr.split_for_in_conditions(self.ids):
-                # Check if the records are used as default properties.
-                refs = ['%s,%s' % (self._name, i) for i in sub_ids]
-                if Property.search([('res_id', '=', False), ('value_reference', 'in', refs)], limit=1):
-                    raise UserError(_('Unable to delete this document because it is used as a default property'))
+        self.flush()
 
-                # Delete the records' properties.
-                Property.search([('res_id', 'in', refs)]).unlink()
+        cr = self._cr
+        Data = self.env['ir.model.data'].sudo().with_context({})
+        Defaults = self.env['ir.default'].sudo()
+        Property = self.env['ir.property'].sudo()
+        Attachment = self.env['ir.attachment'].sudo()
+        ir_model_data_unlink = Data
+        ir_attachment_unlink = Attachment
 
-                query = "DELETE FROM %s WHERE id IN %%s" % self._table
-                cr.execute(query, (sub_ids,))
+        for sub_ids in cr.split_for_in_conditions(self.ids):
+            records = self.browse(sub_ids)
 
-                # Removing the ir_model_data reference if the record being deleted
-                # is a record created by xml/csv file, as these are not connected
-                # with real database foreign keys, and would be dangling references.
-                #
-                # Note: the following steps are performed as superuser to avoid
-                # access rights restrictions, and with no context to avoid possible
-                # side-effects during admin calls.
-                data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
-                if data:
-                    ir_model_data_unlink |= data
+            # Check if the records are used as default properties.
+            refs = ['%s,%s' % (self._name, i) for i in sub_ids]
+            if Property.search([('res_id', '=', False), ('value_reference', 'in', refs)], limit=1):
+                raise UserError(_('Unable to delete this document because it is used as a default property'))
 
-                # For the same reason, remove the defaults having some of the
-                # records as value
-                Defaults.discard_records(self.browse(sub_ids))
+            # Delete the records' properties.
+            Property.search([('res_id', 'in', refs)]).unlink()
 
-                # For the same reason, remove the relevant records in ir_attachment
-                # (the search is performed with sql as the search method of
-                # ir_attachment is overridden to hide attachments of deleted
-                # records)
-                query = 'SELECT id FROM ir_attachment WHERE res_model=%s AND res_id IN %s'
-                cr.execute(query, (self._name, sub_ids))
-                attachments = Attachment.browse([row[0] for row in cr.fetchall()])
-                if attachments:
-                    ir_attachment_unlink |= attachments.sudo()
+            # mark fields that depend on 'self' to recompute them after 'self' has
+            # been deleted (like updating a sum of lines after deleting one line)
+            with self.env.protecting(self._fields.values(), records):
+                records.modified(self._fields, before=True)
 
-            # invalidate the *whole* cache, since the orm does not handle all
-            # changes made in the database, like cascading delete!
-            self.invalidate_cache()
-            if ir_model_data_unlink:
-                ir_model_data_unlink.unlink()
-            if ir_attachment_unlink:
-                ir_attachment_unlink.unlink()
-            # DLE P93: flush after the unlink, for recompute fields depending on
-            # the modified of the unlink
-            self.flush()
+            query = "DELETE FROM %s WHERE id IN %%s" % self._table
+            cr.execute(query, (sub_ids,))
+
+            # Removing the ir_model_data reference if the record being deleted
+            # is a record created by xml/csv file, as these are not connected
+            # with real database foreign keys, and would be dangling references.
+            #
+            # Note: the following steps are performed as superuser to avoid
+            # access rights restrictions, and with no context to avoid possible
+            # side-effects during admin calls.
+            data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
+            if data:
+                ir_model_data_unlink |= data
+
+            # For the same reason, remove the defaults having some of the
+            # records as value
+            Defaults.discard_records(records)
+
+            # For the same reason, remove the relevant records in ir_attachment
+            # (the search is performed with sql as the search method of
+            # ir_attachment is overridden to hide attachments of deleted
+            # records)
+            query = 'SELECT id FROM ir_attachment WHERE res_model=%s AND res_id IN %s'
+            cr.execute(query, (self._name, sub_ids))
+            attachments = Attachment.browse([row[0] for row in cr.fetchall()])
+            if attachments:
+                ir_attachment_unlink |= attachments.sudo()
+
+        # invalidate the *whole* cache, since the orm does not handle all
+        # changes made in the database, like cascading delete!
+        self.invalidate_cache()
+        if ir_model_data_unlink:
+            ir_model_data_unlink.unlink()
+        if ir_attachment_unlink:
+            ir_attachment_unlink.unlink()
+        # DLE P93: flush after the unlink, for recompute fields depending on
+        # the modified of the unlink
+        self.flush()
 
         # auditing: deletions are infrequent and leave no trace in the database
         _unlink.info('User #%s deleted %s records with IDs: %r', self._uid, self._name, self.ids)
