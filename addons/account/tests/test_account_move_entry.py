@@ -477,14 +477,17 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.test_move.name = '00000876-G 0002/2020'
         next = self.test_move.copy({'date': self.test_move.date})
         next.action_post()
-        self.assertEqual(next.name, '00000876-G 0002/2021')  # Wait, I didn't want this!
+        self.assertEqual(next.name, '00000876-G 0002/0001')  # Wait, I didn't want this!
 
         next.journal_id.sequence_override_regex = r'^(?P<seq>\d*)(?P<suffix1>.*?)(?P<year>(\d{4})?)(?P<suffix2>)$'
         next.name = '/'
-        next._compute_name()
+        next.action_post()
         self.assertEqual(next.name, '00000877-G 0002/2020')  # Pfew, better!
+        next = self.test_move.copy({'date': self.test_move.date})
+        next.action_post()
+        self.assertEqual(next.name, '00000878-G 0002/2020')
 
-        next = next = self.test_move.copy({'date': self.test_move.date})
+        next = self.test_move.copy({'date': self.test_move.date})
         next.date = "2017-05-02"
         next.action_post()
         self.assertEqual(next.name, '00000001-G 0002/2017')
@@ -551,6 +554,25 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.assertEqual(copies[3].state, 'posted')
         self.assertEqual(copies[5].name, 'XMISC/2019/10005')
         self.assertEqual(copies[5].state, 'draft')
+
+    def test_sequence_get_more_specific(self):
+        # Start with a continuous sequence
+        self.test_move.name = 'MISC/00001'
+
+        # Change the prefix to reset every year starting in 2017
+        new = self.test_move.copy({
+            'date': self.test_move.date + relativedelta(years=1),
+        })
+        new.action_post()
+        self.assertEqual(new.name, 'MISC/00002')
+        new.name = 'MISC/2017/00001'
+
+        # Keep the old prefix in 2016
+        new_new = self.test_move.copy({
+            'date': self.test_move.date,
+        })
+        new_new.action_post()
+        self.assertEqual(new_new.name, 'MISC/00002')
 
     def test_sequence_concurency(self):
         with self.env.registry.cursor() as cr0,\
