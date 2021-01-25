@@ -151,7 +151,6 @@ const Wysiwyg = Widget.extend({
     save: function () {
         var isDirty = this.isDirty();
         var html = this.getValue();
-        debugger
         if (this.$target.is('textarea')) {
             this.$target.val(html);
         } else {
