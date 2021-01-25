@@ -150,9 +150,6 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             wysiwygLoader.loadFromTextarea(self, $textarea[0], options).then(wysiwyg => {
                 // float-left class messes up the post layout OPW 769721
                 $form.find('.note-editable').find('img.float-left').removeClass('float-left');
-                // $form.on('click', 'button .a-submit', () => {
-                //     wysiwyg.save();
-                // });
             });
         });
 
