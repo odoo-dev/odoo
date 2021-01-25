@@ -23,20 +23,18 @@ function parseXML(node, data) {
     switch (node.tagName) {
       case "graph":
         if (node.getAttribute("disable_linking")) {
-          data.disableLinking = !!JSON.parse(node.getAttribute("disable_linking"));
+          data.disableLinking = Boolean(evaluateExpr(node.getAttribute("disable_linking")));
         }
-        const mode = node.getAttribute("type"); //grr...
-        if (mode && MODES.includes(mode)) {
+        if (node.getAttribute("stacked")) {
+          data.stacked = Boolean(evaluateExpr(node.getAttribute("stacked")));
+        }
+        const mode = node.getAttribute("type");
+        if (MODES.includes(mode)) {
           data.mode = mode;
         }
         const order = node.getAttribute("order");
-        if (order && ORDERS.includes(order)) {
+        if (ORDERS.includes(order)) {
           data.order = order;
-        }
-        const stacked = node.getAttribute("stacked");
-        if (stacked && stacked === "False") {
-          // weird to ask it to be exactly 'False'
-          data.stacked = false;
         }
         const title = node.getAttribute("string");
         if (title) {
@@ -51,18 +49,24 @@ function parseXML(node, data) {
         if (fieldName === "id") {
           break;
         }
-        const isInvisible = Boolean(evaluateExpr(node.getAttribute("invisible") || "False"));
+        const isInvisible = Boolean(evaluateExpr(node.getAttribute("invisible") || "0"));
         if (isInvisible) {
-          delete data.fields[fieldName];
+          delete data.fields[fieldName]; // good idea??? It was not like that before (see also additionalMeasures and click on dashboard aggregate)
           break;
         }
+        // before the string attribute was used eventually in menu "Measures"
         const isDefaultMeasure = node.getAttribute("type") === "measure";
         if (isDefaultMeasure) {
           data.activeMeasure = fieldName;
         } else {
-          const fieldType = data.fields[fieldName].type; // exists (rng validation)
-          if (GROUPABLE_TYPES.includes(fieldType)) {
-            const groupBy = getGroupBy(fieldName, data.fields);
+          const { type } = data.fields[fieldName]; // exists (rng validation)
+          if (GROUPABLE_TYPES.includes(type)) {
+            let gb = fieldName;
+            const interval = node.getAttribute("interval");
+            if (interval) {
+              gb += `:${interval}`;
+            }
+            const groupBy = getGroupBy(gb, data.fields);
             data.groupBy.push(groupBy);
           }
         }
