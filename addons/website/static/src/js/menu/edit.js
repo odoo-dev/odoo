@@ -36,8 +36,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     /**
      * @constructor
      */
-    init: function () {
+    init: function (parent, options) {
         this._super.apply(this, arguments);
+        this.wysiwygOptions = options && options.wysiwygOptions || {};
         var context;
         this.trigger_up('context_get', {
             extra: true,
@@ -61,7 +62,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
         // If we auto start the editor or if we start it in translate mode, do
         // not show a welcome message
-        if (this._editorAutoStart || this._translateMode) {
+        if (this._editorAutoStart) {
             return Promise.all([def, this._startEditMode()]);
         }
 
@@ -362,7 +363,10 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             saveButton: true,
             devicePreview: true,
         };
-        return wysiwygLoader.createWysiwyg(this, params, ['website.compiled_assets_wysiwyg']);
+        return wysiwygLoader.createWysiwyg(this,
+            Object.assign(params, this.wysiwygOptions),
+            ['website.compiled_assets_wysiwyg']
+        );
     },
 
 

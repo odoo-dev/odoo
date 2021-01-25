@@ -1,9 +1,47 @@
 odoo.define('website.translateMenu', function (require) {
 'use strict';
 
-var utils = require('web.utils');
-var TranslatorMenu = require('website.editor.menu.translate');
+require('web.dom_ready');
+var Dialog = require('web.Dialog');
+var EditorMenu = require('website.editMenu');
+var localStorage = require('web.local_storage');
 var websiteNavbarData = require('website.navbar');
+
+var localStorageNoDialogKey = 'website_translator_nodialog';
+
+var TranslatorInfoDialog = Dialog.extend({
+    template: 'website.TranslatorInfoDialog',
+    xmlDependencies: Dialog.prototype.xmlDependencies.concat(
+        ['/website/static/src/xml/translator.xml']
+    ),
+
+    /**
+     * @constructor
+     */
+    init: function (parent, options) {
+        this._super(parent, _.extend({
+            title: _t("Translation Info"),
+            buttons: [
+                {text: _t("Ok, never show me this again"), classes: 'btn-primary', close: true, click: this._onStrongOk.bind(this)},
+                {text: _t("Ok"), close: true}
+            ],
+        }, options || {}));
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Called when the "strong" ok is clicked -> adapt localstorage to make sure
+     * the dialog is never displayed again.
+     *
+     * @private
+     */
+    _onStrongOk: function () {
+        localStorage.setItem(localStorageNoDialogKey, true);
+    },
+});
 
 var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     assetLibs: ['web_editor.compiled_assets_wysiwyg', 'website.compiled_assets_wysiwyg'],
@@ -73,7 +111,12 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             return new Promise(function () {});
         }
 
-        var translator = new TranslatorMenu(this);
+        const params = {
+            enableTranslation: true,
+            devicePreview: false,
+        };
+
+        var translator = new EditorMenu(this, { wysiwygOptions: params });
 
         // We don't want the BS dropdown to close
         // when clicking in a element to translate
@@ -81,7 +124,13 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             ev.stopPropagation();
         });
 
-        return translator.prependTo(document.body);
+        if (!localStorage.getItem(localStorageNoDialogKey)) {
+            new TranslatorInfoDialog(translator).open();
+        }
+
+        translator.prependTo(document.body).then(() => {
+            translator._startEditMode();
+        });
     },
 });
 

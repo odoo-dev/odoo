@@ -1022,6 +1022,18 @@ var SnippetsMenu = Widget.extend({
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
 
+        if (this.options.onlyStyleTab) {
+            await this._loadSnippetsTemplates();
+            this.$el.find('.o_we_website_top_actions').removeClass('d-none');
+            this.$('.o_snippet_search_filter').addClass('d-none');
+            this.$('#o_scroll').addClass('d-none');
+            this.$('#snippets_menu button').removeClass('active').prop('disabled', true);
+            this.$('.o_we_customize_snippet_btn').addClass('active').prop('disabled', false);
+            this.$('o_we_ui_loading').addClass('d-none');
+            $(this.customizePanel).removeClass('d-none');
+            return Promise.all(defs);
+        }
+
         this.invisibleDOMPanelEl = document.createElement('div');
         this.invisibleDOMPanelEl.classList.add('o_we_invisible_el_panel');
         this.invisibleDOMPanelEl.appendChild(

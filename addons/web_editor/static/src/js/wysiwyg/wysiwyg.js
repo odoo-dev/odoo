@@ -79,11 +79,12 @@ const Wysiwyg = Widget.extend({
         await this.toolbar.appendTo(document.createElement('void'));
         this.odooEditor = new OdooEditor(this.$editable[0], { toolbar: this.toolbar.$el[0], document: this.options.document });
 
-        if (options.snippets || options.enableTranslation) {
+        if (options.snippets) {
             $('body').addClass('editor_enable');
             this.snippetsMenu = new snippetsEditor.SnippetsMenu(this, Object.assign({
                 wysiwyg: this,
                 selectorEditableArea: '.o_editable',
+                onlyStyleTab: this.options.enableTranslation,
             }, options));
             this._insertSnippetMenu();
         }
