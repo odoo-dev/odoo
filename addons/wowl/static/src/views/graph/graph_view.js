@@ -102,7 +102,6 @@ export const GRAPH_DEFAULT_PROPS = {
 _lt("Undefined"); // for script analysis
 export class GraphView extends Component {
   constructor() {
-    var _a;
     super(...arguments);
     this.measures = {};
     this.groupableFields = {};
@@ -163,7 +162,7 @@ export class GraphView extends Component {
     this.fields = fields;
     const { groupBy } = this.searchModel;
     let initialGroupBy;
-    if ((_a = this.props.state) === null || _a === void 0 ? void 0 : _a.groupBy) {
+    if (this.props.state && this.props.state.groupBy) {
       initialGroupBy = this.props.state.groupBy;
     } else if (groupBy && groupBy.length) {
       initialGroupBy = groupBy;
@@ -491,14 +490,12 @@ export class GraphView extends Component {
     const minLeftAllowed = Math.floor(this.chart.chartArea.left + 2);
     const maxLeftAllowed = Math.floor(this.chart.chartArea.right - tooltipWidth - 2);
     x = Math.floor(x);
-    if (x <= maxLeftAllowed) {
-      if (x >= minLeftAllowed) {
-        left = x;
-      } else {
-        left = minLeftAllowed;
-      }
-    } else {
+    if (x < minLeftAllowed) {
+      left = minLeftAllowed;
+    } else if (x > maxLeftAllowed) {
       left = maxLeftAllowed;
+    } else {
+      left = x;
     }
     tooltip.style.left = left + "px";
   }
@@ -838,5 +835,4 @@ GraphView.display_name = "graph";
 GraphView.icon = "fa-bar-chart";
 GraphView.multiRecord = true;
 GraphView.template = "wowl.GraphView";
-GraphView.components = {};
 GraphView.defaultProps = GRAPH_DEFAULT_PROPS;
