@@ -70,7 +70,6 @@ async function loadFromTextarea(parent, textarea, options) {
         // float-left class messes up the post layout OPW 769721
         $form.find('.note-editable').find('img.float-left').removeClass('float-left');
         console.log("$textarea:", $textarea);
-        $textarea.val(await wysiwyg.getValue());
         $textarea.html(await wysiwyg.getValue());
     });
 
