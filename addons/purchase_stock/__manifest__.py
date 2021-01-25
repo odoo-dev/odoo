@@ -26,6 +26,7 @@
         'report/purchase_report_templates.xml',
         'report/report_stock_forecasted.xml',
         'report/report_stock_rule.xml',
+        'wizard/stock_warn_missing_vendor_views.xml',
     ],
     'demo': [
         'data/purchase_stock_demo.xml',

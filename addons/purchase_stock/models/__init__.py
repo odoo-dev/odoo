@@ -9,3 +9,4 @@ from . import res_config_settings
 from . import res_partner
 from . import stock
 from . import stock_rule
+from . import stock_orderpoint

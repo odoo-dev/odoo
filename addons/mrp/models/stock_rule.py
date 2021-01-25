@@ -63,9 +63,11 @@ class StockRule(models.Model):
                 origin_production = production.move_dest_ids and production.move_dest_ids[0].raw_material_production_id or False
                 orderpoint = production.orderpoint_id
                 if orderpoint:
-                    production.message_post_with_view('mail.message_origin_link',
-                                                      values={'self': production, 'origin': orderpoint},
-                                                      subtype_id=self.env.ref('mail.mt_note').id)
+                    odoobot = self.env.ref('base.partner_root')
+                    production.message_post(body=_('This production order has been created from Replenishment Report.'),
+                          message_type='comment',
+                          subtype_xmlid='mail.mt_note',
+                          author_id=odoobot.id)
                 if origin_production:
                     production.message_post_with_view('mail.message_origin_link',
                                                       values={'self': production, 'origin': origin_production},

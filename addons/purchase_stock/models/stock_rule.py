@@ -146,6 +146,19 @@ class StockRule(models.Model):
                         procurement.values, po))
             self.env['purchase.order.line'].sudo().create(po_line_values)
 
+            order_point = po.order_line.mapped('orderpoint_id')
+            if order_point:
+                odoobot = self.env.ref('base.partner_root')
+                origin = order_point[0].display_name
+                po_origin = list(po.origin.split(', ')) if po.origin else []
+
+                if origin not in po_origin:
+                    po.write({'origin': po.origin + ', ' + ', '.join([origin]) if po.origin else ', '.join([origin])})
+                    po.message_post(body=_('This purchase order has been created from %s.', origin),
+                        message_type='comment',
+                        subtype_xmlid='mail.mt_note',
+                        author_id=odoobot.id)
+
     def _get_lead_days(self, product):
         """Add the company security lead time, days to purchase and the supplier
         delay to the cumulative delay and cumulative description. The days to

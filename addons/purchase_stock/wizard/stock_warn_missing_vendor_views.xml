@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_warn_missing_vendor_form_view" model="ir.ui.view">
+        <field name="name">stock.warn.missing.vendor.form</field>
+        <field name="model">stock.warn.missing.vendor</field>
+        <field name="arch" type="xml">
+            <form>
+                <div>
+                    There is no matching vendor price to generate the purchase order for product.
+                    You can edit and add the seller on product.
+                </div>         
+                <footer>
+                    <button string="OK" special="cancel"/>
+                    <button string="Edit Product" name="action_edit_product" type="object"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
