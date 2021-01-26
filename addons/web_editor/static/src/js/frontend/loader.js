@@ -45,21 +45,16 @@ async function loadFromTextarea(parent, textarea, options) {
     }
     const wysiwyg = await createWysiwyg(parent, currentOptions);
 
-    const $wysiwygWrapper = $textarea.closest('.o_wysiwyg_wrapper');
+    const $wysiwygWrapper = $textarea.closest('.o_wysiwyg_textarea_wrapper');
     const $form = $textarea.closest('form');
-    $wysiwygWrapper.css({
-        'display': 'flex',
-        'flex-direction': 'column',
-        'flex-grow': '1 1 auto',
-        'height': options.height || 200,
-    });
 
     // hide and append the $textarea in $form so it's value will be send
     // through the form.
     $textarea.hide();
     $form.append($textarea);
+    $wysiwygWrapper.html('');
 
-    await wysiwyg.attachTo($wysiwygWrapper);
+    await wysiwyg.appendTo($wysiwygWrapper);
     $form.find('.note-editable').data('wysiwyg', wysiwyg);
 
     $form.on('click', 'button[type=submit]', async (e) => {

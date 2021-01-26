@@ -67,6 +67,7 @@ publicWidget.registry.websiteProfileEditor = publicWidget.Widget.extend({
                 res_model: 'res.users',
                 res_id: parseInt(this.$('input[name=user_id]').val()),
             },
+            resizable: true,
         });
         // const loadProm = this.wysiwyg.attachTo($textarea[0]);
 

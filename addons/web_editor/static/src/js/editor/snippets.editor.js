@@ -1259,8 +1259,8 @@ var SnippetsMenu = Widget.extend({
      * @returns {JQuery}
      */
     getEditableArea: function () {
-        return this.options.wysiwyg.$editor.find(this.options.selectorEditableArea)
-            .add(this.options.wysiwyg.$editor.filter(this.options.selectorEditableArea));
+        return this.options.wysiwyg.$editable.find(this.options.selectorEditableArea)
+            .add(this.options.wysiwyg.$editable.filter(this.options.selectorEditableArea));
     },
     /**
      * Updates the cover dimensions of the current snippet editor.

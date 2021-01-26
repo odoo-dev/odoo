@@ -54,8 +54,20 @@ Wysiwyg.include({
         const _super = this._super.bind(this);
 
         await this.defAsset;
-        await this._loadIframe();
         await _super();
+    },
+
+    /**
+     * @override
+     **/
+    start: async function () {
+        const _super = this._super.bind(this);
+        if (!this.options.inIframe) {
+            return _super();
+        } else {
+            await this._loadIframe();
+            return _super();
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -91,18 +103,15 @@ Wysiwyg.include({
                 $iframeTarget.html($iframeTarget.html());
                 self.$iframeBody = $iframeTarget;
                 $iframeTarget.attr("isMobile", config.device.isMobile);
-                $iframeTarget.find('.o_editable').html(self.$target.val());
                 const $utilsZone = $('<div class="iframe-utils-zone">');
                 self.$utilsZone = $utilsZone;
 
                 const $iframeWrapper = $('<div class="iframe-editor-wrapper">');
-                const $content = $('<div data-oe-model="model" data-oe-type="html" class="o_editable oe_structure"><p></br></p></div>');
+                self.$editable.attr('class', 'o_editable oe_structure');
 
-                self.$el = $content;
-                self.el = self.$el[0];
                 $iframeTarget.append($iframeWrapper);
                 $iframeTarget.append($utilsZone);
-                $iframeWrapper.append($content);
+                $iframeWrapper.append(self.$editable);
 
                 self.options.toolbarHandler = $('#web_editor-top-edit', self.$iframe[0].contentWindow.document);
                 $iframeTarget.on('click', '.o_fullscreen_btn', function () {
@@ -138,7 +147,7 @@ Wysiwyg.include({
             self.options.document = self.$iframe[0].contentWindow.document;
         });
 
-        this.$iframe.insertAfter(this.$target);
+        this.$iframe.insertAfter(this.$editable);
 
         return def;
     },

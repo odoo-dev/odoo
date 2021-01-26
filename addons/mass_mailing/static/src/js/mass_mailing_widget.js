@@ -61,7 +61,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
         var $editable = this.wysiwyg.getEditable();
 
         return this.wysiwyg.saveModifiedImages(this.$content).then(function () {
-            self.$wysiwygWrapper.html(self.wysiwyg.getValue());
             self._isDirty = self.wysiwyg.isDirty();
 
             convertInline.attachmentThumbnailToLinkImg($editable);
@@ -155,7 +154,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
             this.value = this.recordData[this.nodeOptions['inline-field']];
         }
         const prom = this._super.apply(this, arguments);
-        this.$wysiwygWrapper.hide();
         return prom;
     },
     /**
@@ -292,13 +290,13 @@ var MassMailingFieldHtml = FieldHtml.extend({
         } else if (old_layout) {
             $contents = ($old_layout.hasClass('oe_structure') ? $old_layout : $old_layout.find('.oe_structure').first()).contents().clone();
         } else {
-            $contents = this.$content.find('.o_editable').contents().clone();
+            $contents = this.$content.contents().clone();
         }
 
         $newWrapperContent.append($contents);
         this._switchImages(themeParams, $newWrapperContent);
         old_layout && old_layout.remove();
-        this.$content.find('.o_editable').empty().append($newLayout);
+        this.$content.empty().append($newLayout);
 
         if (firstChoice) {
             $newWrapperContent.find('*').addBack()
@@ -308,10 +306,19 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 }).parent().addClass('o_default_snippet_text');
 
             if (themeParams.name == 'basic') {
-                this.$content.focusIn();
+                this.$content.focusin();
             }
         }
         this.wysiwyg.trigger('reload_snippet_dropzones');
+    },
+
+    /**
+     * @override
+     */
+    _getWysiwygOptions: function () {
+        const options = this._super.apply(this, arguments);
+        options.resizable = false;
+        return options;
     },
 
     //--------------------------------------------------------------------------
