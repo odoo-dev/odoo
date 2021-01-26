@@ -49,7 +49,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         this.oeStructureSelector = '.oe_structure[data-oe-xpath][data-oe-id]';
         this.oeFieldSelector = '[data-oe-field]';
         if (options.savableSelector) {
-            console.log("yup");
             this.savableSelector = options.savableSelector;
         } else {
             this.savableSelector = `${this.oeStructureSelector}, ${this.oeFieldSelector}`;
@@ -68,8 +67,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     start: function () {
         var def = this._super.apply(this, arguments);
 
-        // If we auto start the editor or if we start it in translate mode, do
-        // not show a welcome message
+        // If we auto start the editor, do not show a welcome message
         if (this._editorAutoStart) {
             return Promise.all([def, this._startEditMode()]);
         }
@@ -265,7 +263,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         $('#wrapwrap').on('click.odoo-website-editor', '*', this, this._preventDefault);
         $('#wrapwrap').attr('contenteditable', 'false');
         $('#wrapwrap *').each((key, el) => {delete el.ouid});
-        $(this.savableSelector).attr('contenteditable', 'true');
+        $(this.savableSelector).not('[data-oe-readonly]').attr('contenteditable', 'true');
         this.wysiwyg.odooEditor.idSet($('#wrapwrap')[0]);
         this.wysiwyg.odooEditor.observerActive();
 
