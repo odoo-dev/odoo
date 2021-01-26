@@ -3084,7 +3084,7 @@ const SnippetOptionWidget = Widget.extend({
             // If it is not preview mode, the user selected the option for good
             // (so record the action)
             if (shouldRecordUndo) {
-                this.trigger_up('request_history_undo_record', {$target: this.$target});
+                this.options.wysiwyg.odooEditor.historyStep();
             }
 
             // Call widget option methods and update $target
@@ -3262,10 +3262,7 @@ registry.sizing = SnippetOptionWidget.extend({
                     return;
                 }
                 setTimeout(function () {
-                    self.trigger_up('request_history_undo_record', {
-                        $target: self.$target,
-                        event: 'resize_' + XY,
-                    });
+                    self.options.wysiwyg.odooEditor.historyStep();
                 }, 0);
             };
             $body.on('mousemove', bodyMouseMove);
