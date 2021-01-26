@@ -36,9 +36,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     /**
      * @constructor
      */
-    init: function (parent, options) {
+    init: function (parent, options = {}) {
         this._super.apply(this, arguments);
-        this.wysiwygOptions = options && options.wysiwygOptions || {};
+        this.wysiwygOptions = options.wysiwygOptions || {};
         var context;
         this.trigger_up('context_get', {
             extra: true,
@@ -364,6 +364,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             discardButton: true,
             saveButton: true,
             devicePreview: true,
+            savableSelector: this.savableSelector,
         };
         return wysiwygLoader.createWysiwyg(this,
             Object.assign(params, this.wysiwygOptions),

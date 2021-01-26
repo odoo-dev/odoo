@@ -216,11 +216,7 @@ const Wysiwyg = Widget.extend({
      * Save the content for the normal mode or the translation mode.
      */
     saveContent: async function (reload = true) {
-        if (this.options.enableTranslation) {
-            await this._onSaveTranslation();
-        } else {
-            await this.saveToServer(reload);
-        }
+        await this.saveToServer(reload);
     },
     /**
      * Reset the history.
@@ -331,6 +327,7 @@ const Wysiwyg = Widget.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+
     _editorOptions: function () {
         var self = this;
         var options = Object.assign({},  this.defaultOptions, this.options);
@@ -355,6 +352,43 @@ const Wysiwyg = Widget.extend({
     },
     _insertSnippetMenu: function() {
         return this.snippetsMenu.insertAfter(this.$el);
+    },
+    /**
+     * If the element holds a translation, saves it. Otherwise, fallback to the
+     * standard saving but with the lang kept.
+     *
+     * @override
+     */
+    _saveTranslationElement: function ($el, context, withLang = true) {
+        if ($el.data('oe-translation-id')) {
+            return this._rpc({
+                model: 'ir.translation',
+                method: 'save_html',
+                args: [
+                    [+$el.data('oe-translation-id')],
+                    this._getEscapedElement($el).html()
+                ],
+                context: context,
+            });
+        } else {
+            var viewID = $el.data('oe-id');
+            if (!viewID) {
+                return Promise.resolve();
+            }
+
+            return this._rpc({
+                model: 'ir.ui.view',
+                method: 'save',
+                args: [
+                    viewID,
+                    this._getEscapedElement($el).prop('outerHTML'),
+                    !$el.data('oe-expression') && $el.data('oe-xpath') || null, // Note: hacky way to get the oe-xpath only if not a t-field
+                ],
+                context: context,
+            }, withLang ? undefined : {
+                noContextKeys: 'lang',
+            });
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -396,15 +430,12 @@ const Wysiwyg = Widget.extend({
         $('.o_editable')
             .removeClass('o_editable o_is_inline_editable o_editable_date_field_linked o_editable_date_field_format_changed');
 
-        const $oeStructure = $('.o_dirty.oe_structure[data-oe-xpath][data-oe-id]');
-        const $oeFields = $('.o_dirty[data-oe-field]');
-        const $allBlocks = $oeStructure.add($oeFields);
+        const $allBlocks = $((this.options || {}).savableSelector).filter('.o_dirty');
 
         const $dirty = $('.o_dirty');
         $dirty
             .removeAttr('contentEditable')
             .removeClass('o_dirty oe_carlos_danger o_is_inline_editable');
-        console.log('$dirty', $dirty);
 
         const defs = _.map($allBlocks, (el) => {
             const $el = $(el);
@@ -417,7 +448,11 @@ const Wysiwyg = Widget.extend({
 
             // TODO: Add a queue with concurrency limit in webclient
             return this.saving_mutex.exec(() => {
-                return this._saveElement($el, context || weContext.get())
+                let saveElement = '_saveElement';
+                if (this.options.enableTranslation) {
+                    saveElement = '_saveTranslationElement';
+                }
+                return this[saveElement]($el, context || weContext.get())
                 .then(function () {
                     $el.removeClass('o_dirty');
                 }).guardedCatch(function (response) {

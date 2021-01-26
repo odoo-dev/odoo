@@ -1189,10 +1189,14 @@ var SnippetsMenu = Widget.extend({
     destroy: function () {
         this._super.apply(this, arguments);
         if (this.$window) {
-            this.$snippetEditorArea.remove();
+            if (this.$snippetEditorArea) {
+                this.$snippetEditorArea.remove();
+            }
             this.$window.off('.snippets_menu');
             this.$document.off('.snippets_menu');
-            this.$scrollingElement.off('.snippets_menu');
+            if (this.$scrollingElement) {
+                this.$scrollingElement.off('.snippets_menu');
+            }
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
         delete this.cacheSnippetTemplate[this.options.snippets];

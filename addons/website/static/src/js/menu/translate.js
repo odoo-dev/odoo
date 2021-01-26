@@ -103,6 +103,9 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         edit_master: '_goToMasterPage',
         translate: '_startTranslateMode',
     }),
+    custom_events: {
+        ready_to_save: '_onSave',
+    },
 
     /**
      * @override
@@ -251,7 +254,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @returns {JQuery}
      */
     _getEditableArea: function () {
-        return this.translator.wysiwyg.$editor.add(this.$editables_attribute);
+        return this.translator.wysiwyg.$editable.add(this.$editables_attribute);
     },
     /**
      * Returns a translation object.
@@ -316,6 +319,14 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
             new AttributeTranslateDialog(self, {}, ev.target).open();
         });
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    _onSave: function (ev) {
+        ev.stopPropagation();
     },
 });
 
