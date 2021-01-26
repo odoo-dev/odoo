@@ -2,10 +2,13 @@ odoo.define('website.translateMenu', function (require) {
 'use strict';
 
 require('web.dom_ready');
+var core = require('web.core');
 var Dialog = require('web.Dialog');
 var EditorMenu = require('website.editMenu');
 var localStorage = require('web.local_storage');
 var websiteNavbarData = require('website.navbar');
+
+var _t = core._t;
 
 var localStorageNoDialogKey = 'website_translator_nodialog';
 var reTranslation = /<span [^>]*data-oe-translation-id="([0-9]+)"[^>]*>(.*)<\/span>/;
@@ -44,6 +47,7 @@ var TranslatorInfoDialog = Dialog.extend({
     },
 });
 
+// TODO: Handle this once images are handled.
 var AttributeTranslateDialog = Dialog.extend({
     /**
      * @constructor
