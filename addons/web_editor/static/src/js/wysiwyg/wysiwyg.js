@@ -62,18 +62,22 @@ const Wysiwyg = Widget.extend({
         const _super = this._super;
 
         var options = this._editorOptions();
-        this.$target = this.$el;
         this._value = options.value;
-        this.$editor = this.$target;
-        this.$editor.html(this._value);
-        this.$editor.data('wysiwyg', this);
-        this.$editor.data('oe-model', options.recordInfo.res_model);
-        this.$editor.data('oe-id', options.recordInfo.res_id);
+
+        this.$editable = this.$editable || this.$el;
+        this.$editable.html(this._value);
+        this.$editable.data('wysiwyg', this);
+        this.$editable.data('oe-model', options.recordInfo.res_model);
+        this.$editable.data('oe-id', options.recordInfo.res_id);
         $(document).on('mousedown', this._blur);
+        this.$editable.on('blur', () => {
+            console.log('trigger blur');
+            this.trigger_up('wysiwyg_blur');
+        });
 
         this.toolbar = new Toolbar();
         await this.toolbar.appendTo(document.createElement('void'));
-        this.odooEditor = new OdooEditor(this.$editor[0], { toolbar: this.toolbar.$el[0], document: this.options.document });
+        this.odooEditor = new OdooEditor(this.$editable[0], { toolbar: this.toolbar.$el[0], document: this.options.document });
 
         if (options.snippets) {
             $('body').addClass('editor_enable');
@@ -91,10 +95,59 @@ const Wysiwyg = Widget.extend({
      */
     destroy: function () {
         $(document).off('mousedown', this._blur);
-        if (this.$target && this.$target.is('textarea') && this.$target.next('.note-editor').length) {
-            this.$target.summernote('destroy');
-        }
+        const $body = $(document.body);
+        $body.off('mousedown', this.resizerMousemove);
+        $body.off('mouseup', this.resizerMouseup);
         this._super();
+    },
+    /**
+     * @override
+     */
+    renderElement: function() {
+        this.$editable = this.options.editable || $('<div class="note-editable">');
+
+        if (this.options.resizable) {
+            const $wrapper = $('<div class="o_wysiwyg_wrapper">');
+            $wrapper.append(this.$editable);
+            this.$resizer = $(`<div class="o_wysiwyg_resizer">
+                <div class="o_wysiwyg_resizer_hook"></div>
+                <div class="o_wysiwyg_resizer_hook"></div>
+                <div class="o_wysiwyg_resizer_hook"></div>
+            </div>`);
+            $wrapper.append(this.$resizer);
+            this._replaceElement($wrapper);
+
+            const minHeight = this.options.minHeight || 100;
+            this.$editable.height(this.options.height || minHeight);
+
+            // resizer hooks
+            let startOffsetTop;
+            let startHeight;
+            const $body = $(document.body);
+            const resizerMousedown = (e) => {
+                $body.on('mousemove', this.resizerMousemove);
+                $body.on('mouseup', this.resizerMouseup);
+                startHeight = this.$editable.height();
+                startOffsetTop = e.pageY;
+            };
+            this.resizerMousemove = (e) => {
+                console.log("e.pageY:", e.pageY);
+                const offsetTop = e.pageY - startOffsetTop;
+                console.log('offsetTop', offsetTop);
+                let height = startHeight + offsetTop;
+                console.log("height:", height);
+                if (height < minHeight) height = minHeight;
+                this.$editable.height(height);
+            };
+            this.resizerMouseup = () => {
+                console.log('off')
+                $body.off('mousemove', this.resizerMousemove);
+                $body.off('mouseup', this.resizerMouseup);
+            };
+            this.$resizer.on('mousedown', resizerMousedown)
+        } else {
+            this._replaceElement(this.$editable);
+        }
     },
     //--------------------------------------------------------------------------
     // Public
@@ -105,7 +158,7 @@ const Wysiwyg = Widget.extend({
      * @returns {jQuery}
      */
     getEditable: function () {
-        return this.$editor;
+        return this.$editable;
     },
     /**
      * Return true if the content has changed.
@@ -113,7 +166,7 @@ const Wysiwyg = Widget.extend({
      * @returns {Boolean}
      */
     isDirty: function () {
-        return this._value !== (this.$editor.html() || this.$editor.val());
+        return this._value !== (this.$editable.html() || this.$editable.val());
     },
     /**
      * Set the focus on the element.
@@ -129,7 +182,7 @@ const Wysiwyg = Widget.extend({
      * @returns {String}
      */
     getValue: function (options) {
-        var $editable = options && options.$layout || this.$editor.clone();
+        var $editable = options && options.$layout || this.$editable.clone();
         $editable.find('[contenteditable]').removeAttr('contenteditable');
         $editable.find('[class=""]').removeAttr('class');
         $editable.find('[style=""]').removeAttr('style');
@@ -151,10 +204,10 @@ const Wysiwyg = Widget.extend({
     save: function () {
         var isDirty = this.isDirty();
         var html = this.getValue();
-        if (this.$target.is('textarea')) {
-            this.$target.val(html);
+        if (this.$editable.is('textarea')) {
+            this.$editable.val(html);
         } else {
-            this.$target.html(html);
+            this.$editable.html(html);
         }
         return Promise.resolve({isDirty:isDirty, html:html});
     },
@@ -267,12 +320,12 @@ const Wysiwyg = Widget.extend({
      * @returns {String}
      */
     setValue: function (value, options) {
-        if (this.$editor.is('textarea')) {
-            this.$target.val(value);
+        if (this.$editable.is('textarea')) {
+            this.$editable.val(value);
         } else {
-            this.$target.html(value);
+            this.$editable.html(value);
         }
-        this.$editor.html(value);
+        this.$editable.html(value);
     },
     //--------------------------------------------------------------------------
     // Private
