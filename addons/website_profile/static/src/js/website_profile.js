@@ -69,7 +69,6 @@ publicWidget.registry.websiteProfileEditor = publicWidget.Widget.extend({
             },
             resizable: true,
         });
-        // const loadProm = this.wysiwyg.attachTo($textarea[0]);
 
         return Promise.all([def]);
     },
