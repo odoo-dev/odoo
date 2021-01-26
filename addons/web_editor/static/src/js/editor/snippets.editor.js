@@ -2099,16 +2099,13 @@ var SnippetsMenu = Widget.extend({
 
                         if (prev) {
                             $toInsert.detach();
-                            self.trigger_up('request_history_undo_record', {$target: $(prev)});
                             $toInsert.insertAfter(prev);
                         } else if (next) {
                             $toInsert.detach();
-                            self.trigger_up('request_history_undo_record', {$target: $(next)});
                             $toInsert.insertBefore(next);
                         } else {
                             var $parent = $toInsert.parent();
                             $toInsert.detach();
-                            self.trigger_up('request_history_undo_record', {$target: $parent});
                             $parent.prepend($toInsert);
                         }
 
