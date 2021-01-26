@@ -6,7 +6,7 @@ const useStore = require('mail/static/src/component_hooks/use_store/use_store.js
 const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
 
 const components = {
-    ComposerSuggestionList: require('mail/static/src/components/composer_suggestion_list/composer_suggestion_list.js'),
+    SuggestionsList: require('mail/static/src/components/suggestions_list/suggestions_list.js'),
 };
 const { markEventHandled } = require('mail/static/src/utils/utils.js');
 
@@ -31,7 +31,7 @@ class ComposerTextInput extends Component {
             const correspondent = thread ? thread.correspondent : undefined;
             return {
                 composerHasFocus: composer && composer.hasFocus,
-                composerHasSuggestions: composer && composer.hasSuggestions,
+                composerHasSuggestions: composer && composer.suggestionManager.hasSuggestions,
                 composerIsLastStateChangeProgrammatic: composer && composer.isLastStateChangeProgrammatic,
                 composerIsLog: composer && composer.isLog,
                 composerTextInputContent: composer && composer.textInputContent,
@@ -238,9 +238,9 @@ class ComposerTextInput extends Component {
     _onKeydownTextarea(ev) {
         switch (ev.key) {
             case 'Escape':
-                if (this.composer.hasSuggestions) {
+                if (this.composer.suggestionManager.hasSuggestions) {
                     ev.preventDefault();
-                    this.composer.closeSuggestions();
+                    this.composer.suggestionManager.closeSuggestions();
                     markEventHandled(ev, 'ComposerTextInput.closeSuggestions');
                 }
                 break;
@@ -252,7 +252,7 @@ class ComposerTextInput extends Component {
             case 'Home':
             case 'End':
             case 'Tab':
-                if (this.composer.hasSuggestions) {
+                if (this.composer.suggestionManager.hasSuggestions) {
                     // We use preventDefault here to avoid keys native actions but actions are handled in keyUp
                     ev.preventDefault();
                 }
@@ -269,7 +269,7 @@ class ComposerTextInput extends Component {
      * @param {KeyboardEvent} ev
      */
     _onKeydownTextareaEnter(ev) {
-        if (this.composer.hasSuggestions) {
+        if (this.composer.suggestionManager.hasSuggestions) {
             ev.preventDefault();
             return;
         }
@@ -316,76 +316,17 @@ class ComposerTextInput extends Component {
      * @param {KeyboardEvent} ev
      */
     _onKeyupTextarea(ev) {
-        switch (ev.key) {
-            case 'Escape':
-                // already handled in _onKeydownTextarea, break to avoid default
-                break;
-            // ENTER, HOME, END, UP, DOWN, PAGE UP, PAGE DOWN, TAB: check if navigation in mention suggestions
-            case 'Enter':
-                if (this.composer.hasSuggestions) {
-                    this.composer.insertSuggestion();
-                    this.composer.closeSuggestions();
-                    this.focus();
-                }
-                break;
-            case 'ArrowUp':
-            case 'PageUp':
-                if (this.composer.hasSuggestions) {
-                    this.composer.setPreviousSuggestionActive();
-                    this.composer.update({ hasToScrollToActiveSuggestion: true });
-                }
-                break;
-            case 'ArrowDown':
-            case 'PageDown':
-                if (this.composer.hasSuggestions) {
-                    this.composer.setNextSuggestionActive();
-                    this.composer.update({ hasToScrollToActiveSuggestion: true });
-                }
-                break;
-            case 'Home':
-                if (this.composer.hasSuggestions) {
-                    this.composer.setFirstSuggestionActive();
-                    this.composer.update({ hasToScrollToActiveSuggestion: true });
-                }
-                break;
-            case 'End':
-                if (this.composer.hasSuggestions) {
-                    this.composer.setLastSuggestionActive();
-                    this.composer.update({ hasToScrollToActiveSuggestion: true });
-                }
-                break;
-            case 'Tab':
-                if (this.composer.hasSuggestions) {
-                    if (ev.shiftKey) {
-                        this.composer.setPreviousSuggestionActive();
-                        this.composer.update({ hasToScrollToActiveSuggestion: true });
-                    } else {
-                        this.composer.setNextSuggestionActive();
-                        this.composer.update({ hasToScrollToActiveSuggestion: true });
-                    }
-                }
-                break;
-            case 'Alt':
-            case 'AltGraph':
-            case 'CapsLock':
-            case 'Control':
-            case 'Fn':
-            case 'FnLock':
-            case 'Hyper':
-            case 'Meta':
-            case 'NumLock':
-            case 'ScrollLock':
-            case 'Shift':
-            case 'ShiftSuper':
-            case 'Symbol':
-            case 'SymbolLock':
-                // prevent modifier keys from resetting the suggestion state
-                break;
-            // Otherwise, check if a mention is typed
-            default:
-                this.saveStateInStore();
-                this.composer.detectSuggestionDelimiter();
-        }
+        this.saveStateInStore();
+        this.composer.suggestionManager.update({
+            textInputContent: this.composer.textInputContent,
+            textInputCursorEnd: this.composer.textInputCursorEnd,
+            textInputCursorStart: this.composer.textInputCursorStart,
+            textInputSelectionDirection: this.composer.textInputSelectionDirection,
+        });
+    }
+
+    _onSuggestionSelected() {
+        this.composer.insertSuggestion();
     }
 
 }

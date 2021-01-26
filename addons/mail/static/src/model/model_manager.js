@@ -919,7 +919,11 @@ class ModelManager {
                     let dependencyField = TargetModel.fields[dependencyFieldName];
                     while (!dependencyField) {
                         TargetModel = TargetModel.__proto__;
-                        dependencyField = TargetModel.fields[dependencyFieldName];
+                        try {
+                            dependencyField = TargetModel.fields[dependencyFieldName];
+                        } catch {
+                            throw("error dep field " + dependencyFieldName + ' ' + Model);
+                        }
                     }
                     const dependent = [field.id, field.fieldName].join(DEPENDENT_INNER_SEPARATOR);
                     dependencyField.dependents = [

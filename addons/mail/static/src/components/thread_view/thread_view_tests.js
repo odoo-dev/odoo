@@ -1166,13 +1166,13 @@ QUnit.test('Post a message containing an email address followed by a mention on 
         ["@", "T", "e"].forEach((char)=>{
             document.execCommand('insertText', false, char);
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keydown'));
+                .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keyup'));
+                .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
         });
     });
     await afterNextRender(() =>
-        document.querySelector('.o_ComposerSuggestion').click()
+        document.querySelector('.o_Suggestion').click()
     );
     await afterNextRender(() => {
         document.querySelector('.o_Composer_buttonSend').click();
@@ -1208,13 +1208,13 @@ QUnit.test(`Mention a partner with special character (e.g. apostrophe ')`, async
         ["@", "P", "y", "n"].forEach((char)=>{
             document.execCommand('insertText', false, char);
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keydown'));
+                .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keyup'));
+                .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
         });
     });
     await afterNextRender(() =>
-        document.querySelector('.o_ComposerSuggestion').click()
+        document.querySelector('.o_Suggestion').click()
     );
     await afterNextRender(() => {
         document.querySelector('.o_Composer_buttonSend').click();
@@ -1256,22 +1256,22 @@ QUnit.test('mention 2 different partners that have the same name', async functio
         ["@", "T", "e"].forEach((char)=>{
             document.execCommand('insertText', false, char);
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keydown'));
+                .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keyup'));
+                .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
         });
     });
-    await afterNextRender(() => document.querySelectorAll('.o_ComposerSuggestion')[0].click());
+    await afterNextRender(() => document.querySelectorAll('.o_Suggestion')[0].click());
     await afterNextRender(() => {
         ["@", "T", "e"].forEach((char)=>{
             document.execCommand('insertText', false, char);
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keydown'));
+                .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keyup'));
+                .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
         });
     });
-    await afterNextRender(() => document.querySelectorAll('.o_ComposerSuggestion')[1].click());
+    await afterNextRender(() => document.querySelectorAll('.o_Suggestion')[1].click());
     await afterNextRender(() => document.querySelector('.o_Composer_buttonSend').click());
     assert.containsOnce(document.body, '.o_Message_content', 'should have one message after posting it');
     assert.containsOnce(
@@ -1308,12 +1308,12 @@ QUnit.test('mention a channel with space in the name', async function (assert) {
         document.querySelector(`.o_ComposerTextInput_textarea`).focus();
         document.execCommand('insertText', false, "#");
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keydown'));
+            .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keyup'));
+            .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
     });
     await afterNextRender(() =>
-        document.querySelector('.o_ComposerSuggestion').click()
+        document.querySelector('.o_Suggestion').click()
     );
     await afterNextRender(() => {
         document.querySelector('.o_Composer_buttonSend').click();
@@ -1352,12 +1352,12 @@ QUnit.test('mention a channel with "&" in the name', async function (assert) {
         document.querySelector(`.o_ComposerTextInput_textarea`).focus();
         document.execCommand('insertText', false, "#");
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keydown'));
+            .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keyup'));
+            .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
     });
     await afterNextRender(() =>
-        document.querySelector('.o_ComposerSuggestion').click()
+        document.querySelector('.o_Suggestion').click()
     );
     await afterNextRender(() => {
         document.querySelector('.o_Composer_buttonSend').click();
@@ -1396,12 +1396,12 @@ QUnit.test('mention a channel on a second line when the first line contains #', 
         document.querySelector(`.o_ComposerTextInput_textarea`).focus();
         document.execCommand('insertText', false, "#blabla\n#");
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keydown'));
+            .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keyup'));
+            .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
     });
     await afterNextRender(() => {
-        document.querySelector('.o_ComposerSuggestion').click();
+        document.querySelector('.o_Suggestion').click();
     });
     await afterNextRender(() => {
         document.querySelector('.o_Composer_buttonSend').click();
@@ -1440,21 +1440,21 @@ QUnit.test('mention a channel when replacing the space after the mention by anot
         document.querySelector(`.o_ComposerTextInput_textarea`).focus();
         document.execCommand('insertText', false, "#");
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keydown'));
+            .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keyup'));
+            .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
     });
     await afterNextRender(() => {
-        document.querySelector('.o_ComposerSuggestion').click();
+        document.querySelector('.o_Suggestion').click();
     });
     await afterNextRender(() => {
         const text = document.querySelector(`.o_ComposerTextInput_textarea`).value;
         document.querySelector(`.o_ComposerTextInput_textarea`).value = text.slice(0, -1);
         document.execCommand('insertText', false, ", test");
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keydown'));
+            .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
         document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keyup'));
+            .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
     });
     await afterNextRender(() => {
         document.querySelector('.o_Composer_buttonSend').click();
@@ -1499,22 +1499,22 @@ QUnit.test('mention 2 different channels that have the same name', async functio
         ["#", "m", "y"].forEach((char)=>{
             document.execCommand('insertText', false, char);
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keydown'));
+                .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keyup'));
+                .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
         });
     });
-    await afterNextRender(() => document.querySelectorAll('.o_ComposerSuggestion')[0].click());
+    await afterNextRender(() => document.querySelectorAll('.o_Suggestion')[0].click());
     await afterNextRender(() => {
         ["#", "m", "y"].forEach((char)=>{
             document.execCommand('insertText', false, char);
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keydown'));
+                .dispatchEvent(new window.KeyboardEvent('keydown', { bubbles: true }));
             document.querySelector(`.o_ComposerTextInput_textarea`)
-                .dispatchEvent(new window.KeyboardEvent('keyup'));
+                .dispatchEvent(new window.KeyboardEvent('keyup', { bubbles: true }));
         });
     });
-    await afterNextRender(() => document.querySelectorAll('.o_ComposerSuggestion')[1].click());
+    await afterNextRender(() => document.querySelectorAll('.o_Suggestion')[1].click());
     await afterNextRender(() => document.querySelector('.o_Composer_buttonSend').click());
     assert.containsOnce(document.body, '.o_Message_content', 'should have one message after posting it');
     assert.containsOnce(
