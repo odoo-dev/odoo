@@ -222,7 +222,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         var value = this._textToHtml(this.value);
         if (this.nodeOptions.wrapper) {
             value = this._wrap(value);
-
+        }
         var fieldNameAttachment = _.chain(this.recordData)
             .pairs()
             .find(function (value) {
