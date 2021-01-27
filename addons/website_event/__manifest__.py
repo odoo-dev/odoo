@@ -38,7 +38,6 @@
     ],
     'demo': [
         'data/res_partner_demo.xml',
-        'data/website_visitor_demo.xml',
         'data/event_demo.xml',
         'data/event_registration_demo.xml',
     ],
