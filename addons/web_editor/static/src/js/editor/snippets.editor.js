@@ -2796,7 +2796,7 @@ var SnippetsMenu = Widget.extend({
         this.trigger_up('request_cancel');
     },
     /**
-     * Preview on mobile..
+     * Preview on mobile.
      */
     _onMobilePreviewClick: async function() {
         throw new Error('implement me');
