@@ -317,8 +317,8 @@ class PosSession(models.Model):
             else:
                 self.with_company(self.company_id)._create_account_move()
             if self.move_id.line_ids:
-                # Set the uninvoiced orders' state to 'done'
-                self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
+                orders = self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')])
+                self._finalize_orders(orders)
             else:
                 self.move_id.unlink()
         self.write({'state': 'closed'})
@@ -1129,6 +1129,12 @@ class PosSession(models.Model):
                 ) % ', '.join(draft_orders.mapped('name'))
             )
         return True
+
+    @api.model
+    def _finalize_orders(self, orders):
+        # Set the uninvoiced orders' state to 'done'
+        orders.write({'state': 'done'})
+
 
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
