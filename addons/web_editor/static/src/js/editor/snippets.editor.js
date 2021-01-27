@@ -942,6 +942,8 @@ var SnippetsMenu = Widget.extend({
         'click .o_we_website_top_actions button[data-action=save]': '_onSaveRequest',
         'click .o_we_website_top_actions button[data-action=cancel]': '_onDiscardClick',
         'click .o_we_website_top_actions button[data-action=mobile]': '_onMobilePreviewClick',
+        'click .o_we_website_top_actions button[data-action=undo]': '_onUndo',
+        'click .o_we_website_top_actions button[data-action=redo]': '_onRedo',
     },
     custom_events: {
         'activate_insertion_zones': '_onActivateInsertionZones',
@@ -1199,6 +1201,16 @@ var SnippetsMenu = Widget.extend({
         });
 
         return Promise.all(defs).then(() => {
+            const $undoButton = this.$('.o_we_external_history_buttons button[data-action="undo"]');
+            const $redoButton = this.$('.o_we_external_history_buttons button[data-action="redo"]');
+            if ($undoButton.length) {
+                const updateHistoryButtons = () => {
+                    $undoButton.attr('disabled', !this.options.wysiwyg.odooEditor.historyCanUndo());
+                    $redoButton.attr('disabled', !this.options.wysiwyg.odooEditor.historyCanRedo());
+                };
+                this.options.wysiwyg.odooEditor.addEventListener('historyApply', updateHistoryButtons);
+            }
+
             this.$('[data-title]').tooltip({
                 delay: 100,
                 title: function () {
@@ -2824,6 +2836,18 @@ var SnippetsMenu = Widget.extend({
      */
     _onMobilePreviewClick: async function() {
         throw new Error('implement me');
+    },
+    /**
+     * Undo..
+     */
+    _onUndo: async function() {
+        this.options.wysiwyg.undo();
+    },
+    /**
+     * Redo.
+     */
+    _onRedo: async function() {
+        this.options.wysiwyg.redo();
     },
 });
 

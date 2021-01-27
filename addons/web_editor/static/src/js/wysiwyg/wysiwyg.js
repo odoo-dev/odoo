@@ -327,6 +327,18 @@ const Wysiwyg = Widget.extend({
         }
         this.$editable.html(value);
     },
+    /**
+     * Undo one step of change in the editor.
+     */
+    undo: function () {
+        this.odooEditor.historyUndo();
+    },
+    /**
+     * Redo one step of change in the editor.
+     */
+    redo: function () {
+        this.odooEditor.historyRedo();
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
