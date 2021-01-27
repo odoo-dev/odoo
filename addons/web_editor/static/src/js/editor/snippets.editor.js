@@ -1128,6 +1128,16 @@ var SnippetsMenu = Widget.extend({
             const text =  $(range.startContainer).closest('.o_default_snippet_text');
             $(range.startContainer).closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
         });
+        const refreshSnippetEditors = _.debounce(() => {
+            for (const snippetEditor of this.snippetEditors) {
+                this._mutex.exec(() => snippetEditor.destroy());
+            }
+            const target = this.$document[0].getSelection().getRangeAt(0).startContainer.parentElement;
+            console.log("target:", target);
+            this._activateSnippet($(target));
+        }, 500);
+        this.options.wysiwyg.odooEditor.addEventListener('historyUndo', refreshSnippetEditors);
+        this.options.wysiwyg.odooEditor.addEventListener('historyRedo', refreshSnippetEditors);
 
         const $autoFocusEls = $('.o_we_snippet_autofocus');
         this._activateSnippet($autoFocusEls.length ? $autoFocusEls.first() : false);
