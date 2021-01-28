@@ -77,7 +77,11 @@ const Wysiwyg = Widget.extend({
 
         this.toolbar = new Toolbar();
         await this.toolbar.appendTo(document.createElement('void'));
-        this.odooEditor = new OdooEditor(this.$editable[0], { toolbar: this.toolbar.$el[0], document: this.options.document });
+        this.odooEditor = new OdooEditor(this.$editable[0], {
+            toolbar: this.toolbar.$el[0],
+            document: this.options.document,
+            autohideToolbar: !!this.options.autohideToolbar,
+        });
 
         if (options.snippets) {
             $('body').addClass('editor_enable');
@@ -107,7 +111,7 @@ const Wysiwyg = Widget.extend({
         this.$editable = this.options.editable || $('<div class="note-editable">');
 
         if (this.options.resizable) {
-            const $wrapper = $('<div class="o_wysiwyg_wrapper">');
+            const $wrapper = $('<div class="o_wysiwyg_wrapper odoo-editor">');
             $wrapper.append(this.$editable);
             this.$resizer = $(`<div class="o_wysiwyg_resizer">
                 <div class="o_wysiwyg_resizer_hook"></div>
