@@ -86,6 +86,7 @@ var FormRenderer = BasicRenderer.extend({
             }
         }
         if (focusWidget) {
+            focusWidget.highlightActivated();
             return focusWidget.activate({noselect: true, noAutomaticCreate: true});
         }
     },

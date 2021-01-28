@@ -240,6 +240,7 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
                     noAutomaticCreate: options.noAutomaticCreate || false
                 });
             if (activated) {
+                recordWidgets[currentIndex].highlightActivated();
                 return currentIndex;
             }
 

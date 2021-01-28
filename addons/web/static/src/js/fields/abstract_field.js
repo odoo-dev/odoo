@@ -264,6 +264,21 @@ var AbstractField = Widget.extend({
         return $();
     },
     /**
+     * Highlights activated element with light green background and green border
+     *
+     */
+    highlightActivated() {
+        if (this.mode === 'edit' && this.isFocusable()) {
+            const $focusable = this.getFocusableElement();
+            // add o_active_field class on current focusable element and remove when blurred
+            $focusable[0].classList.add("o_active_field");
+            $focusable.on("focusout", function () {
+                this.classList.remove('o_active_field');
+                $focusable.off("focusout");
+            });
+        }
+    },
+    /**
      * Returns whether or not the field is empty and can thus be hidden. This
      * method is typically called when the widget is in readonly, to hide it
      * (and its label) if it is empty.

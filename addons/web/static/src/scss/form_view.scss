@@ -145,6 +145,15 @@
                 }
             }
         }
+        .o_field_widget {
+            &, input.o_input {
+                &.o_active_field:not(.o_field_invalid) {
+                // :active, :focus {
+                    background-color: rgba(#00a09d, 0.05);
+                    border-color: #00a09d !important;
+                }
+            }
+        }
     }
 
     // No sheet
