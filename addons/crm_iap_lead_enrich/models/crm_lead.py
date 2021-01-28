@@ -79,19 +79,16 @@ class Lead(models.Model):
                         except iap_tools.InsufficientCreditError:
                             _logger.info('Sent batch %s enrich requests: failed because of credit', len(lead_emails))
                             if not from_cron:
-                                data = {
-                                    'url': self.env['iap.account'].get_credits_url('reveal'),
-                                }
-                                leads[0].message_post_with_view(
-                                    'crm_iap_lead_enrich.mail_message_lead_enrich_no_credit',
-                                    values=data,
-                                    subtype_id=self.env.ref('mail.mt_note').id)
+                                message = _("Not enough credits for Lead Enrich")
+                                self.env['iap.account'].get_notification_message('reveal', notify_type='warning', message=message)
                             # Since there are no credits left, there is no point to process the other batches
                             break
                         except Exception as e:
                             _logger.info('Sent batch %s enrich requests: failed with exception %s', len(lead_emails), e)
                         else:
                             _logger.info('Sent batch %s enrich requests: success', len(lead_emails))
+                            message = _("Lead enrich are successfully sent")
+                            self.env['iap.account'].get_notification_message('reveal', notify_type='success', message=message)
                             self._iap_enrich_from_response(iap_response)
                 except OperationalError:
                     _logger.error('A batch of leads could not be enriched :%s', repr(leads))

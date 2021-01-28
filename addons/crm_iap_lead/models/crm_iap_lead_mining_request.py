@@ -191,11 +191,11 @@ class CRMLeadMiningRequest(models.Model):
         try:
             response = iap_tools.iap_jsonrpc(endpoint, params=params, timeout=300)
             return response['data']
-        except iap_tools.InsufficientCreditError as e:
-            self.error = 'Insufficient credits. Recharge your account and retry.'
+        except iap_tools.InsufficientCreditError:
+            message = _("Not enough credits for Lead Mining Request")
+            self.env['iap.account'].get_notification_message('reveal', notify_type='warning', message=message)
             self.state = 'error'
             self._cr.commit()
-            raise e
 
     def _create_leads_from_response(self, result):
         """ This method will get the response from the service and create the leads accordingly """

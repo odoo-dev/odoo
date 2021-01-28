@@ -5,7 +5,7 @@ import logging
 import uuid
 import werkzeug.urls
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.addons.iap.tools import iap_tools
 
 _logger = logging.getLogger(__name__)
@@ -57,14 +57,14 @@ class IapAccount(models.Model):
         return accounts[0]
 
     @api.model
-    def get_credits_url(self, service_name, base_url='', credit=0, trial=False):
+    def get_credits_url(self, service_name, base_url='', credit=0, trial=False, force_create=True):
         """ Called notably by ajax crash manager, buy more widget, partner_autocomplete, sanilmail. """
         dbuuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
         if not base_url:
             endpoint = iap_tools.iap_get_endpoint(self.env)
             route = '/iap/1/credit'
             base_url = endpoint + route
-        account_token = self.get(service_name).account_token
+        account_token = self.get(service_name, force_create=force_create).account_token
         d = {
             'dbuuid': dbuuid,
             'service_name': service_name,
@@ -74,6 +74,15 @@ class IapAccount(models.Model):
         if trial:
             d.update({'trial': trial})
         return '%s?%s' % (base_url, werkzeug.urls.url_encode(d))
+
+    @api.model
+    def get_notification_message(self, service_name, notify_type, message=''):
+        if notify_type == 'warning':
+            data = self.env['iap.account'].get_credits_url(service_name, force_create=False)
+            message = _('%s <br/> <a href="%s" target="_blank"> <i class="fa fa-arrow-right"/> IAP Credit</a>') % (message, data)
+        self.env['bus.bus'].sendone(
+            (self._cr.dbname, 'res.partner', self.env.user.partner_id.id),
+            {'type': 'simple_notification', 'message': message, 'sticky': False, 'simple_message': True, notify_type: True})
 
     @api.model
     def get_account_url(self):

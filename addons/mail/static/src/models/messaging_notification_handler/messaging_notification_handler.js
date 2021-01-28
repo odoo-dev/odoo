@@ -415,9 +415,9 @@ function factory(dependencies) {
             } else if (type === 'simple_notification') {
                 const escapedMessage = owl.utils.escape(data.message);
                 this.env.services['notification'].notify({
-                    message: escapedMessage,
+                    message: data.simple_message ? data.message : escapedMessage,
                     sticky: data.sticky,
-                    type: data.warning ? 'warning' : 'danger',
+                    type: data.success ? 'success' : data.warning ? 'warning' : 'danger',
                 });
             } else if (type === 'toggle_star') {
                 return this._handleNotificationPartnerToggleStar(data);

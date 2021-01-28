@@ -4,7 +4,7 @@
 import logging
 import threading
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 
 _logger = logging.getLogger(__name__)
 
@@ -126,6 +126,12 @@ class SmsSms(models.Model):
                         'state': 'error',
                         'error_code': self.IAP_TO_SMS_STATE[state],
                     })
+                if state == 'insufficient_credit':
+                    message = _('Not enough credits for SMS')
+                    self.env['iap.account'].get_notification_message('sms', notify_type='warning', message=message)
+                if state == 'success':
+                    message = _('SMS is successfully sent')
+                    self.env['iap.account'].get_notification_message('sms', notify_type='success', message=message)
                 notifications = self.env['mail.notification'].sudo().search([
                     ('notification_type', '=', 'sms'),
                     ('sms_id', 'in', sms_ids),
