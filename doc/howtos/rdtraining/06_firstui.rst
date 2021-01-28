@@ -4,11 +4,11 @@
 Part 6: Finally, Some UI To Play With
 =====================================
 
-After the creation of a new :ref:`model <howto/rdtraining/04_basicmodel>` and its corresponding
-:ref:`access rights <howto/rdtraining/05_securityintro>`, it is now time to be able to interact in
+Now that we've created our new :ref:`model <howto/rdtraining/04_basicmodel>` and its corresponding
+:ref:`access rights <howto/rdtraining/05_securityintro>`, it is time to interact with
 the user interface.
 
-At the end of this chapter, a couple of menus will be created in order to access a default list
+At the end of this chapter, we will have created a couple of menus in order to access a default list
 and form view.
 
 Data Files (XML)
@@ -17,30 +17,30 @@ Data Files (XML)
 **Reference**: the documentation related to this topic can be found in
 :ref:`reference/data`.
 
-In the :ref:`howto/rdtraining/05_securityintro` chapter, we added data through a CSV file. The CSV
-format is convenient when the data to load has a simple format. If the format is more complex
+In :ref:`howto/rdtraining/05_securityintro`, we added data through a CSV file. The CSV
+format is convenient when the data to load has a simple format. When the format is more complex
 (e.g. load the structure of a view or an email template), we use the XML format. For example,
 this
 `help field <https://github.com/odoo/odoo/blob/09c59012bf80d2ccbafe21c39e604d6cfda72924/addons/crm/views/crm_lost_reason_views.xml#L61-L69>`__
-contains HTML tags. While it would be possible to load such data through a CSV, it is more
+contains HTML tags. While it would be possible to load such data through a CSV file, it is more
 convenient to use an XML file.
 
-The XML files must be added in the same folders as the CSV files, and defined similarly in the
-``__manifest__.py``. The content of the data files is also loaded when a module is installed or
-updated, sequentially. Therefore, all remarks made for the CSV files holds true for the XML files.
-When the data we add is linked to views, we add it in the ``views`` folder.
+The XML files must be added to the same folders as the CSV files and defined similarly in the
+``__manifest__.py``. The content of the data files is also sequentially loaded when a module is installed or
+updated, therefore all remarks made for CSV files hold true for XML files.
+When the data is linked to views, we add them to the ``views`` folder.
 
-In this chapter, we will load our first action and menus though an XML file. Actions and menus are
-regular records in database.
+In this chapter we will load our first action and menus though an XML file. Actions and menus are
+standard records in the database.
 
 .. note::
 
-    When performance is important, the CSV format is preferred over the XML format. Indeed, in Odoo
-    loading a CSV file is faster than loading an XML file.
+    When performance is important, the CSV format is preferred over the XML format. This is the case in Odoo
+    where loading a CSV file is faster than loading an XML file.
 
 In Odoo, the user interface (actions, menus and views) is largely defined by creating
 and composing records defined in an XML file. A common pattern is Menu > Action > View.
-To access records, the user navigates through several menu levels; the deepest level is an
+To access records the user navigates through several menu levels; the deepest level is an
 action which triggers the opening of a list of the records.
 
 Actions
@@ -64,13 +64,13 @@ Actions can be triggered in three ways:
 2. by clicking on buttons in views (if these are connected to actions)
 3. as contextual actions on object
 
-We will only cover the first case in this chapter. The second case will be covered in an
-:ref:`upcoming chapter <howto/rdtraining/10_actions>` while the last one is the topic of an appendix.
+We will only cover the first case in this chapter. The second case will be covered in a
+:ref:`later chapter <howto/rdtraining/10_actions>` while the last is the topic of an appendix.
 In our Real Estate example, we would like to link a menu to the ``estate.property`` model, so we
-are able to create a new record. The action can be seen as the link between the menu and
+are able to create a new record. The action can be viewed as the link between the menu and
 the model.
 
-A minimal action for our ``test.model`` would look like:
+A basic action for our ``test.model`` is:
 
 .. code-block:: xml
 
@@ -80,17 +80,17 @@ A minimal action for our ``test.model`` would look like:
         <field name="view_mode">tree,form</field>
     </record>
 
-- ``id`` is an :term:`external identifier`, it allows referring to the record
-  (without having to know its in-database identifier).
-- ``model`` has a fixed value of ``ir.actions.act_window`` (:ref:`reference/actions/window`)
+- ``id`` is an :term:`external identifier`. It can be used to refer to the record
+  (without knowing its in-database identifier).
+- ``model`` has a fixed value of ``ir.actions.act_window`` (:ref:`reference/actions/window`).
 - ``name`` is the name of the action.
-- ``res_model`` is the model to which the action applies.
-- ``view_mode`` are the views which will be available, in this case the list (tree) and form views.
+- ``res_model`` is the model which the action applies to.
+- ``view_mode`` are the views that will be available; in this case they are the list (tree) and form views.
   We'll see :ref:`later <howto/rdtraining/15_qwebintro>` that there can be other view modes.
 
 Examples can be found everywhere in Odoo, but
-`this one <https://github.com/odoo/odoo/blob/09c59012bf80d2ccbafe21c39e604d6cfda72924/addons/crm/views/crm_lost_reason_views.xml#L57-L70>`__
-is a good example of a simple action. Pay attention to the structure of the XML data file, you will
+`this <https://github.com/odoo/odoo/blob/09c59012bf80d2ccbafe21c39e604d6cfda72924/addons/crm/views/crm_lost_reason_views.xml#L57-L70>`__
+is a good example of a simple action. Pay attention to the structure of the XML data file since you will
 need it in the following exercise.
 
 .. exercise:: Add an action.
@@ -100,7 +100,7 @@ need it in the following exercise.
 
     Create an action for the model ``estate.property``.
 
-Restart the server, you should see the file loaded in the log.
+Restart the server and you should see the file loaded in the log.
 
 Menus
 =====
@@ -125,21 +125,20 @@ Menus
       :align: center
       :alt: Default form view
 
-Because menus are somewhat complex to declare there is a ``<menuitem>``
-shortcut to declare an ``ir.ui.menu`` and connect it to the corresponding
-action more easily.
+To reduce the complexity in declaring a menu (``ir.ui.menu``) and connecting it to the corresponding action,
+we can use the ``<menuitem>`` shortcut .
 
-A minimal menu for our ``test_model_action`` would look like:
+A basic menu for our ``test_model_action`` is:
 
 .. code-block:: xml
 
     <menuitem id="test_model_menu_action" action="test_model_action"/>
 
 The menu ``test_model_menu_action`` is linked to the action ``test_model_action``, and the action
-is linked to the model ``test.model``. As mentioned before, the action can be seen as the link
+is linked to the model ``test.model``. As previously mentioned, the action can be seen as the link
 between the menu and the model.
 
-However, menus always follow an architecture; in practice, there are three levels of menus:
+However, menus always follow an architecture, and in practice there are three levels of menus:
 
 1. The root menu, which is displayed in the App switcher (the Odoo Community App switcher is a
    dropdown menu)
@@ -154,8 +153,8 @@ However, menus always follow an architecture; in practice, there are three level
       :align: center
       :alt: First level and action menus
 
-The easiest way to define the structure is to create a structure in the XML file. A minimal
-structure for our ``test_model_action`` would look like:
+The easiest way to define the structure is to create it in the XML file. A basic
+structure for our ``test_model_action`` is:
 
 .. code-block:: xml
 
@@ -165,15 +164,15 @@ structure for our ``test_model_action`` would look like:
         </menuitem>
     </menuitem>
 
-The third menu will get the name of the ``action``.
+The name for the third menu is taken from the name of the ``action``.
 
-.. exercise:: Add the menus.
+.. exercise:: Add menus.
 
     Create the ``estate_menus.xml`` file in the appropriate folder and define it in the
     ``__manifest__.py`` file. Remember the sequential loading of the data files ;-)
 
     Create the three levels of menus for the ``estate.property`` action created in the previous
-    exercise. Refer to the **Goal** of the section for the expected result.
+    exercise. Refer to the **Goal** of this section for the expected result.
 
 Restart the server and **refresh the browser**\ [#refresh]_. You should now see the menus,
 and you'll even be able to create your first real estate property advertisement!
@@ -184,18 +183,18 @@ Fields, Attributes And View
 .. note::
 
     **Goal**: at the end of this section, the selling price should be read-only and the number
-    of bedrooms and the availability date is set by default. The latter is not copied when the
-    record is duplicated
+    of bedrooms and the availability date should have default values. Additionally the selling price
+    and availability date values won't be copied when the record is duplicated.
 
     .. image:: 06_firstui/media/attribute_and_default.gif
       :align: center
       :alt: Interaction between model and view
-    
+
     The reserved fields ``active`` and ``state`` are added to the ``estate.property`` model.
 
-Up to now, we were using the generic view for our real estate property advertisements.
-In most cases we want to fine tune the view. There are many fine-tunings possible in Odoo, but
-the very first step is usually to make sure that:
+So far we have only used the generic view for our real estate property advertisements, but
+in most cases we want to fine tune the view. There are many fine-tunings possible in Odoo, but
+usually the first step is to make sure that:
 
 - some fields have a default value
 - some fields are read-only
@@ -203,7 +202,7 @@ the very first step is usually to make sure that:
 
 In our real estate business case, we would like the following:
 
-- The selling price should be read-only (it will be filled in automatically later)
+- The selling price should be read-only (it will be automatically filled in later)
 - The availability date and the selling price should not be copied when duplicating a record
 - The default number of bedrooms should be 2
 - The default availability date should be in 3 months
@@ -211,18 +210,18 @@ In our real estate business case, we would like the following:
 Some New Attributes
 -------------------
 
-Before moving further on the view design, let's come back to our model definition. We saw that some
+Before moving further with the view design, let's step back to our model definition. We saw that some
 attributes, such as ``required=True``, impact the table schema in the database. Other attributes
 will impact the view or provide default values.
 
-.. exercise:: Add new attributes to the fields
+.. exercise:: Add new attributes to the fields.
 
   Find the appropriate attributes (see :class:`~odoo.fields.Field`) to:
 
   - set the selling price as read-only
-  - prevent copying the value of the availability date and the selling price
+  - prevent copying of the availability date and the selling price values
 
-Restart the server and refresh the browser: you should not be able to set any selling price. When
+Restart the server and refresh the browser. You should not be able to set any selling prices. When
 duplicating a record, the availability date should be empty.
 
 Default Values
@@ -230,15 +229,15 @@ Default Values
 
 Any field can be given a default value. In the field definition, add the option
 ``default=X`` where ``X`` is either a Python literal value (boolean, integer,
-float, string), or a function taking a model and returning a value::
+float, string) or a function taking a model and returning a value::
 
     name = fields.Char(default="Unknown")
     last_seen = fields.Datetime("Last Seen", default=lambda self: fields.Datetime.now())
 
-The ``name`` field get the 'Unknown' value by default, while the ``last_seen`` field is set as
-the current time.
+The ``name`` field will have the value 'Unknown' by default while the ``last_seen`` field will be
+set as the current time.
 
-.. exercise:: Default values
+.. exercise:: Set default values.
 
     Add the appropriate default attributes so that:
 
@@ -258,37 +257,37 @@ Reserved Fields
 A few field names are reserved for pre-defined behaviors. They should be defined on a
 model when the related behavior is desired.
 
-.. exercise:: Active field
+.. exercise:: Add active field.
 
     Add the ``active`` field to the ``estate.property`` model.
 
-Restart the server, create a new property, then come back to the list view... The property should
-not be listed! ``active`` is the example of such a reserved field with a specific behavior: when
+Restart the server, create a new property, then come back to the list view... The property will
+not be listed! ``active`` is an example of a reserved field with a specific behavior: when
 a record has ``active=False``, it is automatically removed from any search. To display the
-property created, you need to specifically search for inactive records.
+created property, you will need to specifically search for inactive records.
 
 .. image:: 06_firstui/media/inactive.gif
   :align: center
   :alt: Inactive records
 
-.. exercise:: Active field, set a default value
+.. exercise:: Set a default value for active field.
 
-    Set the appropriate default value to the ``active`` field so it doesn't disappear anymore.
+    Set the appropriate default value for the ``active`` field so it doesn't disappear anymore.
 
 Note that the default ``active=False`` value was assigned to all existing records.
 
-.. exercise:: State field
+.. exercise:: Add state field.
 
-    Add a ``state`` field to the ``estate.property`` model. 5 values are possible: New,
+    Add a ``state`` field to the ``estate.property`` model. Five values are possible: New,
     Offer Received, Offer Accepted, Sold and Canceled. It must be required, should not be copied
-    and have its default value set to 'New'.
+    and should have its default value set to 'New'.
 
-    Pay attention to use the correct type!
+    Make sure to use the correct type!
 
 The ``state`` will be used later on for several UI enhancements.
 
-Now that we have are to interact with the UI thanks to the default views, the next step is
+Now that we are able to interact with the UI thanks to the default views, the next step is
 obvious: we want to define :ref:`our own views <howto/rdtraining/07_basicviews>`.
 
-.. [#refresh] A refresh is needed since the web clients keeps a cache of the various menus
+.. [#refresh] A refresh is needed since the web client keeps a cache of the various menus
               and views for performance reasons.

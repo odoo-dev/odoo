@@ -7,7 +7,7 @@ Part 2: Development Environment Set-up
 There are multiple ways to install Odoo depending on the intended use case.
 
 This document attempts to describe the installation options for an internal Odoo R&D developer. We
-assume that you are installing your development environment on an Odoo standard laptop with Linux
+assume that you are installing your development environment on a standard Odoo laptop with Linux
 Mint installed and up-to-date. At the time of writing, we are using a vanilla Linux Mint 20
 (Ubuntu 20.04) as a starting point.
 
@@ -22,7 +22,7 @@ Install and configure git
 -------------------------
 
 The very first step of the installation process is to install the `git version control system <https://git-scm.com/>`__
-as the Odoo source code is managed on GitHub. Once installed, you can set your name and email:
+because the Odoo source code is managed on GitHub. Once installed, you can set your name and email:
 
 .. code-block:: console
 
@@ -38,14 +38,15 @@ recommend using your trigram (xyz) followed by '-odoo' as your username: 'xyz-od
 you can also use your personal GitHub account.
 
 
-The easiest way to authenticate to GitHub is to use an SSH connection. Using the SSH authentication
-will allow you to connect to GitHub without supplying your username or password every time.
+The easiest way to authenticate with GitHub is to use an SSH connection. Using the SSH
+authentication will allow you to connect to GitHub without supplying your username and
+password every time.
 
 
 The following instructions are based on the official `GitHub documentation <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`__.
 
 
-Here is a step-by-step procedure to do so:
+Here is a step-by-step procedure:
 
 
 - Generate a new SSH key, add it to the ssh-agent and copy the SSH key to your clipboard.
@@ -58,7 +59,7 @@ Here is a step-by-step procedure to do so:
     $ xclip -sel clip < ~/.ssh/id_ed25519.pub
 
 
-On Github:
+In Github:
 
 
 - In the upper-right corner of any page, click your profile photo, then click Settings
@@ -93,22 +94,22 @@ All the Odoo sources will be located in `$HOME/src/`
     $ git clone git@github.com:odoo/odoo.git
     $ git clone git@github.com:odoo/enterprise.git
 
-.. tip:: Cloning the repositories will take a while, enjoy a cup of coffee while waiting.
+.. tip:: Cloning the repositories will take a while, enjoy a cup of coffee while you wait.
 
-.. tip:: You may need to ask your manager read rights to fetch the enterprise repository.
+.. tip:: You may need to ask your manager for read rights to fetch the enterprise repository.
 
 .. _howto/rdtraining/02_setup/development_repository:
 
 Configure development repository
 --------------------------------
 
-To contribute to Odoo's development, you will need to
+To contribute to Odoo's development you will need to
 `fork the repository <https://guides.github.com/activities/forking/>`__, create a branch containing
 your code in the fork and submit a
 `Pull Request <https://docs.github.com/en/github/getting-started-with-github/github-glossary#pull-request>`__
 to the Odoo repository.
 
-In the case you are lucky enough to work at Odoo, the forks already exist. They are called
+If you are lucky enough to work at Odoo, the forks already exist. They are called
 `odoo-dev/odoo` and `odoo-dev/enterprise`.
 
 .. code-block:: console
@@ -127,7 +128,7 @@ In the case you are lucky enough to work at Odoo, the forks already exist. They 
 Useful git commands
 -------------------
 
-These are useful git commands for your day-to-day work.
+Here are some useful git commands for your day-to-day work.
 
 * Change branch:
   When you change branches, both repositories (odoo and enterprise) must be synchronized, i.e. both
@@ -160,8 +161,8 @@ Install the dependencies
 Python
 ------
 
-Odoo requires Python 3.6 or later, if your computer is up-to-date you should already be at least
-on this version.
+Odoo requires Python 3.6 or later, if your computer is up-to-date you should already be at this
+version or higher.
 
 You can check your Python version with:
 
@@ -172,8 +173,8 @@ You can check your Python version with:
 Install pip3 and libraries
 --------------------------
 
-For libraries using native code, it is necessary to install development tools and native
-dependencies before the Python dependencies of Odoo.
+For libraries using native code, installation of development tools and native dependencies is
+required before installing the Python dependencies of Odoo.
 
 .. code-block:: console
 
@@ -192,8 +193,8 @@ Install odoo requirements
 Install wkhtmltopdf
 -------------------
 
-wkhtmltopdf is a library to render HTML into PDF, it is used to create the PDF reports. wkhtmltopdf
-is not installed through pip and must be installed manually in version 0.12.5 for it to support
+wkhtmltopdf is a library to render HTML into PDF. Odoo uses it to create PDF reports. wkhtmltopdf
+is not installed through pip and must be installed manually in version 0.12.5 to support
 headers and footers.
 
 .. code-block:: console
@@ -218,7 +219,7 @@ Install PostgreSQL
 ------------------
 
 As seen in :ref:`howto/rdtraining/01_architecture`, Odoo uses PostgreSQL as a RDBMS. In the context of a
-development machine, the easiest way is to install it locally. Then, we can create a PostgreSQL user
+development machine, the easiest approach is to install it locally. Then we can create a PostgreSQL user
 corresponding to our current user:
 
 .. code-block:: console
@@ -254,7 +255,7 @@ Once all dependencies are set up, Odoo can be launched by running odoo-bin, the 
     $ ./odoo-bin --addons-path="addons/,../enterprise/" -d rd-demo
 
 There are multiple :ref:`command-line arguments <reference/cmdline/server>` that you can use to
-configure the server. In this training, you will only need some of them.
+configure the server. In this training you will only need some of them.
 
 .. option:: -d <database>
 
@@ -273,17 +274,16 @@ configure the server. In this training, you will only need some of them.
 
     Prevents the worker from taking longer than <limit> seconds to process a request.
 
-The last two are going to be used to prevent the worker from being killed when debugging the
-source code.
+The last two can be used to prevent the worker from being killed when debugging the source code.
 
-.. tip:: You may face an error like `AttributeError: module '$MODULE_NAME' has no attribute '$ATTRIBUTE'`
+.. tip:: You may face an error similar to `AttributeError: module '$MODULE_NAME' has no attribute '$ATTRIBUTE'`
 
-         You may need to re-install the module with `$ pip install --upgrade --force-reinstall $MODULE_NAME`
+         In this case you may need to re-install the module with `$ pip install --upgrade --force-reinstall $MODULE_NAME`
 
-         If this error occurs with more than one module you may need to re-install all the
+         If this error occurs with more than one module then you may need to re-install all the
          requirements with `$ pip3 install --upgrade --force-reinstall -r requirements.txt`
 
-         You can also remove the python cache to solve the issue
+         You can also clear the python cache to solve the issue
 
          .. code-block:: console
 
@@ -308,10 +308,9 @@ To log in as the administrator user, you can use the following credentials:
 The developer mode
 ==================
 
-The Developer or Debug Mode gives you access to extra and advanced tools.
+The Developer or Debug Mode gives you access to additional (advanced) tools.
 
-This will be useful during the whole training, for the rest of the training we will always assume
-that the user is in developer mode.
+This is useful for training and we assume that the user is in developer mode for the rest of the tutorials.
 
 To activate the developer or debug mode you can follow the steps `here <https://www.odoo.com/documentation/user/general/developer_mode/activate.html>`__.
 
@@ -321,10 +320,10 @@ Extra tools
 Code Editor
 -----------
 If you are working at Odoo, many of your colleagues are using `VSCode`_ (`VSCodium`_ the open source
-equivalent), `Sublime Text`_, `Atom`_ or `PyCharm`_. However, you are free to
+equivalent), `Sublime Text`_, `Atom`_ or `PyCharm`_. However you are free to
 choose your preferred editor.
 
-Don't forget to configure the linters correctly. Using a linter can help you by showing syntax and semantic
+Don't forget to configure your linters correctly. Using a linter can help you by showing syntax and semantic
 warnings or errors. Odoo source code tries to respect Python and JavaScript standards, but some of
 them can be ignored.
 
@@ -334,19 +333,19 @@ For Python, we use PEP8 with these options ignored:
 - E301: expected 1 blank line, found 0
 - E302: expected 2 blank lines, found 1
 
-For JavaScript, we use ESLint, and you can find a `configuration file example here`_.
+For JavaScript, we use ESLint and you can find a `configuration file example here`_.
 
 .. _configuration file example here: https://github.com/odoo/odoo/wiki/Javascript-coding-guidelines#use-a-linter
 .. _VSCode: https://code.visualstudio.com/
 .. _VSCodium: https://vscodium.com/
 .. _Sublime Text: https://www.sublimetext.com/
-.. _PyCharm: https://www.jetbrains.com/fr-fr/pycharm/download/#section=linux
+.. _PyCharm: https://www.jetbrains.com/pycharm/download/#section=linux
 .. _Atom: https://atom.io/
 
-Administration tools for PostgreSQL
+Administrator tools for PostgreSQL
 -----------------------------------
 
-You can administrate your PostgreSQL databases using the command line as exemplified before or using
+You can manage your PostgreSQL databases using the command line as demonstrated earlier or using
 a GUI application such as `pgAdmin <https://www.pgadmin.org/download/pgadmin-4-apt/>`__ or `DBeaver <https://dbeaver.io/>`__.
 
 To connect the GUI application to your database we recommend you connect using the Unix socket.
@@ -364,11 +363,10 @@ go a long way, but a proper debugger can save a lot of time.
 
 You can use a classic Python library debugger (`pdb <https://docs.python.org/3/library/pdb.html>`__,
 `pudb <https://pypi.org/project/pudb/>`__ or `ipdb <https://pypi.org/project/ipdb/>`__) or you can
-use your editor's debugger. At the beginning, to avoid difficult configurations, it's going to be
+use your editor's debugger. To avoid difficult configurations in the beginning, it is
 easier if you use a library debugger.
 
-In the following example, we are going to use ipdb, but the procedure is the same with the other
-ones.
+In the following example we use ipdb, but the process is similar with other libraries.
 
 - Install the library:
 
@@ -399,7 +397,7 @@ Here is a list of commands:
 
 .. option:: h(elp) [command]
 
-    Without argument, print the list of available commands. With a command as argument, print help
+    Without an argument, print the list of available commands. With a command as an argument, print help
     about that command.
 
 .. option:: pp expression
@@ -448,5 +446,5 @@ Here is a list of commands:
         limit_time_cpu = 9999
         limit_time_real = 9999
 
-Alright, now that your server is running, it's time to start
+Now that your server is running, it's time to start
 :ref:`writing your own application <howto/rdtraining/03_newapp>`!
