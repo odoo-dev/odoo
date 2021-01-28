@@ -65,6 +65,12 @@ class BaseDocumentLayout(models.TransientModel):
     vat = fields.Char(related='company_id.vat', readonly=True)
     name = fields.Char(related='company_id.name', readonly=True)
     country_id = fields.Many2one(related="company_id.country_id", readonly=True)
+    street = fields.Char(related='company_id.street', readonly=True)
+    street2 = fields.Char(related='company_id.street2', readonly=True)
+    zip = fields.Char(related='company_id.zip', readonly=True)
+    city = fields.Char(related='company_id.city', readonly=True)
+    company_registry = fields.Char(related='company_id.company_registry', readonly=True)
+    bank_ids = fields.One2many(related='company_id.bank_ids', readonly=True)
 
     @api.depends('logo_primary_color', 'logo_secondary_color', 'primary_color', 'secondary_color',)
     def _compute_custom_colors(self):

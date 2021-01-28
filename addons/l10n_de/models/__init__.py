@@ -3,3 +3,4 @@
 
 from . import datev
 from . import chart_template
+from . import ir_actions_report
