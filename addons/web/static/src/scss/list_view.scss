@@ -187,7 +187,12 @@
 
         &, &.table-striped {
             tr:focus-within {
-                background-color: lighten($o-form-lightsecondary, 10%);
+                background-color: rgba(#00a09d, 0.05);
+                &, + tr {
+                    th, td {
+                        border-top-color: #00a09d !important;
+                    }
+                }
             }
         }
         thead th:focus-within,
