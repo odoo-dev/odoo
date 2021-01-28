@@ -3,6 +3,7 @@ odoo.define('website.tour.public_user_editor_dep_widget', function (require) {
 
 const publicWidget = require('web.public.widget');
 const wysiwygLoader = require('web_editor.loader');
+const ajax = require('web.ajax');
 
 publicWidget.registry['public_user_editor_test'] = publicWidget.Widget.extend({
     selector: 'textarea.o_public_user_editor_test_textarea',
@@ -12,7 +13,8 @@ publicWidget.registry['public_user_editor_test'] = publicWidget.Widget.extend({
      */
     start: async function () {
         await this._super(...arguments);
-        await wysiwygLoader.load(this, this.el, {});
+        await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', 'website.compiled_assets_wysiwyg']});
+        await wysiwygLoader.loadFromTextarea(this, this.el, {});
     },
 });
 });
@@ -25,7 +27,7 @@ const tour = require('web_tour.tour');
 tour.register('public_user_editor', {
     test: true,
 }, [{
-    trigger: 'odoo-wysiwyg-container:has(> .o_public_user_editor_test_textarea:first-child)',
+    trigger: '.note-editable',
     run: function () {}, // Simple check
 }]);
 });
