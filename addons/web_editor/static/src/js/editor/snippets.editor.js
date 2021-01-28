@@ -1031,29 +1031,29 @@ var SnippetsMenu = Widget.extend({
             this.$('.o_we_customize_snippet_btn').addClass('active').prop('disabled', false);
             this.$('o_we_ui_loading').addClass('d-none');
             $(this.customizePanel).removeClass('d-none');
-        } else {
-            this.invisibleDOMPanelEl = document.createElement('div');
-            this.invisibleDOMPanelEl.classList.add('o_we_invisible_el_panel');
-            this.invisibleDOMPanelEl.appendChild(
-                $('<div/>', {
-                    text: _t('Invisible Elements'),
-                    class: 'o_panel_header',
-                })[0]
-            );
-
-            this.options.getScrollOptions = this._getScrollOptions.bind(this);
-
-            // Fetch snippet templates and compute it
-            defs.push((async () => {
-                await this._loadSnippetsTemplates();
-                await this._updateInvisibleDOM();
-            })());
-
-            // Prepare snippets editor environment
-            this.$snippetEditorArea = $('<div/>', {
-                id: 'oe_manipulators',
-            }).insertAfter(this.$el);
+            return Promise.all(defs).then(this._addToolbar.bind(this));
         }
+        this.invisibleDOMPanelEl = document.createElement('div');
+        this.invisibleDOMPanelEl.classList.add('o_we_invisible_el_panel');
+        this.invisibleDOMPanelEl.appendChild(
+            $('<div/>', {
+                text: _t('Invisible Elements'),
+                class: 'o_panel_header',
+            })[0]
+        );
+
+        this.options.getScrollOptions = this._getScrollOptions.bind(this);
+
+        // Fetch snippet templates and compute it
+        defs.push((async () => {
+            await this._loadSnippetsTemplates();
+            await this._updateInvisibleDOM();
+        })());
+
+        // Prepare snippets editor environment
+        this.$snippetEditorArea = $('<div/>', {
+            id: 'oe_manipulators',
+        }).insertAfter(this.$el);
 
         // Active snippet editor on click in the page
         var lastElement;
@@ -2146,9 +2146,9 @@ var SnippetsMenu = Widget.extend({
                 this.customizePanel.removeChild(this.customizePanel.firstChild);
             }
             $(this.customizePanel).append(content);
-        }
-        if (content && tab === this.tabs.OPTIONS || this.options.enableTranslation) {
-            this._addToolbar();
+            if (tab === this.tabs.OPTIONS) {
+                this._addToolbar();
+            }
         }
 
         this.$('.o_snippet_search_filter').toggleClass('d-none', tab !== this.tabs.BLOCKS);
