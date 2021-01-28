@@ -125,19 +125,26 @@ var RunningTourActionHelper = core.Class.extend({
         elementCenter.left += values.$element.outerWidth()/2;
         elementCenter.top += values.$element.outerHeight()/2;
 
-        var toCenter = $to.offset();
 
-        if (to && to.indexOf('iframe') !== -1) {
-            var iFrameOffset = $('iframe').offset();
-            toCenter.left += iFrameOffset.left;
-            toCenter.top += iFrameOffset.top;
-        }
-        toCenter.left += $to.outerWidth()/2;
-        toCenter.top += $to.outerHeight()/2;
+        const calculateCenter = () => {
+            const toCenter = $to.offset();
+
+            if (to && to.indexOf('iframe') !== -1) {
+                const iFrameOffset = $('iframe').offset();
+                toCenter.left += iFrameOffset.left;
+                toCenter.top += iFrameOffset.top;
+            }
+            toCenter.left += $to.outerWidth()/2;
+            toCenter.top += $to.outerHeight()/2;
+            return toCenter;
+        };
+        let toCenter = calculateCenter();
 
         values.$element.trigger($.Event("mouseenter"));
         values.$element.trigger($.Event("mousedown", {which: 1, pageX: elementCenter.left, pageY: elementCenter.top}));
-        values.$element.trigger($.Event("mousemove", {which: 1, pageX: toCenter.left, pageY: toCenter.top}));
+        values.$element.trigger($.Event("mousemove", {which: 1, pageX: toCenter.left, pageY: toCenter.top + 10}));
+        // recalculate the center as the mousemove might have made the element bigger.
+        toCenter = calculateCenter();
         values.$element.trigger($.Event("mouseup", {which: 1, pageX: toCenter.left, pageY: toCenter.top}));
      },
     _keydown: function (values, keyCodes) {
