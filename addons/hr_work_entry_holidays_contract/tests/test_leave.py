@@ -4,16 +4,13 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from odoo.addons.hr_work_entry_holidays.tests.common import TestWorkEntryHolidaysBase
+from odoo.addons.hr_work_entry_holidays_contract.tests.common import TestWorkEntryHolidaysContractBase
 
 
-class TestWorkEntryLeave(TestWorkEntryHolidaysBase):
+class TestWorkEntryLeave(TestWorkEntryHolidaysContractBase):
+    def setUp(cls):
+        super(TestWorkEntryHolidaysContractBase, cls).setUp()
 
-    def test_resource_leave_has_work_entry_type(self):
-        leave = self.create_leave()
-
-        resource_leave = leave._create_resource_leave()
-        self.assertEqual(resource_leave.work_entry_type_id, self.leave_type.work_entry_type_id, "it should have the corresponding work_entry type")
 
     def test_resource_leave_in_contract_calendar(self):
         other_calendar = self.env['resource.calendar'].create({'name': 'New calendar'})
@@ -74,15 +71,6 @@ class TestWorkEntryLeave(TestWorkEntryHolidaysBase):
         self.assertTrue(leave_work_entry.work_entry_type_id.is_leave, "It should have created a leave work entry")
         self.assertEqual(leave_work_entry[:1].state, 'conflict', "The leave work entry should conflict")
 
-    def test_conflict_move_work_entry(self):
-        leave = self.create_leave(datetime(2019, 10, 10, 9, 0), datetime(2019, 10, 12, 18, 0))
-        work_entry = self.create_work_entry(datetime(2019, 10, 8, 9, 0), datetime(2019, 10, 11, 9, 0))  # overlaps
-        self.assertEqual(work_entry.state, 'conflict', "It should be conflicting")
-        self.assertEqual(work_entry.leave_id, leave, "It should be linked to conflicting leave")
-        work_entry.date_stop = datetime(2019, 10, 9, 9, 0)  # no longer overlaps
-        self.assertNotEqual(work_entry.state, 'conflict', "It should not be conflicting")
-        self.assertFalse(work_entry.leave_id, "It should not be linked to any leave")
-
     def test_validate_leave_without_overlap(self):
         contract = self.richard_emp.contract_ids[:1]
         contract.state = 'open'
@@ -127,12 +115,3 @@ class TestWorkEntryLeave(TestWorkEntryHolidaysBase):
         self.assertFalse(leave_work_entry[:1].filtered('leave_id').active)
         self.assertEqual(len(work_entries), 2, "Attendance work entries should have been re-created (morning and afternoon)")
         self.assertTrue(all(work_entries.mapped(lambda w: w.state != 'conflict')), "Attendance work entries should not conflict")
-
-    def test_archived_work_entry_conflict(self):
-        self.create_leave(datetime(2019, 10, 10, 9, 0), datetime(2019, 10, 10, 18, 0))
-        work_entry = self.create_work_entry(datetime(2019, 10, 10, 9, 0), datetime(2019, 10, 10, 18, 0))
-        self.assertTrue(work_entry.active)
-        self.assertEqual(work_entry.state, 'conflict', "Attendance work entries should conflict with the leave")
-        work_entry.toggle_active()
-        self.assertEqual(work_entry.state, 'cancelled', "Attendance work entries should be cancelled and not conflict")
-        self.assertFalse(work_entry.active)

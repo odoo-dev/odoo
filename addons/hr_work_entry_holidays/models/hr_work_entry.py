@@ -11,11 +11,14 @@ class HrWorkEntry(models.Model):
     leave_state = fields.Selection(related='leave_id.state')
 
     def _get_duration(self, date_start, date_stop):
+        """
+        The work durations are calculated according to the company calendar.
+        """
         if not date_start or not date_stop:
             return 0
         if not self.work_entry_type_id and self.leave_id:
-            calendar = self.contract_id.resource_calendar_id
-            employee = self.contract_id.employee_id
+            calendar = self.employee_id.company_id.resource_calendar_id
+            employee = self.employee_id
             contract_data = employee._get_work_days_data_batch(
                 date_start, date_stop, compute_leaves=False, calendar=calendar)[employee.id]
             return contract_data.get('hours', 0)
@@ -89,4 +92,5 @@ class HrWorkEntryType(models.Model):
     _inherit = 'hr.work.entry.type'
     _description = 'HR Work Entry Type'
 
+    is_leave = fields.Boolean(default=False, string="Time Off")
     leave_type_ids = fields.One2many('hr.leave.type', 'work_entry_type_id', string='Time Off Type')
