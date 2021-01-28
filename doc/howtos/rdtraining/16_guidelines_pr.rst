@@ -1,22 +1,22 @@
 .. _howto/rdtraining/16_guidelines_pr:
 
-=========================================
-Part 16: Make It Shine And Submit Your PR
-=========================================
+============================================
+Part 16: Polish Your Code And Submit Your PR
+============================================
 
 In the previous chapters we saw how to create a fully functional business application. Now we will
-prepare our code, to be shared and learn how to share it.
+prepare our code to be shared and learn how to share it.
 
 Coding guidelines
 =================
 
 We will start refactoring the code to match to the Odoo coding guidelines. The guidelines aim
-to improve the quality of Odoo Apps code.
+to improve the quality of the Odoo Apps code.
 
 
 **Reference**: you will find the Odoo coding guidelines in :ref:`reference/guidelines`.
 
-.. exercise:: Make it shine
+.. exercise:: Polish your code.
 
     Refactor your code to respect the coding guidelines. Don't forget to respect the module
     structure, the variable names, the method name convention, the model attribute order and the
@@ -26,20 +26,21 @@ Your first Pull Request (PR)
 ============================
 
 **The following is intended to be used by Odoo staff members only. All repositories mentioned are
-not accessible by third-party.**
+not accessible for third-parties.**
 
-Now that your code respects the Odoo code guidelines and is shiny, let's share it with others.
+Now that your code respects the Odoo code guidelines and is polished up, let's share it with others.
 
 
 Configure development repository
 --------------------------------
 
-We will start creating a git development environment for the 'custom' folder, as we did it in the
+We will start by creating a git development environment for the 'custom' folder, like we did in the
 beginning for 'odoo' and 'enterprise'. The PR will target the `odoo/technical-training-sandbox` repository.
 
 To do this the first step is to
-`fork this repository in GitHub <https://guides.github.com/activities/forking/>`__ to create your
-own development repository.
+`fork <https://guides.github.com/activities/forking/>`__  in GitHub
+`this repository <https://github.com/odoo/technical-training-sandbox/>`__
+to create your own development repository.
 
 After you successfully created your development repository, we will configure your existing `$HOME/src/custom`
 folder to be able to commit your work.
@@ -57,7 +58,7 @@ folder to be able to commit your work.
     $ git checkout master #Two new files will be downloaded README.md and .gitignore
 
 Note that if your work is already in a :ref:`Git and GitHub configured folder <howto/rdtraining/02_setup/development_repository>`
-the previous steps are not needed. This is going to be the case when you will start working in the
+the previous steps are not needed. This is the case when you start working in the
 'odoo' or 'enterprise' folders.
 
 
@@ -87,28 +88,28 @@ Commit your code:
     $ git commit
 
 
-**Everyone is reading your commit messages!**
+**Everyone reads your commit messages!**
 
 The commit message is very important, follow the :ref:`Developer guidelines <reference/guidelines/git>`.
 
 
-Push your new branch to your developement repository:
+Push your new branch to your development repository:
 
 .. code-block:: console
 
     $ git push -u master-my_first_branch-xyz
 
-.. warning:: NEVER use `git push --force` (or `git push -f`) in a branch that does not belong to you
-             nor in a stable branch. Never, never, never!
+.. warning:: NEVER use `git push --force` (or `git push -f`) with a branch that does not belong to you
+             or in a stable branch. Never, never, never!
 
-.. tip:: Remember that you can use `git status` at any step to know the current status of your branch
-.. tip:: You can create git alias to shorten some of theses commands. Ask your colleagues around you
+.. tip:: Remember that you can use `git status` at any point to check the current status of your branch
+.. tip:: You can create git aliases to shorten some of these commands. Ask your colleagues
          if they use git aliases and get inspired by their work.
 
 Create your first PR
 --------------------
 
-After pushing your branch to your development repository, the output will look like this:
+After pushing your branch to your development repository you will see an output similar to:
 
 .. code-block:: console
 
@@ -130,13 +131,13 @@ There are two ways to create the PR:
 
 - Click on the link displayed in the output of the push command.
 - Open a browser in your development repository `https://github.com/xyz-odoo/technical-training-sandbox`.
-  A button will suggest you to create a new pull request.
+  There will be a button to create a new pull request.
 
   .. image:: 16_guidelines_pr/media/pr_from_branch.png
 
-You will notice that your commit message is used as pull request message, this occurs if you have only 1 commit.
-If you have multiple commits, you can make a summary of the commit as PR message. Or, if you have few
-commits, just copy/paste your commit messagges as the PR message.
+You will notice that your commit message is used as the pull request message. This occurs if you have only 1 commit.
+If you have multiple commits, you can either make a summary of the commits as the PR message or if there aren't that many
+commits you can just copy/paste your commit messages as the PR message.
 
 .. image:: 16_guidelines_pr/media/pr_message.png
 
@@ -145,10 +146,10 @@ Test on the runbot
 ==================
 
 Odoo has its own :abbr:`CI (Continuous integration)` server named `runbot <https://runbot.odoo.com/>`__. All
-the commits, branches and PR will be tested to avoid regressions or breaking the stable versions.
+commits, branches and PR will be tested to avoid regressions or breaking of the stable versions.
 All the runs that pass the tests are deployed on their own server with demo data.
 
-.. exercise:: Play with runbot
+.. exercise:: Play with the runbot.
 
-    Feel free to go to runbot, open the last stable version of Odoo and check all the available
+    Feel free to go to the runbot website and open the last stable version of Odoo to check out all the available
     applications and functionalities.

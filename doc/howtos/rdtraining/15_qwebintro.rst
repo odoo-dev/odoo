@@ -4,7 +4,7 @@
 Part 15: A Brief History Of QWeb
 ================================
 
-Up to now, the design of the interface of our real estate module was rather limited. Building
+So far the interface design of our real estate module has been rather limited. Building
 a list view is straightforward since only the list of fields is necessary. The same holds true
 for the form view: despite the use of a few tags such as ``<group>`` or ``<page>``, there
 is very little to do in terms of design.
@@ -18,8 +18,8 @@ Twig (PHP). Odoo comes with its own built-in engine: :ref:`reference/qweb`.
 QWeb is the primary templating engine used by Odoo. It is an XML templating engine and used
 mostly to generate HTML fragments and pages.
 
-You probably already came across the `kanban board`_ in Odoo: the records are displayed in a
-card-like structure. We will build such a view for our real estate module.
+You probably already have come across the `kanban board`_ in Odoo where the records are
+displayed in a card-like structure. We will build such a view for our real estate module.
 
 Concrete Example: A Kanban View
 ===============================
@@ -29,14 +29,14 @@ Concrete Example: A Kanban View
 
 .. note::
 
-    **Goal**: at the end of this section a Kanban view of the properties is created:
+    **Goal**: at the end of this section a Kanban view of the properties should be created:
 
     .. image:: 15_qwebintro/media/kanban.png
         :align: center
         :alt: Kanban view
 
 In our estate application, we would like to add a Kanban view to display our properties. Kanban
-views are standard Odoo views (such as the form or list view), but their structure is much more
+views are a standard Odoo view (like the form and list views), but their structure is much more
 flexible. In fact, the structure of each card is a mix of form elements (including basic HTML)
 and QWeb. The definition of a Kanban view is similar to the definition of the list and form
 views, except that their root element is ``<kanban>``. In its simplest form, a Kanban view
@@ -64,7 +64,7 @@ Let's break down this example:
   clickable to open the record.
 - ``<field name="name"/>``: this will add the ``name`` field to the view.
 
-.. exercise:: Minimal kanban view
+.. exercise:: Make a minimal kanban view.
 
     Using the simple example provided, create a minimal Kanban view for the properties. The
     only field to display is the ``name``.
@@ -95,37 +95,37 @@ We added a few things:
 
 - ``t-if``: the ``<div>`` element is rendered if the condition is true.
 - ``record``: an object with all the requested fields as its attributes. Each field has
-  two attributes ``value`` and ``raw_value``, the former is formatted according to current
-  user parameters, the latter is the direct value from a :meth:`~odoo.models.Model.read`.
+  two attributes ``value`` and ``raw_value``. The former is formatted according to current
+  user parameters and the latter is the direct value from a :meth:`~odoo.models.Model.read`.
 
 In the above example, the field ``name`` was added in the ``<templates>`` element, but ``state``
-is outside. When we need the value of a field but not display it in the view, it is possible to
-add it outside of the ``<templates>`` element.
+is outside of it. When we need the value of a field but don't want to display it in the view,
+it is possible to add it outside of the ``<templates>`` element.
 
-.. exercise:: Improving the Kanban view
+.. exercise:: Improve the Kanban view.
 
     Add the following fields to the Kanban view: expected price, best price, selling price and
     tags. Pay attention: the best price is only displayed when an offer is received, while the
-    selling price is only displayed when set.
+    selling price is only displayed when an offer is accepted.
 
     Refer to the **Goal** of the section for a visual example.
 
 Let's give the final touch to our view: the properties must be grouped by type by default. You
 might want to have a look at the various options described in :ref:`reference/views/kanban`.
 
-.. exercise:: Default grouping
+.. exercise:: Add default grouping.
 
     Use the appropriate attribute to group the properties by type by default. You must also prevent
-    the drag and drop.
+    drag and drop.
 
     Refer to the **Goal** of the section for a visual example.
 
-Kanban views are the typical example where it is always a good idea to start from an existing
+Kanban views are a typical example of how it is always a good idea to start from an existing
 view and fine tune it instead of starting from scratch. There are many options and classes
 available, so... read and learn!
 
-It is now time to give the
-:ref:`final touch to our application and submit it on GitHub <howto/rdtraining/16_guidelines_pr>`!
+It is now time to add the
+:ref:`final touches to our application and submit it on GitHub <howto/rdtraining/16_guidelines_pr>`!
 
 .. _templating:
     https://en.wikipedia.org/wiki/Template_processor
