@@ -15,12 +15,6 @@ const Toolbar = Widget.extend({
         this._super.apply(this, arguments);
         this.template = template;
     },
-    /**
-     * @override
-     */
-    start: async function () {
-        await this._super.apply(this, arguments);
-    }
 });
 
 return Toolbar;

@@ -7,11 +7,11 @@
     <!-- Editor toolbar -->
     <t t-name="web_editor.toolbar">
         <div id="toolbar" class="oe-toolbar">
-            <div id="style" class="button-group dropdown">
-                <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
+            <div id="style" class="btn-group dropdown">
+                <button type="button" class="btn btn-sm dropdown-toggle"
                     data-toggle="dropdown" title="" tabindex="-1"
                     data-original-title="Style" aria-expanded="false">
-                    <i class="fa fa-magic"></i> <span class="caret"></span>
+                    <i class="fa fa-paragraph"></i>
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="#" id="paragraph">Normal</a></li>
@@ -25,20 +25,18 @@
                     <li><a class="dropdown-item" href="#" id="blockquote"><blockquote>Quote</blockquote></a></li>
                 </ul>
             </div>
-            <div id="decoration" class="button-group">
-                <div id="bold" title="Toggle bold" class="fa fa-bold fa-fw btn"></div>
-                <div id="italic" title="Toggle italic" class="fa fa-italic fa-fw btn active"></div>
-                <div id="underline" title="Toggle underline" class="fa fa-underline fa-fw btn"></div>
-                <div id="strikeThrough" title="Toggle strikethrough" class="fa fa-strikethrough fa-fw btn"></div>
-                <div id="removeFormat" title="Remove format" class="fa fa-eraser fa-fw btn"></div>
+            <div id="decoration" class="btn-group">
+                <div id="bold" title="Toggle bold" class="btn"><i class="fa fa-bold fa-fw"></i></div>
+                <div id="italic" title="Toggle italic" class="btn"><i class="fa fa-italic fa-fw"></i></div>
+                <div id="underline" title="Toggle underline" class="btn"><i class="fa fa-underline fa-fw"></i></div>
+                <div id="removeFormat" title="Remove format" class="btn"><i class="fa fa-eraser fa-fw"></i></div>
             </div>
 
-            <div class="button-group dropdown">
-                <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
+            <div id="font-size" class="btn-group dropdown">
+                <button type="button" class="btn btn-sm dropdown-toggle"
                     data-toggle="dropdown" title="" tabindex="-1"
-                    data-original-title="Style" aria-expanded="false">
+                    data-original-title="Font Size" aria-expanded="false">
                     <span id="fontSizeCurrentValue"></span>
-                    <i class="fa fa-text-height"></i> <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="#" data-font-size="medium">default</a></li>
@@ -56,49 +54,58 @@
                 </ul>
             </div>
 
-            <div class="button-group" id="colorInputButtonGroup">
+            <div id="colorInputButtonGroup" class="btn-group">
                 <label id="foreColor" htmlFor="foreColorInput">
                     <input id="foreColorInput" type="color" name="foreColor" />
-                    <i class="color-indicator fore-color fa fa-font btn dropdown-toggle"></i>
+                    <div class="btn color-button">
+                        <i class="fa fa-font color-indicator fore-color"></i>
+                    </div>
                 </label>
                 <label id="hiliteColor" htmlFor="hiliteColorInput">
-                    <input id="hiliteColorInput" type="color" name="hiliteColor" />
-                    <i class="color-indicator hilite-color fa fa-paint-brush btn dropdown-toggle"></i>
+                    <input id="hiliteColorInput" type="color" name="hiliteColor"/>
+                    <div class="btn color-button">
+                        <i class="fa fa-paint-brush color-indicator hilite-color"></i>
+                    </div>
                 </label>
             </div>
 
-            <div id="media" class="button-group">
-                <div id="fontawesome" title="Insert font Awesome icon" class="fa fa-star fa-fw btn"></div>
-            </div>
-
-            <div id="list" class="button-group">
-                <div id="unordered" title="Toggle unordered list" class="fa fa-list-ul fa-fw btn"></div>
-                <div id="ordered" title="Toggle ordered list" class="fa fa-list-ol fa-fw btn"></div>
-                <div id="checklist" title="Toggle checklist" class="fa fa-check-square-o fa-fw btn"></div>
-            </div>
-
-            <div id="justify" class="button-group dropdown">
-                <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
+            <div id="justify" class="btn-group dropdown">
+                <button type="button" class="btn btn-sm dropdown-toggle"
                     data-toggle="dropdown" title="" tabindex="-1"
                     data-original-title="Paragraph" aria-expanded="false">
-                    <i id="paragraphDropdownButton" class="fa fa-align-left fa-fw"></i> <span class="caret"></span>
+                    <i id="paragraphDropdownButton" class="fa fa-align-left fa-fw"></i>
                 </button>
                 <div class="dropdown-menu">
                     <div class="btn-group">
-                        <div class="btn" href="#" id="justifyLeft"><i class="fa fa-align-left fa-fw btn"></i></div>
-                        <div class="btn" href="#" id="justifyCenter"><i class="fa fa-align-center fa-fw btn"></i></div>
-                        <div class="btn" href="#" id="justifyRight"><i class="fa fa-align-right fa-fw btn"></i></div>
-                        <div class="btn" href="#" id="justifyFull"><i class="fa fa-align-justify fa-fw btn"></i></div>
+                        <div id="justifyLeft" class="btn"><i class="fa fa-align-left fa-fw"></i></div>
+                        <div id="justifyCenter" class="btn"><i class="fa fa-align-center fa-fw"></i></div>
+                        <div id="justifyRight" class="btn"><i class="fa fa-align-right fa-fw"></i></div>
+                        <div id="justifyFull" class="btn"><i class="fa fa-align-justify fa-fw"></i></div>
                     </div>
                 </div>
             </div>
 
-            <div id="table" class="button-group dropdown">
-                <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
+            <div id="list" class="btn-group dropdown">
+                <button type="button" class="btn btn-sm dropdown-toggle"
+                    data-toggle="dropdown" title="" tabindex="-1"
+                    data-original-title="List" aria-expanded="false">
+                    <i id="justifyDropdownButton" class="fa fa-list-ul fa-fw"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <div class="btn-group">
+                        <div id="unordered" title="Toggle unordered list" class="btn"><i class="fa fa-list-ul fa-fw"></i></div>
+                        <div id="ordered" title="Toggle ordered list" class="btn"><i class="fa fa-list-ol fa-fw"></i></div>
+                        <div id="checklist" title="Toggle checklist" class="btn"><i class="fa fa-check-square-o fa-fw"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="table" class="btn-group dropdown">
+                <button type="button" class="btn btn-sm dropdown-toggle"
                     data-toggle="dropdown" title="" tabindex="-1"
                     data-original-title="Table" aria-expanded="false"
                     id="tableDropdownButton">
-                    <i class="fa fa-table fa-fw"></i> <span class="caret"></span>
+                    <i class="fa fa-table fa-fw"></i>
                 </button>
                 <div class="dropdown-menu">
                     <div class="tablepicker"></div>
@@ -106,9 +113,8 @@
                 </div>
             </div>
 
-            <div id="link" class="button-group">
+            <div id="link" class="btn-group">
                 <div id="createLink" title="Link" class="fa fa-link fa-fw btn"></div>
-                <div id="unLink" title="Link" class="fa fa-unlink fa-fw btn"></div>
             </div>
         </div>
     </t>

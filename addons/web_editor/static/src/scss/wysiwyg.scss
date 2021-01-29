@@ -38,7 +38,6 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     // Main layout of buttons
     .btn-group, .btn {
         width: auto !important;
-        height: 100% !important;
         margin-top: 0;
         margin-bottom: 0;
         background: transparent;
@@ -124,6 +123,9 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     }
 
     // Specific elements
+    #colorInputButtonGroup label:last-of-type() .btn {
+        margin: 0 1px 0 -1px;
+    }
     .o_image_alt {
         @include o-text-overflow();
         max-width: 150px;
@@ -351,16 +353,6 @@ img::selection {
         height: initial !important;
         top: initial !important;
         left: initial !important;
-
-        #web_editor-toolbars .popover-body {
-            display: flex;
-            width: 100%;
-            overflow-x: auto;
-
-            .btn-group {
-                position: static;
-            }
-        }
     }
 }
 
