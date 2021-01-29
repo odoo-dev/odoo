@@ -4,8 +4,23 @@ odoo.define('web_editor.toolbar', function (require) {
 var Widget = require('web.Widget');
 
 const Toolbar = Widget.extend({
-    template: 'web_editor.toolbar',
-    xmlDependencies: ['/web_editor/static/src/xml/snippets.xml'],
+    xmlDependencies: ['/web_editor/static/src/xml/editor.xml'],
+
+    /**
+     * @constructor
+     * @param {Widget} parent
+     * @param {string} contents
+     */
+    init: function (parent, template = 'web_editor.toolbar') {
+        this._super.apply(this, arguments);
+        this.template = template;
+    },
+    /**
+     * @override
+     */
+    start: async function () {
+        await this._super.apply(this, arguments);
+    }
 });
 
 return Toolbar;

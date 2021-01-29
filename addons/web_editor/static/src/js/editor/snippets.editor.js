@@ -2837,7 +2837,7 @@ var SnippetsMenu = Widget.extend({
         this._filterSnippets('');
     },
     _addToolbar(toolbarMode = "text") {
-        let titleText = _t("Text Formatting");
+        let titleText = _t("Inline Text");
         switch (toolbarMode) {
             case "image":
                 titleText = _t("Image Formatting");
