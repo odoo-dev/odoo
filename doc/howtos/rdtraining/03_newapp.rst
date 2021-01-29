@@ -1,8 +1,8 @@
 .. _howto/rdtraining/03_newapp:
 
-=========================
-Part 3: A New Application
-=========================
+============================
+Chapter 3: A New Application
+============================
 
 The purpose of this chapter is to lay the foundation for the creation of a completely new Odoo module.
 We will start from scratch with the minimum needed to have our module recognized by Odoo.

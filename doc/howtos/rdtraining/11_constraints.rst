@@ -1,8 +1,8 @@
 .. _howto/rdtraining/11_constraints:
 
-====================
-Part 11: Constraints
-====================
+=======================
+Chapter 11: Constraints
+=======================
 
 The :ref:`previous chapter <howto/rdtraining/10_actions>` introduced the ability to add some
 business logic to our model. We can now link buttons to business code, but how can we prevent

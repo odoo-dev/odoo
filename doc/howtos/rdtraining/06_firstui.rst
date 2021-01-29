@@ -1,8 +1,8 @@
 .. _howto/rdtraining/06_firstui:
 
-=====================================
-Part 6: Finally, Some UI To Play With
-=====================================
+========================================
+Chapter 6: Finally, Some UI To Play With
+========================================
 
 Now that we've created our new :ref:`model <howto/rdtraining/04_basicmodel>` and its corresponding
 :ref:`access rights <howto/rdtraining/05_securityintro>`, it is time to interact with
@@ -65,7 +65,7 @@ Actions can be triggered in three ways:
 3. as contextual actions on object
 
 We will only cover the first case in this chapter. The second case will be covered in a
-:ref:`later chapter <howto/rdtraining/10_actions>` while the last is the topic of an appendix.
+:ref:`later chapter <howto/rdtraining/10_actions>` while the last is the focus of an advanced topic.
 In our Real Estate example, we would like to link a menu to the ``estate.property`` model, so we
 are able to create a new record. The action can be viewed as the link between the menu and
 the model.

@@ -1,8 +1,8 @@
 .. _howto/rdtraining/13_inheritance:
 
-====================
-Part 13: Inheritance
-====================
+=======================
+Chapter 13: Inheritance
+=======================
 
 A powerful aspect of Odoo is its modularity. A module is dedicated to a business need, but
 modules can also interact with one another. This is useful for extending the functionality of an existing

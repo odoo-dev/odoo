@@ -1,8 +1,8 @@
 .. _howto/rdtraining/08_relations:
 
-================================
-Part 8: Relations Between Models
-================================
+===================================
+Chapter 8: Relations Between Models
+===================================
 
 The :ref:`previous chapter <howto/rdtraining/07_basicviews>` covered the creation of custom views
 for a model containing basic fields. However, in any real business scenario we need more than
@@ -185,7 +185,7 @@ operations like ``recs1 | recs2``.
 
     Tip: in the view, use the ``widget="many2many_tags"`` attribute as demonstrated
     `here <https://github.com/odoo/odoo/blob/5bb8b927524d062be32f92eb326ef64091301de1/addons/crm_iap_lead_website/views/crm_reveal_views.xml#L36>`__.
-    The ``widget`` attribute will be explained in detail in :ref:`a later part of the training <howto/rdtraining/12_sprinkles>`.
+    The ``widget`` attribute will be explained in detail in :ref:`a later chapter of the training <howto/rdtraining/12_sprinkles>`.
     For now, you can try to adding and removing it and see the result ;-)
 
 One2many
