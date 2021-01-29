@@ -261,13 +261,6 @@ body.editor_enable.o_basic_theme.o_in_iframe {
     overflow: initial;
 }
 
-#web_editor-toolbars .popover .note-color {
-    .note-back-color-preview .dropdown-toggle,
-    .note-fore-color-preview .dropdown-toggle {
-        height: $o-we-toolbar-height - 1;
-    }
-}
-
 .oe_structure {
     width: 100%;
 }

@@ -440,7 +440,7 @@ body.editor_enable.editor_has_snippets {
             width: $o-we-sidebar-content-available-room * .6;
         }
 
-        we-button, we-toggler {
+        we-button, we-toggler, .oe-toolbar .btn {
             @extend %we-generic-button;
         }
 

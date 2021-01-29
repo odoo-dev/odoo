@@ -2865,19 +2865,6 @@ var SnippetsMenu = Widget.extend({
         const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_jw_toolbar_container"/>');
         const $title = $("<we-title><span>" + titleText + "</span></we-title>");
 
-        if (toolbarMode === "text") {
-            const $removeFormatButton = $('<we-button/>', {
-                class: 'fa fa-fw fa-eraser o_we_link o_we_hover_danger',
-                title: 'Clear Formatting',
-            })
-            $removeFormatButton.on('click', () => {
-                throw new Error('implement me');
-            });
-            const $group = $('<we-top-button-group>');
-            $group.append($removeFormatButton);
-            $title.append($group);
-        }
-
         customizeBlock.append($title);
         customizeBlock.append(this.options.wysiwyg.toolbar.$el);
         $(this.customizePanel).append(customizeBlock);
