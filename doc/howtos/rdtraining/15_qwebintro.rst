@@ -1,8 +1,8 @@
 .. _howto/rdtraining/15_qwebintro:
 
-================================
-Part 15: A Brief History Of QWeb
-================================
+===================================
+Chapter 15: A Brief History Of QWeb
+===================================
 
 So far the interface design of our real estate module has been rather limited. Building
 a list view is straightforward since only the list of fields is necessary. The same holds true

@@ -1,8 +1,8 @@
 .. _howto/rdtraining/16_guidelines_pr:
 
-============================================
-Part 16: Polish Your Code And Submit Your PR
-============================================
+===============================================
+Chapter 16: Polish Your Code And Submit Your PR
+===============================================
 
 In the previous chapters we saw how to create a fully functional business application. Now we will
 prepare our code to be shared and learn how to share it.

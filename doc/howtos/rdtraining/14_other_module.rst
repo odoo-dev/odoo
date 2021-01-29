@@ -1,8 +1,8 @@
 .. _howto/rdtraining/14_other_module:
 
-====================================
-Part 14: Interact With Other Modules
-====================================
+=======================================
+Chapter 14: Interact With Other Modules
+=======================================
 
 In the :ref:`previous chapter <howto/rdtraining/13_inheritance>`, we used inheritance to modify
 the behavior of a module. In our real estate scenario, we would like to go a step further

@@ -1,8 +1,8 @@
 .. _howto/rdtraining/05_securityintro:
 
-=======================================
-Part 5: Security - A Brief Introduction
-=======================================
+==========================================
+Chapter 5: Security - A Brief Introduction
+==========================================
 
 In the :ref:`previous chapter <howto/rdtraining/04_basicmodel>`, we created our first table intended
 to store business data. In a business application such as Odoo, one of the first questions to consider
@@ -105,7 +105,7 @@ Here is an example for our previous ``test.model``:
   to the model is ``model_<model_name>``, where ``<model_name>`` is the ``_name`` of the model
   with the ``.`` replaced by ``_``. Seems cumbersome? Indeed it is...
 - ``group_id/id`` refers to the group which the access right applies to. We will cover the concept
-  of groups in the appendix dedicated to the security.
+  of groups in the :ref:`advanced topic <howto/rdtraining/N_security>` dedicated to the security.
 - ``perm_read,perm_write,perm_create,perm_unlink``: read, write, create and unlink permissions
 
 .. exercise:: Add access rights.

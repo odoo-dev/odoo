@@ -1,8 +1,8 @@
 .. _howto/rdtraining/07_basicviews:
 
-===================
-Part 7: Basic Views
-===================
+======================
+Chapter 7: Basic Views
+======================
 
 We have seen in the :ref:`previous chapter <howto/rdtraining/06_firstui>` that Odoo is able to
 generate default views for a given model. In practice, the default view is **never** acceptable

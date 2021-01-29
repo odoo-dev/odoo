@@ -1,8 +1,8 @@
 .. _howto/rdtraining/01_architecture:
 
-=============================
-Part 1: Architecture Overview
-=============================
+================================
+Chapter 1: Architecture Overview
+================================
 
 Multitier application
 =====================

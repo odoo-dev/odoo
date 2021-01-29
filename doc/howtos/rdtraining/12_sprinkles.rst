@@ -1,8 +1,8 @@
 .. _howto/rdtraining/12_sprinkles:
 
-=========================
-Part 12: Add The Sprinkles
-=========================
+=============================
+Chapter 12: Add The Sprinkles
+=============================
 
 Our real estate module now makes sense from a business perspective. We created
 :ref:`specific views <howto/rdtraining/07_basicviews>`, added several

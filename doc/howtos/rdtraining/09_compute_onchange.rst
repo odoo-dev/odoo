@@ -1,8 +1,8 @@
 .. _howto/rdtraining/09_compute_onchange:
 
-=====================================
-Part 9: Computed Fields And Onchanges
-=====================================
+========================================
+Chapter 9: Computed Fields And Onchanges
+========================================
 
 The :ref:`relations between models <howto/rdtraining/08_relations>` are a key component of any Odoo
 module. They are necessary for the modelization of any business case.

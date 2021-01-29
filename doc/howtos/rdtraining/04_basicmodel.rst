@@ -1,8 +1,8 @@
 .. _howto/rdtraining/04_basicmodel:
 
-===============================
-Part 4: Models And Basic Fields
-===============================
+==================================
+Chapter 4: Models And Basic Fields
+==================================
 
 At the end of the :ref:`previous chapter <howto/rdtraining/03_newapp>`, we were able to create an Odoo
 module. However, at this point it is still an empty shell which doesn't allow us to store any data.

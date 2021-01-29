@@ -1,8 +1,8 @@
 .. _howto/rdtraining/10_actions:
 
-===============================
-Part 10: Ready For Some Action?
-===============================
+==================================
+Chapter 10: Ready For Some Action?
+==================================
 
 So far we have mostly built our module by declaring fields and views. We just introduced business
 logic in the :ref:`previous chapter <howto/rdtraining/09_compute_onchange>` thanks to computed fields
