@@ -7,9 +7,8 @@ from string import digits
 from werkzeug.urls import url_encode
 
 from odoo import api, fields, models, _
-from odoo.osv.query import Query
 from odoo.exceptions import ValidationError, AccessError
-from odoo.modules.module import get_module_resource
+from odoo.tools import Query
 
 
 class HrEmployeePrivate(models.Model):
