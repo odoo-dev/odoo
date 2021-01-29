@@ -75,7 +75,7 @@ const Wysiwyg = Widget.extend({
             this.trigger_up('wysiwyg_blur');
         });
 
-        this.toolbar = new Toolbar();
+        this.toolbar = new Toolbar(this, this.options.toolbarTemplate);
         await this.toolbar.appendTo(document.createElement('void'));
         this.odooEditor = new OdooEditor(this.$editable[0], {
             toolbar: this.toolbar.$el[0],
