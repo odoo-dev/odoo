@@ -10,5 +10,12 @@
             <field name="leave_right">True</field>
         </record>
 
+        <record id="work_entry_type_absence" model="hr.work.entry.type">
+            <field name="name">Absence</field>
+            <field name="color">3</field>
+            <field name="code">LEAVE101</field>
+            <field name="leave_right">True</field>
+        </record>
+
     </data>
 </odoo>

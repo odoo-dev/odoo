@@ -4,6 +4,7 @@
 from contextlib import contextmanager
 from dateutil.relativedelta import relativedelta
 from psycopg2 import OperationalError
+from itertools import chain
 
 from odoo import api, fields, models
 
@@ -206,6 +207,10 @@ class HrWorkEntry(models.Model):
                 # New work entries are handled in the create method,
                 # no need to reload work entries.
                 work_entries.exists()._check_if_error()
+
+    @api.model
+    def _from_intervals(self, intervals):
+        return self.browse(chain.from_iterable(recs.ids for start, end, recs in intervals))
 
 
 class HrWorkEntryType(models.Model):
