@@ -106,6 +106,12 @@
                 background-color: #c7632a;
                 color: $white;
             }
+
+            // Unpublished ribbon
+            .o_ribbon_right {
+                color: $white;
+                font-size: $font-size-base/2;
+            }
         }
     }
 }
