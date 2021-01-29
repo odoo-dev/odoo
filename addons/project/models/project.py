@@ -199,7 +199,7 @@ class Project(models.Model):
             ('employees', 'All employees'),
             ('portal', 'Portal users and all employees'),
         ],
-        string='Visibility', required=True,
+        string='Visibility', required=True, inverse='_inverse_privacy_visibility',
         default='portal',
         help="Defines the visibility of the tasks of the project:\n"
             "- Invited employees: employees may only see the followed project and tasks.\n"
@@ -268,6 +268,17 @@ class Project(models.Model):
     def _compute_alias_enabled(self):
         for project in self:
             project.alias_enabled = project.alias_domain and project.alias_id.alias_name
+
+    def _inverse_privacy_visibility(self):
+        """
+        Unsubscribe non-internal users from the project and tasks if the project privacy visibility
+        goes to a value different than 'portal'
+        """
+        for project in self.filtered(lambda p: p.privacy_visibility != 'portal'):
+            portal_users = project.message_partner_ids.user_ids.filtered('share')
+            if portal_users:
+                project.message_unsubscribe(partner_ids=portal_users.partner_id.ids)
+            project.mapped('tasks')._inverse_project_privacy_visibility()
 
     def _compute_access_url(self):
         super(Project, self)._compute_access_url()
@@ -394,20 +405,19 @@ class Project(models.Model):
     def message_subscribe(self, partner_ids=None, channel_ids=None, subtype_ids=None):
         """
         Subscribe to all existing active tasks when subscribing to a project
-        And add the portal user subscribed to allowed portal users
+        One cannot add a portal partner as subscriber of a project which is not deditaced to be shared to portal users.
         """
+        if self.filtered(lambda t: t.privacy_visibility != 'portal') and partner_ids:
+            portal_users = self.env['res.partner'].browse(partner_ids).user_ids.filtered('share')
+            if portal_users:
+                user_names = ', '.join(portal_users[:10].mapped('name'))
+                raise ValidationError(_("The project visibility setting doesn't allow portal users to see the project. (%s)", user_names))
         res = super(Project, self).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
         project_subtypes = self.env['mail.message.subtype'].browse(subtype_ids) if subtype_ids else None
         task_subtypes = (project_subtypes.mapped('parent_id') | project_subtypes.filtered(lambda sub: sub.internal or sub.default)).ids if project_subtypes else None
         if not subtype_ids or task_subtypes:
             self.mapped('tasks').message_subscribe(
                 partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=task_subtypes)
-        if partner_ids:
-            all_users = self.env['res.partner'].browse(partner_ids).user_ids
-            portal_users = all_users.filtered('share')
-            internal_users = all_users - portal_users
-            self.allowed_portal_user_ids |= portal_users
-            self.allowed_internal_user_ids |= internal_users
         return res
 
     def message_unsubscribe(self, partner_ids=None, channel_ids=None):
@@ -831,6 +841,12 @@ class Task(models.Model):
         if not self._check_recursion():
             raise ValidationError(_('Error! You cannot create a recursive hierarchy of tasks.'))
 
+    def _inverse_project_privacy_visibility(self):
+        for task in self.filtered(lambda t: t.project_privacy_visibility != 'portal'):
+            portal_users = task.message_partner_ids.user_ids.filtered('share')
+            if portal_users:
+                task.message_unsubscribe(partner_ids=portal_users.partner_id.ids)
+
     def _compute_attachment_ids(self):
         for task in self:
             attachment_ids = self.env['ir.attachment'].search([('res_id', '=', task.id), ('res_model', '=', 'project.task')]).ids
@@ -946,12 +962,12 @@ class Task(models.Model):
         """
         Add the users subscribed to allowed portal users
         """
-        res = super(Task, self).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
-        if partner_ids:
-            new_allowed_users = self.env['res.partner'].browse(partner_ids).user_ids.filtered('share')
-            tasks = self.filtered(lambda task: task.project_id.privacy_visibility == 'portal')
-            tasks.sudo().write({'allowed_user_ids': [(4, user.id) for user in new_allowed_users]})
-        return res
+        if self.filtered(lambda t: t.project_privacy_visibility != 'portal') and partner_ids:
+            portal_users = self.env['res.partner'].browse(partner_ids).user_ids.filtered('share')
+            if portal_users:
+                user_names = ', '.join(portal_users[:10].mapped('name'))
+                raise ValidationError(_("The project visibility setting doesn't allow portal users to see the project's task. (%s)", user_names))
+        return super(Task, self).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
 
     # ----------------------------------------
     # Case management
@@ -1171,9 +1187,6 @@ class Task(models.Model):
         project_user_group_id = self.env.ref('project.group_project_user').id
 
         group_func = lambda pdata: pdata['type'] == 'user' and project_user_group_id in pdata['groups']
-        if self.project_id.privacy_visibility == 'followers':
-            allowed_user_ids = self.project_id.allowed_internal_user_ids.partner_id.ids
-            group_func = lambda pdata: pdata['type'] == 'user' and project_user_group_id in pdata['groups'] and pdata['id'] in allowed_user_ids
         new_group = ('group_project_user', group_func, {})
 
         if not self.user_id and not self.stage_id.fold:
@@ -1182,15 +1195,6 @@ class Task(models.Model):
             new_group[2]['actions'] = project_actions
 
         groups = [new_group] + groups
-
-        if self.project_id.privacy_visibility == 'portal':
-            allowed_user_ids = self.project_id.allowed_portal_user_ids.partner_id.ids
-            groups.insert(0, (
-                'allowed_portal_users',
-                lambda pdata: pdata['type'] == 'portal' and pdata['id'] in allowed_user_ids,
-                {}
-            ))
-
         portal_privacy = self.project_id.privacy_visibility == 'portal'
         for group_name, group_method, group_data in groups:
             if group_name in ('customer', 'user') or group_name == 'portal_customer' and not portal_privacy:
