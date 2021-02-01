@@ -57,10 +57,10 @@ async function loadFromTextarea(parent, textarea, options) {
     await wysiwyg.appendTo($wysiwygWrapper);
     $form.find('.note-editable').data('wysiwyg', wysiwyg);
 
-    $form.on('click', 'button[type=submit]', async (e) => {
+    $form.on('click', 'button[type=submit]', (e) => {
         // float-left class messes up the post layout OPW 769721
         $form.find('.note-editable').find('img.float-left').removeClass('float-left');
-        $textarea.html(await wysiwyg.getValue());
+        $textarea.html(wysiwyg.getValue());
     });
 
     return wysiwyg;
