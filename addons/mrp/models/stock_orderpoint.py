@@ -44,11 +44,11 @@ class StockWarehouseOrderpoint(models.Model):
             orderpoint.show_bom = orderpoint.route_id.id in manufacture_route
 
     def _quantity_in_progress(self):
+        bom_kits = self.env['mrp.bom']._bom_find(self.product_id, bom_type='phantom')
         bom_kit_orderpoints = {
-            orderpoint: bom
+            orderpoint: bom_kits[orderpoint.product_id]
             for orderpoint in self
-            for bom in self.env['mrp.bom']._bom_find(product=orderpoint.product_id, bom_type='phantom')
-            if bom
+            if orderpoint.product_id in bom_kits
         }
         res = super(StockWarehouseOrderpoint, self.filtered(lambda p: p not in bom_kit_orderpoints))._quantity_in_progress()
         for orderpoint in bom_kit_orderpoints:
