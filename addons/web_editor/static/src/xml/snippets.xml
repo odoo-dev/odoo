@@ -101,7 +101,7 @@
     </t>
 
     <t t-name="web_editor.toolbar">
-        <div id="toolbar" class="odoo-editor toolbar">
+        <div id="toolbar" class="oe-toolbar">
             <div class="button-group dropdown">
                 <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
                     data-toggle="dropdown" title="" tabindex="-1"
