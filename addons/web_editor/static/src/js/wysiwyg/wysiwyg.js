@@ -81,6 +81,7 @@ const Wysiwyg = Widget.extend({
             toolbar: this.toolbar.$el[0],
             document: this.options.document,
             autohideToolbar: !!this.options.autohideToolbar,
+            setContentEditable: this.options.setContentEditable,
         });
 
         if (options.snippets) {

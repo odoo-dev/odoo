@@ -364,6 +364,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             saveButton: true,
             devicePreview: true,
             savableSelector: this.savableSelector,
+            setContentEditable: false,
         };
         return wysiwygLoader.createWysiwyg(this,
             Object.assign(params, this.wysiwygOptions),
