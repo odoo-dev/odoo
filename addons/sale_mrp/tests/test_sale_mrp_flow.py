@@ -66,7 +66,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         #         |- component_b   x1
         #         |- component_c   x3
 
-        cls.kit_1 = cls._cls_create_product('Kit 1', cls.uom_unit)
+        cls.kit_1 = cls._cls_create_product('Kit 1', cls.uom_unit, type='consu')
 
         cls.bom_kit_1 = cls.env['mrp.bom'].create({
             'product_tmpl_id': cls.kit_1.product_tmpl_id.id,
@@ -101,9 +101,9 @@ class TestSaleMrpFlow(common.SavepointCase):
         #              |- component_e x1
 
         # Creating all kits
-        cls.kit_2 = cls._cls_create_product('Kit 2', cls.uom_unit)
-        cls.kit_3 = cls._cls_create_product('kit 3', cls.uom_unit)
-        cls.kit_parent = cls._cls_create_product('Kit Parent', cls.uom_unit)
+        cls.kit_2 = cls._cls_create_product('Kit 2', cls.uom_unit, type='consu')
+        cls.kit_3 = cls._cls_create_product('kit 3', cls.uom_unit, type='consu')
+        cls.kit_parent = cls._cls_create_product('Kit Parent', cls.uom_unit, type='consu')
 
         # Linking the kits and the components via some 'phantom' BoMs
         bom_kit_2 = cls.env['mrp.bom'].create({
@@ -154,10 +154,10 @@ class TestSaleMrpFlow(common.SavepointCase):
             'bom_id': bom_kit_parent.id})
 
     @classmethod
-    def _cls_create_product(cls, name, uom_id, routes=()):
+    def _cls_create_product(cls, name, uom_id, routes=(), type='product'):
         p = Form(cls.env['product.product'])
         p.name = name
-        p.type = 'product'
+        p.type = type
         p.uom_id = uom_id
         p.uom_po_id = uom_id
         p.route_ids.clear()
@@ -165,10 +165,10 @@ class TestSaleMrpFlow(common.SavepointCase):
             p.route_ids.add(r)
         return p.save()
 
-    def _create_product(self, name, uom_id, routes=()):
+    def _create_product(self, name, uom_id, routes=(), type='product'):
         p = Form(self.env['product.product'])
         p.name = name
-        p.type = 'product'
+        p.type = type
         p.uom_id = uom_id
         p.uom_po_id = uom_id
         p.route_ids.clear()
@@ -238,7 +238,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         route_mto = self.warehouse.mto_pull_id.route_id
         product_a = self._create_product('Product A', self.uom_unit, routes=[route_manufacture, route_mto])
         product_c = self._create_product('Product C', self.uom_kg)
-        product_b = self._create_product('Product B', self.uom_dozen, routes=[route_manufacture, route_mto])
+        product_b = self._create_product('Product B', self.uom_dozen, routes=[route_manufacture, route_mto], type='consu')
         product_d = self._create_product('Product D', self.uom_unit, routes=[route_manufacture, route_mto])
 
         # ------------------------------------------------------------------------------------------
@@ -504,8 +504,6 @@ class TestSaleMrpFlow(common.SavepointCase):
         """ Test delivered quantity on SO based on delivered quantity in pickings."""
         # intial so
         product = self.env.ref('mrp.product_product_table_kit')
-        qty_available = self.env['stock.quant']._get_available_quantity(product, self.stock_location)
-        self.env['stock.quant']._update_available_quantity(product, self.stock_location, -qty_available)
         product.invoice_policy = 'delivery'
         # Remove the MTO route as purchase is not installed and since the procurement removal the exception is directly raised
         product.write({'route_ids': [(6, 0, [self.warehouse.manufacture_pull_id.route_id.id])]})
@@ -591,7 +589,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         Product = self.env['product.product']
         self.finished_product = Product.create({
                 'name': 'Finished product',
-                'type': 'product',
+                'type': 'consu',
                 'uom_id': self.uom_unit.id,
                 'invoice_policy': 'delivery',
                 'categ_id': self.category.id})
@@ -1115,7 +1113,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         #             |- component_uom_dozen   x1 Test-Dozen
         #             |- component_uom_kg      x3 Test-G
 
-        kit_uom_1 = self._create_product('Kit 1', self.uom_unit)
+        kit_uom_1 = self._create_product('Kit 1', self.uom_unit, type='consu')
 
         bom_kit_uom_1 = self.env['mrp.bom'].create({
             'product_tmpl_id': kit_uom_1.product_tmpl_id.id,
@@ -1222,8 +1220,8 @@ class TestSaleMrpFlow(common.SavepointCase):
         #                                                       |- component_uom_dozen   x1 Test-Dozen
         #                                                       |- component_uom_kg      x3 Test-G
 
-        kit_uom_1 = self._create_product('Sub Kit 1', self.uom_unit)
-        kit_uom_in_kit = self._create_product('Parent Kit', self.uom_unit)
+        kit_uom_1 = self._create_product('Sub Kit 1', self.uom_unit, type='consu')
+        kit_uom_in_kit = self._create_product('Parent Kit', self.uom_unit, type='consu')
 
         bom_kit_uom_1 = self.env['mrp.bom'].create({
             'product_tmpl_id': kit_uom_1.product_tmpl_id.id,
@@ -1327,7 +1325,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         # kit_1 --|- component_shelf1   x3
         #         |- component_shelf2   x2
 
-        kit_1 = self._create_product('Kit1', self.uom_unit)
+        kit_1 = self._create_product('Kit1', self.uom_unit, type='consu')
         component_shelf1 = self._create_product('Comp Shelf1', self.uom_unit)
         component_shelf2 = self._create_product('Comp Shelf2', self.uom_unit)
 
@@ -1410,7 +1408,7 @@ class TestSaleMrpFlow(common.SavepointCase):
         # 2x Dozens kit_1 --|- component_unit   x6 Units
         #                   |- component_kg     x7 Kg
 
-        kit_1 = self._create_product('Kit1', self.uom_unit)
+        kit_1 = self._create_product('Kit1', self.uom_unit, type='consu')
         component_unit = self._create_product('Comp Unit', self.uom_unit)
         component_kg = self._create_product('Comp Kg', self.uom_kg)
 
