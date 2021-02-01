@@ -113,7 +113,9 @@ QUnit.test('list activity widget with no activity', async function (assert) {
         data: this.data,
         arch: '<list><field name="activity_ids" widget="list_activity"/></list>',
         mockRPC: function (route) {
-            assert.step(route);
+            if (new RegExp('dataset/search_read|init_messaging').test(route)) {
+                assert.step(route);
+            }
             return this._super(...arguments);
         },
         session: { uid: 2 },
@@ -159,7 +161,9 @@ QUnit.test('list activity widget with activities', async function (assert) {
         data: this.data,
         arch: '<list><field name="activity_ids" widget="list_activity"/></list>',
         mockRPC: function (route) {
-            assert.step(route);
+            if (new RegExp('dataset/search_read|init_messaging').test(route)) {
+                assert.step(route);
+            }
             return this._super(...arguments);
         },
     });
@@ -202,7 +206,9 @@ QUnit.test('list activity widget with exception', async function (assert) {
         data: this.data,
         arch: '<list><field name="activity_ids" widget="list_activity"/></list>',
         mockRPC: function (route) {
-            assert.step(route);
+            if (new RegExp('dataset/search_read|init_messaging').test(route)) {
+                assert.step(route);
+            }
             return this._super(...arguments);
         },
     });
@@ -264,7 +270,17 @@ QUnit.test('list activity widget: open dropdown', async function (assert) {
                 <field name="activity_ids" widget="list_activity"/>
             </list>`,
         mockRPC: function (route, args) {
-            assert.step(args.method || route);
+            const step = args.method || route;
+            switch (step) {
+                case '/mail/init_messaging':
+                case '/web/dataset/search_read':
+                case 'switch_view':
+                case 'open dropdown':
+                case 'activity_format':
+                case 'action_feedback':
+                case 'read':
+                    assert.step(step);
+            }
             if (args.method === 'action_feedback') {
                 const currentUser = this.data['res.users'].records.find(user =>
                     user.id === env.messaging.currentUser.id
