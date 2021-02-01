@@ -22,7 +22,10 @@
 
 .o_Attachment_aside {
     position: relative;
-    overflow: hidden;
+
+    &.o-isInComposer {
+        overflow: hidden;
+    }
 
     &:not(.o-has-multiple-action) {
         min-width: 50px;

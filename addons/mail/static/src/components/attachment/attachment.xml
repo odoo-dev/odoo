@@ -75,7 +75,10 @@
                 </t>
                 <!-- Attachment aside -->
                 <t t-if="detailsMode !== 'hover' and (props.isDownloadable or props.isEditable)">
-                    <div class="o_Attachment_aside" t-att-class="{ 'o-has-multiple-action': props.isDownloadable and props.isEditable }">
+                    <div class="o_Attachment_aside" t-att-class="{
+                        'o-has-multiple-action': props.isDownloadable and props.isEditable,
+                        'o-isInComposer': attachment.isLinkedToComposer,
+                    }">
                         <!-- Uploading icon -->
                         <t t-if="attachment.isUploading and attachment.isLinkedToComposer">
                             <div class="o_Attachment_asideItem o_Attachment_asideItemUploading" title="Uploading">
