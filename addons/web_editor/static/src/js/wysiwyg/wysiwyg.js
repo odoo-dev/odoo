@@ -117,7 +117,9 @@ const Wysiwyg = Widget.extend({
             });
         }
 
-        return _super.apply(this, arguments);
+        return _super.apply(this, arguments).then(() => {
+            $(document.body).append(this.toolbar.$el);
+        });
     },
     /**
      * @override
