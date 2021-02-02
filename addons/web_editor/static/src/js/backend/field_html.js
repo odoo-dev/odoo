@@ -165,7 +165,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             this.$content = this.wysiwyg.$editable;
             this._onLoadWysiwyg();
             this.isRendered = true;
-            $(this.wysiwyg.odooEditor.document.body).append(this.wysiwyg.toolbar.$el);
         });
     },
     /**
