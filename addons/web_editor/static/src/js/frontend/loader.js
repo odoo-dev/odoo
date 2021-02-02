@@ -5,13 +5,15 @@ var ajax = require('web.ajax');
 
 let wysiwygPromise;
 
+const exports = {};
+
 /**
  * Load the assets and create a wysiwyg.
  *
  * @param {Widget} parent The wysiwyg parent
  * @param {object} options The wysiwyg options
  */
-async function createWysiwyg(parent, options, additionnalAssets = []) {
+exports.createWysiwyg = async (parent, options, additionnalAssets = []) => {
     if (!wysiwygPromise) {
         wysiwygPromise = new Promise(async (resolve) => {
             await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', ...additionnalAssets]});
@@ -32,7 +34,7 @@ async function createWysiwyg(parent, options, additionnalAssets = []) {
     return new Wysiwyg(parent, options);
 }
 
-async function loadFromTextarea(parent, textarea, options) {
+exports.loadFromTextarea = async (parent, textarea, options) => {
     var loading = textarea.nextElementSibling;
     if (loading && !loading.classList.contains('o_wysiwyg_loading')) {
         loading = null;
@@ -43,7 +45,7 @@ async function loadFromTextarea(parent, textarea, options) {
     if (!currentOptions.value.trim()) {
         currentOptions.value = '<p><br></p>';
     }
-    const wysiwyg = await createWysiwyg(parent, currentOptions);
+    const wysiwyg = await exports.createWysiwyg(parent, currentOptions);
 
     const $wysiwygWrapper = $textarea.closest('.o_wysiwyg_textarea_wrapper');
     const $form = $textarea.closest('form');
@@ -70,8 +72,5 @@ async function loadFromTextarea(parent, textarea, options) {
     return wysiwyg;
 }
 
-return {
-    loadFromTextarea: loadFromTextarea,
-    createWysiwyg: createWysiwyg,
-};
+return exports;
 });
