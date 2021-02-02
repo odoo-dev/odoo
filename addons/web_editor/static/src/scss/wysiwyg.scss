@@ -103,28 +103,16 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         border-top: $o-we-dropdown-item-spacing solid transparent;
     }
 
-    #style {
-        .dropdown-item {
-            > * {
-                display: inline;;
-            }
-            &, > * {
-                line-height: 2;
-            }
-            &[data-value="blockquote"] {
-                padding-top: 0.5em;
-                padding-bottom: 0.5em;
-
-                > * {
-                    display: block;
-                }
-            }
-        }
-    }
-
     // Specific elements
     #colorInputButtonGroup label:last-of-type() .btn {
         margin: 0 1px 0 -1px;
+    }
+    .tablepicker {
+        margin: 1px 2px -8px 2px !important;
+
+        .tablepicker-cell {
+            width: 5px !important;
+        }
     }
     .o_image_alt {
         @include o-text-overflow();
